@@ -1,0 +1,13 @@
+packages:
+  "framer-motion": "For page transitions and smooth step-by-step form animations"
+  "recharts": "For the resilience score radar chart and visualizations"
+
+images:
+  - path: "artifacts/resilium/public/images/hero-abstract.png"
+    description: "Minimalist premium abstract background, smooth soft fluid gradients in muted earth tones, sage green, and warm sand. Clean, corporate, calm, high-end editorial feel."
+    aspect_ratio: "16:9"
+
+notes:
+  - "Using Recharts for the multidimensional resilience score visualization."
+  - "React Query hooks are imported from @workspace/api-client-react as instructed."
+  - "Implementing a 10-step smooth-animated assessment wizard using framer-motion."

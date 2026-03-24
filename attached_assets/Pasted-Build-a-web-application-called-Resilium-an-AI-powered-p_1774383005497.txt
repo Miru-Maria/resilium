@@ -1,0 +1,94 @@
+Build a web application called “Resilium” — an AI-powered personal resilience planning system that generates a customized “Resilience Report” for users in under 15 minutes.
+
+CORE OBJECTIVE:
+Help users assess how prepared they are for life disruptions (financial, health, geopolitical, career, environmental) and generate a clear, actionable resilience plan.
+
+TARGET USER:
+Global audience (remote workers, professionals, digital nomads, anxious planners, people seeking stability and preparedness).
+
+CORE USER FLOW:
+1. User lands on homepage with a strong, emotionally compelling message:
+   “You’re one disruption away from chaos. Check your readiness.”
+
+2. User clicks “Get My Resilience Plan”
+
+3. User completes a structured questionnaire (multi-step form):
+   - Location (country/region)
+   - Income stability (fixed, freelance, unstable)
+   - Savings buffer (months of runway)
+   - Dependents (yes/no)
+   - Skills (digital, physical, survival, none)
+   - Health & mobility
+   - Housing situation
+   - Access to food/water backups
+   - Psychological resilience (self-rated)
+   - Risk concerns (user-selected: job loss, war, inflation, illness, etc.)
+
+4. After submission:
+   - AI generates a “Resilience Report” including:
+     a. Resilience Score (0–100)
+     b. Risk Profile Summary
+     c. Top 5 Vulnerabilities
+     d. Personalized Action Plan (short-term, mid-term, long-term)
+     e. “If X happens” scenario simulation (e.g. job loss, relocation)
+     f. Daily/weekly stability habits
+
+5. User sees results in a visually clean dashboard.
+
+6. Option to:
+   - Download report (PDF)
+   - Save account (optional)
+   - Share score (social/viral loop)
+
+TECH REQUIREMENTS:
+- Use Replit Agent for full-stack build
+- Frontend: clean, modern, premium feel, relatable not cyberpunk core, it shouldn't feel like a game or something that is fear-baiting (dark/light mode optional)
+- Backend: handles questionnaire + AI prompt processing
+- AI integration: generate structured output (not just paragraphs)
+- Store minimal user data (optional accounts)
+- Generate downloadable report (PDF or formatted page)
+
+FEATURE PRIORITIES (MVP):
+- Multi-step questionnaire UI
+- AI-generated structured report
+- Resilience Score calculation logic
+- Clean dashboard display
+
+SCORING LOGIC:
+Design a simple scoring model based on:
+- Financial stability
+- Resource access
+- Skills
+- Health
+- Flexibility/mobility
+- Psychological resilience
+
+DESIGN STYLE:
+- Minimalist, premium, slightly futuristic
+- Calm but serious tone (not fear-mongering, but honest)
+- Strong typography, clear hierarchy
+- Subtle animations/transitions
+
+VOICE & BRAND:
+- Intelligent
+- Grounded
+- Strategic
+- Empowering (not alarmist)
+
+MARKETING HOOKS:
+- “Check how prepared you really are”
+- “Most people are not ready. Are you?”
+- “Your life, stress-tested”
+
+BONUS FEATURES (if time allows):
+- Scenario simulator toggle
+- “Improve my score” button (regenerates plan)
+- Waitlist / email capture
+- Shareable resilience badge
+- The ability to have an offline/low or no-wifi access to the tool when needed.
+
+CONSTRAINT:
+This must be built from scratch within the Replit environment starting now. No external pre-built projects from my account should be reused.
+
+END GOAL:
+A functional MVP that clearly demonstrates concept, usability, and strong user value within 3 weeks.

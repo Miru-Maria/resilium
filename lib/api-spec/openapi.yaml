@@ -1,15 +1,16 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Resilium API specification
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: resilience
+    description: Resilience assessment and reporting
 paths:
   /healthz:
     get:
@@ -24,6 +25,64 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /resilience/assess:
+    post:
+      operationId: submitAssessment
+      tags: [resilience]
+      summary: Submit resilience assessment
+      description: Submit questionnaire answers and receive AI-generated resilience report
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssessmentInput"
+      responses:
+        "200":
+          description: Resilience report generated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResilienceReport"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /resilience/reports/{reportId}:
+    get:
+      operationId: getReport
+      tags: [resilience]
+      summary: Get a saved resilience report
+      parameters:
+        - name: reportId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Resilience report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResilienceReport"
+        "404":
+          description: Report not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +93,231 @@ components:
       required:
         - status
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+      required:
+        - error
+        - message
+
+    AssessmentInput:
+      type: object
+      properties:
+        location:
+          type: string
+          description: Country or region
+        incomeStability:
+          type: string
+          enum: [fixed, freelance, unstable]
+          description: Income stability type
+        savingsMonths:
+          type: number
+          description: Months of savings runway
+        hasDependents:
+          type: boolean
+          description: Whether user has dependents
+        skills:
+          type: array
+          items:
+            type: string
+            enum: [digital, physical, survival, medical, financial, language, none]
+          description: Skills the user has
+        healthStatus:
+          type: string
+          enum: [excellent, good, fair, poor]
+          description: Overall health status
+        mobilityLevel:
+          type: string
+          enum: [high, medium, low]
+          description: Ability to relocate or travel
+        housingType:
+          type: string
+          enum: [own, rent, family, nomadic, other]
+          description: Current housing situation
+        hasEmergencySupplies:
+          type: boolean
+          description: Access to emergency food/water supplies
+        psychologicalResilience:
+          type: number
+          minimum: 1
+          maximum: 10
+          description: Self-rated psychological resilience (1-10)
+        riskConcerns:
+          type: array
+          items:
+            type: string
+            enum: [job_loss, war_conflict, inflation, illness, natural_disaster, political_instability, supply_chain, cyber_attack, pandemic, financial_crisis]
+          description: Primary risk concerns
+        sessionId:
+          type: string
+          description: Optional session ID for saving reports
+      required:
+        - location
+        - incomeStability
+        - savingsMonths
+        - hasDependents
+        - skills
+        - healthStatus
+        - mobilityLevel
+        - housingType
+        - hasEmergencySupplies
+        - psychologicalResilience
+        - riskConcerns
+
+    ResilienceScore:
+      type: object
+      properties:
+        overall:
+          type: number
+          minimum: 0
+          maximum: 100
+        financial:
+          type: number
+          minimum: 0
+          maximum: 100
+        health:
+          type: number
+          minimum: 0
+          maximum: 100
+        skills:
+          type: number
+          minimum: 0
+          maximum: 100
+        mobility:
+          type: number
+          minimum: 0
+          maximum: 100
+        psychological:
+          type: number
+          minimum: 0
+          maximum: 100
+        resources:
+          type: number
+          minimum: 0
+          maximum: 100
+      required:
+        - overall
+        - financial
+        - health
+        - skills
+        - mobility
+        - psychological
+        - resources
+
+    ActionItem:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        priority:
+          type: string
+          enum: [critical, high, medium, low]
+        category:
+          type: string
+      required:
+        - title
+        - description
+        - priority
+        - category
+
+    ScenarioSimulation:
+      type: object
+      properties:
+        scenario:
+          type: string
+        impact:
+          type: string
+          enum: [severe, high, moderate, low]
+        description:
+          type: string
+        immediateSteps:
+          type: array
+          items:
+            type: string
+        timeToRecover:
+          type: string
+      required:
+        - scenario
+        - impact
+        - description
+        - immediateSteps
+        - timeToRecover
+
+    DailyHabit:
+      type: object
+      properties:
+        habit:
+          type: string
+        frequency:
+          type: string
+          enum: [daily, weekly, monthly]
+        category:
+          type: string
+      required:
+        - habit
+        - frequency
+        - category
+
+    ResilienceReport:
+      type: object
+      properties:
+        reportId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        score:
+          $ref: "#/components/schemas/ResilienceScore"
+        riskProfileSummary:
+          type: string
+        topVulnerabilities:
+          type: array
+          items:
+            type: string
+          minItems: 3
+          maxItems: 5
+        actionPlan:
+          type: object
+          properties:
+            shortTerm:
+              type: array
+              items:
+                $ref: "#/components/schemas/ActionItem"
+            midTerm:
+              type: array
+              items:
+                $ref: "#/components/schemas/ActionItem"
+            longTerm:
+              type: array
+              items:
+                $ref: "#/components/schemas/ActionItem"
+          required:
+            - shortTerm
+            - midTerm
+            - longTerm
+        scenarioSimulations:
+          type: array
+          items:
+            $ref: "#/components/schemas/ScenarioSimulation"
+        dailyHabits:
+          type: array
+          items:
+            $ref: "#/components/schemas/DailyHabit"
+        input:
+          $ref: "#/components/schemas/AssessmentInput"
+      required:
+        - reportId
+        - createdAt
+        - score
+        - riskProfileSummary
+        - topVulnerabilities
+        - actionPlan
+        - scenarioSimulations
+        - dailyHabits
+        - input
