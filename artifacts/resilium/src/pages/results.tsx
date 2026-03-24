@@ -10,6 +10,7 @@ import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/
 import { Loader2, Download, Share2, AlertTriangle, ShieldAlert, CheckCircle, RefreshCcw, Activity } from "lucide-react";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import { SiteFooter } from "@/components/site-footer";
 
 export default function ResultsPage() {
   const [, params] = useRoute("/results/:reportId");
@@ -251,6 +252,8 @@ export default function ResultsPage() {
         </section>
 
       </main>
+
+      <SiteFooter />
     </div>
   );
 }

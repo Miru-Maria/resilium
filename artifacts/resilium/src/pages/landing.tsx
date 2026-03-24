@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { ShieldCheck, TrendingUp, Activity, ArrowRight } from "lucide-react";
+import { SiteFooter } from "@/components/site-footer";
 
 export default function LandingPage() {
   return (
@@ -24,11 +25,16 @@ export default function LandingPage() {
           </div>
           <span className="font-display font-bold text-xl tracking-tight text-primary">Resilium</span>
         </div>
-        <Link href="/assess">
-          <Button variant="outline" className="rounded-full px-6 border-primary/20 hover:bg-primary/5 font-medium">
-            Log In
-          </Button>
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link href="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors hidden sm:block">
+            Privacy Policy
+          </Link>
+          <Link href="/assess">
+            <Button variant="outline" className="rounded-full px-6 border-primary/20 hover:bg-primary/5 font-medium">
+              Log In
+            </Button>
+          </Link>
+        </div>
       </header>
 
       <main className="flex-1 flex flex-col items-center justify-center px-6 text-center z-10 max-w-4xl mx-auto pt-12 pb-24">
@@ -84,6 +90,8 @@ export default function LandingPage() {
           </div>
         </motion.div>
       </main>
+
+      <SiteFooter />
     </div>
   );
 }

@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { useSubmitAssessment } from "@workspace/api-client-react";
 import { Loader2, ArrowRight, ArrowLeft, CheckCircle2, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SiteFooter } from "@/components/site-footer";
 
 // Types derived from OpenAPI schema
 import type { 
@@ -454,6 +455,8 @@ export default function AssessmentPage() {
           </Button>
         </div>
       </main>
+
+      <SiteFooter />
     </div>
   );
 }
