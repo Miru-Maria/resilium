@@ -98,6 +98,15 @@ Uses Replit AI Integrations (OpenAI gpt-5.2 model). The AI:
 - `/results/:reportId` — Dashboard showing report: circular score, radar chart, vulnerabilities, action plan, scenarios, habits; has auth header controls
 - `/profile` — "My Plans" page: lists user's saved plans (date, score badge, view/delete), shows sign-in prompt when unauthenticated, warns when at 10-plan limit
 
+## GitHub Repository
+
+The project is mirrored to a public GitHub repository:
+- **URL**: https://github.com/Miru-Maria/resilium
+- **Branch**: `main`
+- The `origin` remote in the local git config points to this repository
+- GitHub integration is enabled (Replit connector: `conn_github_01KJXCFKRVXXA64K4SRJX9NF1V`)
+- `@replit/connectors-sdk` is installed at workspace root for GitHub API access
+
 ## Environment Variables
 
 - `DATABASE_URL`, `PGHOST`, etc. — Auto-provisioned by Replit PostgreSQL
