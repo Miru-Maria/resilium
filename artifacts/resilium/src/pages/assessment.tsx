@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -28,6 +28,7 @@ export default function AssessmentPage() {
   const [, setLocation] = useLocation();
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<{ code: string; message: string } | null>(null);
   
   const [formData, setFormData] = useState<AssessmentInput>({
     location: "",
@@ -56,14 +57,20 @@ export default function AssessmentPage() {
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
+    setSubmitError(null);
     try {
       const report = await mutateAsync({ data: formData });
-      // Short artificial delay for dramatic effect
       setTimeout(() => {
         setLocation(`/results/${report.reportId}`);
       }, 1500);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Assessment submission failed", error);
+      const body = error?.response?.data || error?.data;
+      if (body?.error === "PLAN_LIMIT_EXCEEDED") {
+        setSubmitError({ code: "PLAN_LIMIT_EXCEEDED", message: body.message });
+      } else {
+        setSubmitError({ code: "UNKNOWN", message: "Something went wrong. Please try again." });
+      }
       setIsSubmitting(false);
     }
   };
@@ -102,6 +109,25 @@ export default function AssessmentPage() {
         <p className="text-muted-foreground max-w-md animate-pulse">
           Our AI is analyzing your vulnerabilities, simulating thousands of risk scenarios, and generating a personalized roadmap.
         </p>
+      </div>
+    );
+  }
+
+  // Plan limit error screen
+  if (submitError?.code === "PLAN_LIMIT_EXCEEDED") {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
+        <AlertCircle className="w-16 h-16 text-amber-500 mb-6" />
+        <h2 className="text-2xl font-display font-bold mb-2">Plan Limit Reached</h2>
+        <p className="text-muted-foreground max-w-md mb-8">{submitError.message}</p>
+        <div className="flex gap-3">
+          <Link href="/profile">
+            <Button className="rounded-full">Manage My Plans</Button>
+          </Link>
+          <Button variant="outline" className="rounded-full" onClick={() => setSubmitError(null)}>
+            Go Back
+          </Button>
+        </div>
       </div>
     );
   }

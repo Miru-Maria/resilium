@@ -2,10 +2,20 @@ import React from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { ShieldCheck, TrendingUp, Activity, ArrowRight } from "lucide-react";
+import { ShieldCheck, TrendingUp, Activity, ArrowRight, LogIn, User } from "lucide-react";
 import { SiteFooter } from "@/components/site-footer";
+import { useAuth } from "@workspace/replit-auth-web";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function LandingPage() {
+  const { user, isLoading, isAuthenticated, login, logout } = useAuth();
+
   return (
     <div className="min-h-screen bg-background flex flex-col relative overflow-hidden">
       {/* Background Hero Image with Overlay */}
@@ -25,15 +35,60 @@ export default function LandingPage() {
           </div>
           <span className="font-display font-bold text-xl tracking-tight text-primary">Resilium</span>
         </div>
-        <div className="flex items-center gap-4">
+
+        <div className="flex items-center gap-3">
           <Link href="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors hidden sm:block">
             Privacy Policy
           </Link>
-          <Link href="/assess">
-            <Button variant="outline" className="rounded-full px-6 border-primary/20 hover:bg-primary/5 font-medium">
-              Log In
+
+          {!isLoading && isAuthenticated && (
+            <Link href="/profile">
+              <Button variant="ghost" className="rounded-full px-4 font-medium text-sm">
+                My Plans
+              </Button>
+            </Link>
+          )}
+
+          {isLoading ? (
+            <div className="w-24 h-9 rounded-full bg-muted animate-pulse" />
+          ) : isAuthenticated ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="rounded-full px-4 border-primary/20 hover:bg-primary/5 font-medium flex items-center gap-2">
+                  {user?.profileImageUrl ? (
+                    <img
+                      src={user.profileImageUrl}
+                      alt={user.firstName || "User"}
+                      className="w-5 h-5 rounded-full object-cover"
+                    />
+                  ) : (
+                    <User className="w-4 h-4" />
+                  )}
+                  <span className="max-w-[100px] truncate">
+                    {user?.firstName || "Account"}
+                  </span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem asChild>
+                  <Link href="/profile" className="cursor-pointer">My Plans</Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={logout} className="cursor-pointer">
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button
+              variant="outline"
+              className="rounded-full px-6 border-primary/20 hover:bg-primary/5 font-medium flex items-center gap-2"
+              onClick={login}
+            >
+              <LogIn className="w-4 h-4" />
+              Sign In
             </Button>
-          </Link>
+          )}
         </div>
       </header>
 

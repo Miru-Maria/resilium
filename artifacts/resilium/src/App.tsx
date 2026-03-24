@@ -7,6 +7,7 @@ import LandingPage from "@/pages/landing";
 import AssessmentPage from "@/pages/assessment";
 import ResultsPage from "@/pages/results";
 import PrivacyPage from "@/pages/privacy";
+import ProfilePage from "@/pages/profile";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient({
@@ -25,6 +26,7 @@ function Router() {
       <Route path="/assess" component={AssessmentPage} />
       <Route path="/results/:reportId" component={ResultsPage} />
       <Route path="/privacy" component={PrivacyPage} />
+      <Route path="/profile" component={ProfilePage} />
       <Route component={NotFound} />
     </Switch>
   );

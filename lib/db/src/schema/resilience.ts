@@ -1,11 +1,13 @@
-import { pgTable, text, serial, real, boolean, jsonb, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, real, boolean, jsonb, timestamp, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
+import { usersTable } from "./auth";
 
 export const resilienceReportsTable = pgTable("resilience_reports", {
   id: serial("id").primaryKey(),
   reportId: text("report_id").notNull().unique(),
   sessionId: text("session_id"),
+  userId: varchar("user_id").references(() => usersTable.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 
   location: text("location").notNull(),

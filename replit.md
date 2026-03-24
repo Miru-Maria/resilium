@@ -49,6 +49,7 @@ artifacts-monorepo/
 │   ├── api-client-react/   # Generated React Query hooks
 │   ├── api-zod/            # Generated Zod schemas from OpenAPI
 │   ├── db/                 # Drizzle ORM schema + DB connection
+│   ├── replit-auth-web/    # useAuth hook for Replit OIDC browser auth
 │   └── integrations-openai-ai-server/  # OpenAI AI client via Replit integrations
 ├── scripts/                # Utility scripts
 ├── pnpm-workspace.yaml
@@ -58,8 +59,15 @@ artifacts-monorepo/
 
 ## Database Schema
 
+### `users` table
+Replit Auth users — id (varchar, PK, matches OIDC sub), email, firstName, lastName, profileImageUrl, createdAt, updatedAt
+
+### `sessions` table
+Replit Auth sessions — sid (varchar, PK), sess (jsonb), expire (timestamp)
+
 ### `resilience_reports` table
 Stores all user assessment inputs and generated report data:
+- `userId` (varchar, FK → users.id, nullable) — set when user is authenticated
 - Input fields: location, incomeStability, savingsMonths, hasDependents, skills (jsonb), healthStatus, mobilityLevel, housingType, hasEmergencySupplies, psychologicalResilience, riskConcerns (jsonb)
 - Score fields: scoreOverall, scoreFinancial, scoreHealth, scoreSkills, scoreMobility, scorePsychological, scoreResources
 - Report fields: riskProfileSummary, topVulnerabilities (jsonb), actionPlan (jsonb), scenarioSimulations (jsonb), dailyHabits (jsonb)
@@ -67,8 +75,14 @@ Stores all user assessment inputs and generated report data:
 ## API Routes
 
 - `GET /api/healthz` — Health check
-- `POST /api/resilience/assess` — Submit assessment, receive AI-generated report
+- `POST /api/resilience/assess` — Submit assessment, receive AI-generated report. If authenticated, attaches userId and enforces 10-plan limit (PLAN_LIMIT_EXCEEDED error).
 - `GET /api/resilience/reports/:reportId` — Retrieve saved report
+- `GET /api/auth/user` — Returns current auth state (user or null)
+- `GET /api/login` — Initiates Replit OIDC login flow (redirects)
+- `GET /api/callback` — OIDC callback, creates session, redirects
+- `GET /api/logout` — Clears session, redirects to OIDC end-session
+- `GET /api/users/me/plans` — Returns authenticated user's plan summaries (reportId, createdAt, scoreOverall)
+- `DELETE /api/users/me/plans/:reportId` — Deletes a plan belonging to the authenticated user
 
 ## AI Integration
 
@@ -79,9 +93,10 @@ Uses Replit AI Integrations (OpenAI gpt-5.2 model). The AI:
 
 ## Frontend Pages
 
-- `/` — Landing page with hero CTA
-- `/assess` — Multi-step assessment form (10 steps with progress bar)
-- `/results` — Dashboard showing report: circular score, radar chart, vulnerabilities, action plan, scenarios, habits
+- `/` — Landing page with hero CTA; Sign In button (unauthenticated) or user dropdown + "My Plans" link (authenticated)
+- `/assess` — Multi-step assessment form (10 steps with progress bar); shows PLAN_LIMIT_EXCEEDED error screen if user has 10 plans
+- `/results/:reportId` — Dashboard showing report: circular score, radar chart, vulnerabilities, action plan, scenarios, habits; has auth header controls
+- `/profile` — "My Plans" page: lists user's saved plans (date, score badge, view/delete), shows sign-in prompt when unauthenticated, warns when at 10-plan limit
 
 ## Environment Variables
 
@@ -122,5 +137,16 @@ Pre-configured OpenAI SDK client via Replit AI Integrations. No API key needed.
 
 ### `lib/db` (`@workspace/db`)
 
-Drizzle ORM with PostgreSQL. Schema in `src/schema/resilience.ts`.
+Drizzle ORM with PostgreSQL. Schema in `src/schema/resilience.ts` and `src/schema/auth.ts`.
 - `pnpm --filter @workspace/db run push` — sync schema to database
+
+### `lib/replit-auth-web` (`@workspace/replit-auth-web`)
+
+Browser auth library providing `useAuth()` hook. Calls `GET /api/auth/user` with `credentials: "include"`. `login()` redirects to `/api/login?returnTo=<BASE_URL>`. `logout()` redirects to `/api/logout`.
+
+### Auth Flow (API Server)
+
+- `artifacts/api-server/src/lib/auth.ts` — session CRUD, OIDC config
+- `artifacts/api-server/src/middlewares/authMiddleware.ts` — loads user from session on every request, patches `req.isAuthenticated()`
+- `artifacts/api-server/src/routes/auth.ts` — OIDC login/callback/logout routes
+- `artifacts/api-server/src/routes/users.ts` — `/users/me/plans` GET and DELETE

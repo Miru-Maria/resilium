@@ -2,9 +2,10 @@ import { Router, type IRouter } from "express";
 import { randomUUID } from "crypto";
 import { SubmitAssessmentBody, GetReportParams } from "@workspace/api-zod";
 import { db, resilienceReportsTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { eq, and, count } from "drizzle-orm";
 import { calculateScores } from "./scoring.js";
 import { generateResilienceReport } from "./ai.js";
+import { PLAN_LIMIT } from "../users.js";
 
 const router: IRouter = Router();
 
@@ -20,6 +21,21 @@ router.post("/assess", async (req, res) => {
     }
 
     const input = parseResult.data;
+
+    if (req.isAuthenticated()) {
+      const [{ planCount }] = await db
+        .select({ planCount: count() })
+        .from(resilienceReportsTable)
+        .where(eq(resilienceReportsTable.userId, req.user.id));
+
+      if (planCount >= PLAN_LIMIT) {
+        res.status(400).json({
+          error: "PLAN_LIMIT_EXCEEDED",
+          message: `You have reached the maximum of ${PLAN_LIMIT} saved plans. Please delete an existing plan before creating a new one.`,
+        });
+        return;
+      }
+    }
     const scores = calculateScores({
       location: input.location,
       incomeStability: input.incomeStability,
@@ -57,6 +73,7 @@ router.post("/assess", async (req, res) => {
     await db.insert(resilienceReportsTable).values({
       reportId,
       sessionId: input.sessionId ?? null,
+      userId: req.isAuthenticated() ? req.user.id : null,
       location: input.location,
       incomeStability: input.incomeStability,
       savingsMonths: input.savingsMonths,

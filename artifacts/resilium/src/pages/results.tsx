@@ -7,20 +7,33 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
-import { Loader2, Download, Share2, AlertTriangle, ShieldAlert, CheckCircle, RefreshCcw, Activity } from "lucide-react";
+import { Loader2, Download, Share2, AlertTriangle, ShieldAlert, CheckCircle, RefreshCcw, Activity, User, LogIn } from "lucide-react";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { SiteFooter } from "@/components/site-footer";
+import { useAuth } from "@workspace/replit-auth-web";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function ResultsPage() {
   const [, params] = useRoute("/results/:reportId");
   const reportId = params?.reportId || "";
   const { toast } = useToast();
+  const { user, isAuthenticated, login, logout } = useAuth();
 
   const { data: report, isLoading, error } = useGetReport(reportId, {
     query: {
       enabled: !!reportId,
-      retry: 2
+      retry: (failureCount, error: any) => {
+        const status = error?.response?.status ?? error?.status;
+        if (status === 404) return false;
+        return failureCount < 2;
+      },
     }
   });
 
@@ -71,9 +84,11 @@ export default function ResultsPage() {
       {/* Header */}
       <header className="w-full bg-card border-b border-border sticky top-0 z-50 print:hidden">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="font-display font-bold text-xl text-primary flex items-center gap-2">
-            <ShieldAlert className="w-5 h-5" /> Resilium
-          </div>
+          <Link href="/">
+            <div className="font-display font-bold text-xl text-primary flex items-center gap-2 cursor-pointer">
+              <ShieldAlert className="w-5 h-5" /> Resilium
+            </div>
+          </Link>
           <div className="flex items-center gap-3">
             <Button variant="outline" size="sm" onClick={handleShare} className="rounded-full">
               <Share2 className="w-4 h-4 mr-2" /> Share
@@ -81,6 +96,36 @@ export default function ResultsPage() {
             <Button variant="default" size="sm" onClick={handlePrint} className="rounded-full">
               <Download className="w-4 h-4 mr-2" /> Save PDF
             </Button>
+
+            {isAuthenticated ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="rounded-full flex items-center gap-2">
+                    {user?.profileImageUrl ? (
+                      <img
+                        src={user.profileImageUrl}
+                        alt={user.firstName || "User"}
+                        className="w-5 h-5 rounded-full object-cover"
+                      />
+                    ) : (
+                      <User className="w-4 h-4" />
+                    )}
+                    <span className="max-w-[80px] truncate text-sm">{user?.firstName || "Account"}</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem asChild>
+                    <Link href="/profile" className="cursor-pointer">My Plans</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={logout} className="cursor-pointer">Sign Out</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button variant="ghost" size="sm" className="rounded-full" onClick={login}>
+                <LogIn className="w-4 h-4 mr-1" /> Sign In
+              </Button>
+            )}
           </div>
         </div>
       </header>
