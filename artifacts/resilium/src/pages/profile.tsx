@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@workspace/replit-auth-web";
+import { ResilientIcon } from "@/components/resilient-icon";
 import {
-  ShieldCheck,
   Trash2,
   Eye,
   AlertTriangle,
@@ -106,7 +106,7 @@ export default function ProfilePage() {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
-        <ShieldCheck className="w-16 h-16 text-primary mb-6 opacity-60" />
+        <ResilientIcon className="w-16 h-16 text-primary mb-6 opacity-60" />
         <h2 className="text-2xl font-display font-bold mb-2">Sign in to view your plans</h2>
         <p className="text-muted-foreground max-w-md mb-8">
           Create an account to save your resilience plans and track your progress over time.
@@ -125,7 +125,7 @@ export default function ProfilePage() {
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/">
             <div className="font-display font-bold text-xl text-primary flex items-center gap-2 cursor-pointer">
-              <ShieldCheck className="w-5 h-5" /> Resilium
+              <ResilientIcon className="w-5 h-5" /> Resilium
             </div>
           </Link>
 
@@ -198,7 +198,7 @@ export default function ProfilePage() {
           </div>
         ) : plans.length === 0 ? (
           <div className="text-center py-20 border border-dashed border-border rounded-3xl">
-            <ShieldCheck className="w-12 h-12 text-muted-foreground/40 mx-auto mb-4" />
+            <ResilientIcon className="w-12 h-12 text-muted-foreground/40 mx-auto mb-4" />
             <p className="text-muted-foreground font-medium">No saved plans yet</p>
             <p className="text-sm text-muted-foreground mt-1">Complete an assessment to see your resilience plan here.</p>
             <Link href="/assess">

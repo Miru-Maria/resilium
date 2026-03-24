@@ -63,13 +63,13 @@
   --popover-foreground: 160 20% 14%;
   --popover-border: 120 6% 90%;
 
-  --primary: 156 26% 24%;         /* #2D4A3E — deep forest green */
-  --primary-foreground: 120 8% 97%;
-  --primary-border: 156 26% 20%;
+  --primary: 152 58% 38%;         /* #1E9E6A — vibrant emerald green */
+  --primary-foreground: 0 0% 100%;
+  --primary-border: 152 58% 32%;
 
-  --secondary: 38 30% 72%;        /* #C8B598 — warm sand */
-  --secondary-foreground: 160 20% 14%;
-  --secondary-border: 38 30% 64%;
+  --secondary: 152 35% 87%;       /* #CCE8DA — soft mint green */
+  --secondary-foreground: 152 58% 25%;
+  --secondary-border: 152 25% 79%;
 
   --muted: 120 6% 94%;            /* #EDF0EE */
   --muted-foreground: 155 8% 44%; /* #67776F */
@@ -85,7 +85,7 @@
 
   --border: 120 6% 90%;
   --input: 120 6% 90%;
-  --ring: 156 26% 24%;
+  --ring: 152 58% 38%;
 
   --radius: 0.75rem;
 }

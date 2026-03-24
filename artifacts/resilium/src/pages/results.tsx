@@ -10,7 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { Progress } from "@/components/ui/progress";
-import { Loader2, Download, Share2, AlertTriangle, ShieldAlert, CheckCircle, RefreshCcw, Activity, User, LogIn, Brain, TrendingUp, Award } from "lucide-react";
+import { Loader2, Download, Share2, AlertTriangle, CheckCircle, RefreshCcw, Activity, User, LogIn, Brain, TrendingUp, Award } from "lucide-react";
+import { ResilientIcon } from "@/components/resilient-icon";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { SiteFooter } from "@/components/site-footer";
@@ -182,7 +183,7 @@ export default function ResultsPage() {
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/">
             <div className="font-display font-bold text-xl text-primary flex items-center gap-2 cursor-pointer">
-              <ShieldAlert className="w-5 h-5" /> Resilium
+              <ResilientIcon className="w-5 h-5" /> Resilium
             </div>
           </Link>
           <div className="flex items-center gap-3">
