@@ -21,6 +21,26 @@ export const HealthCheckResponse = zod.object({
  */
 export const submitAssessmentBodyPsychologicalResilienceMax = 10;
 
+export const submitAssessmentBodyMentalResilienceAnswersStressTolerance1Max = 5;
+
+export const submitAssessmentBodyMentalResilienceAnswersStressTolerance2Max = 5;
+
+export const submitAssessmentBodyMentalResilienceAnswersAdaptability1Max = 5;
+
+export const submitAssessmentBodyMentalResilienceAnswersAdaptability2Max = 5;
+
+export const submitAssessmentBodyMentalResilienceAnswersLearningAgility1Max = 5;
+
+export const submitAssessmentBodyMentalResilienceAnswersChangeManagement1Max = 5;
+
+export const submitAssessmentBodyMentalResilienceAnswersChangeManagement2Max = 5;
+
+export const submitAssessmentBodyMentalResilienceAnswersEmotionalRegulation1Max = 5;
+
+export const submitAssessmentBodyMentalResilienceAnswersEmotionalRegulation2Max = 5;
+
+export const submitAssessmentBodyMentalResilienceAnswersSocialSupport1Max = 5;
+
 export const SubmitAssessmentBody = zod.object({
   location: zod.string().describe("Country or region"),
   incomeStability: zod
@@ -78,6 +98,57 @@ export const SubmitAssessmentBody = zod.object({
     .string()
     .optional()
     .describe("Optional session ID for saving reports"),
+  mentalResilienceAnswers: zod
+    .object({
+      stressTolerance1: zod
+        .number()
+        .min(1)
+        .max(submitAssessmentBodyMentalResilienceAnswersStressTolerance1Max),
+      stressTolerance2: zod
+        .number()
+        .min(1)
+        .max(submitAssessmentBodyMentalResilienceAnswersStressTolerance2Max),
+      adaptability1: zod
+        .number()
+        .min(1)
+        .max(submitAssessmentBodyMentalResilienceAnswersAdaptability1Max),
+      adaptability2: zod
+        .number()
+        .min(1)
+        .max(submitAssessmentBodyMentalResilienceAnswersAdaptability2Max),
+      learningAgility1: zod
+        .number()
+        .min(1)
+        .max(submitAssessmentBodyMentalResilienceAnswersLearningAgility1Max),
+      changeManagement1: zod
+        .number()
+        .min(1)
+        .max(submitAssessmentBodyMentalResilienceAnswersChangeManagement1Max),
+      changeManagement2: zod
+        .number()
+        .min(1)
+        .max(submitAssessmentBodyMentalResilienceAnswersChangeManagement2Max),
+      emotionalRegulation1: zod
+        .number()
+        .min(1)
+        .max(
+          submitAssessmentBodyMentalResilienceAnswersEmotionalRegulation1Max,
+        ),
+      emotionalRegulation2: zod
+        .number()
+        .min(1)
+        .max(
+          submitAssessmentBodyMentalResilienceAnswersEmotionalRegulation2Max,
+        ),
+      socialSupport1: zod
+        .number()
+        .min(1)
+        .max(submitAssessmentBodyMentalResilienceAnswersSocialSupport1Max),
+    })
+    .optional()
+    .describe(
+      "Answers to the 10 mental resilience questions (1-5 Likert scale each)",
+    ),
 });
 
 export const submitAssessmentResponseScoreOverallMin = 0;
@@ -101,10 +172,51 @@ export const submitAssessmentResponseScorePsychologicalMax = 100;
 export const submitAssessmentResponseScoreResourcesMin = 0;
 export const submitAssessmentResponseScoreResourcesMax = 100;
 
+export const submitAssessmentResponseMentalResilienceProfileStressToleranceMin = 0;
+export const submitAssessmentResponseMentalResilienceProfileStressToleranceMax = 100;
+
+export const submitAssessmentResponseMentalResilienceProfileAdaptabilityMin = 0;
+export const submitAssessmentResponseMentalResilienceProfileAdaptabilityMax = 100;
+
+export const submitAssessmentResponseMentalResilienceProfileLearningAgilityMin = 0;
+export const submitAssessmentResponseMentalResilienceProfileLearningAgilityMax = 100;
+
+export const submitAssessmentResponseMentalResilienceProfileChangeManagementMin = 0;
+export const submitAssessmentResponseMentalResilienceProfileChangeManagementMax = 100;
+
+export const submitAssessmentResponseMentalResilienceProfileEmotionalRegulationMin = 0;
+export const submitAssessmentResponseMentalResilienceProfileEmotionalRegulationMax = 100;
+
+export const submitAssessmentResponseMentalResilienceProfileSocialSupportMin = 0;
+export const submitAssessmentResponseMentalResilienceProfileSocialSupportMax = 100;
+
+export const submitAssessmentResponseMentalResilienceProfileCompositeMin = 0;
+export const submitAssessmentResponseMentalResilienceProfileCompositeMax = 100;
+
 export const submitAssessmentResponseTopVulnerabilitiesMin = 3;
 export const submitAssessmentResponseTopVulnerabilitiesMax = 5;
 
 export const submitAssessmentResponseInputPsychologicalResilienceMax = 10;
+
+export const submitAssessmentResponseInputMentalResilienceAnswersStressTolerance1Max = 5;
+
+export const submitAssessmentResponseInputMentalResilienceAnswersStressTolerance2Max = 5;
+
+export const submitAssessmentResponseInputMentalResilienceAnswersAdaptability1Max = 5;
+
+export const submitAssessmentResponseInputMentalResilienceAnswersAdaptability2Max = 5;
+
+export const submitAssessmentResponseInputMentalResilienceAnswersLearningAgility1Max = 5;
+
+export const submitAssessmentResponseInputMentalResilienceAnswersChangeManagement1Max = 5;
+
+export const submitAssessmentResponseInputMentalResilienceAnswersChangeManagement2Max = 5;
+
+export const submitAssessmentResponseInputMentalResilienceAnswersEmotionalRegulation1Max = 5;
+
+export const submitAssessmentResponseInputMentalResilienceAnswersEmotionalRegulation2Max = 5;
+
+export const submitAssessmentResponseInputMentalResilienceAnswersSocialSupport1Max = 5;
 
 export const SubmitAssessmentResponse = zod.object({
   reportId: zod.string(),
@@ -139,6 +251,45 @@ export const SubmitAssessmentResponse = zod.object({
       .min(submitAssessmentResponseScoreResourcesMin)
       .max(submitAssessmentResponseScoreResourcesMax),
   }),
+  mentalResilienceProfile: zod
+    .object({
+      stressTolerance: zod
+        .number()
+        .min(submitAssessmentResponseMentalResilienceProfileStressToleranceMin)
+        .max(submitAssessmentResponseMentalResilienceProfileStressToleranceMax),
+      adaptability: zod
+        .number()
+        .min(submitAssessmentResponseMentalResilienceProfileAdaptabilityMin)
+        .max(submitAssessmentResponseMentalResilienceProfileAdaptabilityMax),
+      learningAgility: zod
+        .number()
+        .min(submitAssessmentResponseMentalResilienceProfileLearningAgilityMin)
+        .max(submitAssessmentResponseMentalResilienceProfileLearningAgilityMax),
+      changeManagement: zod
+        .number()
+        .min(submitAssessmentResponseMentalResilienceProfileChangeManagementMin)
+        .max(
+          submitAssessmentResponseMentalResilienceProfileChangeManagementMax,
+        ),
+      emotionalRegulation: zod
+        .number()
+        .min(
+          submitAssessmentResponseMentalResilienceProfileEmotionalRegulationMin,
+        )
+        .max(
+          submitAssessmentResponseMentalResilienceProfileEmotionalRegulationMax,
+        ),
+      socialSupport: zod
+        .number()
+        .min(submitAssessmentResponseMentalResilienceProfileSocialSupportMin)
+        .max(submitAssessmentResponseMentalResilienceProfileSocialSupportMax),
+      composite: zod
+        .number()
+        .min(submitAssessmentResponseMentalResilienceProfileCompositeMin)
+        .max(submitAssessmentResponseMentalResilienceProfileCompositeMax),
+      pathway: zod.enum(["growth", "compensation"]),
+    })
+    .optional(),
   riskProfileSummary: zod.string(),
   topVulnerabilities: zod
     .array(zod.string())
@@ -186,6 +337,20 @@ export const SubmitAssessmentResponse = zod.object({
       category: zod.string(),
     }),
   ),
+  checklistsByArea: zod
+    .record(
+      zod.string(),
+      zod.array(
+        zod.object({
+          id: zod.string(),
+          title: zod.string(),
+          description: zod.string(),
+          priority: zod.enum(["critical", "high", "medium", "low"]),
+          pathway: zod.enum(["growth", "compensation"]),
+        }),
+      ),
+    )
+    .optional(),
   input: zod.object({
     location: zod.string().describe("Country or region"),
     incomeStability: zod
@@ -243,6 +408,73 @@ export const SubmitAssessmentResponse = zod.object({
       .string()
       .optional()
       .describe("Optional session ID for saving reports"),
+    mentalResilienceAnswers: zod
+      .object({
+        stressTolerance1: zod
+          .number()
+          .min(1)
+          .max(
+            submitAssessmentResponseInputMentalResilienceAnswersStressTolerance1Max,
+          ),
+        stressTolerance2: zod
+          .number()
+          .min(1)
+          .max(
+            submitAssessmentResponseInputMentalResilienceAnswersStressTolerance2Max,
+          ),
+        adaptability1: zod
+          .number()
+          .min(1)
+          .max(
+            submitAssessmentResponseInputMentalResilienceAnswersAdaptability1Max,
+          ),
+        adaptability2: zod
+          .number()
+          .min(1)
+          .max(
+            submitAssessmentResponseInputMentalResilienceAnswersAdaptability2Max,
+          ),
+        learningAgility1: zod
+          .number()
+          .min(1)
+          .max(
+            submitAssessmentResponseInputMentalResilienceAnswersLearningAgility1Max,
+          ),
+        changeManagement1: zod
+          .number()
+          .min(1)
+          .max(
+            submitAssessmentResponseInputMentalResilienceAnswersChangeManagement1Max,
+          ),
+        changeManagement2: zod
+          .number()
+          .min(1)
+          .max(
+            submitAssessmentResponseInputMentalResilienceAnswersChangeManagement2Max,
+          ),
+        emotionalRegulation1: zod
+          .number()
+          .min(1)
+          .max(
+            submitAssessmentResponseInputMentalResilienceAnswersEmotionalRegulation1Max,
+          ),
+        emotionalRegulation2: zod
+          .number()
+          .min(1)
+          .max(
+            submitAssessmentResponseInputMentalResilienceAnswersEmotionalRegulation2Max,
+          ),
+        socialSupport1: zod
+          .number()
+          .min(1)
+          .max(
+            submitAssessmentResponseInputMentalResilienceAnswersSocialSupport1Max,
+          ),
+      })
+      .optional()
+      .describe(
+        "Answers to the 10 mental resilience questions (1-5 Likert scale each)",
+      ),
   }),
 });
 
@@ -274,10 +506,51 @@ export const getReportResponseScorePsychologicalMax = 100;
 export const getReportResponseScoreResourcesMin = 0;
 export const getReportResponseScoreResourcesMax = 100;
 
+export const getReportResponseMentalResilienceProfileStressToleranceMin = 0;
+export const getReportResponseMentalResilienceProfileStressToleranceMax = 100;
+
+export const getReportResponseMentalResilienceProfileAdaptabilityMin = 0;
+export const getReportResponseMentalResilienceProfileAdaptabilityMax = 100;
+
+export const getReportResponseMentalResilienceProfileLearningAgilityMin = 0;
+export const getReportResponseMentalResilienceProfileLearningAgilityMax = 100;
+
+export const getReportResponseMentalResilienceProfileChangeManagementMin = 0;
+export const getReportResponseMentalResilienceProfileChangeManagementMax = 100;
+
+export const getReportResponseMentalResilienceProfileEmotionalRegulationMin = 0;
+export const getReportResponseMentalResilienceProfileEmotionalRegulationMax = 100;
+
+export const getReportResponseMentalResilienceProfileSocialSupportMin = 0;
+export const getReportResponseMentalResilienceProfileSocialSupportMax = 100;
+
+export const getReportResponseMentalResilienceProfileCompositeMin = 0;
+export const getReportResponseMentalResilienceProfileCompositeMax = 100;
+
 export const getReportResponseTopVulnerabilitiesMin = 3;
 export const getReportResponseTopVulnerabilitiesMax = 5;
 
 export const getReportResponseInputPsychologicalResilienceMax = 10;
+
+export const getReportResponseInputMentalResilienceAnswersStressTolerance1Max = 5;
+
+export const getReportResponseInputMentalResilienceAnswersStressTolerance2Max = 5;
+
+export const getReportResponseInputMentalResilienceAnswersAdaptability1Max = 5;
+
+export const getReportResponseInputMentalResilienceAnswersAdaptability2Max = 5;
+
+export const getReportResponseInputMentalResilienceAnswersLearningAgility1Max = 5;
+
+export const getReportResponseInputMentalResilienceAnswersChangeManagement1Max = 5;
+
+export const getReportResponseInputMentalResilienceAnswersChangeManagement2Max = 5;
+
+export const getReportResponseInputMentalResilienceAnswersEmotionalRegulation1Max = 5;
+
+export const getReportResponseInputMentalResilienceAnswersEmotionalRegulation2Max = 5;
+
+export const getReportResponseInputMentalResilienceAnswersSocialSupport1Max = 5;
 
 export const GetReportResponse = zod.object({
   reportId: zod.string(),
@@ -312,6 +585,39 @@ export const GetReportResponse = zod.object({
       .min(getReportResponseScoreResourcesMin)
       .max(getReportResponseScoreResourcesMax),
   }),
+  mentalResilienceProfile: zod
+    .object({
+      stressTolerance: zod
+        .number()
+        .min(getReportResponseMentalResilienceProfileStressToleranceMin)
+        .max(getReportResponseMentalResilienceProfileStressToleranceMax),
+      adaptability: zod
+        .number()
+        .min(getReportResponseMentalResilienceProfileAdaptabilityMin)
+        .max(getReportResponseMentalResilienceProfileAdaptabilityMax),
+      learningAgility: zod
+        .number()
+        .min(getReportResponseMentalResilienceProfileLearningAgilityMin)
+        .max(getReportResponseMentalResilienceProfileLearningAgilityMax),
+      changeManagement: zod
+        .number()
+        .min(getReportResponseMentalResilienceProfileChangeManagementMin)
+        .max(getReportResponseMentalResilienceProfileChangeManagementMax),
+      emotionalRegulation: zod
+        .number()
+        .min(getReportResponseMentalResilienceProfileEmotionalRegulationMin)
+        .max(getReportResponseMentalResilienceProfileEmotionalRegulationMax),
+      socialSupport: zod
+        .number()
+        .min(getReportResponseMentalResilienceProfileSocialSupportMin)
+        .max(getReportResponseMentalResilienceProfileSocialSupportMax),
+      composite: zod
+        .number()
+        .min(getReportResponseMentalResilienceProfileCompositeMin)
+        .max(getReportResponseMentalResilienceProfileCompositeMax),
+      pathway: zod.enum(["growth", "compensation"]),
+    })
+    .optional(),
   riskProfileSummary: zod.string(),
   topVulnerabilities: zod
     .array(zod.string())
@@ -359,6 +665,20 @@ export const GetReportResponse = zod.object({
       category: zod.string(),
     }),
   ),
+  checklistsByArea: zod
+    .record(
+      zod.string(),
+      zod.array(
+        zod.object({
+          id: zod.string(),
+          title: zod.string(),
+          description: zod.string(),
+          priority: zod.enum(["critical", "high", "medium", "low"]),
+          pathway: zod.enum(["growth", "compensation"]),
+        }),
+      ),
+    )
+    .optional(),
   input: zod.object({
     location: zod.string().describe("Country or region"),
     incomeStability: zod
@@ -416,6 +736,67 @@ export const GetReportResponse = zod.object({
       .string()
       .optional()
       .describe("Optional session ID for saving reports"),
+    mentalResilienceAnswers: zod
+      .object({
+        stressTolerance1: zod
+          .number()
+          .min(1)
+          .max(
+            getReportResponseInputMentalResilienceAnswersStressTolerance1Max,
+          ),
+        stressTolerance2: zod
+          .number()
+          .min(1)
+          .max(
+            getReportResponseInputMentalResilienceAnswersStressTolerance2Max,
+          ),
+        adaptability1: zod
+          .number()
+          .min(1)
+          .max(getReportResponseInputMentalResilienceAnswersAdaptability1Max),
+        adaptability2: zod
+          .number()
+          .min(1)
+          .max(getReportResponseInputMentalResilienceAnswersAdaptability2Max),
+        learningAgility1: zod
+          .number()
+          .min(1)
+          .max(
+            getReportResponseInputMentalResilienceAnswersLearningAgility1Max,
+          ),
+        changeManagement1: zod
+          .number()
+          .min(1)
+          .max(
+            getReportResponseInputMentalResilienceAnswersChangeManagement1Max,
+          ),
+        changeManagement2: zod
+          .number()
+          .min(1)
+          .max(
+            getReportResponseInputMentalResilienceAnswersChangeManagement2Max,
+          ),
+        emotionalRegulation1: zod
+          .number()
+          .min(1)
+          .max(
+            getReportResponseInputMentalResilienceAnswersEmotionalRegulation1Max,
+          ),
+        emotionalRegulation2: zod
+          .number()
+          .min(1)
+          .max(
+            getReportResponseInputMentalResilienceAnswersEmotionalRegulation2Max,
+          ),
+        socialSupport1: zod
+          .number()
+          .min(1)
+          .max(getReportResponseInputMentalResilienceAnswersSocialSupport1Max),
+      })
+      .optional()
+      .describe(
+        "Answers to the 10 mental resilience questions (1-5 Likert scale each)",
+      ),
   }),
 });
 
@@ -525,4 +906,110 @@ export const DeleteMyPlanParams = zod.object({
 
 export const DeleteMyPlanResponse = zod.object({
   success: zod.boolean(),
+});
+
+/**
+ * @summary Get checklist progress for a report
+ */
+export const GetChecklistsParams = zod.object({
+  reportId: zod.coerce.string(),
+});
+
+export const GetChecklistsResponse = zod.object({
+  progress: zod.array(
+    zod.object({
+      area: zod.string(),
+      itemId: zod.string(),
+      completed: zod.boolean(),
+      completedAt: zod.date().nullish(),
+    }),
+  ),
+});
+
+/**
+ * @summary Mark or unmark a checklist item as complete
+ */
+export const UpdateChecklistItemParams = zod.object({
+  reportId: zod.coerce.string(),
+  area: zod.coerce.string(),
+  itemId: zod.coerce.string(),
+});
+
+export const UpdateChecklistItemBody = zod.object({
+  completed: zod.boolean(),
+});
+
+export const UpdateChecklistItemResponse = zod.object({
+  area: zod.string(),
+  itemId: zod.string(),
+  completed: zod.boolean(),
+  completedAt: zod.date().nullish(),
+});
+
+/**
+ * @summary Get progress snapshots for a session
+ */
+export const GetSnapshotsParams = zod.object({
+  reportId: zod.coerce.string(),
+});
+
+export const getSnapshotsResponseSnapshotsItemScoreOverallMin = 0;
+export const getSnapshotsResponseSnapshotsItemScoreOverallMax = 100;
+
+export const getSnapshotsResponseSnapshotsItemScoreFinancialMin = 0;
+export const getSnapshotsResponseSnapshotsItemScoreFinancialMax = 100;
+
+export const getSnapshotsResponseSnapshotsItemScoreHealthMin = 0;
+export const getSnapshotsResponseSnapshotsItemScoreHealthMax = 100;
+
+export const getSnapshotsResponseSnapshotsItemScoreSkillsMin = 0;
+export const getSnapshotsResponseSnapshotsItemScoreSkillsMax = 100;
+
+export const getSnapshotsResponseSnapshotsItemScoreMobilityMin = 0;
+export const getSnapshotsResponseSnapshotsItemScoreMobilityMax = 100;
+
+export const getSnapshotsResponseSnapshotsItemScorePsychologicalMin = 0;
+export const getSnapshotsResponseSnapshotsItemScorePsychologicalMax = 100;
+
+export const getSnapshotsResponseSnapshotsItemScoreResourcesMin = 0;
+export const getSnapshotsResponseSnapshotsItemScoreResourcesMax = 100;
+
+export const GetSnapshotsResponse = zod.object({
+  snapshots: zod.array(
+    zod.object({
+      reportId: zod.string(),
+      snapshotAt: zod.date(),
+      score: zod.object({
+        overall: zod
+          .number()
+          .min(getSnapshotsResponseSnapshotsItemScoreOverallMin)
+          .max(getSnapshotsResponseSnapshotsItemScoreOverallMax),
+        financial: zod
+          .number()
+          .min(getSnapshotsResponseSnapshotsItemScoreFinancialMin)
+          .max(getSnapshotsResponseSnapshotsItemScoreFinancialMax),
+        health: zod
+          .number()
+          .min(getSnapshotsResponseSnapshotsItemScoreHealthMin)
+          .max(getSnapshotsResponseSnapshotsItemScoreHealthMax),
+        skills: zod
+          .number()
+          .min(getSnapshotsResponseSnapshotsItemScoreSkillsMin)
+          .max(getSnapshotsResponseSnapshotsItemScoreSkillsMax),
+        mobility: zod
+          .number()
+          .min(getSnapshotsResponseSnapshotsItemScoreMobilityMin)
+          .max(getSnapshotsResponseSnapshotsItemScoreMobilityMax),
+        psychological: zod
+          .number()
+          .min(getSnapshotsResponseSnapshotsItemScorePsychologicalMin)
+          .max(getSnapshotsResponseSnapshotsItemScorePsychologicalMax),
+        resources: zod
+          .number()
+          .min(getSnapshotsResponseSnapshotsItemScoreResourcesMin)
+          .max(getSnapshotsResponseSnapshotsItemScoreResourcesMax),
+      }),
+      mrComposite: zod.number().nullish(),
+    }),
+  ),
 });

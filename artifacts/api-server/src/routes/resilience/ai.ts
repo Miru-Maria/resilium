@@ -1,5 +1,16 @@
 import { openai } from "@workspace/integrations-openai-ai-server";
 
+type MentalResilienceSubScores = {
+  stressTolerance: number;
+  adaptability: number;
+  learningAgility: number;
+  changeManagement: number;
+  emotionalRegulation: number;
+  socialSupport: number;
+  composite: number;
+  pathway: "growth" | "compensation";
+};
+
 type AssessmentInput = {
   location: string;
   incomeStability: string;
@@ -31,6 +42,14 @@ type ActionItem = {
   category: string;
 };
 
+type ChecklistItem = {
+  id: string;
+  title: string;
+  description: string;
+  priority: "critical" | "high" | "medium" | "low";
+  pathway: "growth" | "compensation";
+};
+
 type ScenarioSimulation = {
   scenario: string;
   impact: "severe" | "high" | "moderate" | "low";
@@ -55,12 +74,32 @@ type ReportContent = {
   };
   scenarioSimulations: ScenarioSimulation[];
   dailyHabits: DailyHabit[];
+  checklistsByArea: {
+    financial: ChecklistItem[];
+    health: ChecklistItem[];
+    skills: ChecklistItem[];
+    mobility: ChecklistItem[];
+    psychological: ChecklistItem[];
+    resources: ChecklistItem[];
+  };
 };
 
 export async function generateResilienceReport(
   input: AssessmentInput,
-  scores: Scores
+  scores: Scores,
+  mentalResilienceSubScores: MentalResilienceSubScores | null
 ): Promise<ReportContent> {
+  const pathway = mentalResilienceSubScores?.pathway ?? "compensation";
+  const mrComposite = mentalResilienceSubScores?.composite ?? Math.round((input.psychologicalResilience / 10) * 100);
+
+  const pathwayContext = pathway === "growth"
+    ? `The user has a HIGH mental resilience composite (${mrComposite}/100) — use a GROWTH pathway. Checklist items should be ambitious, challenge-oriented, and push the user toward capability expansion. Frame tasks as opportunities.`
+    : `The user has a LOWER mental resilience composite (${mrComposite}/100) — use a COMPENSATION pathway. Checklist items should be emotionally scaffolded, confidence-building, and broken into small achievable steps. Prioritize quick wins. Frame tasks as safety-building.`;
+
+  const interdependenceContext = scores.financial < 40 && scores.psychological < 50
+    ? "IMPORTANT: The user has both critical financial vulnerability AND low psychological resilience. Financial checklist items must include emotionally-scaffolded steps (e.g., 'take one small financial action per week' rather than 'build 6-month emergency fund immediately'). Psychological pressure from financial stress is compounding — acknowledge this explicitly in relevant items."
+    : "";
+
   const prompt = `You are a resilience planning expert. Based on the following assessment, generate a structured resilience report.
 
 USER PROFILE:
@@ -84,6 +123,10 @@ RESILIENCE SCORES (0-100):
 - Mobility: ${scores.mobility}
 - Psychological: ${scores.psychological}
 - Resources: ${scores.resources}
+
+MENTAL RESILIENCE PATHWAY:
+${pathwayContext}
+${interdependenceContext}
 
 Generate a JSON response with this exact structure:
 {
@@ -111,7 +154,27 @@ Generate a JSON response with this exact structure:
   ],
   "dailyHabits": [
     {"habit": "specific habit", "frequency": "daily|weekly|monthly", "category": "financial|health|skills|mental|social"}
-  ]
+  ],
+  "checklistsByArea": {
+    "financial": [
+      {"id": "financial_1", "title": "item title", "description": "specific actionable description", "priority": "critical|high|medium|low", "pathway": "${pathway}"}
+    ],
+    "health": [
+      {"id": "health_1", "title": "item title", "description": "specific actionable description", "priority": "critical|high|medium|low", "pathway": "${pathway}"}
+    ],
+    "skills": [
+      {"id": "skills_1", "title": "item title", "description": "specific actionable description", "priority": "critical|high|medium|low", "pathway": "${pathway}"}
+    ],
+    "mobility": [
+      {"id": "mobility_1", "title": "item title", "description": "specific actionable description", "priority": "critical|high|medium|low", "pathway": "${pathway}"}
+    ],
+    "psychological": [
+      {"id": "psychological_1", "title": "item title", "description": "specific actionable description", "priority": "critical|high|medium|low", "pathway": "${pathway}"}
+    ],
+    "resources": [
+      {"id": "resources_1", "title": "item title", "description": "specific actionable description", "priority": "critical|high|medium|low", "pathway": "${pathway}"}
+    ]
+  }
 }
 
 Requirements:
@@ -120,8 +183,10 @@ Requirements:
 - Long-term: 3-5 items (6+ months)
 - Scenario simulations: cover the top 3 risk concerns from the user's list
 - Daily habits: 6-8 habits across different categories
+- checklistsByArea: 4-8 items per area, ordered by priority descending (critical first). All item ids must be unique within their area (use area_1, area_2, etc.)
 - Voice: intelligent, grounded, strategic, empowering (not alarmist)
 - Be specific to the user's actual situation, not generic
+- Checklist items MUST reflect the ${pathway} pathway — ${pathway === "growth" ? "challenge-oriented, ambitious" : "scaffolded, confidence-building"}
 
 Return ONLY the JSON, no additional text.`;
 

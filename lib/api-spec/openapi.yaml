@@ -257,6 +257,91 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
 
+  /resilience/reports/{reportId}/checklists:
+    get:
+      operationId: getChecklists
+      tags: [resilience]
+      summary: Get checklist progress for a report
+      parameters:
+        - name: reportId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Checklist progress
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChecklistProgressResponse"
+        "404":
+          description: Report not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /resilience/reports/{reportId}/checklists/{area}/{itemId}:
+    patch:
+      operationId: updateChecklistItem
+      tags: [resilience]
+      summary: Mark or unmark a checklist item as complete
+      parameters:
+        - name: reportId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: area
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateChecklistItemBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChecklistItemProgress"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /resilience/reports/{reportId}/snapshots:
+    get:
+      operationId: getSnapshots
+      tags: [resilience]
+      summary: Get progress snapshots for a session
+      parameters:
+        - name: reportId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Snapshots
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SnapshotsResponse"
+
 components:
   parameters:
     AuthorizationSessionHeader:
@@ -383,6 +468,62 @@ components:
           items:
             $ref: '#/components/schemas/PlanSummary'
 
+    MentalResilienceAnswers:
+      type: object
+      description: Answers to the 10 mental resilience questions (1-5 Likert scale each)
+      properties:
+        stressTolerance1:
+          type: integer
+          minimum: 1
+          maximum: 5
+        stressTolerance2:
+          type: integer
+          minimum: 1
+          maximum: 5
+        adaptability1:
+          type: integer
+          minimum: 1
+          maximum: 5
+        adaptability2:
+          type: integer
+          minimum: 1
+          maximum: 5
+        learningAgility1:
+          type: integer
+          minimum: 1
+          maximum: 5
+        changeManagement1:
+          type: integer
+          minimum: 1
+          maximum: 5
+        changeManagement2:
+          type: integer
+          minimum: 1
+          maximum: 5
+        emotionalRegulation1:
+          type: integer
+          minimum: 1
+          maximum: 5
+        emotionalRegulation2:
+          type: integer
+          minimum: 1
+          maximum: 5
+        socialSupport1:
+          type: integer
+          minimum: 1
+          maximum: 5
+      required:
+        - stressTolerance1
+        - stressTolerance2
+        - adaptability1
+        - adaptability2
+        - learningAgility1
+        - changeManagement1
+        - changeManagement2
+        - emotionalRegulation1
+        - emotionalRegulation2
+        - socialSupport1
+
     AssessmentInput:
       type: object
       properties:
@@ -434,6 +575,8 @@ components:
         sessionId:
           type: string
           description: Optional session ID for saving reports
+        mentalResilienceAnswers:
+          $ref: "#/components/schemas/MentalResilienceAnswers"
       required:
         - location
         - incomeStability
@@ -446,6 +589,72 @@ components:
         - hasEmergencySupplies
         - psychologicalResilience
         - riskConcerns
+
+    MentalResilienceProfile:
+      type: object
+      properties:
+        stressTolerance:
+          type: number
+          minimum: 0
+          maximum: 100
+        adaptability:
+          type: number
+          minimum: 0
+          maximum: 100
+        learningAgility:
+          type: number
+          minimum: 0
+          maximum: 100
+        changeManagement:
+          type: number
+          minimum: 0
+          maximum: 100
+        emotionalRegulation:
+          type: number
+          minimum: 0
+          maximum: 100
+        socialSupport:
+          type: number
+          minimum: 0
+          maximum: 100
+        composite:
+          type: number
+          minimum: 0
+          maximum: 100
+        pathway:
+          type: string
+          enum: [growth, compensation]
+      required:
+        - stressTolerance
+        - adaptability
+        - learningAgility
+        - changeManagement
+        - emotionalRegulation
+        - socialSupport
+        - composite
+        - pathway
+
+    ChecklistItem:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        priority:
+          type: string
+          enum: [critical, high, medium, low]
+        pathway:
+          type: string
+          enum: [growth, compensation]
+      required:
+        - id
+        - title
+        - description
+        - priority
+        - pathway
 
     ResilienceScore:
       type: object
@@ -553,6 +762,8 @@ components:
           format: date-time
         score:
           $ref: "#/components/schemas/ResilienceScore"
+        mentalResilienceProfile:
+          $ref: "#/components/schemas/MentalResilienceProfile"
         riskProfileSummary:
           type: string
         topVulnerabilities:
@@ -588,6 +799,12 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/DailyHabit"
+        checklistsByArea:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: "#/components/schemas/ChecklistItem"
         input:
           $ref: "#/components/schemas/AssessmentInput"
       required:
@@ -600,3 +817,67 @@ components:
         - scenarioSimulations
         - dailyHabits
         - input
+
+    ChecklistItemProgress:
+      type: object
+      properties:
+        area:
+          type: string
+        itemId:
+          type: string
+        completed:
+          type: boolean
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - area
+        - itemId
+        - completed
+
+    ChecklistProgressResponse:
+      type: object
+      properties:
+        progress:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChecklistItemProgress"
+      required:
+        - progress
+
+    UpdateChecklistItemBody:
+      type: object
+      properties:
+        completed:
+          type: boolean
+      required:
+        - completed
+
+    ProgressSnapshot:
+      type: object
+      properties:
+        reportId:
+          type: string
+        snapshotAt:
+          type: string
+          format: date-time
+        score:
+          $ref: "#/components/schemas/ResilienceScore"
+        mrComposite:
+          type: number
+          nullable: true
+      required:
+        - reportId
+        - snapshotAt
+        - score
+
+    SnapshotsResponse:
+      type: object
+      properties:
+        snapshots:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProgressSnapshot"
+      required:
+        - snapshots

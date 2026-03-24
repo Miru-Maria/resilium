@@ -1,12 +1,11 @@
 import { Router, type IRouter } from "express";
 import { randomUUID } from "crypto";
 import { SubmitAssessmentBody, GetReportParams } from "@workspace/api-zod";
-import { db, resilienceReportsTable } from "@workspace/db";
+import { db, resilienceReportsTable, checklistProgressTable, progressSnapshotsTable } from "@workspace/db";
 import { eq, and, count } from "drizzle-orm";
 import { calculateScores } from "./scoring.js";
 import { generateResilienceReport } from "./ai.js";
 import { PLAN_LIMIT } from "../users.js";
-
 const router: IRouter = Router();
 
 router.post("/assess", async (req, res) => {
@@ -36,7 +35,7 @@ router.post("/assess", async (req, res) => {
         return;
       }
     }
-    const scores = calculateScores({
+    const scoreResult = calculateScores({
       location: input.location,
       incomeStability: input.incomeStability,
       savingsMonths: input.savingsMonths,
@@ -48,7 +47,10 @@ router.post("/assess", async (req, res) => {
       hasEmergencySupplies: input.hasEmergencySupplies,
       psychologicalResilience: input.psychologicalResilience,
       riskConcerns: input.riskConcerns as string[],
+      mentalResilienceAnswers: input.mentalResilienceAnswers ?? undefined,
     });
+
+    const { mentalResilienceSubScores, ...scores } = scoreResult;
 
     const reportContent = await generateResilienceReport(
       {
@@ -64,7 +66,8 @@ router.post("/assess", async (req, res) => {
         psychologicalResilience: input.psychologicalResilience,
         riskConcerns: input.riskConcerns as string[],
       },
-      scores
+      scores,
+      mentalResilienceSubScores
     );
 
     const reportId = randomUUID();
@@ -85,6 +88,14 @@ router.post("/assess", async (req, res) => {
       hasEmergencySupplies: input.hasEmergencySupplies,
       psychologicalResilience: input.psychologicalResilience,
       riskConcerns: input.riskConcerns,
+      mrStressTolerance: mentalResilienceSubScores?.stressTolerance ?? null,
+      mrAdaptability: mentalResilienceSubScores?.adaptability ?? null,
+      mrLearningAgility: mentalResilienceSubScores?.learningAgility ?? null,
+      mrChangeManagement: mentalResilienceSubScores?.changeManagement ?? null,
+      mrEmotionalRegulation: mentalResilienceSubScores?.emotionalRegulation ?? null,
+      mrSocialSupport: mentalResilienceSubScores?.socialSupport ?? null,
+      mrComposite: mentalResilienceSubScores?.composite ?? null,
+      mrPathway: mentalResilienceSubScores?.pathway ?? null,
       scoreOverall: scores.overall,
       scoreFinancial: scores.financial,
       scoreHealth: scores.health,
@@ -97,8 +108,26 @@ router.post("/assess", async (req, res) => {
       actionPlan: reportContent.actionPlan,
       scenarioSimulations: reportContent.scenarioSimulations,
       dailyHabits: reportContent.dailyHabits,
+      checklistsByArea: reportContent.checklistsByArea ?? null,
       createdAt: now,
     });
+
+    // Save a progress snapshot if sessionId is provided
+    if (input.sessionId) {
+      await db.insert(progressSnapshotsTable).values({
+        sessionId: input.sessionId,
+        reportId,
+        snapshotAt: now,
+        scoreOverall: scores.overall,
+        scoreFinancial: scores.financial,
+        scoreHealth: scores.health,
+        scoreSkills: scores.skills,
+        scoreMobility: scores.mobility,
+        scorePsychological: scores.psychological,
+        scoreResources: scores.resources,
+        mrComposite: mentalResilienceSubScores?.composite ?? null,
+      });
+    }
 
     res.json({
       reportId,
@@ -112,11 +141,13 @@ router.post("/assess", async (req, res) => {
         psychological: scores.psychological,
         resources: scores.resources,
       },
+      mentalResilienceProfile: mentalResilienceSubScores ?? undefined,
       riskProfileSummary: reportContent.riskProfileSummary,
       topVulnerabilities: reportContent.topVulnerabilities,
       actionPlan: reportContent.actionPlan,
       scenarioSimulations: reportContent.scenarioSimulations,
       dailyHabits: reportContent.dailyHabits,
+      checklistsByArea: reportContent.checklistsByArea ?? undefined,
       input: {
         location: input.location,
         incomeStability: input.incomeStability,
@@ -129,6 +160,8 @@ router.post("/assess", async (req, res) => {
         hasEmergencySupplies: input.hasEmergencySupplies,
         psychologicalResilience: input.psychologicalResilience,
         riskConcerns: input.riskConcerns,
+        sessionId: input.sessionId,
+        mentalResilienceAnswers: input.mentalResilienceAnswers,
       },
     });
   } catch (err) {
@@ -168,6 +201,17 @@ router.get("/reports/:reportId", async (req, res) => {
       return;
     }
 
+    const mentalResilienceProfile = row.mrComposite != null ? {
+      stressTolerance: row.mrStressTolerance ?? 0,
+      adaptability: row.mrAdaptability ?? 0,
+      learningAgility: row.mrLearningAgility ?? 0,
+      changeManagement: row.mrChangeManagement ?? 0,
+      emotionalRegulation: row.mrEmotionalRegulation ?? 0,
+      socialSupport: row.mrSocialSupport ?? 0,
+      composite: row.mrComposite,
+      pathway: (row.mrPathway as "growth" | "compensation") ?? "compensation",
+    } : undefined;
+
     res.json({
       reportId: row.reportId,
       createdAt: row.createdAt.toISOString(),
@@ -180,11 +224,13 @@ router.get("/reports/:reportId", async (req, res) => {
         psychological: row.scorePsychological,
         resources: row.scoreResources,
       },
+      mentalResilienceProfile,
       riskProfileSummary: row.riskProfileSummary,
       topVulnerabilities: row.topVulnerabilities as string[],
       actionPlan: row.actionPlan,
       scenarioSimulations: row.scenarioSimulations,
       dailyHabits: row.dailyHabits,
+      checklistsByArea: row.checklistsByArea ?? undefined,
       input: {
         location: row.location,
         incomeStability: row.incomeStability as "fixed" | "freelance" | "unstable",
@@ -205,6 +251,142 @@ router.get("/reports/:reportId", async (req, res) => {
       error: "INTERNAL_ERROR",
       message: "Failed to fetch report.",
     });
+  }
+});
+
+// GET /resilience/reports/:reportId/checklists
+router.get("/reports/:reportId/checklists", async (req, res) => {
+  try {
+    const reportId = req.params.reportId;
+    if (!reportId) {
+      res.status(400).json({ error: "VALIDATION_ERROR", message: "Missing reportId" });
+      return;
+    }
+
+    const progress = await db
+      .select()
+      .from(checklistProgressTable)
+      .where(eq(checklistProgressTable.reportId, reportId));
+
+    res.json({
+      progress: progress.map(p => ({
+        area: p.area,
+        itemId: p.itemId,
+        completed: p.completed,
+        completedAt: p.completedAt?.toISOString() ?? null,
+      })),
+    });
+  } catch (err) {
+    req.log.error({ err }, "Error fetching checklist progress");
+    res.status(500).json({ error: "INTERNAL_ERROR", message: "Failed to fetch checklist." });
+  }
+});
+
+// PATCH /resilience/reports/:reportId/checklists/:area/:itemId
+router.patch("/reports/:reportId/checklists/:area/:itemId", async (req, res) => {
+  try {
+    const { reportId, area, itemId } = req.params;
+    const body = req.body as { completed?: unknown };
+    if (typeof body.completed !== "boolean") {
+      res.status(400).json({ error: "VALIDATION_ERROR", message: "Invalid body: 'completed' must be a boolean" });
+      return;
+    }
+    const completed = body.completed;
+    const completedAt = completed ? new Date() : null;
+
+    // Upsert: check if record exists
+    const existing = await db
+      .select()
+      .from(checklistProgressTable)
+      .where(
+        and(
+          eq(checklistProgressTable.reportId, reportId),
+          eq(checklistProgressTable.area, area),
+          eq(checklistProgressTable.itemId, itemId)
+        )
+      )
+      .limit(1);
+
+    if (existing.length > 0) {
+      await db
+        .update(checklistProgressTable)
+        .set({ completed, completedAt })
+        .where(
+          and(
+            eq(checklistProgressTable.reportId, reportId),
+            eq(checklistProgressTable.area, area),
+            eq(checklistProgressTable.itemId, itemId)
+          )
+        );
+    } else {
+      await db.insert(checklistProgressTable).values({
+        reportId,
+        area,
+        itemId,
+        completed,
+        completedAt,
+      });
+    }
+
+    res.json({
+      area,
+      itemId,
+      completed,
+      completedAt: completedAt?.toISOString() ?? null,
+    });
+  } catch (err) {
+    req.log.error({ err }, "Error updating checklist item");
+    res.status(500).json({ error: "INTERNAL_ERROR", message: "Failed to update checklist item." });
+  }
+});
+
+// GET /resilience/reports/:reportId/snapshots
+router.get("/reports/:reportId/snapshots", async (req, res) => {
+  try {
+    const reportId = req.params.reportId;
+    if (!reportId) {
+      res.status(400).json({ error: "VALIDATION_ERROR", message: "Missing reportId" });
+      return;
+    }
+
+    // Find the sessionId for this report
+    const reportRows = await db
+      .select({ sessionId: resilienceReportsTable.sessionId })
+      .from(resilienceReportsTable)
+      .where(eq(resilienceReportsTable.reportId, reportId))
+      .limit(1);
+
+    const sessionId = reportRows[0]?.sessionId;
+    if (!sessionId) {
+      res.json({ snapshots: [] });
+      return;
+    }
+
+    const snapshots = await db
+      .select()
+      .from(progressSnapshotsTable)
+      .where(eq(progressSnapshotsTable.sessionId, sessionId))
+      .orderBy(progressSnapshotsTable.snapshotAt);
+
+    res.json({
+      snapshots: snapshots.map(s => ({
+        reportId: s.reportId,
+        snapshotAt: s.snapshotAt.toISOString(),
+        score: {
+          overall: s.scoreOverall,
+          financial: s.scoreFinancial,
+          health: s.scoreHealth,
+          skills: s.scoreSkills,
+          mobility: s.scoreMobility,
+          psychological: s.scorePsychological,
+          resources: s.scoreResources,
+        },
+        mrComposite: s.mrComposite ?? null,
+      })),
+    });
+  } catch (err) {
+    req.log.error({ err }, "Error fetching snapshots");
+    res.status(500).json({ error: "INTERNAL_ERROR", message: "Failed to fetch snapshots." });
   }
 });
 

@@ -1,13 +1,15 @@
-import React, { useRef } from "react";
+import React, { useState, useCallback } from "react";
 import { useRoute } from "wouter";
-import { useGetReport } from "@workspace/api-client-react";
+import { useGetReport, useGetChecklists, useUpdateChecklistItem, useGetSnapshots } from "@workspace/api-client-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { CircularProgress } from "@/components/circular-progress";
 import { RadarChartView } from "@/components/radar-chart-view";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
-import { Loader2, Download, Share2, AlertTriangle, ShieldAlert, CheckCircle, RefreshCcw, Activity, User, LogIn } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { Loader2, Download, Share2, AlertTriangle, ShieldAlert, CheckCircle, RefreshCcw, Activity, User, LogIn, Brain, TrendingUp, Award } from "lucide-react";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { SiteFooter } from "@/components/site-footer";
@@ -19,12 +21,42 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
+import type { ResilienceScore, MentalResilienceProfile, ChecklistItem } from "@workspace/api-client-react/src/generated/api.schemas";
+
+const AREA_LABELS: Record<string, string> = {
+  financial: "Financial",
+  health: "Health",
+  skills: "Skills",
+  mobility: "Mobility",
+  psychological: "Psychological",
+  resources: "Resources",
+};
+
+const PRIORITY_CONFIG = {
+  critical: { label: "Critical", className: "bg-destructive/10 text-destructive" },
+  high: { label: "High", className: "bg-amber-500/10 text-amber-700" },
+  medium: { label: "Medium", className: "bg-blue-500/10 text-blue-700" },
+  low: { label: "Low", className: "bg-primary/10 text-primary" },
+};
+
+const MILESTONE_MARKERS = [
+  { percent: 25, label: "Momentum Building", icon: "🌱" },
+  { percent: 50, label: "Strong Foundation", icon: "🏗️" },
+  { percent: 75, label: "Well Prepared", icon: "🛡️" },
+  { percent: 100, label: "Fully Resilient", icon: "🎯" },
+];
+
+function getMilestone(percent: number) {
+  return MILESTONE_MARKERS.slice().reverse().find(m => percent >= m.percent);
+}
 
 export default function ResultsPage() {
   const [, params] = useRoute("/results/:reportId");
   const reportId = params?.reportId || "";
   const { toast } = useToast();
   const { user, isAuthenticated, login, logout } = useAuth();
+  const queryClient = useQueryClient();
 
   const { data: report, isLoading, error } = useGetReport(reportId, {
     query: {
@@ -36,6 +68,25 @@ export default function ResultsPage() {
       },
     }
   });
+
+  const { data: checklistData, refetch: refetchChecklist } = useGetChecklists(reportId, {
+    query: { enabled: !!reportId }
+  });
+
+  const { data: snapshotsData } = useGetSnapshots(reportId, {
+    query: { enabled: !!reportId }
+  });
+
+  const { mutateAsync: updateItem } = useUpdateChecklistItem();
+
+  const handleChecklistToggle = useCallback(async (area: string, itemId: string, currentlyCompleted: boolean) => {
+    try {
+      await updateItem({ reportId, area, itemId, data: { completed: !currentlyCompleted } });
+      await refetchChecklist();
+    } catch (err) {
+      toast({ title: "Failed to update", description: "Could not save your progress.", variant: "destructive" });
+    }
+  }, [reportId, updateItem, refetchChecklist, toast]);
 
   if (isLoading) {
     return (
@@ -69,15 +120,59 @@ export default function ResultsPage() {
 
   const handleShare = () => {
     navigator.clipboard.writeText(`My Resilium Score is ${Math.round(report.score.overall)}/100. Find out your survival readiness at Resilium.`);
-    toast({
-      title: "Copied to clipboard",
-      description: "You can now paste and share your score.",
-    });
+    toast({ title: "Copied to clipboard", description: "You can now paste and share your score." });
   };
 
-  const handlePrint = () => {
-    window.print();
+  const handlePrint = () => window.print();
+
+  // Checklist progress lookup
+  const progressMap: Record<string, boolean> = {};
+  (checklistData?.progress ?? []).forEach(p => {
+    progressMap[`${p.area}::${p.itemId}`] = p.completed;
+  });
+
+  // Sort areas by score ascending (worst first)
+  const scoreByArea: Record<string, number> = {
+    financial: report.score.financial,
+    health: report.score.health,
+    skills: report.score.skills,
+    mobility: report.score.mobility,
+    psychological: report.score.psychological,
+    resources: report.score.resources,
   };
+
+  const checklistsByArea = (report.checklistsByArea ?? {}) as Record<string, ChecklistItem[]>;
+  const sortedAreas = Object.keys(checklistsByArea).sort((a, b) => (scoreByArea[a] ?? 50) - (scoreByArea[b] ?? 50));
+
+  // Compute per-area completion
+  const areaCompletion = (area: string, items: ChecklistItem[]) => {
+    const done = items.filter(item => progressMap[`${area}::${item.id}`]).length;
+    return { done, total: items.length, percent: items.length > 0 ? Math.round((done / items.length) * 100) : 0 };
+  };
+
+  // Overall checklist completion
+  const allItems = Object.entries(checklistsByArea).flatMap(([area, items]) => items.map(i => ({ area, id: i.id })));
+  const totalDone = allItems.filter(i => progressMap[`${i.area}::${i.id}`]).length;
+  const totalItems = allItems.length;
+  const overallPercent = totalItems > 0 ? Math.round((totalDone / totalItems) * 100) : 0;
+  const milestone = getMilestone(overallPercent);
+
+  // Progress snapshots
+  const snapshots = snapshotsData?.snapshots ?? [];
+  const previousSnapshot = snapshots.length >= 2 ? snapshots[snapshots.length - 2] : null;
+  const previousScore = previousSnapshot?.score;
+
+  // Mental resilience profile
+  const mrProfile = (report as any).mentalResilienceProfile as MentalResilienceProfile | undefined;
+
+  const mrDimensions = mrProfile ? [
+    { label: "Stress Tolerance", value: mrProfile.stressTolerance },
+    { label: "Adaptability", value: mrProfile.adaptability },
+    { label: "Learning Agility", value: mrProfile.learningAgility },
+    { label: "Change Management", value: mrProfile.changeManagement },
+    { label: "Emotional Regulation", value: mrProfile.emotionalRegulation },
+    { label: "Social Support", value: mrProfile.socialSupport },
+  ] : [];
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -131,7 +226,7 @@ export default function ResultsPage() {
       </header>
 
       <main className="max-w-6xl mx-auto px-6 pt-10 space-y-10">
-        
+
         {/* HERO SCORES SECTION */}
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <Card className="lg:col-span-1 border-none shadow-xl shadow-black/5 bg-gradient-to-b from-card to-muted/20 flex flex-col items-center justify-center p-8 text-center">
@@ -149,16 +244,61 @@ export default function ResultsPage() {
           
           <Card className="lg:col-span-2 border-none shadow-xl shadow-black/5 flex flex-col sm:flex-row items-center p-6 gap-6">
             <div className="w-full sm:w-1/2 h-[300px]">
-              <RadarChartView score={report.score} />
+              <RadarChartView score={report.score} previousScore={previousScore} />
             </div>
             <div className="w-full sm:w-1/2 space-y-4">
               <h3 className="font-display font-bold text-2xl">Risk Profile</h3>
               <p className="text-muted-foreground leading-relaxed">
                 {report.riskProfileSummary}
               </p>
+              {previousScore && (
+                <div className="text-xs text-muted-foreground border-t pt-3 mt-3">
+                  Dashed line shows your previous assessment score
+                </div>
+              )}
             </div>
           </Card>
         </section>
+
+        {/* MENTAL RESILIENCE PROFILE */}
+        {mrProfile && (
+          <section className="bg-card rounded-3xl p-6 md:p-8 shadow-lg shadow-black/5 border border-border">
+            <div className="flex items-center gap-3 mb-6">
+              <Brain className="w-6 h-6 text-primary" />
+              <h2 className="font-display font-bold text-2xl">Mental Resilience Profile</h2>
+              <span className={cn(
+                "ml-auto text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full",
+                mrProfile.pathway === "growth" ? "bg-emerald-500/10 text-emerald-700" : "bg-amber-500/10 text-amber-700"
+              )}>
+                {mrProfile.pathway === "growth" ? "Growth Pathway" : "Compensation Pathway"}
+              </span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              {mrDimensions.map((dim) => (
+                <div key={dim.label} className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-semibold text-foreground">{dim.label}</span>
+                    <span className={cn("text-sm font-bold", getScoreColorClass(dim.value))}>{dim.value}/100</span>
+                  </div>
+                  <Progress value={dim.value} className="h-2" />
+                </div>
+              ))}
+            </div>
+            <div className="bg-muted/30 rounded-2xl p-4 flex items-center gap-4">
+              <div className="flex-shrink-0 w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
+                <span className="text-2xl font-display font-bold text-primary">{mrProfile.composite}</span>
+              </div>
+              <div>
+                <p className="font-bold text-sm">Composite Mental Resilience Score</p>
+                <p className="text-muted-foreground text-xs leading-relaxed">
+                  {mrProfile.pathway === "growth"
+                    ? "Your strong mental resilience enables an ambitious, challenge-oriented action plan. Embrace growth-oriented goals."
+                    : "Your plan is scaffolded to build confidence step-by-step. Start small, build momentum, and your resilience will grow."}
+                </p>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* TOP VULNERABILITIES */}
         <section>
@@ -178,10 +318,118 @@ export default function ResultsPage() {
           </div>
         </section>
 
+        {/* ACTION CHECKLISTS */}
+        {sortedAreas.length > 0 && (
+          <section className="bg-card rounded-3xl p-6 md:p-8 shadow-lg shadow-black/5 border border-border">
+            <div className="flex items-center gap-3 mb-2">
+              <CheckCircle className="w-6 h-6 text-emerald-600" />
+              <h2 className="font-display font-bold text-2xl">Action Checklists</h2>
+            </div>
+            <p className="text-muted-foreground text-sm mb-6">
+              Areas sorted from most critical to least. Check items off as you complete them — your progress is saved.
+            </p>
+
+            {/* Overall progress */}
+            {totalItems > 0 && (
+              <div className="mb-8 p-4 rounded-2xl bg-muted/30 border border-border">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-semibold text-sm">Overall Progress</span>
+                  <span className="text-sm font-bold text-primary">{totalDone}/{totalItems} completed</span>
+                </div>
+                <Progress value={overallPercent} className="h-3 mb-3" />
+                {milestone && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <span>{milestone.icon}</span>
+                    <span className="font-medium">{overallPercent}% — {milestone.label}</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <Tabs defaultValue={sortedAreas[0]} className="w-full">
+              <TabsList className="flex flex-wrap h-auto gap-1 bg-muted/50 p-1 rounded-2xl mb-6">
+                {sortedAreas.map(area => {
+                  const items = checklistsByArea[area] ?? [];
+                  const comp = areaCompletion(area, items);
+                  return (
+                    <TabsTrigger key={area} value={area} className="rounded-xl text-xs sm:text-sm data-[state=active]:shadow-sm flex items-center gap-1.5">
+                      {AREA_LABELS[area] ?? area}
+                      {comp.total > 0 && (
+                        <span className={cn(
+                          "text-[10px] font-bold px-1.5 py-0.5 rounded-full",
+                          comp.done === comp.total ? "bg-emerald-500/20 text-emerald-700" : "bg-muted text-muted-foreground"
+                        )}>
+                          {comp.done}/{comp.total}
+                        </span>
+                      )}
+                    </TabsTrigger>
+                  );
+                })}
+              </TabsList>
+
+              {sortedAreas.map(area => {
+                const items = checklistsByArea[area] ?? [];
+                const comp = areaCompletion(area, items);
+                return (
+                  <TabsContent key={area} value={area} className="space-y-4 focus-visible:outline-none focus-visible:ring-0">
+                    {/* Area progress bar */}
+                    <div className="flex items-center gap-3 mb-4">
+                      <Progress value={comp.percent} className="h-2 flex-1" />
+                      <span className="text-xs font-bold text-muted-foreground whitespace-nowrap">{comp.done}/{comp.total}</span>
+                    </div>
+
+                    {items.map((item) => {
+                      const key = `${area}::${item.id}`;
+                      const completed = progressMap[key] ?? false;
+                      const priorityConfig = PRIORITY_CONFIG[item.priority as keyof typeof PRIORITY_CONFIG] ?? PRIORITY_CONFIG.medium;
+                      return (
+                        <div
+                          key={item.id}
+                          className={cn(
+                            "flex items-start gap-4 p-5 rounded-2xl border transition-all cursor-pointer",
+                            completed
+                              ? "border-emerald-200 bg-emerald-50/50 dark:bg-emerald-900/10 dark:border-emerald-900/30"
+                              : "border-border/60 hover:border-primary/30 hover:bg-muted/10"
+                          )}
+                          onClick={() => handleChecklistToggle(area, item.id, completed)}
+                        >
+                          <div className={cn(
+                            "w-5 h-5 rounded-full border-2 flex-shrink-0 mt-0.5 flex items-center justify-center transition-all",
+                            completed ? "border-emerald-500 bg-emerald-500" : "border-muted-foreground/40"
+                          )}>
+                            {completed && <CheckCircle className="w-3 h-3 text-white" />}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex flex-wrap items-center gap-2 mb-1">
+                              <span className={cn("text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full", priorityConfig.className)}>
+                                {priorityConfig.label}
+                              </span>
+                              <span className={cn(
+                                "text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full",
+                                item.pathway === "growth" ? "bg-emerald-500/10 text-emerald-700" : "bg-amber-500/10 text-amber-700"
+                              )}>
+                                {item.pathway === "growth" ? "Growth" : "Foundation"}
+                              </span>
+                            </div>
+                            <h4 className={cn("font-bold text-base", completed && "line-through text-muted-foreground")}>
+                              {item.title}
+                            </h4>
+                            <p className="text-muted-foreground text-sm mt-0.5">{item.description}</p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </TabsContent>
+                );
+              })}
+            </Tabs>
+          </section>
+        )}
+
         {/* ACTION PLAN TABS */}
         <section className="bg-card rounded-3xl p-6 md:p-8 shadow-lg shadow-black/5 border border-border">
           <div className="flex items-center gap-3 mb-6">
-            <CheckCircle className="w-6 h-6 text-emerald-600" />
+            <TrendingUp className="w-6 h-6 text-emerald-600" />
             <h2 className="font-display font-bold text-2xl">Strategic Action Plan</h2>
           </div>
           
@@ -218,6 +466,80 @@ export default function ResultsPage() {
             ))}
           </Tabs>
         </section>
+
+        {/* PROGRESS SECTION */}
+        {(snapshots.length >= 2 || totalItems > 0) && (
+          <section className="bg-card rounded-3xl p-6 md:p-8 shadow-lg shadow-black/5 border border-border">
+            <div className="flex items-center gap-3 mb-6">
+              <Award className="w-6 h-6 text-amber-500" />
+              <h2 className="font-display font-bold text-2xl">Your Progress</h2>
+            </div>
+
+            {/* Score delta */}
+            {snapshots.length >= 2 && previousScore && (
+              <div className="mb-8">
+                <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider mb-4">Score Changes Since Last Assessment</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
+                  {(["overall", "financial", "health", "skills", "mobility", "psychological", "resources"] as const).map(area => {
+                    const current = report.score[area];
+                    const prev = previousScore[area];
+                    const delta = current - prev;
+                    return (
+                      <div key={area} className="bg-muted/30 rounded-2xl p-3 text-center">
+                        <p className="text-xs text-muted-foreground capitalize mb-1">{area}</p>
+                        <p className="text-xl font-bold font-display">{current}</p>
+                        <p className={cn("text-xs font-bold", delta > 0 ? "text-emerald-600" : delta < 0 ? "text-destructive" : "text-muted-foreground")}>
+                          {delta > 0 ? `+${delta}` : delta === 0 ? "—" : delta}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Checklist completion summary */}
+            {totalItems > 0 && (
+              <div className="mb-6">
+                <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider mb-4">Checklist Completion by Area</h3>
+                <div className="space-y-3">
+                  {Object.entries(checklistsByArea).map(([area, items]) => {
+                    const comp = areaCompletion(area, items);
+                    return (
+                      <div key={area} className="flex items-center gap-4">
+                        <span className="text-sm font-medium w-24 flex-shrink-0">{AREA_LABELS[area] ?? area}</span>
+                        <Progress value={comp.percent} className="h-2 flex-1" />
+                        <span className="text-xs font-bold text-muted-foreground w-12 text-right">{comp.done}/{comp.total}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Milestone markers */}
+            {totalItems > 0 && (
+              <div>
+                <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider mb-4">Milestones</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {MILESTONE_MARKERS.map(m => {
+                    const achieved = overallPercent >= m.percent;
+                    return (
+                      <div key={m.percent} className={cn(
+                        "rounded-2xl p-4 text-center border transition-all",
+                        achieved ? "border-emerald-200 bg-emerald-50/50 dark:bg-emerald-900/10 dark:border-emerald-900/30" : "border-border bg-muted/20 opacity-50"
+                      )}>
+                        <div className="text-2xl mb-1">{m.icon}</div>
+                        <p className="text-xs font-bold">{m.percent}%</p>
+                        <p className="text-xs text-muted-foreground">{m.label}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </section>
+        )}
 
         {/* SCENARIO SIMULATIONS */}
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-8">

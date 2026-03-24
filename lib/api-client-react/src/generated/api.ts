@@ -20,6 +20,8 @@ import type {
   AssessmentInput,
   AuthUserEnvelope,
   BeginBrowserLoginParams,
+  ChecklistItemProgress,
+  ChecklistProgressResponse,
   ErrorEnvelope,
   ErrorResponse,
   HandleBrowserLoginCallbackParams,
@@ -29,6 +31,8 @@ import type {
   MobileTokenExchangeSuccess,
   MyPlansResponse,
   ResilienceReport,
+  SnapshotsResponse,
+  UpdateChecklistItemBody,
 } from "./api.schemas";
 
 import { customFetch } from "../custom-fetch";
@@ -970,3 +974,298 @@ export const useDeleteMyPlan = <
 > => {
   return useMutation(getDeleteMyPlanMutationOptions(options));
 };
+
+/**
+ * @summary Get checklist progress for a report
+ */
+export const getGetChecklistsUrl = (reportId: string) => {
+  return `/api/resilience/reports/${reportId}/checklists`;
+};
+
+export const getChecklists = async (
+  reportId: string,
+  options?: RequestInit,
+): Promise<ChecklistProgressResponse> => {
+  return customFetch<ChecklistProgressResponse>(getGetChecklistsUrl(reportId), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetChecklistsQueryKey = (reportId: string) => {
+  return [`/api/resilience/reports/${reportId}/checklists`] as const;
+};
+
+export const getGetChecklistsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getChecklists>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  reportId: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getChecklists>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetChecklistsQueryKey(reportId);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getChecklists>>> = ({
+    signal,
+  }) => getChecklists(reportId, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!reportId,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getChecklists>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetChecklistsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getChecklists>>
+>;
+export type GetChecklistsQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Get checklist progress for a report
+ */
+
+export function useGetChecklists<
+  TData = Awaited<ReturnType<typeof getChecklists>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  reportId: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getChecklists>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetChecklistsQueryOptions(reportId, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Mark or unmark a checklist item as complete
+ */
+export const getUpdateChecklistItemUrl = (
+  reportId: string,
+  area: string,
+  itemId: string,
+) => {
+  return `/api/resilience/reports/${reportId}/checklists/${area}/${itemId}`;
+};
+
+export const updateChecklistItem = async (
+  reportId: string,
+  area: string,
+  itemId: string,
+  updateChecklistItemBody: UpdateChecklistItemBody,
+  options?: RequestInit,
+): Promise<ChecklistItemProgress> => {
+  return customFetch<ChecklistItemProgress>(
+    getUpdateChecklistItemUrl(reportId, area, itemId),
+    {
+      ...options,
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", ...options?.headers },
+      body: JSON.stringify(updateChecklistItemBody),
+    },
+  );
+};
+
+export const getUpdateChecklistItemMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateChecklistItem>>,
+    TError,
+    {
+      reportId: string;
+      area: string;
+      itemId: string;
+      data: BodyType<UpdateChecklistItemBody>;
+    },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateChecklistItem>>,
+  TError,
+  {
+    reportId: string;
+    area: string;
+    itemId: string;
+    data: BodyType<UpdateChecklistItemBody>;
+  },
+  TContext
+> => {
+  const mutationKey = ["updateChecklistItem"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateChecklistItem>>,
+    {
+      reportId: string;
+      area: string;
+      itemId: string;
+      data: BodyType<UpdateChecklistItemBody>;
+    }
+  > = (props) => {
+    const { reportId, area, itemId, data } = props ?? {};
+
+    return updateChecklistItem(reportId, area, itemId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateChecklistItemMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateChecklistItem>>
+>;
+export type UpdateChecklistItemMutationBody = BodyType<UpdateChecklistItemBody>;
+export type UpdateChecklistItemMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Mark or unmark a checklist item as complete
+ */
+export const useUpdateChecklistItem = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateChecklistItem>>,
+    TError,
+    {
+      reportId: string;
+      area: string;
+      itemId: string;
+      data: BodyType<UpdateChecklistItemBody>;
+    },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof updateChecklistItem>>,
+  TError,
+  {
+    reportId: string;
+    area: string;
+    itemId: string;
+    data: BodyType<UpdateChecklistItemBody>;
+  },
+  TContext
+> => {
+  return useMutation(getUpdateChecklistItemMutationOptions(options));
+};
+
+/**
+ * @summary Get progress snapshots for a session
+ */
+export const getGetSnapshotsUrl = (reportId: string) => {
+  return `/api/resilience/reports/${reportId}/snapshots`;
+};
+
+export const getSnapshots = async (
+  reportId: string,
+  options?: RequestInit,
+): Promise<SnapshotsResponse> => {
+  return customFetch<SnapshotsResponse>(getGetSnapshotsUrl(reportId), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetSnapshotsQueryKey = (reportId: string) => {
+  return [`/api/resilience/reports/${reportId}/snapshots`] as const;
+};
+
+export const getGetSnapshotsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getSnapshots>>,
+  TError = ErrorType<unknown>,
+>(
+  reportId: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getSnapshots>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetSnapshotsQueryKey(reportId);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getSnapshots>>> = ({
+    signal,
+  }) => getSnapshots(reportId, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!reportId,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getSnapshots>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetSnapshotsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getSnapshots>>
+>;
+export type GetSnapshotsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get progress snapshots for a session
+ */
+
+export function useGetSnapshots<
+  TData = Awaited<ReturnType<typeof getSnapshots>>,
+  TError = ErrorType<unknown>,
+>(
+  reportId: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getSnapshots>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetSnapshotsQueryOptions(reportId, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}

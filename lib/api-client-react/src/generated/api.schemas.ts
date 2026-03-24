@@ -67,6 +67,62 @@ export interface MyPlansResponse {
 }
 
 /**
+ * Answers to the 10 mental resilience questions (1-5 Likert scale each)
+ */
+export interface MentalResilienceAnswers {
+  /**
+   * @minimum 1
+   * @maximum 5
+   */
+  stressTolerance1: number;
+  /**
+   * @minimum 1
+   * @maximum 5
+   */
+  stressTolerance2: number;
+  /**
+   * @minimum 1
+   * @maximum 5
+   */
+  adaptability1: number;
+  /**
+   * @minimum 1
+   * @maximum 5
+   */
+  adaptability2: number;
+  /**
+   * @minimum 1
+   * @maximum 5
+   */
+  learningAgility1: number;
+  /**
+   * @minimum 1
+   * @maximum 5
+   */
+  changeManagement1: number;
+  /**
+   * @minimum 1
+   * @maximum 5
+   */
+  changeManagement2: number;
+  /**
+   * @minimum 1
+   * @maximum 5
+   */
+  emotionalRegulation1: number;
+  /**
+   * @minimum 1
+   * @maximum 5
+   */
+  emotionalRegulation2: number;
+  /**
+   * @minimum 1
+   * @maximum 5
+   */
+  socialSupport1: number;
+}
+
+/**
  * Income stability type
  */
 export type AssessmentInputIncomeStability =
@@ -175,6 +231,80 @@ export interface AssessmentInput {
   riskConcerns: AssessmentInputRiskConcernsItem[];
   /** Optional session ID for saving reports */
   sessionId?: string;
+  mentalResilienceAnswers?: MentalResilienceAnswers;
+}
+
+export type MentalResilienceProfilePathway =
+  (typeof MentalResilienceProfilePathway)[keyof typeof MentalResilienceProfilePathway];
+
+export const MentalResilienceProfilePathway = {
+  growth: "growth",
+  compensation: "compensation",
+} as const;
+
+export interface MentalResilienceProfile {
+  /**
+   * @minimum 0
+   * @maximum 100
+   */
+  stressTolerance: number;
+  /**
+   * @minimum 0
+   * @maximum 100
+   */
+  adaptability: number;
+  /**
+   * @minimum 0
+   * @maximum 100
+   */
+  learningAgility: number;
+  /**
+   * @minimum 0
+   * @maximum 100
+   */
+  changeManagement: number;
+  /**
+   * @minimum 0
+   * @maximum 100
+   */
+  emotionalRegulation: number;
+  /**
+   * @minimum 0
+   * @maximum 100
+   */
+  socialSupport: number;
+  /**
+   * @minimum 0
+   * @maximum 100
+   */
+  composite: number;
+  pathway: MentalResilienceProfilePathway;
+}
+
+export type ChecklistItemPriority =
+  (typeof ChecklistItemPriority)[keyof typeof ChecklistItemPriority];
+
+export const ChecklistItemPriority = {
+  critical: "critical",
+  high: "high",
+  medium: "medium",
+  low: "low",
+} as const;
+
+export type ChecklistItemPathway =
+  (typeof ChecklistItemPathway)[keyof typeof ChecklistItemPathway];
+
+export const ChecklistItemPathway = {
+  growth: "growth",
+  compensation: "compensation",
+} as const;
+
+export interface ChecklistItem {
+  id: string;
+  title: string;
+  description: string;
+  priority: ChecklistItemPriority;
+  pathway: ChecklistItemPathway;
 }
 
 export interface ResilienceScore {
@@ -271,10 +401,15 @@ export type ResilienceReportActionPlan = {
   longTerm: ActionItem[];
 };
 
+export type ResilienceReportChecklistsByArea = {
+  [key: string]: ChecklistItem[];
+};
+
 export interface ResilienceReport {
   reportId: string;
   createdAt: string;
   score: ResilienceScore;
+  mentalResilienceProfile?: MentalResilienceProfile;
   riskProfileSummary: string;
   /**
    * @minItems 3
@@ -284,7 +419,34 @@ export interface ResilienceReport {
   actionPlan: ResilienceReportActionPlan;
   scenarioSimulations: ScenarioSimulation[];
   dailyHabits: DailyHabit[];
+  checklistsByArea?: ResilienceReportChecklistsByArea;
   input: AssessmentInput;
+}
+
+export interface ChecklistItemProgress {
+  area: string;
+  itemId: string;
+  completed: boolean;
+  completedAt?: string | null;
+}
+
+export interface ChecklistProgressResponse {
+  progress: ChecklistItemProgress[];
+}
+
+export interface UpdateChecklistItemBody {
+  completed: boolean;
+}
+
+export interface ProgressSnapshot {
+  reportId: string;
+  snapshotAt: string;
+  score: ResilienceScore;
+  mrComposite?: number | null;
+}
+
+export interface SnapshotsResponse {
+  snapshots: ProgressSnapshot[];
 }
 
 /**

@@ -7,7 +7,9 @@
  */
 import type { AssessmentInput } from "./assessmentInput";
 import type { DailyHabit } from "./dailyHabit";
+import type { MentalResilienceProfile } from "./mentalResilienceProfile";
 import type { ResilienceReportActionPlan } from "./resilienceReportActionPlan";
+import type { ResilienceReportChecklistsByArea } from "./resilienceReportChecklistsByArea";
 import type { ResilienceScore } from "./resilienceScore";
 import type { ScenarioSimulation } from "./scenarioSimulation";
 
@@ -15,6 +17,7 @@ export interface ResilienceReport {
   reportId: string;
   createdAt: Date;
   score: ResilienceScore;
+  mentalResilienceProfile?: MentalResilienceProfile;
   riskProfileSummary: string;
   /**
    * @minItems 3
@@ -24,5 +27,6 @@ export interface ResilienceReport {
   actionPlan: ResilienceReportActionPlan;
   scenarioSimulations: ScenarioSimulation[];
   dailyHabits: DailyHabit[];
+  checklistsByArea?: ResilienceReportChecklistsByArea;
   input: AssessmentInput;
 }

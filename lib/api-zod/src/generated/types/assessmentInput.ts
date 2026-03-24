@@ -11,6 +11,7 @@ import type { AssessmentInputIncomeStability } from "./assessmentInputIncomeStab
 import type { AssessmentInputMobilityLevel } from "./assessmentInputMobilityLevel";
 import type { AssessmentInputRiskConcernsItem } from "./assessmentInputRiskConcernsItem";
 import type { AssessmentInputSkillsItem } from "./assessmentInputSkillsItem";
+import type { MentalResilienceAnswers } from "./mentalResilienceAnswers";
 
 export interface AssessmentInput {
   /** Country or region */
@@ -41,4 +42,5 @@ export interface AssessmentInput {
   riskConcerns: AssessmentInputRiskConcernsItem[];
   /** Optional session ID for saving reports */
   sessionId?: string;
+  mentalResilienceAnswers?: MentalResilienceAnswers;
 }
