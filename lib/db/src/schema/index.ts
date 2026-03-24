@@ -19,3 +19,4 @@
 
 export * from "./resilience";
 export * from "./auth";
+export * from "./gdpr";
