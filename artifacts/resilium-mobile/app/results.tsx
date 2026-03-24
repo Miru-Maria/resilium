@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useMemo } from "react";
 import {
   View,
   Text,
@@ -17,7 +17,8 @@ import * as Haptics from "expo-haptics";
 import * as Clipboard from "expo-clipboard";
 import { useQuery } from "@tanstack/react-query";
 
-import { Colors } from "@/constants/colors";
+import { useColors } from "@/context/theme";
+import { ColorsType } from "@/constants/colors";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -67,26 +68,7 @@ type Report = {
   dailyHabits: Habit[];
 };
 
-function ScoreRing({ score, size = 120 }: { score: number; size?: number }) {
-  const radius = (size - 16) / 2;
-  const circumference = 2 * Math.PI * radius;
-  const progress = (score / 100) * circumference;
-
-  const color = score >= 70 ? Colors.success : score >= 40 ? Colors.warning : Colors.danger;
-
-  return (
-    <View style={{ width: size, height: size, alignItems: "center", justifyContent: "center" }}>
-      <View style={[StyleSheet.absoluteFill, { alignItems: "center", justifyContent: "center" }]}>
-        <Text style={[styles.ringScore, { color, fontSize: size * 0.3 }]}>
-          {Math.round(score)}
-        </Text>
-        <Text style={[styles.ringLabel, { fontSize: size * 0.1 }]}>/ 100</Text>
-      </View>
-    </View>
-  );
-}
-
-function RadarChart({ score }: { score: ScoreObj }) {
+function RadarChart({ score, colors, styles }: { score: ScoreObj, colors: ColorsType, styles: any }) {
   const dims = [
     { key: "financial", label: "Financial" },
     { key: "health", label: "Health" },
@@ -100,7 +82,7 @@ function RadarChart({ score }: { score: ScoreObj }) {
     <View style={styles.radarContainer}>
       {dims.map((dim) => {
         const val = score[dim.key as keyof ScoreObj] as number;
-        const color = val >= 70 ? Colors.success : val >= 40 ? Colors.warning : Colors.danger;
+        const color = val >= 70 ? colors.success : val >= 40 ? colors.warning : colors.danger;
         return (
           <View key={dim.key} style={styles.radarRow}>
             <Text style={styles.radarLabel}>{dim.label}</Text>
@@ -121,12 +103,12 @@ const PLAN_TABS = [
   { key: "longTerm" as const, label: "Long Term" },
 ];
 
-function PriorityBadge({ priority }: { priority: string }) {
+function PriorityBadge({ priority, colors, styles }: { priority: string, colors: ColorsType, styles: any }) {
   const config = {
-    critical: { bg: Colors.dangerMuted, text: Colors.danger },
-    high: { bg: Colors.warningMuted, text: Colors.warning },
-    medium: { bg: Colors.primaryMuted, text: Colors.primary },
-    low: { bg: Colors.surface, text: Colors.textMuted },
+    critical: { bg: colors.dangerMuted, text: colors.danger },
+    high: { bg: colors.warningMuted, text: colors.warning },
+    medium: { bg: colors.primaryMuted, text: colors.primary },
+    low: { bg: colors.surface, text: colors.textMuted },
   };
   const c = config[priority as keyof typeof config] ?? config.low;
   return (
@@ -136,12 +118,12 @@ function PriorityBadge({ priority }: { priority: string }) {
   );
 }
 
-function ImpactBadge({ impact }: { impact: string }) {
+function ImpactBadge({ impact, colors, styles }: { impact: string, colors: ColorsType, styles: any }) {
   const config = {
-    severe: { bg: Colors.dangerMuted, text: Colors.danger },
-    high: { bg: Colors.warningMuted, text: Colors.warning },
-    moderate: { bg: Colors.primaryMuted, text: Colors.primary },
-    low: { bg: Colors.successMuted, text: Colors.success },
+    severe: { bg: colors.dangerMuted, text: colors.danger },
+    high: { bg: colors.warningMuted, text: colors.warning },
+    moderate: { bg: colors.primaryMuted, text: colors.primary },
+    low: { bg: colors.successMuted, text: colors.success },
   };
   const c = config[impact as keyof typeof config] ?? config.moderate;
   return (
@@ -157,6 +139,9 @@ export default function ResultsScreen() {
   const [activeTab, setActiveTab] = useState<"shortTerm" | "midTerm" | "longTerm">("shortTerm");
   const [expandedScenario, setExpandedScenario] = useState<number | null>(null);
   const [copied, setCopied] = useState(false);
+
+  const colors = useColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
@@ -189,7 +174,7 @@ export default function ResultsScreen() {
   if (isLoading) {
     return (
       <View style={[styles.center, { paddingTop: topPad }]}>
-        <Feather name="loader" size={32} color={Colors.primary} />
+        <Feather name="loader" size={32} color={colors.primary} />
         <Text style={styles.loadingText}>Loading your report...</Text>
       </View>
     );
@@ -198,7 +183,7 @@ export default function ResultsScreen() {
   if (error || !report) {
     return (
       <View style={[styles.center, { paddingTop: topPad }]}>
-        <Feather name="alert-circle" size={48} color={Colors.danger} />
+        <Feather name="alert-circle" size={48} color={colors.danger} />
         <Text style={styles.errorTitle}>Report Not Found</Text>
         <Text style={styles.errorMsg}>We couldn't find your report. It may have expired.</Text>
         <Pressable style={styles.retryBtn} onPress={() => router.replace("/")}>
@@ -208,21 +193,21 @@ export default function ResultsScreen() {
     );
   }
 
-  const scoreColor = report.score.overall >= 70 ? Colors.success : report.score.overall >= 40 ? Colors.warning : Colors.danger;
+  const scoreColor = report.score.overall >= 70 ? colors.success : report.score.overall >= 40 ? colors.warning : colors.danger;
   const scoreLabel = report.score.overall >= 70 ? "Highly Resilient" : report.score.overall >= 40 ? "Moderately Prepared" : "Critically Vulnerable";
 
   return (
     <View style={[styles.container, { paddingTop: topPad }]}>
       <View style={styles.topBar}>
         <Pressable onPress={() => router.push("/")} style={styles.homeBtn} hitSlop={12}>
-          <Feather name="home" size={18} color={Colors.textSecondary} />
+          <Feather name="home" size={18} color={colors.textSecondary} />
         </Pressable>
         <View style={styles.topBarCenter}>
-          <Feather name="shield" size={16} color={Colors.primary} />
+          <Feather name="shield" size={16} color={colors.primary} />
           <Text style={styles.topBarTitle}>Your Report</Text>
         </View>
         <Pressable onPress={handleShare} style={styles.shareBtn} hitSlop={12} testID="share-btn">
-          <Feather name={copied ? "check" : "share-2"} size={18} color={copied ? Colors.success : Colors.textSecondary} />
+          <Feather name={copied ? "check" : "share-2"} size={18} color={copied ? colors.success : colors.textSecondary} />
         </Pressable>
       </View>
 
@@ -246,12 +231,12 @@ export default function ResultsScreen() {
 
         <View style={styles.sectionCard}>
           <Text style={styles.sectionTitle}>Category Scores</Text>
-          <RadarChart score={report.score} />
+          <RadarChart score={report.score} colors={colors} styles={styles} />
         </View>
 
         <View style={styles.sectionCard}>
           <View style={styles.sectionHeader}>
-            <Feather name="alert-triangle" size={16} color={Colors.danger} />
+            <Feather name="alert-triangle" size={16} color={colors.danger} />
             <Text style={styles.sectionTitle}>Critical Vulnerabilities</Text>
           </View>
           {report.topVulnerabilities.map((v, i) => (
@@ -266,7 +251,7 @@ export default function ResultsScreen() {
 
         <View style={styles.sectionCard}>
           <View style={styles.sectionHeader}>
-            <Feather name="check-circle" size={16} color={Colors.success} />
+            <Feather name="check-circle" size={16} color={colors.success} />
             <Text style={styles.sectionTitle}>Action Plan</Text>
           </View>
           <View style={styles.tabRow}>
@@ -286,7 +271,7 @@ export default function ResultsScreen() {
             {report.actionPlan[activeTab].map((item, i) => (
               <View key={i} style={styles.actionItem}>
                 <View style={styles.actionHeader}>
-                  <PriorityBadge priority={item.priority} />
+                  <PriorityBadge priority={item.priority} colors={colors} styles={styles} />
                   <View style={styles.categoryBadge}>
                     <Text style={styles.categoryBadgeText}>{item.category}</Text>
                   </View>
@@ -300,7 +285,7 @@ export default function ResultsScreen() {
 
         <View style={styles.sectionCard}>
           <View style={styles.sectionHeader}>
-            <Feather name="zap" size={16} color={Colors.primary} />
+            <Feather name="zap" size={16} color={colors.primary} />
             <Text style={styles.sectionTitle}>Stress Test Scenarios</Text>
           </View>
           {report.scenarioSimulations.map((s, i) => (
@@ -314,12 +299,12 @@ export default function ResultsScreen() {
               >
                 <View style={styles.scenarioHeaderLeft}>
                   <Text style={styles.scenarioTitle}>{s.scenario}</Text>
-                  <ImpactBadge impact={s.impact} />
+                  <ImpactBadge impact={s.impact} colors={colors} styles={styles} />
                 </View>
                 <Feather
                   name={expandedScenario === i ? "chevron-up" : "chevron-down"}
                   size={18}
-                  color={Colors.textMuted}
+                  color={colors.textMuted}
                 />
               </Pressable>
               {expandedScenario === i && (
@@ -333,7 +318,7 @@ export default function ResultsScreen() {
                     </View>
                   ))}
                   <View style={styles.recoveryRow}>
-                    <Feather name="clock" size={13} color={Colors.textMuted} />
+                    <Feather name="clock" size={13} color={colors.textMuted} />
                     <Text style={styles.recoveryText}>Est. recovery: {s.timeToRecover}</Text>
                   </View>
                 </View>
@@ -342,14 +327,14 @@ export default function ResultsScreen() {
           ))}
         </View>
 
-        <View style={[styles.sectionCard, { backgroundColor: Colors.primaryMuted, borderColor: "rgba(0,212,170,0.2)" }]}>
+        <View style={[styles.sectionCard, { backgroundColor: colors.primaryMuted, borderColor: colors.primaryBorder }]}>
           <View style={styles.sectionHeader}>
-            <Feather name="sun" size={16} color={Colors.primary} />
-            <Text style={[styles.sectionTitle, { color: Colors.primary }]}>Daily Habits</Text>
+            <Feather name="sun" size={16} color={colors.primary} />
+            <Text style={[styles.sectionTitle, { color: colors.primary }]}>Daily Habits</Text>
           </View>
           {report.dailyHabits.map((h, i) => (
             <View key={i} style={[styles.habitItem, i < report.dailyHabits.length - 1 && styles.habitItemBorder]}>
-              <Feather name="check" size={14} color={Colors.primary} />
+              <Feather name="check" size={14} color={colors.primary} />
               <View style={{ flex: 1 }}>
                 <Text style={styles.habitText}>{h.habit}</Text>
                 <Text style={styles.habitFreq}>{h.frequency} · {h.category}</Text>
@@ -360,17 +345,17 @@ export default function ResultsScreen() {
 
         <View style={styles.bottomActions}>
           <Pressable style={styles.shareFullBtn} onPress={handleShare}>
-            <Feather name="share-2" size={16} color={Colors.background} />
+            <Feather name="share-2" size={16} color={colors.background} />
             <Text style={styles.shareFullBtnText}>{copied ? "Link Copied!" : "Share Report"}</Text>
           </Pressable>
 
           <Pressable style={styles.retakeBtn} onPress={() => router.push("/assessment")}>
-            <Feather name="refresh-cw" size={16} color={Colors.textSecondary} />
+            <Feather name="refresh-cw" size={16} color={colors.textSecondary} />
             <Text style={styles.retakeBtnText}>Retake Assessment</Text>
           </Pressable>
 
           <Pressable style={styles.dataBtn} onPress={() => router.push("/my-data")}>
-            <Feather name="user" size={16} color={Colors.textMuted} />
+            <Feather name="user" size={16} color={colors.textMuted} />
             <Text style={styles.dataBtnText}>My Data & Privacy</Text>
           </Pressable>
         </View>
@@ -379,11 +364,11 @@ export default function ResultsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
+const createStyles = (colors: ColorsType) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
   center: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
     alignItems: "center",
     justifyContent: "center",
     gap: 16,
@@ -392,22 +377,22 @@ const styles = StyleSheet.create({
   loadingText: {
     fontFamily: "Inter_400Regular",
     fontSize: 16,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
   },
   errorTitle: {
     fontFamily: "Inter_700Bold",
     fontSize: 24,
-    color: Colors.text,
+    color: colors.text,
     letterSpacing: -0.5,
   },
   errorMsg: {
     fontFamily: "Inter_400Regular",
     fontSize: 15,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     textAlign: "center",
   },
   retryBtn: {
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     borderRadius: 12,
     paddingVertical: 12,
     paddingHorizontal: 28,
@@ -416,7 +401,7 @@ const styles = StyleSheet.create({
   retryBtnText: {
     fontFamily: "Inter_700Bold",
     fontSize: 15,
-    color: Colors.background,
+    color: colors.background,
   },
   topBar: {
     flexDirection: "row",
@@ -425,30 +410,30 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 12,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: colors.border,
   },
   homeBtn: {
     width: 38, height: 38, borderRadius: 19,
-    backgroundColor: Colors.surface, alignItems: "center", justifyContent: "center",
-    borderWidth: 1, borderColor: Colors.border,
+    backgroundColor: colors.surface, alignItems: "center", justifyContent: "center",
+    borderWidth: 1, borderColor: colors.border,
   },
   topBarCenter: { flexDirection: "row", alignItems: "center", gap: 6 },
-  topBarTitle: { fontFamily: "Inter_600SemiBold", fontSize: 16, color: Colors.text },
+  topBarTitle: { fontFamily: "Inter_600SemiBold", fontSize: 16, color: colors.text },
   shareBtn: {
     width: 38, height: 38, borderRadius: 19,
-    backgroundColor: Colors.surface, alignItems: "center", justifyContent: "center",
-    borderWidth: 1, borderColor: Colors.border,
+    backgroundColor: colors.surface, alignItems: "center", justifyContent: "center",
+    borderWidth: 1, borderColor: colors.border,
   },
   scroll: { flex: 1 },
   scrollContent: { paddingHorizontal: 20, paddingTop: 20, gap: 16 },
   heroCard: {
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     borderRadius: 20,
     padding: 20,
     flexDirection: "row",
     gap: 16,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: colors.border,
   },
   heroLeft: { alignItems: "center", gap: 6, minWidth: 80 },
   heroScore: {
@@ -460,7 +445,7 @@ const styles = StyleSheet.create({
   heroScoreMax: {
     fontFamily: "Inter_400Regular",
     fontSize: 14,
-    color: Colors.textMuted,
+    color: colors.textMuted,
     marginTop: -4,
   },
   heroLabel: {
@@ -479,22 +464,22 @@ const styles = StyleSheet.create({
   heroSummary: {
     fontFamily: "Inter_400Regular",
     fontSize: 13,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     lineHeight: 20,
   },
   sectionCard: {
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     borderRadius: 20,
     padding: 18,
     gap: 14,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: colors.border,
   },
   sectionHeader: { flexDirection: "row", alignItems: "center", gap: 8 },
   sectionTitle: {
     fontFamily: "Inter_700Bold",
     fontSize: 16,
-    color: Colors.text,
+    color: colors.text,
     letterSpacing: -0.3,
   },
   radarContainer: { gap: 10 },
@@ -506,13 +491,13 @@ const styles = StyleSheet.create({
   radarLabel: {
     fontFamily: "Inter_500Medium",
     fontSize: 12,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     width: 80,
   },
   radarBarTrack: {
     flex: 1,
     height: 6,
-    backgroundColor: Colors.border,
+    backgroundColor: colors.border,
     borderRadius: 3,
     overflow: "hidden",
   },
@@ -530,7 +515,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-start",
     gap: 12,
-    backgroundColor: Colors.dangerMuted,
+    backgroundColor: colors.dangerMuted,
     borderRadius: 12,
     padding: 12,
     borderWidth: 1,
@@ -540,7 +525,7 @@ const styles = StyleSheet.create({
     width: 22,
     height: 22,
     borderRadius: 11,
-    backgroundColor: Colors.danger,
+    backgroundColor: colors.danger,
     alignItems: "center",
     justifyContent: "center",
     flexShrink: 0,
@@ -548,18 +533,18 @@ const styles = StyleSheet.create({
   vulnNumText: {
     fontFamily: "Inter_700Bold",
     fontSize: 11,
-    color: Colors.white,
+    color: colors.white,
   },
   vulnText: {
     fontFamily: "Inter_400Regular",
     fontSize: 13,
-    color: Colors.text,
+    color: colors.text,
     lineHeight: 19,
     flex: 1,
   },
   tabRow: {
     flexDirection: "row",
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
     borderRadius: 12,
     padding: 3,
     gap: 2,
@@ -571,35 +556,35 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   tabActive: {
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: colors.border,
   },
   tabText: {
     fontFamily: "Inter_500Medium",
     fontSize: 12,
-    color: Colors.textMuted,
+    color: colors.textMuted,
   },
-  tabTextActive: { color: Colors.primary },
+  tabTextActive: { color: colors.primary },
   actionList: { gap: 10 },
   actionItem: {
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
     borderRadius: 12,
     padding: 14,
     gap: 6,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: colors.border,
   },
   actionHeader: { flexDirection: "row", gap: 8 },
   actionTitle: {
     fontFamily: "Inter_600SemiBold",
     fontSize: 15,
-    color: Colors.text,
+    color: colors.text,
   },
   actionDesc: {
     fontFamily: "Inter_400Regular",
     fontSize: 13,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     lineHeight: 19,
   },
   badge: {
@@ -616,19 +601,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
-    backgroundColor: Colors.surfaceElevated,
+    backgroundColor: colors.surfaceElevated,
   },
   categoryBadgeText: {
     fontFamily: "Inter_500Medium",
     fontSize: 10,
-    color: Colors.textMuted,
+    color: colors.textMuted,
   },
   scenarioItem: {
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
     borderRadius: 12,
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: colors.border,
   },
   scenarioHeader: {
     flexDirection: "row",
@@ -640,25 +625,25 @@ const styles = StyleSheet.create({
   scenarioTitle: {
     fontFamily: "Inter_600SemiBold",
     fontSize: 14,
-    color: Colors.text,
+    color: colors.text,
   },
   scenarioExpanded: {
     padding: 14,
     paddingTop: 0,
     gap: 10,
     borderTopWidth: 1,
-    borderTopColor: Colors.border,
+    borderTopColor: colors.border,
   },
   scenarioDesc: {
     fontFamily: "Inter_400Regular",
     fontSize: 13,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     lineHeight: 19,
   },
   scenarioStepsTitle: {
     fontFamily: "Inter_600SemiBold",
     fontSize: 12,
-    color: Colors.textMuted,
+    color: colors.textMuted,
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
@@ -671,14 +656,14 @@ const styles = StyleSheet.create({
     width: 5,
     height: 5,
     borderRadius: 2.5,
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     marginTop: 5,
     flexShrink: 0,
   },
   scenarioStepText: {
     fontFamily: "Inter_400Regular",
     fontSize: 13,
-    color: Colors.text,
+    color: colors.text,
     flex: 1,
     lineHeight: 18,
   },
@@ -686,7 +671,7 @@ const styles = StyleSheet.create({
   recoveryText: {
     fontFamily: "Inter_400Regular",
     fontSize: 12,
-    color: Colors.textMuted,
+    color: colors.textMuted,
   },
   habitItem: {
     flexDirection: "row",
@@ -696,60 +681,55 @@ const styles = StyleSheet.create({
   },
   habitItemBorder: {
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(0,212,170,0.15)",
+    borderBottomColor: colors.primaryBorder,
   },
   habitText: {
     fontFamily: "Inter_500Medium",
     fontSize: 14,
-    color: Colors.text,
+    color: colors.text,
     lineHeight: 18,
   },
   habitFreq: {
     fontFamily: "Inter_400Regular",
     fontSize: 11,
-    color: Colors.textMuted,
+    color: colors.textMuted,
     textTransform: "uppercase",
     letterSpacing: 0.4,
     marginTop: 2,
   },
-  ringScore: {
-    fontFamily: "Inter_700Bold",
-    letterSpacing: -1,
+  bottomActions: {
+    gap: 12,
+    marginTop: 8,
   },
-  ringLabel: {
-    fontFamily: "Inter_400Regular",
-    color: Colors.textMuted,
-  },
-  bottomActions: { gap: 10, marginTop: 4 },
   shareFullBtn: {
+    backgroundColor: colors.primary,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    backgroundColor: Colors.primary,
-    borderRadius: 14,
     paddingVertical: 16,
+    borderRadius: 14,
   },
   shareFullBtnText: {
     fontFamily: "Inter_700Bold",
     fontSize: 16,
-    color: Colors.background,
+    color: colors.background,
   },
   retakeBtn: {
+    backgroundColor: colors.surface,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    backgroundColor: Colors.surface,
+    paddingVertical: 16,
     borderRadius: 14,
-    paddingVertical: 14,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: colors.border,
   },
   retakeBtnText: {
     fontFamily: "Inter_600SemiBold",
     fontSize: 15,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
   },
   dataBtn: {
     flexDirection: "row",
@@ -761,6 +741,6 @@ const styles = StyleSheet.create({
   dataBtnText: {
     fontFamily: "Inter_500Medium",
     fontSize: 14,
-    color: Colors.textMuted,
+    color: colors.textMuted,
   },
 });

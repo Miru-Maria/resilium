@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -13,8 +13,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 
-import { Colors } from "@/constants/colors";
 import { useSession } from "@/context/session";
+import { useColors } from "@/context/theme";
+import { ColorsType } from "@/constants/colors";
 
 const CONSENT_VERSION = "1.0";
 
@@ -31,6 +32,9 @@ export default function ConsentScreen() {
   const insets = useSafeAreaInsets();
   const { giveConsent } = useSession();
   const [isAccepting, setIsAccepting] = useState(false);
+  
+  const colors = useColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
@@ -82,10 +86,10 @@ export default function ConsentScreen() {
     <View style={[styles.container, { paddingTop: topPad }]}>
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} style={styles.backBtn} hitSlop={12}>
-          <Feather name="x" size={20} color={Colors.textSecondary} />
+          <Feather name="x" size={20} color={colors.textSecondary} />
         </Pressable>
         <View style={styles.headerBadge}>
-          <Feather name="shield" size={12} color={Colors.primary} />
+          <Feather name="shield" size={12} color={colors.primary} />
           <Text style={styles.headerBadgeText}>GDPR Compliant</Text>
         </View>
         <View style={{ width: 38 }} />
@@ -97,7 +101,7 @@ export default function ConsentScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.iconContainer}>
-          <Feather name="lock" size={32} color={Colors.primary} />
+          <Feather name="lock" size={32} color={colors.primary} />
         </View>
 
         <Text style={styles.title}>Your Privacy Matters</Text>
@@ -110,7 +114,7 @@ export default function ConsentScreen() {
           {DATA_POINTS.map((item) => (
             <View key={item.label} style={styles.dataItem}>
               <View style={styles.dataIcon}>
-                <Feather name={item.icon as any} size={14} color={Colors.primary} />
+                <Feather name={item.icon as any} size={14} color={colors.primary} />
               </View>
               <Text style={styles.dataLabel}>{item.label}</Text>
             </View>
@@ -119,21 +123,21 @@ export default function ConsentScreen() {
 
         <View style={styles.infoCards}>
           <View style={styles.infoCard}>
-            <Feather name="clock" size={16} color={Colors.warning} />
+            <Feather name="clock" size={16} color={colors.warning} />
             <View style={styles.infoCardText}>
               <Text style={styles.infoCardTitle}>Data Retention</Text>
               <Text style={styles.infoCardDesc}>Your assessment data is retained for 12 months, then automatically deleted.</Text>
             </View>
           </View>
           <View style={styles.infoCard}>
-            <Feather name="eye-off" size={16} color={Colors.primary} />
+            <Feather name="eye-off" size={16} color={colors.primary} />
             <View style={styles.infoCardText}>
               <Text style={styles.infoCardTitle}>No Selling of Data</Text>
               <Text style={styles.infoCardDesc}>We never sell or share your personal data with third parties for marketing.</Text>
             </View>
           </View>
           <View style={styles.infoCard}>
-            <Feather name="download" size={16} color={Colors.success} />
+            <Feather name="download" size={16} color={colors.success} />
             <View style={styles.infoCardText}>
               <Text style={styles.infoCardTitle}>Your Rights</Text>
               <Text style={styles.infoCardDesc}>You can export or delete your data at any time from the My Data screen.</Text>
@@ -157,7 +161,7 @@ export default function ConsentScreen() {
           disabled={isAccepting}
           testID="accept-consent-btn"
         >
-          <Feather name="check-circle" size={18} color={Colors.background} />
+          <Feather name="check-circle" size={18} color={colors.background} />
           <Text style={styles.acceptText}>{isAccepting ? "Saving..." : "Accept & Continue"}</Text>
         </Pressable>
         <Pressable
@@ -172,10 +176,10 @@ export default function ConsentScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ColorsType) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: "row",
@@ -188,17 +192,17 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: colors.border,
   },
   headerBadge: {
     flexDirection: "row",
     alignItems: "center",
     gap: 5,
-    backgroundColor: Colors.primaryMuted,
+    backgroundColor: colors.primaryMuted,
     borderRadius: 20,
     paddingHorizontal: 10,
     paddingVertical: 5,
@@ -206,7 +210,7 @@ const styles = StyleSheet.create({
   headerBadgeText: {
     fontFamily: "Inter_600SemiBold",
     fontSize: 11,
-    color: Colors.primary,
+    color: colors.primary,
   },
   scroll: { flex: 1 },
   scrollContent: {
@@ -218,39 +222,39 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 20,
-    backgroundColor: Colors.primaryMuted,
+    backgroundColor: colors.primaryMuted,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "rgba(0,212,170,0.3)",
+    borderColor: colors.primaryBorder,
     alignSelf: "center",
   },
   title: {
     fontFamily: "Inter_700Bold",
     fontSize: 28,
-    color: Colors.text,
+    color: colors.text,
     textAlign: "center",
     letterSpacing: -0.8,
   },
   subtitle: {
     fontFamily: "Inter_400Regular",
     fontSize: 15,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     textAlign: "center",
     lineHeight: 22,
   },
   section: {
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     borderRadius: 16,
     padding: 16,
     gap: 12,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: colors.border,
   },
   sectionTitle: {
     fontFamily: "Inter_600SemiBold",
     fontSize: 13,
-    color: Colors.textMuted,
+    color: colors.textMuted,
     textTransform: "uppercase",
     letterSpacing: 0.8,
     marginBottom: 4,
@@ -264,14 +268,14 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 8,
-    backgroundColor: Colors.primaryMuted,
+    backgroundColor: colors.primaryMuted,
     alignItems: "center",
     justifyContent: "center",
   },
   dataLabel: {
     fontFamily: "Inter_400Regular",
     fontSize: 14,
-    color: Colors.text,
+    color: colors.text,
     flex: 1,
   },
   infoCards: {
@@ -281,41 +285,41 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-start",
     gap: 12,
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     borderRadius: 12,
     padding: 14,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: colors.border,
   },
   infoCardText: { flex: 1, gap: 4 },
   infoCardTitle: {
     fontFamily: "Inter_600SemiBold",
     fontSize: 14,
-    color: Colors.text,
+    color: colors.text,
   },
   infoCardDesc: {
     fontFamily: "Inter_400Regular",
     fontSize: 13,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     lineHeight: 18,
   },
   legalNote: {
-    backgroundColor: Colors.surfaceElevated,
+    backgroundColor: colors.surfaceElevated,
     borderRadius: 12,
     padding: 14,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: colors.border,
   },
   legalNoteText: {
     fontFamily: "Inter_400Regular",
     fontSize: 12,
-    color: Colors.textMuted,
+    color: colors.textMuted,
     lineHeight: 18,
   },
   versionText: {
     fontFamily: "Inter_400Regular",
     fontSize: 11,
-    color: Colors.textMuted,
+    color: colors.textMuted,
     textAlign: "center",
   },
   actions: {
@@ -326,23 +330,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: 16,
     gap: 10,
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
     borderTopWidth: 1,
-    borderTopColor: Colors.border,
+    borderTopColor: colors.border,
   },
   acceptBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     borderRadius: 14,
     paddingVertical: 16,
   },
   acceptText: {
     fontFamily: "Inter_700Bold",
     fontSize: 16,
-    color: Colors.background,
+    color: colors.background,
   },
   declineBtn: {
     alignItems: "center",
@@ -352,7 +356,7 @@ const styles = StyleSheet.create({
   declineText: {
     fontFamily: "Inter_500Medium",
     fontSize: 15,
-    color: Colors.textMuted,
+    color: colors.textMuted,
   },
   pressed: {
     opacity: 0.75,

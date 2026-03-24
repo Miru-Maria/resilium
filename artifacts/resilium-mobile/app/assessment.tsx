@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useMemo } from "react";
 import {
   View,
   Text,
@@ -15,8 +15,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 
-import { Colors } from "@/constants/colors";
 import { useSession } from "@/context/session";
+import { useColors } from "@/context/theme";
+import { ColorsType } from "@/constants/colors";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -54,11 +55,13 @@ function OptionCard({
   onPress,
   children,
   danger = false,
+  styles,
 }: {
   selected: boolean;
   onPress: () => void;
   children: React.ReactNode;
   danger?: boolean;
+  styles: any;
 }) {
   return (
     <Pressable
@@ -80,12 +83,14 @@ function SliderControl({
   max,
   onChange,
   formatValue,
+  styles,
 }: {
   value: number;
   min: number;
   max: number;
   onChange: (v: number) => void;
   formatValue?: (v: number) => string;
+  styles: any;
 }) {
   const steps = Array.from({ length: max - min + 1 }, (_, i) => i + min);
   return (
@@ -120,6 +125,9 @@ export default function AssessmentScreen() {
   const { sessionId } = useSession();
   const [step, setStep] = useState(0);
   const progress = useRef(new Animated.Value(1 / TOTAL_STEPS)).current;
+
+  const colors = useColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const [data, setData] = useState<AssessmentData>({
     location: "",
@@ -219,7 +227,7 @@ export default function AssessmentScreen() {
     <View style={[styles.container, { paddingTop: topPad }]}>
       <View style={styles.topBar}>
         <Pressable onPress={handleBack} style={styles.backBtn} hitSlop={12} testID="back-btn">
-          <Feather name={step === 0 ? "x" : "arrow-left"} size={20} color={Colors.textSecondary} />
+          <Feather name={step === 0 ? "x" : "arrow-left"} size={20} color={colors.textSecondary} />
         </Pressable>
         <Text style={styles.stepCounter}>{step + 1} / {TOTAL_STEPS}</Text>
         <View style={{ width: 38 }} />
@@ -244,7 +252,7 @@ export default function AssessmentScreen() {
             value={data.location}
             onChangeText={(v) => update("location", v)}
             placeholder="e.g. California, USA"
-            placeholderTextColor={Colors.textMuted}
+            placeholderTextColor={colors.textMuted}
             autoFocus
             returnKeyType="next"
             onSubmitEditing={isValid() ? handleNext : undefined}
@@ -259,14 +267,14 @@ export default function AssessmentScreen() {
               { id: "freelance", label: "Variable / Freelance", desc: "Fluctuates month to month" },
               { id: "unstable", label: "Unstable / Irregular", desc: "Unemployed or highly volatile" },
             ] as const).map((opt) => (
-              <OptionCard key={opt.id} selected={data.incomeStability === opt.id} onPress={() => { Haptics.selectionAsync(); update("incomeStability", opt.id); }}>
+              <OptionCard key={opt.id} styles={styles} selected={data.incomeStability === opt.id} onPress={() => { Haptics.selectionAsync(); update("incomeStability", opt.id); }}>
                 <View style={styles.optionCardInner}>
                   <View style={styles.optionCardText}>
                     <Text style={[styles.optionLabel, data.incomeStability === opt.id && styles.optionLabelSelected]}>{opt.label}</Text>
                     <Text style={styles.optionDesc}>{opt.desc}</Text>
                   </View>
                   {data.incomeStability === opt.id && (
-                    <Feather name="check-circle" size={20} color={Colors.primary} />
+                    <Feather name="check-circle" size={20} color={colors.primary} />
                   )}
                 </View>
               </OptionCard>
@@ -277,6 +285,7 @@ export default function AssessmentScreen() {
         {step === 2 && (
           <View style={styles.section}>
             <SliderControl
+              styles={styles}
               value={data.savingsMonths}
               min={0}
               max={24}
@@ -292,12 +301,12 @@ export default function AssessmentScreen() {
               const isYes = val === "true";
               const selected = data.hasDependents === isYes;
               return (
-                <OptionCard key={val} selected={selected} onPress={() => { Haptics.selectionAsync(); update("hasDependents", isYes); }}>
+                <OptionCard key={val} styles={styles} selected={selected} onPress={() => { Haptics.selectionAsync(); update("hasDependents", isYes); }}>
                   <View style={styles.yesNoCard}>
                     <Feather
                       name={isYes ? "users" : "user"}
                       size={28}
-                      color={selected ? Colors.primary : Colors.textMuted}
+                      color={selected ? colors.primary : colors.textMuted}
                     />
                     <Text style={[styles.yesNoLabel, selected && styles.yesNoLabelSelected]}>
                       {isYes ? "Yes" : "No"}
@@ -380,14 +389,14 @@ export default function AssessmentScreen() {
               { id: "nomadic", label: "Nomadic", desc: "Frequent traveler, no fixed base" },
               { id: "other", label: "Other", desc: "Temporary or transitional housing" },
             ].map((opt) => (
-              <OptionCard key={opt.id} selected={data.housingType === opt.id} onPress={() => { Haptics.selectionAsync(); update("housingType", opt.id as any); }}>
+              <OptionCard key={opt.id} styles={styles} selected={data.housingType === opt.id} onPress={() => { Haptics.selectionAsync(); update("housingType", opt.id as any); }}>
                 <View style={styles.optionCardInner}>
                   <View style={styles.optionCardText}>
                     <Text style={[styles.optionLabel, data.housingType === opt.id && styles.optionLabelSelected]}>{opt.label}</Text>
                     <Text style={styles.optionDesc}>{opt.desc}</Text>
                   </View>
                   {data.housingType === opt.id && (
-                    <Feather name="check-circle" size={20} color={Colors.primary} />
+                    <Feather name="check-circle" size={20} color={colors.primary} />
                   )}
                 </View>
               </OptionCard>
@@ -401,12 +410,12 @@ export default function AssessmentScreen() {
               const isYes = val === "true";
               const selected = data.hasEmergencySupplies === isYes;
               return (
-                <OptionCard key={val} selected={selected} onPress={() => { Haptics.selectionAsync(); update("hasEmergencySupplies", isYes); }}>
+                <OptionCard key={val} styles={styles} selected={selected} onPress={() => { Haptics.selectionAsync(); update("hasEmergencySupplies", isYes); }}>
                   <View style={styles.yesNoCard}>
                     <Feather
                       name={isYes ? "package" : "x-circle"}
                       size={28}
-                      color={selected ? Colors.primary : Colors.textMuted}
+                      color={selected ? colors.primary : colors.textMuted}
                     />
                     <Text style={[styles.yesNoLabel, selected && styles.yesNoLabelSelected]}>
                       {isYes ? "Yes" : "No"}
@@ -424,6 +433,7 @@ export default function AssessmentScreen() {
         {step === 8 && (
           <View style={styles.section}>
             <SliderControl
+              styles={styles}
               value={data.psychologicalResilience}
               min={1}
               max={10}
@@ -479,7 +489,7 @@ export default function AssessmentScreen() {
           <Feather
             name={step === TOTAL_STEPS - 1 ? "zap" : "arrow-right"}
             size={18}
-            color={!isValid() ? Colors.textMuted : Colors.background}
+            color={!isValid() ? colors.textMuted : colors.background}
           />
         </Pressable>
       </View>
@@ -487,10 +497,10 @@ export default function AssessmentScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ColorsType) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
   },
   topBar: {
     flexDirection: "row",
@@ -503,25 +513,25 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: colors.border,
   },
   stepCounter: {
     fontFamily: "Inter_500Medium",
     fontSize: 14,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
   },
   progressTrack: {
     height: 3,
-    backgroundColor: Colors.border,
+    backgroundColor: colors.border,
     marginBottom: 0,
   },
   progressFill: {
     height: 3,
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     borderRadius: 2,
   },
   scroll: { flex: 1 },
@@ -533,43 +543,43 @@ const styles = StyleSheet.create({
   stepTitle: {
     fontFamily: "Inter_700Bold",
     fontSize: 28,
-    color: Colors.text,
+    color: colors.text,
     letterSpacing: -0.8,
     lineHeight: 34,
   },
   stepSubtitle: {
     fontFamily: "Inter_400Regular",
     fontSize: 15,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     lineHeight: 22,
     marginTop: -4,
   },
   textInput: {
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     borderRadius: 14,
     borderWidth: 2,
-    borderColor: Colors.border,
+    borderColor: colors.border,
     paddingHorizontal: 18,
     paddingVertical: 16,
     fontFamily: "Inter_500Medium",
     fontSize: 18,
-    color: Colors.text,
+    color: colors.text,
   },
   optionList: { gap: 10 },
   optionCard: {
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     borderRadius: 14,
     borderWidth: 2,
-    borderColor: Colors.border,
+    borderColor: colors.border,
     padding: 16,
   },
   optionCardSelected: {
-    borderColor: Colors.primary,
-    backgroundColor: Colors.primaryMuted,
+    borderColor: colors.primary,
+    backgroundColor: colors.primaryMuted,
   },
   optionCardSelectedDanger: {
-    borderColor: Colors.danger,
-    backgroundColor: Colors.dangerMuted,
+    borderColor: colors.danger,
+    backgroundColor: colors.dangerMuted,
   },
   optionCardPressed: {
     opacity: 0.8,
@@ -583,15 +593,15 @@ const styles = StyleSheet.create({
   optionLabel: {
     fontFamily: "Inter_600SemiBold",
     fontSize: 16,
-    color: Colors.text,
+    color: colors.text,
   },
   optionLabelSelected: {
-    color: Colors.primary,
+    color: colors.primary,
   },
   optionDesc: {
     fontFamily: "Inter_400Regular",
     fontSize: 13,
-    color: Colors.textMuted,
+    color: colors.textMuted,
     marginTop: 2,
   },
   yesNoGrid: {
@@ -607,27 +617,27 @@ const styles = StyleSheet.create({
   yesNoLabel: {
     fontFamily: "Inter_700Bold",
     fontSize: 22,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
   },
   yesNoLabelSelected: {
-    color: Colors.primary,
+    color: colors.primary,
   },
   yesNoDesc: {
     fontFamily: "Inter_400Regular",
     fontSize: 12,
-    color: Colors.textMuted,
+    color: colors.textMuted,
     textAlign: "center",
   },
   section: { gap: 12 },
   subSectionTitle: {
     fontFamily: "Inter_600SemiBold",
     fontSize: 15,
-    color: Colors.text,
+    color: colors.text,
   },
   subSectionDesc: {
     fontFamily: "Inter_400Regular",
     fontSize: 13,
-    color: Colors.textMuted,
+    color: colors.textMuted,
     marginTop: -6,
     marginBottom: 4,
   },
@@ -639,22 +649,22 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 12,
     alignItems: "center",
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     borderRadius: 10,
     borderWidth: 2,
-    borderColor: Colors.border,
+    borderColor: colors.border,
   },
   segmentSelected: {
-    borderColor: Colors.primary,
-    backgroundColor: Colors.primaryMuted,
+    borderColor: colors.primary,
+    backgroundColor: colors.primaryMuted,
   },
   segmentText: {
     fontFamily: "Inter_500Medium",
     fontSize: 13,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
   },
   segmentTextSelected: {
-    color: Colors.primary,
+    color: colors.primary,
   },
   chipGrid: {
     flexDirection: "row",
@@ -665,89 +675,93 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 10,
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     borderWidth: 2,
-    borderColor: Colors.border,
+    borderColor: colors.border,
   },
   riskChip: {},
   chipSelected: {
-    borderColor: Colors.primary,
-    backgroundColor: Colors.primaryMuted,
+    borderColor: colors.primary,
+    backgroundColor: colors.primaryMuted,
   },
   chipSelectedDanger: {
-    borderColor: Colors.danger,
-    backgroundColor: Colors.dangerMuted,
+    borderColor: colors.danger,
+    backgroundColor: colors.dangerMuted,
   },
   chipText: {
     fontFamily: "Inter_500Medium",
     fontSize: 13,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
   },
   chipTextSelected: {
-    color: Colors.primary,
+    color: colors.primary,
   },
   chipTextDanger: {
-    color: Colors.danger,
+    color: colors.danger,
   },
   sliderValue: {
     fontFamily: "Inter_700Bold",
-    fontSize: 28,
-    color: Colors.primary,
-    textAlign: "center",
-    letterSpacing: -0.5,
-    marginBottom: 20,
+    fontSize: 32,
+    color: colors.primary,
+    letterSpacing: -1,
+    marginBottom: 16,
   },
   sliderRow: {
     gap: 8,
-    paddingHorizontal: 4,
+    paddingRight: 24,
   },
   sliderTick: {
-    width: 48,
-    height: 56,
-    borderRadius: 12,
-    backgroundColor: Colors.surface,
-    borderWidth: 2,
-    borderColor: Colors.border,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: colors.surface,
     alignItems: "center",
     justifyContent: "center",
+    borderWidth: 2,
+    borderColor: colors.border,
   },
   sliderTickSelected: {
-    borderColor: Colors.primary,
-    backgroundColor: Colors.primaryMuted,
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
   sliderTickText: {
     fontFamily: "Inter_600SemiBold",
     fontSize: 15,
-    color: Colors.textMuted,
+    color: colors.textSecondary,
   },
   sliderTickTextSelected: {
-    color: Colors.primary,
+    color: colors.background,
   },
   footer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: colors.background,
     paddingHorizontal: 24,
     paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: Colors.border,
-    backgroundColor: Colors.background,
+    borderTopColor: colors.border,
   },
   nextBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     borderRadius: 14,
-    paddingVertical: 18,
+    paddingVertical: 16,
   },
   nextBtnDisabled: {
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surfaceElevated,
   },
   nextBtnPressed: {
     opacity: 0.85,
+    transform: [{ scale: 0.98 }],
   },
   nextBtnText: {
     fontFamily: "Inter_700Bold",
-    fontSize: 17,
-    color: Colors.background,
+    fontSize: 16,
+    color: colors.background,
   },
 });

@@ -16,7 +16,7 @@ import { setBaseUrl } from "@workspace/api-client-react";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { SessionProvider } from "@/context/session";
-import { Colors } from "@/constants/colors";
+import { ThemeProvider, useColors } from "@/context/theme";
 
 setBaseUrl(`https://${process.env.EXPO_PUBLIC_DOMAIN}`);
 
@@ -25,21 +25,27 @@ SplashScreen.preventAutoHideAsync();
 const queryClient = new QueryClient();
 
 function RootLayoutNav() {
+  const colors = useColors();
+
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        contentStyle: { backgroundColor: Colors.background },
-        animation: "slide_from_right",
-      }}
-    >
-      <Stack.Screen name="index" />
-      <Stack.Screen name="consent" />
-      <Stack.Screen name="assessment" />
-      <Stack.Screen name="loading" />
-      <Stack.Screen name="results" />
-      <Stack.Screen name="my-data" />
-    </Stack>
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.background }}>
+      <KeyboardProvider>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: colors.background },
+            animation: "slide_from_right",
+          }}
+        >
+          <Stack.Screen name="index" />
+          <Stack.Screen name="consent" />
+          <Stack.Screen name="assessment" />
+          <Stack.Screen name="loading" />
+          <Stack.Screen name="results" />
+          <Stack.Screen name="my-data" />
+        </Stack>
+      </KeyboardProvider>
+    </GestureHandlerRootView>
   );
 }
 
@@ -64,11 +70,9 @@ export default function RootLayout() {
       <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
           <SessionProvider>
-            <GestureHandlerRootView style={{ flex: 1, backgroundColor: Colors.background }}>
-              <KeyboardProvider>
-                <RootLayoutNav />
-              </KeyboardProvider>
-            </GestureHandlerRootView>
+            <ThemeProvider>
+              <RootLayoutNav />
+            </ThemeProvider>
           </SessionProvider>
         </QueryClientProvider>
       </ErrorBoundary>

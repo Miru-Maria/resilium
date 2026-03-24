@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import {
   View,
   Text,
@@ -13,12 +13,16 @@ import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 
-import { Colors } from "@/constants/colors";
 import { useSession } from "@/context/session";
+import { useTheme, useColors } from "@/context/theme";
+import { ColorsType } from "@/constants/colors";
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const { hasConsented, isLoaded } = useSession();
+  const { theme, toggleTheme } = useTheme();
+  const colors = useColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   useEffect(() => {
     if (isLoaded && hasConsented) {
@@ -39,13 +43,18 @@ export default function HomeScreen() {
     router.push("/my-data");
   };
 
+  const handleToggleTheme = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    toggleTheme();
+  };
+
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
 
   return (
     <View style={[styles.container, { paddingTop: topPad, paddingBottom: bottomPad + 24 }]}>
       <LinearGradient
-        colors={["rgba(0,212,170,0.08)", "transparent"]}
+        colors={[colors.primaryMuted, "transparent"]}
         style={StyleSheet.absoluteFill}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 0.5 }}
@@ -54,19 +63,24 @@ export default function HomeScreen() {
 
       <View style={styles.header}>
         <View style={styles.logo}>
-          <Feather name="shield" size={20} color={Colors.primary} />
+          <Feather name="shield" size={20} color={colors.primary} />
           <Text style={styles.logoText}>Resilium</Text>
         </View>
-        {hasConsented && (
-          <Pressable onPress={handleMyData} style={styles.dataBtn} hitSlop={12} testID="my-data-btn">
-            <Feather name="user" size={18} color={Colors.textSecondary} />
+        <View style={styles.headerActions}>
+          <Pressable onPress={handleToggleTheme} style={styles.iconBtn} hitSlop={12} testID="theme-toggle-btn">
+            <Feather name={theme === "light" ? "moon" : "sun"} size={18} color={colors.textSecondary} />
           </Pressable>
-        )}
+          {hasConsented && (
+            <Pressable onPress={handleMyData} style={styles.iconBtn} hitSlop={12} testID="my-data-btn">
+              <Feather name="user" size={18} color={colors.textSecondary} />
+            </Pressable>
+          )}
+        </View>
       </View>
 
       <View style={styles.hero}>
         <View style={styles.scoreBadge}>
-          <Feather name="activity" size={14} color={Colors.primary} />
+          <Feather name="activity" size={14} color={colors.primary} />
           <Text style={styles.scoreBadgeText}>AI-Powered Assessment</Text>
         </View>
 
@@ -99,7 +113,7 @@ export default function HomeScreen() {
         ].map((f) => (
           <View key={f.label} style={styles.featureItem}>
             <View style={styles.featureIcon}>
-              <Feather name={f.icon as any} size={16} color={Colors.primary} />
+              <Feather name={f.icon as any} size={16} color={colors.primary} />
             </View>
             <View style={styles.featureText}>
               <Text style={styles.featureLabel}>{f.label}</Text>
@@ -116,7 +130,7 @@ export default function HomeScreen() {
           testID="start-btn"
         >
           <LinearGradient
-            colors={[Colors.primary, Colors.primaryDark]}
+            colors={[colors.primary, colors.primaryDark]}
             style={styles.ctaGradient}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
@@ -124,21 +138,21 @@ export default function HomeScreen() {
             <Text style={styles.ctaText}>
               {hasConsented ? "Start Assessment" : "Get Started"}
             </Text>
-            <Feather name="arrow-right" size={18} color={Colors.background} />
+            <Feather name="arrow-right" size={18} color={colors.background} />
           </LinearGradient>
         </Pressable>
         <Text style={styles.privacyNote}>
-          <Feather name="lock" size={11} color={Colors.textMuted} /> GDPR compliant · No account required
+          <Feather name="lock" size={11} color={colors.textMuted} /> GDPR compliant · No account required
         </Text>
       </View>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ColorsType) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
     paddingHorizontal: 24,
   },
   header: {
@@ -155,18 +169,23 @@ const styles = StyleSheet.create({
   logoText: {
     fontFamily: "Inter_700Bold",
     fontSize: 20,
-    color: Colors.text,
+    color: colors.text,
     letterSpacing: -0.5,
   },
-  dataBtn: {
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  iconBtn: {
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: colors.border,
   },
   hero: {
     marginTop: 40,
@@ -177,30 +196,30 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 6,
     alignSelf: "flex-start",
-    backgroundColor: Colors.primaryMuted,
+    backgroundColor: colors.primaryMuted,
     borderRadius: 20,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderWidth: 1,
-    borderColor: "rgba(0,212,170,0.3)",
+    borderColor: colors.primaryBorder,
   },
   scoreBadgeText: {
     fontFamily: "Inter_600SemiBold",
     fontSize: 12,
-    color: Colors.primary,
+    color: colors.primary,
     letterSpacing: 0.2,
   },
   heroTitle: {
     fontFamily: "Inter_700Bold",
     fontSize: 40,
-    color: Colors.text,
+    color: colors.text,
     letterSpacing: -1.5,
     lineHeight: 46,
   },
   heroSubtitle: {
     fontFamily: "Inter_400Regular",
     fontSize: 15,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     lineHeight: 22,
   },
   statsRow: {
@@ -212,20 +231,20 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     paddingVertical: 16,
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: colors.border,
   },
   statValue: {
     fontFamily: "Inter_700Bold",
     fontSize: 24,
-    color: Colors.primary,
+    color: colors.primary,
     letterSpacing: -0.5,
   },
   statLabel: {
     fontFamily: "Inter_400Regular",
     fontSize: 11,
-    color: Colors.textMuted,
+    color: colors.textMuted,
     marginTop: 2,
     textTransform: "uppercase",
     letterSpacing: 0.5,
@@ -238,17 +257,17 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 14,
-    backgroundColor: Colors.surface,
+    backgroundColor: colors.surface,
     borderRadius: 12,
     padding: 14,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: colors.border,
   },
   featureIcon: {
     width: 36,
     height: 36,
     borderRadius: 10,
-    backgroundColor: Colors.primaryMuted,
+    backgroundColor: colors.primaryMuted,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -259,12 +278,12 @@ const styles = StyleSheet.create({
   featureLabel: {
     fontFamily: "Inter_600SemiBold",
     fontSize: 14,
-    color: Colors.text,
+    color: colors.text,
   },
   featureDesc: {
     fontFamily: "Inter_400Regular",
     fontSize: 12,
-    color: Colors.textMuted,
+    color: colors.textMuted,
   },
   bottom: {
     marginTop: "auto",
@@ -288,13 +307,13 @@ const styles = StyleSheet.create({
   ctaText: {
     fontFamily: "Inter_700Bold",
     fontSize: 17,
-    color: Colors.background,
+    color: colors.background,
     letterSpacing: -0.3,
   },
   privacyNote: {
     fontFamily: "Inter_400Regular",
     fontSize: 12,
-    color: Colors.textMuted,
+    color: colors.textMuted,
     textAlign: "center",
   },
 });

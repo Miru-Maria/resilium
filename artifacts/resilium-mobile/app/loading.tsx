@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -10,7 +10,8 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 
-import { Colors } from "@/constants/colors";
+import { useColors } from "@/context/theme";
+import { ColorsType } from "@/constants/colors";
 
 const MESSAGES = [
   "Analyzing your risk profile...",
@@ -27,6 +28,9 @@ export default function LoadingScreen() {
   const [error, setError] = useState<string | null>(null);
   const spinAnim = useRef(new Animated.Value(0)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  const colors = useColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
@@ -97,12 +101,12 @@ export default function LoadingScreen() {
     <View style={[styles.container, { paddingTop: topPadValue }]}>
       {error ? (
         <View style={styles.errorContainer}>
-          <Feather name="alert-circle" size={48} color={Colors.danger} />
+          <Feather name="alert-circle" size={48} color={colors.danger} />
           <Text style={styles.errorTitle}>Something went wrong</Text>
           <Text style={styles.errorMsg}>{error}</Text>
           <View style={{ height: 24 }} />
           <View style={styles.retryRow}>
-            <Feather name="arrow-left" size={16} color={Colors.primary} />
+            <Feather name="arrow-left" size={16} color={colors.primary} />
             <Text style={styles.retryText} onPress={() => router.back()}>Go back and try again</Text>
           </View>
         </View>
@@ -111,7 +115,7 @@ export default function LoadingScreen() {
           <Animated.View style={[styles.orb, { transform: [{ scale: pulseAnim }] }]}>
             <View style={styles.orbInner}>
               <Animated.View style={{ transform: [{ rotate: spin }] }}>
-                <Feather name="shield" size={40} color={Colors.primary} />
+                <Feather name="shield" size={40} color={colors.primary} />
               </Animated.View>
             </View>
           </Animated.View>
@@ -130,10 +134,10 @@ export default function LoadingScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ColorsType) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
     alignItems: "center",
     justifyContent: "center",
     padding: 32,
@@ -146,30 +150,30 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: "rgba(0,212,170,0.08)",
+    backgroundColor: colors.primaryMuted,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "rgba(0,212,170,0.2)",
+    borderColor: colors.primaryBorder,
   },
   orbInner: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: Colors.primaryMuted,
+    backgroundColor: colors.primaryMuted,
     alignItems: "center",
     justifyContent: "center",
   },
   title: {
     fontFamily: "Inter_700Bold",
     fontSize: 28,
-    color: Colors.text,
+    color: colors.text,
     letterSpacing: -0.8,
   },
   message: {
     fontFamily: "Inter_400Regular",
     fontSize: 16,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     textAlign: "center",
     lineHeight: 22,
   },
@@ -181,10 +185,10 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: Colors.border,
+    backgroundColor: colors.border,
   },
   dotActive: {
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
   },
   errorContainer: {
     alignItems: "center",
@@ -193,13 +197,13 @@ const styles = StyleSheet.create({
   errorTitle: {
     fontFamily: "Inter_700Bold",
     fontSize: 24,
-    color: Colors.text,
+    color: colors.text,
     letterSpacing: -0.5,
   },
   errorMsg: {
     fontFamily: "Inter_400Regular",
     fontSize: 15,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     textAlign: "center",
     lineHeight: 22,
   },
@@ -211,6 +215,6 @@ const styles = StyleSheet.create({
   retryText: {
     fontFamily: "Inter_600SemiBold",
     fontSize: 15,
-    color: Colors.primary,
+    color: colors.primary,
   },
 });

@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { ShieldCheck, TrendingUp, Activity, ArrowRight, LogIn, User } from "lucide-react";
 import { SiteFooter } from "@/components/site-footer";
 import { useAuth } from "@workspace/replit-auth-web";
+import { ThemeToggle } from "@/components/theme-toggle";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,7 +24,7 @@ export default function LandingPage() {
         <img
           src={`${import.meta.env.BASE_URL}images/hero-abstract.png`}
           alt="Abstract calming gradients"
-          className="w-full h-full object-cover opacity-60 mix-blend-multiply"
+          className="w-full h-full object-cover opacity-60 mix-blend-multiply dark:opacity-20 dark:mix-blend-screen"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/80 to-background"></div>
       </div>
@@ -37,6 +38,7 @@ export default function LandingPage() {
         </div>
 
         <div className="flex items-center gap-3">
+          <ThemeToggle />
           <Link href="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors hidden sm:block">
             Privacy Policy
           </Link>

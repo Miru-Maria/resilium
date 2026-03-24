@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -13,8 +13,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 
-import { Colors } from "@/constants/colors";
 import { useSession } from "@/context/session";
+import { useColors } from "@/context/theme";
+import { ColorsType } from "@/constants/colors";
 
 type ExportedData = {
   sessionId: string;
@@ -32,6 +33,9 @@ export default function MyDataScreen() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [exportDone, setExportDone] = useState(false);
   const [deleteDone, setDeleteDone] = useState(false);
+
+  const colors = useColors();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
@@ -100,7 +104,7 @@ export default function MyDataScreen() {
     return (
       <View style={[styles.center, { paddingTop: topPad }]}>
         <View style={styles.successIcon}>
-          <Feather name="check" size={32} color={Colors.success} />
+          <Feather name="check" size={32} color={colors.success} />
         </View>
         <Text style={styles.successTitle}>Deletion Requested</Text>
         <Text style={styles.successMsg}>
@@ -114,7 +118,7 @@ export default function MyDataScreen() {
     <View style={[styles.container, { paddingTop: topPad }]}>
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} style={styles.backBtn} hitSlop={12} testID="back-btn">
-          <Feather name="arrow-left" size={20} color={Colors.textSecondary} />
+          <Feather name="arrow-left" size={20} color={colors.textSecondary} />
         </Pressable>
         <Text style={styles.headerTitle}>My Data & Privacy</Text>
         <View style={{ width: 38 }} />
@@ -127,7 +131,7 @@ export default function MyDataScreen() {
       >
         {!hasConsented ? (
           <View style={styles.noDataCard}>
-            <Feather name="shield-off" size={40} color={Colors.textMuted} />
+            <Feather name="shield-off" size={40} color={colors.textMuted} />
             <Text style={styles.noDataTitle}>No Data Collected</Text>
             <Text style={styles.noDataDesc}>
               You have not given consent to collect data. No personal information has been stored.
@@ -169,7 +173,7 @@ export default function MyDataScreen() {
               ].map((right) => (
                 <View key={right.label} style={styles.rightItem}>
                   <View style={styles.rightIcon}>
-                    <Feather name={right.icon as any} size={14} color={Colors.primary} />
+                    <Feather name={right.icon as any} size={14} color={colors.primary} />
                   </View>
                   <View style={styles.rightText}>
                     <Text style={styles.rightLabel}>{right.label}</Text>
@@ -182,7 +186,7 @@ export default function MyDataScreen() {
             {exportDone && exportData && (
               <View style={styles.exportResult}>
                 <View style={styles.exportResultHeader}>
-                  <Feather name="check-circle" size={16} color={Colors.success} />
+                  <Feather name="check-circle" size={16} color={colors.success} />
                   <Text style={styles.exportResultTitle}>Export Complete</Text>
                 </View>
                 <Text style={styles.exportResultStats}>
@@ -198,7 +202,7 @@ export default function MyDataScreen() {
                 disabled={isExporting}
                 testID="export-btn"
               >
-                <Feather name="download" size={18} color={Colors.background} />
+                <Feather name="download" size={18} color={colors.background} />
                 <Text style={styles.exportBtnText}>{isExporting ? "Exporting..." : "Export My Data"}</Text>
               </Pressable>
 
@@ -208,13 +212,13 @@ export default function MyDataScreen() {
                 disabled={isDeleting}
                 testID="delete-btn"
               >
-                <Feather name="trash-2" size={18} color={Colors.danger} />
+                <Feather name="trash-2" size={18} color={colors.danger} />
                 <Text style={styles.deleteBtnText}>{isDeleting ? "Submitting..." : "Delete My Data"}</Text>
               </Pressable>
             </View>
 
             <View style={styles.legalNote}>
-              <Feather name="info" size={14} color={Colors.textMuted} />
+              <Feather name="info" size={14} color={colors.textMuted} />
               <Text style={styles.legalNoteText}>
                 Data deletion requests are processed within 30 days per GDPR Article 17. Export requests are processed immediately.
               </Text>
@@ -226,11 +230,11 @@ export default function MyDataScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
+const createStyles = (colors: ColorsType) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
   center: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
     alignItems: "center",
     justifyContent: "center",
     gap: 20,
@@ -238,124 +242,124 @@ const styles = StyleSheet.create({
   },
   successIcon: {
     width: 72, height: 72, borderRadius: 36,
-    backgroundColor: Colors.successMuted, alignItems: "center", justifyContent: "center",
+    backgroundColor: colors.successMuted, alignItems: "center", justifyContent: "center",
   },
   successTitle: {
-    fontFamily: "Inter_700Bold", fontSize: 24, color: Colors.text, letterSpacing: -0.5,
+    fontFamily: "Inter_700Bold", fontSize: 24, color: colors.text, letterSpacing: -0.5,
   },
   successMsg: {
-    fontFamily: "Inter_400Regular", fontSize: 15, color: Colors.textSecondary,
+    fontFamily: "Inter_400Regular", fontSize: 15, color: colors.textSecondary,
     textAlign: "center", lineHeight: 22,
   },
   header: {
     flexDirection: "row", alignItems: "center", justifyContent: "space-between",
     paddingHorizontal: 20, paddingBottom: 12,
-    borderBottomWidth: 1, borderBottomColor: Colors.border,
+    borderBottomWidth: 1, borderBottomColor: colors.border,
   },
   backBtn: {
     width: 38, height: 38, borderRadius: 19,
-    backgroundColor: Colors.surface, alignItems: "center", justifyContent: "center",
-    borderWidth: 1, borderColor: Colors.border,
+    backgroundColor: colors.surface, alignItems: "center", justifyContent: "center",
+    borderWidth: 1, borderColor: colors.border,
   },
   headerTitle: {
-    fontFamily: "Inter_700Bold", fontSize: 18, color: Colors.text, letterSpacing: -0.3,
+    fontFamily: "Inter_700Bold", fontSize: 18, color: colors.text, letterSpacing: -0.3,
   },
   scroll: { flex: 1 },
   scrollContent: { paddingHorizontal: 20, paddingTop: 20, gap: 16 },
   noDataCard: {
     alignItems: "center", gap: 16,
-    backgroundColor: Colors.surface, borderRadius: 20, padding: 32,
-    borderWidth: 1, borderColor: Colors.border,
+    backgroundColor: colors.surface, borderRadius: 20, padding: 32,
+    borderWidth: 1, borderColor: colors.border,
   },
   noDataTitle: {
-    fontFamily: "Inter_700Bold", fontSize: 22, color: Colors.text, letterSpacing: -0.5,
+    fontFamily: "Inter_700Bold", fontSize: 22, color: colors.text, letterSpacing: -0.5,
   },
   noDataDesc: {
-    fontFamily: "Inter_400Regular", fontSize: 14, color: Colors.textSecondary,
+    fontFamily: "Inter_400Regular", fontSize: 14, color: colors.textSecondary,
     textAlign: "center", lineHeight: 20,
   },
   goHomeBtn: {
-    backgroundColor: Colors.surface, borderRadius: 12, paddingVertical: 12, paddingHorizontal: 24,
-    borderWidth: 1, borderColor: Colors.border, marginTop: 8,
+    backgroundColor: colors.surface, borderRadius: 12, paddingVertical: 12, paddingHorizontal: 24,
+    borderWidth: 1, borderColor: colors.border, marginTop: 8,
   },
   goHomeBtnText: {
-    fontFamily: "Inter_600SemiBold", fontSize: 15, color: Colors.text,
+    fontFamily: "Inter_600SemiBold", fontSize: 15, color: colors.text,
   },
   infoCard: {
-    backgroundColor: Colors.surface, borderRadius: 16, padding: 18,
-    gap: 12, borderWidth: 1, borderColor: Colors.border,
+    backgroundColor: colors.surface, borderRadius: 16, padding: 18,
+    gap: 12, borderWidth: 1, borderColor: colors.border,
   },
   infoCardTitle: {
-    fontFamily: "Inter_700Bold", fontSize: 15, color: Colors.text, marginBottom: 4,
+    fontFamily: "Inter_700Bold", fontSize: 15, color: colors.text, marginBottom: 4,
   },
   infoRow: {
     flexDirection: "row", justifyContent: "space-between", alignItems: "center",
-    paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: Colors.border,
+    paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: colors.border,
   },
   infoLabel: {
-    fontFamily: "Inter_400Regular", fontSize: 13, color: Colors.textMuted,
+    fontFamily: "Inter_400Regular", fontSize: 13, color: colors.textMuted,
   },
   infoValue: {
-    fontFamily: "Inter_600SemiBold", fontSize: 13, color: Colors.text,
+    fontFamily: "Inter_600SemiBold", fontSize: 13, color: colors.text,
     flex: 1, textAlign: "right", marginLeft: 16,
   },
   rightsCard: {
-    backgroundColor: Colors.surface, borderRadius: 16, padding: 18,
-    gap: 14, borderWidth: 1, borderColor: Colors.border,
+    backgroundColor: colors.surface, borderRadius: 16, padding: 18,
+    gap: 14, borderWidth: 1, borderColor: colors.border,
   },
   rightsTitle: {
-    fontFamily: "Inter_700Bold", fontSize: 15, color: Colors.text,
+    fontFamily: "Inter_700Bold", fontSize: 15, color: colors.text,
   },
   rightItem: {
     flexDirection: "row", alignItems: "flex-start", gap: 12,
   },
   rightIcon: {
-    width: 30, height: 30, borderRadius: 8, backgroundColor: Colors.primaryMuted,
+    width: 30, height: 30, borderRadius: 8, backgroundColor: colors.primaryMuted,
     alignItems: "center", justifyContent: "center",
   },
   rightText: { flex: 1, gap: 2 },
   rightLabel: {
-    fontFamily: "Inter_600SemiBold", fontSize: 14, color: Colors.text,
+    fontFamily: "Inter_600SemiBold", fontSize: 14, color: colors.text,
   },
   rightDesc: {
-    fontFamily: "Inter_400Regular", fontSize: 12, color: Colors.textMuted,
+    fontFamily: "Inter_400Regular", fontSize: 12, color: colors.textMuted,
   },
   exportResult: {
-    backgroundColor: Colors.successMuted, borderRadius: 12, padding: 14,
+    backgroundColor: colors.successMuted, borderRadius: 12, padding: 14,
     gap: 6, borderWidth: 1, borderColor: "rgba(34,197,94,0.2)",
   },
   exportResultHeader: { flexDirection: "row", alignItems: "center", gap: 8 },
   exportResultTitle: {
-    fontFamily: "Inter_600SemiBold", fontSize: 14, color: Colors.success,
+    fontFamily: "Inter_600SemiBold", fontSize: 14, color: colors.success,
   },
   exportResultStats: {
-    fontFamily: "Inter_400Regular", fontSize: 13, color: Colors.textSecondary,
+    fontFamily: "Inter_400Regular", fontSize: 13, color: colors.textSecondary,
   },
   actions: { gap: 12 },
   exportBtn: {
     flexDirection: "row", alignItems: "center", justifyContent: "center",
-    gap: 8, backgroundColor: Colors.primary, borderRadius: 14, paddingVertical: 16,
+    gap: 8, backgroundColor: colors.primary, borderRadius: 14, paddingVertical: 16,
   },
   exportBtnText: {
-    fontFamily: "Inter_700Bold", fontSize: 16, color: Colors.background,
+    fontFamily: "Inter_700Bold", fontSize: 16, color: colors.background,
   },
   deleteBtn: {
     flexDirection: "row", alignItems: "center", justifyContent: "center",
-    gap: 8, backgroundColor: Colors.dangerMuted, borderRadius: 14, paddingVertical: 16,
+    gap: 8, backgroundColor: colors.dangerMuted, borderRadius: 14, paddingVertical: 16,
     borderWidth: 1, borderColor: "rgba(255,69,69,0.2)",
   },
   deleteBtnText: {
-    fontFamily: "Inter_700Bold", fontSize: 16, color: Colors.danger,
+    fontFamily: "Inter_700Bold", fontSize: 16, color: colors.danger,
   },
   btnPressed: { opacity: 0.75 },
   btnDisabled: { opacity: 0.5 },
   legalNote: {
     flexDirection: "row", alignItems: "flex-start", gap: 10,
-    backgroundColor: Colors.surface, borderRadius: 12, padding: 14,
-    borderWidth: 1, borderColor: Colors.border,
+    backgroundColor: colors.surface, borderRadius: 12, padding: 14,
+    borderWidth: 1, borderColor: colors.border,
   },
   legalNoteText: {
-    fontFamily: "Inter_400Regular", fontSize: 12, color: Colors.textMuted,
+    fontFamily: "Inter_400Regular", fontSize: 12, color: colors.textMuted,
     lineHeight: 18, flex: 1,
   },
 });

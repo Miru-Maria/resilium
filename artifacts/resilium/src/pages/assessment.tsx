@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useLocation, Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Card } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { Progress } from "@/components/ui/progress";
@@ -287,7 +288,10 @@ export default function AssessmentPage() {
     <div className="min-h-screen bg-background flex flex-col">
       <header className="w-full p-6 lg:p-8 flex items-center justify-between z-10">
         <div className="font-display font-bold text-xl tracking-tight text-primary">Resilium</div>
-        <div className="text-sm font-medium text-muted-foreground">{stepLabel}</div>
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
+          <div className="text-sm font-medium text-muted-foreground">{stepLabel}</div>
+        </div>
       </header>
 
       <div className="w-full max-w-md mx-auto px-6 mb-8">
