@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 import { TrendingUp, Activity, ArrowRight, LogIn, User } from "lucide-react";
 import { SiteFooter } from "@/components/site-footer";
 import { useAuth } from "@workspace/replit-auth-web";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { ResilientIcon } from "@/components/resilient-icon";
 import {
   DropdownMenu,
@@ -39,7 +38,6 @@ export default function LandingPage() {
         </div>
 
         <div className="flex items-center gap-3">
-          <ThemeToggle />
           <Link href="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors hidden sm:block">
             Privacy Policy
           </Link>

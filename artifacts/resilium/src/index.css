@@ -49,50 +49,8 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-/* ===================== LIGHT MODE ===================== */
+/* ===================== THEME — deep navy + warm amber ===================== */
 :root {
-  /* Warm amber + deep navy on cream linen */
-  --background: 38 55% 96%;       /* #FBF5EB — warm cream linen */
-  --foreground: 225 40% 18%;      /* #1A2340 — deep navy */
-
-  --card: 38 50% 99%;             /* #FFFCF7 — warm near-white */
-  --card-foreground: 225 40% 18%;
-  --card-border: 35 25% 88%;      /* #E6D9C7 — warm sand border */
-
-  --popover: 38 50% 99%;
-  --popover-foreground: 225 40% 18%;
-  --popover-border: 35 25% 88%;
-
-  --primary: 25 65% 52%;          /* #D47235 — warm amber */
-  --primary-foreground: 0 0% 100%;
-  --primary-border: 25 65% 44%;
-
-  --secondary: 35 50% 88%;        /* #EDD9B8 — warm sand */
-  --secondary-foreground: 25 65% 25%;
-  --secondary-border: 35 35% 78%;
-
-  --muted: 38 25% 92%;            /* #EDE5D5 — pale linen */
-  --muted-foreground: 35 15% 48%; /* #8A7A65 — warm mid-tone */
-  --muted-border: 35 20% 85%;
-
-  --accent: 25 40% 90%;           /* #EED9CA — soft peach */
-  --accent-foreground: 25 65% 25%;
-  --accent-border: 25 30% 82%;
-
-  --destructive: 0 65% 55%;
-  --destructive-foreground: 0 0% 100%;
-  --destructive-border: 0 65% 47%;
-
-  --border: 35 25% 85%;           /* #DDD0BE — warm sand */
-  --input: 35 25% 85%;
-  --ring: 25 65% 52%;
-
-  --radius: 0.75rem;
-}
-
-/* ===================== DARK MODE ===================== */
-.dark {
-  /* Deep navy night with warm amber accent */
   --background: 225 42% 9%;       /* #0D1225 — very deep navy */
   --foreground: 38 40% 88%;       /* #EAD9BE — warm cream text */
 
@@ -104,7 +62,7 @@
   --popover-foreground: 38 40% 88%;
   --popover-border: 225 30% 20%;
 
-  --primary: 28 70% 58%;          /* #E08040 — bright amber on dark */
+  --primary: 28 70% 58%;          /* #E08040 — bright amber */
   --primary-foreground: 225 42% 9%;
   --primary-border: 28 70% 48%;
 
@@ -127,6 +85,8 @@
   --border: 225 28% 20%;
   --input: 225 28% 20%;
   --ring: 28 70% 58%;
+
+  --radius: 0.75rem;
 }
 
 @layer base {
@@ -136,10 +96,6 @@
 
   html {
     color-scheme: dark;
-  }
-
-  html.light {
-    color-scheme: light;
   }
 
   body {

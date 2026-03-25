@@ -14,13 +14,12 @@ import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 
 import { useSession } from "@/context/session";
-import { useTheme, useColors } from "@/context/theme";
+import { useColors } from "@/context/theme";
 import { ColorsType } from "@/constants/colors";
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const { hasConsented, isLoaded } = useSession();
-  const { theme, toggleTheme } = useTheme();
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
@@ -43,11 +42,6 @@ export default function HomeScreen() {
     router.push("/my-data");
   };
 
-  const handleToggleTheme = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    toggleTheme();
-  };
-
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
 
@@ -67,9 +61,6 @@ export default function HomeScreen() {
           <Text style={styles.logoText}>Resilium</Text>
         </View>
         <View style={styles.headerActions}>
-          <Pressable onPress={handleToggleTheme} style={styles.iconBtn} hitSlop={12} testID="theme-toggle-btn">
-            <Feather name={theme === "light" ? "moon" : "sun"} size={18} color={colors.textSecondary} />
-          </Pressable>
           {hasConsented && (
             <Pressable onPress={handleMyData} style={styles.iconBtn} hitSlop={12} testID="my-data-btn">
               <Feather name="user" size={18} color={colors.textSecondary} />

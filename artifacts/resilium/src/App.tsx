@@ -2,8 +2,6 @@ import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { useState, useEffect, useCallback } from "react";
-import { ThemeContext, type Theme } from "@/hooks/use-theme";
 
 import LandingPage from "@/pages/landing";
 import AssessmentPage from "@/pages/assessment";
@@ -28,14 +26,6 @@ const queryClient = new QueryClient({
   },
 });
 
-function getInitialTheme(): Theme {
-  try {
-    const stored = localStorage.getItem("resilium-theme");
-    if (stored === "light" || stored === "dark") return stored;
-  } catch {}
-  return "dark";
-}
-
 function Router() {
   return (
     <Switch>
@@ -58,34 +48,15 @@ function Router() {
 }
 
 function App() {
-  const [theme, setThemeState] = useState<Theme>(getInitialTheme);
-
-  useEffect(() => {
-    const root = document.documentElement;
-    if (theme === "dark") {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
-    try {
-      localStorage.setItem("resilium-theme", theme);
-    } catch {}
-  }, [theme]);
-
-  const toggle = useCallback(() => setThemeState((t) => (t === "light" ? "dark" : "light")), []);
-  const setTheme = useCallback((t: Theme) => setThemeState(t), []);
-
   return (
-    <ThemeContext.Provider value={{ theme, toggle, setTheme }}>
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-            <Router />
-          </WouterRouter>
-          <Toaster />
-        </TooltipProvider>
-      </QueryClientProvider>
-    </ThemeContext.Provider>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+          <Router />
+        </WouterRouter>
+        <Toaster />
+      </TooltipProvider>
+    </QueryClientProvider>
   );
 }
 

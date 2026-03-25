@@ -1,5 +1,4 @@
 import React, { useState, useCallback } from "react";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { useRoute } from "wouter";
 import { useGetReport, useGetChecklists, useUpdateChecklistItem, useGetSnapshots } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -284,7 +283,6 @@ export default function ResultsPage() {
             </div>
           </Link>
           <div className="flex items-center gap-3">
-            <ThemeToggle />
             <Button variant="outline" size="sm" onClick={handleShare} className="rounded-full">
               <Share2 className="w-4 h-4 mr-2" /> Share
             </Button>
