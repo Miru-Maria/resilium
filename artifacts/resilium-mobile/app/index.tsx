@@ -57,7 +57,7 @@ export default function HomeScreen() {
 
       <View style={styles.header}>
         <View style={styles.logo}>
-          <Feather name="shield" size={20} color={colors.primary} />
+          <Image source={require("../assets/logo.png")} style={{ width: 24, height: 24 }} />
           <Text style={styles.logoText}>Resilium</Text>
         </View>
         <View style={styles.headerActions}>
