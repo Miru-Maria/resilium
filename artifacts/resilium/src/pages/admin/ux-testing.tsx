@@ -31,14 +31,17 @@ interface PersonaProgress {
   error?: string;
 }
 
+function getToken() { return localStorage.getItem("admin_token"); }
+function authH() { const t = getToken(); return t ? { Authorization: `Bearer ${t}` } : {}; }
+
 async function fetchPersonas(): Promise<{ personas: PersonaMeta[] }> {
-  const res = await fetch("/api/admin/ux-test/personas", { credentials: "include" });
+  const res = await fetch("/api/admin/ux-test/personas", { headers: authH() });
   if (!res.ok) throw new Error("Failed to fetch personas");
   return res.json();
 }
 
 async function fetchRuns(): Promise<{ runs: RunSummary[] }> {
-  const res = await fetch("/api/admin/ux-test/runs", { credentials: "include" });
+  const res = await fetch("/api/admin/ux-test/runs", { headers: authH() });
   if (!res.ok) throw new Error("Failed to fetch runs");
   return res.json();
 }
@@ -128,8 +131,7 @@ export default function UxTestingPage() {
     try {
       const res = await fetch("/api/admin/ux-test/run", {
         method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...authH() },
         body: JSON.stringify({ personaKeys: Array.from(selectedKeys) }),
       });
 

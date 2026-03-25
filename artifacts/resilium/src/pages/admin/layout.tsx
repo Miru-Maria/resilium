@@ -9,18 +9,34 @@ interface AdminLayoutProps {
   activeSection?: "mobile" | "gdpr" | "consent";
 }
 
+export function getAdminToken(): string | null {
+  return localStorage.getItem("admin_token");
+}
+
+export function adminAuthHeaders(): Record<string, string> {
+  const token = getAdminToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 export function AdminLayout({ children, activeSection }: AdminLayoutProps) {
   const [, navigate] = useLocation();
   const [checking, setChecking] = useState(true);
   const [authed, setAuthed] = useState(false);
 
   useEffect(() => {
-    fetch("/api/admin/session", { credentials: "include" })
+    const token = getAdminToken();
+    if (!token) {
+      navigate("/admin/login");
+      setChecking(false);
+      return;
+    }
+    fetch("/api/admin/session", { headers: { Authorization: `Bearer ${token}` } })
       .then((r) => r.json())
       .then((data) => {
         if (data.authenticated) {
           setAuthed(true);
         } else {
+          localStorage.removeItem("admin_token");
           navigate("/admin/login");
         }
       })
@@ -29,7 +45,8 @@ export function AdminLayout({ children, activeSection }: AdminLayoutProps) {
   }, []);
 
   async function handleLogout() {
-    await fetch("/api/admin/logout", { method: "POST", credentials: "include" });
+    localStorage.removeItem("admin_token");
+    await fetch("/api/admin/logout", { method: "POST" });
     navigate("/admin/login");
   }
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { AdminLayout } from "./layout";
+import { AdminLayout, adminAuthHeaders } from "./layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -31,7 +31,7 @@ export default function AdminGdprPage() {
 
   const fetchRequests = useCallback(async () => {
     try {
-      const res = await fetch("/api/admin/gdpr/requests", { credentials: "include" });
+      const res = await fetch("/api/admin/gdpr/requests", { headers: adminAuthHeaders() });
       if (!res.ok) throw new Error("Failed to load");
       const data = await res.json();
       setRequests(data.requests);
@@ -51,7 +51,7 @@ export default function AdminGdprPage() {
     try {
       const res = await fetch(`/api/admin/gdpr/requests/${id}/fulfill`, {
         method: "POST",
-        credentials: "include",
+        headers: adminAuthHeaders(),
       });
       if (!res.ok) {
         const data = await res.json();
@@ -72,7 +72,7 @@ export default function AdminGdprPage() {
     setDownloading(id);
     try {
       const res = await fetch(`/api/admin/gdpr/requests/${id}/export`, {
-        credentials: "include",
+        headers: adminAuthHeaders(),
       });
       if (!res.ok) throw new Error("Failed to download");
       const blob = await res.blob();

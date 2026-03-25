@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { db, resilienceReportsTable, reportFeedbackTable } from "@workspace/db";
 import { desc } from "drizzle-orm";
-import { requireAdminSession } from "../../middlewares/adminAuth.js";
+import { requireAdminSession, generateAdminToken, verifyAdminToken } from "../../middlewares/adminAuth.js";
 import uxTestRouter from "./ux-test/index.js";
 import adminGdprRouter from "./gdpr.js";
 import adminAnalyticsRouter from "./analytics.js";
@@ -20,27 +20,21 @@ router.post("/login", async (req, res) => {
   }
 
   if (username === adminUsername && password === adminPassword) {
-    req.session.isAdmin = true;
-    req.session.save((err) => {
-      if (err) {
-        res.status(500).json({ error: "SESSION_ERROR", message: "Failed to create session." });
-        return;
-      }
-      res.json({ success: true });
-    });
+    const token = generateAdminToken();
+    res.json({ success: true, token });
   } else {
     res.status(401).json({ error: "INVALID_CREDENTIALS", message: "Invalid username or password." });
   }
 });
 
 router.post("/logout", (req, res) => {
-  req.session.destroy(() => {
-    res.json({ success: true });
-  });
+  res.json({ success: true });
 });
 
 router.get("/session", (req, res) => {
-  res.json({ authenticated: req.session?.isAdmin === true });
+  const authHeader = req.headers["authorization"];
+  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
+  res.json({ authenticated: token ? verifyAdminToken(token) : false });
 });
 
 router.get("/analytics", requireAdminSession, async (req, res) => {

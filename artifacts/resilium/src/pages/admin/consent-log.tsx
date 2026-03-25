@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { AdminLayout } from "./layout";
+import { AdminLayout, adminAuthHeaders } from "./layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, Download, ChevronLeft, ChevronRight } from "lucide-react";
@@ -32,7 +32,7 @@ export default function AdminConsentLogPage() {
       setLoading(true);
       try {
         const res = await fetch(`/api/admin/gdpr/consent-log?page=${p}&pageSize=50`, {
-          credentials: "include",
+          headers: adminAuthHeaders(),
         });
         if (!res.ok) throw new Error("Failed to load");
         const data = await res.json();
@@ -55,7 +55,7 @@ export default function AdminConsentLogPage() {
     setExportingCsv(true);
     try {
       const res = await fetch("/api/admin/gdpr/consent-log?page=1&pageSize=10000", {
-        credentials: "include",
+        headers: adminAuthHeaders(),
       });
       if (!res.ok) throw new Error("Failed to load");
       const data = await res.json();

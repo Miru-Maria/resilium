@@ -32,8 +32,10 @@ interface RunReport {
   results: PersonaResult[];
 }
 
+function authH() { const t = localStorage.getItem("admin_token"); return t ? { Authorization: `Bearer ${t}` } : {}; }
+
 async function fetchRunReport(runId: string): Promise<RunReport> {
-  const res = await fetch(`/api/admin/ux-test/runs/${runId}`, { credentials: "include" });
+  const res = await fetch(`/api/admin/ux-test/runs/${runId}`, { headers: authH() });
   if (!res.ok) throw new Error("Failed to fetch run report");
   return res.json();
 }

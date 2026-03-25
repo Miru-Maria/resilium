@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { adminAuthHeaders } from "./layout";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 const COLORS = ["#6366f1", "#22d3ee", "#f59e0b", "#10b981", "#ec4899", "#8b5cf6", "#f97316", "#14b8a6"];
@@ -84,8 +85,9 @@ export default function AdminDashboard() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch(`${BASE}/api/admin/analytics`, { credentials: "include" });
+        const res = await fetch(`${BASE}/api/admin/analytics`, { headers: adminAuthHeaders() });
         if (res.status === 401) {
+          localStorage.removeItem("admin_token");
           setLocation("/admin/login");
           return;
         }
@@ -101,7 +103,8 @@ export default function AdminDashboard() {
   }, [setLocation]);
 
   const handleLogout = async () => {
-    await fetch(`${BASE}/api/admin/logout`, { method: "POST", credentials: "include" });
+    localStorage.removeItem("admin_token");
+    await fetch(`${BASE}/api/admin/logout`, { method: "POST" });
     setLocation("/admin/login");
   };
 

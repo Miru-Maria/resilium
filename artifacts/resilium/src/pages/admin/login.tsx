@@ -23,13 +23,13 @@ export default function AdminLoginPage() {
       const res = await fetch(`${BASE}/api/admin/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify({ username, password }),
       });
-      if (res.ok) {
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.token) {
+        localStorage.setItem("admin_token", data.token);
         setLocation("/admin/dashboard");
       } else {
-        const data = await res.json().catch(() => ({}));
         setError(data.message ?? "Invalid credentials. Please try again.");
       }
     } catch {
