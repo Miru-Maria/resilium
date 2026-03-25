@@ -21,7 +21,13 @@ router.post("/login", async (req, res) => {
 
   if (username === adminUsername && password === adminPassword) {
     req.session.isAdmin = true;
-    res.json({ success: true });
+    req.session.save((err) => {
+      if (err) {
+        res.status(500).json({ error: "SESSION_ERROR", message: "Failed to create session." });
+        return;
+      }
+      res.json({ success: true });
+    });
   } else {
     res.status(401).json({ error: "INVALID_CREDENTIALS", message: "Invalid username or password." });
   }
