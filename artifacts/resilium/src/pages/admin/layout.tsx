@@ -1,0 +1,88 @@
+import React, { useEffect, useState } from "react";
+import { useLocation, Link } from "wouter";
+import { Button } from "@/components/ui/button";
+import { Loader2, LayoutDashboard, Smartphone, Shield, LogOut } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+interface AdminLayoutProps {
+  children: React.ReactNode;
+  activeSection?: "mobile" | "gdpr" | "consent";
+}
+
+export function AdminLayout({ children, activeSection }: AdminLayoutProps) {
+  const [, navigate] = useLocation();
+  const [checking, setChecking] = useState(true);
+  const [authed, setAuthed] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/admin/session", { credentials: "include" })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.authenticated) {
+          setAuthed(true);
+        } else {
+          navigate("/admin/login");
+        }
+      })
+      .catch(() => navigate("/admin/login"))
+      .finally(() => setChecking(false));
+  }, []);
+
+  async function handleLogout() {
+    await fetch("/api/admin/logout", { method: "POST", credentials: "include" });
+    navigate("/admin/login");
+  }
+
+  if (checking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!authed) return null;
+
+  const navItems = [
+    { href: "/admin/mobile", label: "Mobile", icon: Smartphone, key: "mobile" },
+    { href: "/admin/gdpr", label: "GDPR", icon: Shield, key: "gdpr" },
+    { href: "/admin/consent-log", label: "Consent Log", icon: LayoutDashboard, key: "consent" },
+  ];
+
+  return (
+    <div className="min-h-screen bg-muted/30 flex">
+      <aside className="w-56 min-h-screen bg-background border-r flex flex-col">
+        <div className="p-4 border-b flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
+            <Shield className="w-4 h-4 text-primary-foreground" />
+          </div>
+          <span className="font-bold text-sm tracking-tight">Admin Panel</span>
+        </div>
+        <nav className="flex-1 p-3 space-y-1">
+          {navItems.map((item) => (
+            <Link key={item.key} href={item.href}>
+              <span
+                className={cn(
+                  "flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium cursor-pointer transition-colors",
+                  activeSection === item.key
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                )}
+              >
+                <item.icon className="w-4 h-4" />
+                {item.label}
+              </span>
+            </Link>
+          ))}
+        </nav>
+        <div className="p-3 border-t">
+          <Button variant="ghost" size="sm" className="w-full justify-start gap-2" onClick={handleLogout}>
+            <LogOut className="w-4 h-4" />
+            Log Out
+          </Button>
+        </div>
+      </aside>
+      <main className="flex-1 overflow-auto">{children}</main>
+    </div>
+  );
+}

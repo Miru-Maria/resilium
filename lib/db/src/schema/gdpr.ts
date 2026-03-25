@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -25,3 +25,16 @@ export const gdprDataRequestsTable = pgTable("gdpr_data_requests", {
 export const insertGdprDataRequestSchema = createInsertSchema(gdprDataRequestsTable).omit({ id: true });
 export type InsertGdprDataRequest = z.infer<typeof insertGdprDataRequestSchema>;
 export type GdprDataRequest = typeof gdprDataRequestsTable.$inferSelect;
+
+export const gdprAdminActionsTable = pgTable("gdpr_admin_actions", {
+  id: serial("id").primaryKey(),
+  requestId: integer("request_id").notNull(),
+  action: text("action").notNull(),
+  sessionId: text("session_id").notNull(),
+  performedAt: timestamp("performed_at").defaultNow().notNull(),
+  notes: text("notes"),
+});
+
+export const insertGdprAdminActionSchema = createInsertSchema(gdprAdminActionsTable).omit({ id: true });
+export type InsertGdprAdminAction = z.infer<typeof insertGdprAdminActionSchema>;
+export type GdprAdminAction = typeof gdprAdminActionsTable.$inferSelect;

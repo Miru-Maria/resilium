@@ -15,6 +15,9 @@ import AdminLoginPage from "@/pages/admin/login";
 import AdminDashboard from "@/pages/admin/dashboard";
 import UxTestingPage from "@/pages/admin/ux-testing";
 import UxTestReportPage from "@/pages/admin/ux-test-report";
+import AdminMobilePage from "@/pages/admin/mobile";
+import AdminGdprPage from "@/pages/admin/gdpr";
+import AdminConsentLogPage from "@/pages/admin/consent-log";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -49,6 +52,9 @@ function Router() {
       <Route path="/admin" component={AdminLoginPage} />
       <Route path="/admin/ux-test" component={UxTestingPage} />
       <Route path="/admin/ux-test/report/:runId" component={UxTestReportPage} />
+      <Route path="/admin/mobile" component={AdminMobilePage} />
+      <Route path="/admin/gdpr" component={AdminGdprPage} />
+      <Route path="/admin/consent-log" component={AdminConsentLogPage} />
       <Route component={NotFound} />
     </Switch>
   );

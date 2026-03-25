@@ -3,6 +3,8 @@ import { db, resilienceReportsTable, reportFeedbackTable } from "@workspace/db";
 import { desc } from "drizzle-orm";
 import { requireAdminSession } from "../../middlewares/adminAuth.js";
 import uxTestRouter from "./ux-test/index.js";
+import adminGdprRouter from "./gdpr.js";
+import adminAnalyticsRouter from "./analytics.js";
 
 const router: IRouter = Router();
 
@@ -29,6 +31,10 @@ router.post("/logout", (req, res) => {
   req.session.destroy(() => {
     res.json({ success: true });
   });
+});
+
+router.get("/session", (req, res) => {
+  res.json({ authenticated: req.session?.isAdmin === true });
 });
 
 router.get("/analytics", requireAdminSession, async (req, res) => {
@@ -168,5 +174,7 @@ router.get("/analytics", requireAdminSession, async (req, res) => {
 });
 
 router.use("/ux-test", uxTestRouter);
+router.use("/gdpr", adminGdprRouter);
+router.use("/analytics", adminAnalyticsRouter);
 
 export default router;
