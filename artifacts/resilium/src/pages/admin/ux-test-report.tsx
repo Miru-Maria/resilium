@@ -175,7 +175,7 @@ export default function UxTestReportPage() {
           <CardContent className="pt-6 text-center">
             <AlertCircle className="w-8 h-8 text-destructive mx-auto mb-3" />
             <p className="text-muted-foreground">Failed to load report</p>
-            <Link href="/admin/ux-test">
+            <Link href="/admin/ux-testing">
               <Button variant="outline" className="mt-4">Back to UX Testing</Button>
             </Link>
           </CardContent>
@@ -198,7 +198,7 @@ export default function UxTestReportPage() {
       <div className="border-b border-border/60 bg-background/80 backdrop-blur sticky top-0 z-10 print:hidden">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <Link href="/admin/ux-test">
+            <Link href="/admin/ux-testing">
               <Button variant="ghost" size="sm" className="gap-2">
                 <ArrowLeft className="w-4 h-4" />
                 Back
