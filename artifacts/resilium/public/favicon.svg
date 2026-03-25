@@ -1,3 +1,37 @@
 <svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="180" height="180" rx="36" fill="#FF3C00"/>
+  <!-- Amber background tile -->
+  <rect width="180" height="180" rx="36" fill="#D47235"/>
+
+  <!-- Left hemisphere -->
+  <path
+    d="M90 50 C80 50, 67.5 52.5, 60 62.5 C52.5 72.5, 52.5 85, 57.5 95 C62.5 105, 70 110, 72.5 117.5 L90 117.5 L90 50 Z"
+    fill="white" fill-opacity="0.15"
+    stroke="white" stroke-width="7" stroke-linejoin="round"
+  />
+
+  <!-- Right hemisphere -->
+  <path
+    d="M90 50 C100 50, 112.5 52.5, 120 62.5 C127.5 72.5, 127.5 85, 122.5 95 C117.5 105, 110 110, 107.5 117.5 L90 117.5 L90 50 Z"
+    fill="white" fill-opacity="0.15"
+    stroke="white" stroke-width="7" stroke-linejoin="round"
+  />
+
+  <!-- Longitudinal fissure -->
+  <line x1="90" y1="50" x2="90" y2="117.5" stroke="white" stroke-width="6" stroke-linecap="round"/>
+
+  <!-- Left gyri -->
+  <path d="M65 67.5 Q75 60, 85 67.5"   stroke="white" stroke-width="5.5" fill="none" stroke-linecap="round"/>
+  <path d="M57.5 85 Q67.5 77.5, 82.5 82.5" stroke="white" stroke-width="5.5" fill="none" stroke-linecap="round"/>
+  <path d="M62.5 100 Q70 95, 80 100"   stroke="white" stroke-width="5" fill="none" stroke-linecap="round"/>
+
+  <!-- Right gyri -->
+  <path d="M115 67.5 Q105 60, 95 67.5"    stroke="white" stroke-width="5.5" fill="none" stroke-linecap="round"/>
+  <path d="M122.5 85 Q112.5 77.5, 97.5 82.5" stroke="white" stroke-width="5.5" fill="none" stroke-linecap="round"/>
+  <path d="M117.5 100 Q110 95, 100 100"   stroke="white" stroke-width="5" fill="none" stroke-linecap="round"/>
+
+  <!-- Brainstem -->
+  <path
+    d="M77.5 117.5 Q77.5 132, 90 132 Q102.5 132, 102.5 117.5"
+    stroke="white" stroke-width="7" fill="none" stroke-linecap="round"
+  />
 </svg>
