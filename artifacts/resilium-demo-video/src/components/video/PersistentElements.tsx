@@ -2,6 +2,10 @@ import { motion } from 'framer-motion';
 
 const BASE = import.meta.env.BASE_URL;
 
+// CSS filter: convert black PNG logo → Resilium orange (#E08040)
+const LOGO_FILTER =
+  'invert(58%) sepia(58%) saturate(700%) hue-rotate(334deg) brightness(97%) contrast(97%)';
+
 export function PersistentElements({ currentScene }: { currentScene: number }) {
   return (
     <>
@@ -9,22 +13,22 @@ export function PersistentElements({ currentScene }: { currentScene: number }) {
       <motion.div
         className="absolute rounded-full pointer-events-none"
         style={{
-          width: '60vw',
-          height: '60vw',
-          background: 'radial-gradient(circle, rgba(224,128,64,0.18) 0%, transparent 70%)',
+          width: '55vw',
+          height: '55vw',
+          background: 'radial-gradient(circle, rgba(224,128,64,0.14) 0%, transparent 70%)',
           filter: 'blur(80px)',
           zIndex: 0,
         }}
         animate={{
-          x: currentScene % 2 === 0 ? '-5vw' : '25vw',
-          y: currentScene % 3 === 0 ? '-15vh' : '5vh',
-          scale: currentScene === 5 ? 1.4 : 1,
-          opacity: currentScene === 5 ? 0.35 : 0.22,
+          x: currentScene % 2 === 0 ? '-8vw' : '22vw',
+          y: currentScene % 3 === 0 ? '-12vh' : '4vh',
+          scale: currentScene === 5 ? 1.3 : 1,
+          opacity: currentScene === 5 ? 0.30 : 0.18,
         }}
         transition={{ duration: 3.5, ease: [0.4, 0, 0.2, 1] }}
       />
 
-      {/* Resilium logo — top-left, persists across all scenes */}
+      {/* Logo watermark — top-left */}
       <motion.div
         className="absolute top-[3vh] left-[3vw] z-50 flex items-center gap-[1.2vh]"
         animate={{ opacity: currentScene === 5 ? 0 : 1 }}
@@ -33,7 +37,12 @@ export function PersistentElements({ currentScene }: { currentScene: number }) {
         <img
           src={`${BASE}images/logo.png`}
           alt="Resilium"
-          style={{ width: '3.5vh', height: '3.5vh', objectFit: 'contain' }}
+          style={{
+            width: '3.5vh',
+            height: '3.5vh',
+            objectFit: 'contain',
+            filter: LOGO_FILTER,
+          }}
         />
         <span
           style={{

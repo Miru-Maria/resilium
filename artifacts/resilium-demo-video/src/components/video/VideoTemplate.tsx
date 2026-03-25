@@ -1,4 +1,5 @@
 import { AnimatePresence } from 'framer-motion';
+import { useState } from 'react';
 import { useVideoPlayer } from '@/lib/video';
 import { Scene1 } from './Scene1';
 import { Scene2 } from './Scene2';
@@ -8,25 +9,26 @@ import { Scene5 } from './Scene5';
 import { Scene6 } from './Scene6';
 import { PersistentElements } from './PersistentElements';
 import { AmbientSound } from './AmbientSound';
+import { Voiceover } from './Voiceover';
 
 const SCENE_DURATIONS = {
   scene1: 25000,
-  scene2: 20000,
+  scene2: 22000,
   scene3: 42000,
-  scene4: 45000,
+  scene4: 40000,
   scene5: 35000,
   scene6: 25000,
 };
 
 export default function VideoTemplate() {
   const { currentScene } = useVideoPlayer({ durations: SCENE_DURATIONS });
+  const [audioEnabled, setAudioEnabled] = useState(false);
 
   return (
     <div
       className="w-full h-screen overflow-hidden relative"
       style={{ backgroundColor: 'var(--color-bg-light)' }}
     >
-      {/* Persistent amber orb + logo — float above all scenes */}
       <PersistentElements currentScene={currentScene} />
 
       <AnimatePresence mode="wait">
@@ -38,8 +40,8 @@ export default function VideoTemplate() {
         {currentScene === 5 && <Scene6 key="scene6" />}
       </AnimatePresence>
 
-      {/* Ambient sound toggle — bottom-right corner */}
-      <AmbientSound />
+      <Voiceover currentScene={currentScene} enabled={audioEnabled} />
+      <AmbientSound enabled={audioEnabled} onToggle={() => setAudioEnabled(v => !v)} />
     </div>
   );
 }

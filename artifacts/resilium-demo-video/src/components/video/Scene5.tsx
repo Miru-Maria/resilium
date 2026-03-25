@@ -33,41 +33,46 @@ export function Scene5() {
       style={{ background: 'var(--color-bg-light)' }}
       {...sceneTransitions.perspectiveFlip}
     >
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at top, var(--color-bg-muted) 0%, var(--color-bg-light) 60%)', opacity: 0.6 }} />
+      {/* Subtle top glow only */}
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 0%, rgba(224,128,64,0.07) 0%, transparent 55%)' }} />
 
-      <div style={{ position: 'relative', zIndex: 20, width: '58vw', display: 'flex', flexDirection: 'column', gap: '2vh' }}>
+      {/* Two-column layout: checklist left, time horizons right */}
+      <div style={{ position: 'relative', zIndex: 20, display: 'flex', gap: '8vw', alignItems: 'center', width: '82vw' }}>
 
-        {/* Checklist */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5vh', marginBottom: '6vh' }}>
+        {/* Left: Checklist */}
+        <div style={{ flex: '1', display: 'flex', flexDirection: 'column', gap: '1.6vh' }}>
+          <motion.p
+            style={{ fontFamily: 'var(--font-mono)', fontSize: '1.8vh', color: 'var(--color-primary)', letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: '1.5vh' }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: step >= 1 ? 1 : 0 }}
+          >
+            Action Checklist
+          </motion.p>
+
           {items.map((item, i) => {
             const isChecked = step >= 2 + i;
             return (
               <motion.div
                 key={i}
                 style={{
-                  display: 'flex', alignItems: 'center', gap: '3vh',
-                  padding: '2.2vh 3vh', borderRadius: '1.2vh',
+                  display: 'flex', alignItems: 'center', gap: '2.5vh',
+                  padding: '2vh 2.8vh', borderRadius: '1.2vh',
                   background: isChecked ? 'rgba(224,128,64,0.08)' : 'var(--color-bg-muted)',
-                  border: isChecked ? '1px solid rgba(224,128,64,0.4)' : '1px solid transparent',
+                  border: `1px solid ${isChecked ? 'rgba(224,128,64,0.35)' : 'rgba(234,217,190,0.06)'}`,
                   transition: 'background 0.4s, border-color 0.4s',
                 }}
                 initial={{ opacity: 0, x: -50 }}
                 animate={{ opacity: step >= 1 ? 1 : 0, x: step >= 1 ? 0 : -50 }}
                 transition={{ duration: 0.5, delay: i * 0.08 }}
               >
-                {/* Checkbox */}
                 <div style={{
                   width: '3.5vh', height: '3.5vh', borderRadius: '0.6vh', flexShrink: 0,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   background: isChecked ? 'var(--color-primary)' : 'transparent',
-                  border: isChecked ? '2px solid var(--color-primary)' : '2px solid rgba(234,217,190,0.3)',
+                  border: isChecked ? '2px solid var(--color-primary)' : '2px solid rgba(234,217,190,0.25)',
                   transition: 'background 0.3s, border-color 0.3s',
                 }}>
-                  <motion.svg
-                    viewBox="0 0 24 24" fill="none"
-                    style={{ width: '2.2vh', height: '2.2vh' }}
-                    initial={false}
-                  >
+                  <motion.svg viewBox="0 0 24 24" fill="none" style={{ width: '2.2vh', height: '2.2vh' }}>
                     <motion.path
                       d="M5 13l4 4L19 7"
                       stroke="var(--color-bg-light)"
@@ -81,8 +86,8 @@ export function Scene5() {
                   </motion.svg>
                 </div>
                 <span style={{
-                  fontFamily: 'var(--font-body)', fontSize: '2.8vh',
-                  color: isChecked ? 'rgba(234,217,190,0.55)' : 'var(--color-text-primary)',
+                  fontFamily: 'var(--font-body)', fontSize: '2.6vh',
+                  color: isChecked ? 'rgba(234,217,190,0.45)' : 'var(--color-text-primary)',
                   textDecoration: isChecked ? 'line-through' : 'none',
                   transition: 'color 0.3s',
                 }}>
@@ -93,48 +98,52 @@ export function Scene5() {
           })}
         </div>
 
-        {/* Progress bar + milestone */}
+        {/* Right: Progress + time horizons */}
         <motion.div
-          style={{ display: 'flex', flexDirection: 'column', gap: '1.5vh' }}
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: step >= 10 ? 1 : 0, y: step >= 10 ? 0 : 30 }}
-          transition={{ duration: 1 }}
+          style={{ flex: '0 0 28vw', display: 'flex', flexDirection: 'column', gap: '5vh' }}
+          initial={{ opacity: 0, x: 50 }}
+          animate={{ opacity: step >= 10 ? 1 : 0, x: step >= 10 ? 0 : 50 }}
+          transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
         >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1.5vh' }}>
-              <img src={`${BASE}images/shield-icon.png`} alt="Shield" style={{ width: '4.5vh', height: '4.5vh', objectFit: 'contain' }} />
-              <span style={{ fontFamily: 'var(--font-display)', fontSize: '3.8vh', fontWeight: 700, color: 'var(--color-primary)' }}>
-                Well Prepared
-              </span>
+          {/* Resilience tier */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '2vh', marginBottom: '-1vh' }}>
+            <img src={`${BASE}images/shield-icon.png`} alt="" style={{ width: '5.5vh', height: '5.5vh', objectFit: 'contain' }} />
+            <div>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1.6vh', color: 'rgba(234,217,190,0.5)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '0.3vh' }}>Level 3 / 4</div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: '4.5vh', fontWeight: 800, color: 'var(--color-primary)', lineHeight: 1 }}>Well Prepared</div>
             </div>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '2.2vh', color: 'var(--color-text-muted)' }}>Level 3 / 4</span>
           </div>
           <div style={{ width: '100%', height: '1.2vh', background: 'var(--color-bg-muted)', borderRadius: '100px', overflow: 'hidden' }}>
             <motion.div
-              style={{ height: '100%', background: 'var(--color-primary)', borderRadius: '100px' }}
+              style={{ height: '100%', background: 'linear-gradient(to right, var(--color-primary), rgba(224,128,64,0.7))', borderRadius: '100px' }}
               initial={{ width: '40%' }}
               animate={{ width: step >= 10 ? '75%' : '40%' }}
               transition={{ duration: 2.2, ease: 'circOut' }}
             />
           </div>
-        </motion.div>
 
-        {/* Time horizon text */}
-        <motion.div
-          style={{ marginTop: '6vh', textAlign: 'center' }}
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: step >= 11 ? 1 : 0, scale: step >= 11 ? 1 : 0.9 }}
-          transition={{ duration: 1, type: 'spring' }}
-        >
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '5vh', fontWeight: 700, color: 'var(--color-text-primary)', lineHeight: 1.2, letterSpacing: '-0.02em', margin: 0 }}>
-            A prioritized action plan —<br />
-            <span style={{ color: 'var(--color-primary)' }}>30 days, 90 days, 12 months.</span>
-          </h2>
+          {/* Time horizon blocks */}
+          {[
+            { label: '30 days', desc: 'Quick wins & urgent gaps' },
+            { label: '90 days', desc: 'Core resilience building' },
+            { label: '12 months', desc: 'Long-term strategy' },
+          ].map((h, i) => (
+            <motion.div
+              key={i}
+              style={{ padding: '2.5vh 3vh', borderRadius: '1.2vh', background: 'var(--color-bg-muted)', border: '1px solid rgba(234,217,190,0.08)' }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: step >= 11 ? 1 : 0, y: step >= 11 ? 0 : 20 }}
+              transition={{ duration: 0.6, delay: i * 0.15 }}
+            >
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: '3.2vh', fontWeight: 700, color: 'var(--color-primary)', marginBottom: '0.5vh' }}>{h.label}</div>
+              <div style={{ fontFamily: 'var(--font-body)', fontSize: '2.2vh', color: 'var(--color-text-secondary)' }}>{h.desc}</div>
+            </motion.div>
+          ))}
         </motion.div>
       </div>
 
       <div className="subtitle-overlay">
-        The Action Checklist is sorted by your weakest areas first. The Strategic Action Plan lays out concrete steps over three time horizons — 30 days, 90 days, and 12 months.
+        Your action checklist is sorted by weakest areas first. The strategic plan covers three time horizons — 30 days, 90 days, and 12 months.
       </div>
     </motion.div>
   );
