@@ -4,15 +4,16 @@ import { db, uxTestRunsTable, uxTestResultsTable } from "@workspace/db";
 import { eq, desc } from "drizzle-orm";
 import { PERSONAS } from "./personas.js";
 import { runUxTestSimulation, type ProgressEvent } from "./simulation.js";
+import { verifyAdminToken } from "../../../middlewares/adminAuth.js";
 
 const router: IRouter = Router();
 
 function requireAdmin(req: Request, res: Response): boolean {
-  if (!req.isAuthenticated()) {
-    res.status(401).json({ error: "Unauthorized" });
-    return false;
-  }
-  return true;
+  const authHeader = req.headers["authorization"];
+  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
+  if (token && verifyAdminToken(token)) return true;
+  res.status(401).json({ error: "Unauthorized" });
+  return false;
 }
 
 router.get("/personas", (req: Request, res: Response) => {
@@ -146,7 +147,13 @@ router.get("/runs/:runId", async (req: Request, res: Response) => {
 });
 
 router.get("/runs/:runId/stream", (req: Request, res: Response) => {
-  if (!req.isAuthenticated()) {
+  // SSE can't send custom headers, so we accept token as query param too
+  const authHeader = req.headers["authorization"];
+  const bearerToken = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
+  const queryToken = req.query["token"] as string | undefined;
+  const token = bearerToken ?? queryToken ?? null;
+
+  if (!token || !verifyAdminToken(token)) {
     res.status(401).end();
     return;
   }

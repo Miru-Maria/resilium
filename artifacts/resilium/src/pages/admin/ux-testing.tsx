@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "wouter";
-import { useAuth } from "@workspace/replit-auth-web";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { Loader2, Play, CheckCircle2, XCircle, Clock, ChevronRight, ArrowLeft } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { AdminLayout, adminAuthHeaders, getAdminToken } from "./layout";
 
 interface PersonaMeta {
   key: string;
@@ -61,8 +61,8 @@ function getRatingLabel(rating: number) {
 }
 
 export default function UxTestingPage() {
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const [, navigate] = useLocation();
+  const adminToken = getAdminToken();
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
   const [isRunning, setIsRunning] = useState(false);
   const [activeRunId, setActiveRunId] = useState<string | null>(null);
@@ -73,13 +73,13 @@ export default function UxTestingPage() {
   const { data: personasData, isLoading: personasLoading } = useQuery({
     queryKey: ["ux-personas"],
     queryFn: fetchPersonas,
-    enabled: isAuthenticated,
+    enabled: !!adminToken,
   });
 
   const { data: runsData, isLoading: runsLoading, refetch: refetchRuns } = useQuery({
     queryKey: ["ux-runs"],
     queryFn: fetchRuns,
-    enabled: isAuthenticated,
+    enabled: !!adminToken,
   });
 
   const personas = personasData?.personas ?? [];
@@ -139,11 +139,13 @@ export default function UxTestingPage() {
       const { runId } = await res.json() as { runId: string };
       setActiveRunId(runId);
 
-      const es = new EventSource(`/api/admin/ux-test/runs/${runId}/stream`);
+      const token = getToken();
+      const streamUrl = `/api/admin/ux-test/runs/${runId}/stream${token ? `?token=${encodeURIComponent(token)}` : ""}`;
+      const es = new EventSource(streamUrl);
       eventSourceRef.current = es;
 
-      es.onmessage = (event) => {
-        const data = JSON.parse(event.data) as {
+      es.onmessage = (e: MessageEvent) => {
+        const data = JSON.parse(e.data as string) as {
           type: string;
           personaKey?: string;
           personaName?: string;
@@ -190,50 +192,17 @@ export default function UxTestingPage() {
     }
   }
 
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Card className="max-w-sm w-full">
-          <CardContent className="pt-6 text-center">
-            <p className="text-muted-foreground mb-4">Admin access required</p>
-            <Link href="/">
-              <Button variant="outline">Go Home</Button>
-            </Link>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   const allSelected = selectedKeys.size === personas.length;
   const noneSelected = selectedKeys.size === 0;
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="border-b border-border/60 bg-background/80 backdrop-blur sticky top-0 z-10">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-4">
-          <Link href="/">
-            <Button variant="ghost" size="sm" className="gap-2">
-              <ArrowLeft className="w-4 h-4" />
-              Back
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-xl font-semibold text-foreground">UX Testing</h1>
-            <p className="text-xs text-muted-foreground">AI-powered persona simulation</p>
-          </div>
+    <AdminLayout activeSection="ux-testing">
+      <div className="p-6 max-w-5xl mx-auto space-y-8">
+        <div>
+          <h1 className="text-2xl font-bold">AI UX Tester</h1>
+          <p className="text-muted-foreground text-sm mt-1">Autonomous AI persona simulation — evaluates report quality across diverse user profiles</p>
         </div>
-      </div>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-8">
         {!isRunning && !runComplete && (
           <>
             <div className="space-y-4">
@@ -358,7 +327,7 @@ export default function UxTestingPage() {
               <span className="text-sm">Loading runs...</span>
             </div>
           ) : runs.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-6">No test runs yet</p>
+            <p className="text-sm text-muted-foreground text-center py-6">No test runs yet — run your first UX test above</p>
           ) : (
             <div className="space-y-2">
               {runs.map((run) => (
@@ -391,6 +360,6 @@ export default function UxTestingPage() {
           )}
         </div>
       </div>
-    </div>
+    </AdminLayout>
   );
 }

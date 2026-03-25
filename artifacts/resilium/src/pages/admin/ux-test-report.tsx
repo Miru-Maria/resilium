@@ -1,5 +1,5 @@
 import { useParams, Link } from "wouter";
-import { useAuth } from "@workspace/replit-auth-web";
+import { getAdminToken } from "./layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -136,12 +136,12 @@ function generateMarkdown(report: RunReport): string {
 
 export default function UxTestReportPage() {
   const { runId } = useParams<{ runId: string }>();
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const adminToken = getAdminToken();
 
   const { data: report, isLoading, error } = useQuery({
     queryKey: ["ux-run-report", runId],
     queryFn: () => fetchRunReport(runId),
-    enabled: isAuthenticated && !!runId,
+    enabled: !!adminToken && !!runId,
     refetchInterval: (query) => {
       const data = query.state.data;
       return data?.status === "running" ? 5000 : false;
@@ -160,23 +160,10 @@ export default function UxTestReportPage() {
     URL.revokeObjectURL(url);
   }
 
-  if (authLoading || isLoading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Card className="max-w-sm w-full">
-          <CardContent className="pt-6 text-center">
-            <p className="text-muted-foreground mb-4">Admin access required</p>
-            <Link href="/"><Button variant="outline">Go Home</Button></Link>
-          </CardContent>
-        </Card>
       </div>
     );
   }
