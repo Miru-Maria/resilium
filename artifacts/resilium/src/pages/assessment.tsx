@@ -312,7 +312,7 @@ export default function AssessmentPage() {
 
               {/* STEP 1: MENTAL RESILIENCE DEEP ASSESSMENT */}
               {step === 1 && currentMrQuestion && (
-                <div className="space-y-8">
+                <div className="space-y-8 -mt-8">
                   {mrStep === 0 && (
                     <div className="flex items-center gap-3 p-4 bg-primary/5 border border-primary/20 rounded-2xl mb-2">
                       <Brain className="w-8 h-8 text-primary flex-shrink-0" />
