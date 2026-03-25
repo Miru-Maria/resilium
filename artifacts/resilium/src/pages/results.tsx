@@ -6,16 +6,113 @@ import { useQueryClient } from "@tanstack/react-query";
 import { CircularProgress } from "@/components/circular-progress";
 import { RadarChartView } from "@/components/radar-chart-view";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { Progress } from "@/components/ui/progress";
-import { Loader2, Download, Share2, AlertTriangle, CheckCircle, RefreshCcw, Activity, User, LogIn, Brain, TrendingUp, Award } from "lucide-react";
+import { Loader2, Download, Share2, AlertTriangle, CheckCircle, RefreshCcw, Activity, User, LogIn, Brain, TrendingUp, Award, Star } from "lucide-react";
 import { ResilientIcon } from "@/components/resilient-icon";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { SiteFooter } from "@/components/site-footer";
 import { useAuth } from "@workspace/replit-auth-web";
+
+const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+function FeedbackWidget({ reportId }: { reportId: string }) {
+  const storageKey = `feedback_submitted_${reportId}`;
+  const alreadySubmitted = typeof window !== "undefined" && localStorage.getItem(storageKey) === "true";
+
+  const [submitted, setSubmitted] = useState(alreadySubmitted);
+  const [rating, setRating] = useState(0);
+  const [hovered, setHovered] = useState(0);
+  const [comment, setComment] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async () => {
+    if (rating === 0) return;
+    setError(null);
+    setLoading(true);
+    try {
+      const res = await fetch(`${BASE}/api/feedback`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reportId, rating, comment: comment.trim() || undefined }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setError(data.message ?? "Failed to submit feedback.");
+        return;
+      }
+      localStorage.setItem(storageKey, "true");
+      setSubmitted(true);
+    } catch {
+      setError("Network error. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (submitted) {
+    return (
+      <Card className="border-none shadow-lg shadow-black/5 bg-emerald-500/5">
+        <CardContent className="p-8 flex flex-col items-center text-center gap-3">
+          <CheckCircle className="w-10 h-10 text-emerald-500" />
+          <h3 className="font-display font-bold text-lg">Thank you for your feedback!</h3>
+          <p className="text-muted-foreground text-sm">Your rating helps us improve Resilium.</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const displayRating = hovered || rating;
+
+  return (
+    <Card className="border-none shadow-lg shadow-black/5">
+      <CardHeader className="pb-3">
+        <CardTitle className="font-display text-xl">How was your experience?</CardTitle>
+        <CardDescription>Rate your resilience report and share any thoughts.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-5">
+        <div className="flex items-center gap-1">
+          {[1, 2, 3, 4, 5].map(star => (
+            <button
+              key={star}
+              type="button"
+              className="p-1 transition-transform hover:scale-110 focus:outline-none"
+              onMouseEnter={() => setHovered(star)}
+              onMouseLeave={() => setHovered(0)}
+              onClick={() => setRating(star)}
+              aria-label={`Rate ${star} star${star !== 1 ? "s" : ""}`}
+            >
+              <Star className={`w-8 h-8 transition-colors ${star <= displayRating ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30"}`} />
+            </button>
+          ))}
+          {displayRating > 0 && (
+            <span className="ml-3 text-sm text-muted-foreground">
+              {["", "Poor", "Fair", "Good", "Very Good", "Excellent"][displayRating]}
+            </span>
+          )}
+        </div>
+        <textarea
+          className="w-full rounded-xl border border-border bg-muted/30 px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground/50"
+          rows={3}
+          placeholder="Share any thoughts or suggestions (optional)..."
+          value={comment}
+          onChange={e => setComment(e.target.value)}
+          maxLength={2000}
+          disabled={loading}
+        />
+        {error && <p className="text-sm text-destructive">{error}</p>}
+        <Button onClick={handleSubmit} disabled={rating === 0 || loading} className="rounded-full">
+          {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+          {loading ? "Submitting..." : "Submit Feedback"}
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -619,6 +716,11 @@ export default function ResultsPage() {
               </Link>
             </div>
           </div>
+        </section>
+
+        {/* FEEDBACK */}
+        <section className="pb-4 print:hidden">
+          <FeedbackWidget reportId={reportId} />
         </section>
 
       </main>

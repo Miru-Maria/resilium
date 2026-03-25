@@ -11,6 +11,8 @@ import ResultsPage from "@/pages/results";
 import PrivacyPage from "@/pages/privacy";
 import ProfilePage from "@/pages/profile";
 import NotFound from "@/pages/not-found";
+import AdminLoginPage from "@/pages/admin/login";
+import AdminDashboard from "@/pages/admin/dashboard";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -40,6 +42,9 @@ function Router() {
       <Route path="/results/:reportId" component={ResultsPage} />
       <Route path="/privacy" component={PrivacyPage} />
       <Route path="/profile" component={ProfilePage} />
+      <Route path="/admin/login" component={AdminLoginPage} />
+      <Route path="/admin/dashboard" component={AdminDashboard} />
+      <Route path="/admin" component={AdminLoginPage} />
       <Route component={NotFound} />
     </Switch>
   );
