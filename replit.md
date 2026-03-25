@@ -2,7 +2,7 @@
 
 ## Overview
 
-**Resilium** — An AI-powered personal resilience planning system that generates customized "Resilience Reports" for users in under 15 minutes.
+**Resilium** — An AI-powered personal resilience planning platform. Users complete a 10-step assessment (including a 10-question Mental Resilience deep-dive), receive an AI-generated Resilience Report (score 0–100, vulnerabilities, action plan, scenario simulations, daily habits), and can manage their data under GDPR. Includes a full admin dashboard for analytics, AI UX testing, and consent management.
 
 pnpm workspace monorepo using TypeScript. Each package manages its own dependencies.
 
@@ -15,18 +15,23 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - **API framework**: Express 5
 - **Database**: PostgreSQL + Drizzle ORM
 - **Validation**: Zod (`zod/v4`), `drizzle-zod`
-- **API codegen**: Orval (from OpenAPI spec)
 - **Build**: esbuild (CJS bundle)
 - **Frontend**: React + Vite, Tailwind CSS, framer-motion, recharts
+- **Mobile**: Expo + React Native (Expo Router, `@expo/vector-icons`, expo-haptics)
 - **AI**: OpenAI via Replit AI Integrations (gpt-5.2)
+- **Auth**: Replit OIDC (PKCE), express-session
 
 ## Application Architecture
 
 ### Core User Flow
-1. Landing page → compelling "You're one disruption away from chaos" hero
-2. 10-step assessment questionnaire (location, income, savings, dependents, skills, health, housing, emergency supplies, psychological resilience, risk concerns)
-3. AI-generated Resilience Report with score 0-100, vulnerabilities, action plan
-4. Dashboard with score visualization, scenario simulations, daily habits
+1. Landing page → hero CTA
+2. Consent screen (GDPR Article 6(1)(a), version 1.0)
+3. 10-step assessment:
+   - Location, Income stability, Savings runway, Dependents, Skills, Health & Mobility, Housing, Emergency supplies
+   - **Mental Resilience deep-dive** (10 sub-questions rated 1–5: stressTolerance, adaptability, socialSupport, purposeClarity, emotionalRecovery, resourcefulness, proactivePreparation, boundarySetting, crisisLeadership, longTermThinking)
+   - Risk concerns
+4. AI-generated Resilience Report with score 0-100, vulnerabilities, action plan
+5. Dashboard with score visualization, scenario simulations, daily habits, checklists, snapshots
 
 ### Scoring Logic
 Six dimensions, each 0-100:
@@ -34,8 +39,13 @@ Six dimensions, each 0-100:
 - **Skills** (20% weight): Digital, physical, survival, medical, financial, language skills
 - **Health** (15% weight): Health status + medical skills
 - **Mobility** (15% weight): Mobility level + housing type + dependents
-- **Psychological** (15% weight): Self-rated psychological resilience
+- **Psychological** (15% weight): Average of 10 MR sub-question scores × 2 (maps 1–5 scale to 2–10)
 - **Resources** (10% weight): Emergency supplies + survival/financial skills
+
+### Design
+- **Theme**: Permanently dark-only (no light mode, no toggle). Background `#0D1225`, primary `#E08040` (amber), text `#EAD9BE`.
+- **Logo**: Custom PNG (`/logo.png` on web, `../assets/logo.png` on mobile). `ResilientIcon` renders `<img src="/logo.png">`.
+- **CSS vars** in `:root` (no `.dark` class on `<html>`).
 
 ## Structure
 
@@ -43,15 +53,13 @@ Six dimensions, each 0-100:
 artifacts-monorepo/
 ├── artifacts/
 │   ├── api-server/         # Express API server
-│   └── resilium/           # React + Vite frontend (main app, previewPath: /)
+│   ├── resilium/           # React + Vite frontend (previewPath: /)
+│   └── resilium-mobile/    # Expo React Native mobile app
 ├── lib/
-│   ├── api-spec/           # OpenAPI spec + Orval codegen config
-│   ├── api-client-react/   # Generated React Query hooks
-│   ├── api-zod/            # Generated Zod schemas from OpenAPI
 │   ├── db/                 # Drizzle ORM schema + DB connection
 │   ├── replit-auth-web/    # useAuth hook for Replit OIDC browser auth
-│   └── integrations-openai-ai-server/  # OpenAI AI client via Replit integrations
-├── scripts/                # Utility scripts
+│   └── integrations-openai-ai-server/  # OpenAI via Replit integrations
+├── scripts/
 ├── pnpm-workspace.yaml
 ├── tsconfig.base.json
 └── tsconfig.json
@@ -60,52 +68,119 @@ artifacts-monorepo/
 ## Database Schema
 
 ### `users` table
-Replit Auth users — id (varchar, PK, matches OIDC sub), email, firstName, lastName, profileImageUrl, createdAt, updatedAt
+Replit Auth users — id (varchar PK = OIDC sub), email, firstName, lastName, profileImageUrl, createdAt, updatedAt
 
 ### `sessions` table
-Replit Auth sessions — sid (varchar, PK), sess (jsonb), expire (timestamp)
+Replit Auth sessions — sid (varchar PK), sess (jsonb), expire (timestamp)
 
 ### `resilience_reports` table
-Stores all user assessment inputs and generated report data:
-- `userId` (varchar, FK → users.id, nullable) — set when user is authenticated
-- Input fields: location, incomeStability, savingsMonths, hasDependents, skills (jsonb), healthStatus, mobilityLevel, housingType, hasEmergencySupplies, psychologicalResilience, riskConcerns (jsonb)
-- Score fields: scoreOverall, scoreFinancial, scoreHealth, scoreSkills, scoreMobility, scorePsychological, scoreResources
-- Report fields: riskProfileSummary, topVulnerabilities (jsonb), actionPlan (jsonb), scenarioSimulations (jsonb), dailyHabits (jsonb)
+Stores assessment inputs + generated report:
+- Input: location, incomeStability, savingsMonths, hasDependents, skills (jsonb), healthStatus, mobilityLevel, housingType, hasEmergencySupplies, psychologicalResilience, riskConcerns (jsonb), **mentalResilienceAnswers (jsonb)**
+- Scores: scoreOverall, scoreFinancial, scoreHealth, scoreSkills, scoreMobility, scorePsychological, scoreResources
+- Report: riskProfileSummary, topVulnerabilities (jsonb), actionPlan (jsonb), scenarioSimulations (jsonb), dailyHabits (jsonb)
+- `sessionId` (varchar) — anonymous user tracking
+- `platform` (varchar) — 'web' or 'ios' / 'android'
+
+### `gdpr_consents` table
+sessionId, platform, consentVersion, consentGivenAt, ipHash
+
+### `gdpr_data_requests` table
+sessionId, type ('export' | 'deletion'), status ('pending' | 'completed'), createdAt, completedAt
+
+### `report_checklists` table
+reportId (FK), items (jsonb), createdAt, updatedAt
+
+### `report_snapshots` table
+reportId (FK), scores (jsonb), takenAt
+
+### `report_feedback` table
+reportId (FK), rating (int), comment (text), createdAt
+
+### `admin_sessions` table
+Token-based admin auth — token (varchar PK), createdAt, expiresAt
+
+### `ux_test_runs` table
+AI UX simulation runs — runId, status, personas (jsonb), results (jsonb), createdAt
 
 ## API Routes
 
+### Public
 - `GET /api/healthz` — Health check
-- `POST /api/resilience/assess` — Submit assessment, receive AI-generated report. If authenticated, attaches userId and enforces 10-plan limit (PLAN_LIMIT_EXCEEDED error).
-- `GET /api/resilience/reports/:reportId` — Retrieve saved report
-- `GET /api/auth/user` — Returns current auth state (user or null)
-- `GET /api/login` — Initiates Replit OIDC login flow (redirects)
-- `GET /api/callback` — OIDC callback, creates session, redirects
-- `GET /api/logout` — Clears session, redirects to OIDC end-session
-- `GET /api/users/me/plans` — Returns authenticated user's plan summaries (reportId, createdAt, scoreOverall)
-- `DELETE /api/users/me/plans/:reportId` — Deletes a plan belonging to the authenticated user
+- `POST /api/resilience/assess` — Submit assessment + sessionId → AI report
+- `GET /api/resilience/reports/:reportId` — Retrieve report
+- `GET /api/resilience/reports/:reportId/checklists` — Report checklists
+- `GET /api/resilience/reports/:reportId/snapshots` — Score snapshots
+- `POST /api/resilience/reports/:reportId/feedback` — Submit star rating + comment
+- `GET /api/auth/user` — Current Replit Auth state
+- `GET /api/login` — Replit OIDC login redirect
+- `GET /api/callback` — OIDC callback
+- `GET /api/logout` — Clear session + OIDC end-session
+
+### GDPR
+- `POST /api/gdpr/consent` — Record consent (sessionId, platform, consentVersion)
+- `GET /api/gdpr/export/:sessionId` — Export all user data
+- `POST /api/gdpr/data-request` — Submit deletion request
+- `GET /api/gdpr/status/:sessionId` — Check deletion request status
+
+### Authenticated User
+- `GET /api/users/me/plans` — User's saved plan summaries
+- `DELETE /api/users/me/plans/:reportId` — Delete a plan
+
+### Admin (token auth, 24h TTL)
+- `POST /api/admin/login` — Admin login → session token
+- `POST /api/admin/logout` — Revoke admin session
+- `GET /api/admin/analytics` — Full dashboard analytics (overview, demographics, scores, risk, recent reports, feedback)
+- `GET /api/admin/analytics/mobile` — Mobile-specific analytics (platform breakdown, daily trend, score distribution, top locations)
+- `GET /api/admin/gdpr/requests` — GDPR data requests list
+- `PATCH /api/admin/gdpr/requests/:id` — Update request status
+- `GET /api/admin/gdpr/consents` — Consent log
+- `POST /api/admin/ux-test/run` — Trigger AI UX simulation
+- `GET /api/admin/ux-test/runs` — List simulation runs
+- `GET /api/admin/ux-test/runs/:runId` — Get run results
+- `GET /api/admin/ux-test/personas` — List AI test personas
+
+## Admin Dashboard Pages
+
+Access at `/admin` (requires `ADMIN_USERNAME` / `ADMIN_PASSWORD` secrets):
+- `/admin/dashboard` — Main analytics: total reports, avg score, daily chart, demographics, risk concerns, score histogram, feedback
+- `/admin/mobile` — Mobile analytics: platform breakdown, daily mobile trend, score distribution, top locations
+- `/admin/gdpr` — GDPR data request management (pending/completed deletion requests)
+- `/admin/consent-log` — Consent record viewer
+- `/admin/ux-test` — AI UX testing: run simulations with AI personas
+- `/admin/ux-test/report/:runId` — Detailed simulation results per persona
+
+## Web Frontend Pages
+
+- `/` — Landing page (hero, stats, features, CTA)
+- `/consent` — GDPR consent screen (pre-assessment)
+- `/assessment` — 10-step assessment with Mental Resilience deep-dive
+- `/loading` — AI generation loading screen
+- `/results/:reportId` — Full report dashboard (score, radar chart, vulnerabilities, action plan tabs, scenarios, habits, checklists, snapshots, feedback)
+- `/profile` — "My Plans" (Replit Auth users)
+- `/my-data` — GDPR data management (export, deletion request)
+- `/admin` — Admin entry (redirects to `/admin/login`)
+
+## Mobile App Screens (Expo)
+
+- `app/index.tsx` — Home screen (logo, Start CTA, My Data link)
+- `app/consent.tsx` — GDPR consent (calls `POST /api/gdpr/consent`)
+- `app/assessment.tsx` — 10-step assessment with Mental Resilience 10-question deep-dive
+- `app/loading.tsx` — AI generation loading with progress animation
+- `app/results.tsx` — Full report view (score, category bars, vulnerabilities, action plan tabs, scenarios, habits, share)
+- `app/my-data.tsx` — GDPR: export data, delete data request
 
 ## AI Integration
 
-Uses Replit AI Integrations (OpenAI gpt-5.2 model). The AI:
-1. Takes user's profile + calculated scores
-2. Generates structured JSON: riskProfileSummary, topVulnerabilities, actionPlan (3 timeframes), scenarioSimulations (for top risk concerns), dailyHabits
-3. Voice: intelligent, grounded, strategic, empowering (not alarmist)
-
-## Frontend Pages
-
-- `/` — Landing page with hero CTA; Sign In button (unauthenticated) or user dropdown + "My Plans" link (authenticated)
-- `/assess` — Multi-step assessment form (10 steps with progress bar); shows PLAN_LIMIT_EXCEEDED error screen if user has 10 plans
-- `/results/:reportId` — Dashboard showing report: circular score, radar chart, vulnerabilities, action plan, scenarios, habits; has auth header controls
-- `/profile` — "My Plans" page: lists user's saved plans (date, score badge, view/delete), shows sign-in prompt when unauthenticated, warns when at 10-plan limit
+Uses Replit AI Integrations (OpenAI gpt-5.2). The AI:
+1. Receives user profile + calculated scores + mentalResilienceAnswers
+2. Generates structured JSON: riskProfileSummary, topVulnerabilities, actionPlan (short/mid/long term), scenarioSimulations (5 scenarios), dailyHabits (5 habits)
+3. Voice: intelligent, grounded, strategic, empowering — not alarmist
 
 ## GitHub Repository
 
-The project is mirrored to a public GitHub repository:
-- **URL**: https://github.com/Miru-Maria/resilium
-- **Branch**: `main`
-- The `origin` remote in the local git config points to this repository
-- GitHub integration is enabled (Replit connector: `conn_github_01KJXCFKRVXXA64K4SRJX9NF1V`)
-- `@replit/connectors-sdk` is installed at workspace root for GitHub API access
+Mirrored to: https://github.com/Miru-Maria/resilium (branch: `main`)
+GitHub integration: Replit connector `conn_github_01KJXCFKRVXXA64K4SRJX9NF1V`
+Push method: GitHub Contents API via `@replit/connectors-sdk` token
 
 ## Environment Variables
 
@@ -113,49 +188,9 @@ The project is mirrored to a public GitHub repository:
 - `AI_INTEGRATIONS_OPENAI_BASE_URL` — Auto-provisioned by Replit AI Integrations
 - `AI_INTEGRATIONS_OPENAI_API_KEY` — Auto-provisioned by Replit AI Integrations
 - `PORT` — Auto-assigned per artifact by Replit
+- `ADMIN_USERNAME` / `ADMIN_PASSWORD` — Admin dashboard credentials (secrets)
+- `EXPO_PUBLIC_DOMAIN` — Mobile app API domain (set in `.env` for mobile)
 
-## TypeScript & Composite Projects
+## GDPR Contact
 
-Every package extends `tsconfig.base.json` which sets `composite: true`. The root `tsconfig.json` lists all lib packages as project references.
-
-## Root Scripts
-
-- `pnpm run build` — runs `typecheck` first, then recursively runs `build` in all packages
-- `pnpm run typecheck` — runs `tsc --build --emitDeclarationOnly` using project references
-
-## Packages
-
-### `artifacts/resilium` (`@workspace/resilium`)
-
-React + Vite frontend served at `/`. Includes:
-- `framer-motion` for animations
-- `recharts` for score visualization
-- `@workspace/api-client-react` for generated API hooks
-
-### `artifacts/api-server` (`@workspace/api-server`)
-
-Express 5 API server. Routes in `src/routes/`:
-- `health.ts` — health check
-- `resilience/index.ts` — assessment and report endpoints
-- `resilience/scoring.ts` — deterministic scoring logic
-- `resilience/ai.ts` — OpenAI report generation
-
-### `lib/integrations-openai-ai-server` (`@workspace/integrations-openai-ai-server`)
-
-Pre-configured OpenAI SDK client via Replit AI Integrations. No API key needed.
-
-### `lib/db` (`@workspace/db`)
-
-Drizzle ORM with PostgreSQL. Schema in `src/schema/resilience.ts` and `src/schema/auth.ts`.
-- `pnpm --filter @workspace/db run push` — sync schema to database
-
-### `lib/replit-auth-web` (`@workspace/replit-auth-web`)
-
-Browser auth library providing `useAuth()` hook. Calls `GET /api/auth/user` with `credentials: "include"`. `login()` redirects to `/api/login?returnTo=<BASE_URL>`. `logout()` redirects to `/api/logout`.
-
-### Auth Flow (API Server)
-
-- `artifacts/api-server/src/lib/auth.ts` — session CRUD, OIDC config
-- `artifacts/api-server/src/middlewares/authMiddleware.ts` — loads user from session on every request, patches `req.isAuthenticated()`
-- `artifacts/api-server/src/routes/auth.ts` — OIDC login/callback/logout routes
-- `artifacts/api-server/src/routes/users.ts` — `/users/me/plans` GET and DELETE
+Sole individual operator. Contact: `contact_resilium@pm.me`. No DPA or "we/our" language — all copy uses "I/me" framing or impersonal.

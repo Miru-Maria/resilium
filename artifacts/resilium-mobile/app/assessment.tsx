@@ -21,6 +21,8 @@ import { ColorsType } from "@/constants/colors";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
+type MrAnswers = Record<string, number>;
+
 type AssessmentData = {
   location: string;
   incomeStability: "fixed" | "freelance" | "unstable";
@@ -33,21 +35,35 @@ type AssessmentData = {
   hasEmergencySupplies: boolean;
   psychologicalResilience: number;
   riskConcerns: string[];
+  mentalResilienceAnswers: MrAnswers;
 };
+
+const MR_QUESTIONS = [
+  { key: "stressTolerance",       dimension: "STRESS TOLERANCE",      question: "When facing an unexpected crisis, I remain calm and think clearly under pressure." },
+  { key: "adaptability",          dimension: "ADAPTABILITY",          question: "When circumstances change drastically, I find new strategies and adjust quickly." },
+  { key: "socialSupport",         dimension: "SOCIAL SUPPORT",        question: "I have a reliable network of people I can turn to in a serious crisis." },
+  { key: "purposeClarity",        dimension: "SENSE OF PURPOSE",      question: "Even in the most difficult situations, I have a clear sense of what I am working toward." },
+  { key: "emotionalRecovery",     dimension: "EMOTIONAL RECOVERY",    question: "After a setback or traumatic event, I am able to bounce back within days rather than weeks." },
+  { key: "resourcefulness",       dimension: "RESOURCEFULNESS",       question: "When conventional solutions fail, I am skilled at improvising with what is available." },
+  { key: "proactivePreparation",  dimension: "PROACTIVE PREPARATION", question: "I regularly take concrete steps to prepare for future uncertainties before they arise." },
+  { key: "boundarySetting",       dimension: "BOUNDARY SETTING",      question: "Under sustained pressure, I am able to protect my energy and avoid complete emotional burnout." },
+  { key: "crisisLeadership",      dimension: "CRISIS LEADERSHIP",     question: "In emergency situations, others naturally look to me for direction and I step up confidently." },
+  { key: "longTermThinking",      dimension: "LONG-TERM THINKING",    question: "Even during a crisis, I remain focused on long-term outcomes rather than just immediate relief." },
+];
 
 const TOTAL_STEPS = 10;
 
 const STEPS = [
-  { title: "Where are you based?", subtitle: "Your location affects climate, political, and economic risk factors." },
-  { title: "Income stability?", subtitle: "How consistent and secure is your main income source?" },
-  { title: "Financial runway?", subtitle: "Months of expenses covered by savings if income stopped today." },
-  { title: "Do you have dependents?", subtitle: "Children, elderly parents, or others financially reliant on you." },
-  { title: "Practical skills?", subtitle: "Select all skills you actively possess." },
-  { title: "Health & mobility?", subtitle: "Your physical readiness to handle crisis situations." },
-  { title: "Housing situation?", subtitle: "Where you currently live and your flexibility to move." },
-  { title: "Emergency preparedness?", subtitle: "Do you have 14+ days of food, water, and essential medicines?" },
-  { title: "Psychological resilience?", subtitle: "How well do you handle severe stress and rapid change?" },
-  { title: "Primary risk concerns?", subtitle: "Select the risks you feel least prepared for." },
+  { title: "Where are you based?",        subtitle: "Your location affects climate, political, and economic risk factors." },
+  { title: "Income stability?",           subtitle: "How consistent and secure is your main income source?" },
+  { title: "Financial runway?",           subtitle: "Months of expenses covered by savings if income stopped today." },
+  { title: "Do you have dependents?",     subtitle: "Children, elderly parents, or others financially reliant on you." },
+  { title: "Practical skills?",           subtitle: "Select all skills you actively possess." },
+  { title: "Health & mobility?",          subtitle: "Your physical readiness to handle crisis situations." },
+  { title: "Housing situation?",          subtitle: "Where you currently live and your flexibility to move." },
+  { title: "Emergency preparedness?",     subtitle: "Do you have 14+ days of food, water, and essential medicines?" },
+  { title: "Mental resilience",           subtitle: "Rate how accurately each statement describes you." },
+  { title: "Primary risk concerns?",      subtitle: "Select the risks you feel least prepared for." },
 ];
 
 function OptionCard({
@@ -124,6 +140,7 @@ export default function AssessmentScreen() {
   const insets = useSafeAreaInsets();
   const { sessionId } = useSession();
   const [step, setStep] = useState(0);
+  const [mrSubStep, setMrSubStep] = useState(0);
   const progress = useRef(new Animated.Value(1 / TOTAL_STEPS)).current;
 
   const colors = useColors();
@@ -141,14 +158,19 @@ export default function AssessmentScreen() {
     hasEmergencySupplies: false,
     psychologicalResilience: 7,
     riskConcerns: [],
+    mentalResilienceAnswers: {},
   });
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
 
-  const animateProgress = (nextStep: number) => {
+  const animateProgress = (nextStep: number, subOffset = 0) => {
+    const total = TOTAL_STEPS * MR_QUESTIONS.length;
+    const current = step === 8
+      ? (nextStep * MR_QUESTIONS.length + subOffset)
+      : (nextStep * MR_QUESTIONS.length);
     Animated.spring(progress, {
-      toValue: (nextStep + 1) / TOTAL_STEPS,
+      toValue: Math.min((current + 1) / total, 1),
       useNativeDriver: false,
       tension: 50,
       friction: 8,
@@ -157,6 +179,22 @@ export default function AssessmentScreen() {
 
   const handleNext = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+    if (step === 8) {
+      if (mrSubStep < MR_QUESTIONS.length - 1) {
+        const next = mrSubStep + 1;
+        setMrSubStep(next);
+        animateProgress(8, next);
+      } else {
+        const avg = Object.values(data.mentalResilienceAnswers).reduce((a, b) => a + b, 0) / MR_QUESTIONS.length;
+        setData((prev) => ({ ...prev, psychologicalResilience: Math.round(avg * 2) }));
+        const next = step + 1;
+        setStep(next);
+        animateProgress(next);
+      }
+      return;
+    }
+
     if (step < TOTAL_STEPS - 1) {
       const next = step + 1;
       setStep(next);
@@ -168,9 +206,18 @@ export default function AssessmentScreen() {
 
   const handleBack = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+    if (step === 8 && mrSubStep > 0) {
+      const prev = mrSubStep - 1;
+      setMrSubStep(prev);
+      animateProgress(8, prev);
+      return;
+    }
+
     if (step > 0) {
       const prev = step - 1;
       setStep(prev);
+      if (prev === 8) setMrSubStep(MR_QUESTIONS.length - 1);
       animateProgress(prev);
     } else {
       router.back();
@@ -179,6 +226,14 @@ export default function AssessmentScreen() {
 
   const update = <K extends keyof AssessmentData>(key: K, value: AssessmentData[K]) => {
     setData((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const setMrAnswer = (key: string, value: number) => {
+    Haptics.selectionAsync();
+    setData((prev) => ({
+      ...prev,
+      mentalResilienceAnswers: { ...prev.mentalResilienceAnswers, [key]: value },
+    }));
   };
 
   const toggleSkill = (skill: string) => {
@@ -203,6 +258,7 @@ export default function AssessmentScreen() {
   const isValid = () => {
     if (step === 0) return data.location.trim().length > 1;
     if (step === 4) return data.skills.length > 0;
+    if (step === 8) return data.mentalResilienceAnswers[MR_QUESTIONS[mrSubStep].key] !== undefined;
     if (step === 9) return data.riskConcerns.length > 0;
     return true;
   };
@@ -222,14 +278,20 @@ export default function AssessmentScreen() {
   });
 
   const currentStep = STEPS[step];
+  const currentMrQ = MR_QUESTIONS[mrSubStep];
+  const currentMrAnswer = data.mentalResilienceAnswers[currentMrQ?.key];
+
+  const stepLabel = step === 8
+    ? `Mental Resilience ${mrSubStep + 1}/${MR_QUESTIONS.length}`
+    : `${step + 1} / ${TOTAL_STEPS}`;
 
   return (
     <View style={[styles.container, { paddingTop: topPad }]}>
       <View style={styles.topBar}>
         <Pressable onPress={handleBack} style={styles.backBtn} hitSlop={12} testID="back-btn">
-          <Feather name={step === 0 ? "x" : "arrow-left"} size={20} color={colors.textSecondary} />
+          <Feather name={step === 0 && mrSubStep === 0 ? "x" : "arrow-left"} size={20} color={colors.textSecondary} />
         </Pressable>
-        <Text style={styles.stepCounter}>{step + 1} / {TOTAL_STEPS}</Text>
+        <Text style={styles.stepCounter}>{stepLabel}</Text>
         <View style={{ width: 38 }} />
       </View>
 
@@ -243,236 +305,250 @@ export default function AssessmentScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={styles.stepTitle}>{currentStep.title}</Text>
-        <Text style={styles.stepSubtitle}>{currentStep.subtitle}</Text>
 
-        {step === 0 && (
-          <TextInput
-            style={styles.textInput}
-            value={data.location}
-            onChangeText={(v) => update("location", v)}
-            placeholder="e.g. California, USA"
-            placeholderTextColor={colors.textMuted}
-            autoFocus
-            returnKeyType="next"
-            onSubmitEditing={isValid() ? handleNext : undefined}
-            testID="location-input"
-          />
-        )}
-
-        {step === 1 && (
-          <View style={styles.optionList}>
-            {([
-              { id: "fixed", label: "Fixed & Secure", desc: "Salaried, guaranteed pension" },
-              { id: "freelance", label: "Variable / Freelance", desc: "Fluctuates month to month" },
-              { id: "unstable", label: "Unstable / Irregular", desc: "Unemployed or highly volatile" },
-            ] as const).map((opt) => (
-              <OptionCard key={opt.id} styles={styles} selected={data.incomeStability === opt.id} onPress={() => { Haptics.selectionAsync(); update("incomeStability", opt.id); }}>
-                <View style={styles.optionCardInner}>
-                  <View style={styles.optionCardText}>
-                    <Text style={[styles.optionLabel, data.incomeStability === opt.id && styles.optionLabelSelected]}>{opt.label}</Text>
-                    <Text style={styles.optionDesc}>{opt.desc}</Text>
-                  </View>
-                  {data.incomeStability === opt.id && (
-                    <Feather name="check-circle" size={20} color={colors.primary} />
-                  )}
+        {/* ── STEP 8: MENTAL RESILIENCE DEEP ASSESSMENT ── */}
+        {step === 8 ? (
+          <View style={styles.mrContainer}>
+            {mrSubStep === 0 && (
+              <View style={styles.mrBanner}>
+                <Feather name="activity" size={22} color={colors.primary} />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.mrBannerTitle}>Mental Resilience Assessment</Text>
+                  <Text style={styles.mrBannerSub}>10 questions · ~2 minutes · shapes your entire plan</Text>
                 </View>
-              </OptionCard>
-            ))}
-          </View>
-        )}
+              </View>
+            )}
 
-        {step === 2 && (
-          <View style={styles.section}>
-            <SliderControl
-              styles={styles}
-              value={data.savingsMonths}
-              min={0}
-              max={24}
-              onChange={(v) => update("savingsMonths", v)}
-              formatValue={(v) => v === 24 ? "24+ months" : v === 1 ? "1 month" : `${v} months`}
-            />
-          </View>
-        )}
+            <Text style={styles.mrDimension}>{currentMrQ.dimension}</Text>
+            <Text style={styles.mrQuestion}>{currentMrQ.question}</Text>
 
-        {step === 3 && (
-          <View style={styles.yesNoGrid}>
-            {(["true", "false"] as const).map((val) => {
-              const isYes = val === "true";
-              const selected = data.hasDependents === isYes;
-              return (
-                <OptionCard key={val} styles={styles} selected={selected} onPress={() => { Haptics.selectionAsync(); update("hasDependents", isYes); }}>
-                  <View style={styles.yesNoCard}>
-                    <Feather
-                      name={isYes ? "users" : "user"}
-                      size={28}
-                      color={selected ? colors.primary : colors.textMuted}
-                    />
-                    <Text style={[styles.yesNoLabel, selected && styles.yesNoLabelSelected]}>
-                      {isYes ? "Yes" : "No"}
-                    </Text>
-                    <Text style={styles.yesNoDesc}>
-                      {isYes ? "I have dependents" : "No dependents"}
-                    </Text>
-                  </View>
-                </OptionCard>
-              );
-            })}
-          </View>
-        )}
+            <View style={styles.mrDots}>
+              {MR_QUESTIONS.map((_, i) => (
+                <View
+                  key={i}
+                  style={[styles.mrDot, i === mrSubStep && styles.mrDotActive, i < mrSubStep && styles.mrDotDone]}
+                />
+              ))}
+            </View>
 
-        {step === 4 && (
-          <View style={styles.chipGrid}>
-            {[
-              { id: "digital", label: "Digital / Tech" },
-              { id: "physical", label: "Trade / Manual" },
-              { id: "survival", label: "Outdoors / Survival" },
-              { id: "medical", label: "First Aid / Medical" },
-              { id: "financial", label: "Trading / Finance" },
-              { id: "language", label: "Multiple Languages" },
-              { id: "none", label: "None of these" },
-            ].map((s) => (
-              <Pressable
-                key={s.id}
-                onPress={() => toggleSkill(s.id)}
-                style={[styles.chip, data.skills.includes(s.id) && styles.chipSelected]}
-              >
-                <Text style={[styles.chipText, data.skills.includes(s.id) && styles.chipTextSelected]}>
-                  {s.label}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-        )}
-
-        {step === 5 && (
-          <View style={styles.section}>
-            <Text style={styles.subSectionTitle}>Overall Health</Text>
-            <View style={styles.segmentRow}>
-              {(["excellent", "good", "fair", "poor"] as const).map((opt) => (
+            <View style={styles.mrRating}>
+              {[1, 2, 3, 4, 5].map((val) => (
                 <Pressable
-                  key={opt}
-                  onPress={() => { Haptics.selectionAsync(); update("healthStatus", opt); }}
-                  style={[styles.segment, data.healthStatus === opt && styles.segmentSelected]}
+                  key={val}
+                  onPress={() => setMrAnswer(currentMrQ.key, val)}
+                  style={[styles.mrBtn, currentMrAnswer === val && styles.mrBtnSelected]}
                 >
-                  <Text style={[styles.segmentText, data.healthStatus === opt && styles.segmentTextSelected]}>
-                    {opt.charAt(0).toUpperCase() + opt.slice(1)}
+                  <Text style={[styles.mrBtnNum, currentMrAnswer === val && styles.mrBtnNumSelected]}>
+                    {val}
                   </Text>
                 </Pressable>
               ))}
             </View>
-
-            <Text style={[styles.subSectionTitle, { marginTop: 24 }]}>Mobility Level</Text>
-            <Text style={styles.subSectionDesc}>How easily could you relocate internationally?</Text>
-            <View style={styles.segmentRow}>
-              {(["high", "medium", "low"] as const).map((opt) => (
-                <Pressable
-                  key={opt}
-                  onPress={() => { Haptics.selectionAsync(); update("mobilityLevel", opt); }}
-                  style={[styles.segment, data.mobilityLevel === opt && styles.segmentSelected]}
-                >
-                  <Text style={[styles.segmentText, data.mobilityLevel === opt && styles.segmentTextSelected]}>
-                    {opt.charAt(0).toUpperCase() + opt.slice(1)}
-                  </Text>
-                </Pressable>
-              ))}
+            <View style={styles.mrScale}>
+              <Text style={styles.mrScaleLabel}>Rarely</Text>
+              <Text style={styles.mrScaleLabel}>Almost always</Text>
             </View>
           </View>
-        )}
+        ) : (
+          <>
+            <Text style={styles.stepTitle}>{currentStep.title}</Text>
+            <Text style={styles.stepSubtitle}>{currentStep.subtitle}</Text>
 
-        {step === 6 && (
-          <View style={styles.optionList}>
-            {[
-              { id: "own", label: "Own a home", desc: "Mortgage or outright ownership" },
-              { id: "rent", label: "Renting", desc: "Long-term rental agreement" },
-              { id: "family", label: "Living with family", desc: "With parents or relatives" },
-              { id: "nomadic", label: "Nomadic", desc: "Frequent traveler, no fixed base" },
-              { id: "other", label: "Other", desc: "Temporary or transitional housing" },
-            ].map((opt) => (
-              <OptionCard key={opt.id} styles={styles} selected={data.housingType === opt.id} onPress={() => { Haptics.selectionAsync(); update("housingType", opt.id as any); }}>
-                <View style={styles.optionCardInner}>
-                  <View style={styles.optionCardText}>
-                    <Text style={[styles.optionLabel, data.housingType === opt.id && styles.optionLabelSelected]}>{opt.label}</Text>
-                    <Text style={styles.optionDesc}>{opt.desc}</Text>
-                  </View>
-                  {data.housingType === opt.id && (
-                    <Feather name="check-circle" size={20} color={colors.primary} />
-                  )}
+            {step === 0 && (
+              <TextInput
+                style={styles.textInput}
+                value={data.location}
+                onChangeText={(v) => update("location", v)}
+                placeholder="e.g. California, USA"
+                placeholderTextColor={colors.textMuted}
+                autoFocus
+                returnKeyType="next"
+                onSubmitEditing={isValid() ? handleNext : undefined}
+                testID="location-input"
+              />
+            )}
+
+            {step === 1 && (
+              <View style={styles.optionList}>
+                {([
+                  { id: "fixed", label: "Fixed & Secure", desc: "Salaried, guaranteed pension" },
+                  { id: "freelance", label: "Variable / Freelance", desc: "Fluctuates month to month" },
+                  { id: "unstable", label: "Unstable / Irregular", desc: "Unemployed or highly volatile" },
+                ] as const).map((opt) => (
+                  <OptionCard key={opt.id} styles={styles} selected={data.incomeStability === opt.id} onPress={() => { Haptics.selectionAsync(); update("incomeStability", opt.id); }}>
+                    <View style={styles.optionCardInner}>
+                      <View style={styles.optionCardText}>
+                        <Text style={[styles.optionLabel, data.incomeStability === opt.id && styles.optionLabelSelected]}>{opt.label}</Text>
+                        <Text style={styles.optionDesc}>{opt.desc}</Text>
+                      </View>
+                      {data.incomeStability === opt.id && (
+                        <Feather name="check-circle" size={20} color={colors.primary} />
+                      )}
+                    </View>
+                  </OptionCard>
+                ))}
+              </View>
+            )}
+
+            {step === 2 && (
+              <View style={styles.section}>
+                <SliderControl
+                  styles={styles}
+                  value={data.savingsMonths}
+                  min={0}
+                  max={24}
+                  onChange={(v) => update("savingsMonths", v)}
+                  formatValue={(v) => v === 24 ? "24+ months" : v === 1 ? "1 month" : `${v} months`}
+                />
+              </View>
+            )}
+
+            {step === 3 && (
+              <View style={styles.yesNoGrid}>
+                {(["true", "false"] as const).map((val) => {
+                  const isYes = val === "true";
+                  const selected = data.hasDependents === isYes;
+                  return (
+                    <OptionCard key={val} styles={styles} selected={selected} onPress={() => { Haptics.selectionAsync(); update("hasDependents", isYes); }}>
+                      <View style={styles.yesNoCard}>
+                        <Feather name={isYes ? "users" : "user"} size={28} color={selected ? colors.primary : colors.textMuted} />
+                        <Text style={[styles.yesNoLabel, selected && styles.yesNoLabelSelected]}>{isYes ? "Yes" : "No"}</Text>
+                        <Text style={styles.yesNoDesc}>{isYes ? "I have dependents" : "No dependents"}</Text>
+                      </View>
+                    </OptionCard>
+                  );
+                })}
+              </View>
+            )}
+
+            {step === 4 && (
+              <View style={styles.chipGrid}>
+                {[
+                  { id: "digital", label: "Digital / Tech" },
+                  { id: "physical", label: "Trade / Manual" },
+                  { id: "survival", label: "Outdoors / Survival" },
+                  { id: "medical", label: "First Aid / Medical" },
+                  { id: "financial", label: "Trading / Finance" },
+                  { id: "language", label: "Multiple Languages" },
+                  { id: "none", label: "None of these" },
+                ].map((s) => (
+                  <Pressable
+                    key={s.id}
+                    onPress={() => toggleSkill(s.id)}
+                    style={[styles.chip, data.skills.includes(s.id) && styles.chipSelected]}
+                  >
+                    <Text style={[styles.chipText, data.skills.includes(s.id) && styles.chipTextSelected]}>
+                      {s.label}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+            )}
+
+            {step === 5 && (
+              <View style={styles.section}>
+                <Text style={styles.subSectionTitle}>Overall Health</Text>
+                <View style={styles.segmentRow}>
+                  {(["excellent", "good", "fair", "poor"] as const).map((opt) => (
+                    <Pressable
+                      key={opt}
+                      onPress={() => { Haptics.selectionAsync(); update("healthStatus", opt); }}
+                      style={[styles.segment, data.healthStatus === opt && styles.segmentSelected]}
+                    >
+                      <Text style={[styles.segmentText, data.healthStatus === opt && styles.segmentTextSelected]}>
+                        {opt.charAt(0).toUpperCase() + opt.slice(1)}
+                      </Text>
+                    </Pressable>
+                  ))}
                 </View>
-              </OptionCard>
-            ))}
-          </View>
-        )}
 
-        {step === 7 && (
-          <View style={styles.yesNoGrid}>
-            {(["true", "false"] as const).map((val) => {
-              const isYes = val === "true";
-              const selected = data.hasEmergencySupplies === isYes;
-              return (
-                <OptionCard key={val} styles={styles} selected={selected} onPress={() => { Haptics.selectionAsync(); update("hasEmergencySupplies", isYes); }}>
-                  <View style={styles.yesNoCard}>
-                    <Feather
-                      name={isYes ? "package" : "x-circle"}
-                      size={28}
-                      color={selected ? colors.primary : colors.textMuted}
-                    />
-                    <Text style={[styles.yesNoLabel, selected && styles.yesNoLabelSelected]}>
-                      {isYes ? "Yes" : "No"}
+                <Text style={[styles.subSectionTitle, { marginTop: 24 }]}>Mobility Level</Text>
+                <Text style={styles.subSectionDesc}>How easily could you relocate internationally?</Text>
+                <View style={styles.segmentRow}>
+                  {(["high", "medium", "low"] as const).map((opt) => (
+                    <Pressable
+                      key={opt}
+                      onPress={() => { Haptics.selectionAsync(); update("mobilityLevel", opt); }}
+                      style={[styles.segment, data.mobilityLevel === opt && styles.segmentSelected]}
+                    >
+                      <Text style={[styles.segmentText, data.mobilityLevel === opt && styles.segmentTextSelected]}>
+                        {opt.charAt(0).toUpperCase() + opt.slice(1)}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {step === 6 && (
+              <View style={styles.optionList}>
+                {[
+                  { id: "own", label: "Own a home", desc: "Mortgage or outright ownership" },
+                  { id: "rent", label: "Renting", desc: "Long-term rental agreement" },
+                  { id: "family", label: "Living with family", desc: "With parents or relatives" },
+                  { id: "nomadic", label: "Nomadic", desc: "Frequent traveler, no fixed base" },
+                  { id: "other", label: "Other", desc: "Temporary or transitional housing" },
+                ].map((opt) => (
+                  <OptionCard key={opt.id} styles={styles} selected={data.housingType === opt.id} onPress={() => { Haptics.selectionAsync(); update("housingType", opt.id as any); }}>
+                    <View style={styles.optionCardInner}>
+                      <View style={styles.optionCardText}>
+                        <Text style={[styles.optionLabel, data.housingType === opt.id && styles.optionLabelSelected]}>{opt.label}</Text>
+                        <Text style={styles.optionDesc}>{opt.desc}</Text>
+                      </View>
+                      {data.housingType === opt.id && (
+                        <Feather name="check-circle" size={20} color={colors.primary} />
+                      )}
+                    </View>
+                  </OptionCard>
+                ))}
+              </View>
+            )}
+
+            {step === 7 && (
+              <View style={styles.yesNoGrid}>
+                {(["true", "false"] as const).map((val) => {
+                  const isYes = val === "true";
+                  const selected = data.hasEmergencySupplies === isYes;
+                  return (
+                    <OptionCard key={val} styles={styles} selected={selected} onPress={() => { Haptics.selectionAsync(); update("hasEmergencySupplies", isYes); }}>
+                      <View style={styles.yesNoCard}>
+                        <Feather name={isYes ? "package" : "x-circle"} size={28} color={selected ? colors.primary : colors.textMuted} />
+                        <Text style={[styles.yesNoLabel, selected && styles.yesNoLabelSelected]}>{isYes ? "Yes" : "No"}</Text>
+                        <Text style={styles.yesNoDesc}>{isYes ? "14+ days of supplies" : "Not prepared yet"}</Text>
+                      </View>
+                    </OptionCard>
+                  );
+                })}
+              </View>
+            )}
+
+            {step === 9 && (
+              <View style={styles.chipGrid}>
+                {[
+                  { id: "job_loss", label: "Job Loss" },
+                  { id: "inflation", label: "Hyperinflation" },
+                  { id: "financial_crisis", label: "Market Crash" },
+                  { id: "natural_disaster", label: "Natural Disaster" },
+                  { id: "supply_chain", label: "Supply Chain" },
+                  { id: "political_instability", label: "Political Unrest" },
+                  { id: "cyber_attack", label: "Cyber Outage" },
+                  { id: "war_conflict", label: "War / Conflict" },
+                  { id: "pandemic", label: "Pandemic" },
+                  { id: "illness", label: "Personal Illness" },
+                ].map((r) => (
+                  <Pressable
+                    key={r.id}
+                    onPress={() => toggleRisk(r.id)}
+                    style={[styles.chip, styles.riskChip, data.riskConcerns.includes(r.id) && styles.chipSelectedDanger]}
+                  >
+                    <Text style={[styles.chipText, data.riskConcerns.includes(r.id) && styles.chipTextDanger]}>
+                      {r.label}
                     </Text>
-                    <Text style={styles.yesNoDesc}>
-                      {isYes ? "14+ days of supplies" : "Not prepared yet"}
-                    </Text>
-                  </View>
-                </OptionCard>
-              );
-            })}
-          </View>
-        )}
-
-        {step === 8 && (
-          <View style={styles.section}>
-            <SliderControl
-              styles={styles}
-              value={data.psychologicalResilience}
-              min={1}
-              max={10}
-              onChange={(v) => update("psychologicalResilience", v)}
-              formatValue={(v) => {
-                if (v <= 3) return `${v} — Easily overwhelmed`;
-                if (v <= 6) return `${v} — Moderately resilient`;
-                if (v <= 8) return `${v} — Highly adaptable`;
-                return `${v} — Unshakeable`;
-              }}
-            />
-          </View>
-        )}
-
-        {step === 9 && (
-          <View style={styles.chipGrid}>
-            {[
-              { id: "job_loss", label: "Job Loss" },
-              { id: "inflation", label: "Hyperinflation" },
-              { id: "financial_crisis", label: "Market Crash" },
-              { id: "natural_disaster", label: "Natural Disaster" },
-              { id: "supply_chain", label: "Supply Chain" },
-              { id: "political_instability", label: "Political Unrest" },
-              { id: "cyber_attack", label: "Cyber Outage" },
-              { id: "war_conflict", label: "War / Conflict" },
-              { id: "pandemic", label: "Pandemic" },
-              { id: "illness", label: "Personal Illness" },
-            ].map((r) => (
-              <Pressable
-                key={r.id}
-                onPress={() => toggleRisk(r.id)}
-                style={[styles.chip, styles.riskChip, data.riskConcerns.includes(r.id) && styles.chipSelectedDanger]}
-              >
-                <Text style={[styles.chipText, data.riskConcerns.includes(r.id) && styles.chipTextDanger]}>
-                  {r.label}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
+                  </Pressable>
+                ))}
+              </View>
+            )}
+          </>
         )}
       </ScrollView>
 
@@ -484,10 +560,10 @@ export default function AssessmentScreen() {
           testID="next-btn"
         >
           <Text style={styles.nextBtnText}>
-            {step === TOTAL_STEPS - 1 ? "Generate Report" : "Continue"}
+            {step === 9 ? "Generate Report" : step === 8 && mrSubStep < MR_QUESTIONS.length - 1 ? "Next Question" : "Continue"}
           </Text>
           <Feather
-            name={step === TOTAL_STEPS - 1 ? "zap" : "arrow-right"}
+            name={step === 9 ? "zap" : "arrow-right"}
             size={18}
             color={!isValid() ? colors.textMuted : colors.background}
           />
@@ -554,6 +630,103 @@ const createStyles = (colors: ColorsType) => StyleSheet.create({
     lineHeight: 22,
     marginTop: -4,
   },
+  // ── Mental Resilience ──
+  mrContainer: {
+    gap: 20,
+  },
+  mrBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    backgroundColor: colors.primaryMuted,
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: colors.primaryBorder,
+    marginBottom: 8,
+  },
+  mrBannerTitle: {
+    fontFamily: "Inter_700Bold",
+    fontSize: 14,
+    color: colors.primary,
+  },
+  mrBannerSub: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 12,
+    color: colors.textMuted,
+    marginTop: 2,
+  },
+  mrDimension: {
+    fontFamily: "Inter_700Bold",
+    fontSize: 11,
+    color: colors.primary,
+    letterSpacing: 1.2,
+    textTransform: "uppercase",
+  },
+  mrQuestion: {
+    fontFamily: "Inter_700Bold",
+    fontSize: 22,
+    color: colors.text,
+    letterSpacing: -0.5,
+    lineHeight: 30,
+  },
+  mrDots: {
+    flexDirection: "row",
+    gap: 6,
+    alignItems: "center",
+  },
+  mrDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: colors.border,
+  },
+  mrDotActive: {
+    backgroundColor: colors.primary,
+    width: 18,
+    borderRadius: 3,
+  },
+  mrDotDone: {
+    backgroundColor: colors.primaryBorder,
+  },
+  mrRating: {
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 8,
+  },
+  mrBtn: {
+    flex: 1,
+    aspectRatio: 1,
+    borderRadius: 14,
+    backgroundColor: colors.surface,
+    borderWidth: 2,
+    borderColor: colors.border,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  mrBtnSelected: {
+    borderColor: colors.primary,
+    backgroundColor: colors.primary,
+  },
+  mrBtnNum: {
+    fontFamily: "Inter_700Bold",
+    fontSize: 20,
+    color: colors.textSecondary,
+  },
+  mrBtnNumSelected: {
+    color: colors.background,
+  },
+  mrScale: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: -8,
+  },
+  mrScaleLabel: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 11,
+    color: colors.textMuted,
+  },
+  // ── Shared ──
   textInput: {
     backgroundColor: colors.surface,
     borderRadius: 14,
@@ -581,9 +754,7 @@ const createStyles = (colors: ColorsType) => StyleSheet.create({
     borderColor: colors.danger,
     backgroundColor: colors.dangerMuted,
   },
-  optionCardPressed: {
-    opacity: 0.8,
-  },
+  optionCardPressed: { opacity: 0.8 },
   optionCardInner: {
     flexDirection: "row",
     alignItems: "center",
@@ -595,19 +766,14 @@ const createStyles = (colors: ColorsType) => StyleSheet.create({
     fontSize: 16,
     color: colors.text,
   },
-  optionLabelSelected: {
-    color: colors.primary,
-  },
+  optionLabelSelected: { color: colors.primary },
   optionDesc: {
     fontFamily: "Inter_400Regular",
     fontSize: 13,
     color: colors.textMuted,
     marginTop: 2,
   },
-  yesNoGrid: {
-    flexDirection: "row",
-    gap: 12,
-  },
+  yesNoGrid: { flexDirection: "row", gap: 12 },
   yesNoCard: {
     flex: 1,
     alignItems: "center",
@@ -619,9 +785,7 @@ const createStyles = (colors: ColorsType) => StyleSheet.create({
     fontSize: 22,
     color: colors.textSecondary,
   },
-  yesNoLabelSelected: {
-    color: colors.primary,
-  },
+  yesNoLabelSelected: { color: colors.primary },
   yesNoDesc: {
     fontFamily: "Inter_400Regular",
     fontSize: 12,
@@ -641,10 +805,7 @@ const createStyles = (colors: ColorsType) => StyleSheet.create({
     marginTop: -6,
     marginBottom: 4,
   },
-  segmentRow: {
-    flexDirection: "row",
-    gap: 8,
-  },
+  segmentRow: { flexDirection: "row", gap: 8 },
   segment: {
     flex: 1,
     paddingVertical: 12,
@@ -663,9 +824,7 @@ const createStyles = (colors: ColorsType) => StyleSheet.create({
     fontSize: 13,
     color: colors.textSecondary,
   },
-  segmentTextSelected: {
-    color: colors.primary,
-  },
+  segmentTextSelected: { color: colors.primary },
   chipGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -690,56 +849,51 @@ const createStyles = (colors: ColorsType) => StyleSheet.create({
   },
   chipText: {
     fontFamily: "Inter_500Medium",
-    fontSize: 13,
+    fontSize: 14,
     color: colors.textSecondary,
   },
-  chipTextSelected: {
-    color: colors.primary,
-  },
-  chipTextDanger: {
-    color: colors.danger,
-  },
+  chipTextSelected: { color: colors.primary },
+  chipTextDanger: { color: colors.danger },
   sliderValue: {
     fontFamily: "Inter_700Bold",
-    fontSize: 32,
-    color: colors.primary,
-    letterSpacing: -1,
+    fontSize: 22,
+    color: colors.text,
     marginBottom: 16,
+    letterSpacing: -0.5,
   },
   sliderRow: {
+    flexDirection: "row",
     gap: 8,
-    paddingRight: 24,
+    paddingBottom: 4,
   },
   sliderTick: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 48,
+    height: 48,
+    borderRadius: 12,
     backgroundColor: colors.surface,
-    alignItems: "center",
-    justifyContent: "center",
     borderWidth: 2,
     borderColor: colors.border,
+    alignItems: "center",
+    justifyContent: "center",
   },
   sliderTickSelected: {
-    backgroundColor: colors.primary,
     borderColor: colors.primary,
+    backgroundColor: colors.primaryMuted,
   },
   sliderTickText: {
     fontFamily: "Inter_600SemiBold",
-    fontSize: 15,
+    fontSize: 16,
     color: colors.textSecondary,
   },
-  sliderTickTextSelected: {
-    color: colors.background,
-  },
+  sliderTickTextSelected: { color: colors.primary },
   footer: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: colors.background,
     paddingHorizontal: 24,
     paddingTop: 16,
+    backgroundColor: colors.background,
     borderTopWidth: 1,
     borderTopColor: colors.border,
   },
@@ -753,15 +907,14 @@ const createStyles = (colors: ColorsType) => StyleSheet.create({
     paddingVertical: 16,
   },
   nextBtnDisabled: {
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
-  nextBtnPressed: {
-    opacity: 0.85,
-    transform: [{ scale: 0.98 }],
-  },
+  nextBtnPressed: { opacity: 0.85 },
   nextBtnText: {
     fontFamily: "Inter_700Bold",
-    fontSize: 16,
+    fontSize: 17,
     color: colors.background,
   },
 });
