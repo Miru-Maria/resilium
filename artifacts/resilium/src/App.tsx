@@ -37,7 +37,7 @@ function Router() {
       <Route path="/admin/login" component={AdminLoginPage} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
       <Route path="/admin" component={AdminLoginPage} />
-      <Route path="/admin/ux-test" component={UxTestingPage} />
+      <Route path="/admin/ux-testing" component={UxTestingPage} />
       <Route path="/admin/ux-test/report/:runId" component={UxTestReportPage} />
       <Route path="/admin/mobile" component={AdminMobilePage} />
       <Route path="/admin/gdpr" component={AdminGdprPage} />
