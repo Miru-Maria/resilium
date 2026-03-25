@@ -2,120 +2,148 @@ import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { sceneTransitions } from '@/lib/video/animations';
 
+const BASE = import.meta.env.BASE_URL;
+
 export function Scene2() {
   const [step, setStep] = useState(0);
 
   useEffect(() => {
     const timers = [
-      setTimeout(() => setStep(1), 2000), // Radar chart base
-      setTimeout(() => setStep(2), 4000), // Draw spokes
-      setTimeout(() => setStep(3), 8000), // Fill polygon
-      setTimeout(() => setStep(4), 12000), // 360 text
+      setTimeout(() => setStep(1), 1500),
+      setTimeout(() => setStep(2), 3500),
+      setTimeout(() => setStep(3), 6500),
+      setTimeout(() => setStep(4), 11000),
     ];
     return () => timers.forEach(t => clearTimeout(t));
   }, []);
 
-  // Six spokes
   const labels = ['Financial', 'Health', 'Skills', 'Mobility', 'Psychological', 'Resources'];
   const angles = [0, 60, 120, 180, 240, 300];
+  // Sample scores for the filled polygon
+  const scores = [0.54, 0.72, 0.65, 0.45, 0.70, 0.40];
+  const SIZE = 240; // px, half = 120
+  const R = 110;
+
+  function toXY(angleDeg: number, r: number) {
+    const rad = ((angleDeg - 90) * Math.PI) / 180;
+    return { x: SIZE / 2 + r * Math.cos(rad), y: SIZE / 2 + r * Math.sin(rad) };
+  }
+
+  const outerPoints = angles.map(a => toXY(a, R));
+  const dataPoints = angles.map((a, i) => toXY(a, R * scores[i]));
+  const polygonOuter = outerPoints.map(p => `${p.x},${p.y}`).join(' ');
+  const polygonData = dataPoints.map(p => `${p.x},${p.y}`).join(' ');
 
   return (
     <motion.div
-      className="absolute inset-0 flex flex-col items-center justify-center z-10 bg-[var(--color-bg-dark)]"
+      className="absolute inset-0 flex flex-col items-center justify-center z-10"
+      style={{ background: 'var(--color-bg-light)' }}
       {...sceneTransitions.clipCircle}
     >
       <video
-        src="/videos/bg-network.mp4"
-        autoPlay
-        loop
-        muted
-        className="absolute inset-0 w-full h-full object-cover opacity-20 mix-blend-screen"
+        src={`${BASE}videos/bg-network.mp4`}
+        autoPlay loop muted playsInline
+        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.18, mixBlendMode: 'screen', pointerEvents: 'none' }}
       />
 
-      <div className="absolute top-[15vh] text-center w-full z-20 px-[10vw]">
-        <motion.h2
-          className="font-body text-[3vh] md:text-[4vh] text-[var(--color-text-secondary)]"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, ease: 'circOut' }}
-        >
-          Resilium is an AI-powered personal resilience platform.
-        </motion.h2>
-      </div>
-
-      {/* Radar Chart */}
-      <div className="relative w-[50vh] h-[50vh] mt-[5vh] z-20">
-        {/* Hexagon base */}
-        <motion.div
-          className="absolute inset-0 border border-[var(--color-text-muted)] opacity-30"
-          style={{ clipPath: 'polygon(50% 0%, 93.3% 25%, 93.3% 75%, 50% 100%, 6.7% 75%, 6.7% 25%)' }}
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: step >= 1 ? 1 : 0, opacity: step >= 1 ? 0.3 : 0 }}
-          transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
-        />
-        <motion.div
-          className="absolute inset-[15%] border border-[var(--color-text-muted)] opacity-20"
-          style={{ clipPath: 'polygon(50% 0%, 93.3% 25%, 93.3% 75%, 50% 100%, 6.7% 75%, 6.7% 25%)' }}
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: step >= 1 ? 1 : 0, opacity: step >= 1 ? 0.2 : 0 }}
-          transition={{ duration: 1.5, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-        />
-
-        {/* Spokes and Labels */}
-        {angles.map((angle, i) => (
-          <motion.div
-            key={i}
-            className="absolute top-1/2 left-1/2 w-[25vh] h-[1px] bg-[var(--color-text-muted)] origin-left opacity-30"
-            style={{ transform: `rotate(${angle - 90}deg)` }}
-            initial={{ scaleX: 0 }}
-            animate={{ scaleX: step >= 2 ? 1 : 0 }}
-            transition={{ duration: 1, delay: step >= 2 ? i * 0.1 : 0, ease: 'circOut' }}
-          >
-            <div 
-              className="absolute right-[-4vh] top-[-1.5vh] text-[1.5vh] font-mono text-[var(--color-text-secondary)] whitespace-nowrap"
-              style={{ transform: `rotate(${-(angle - 90)}deg)` }}
-            >
-              <motion.span
-                initial={{ opacity: 0 }}
-                animate={{ opacity: step >= 2 ? 1 : 0 }}
-                transition={{ duration: 0.5, delay: step >= 2 ? 1 + i * 0.1 : 0 }}
-              >
-                {labels[i]}
-              </motion.span>
-            </div>
-          </motion.div>
-        ))}
-
-        {/* Data Polygon */}
-        <motion.div
-          className="absolute inset-0 bg-[var(--color-primary)] mix-blend-screen opacity-40"
-          style={{ clipPath: 'polygon(50% 20%, 80% 40%, 70% 80%, 50% 70%, 30% 60%, 40% 30%)' }}
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: step >= 3 ? 1 : 0, opacity: step >= 3 ? 0.4 : 0 }}
-          transition={{ duration: 1.5, type: 'spring', bounce: 0.4 }}
-        />
-        <motion.div
-          className="absolute inset-0 border-2 border-[var(--color-primary)]"
-          style={{ clipPath: 'polygon(50% 20%, 80% 40%, 70% 80%, 50% 70%, 30% 60%, 40% 30%)' }}
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: step >= 3 ? 1 : 0, opacity: step >= 3 ? 1 : 0 }}
-          transition={{ duration: 1.5, type: 'spring', bounce: 0.4 }}
-        />
-      </div>
-
-      <motion.div
-        className="absolute bottom-[20vh] text-center w-full z-20 px-[10vw]"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: step >= 4 ? 1 : 0, y: step >= 4 ? 0 : 20 }}
+      {/* Top text */}
+      <motion.p
+        style={{ position: 'absolute', top: '12vh', fontFamily: 'var(--font-body)', fontSize: '3.2vh', color: 'var(--color-text-secondary)', textAlign: 'center', width: '70%', zIndex: 20 }}
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1, ease: 'circOut' }}
       >
-        <h1 className="font-display text-[6vh] font-bold text-[var(--color-primary)] tracking-tight">
-          360° holistic risk profiling.
-        </h1>
-      </motion.div>
+        Resilium is an AI-powered personal resilience platform.
+      </motion.p>
+
+      {/* Radar chart */}
+      <div style={{ position: 'relative', zIndex: 20, marginTop: '4vh' }}>
+        <svg width={`${SIZE}px`} height={`${SIZE}px`} viewBox={`0 0 ${SIZE} ${SIZE}`} style={{ overflow: 'visible' }}>
+          {/* Grid rings */}
+          {[0.25, 0.5, 0.75, 1].map((r, i) => (
+            <motion.polygon
+              key={i}
+              points={angles.map(a => { const p = toXY(a, R * r); return `${p.x},${p.y}`; }).join(' ')}
+              fill="none"
+              stroke="rgba(234,217,190,0.12)"
+              strokeWidth="1"
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: step >= 1 ? 1 : 0, scale: step >= 1 ? 1 : 0 }}
+              style={{ transformOrigin: `${SIZE / 2}px ${SIZE / 2}px` }}
+              transition={{ duration: 1.2, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] }}
+            />
+          ))}
+
+          {/* Spokes */}
+          {outerPoints.map((p, i) => (
+            <motion.line
+              key={i}
+              x1={SIZE / 2} y1={SIZE / 2} x2={p.x} y2={p.y}
+              stroke="rgba(234,217,190,0.2)" strokeWidth="1"
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: step >= 2 ? 1 : 0 }}
+              transition={{ duration: 0.8, delay: i * 0.08, ease: 'circOut' }}
+            />
+          ))}
+
+          {/* Data polygon fill */}
+          <motion.polygon
+            points={polygonData}
+            fill="rgba(224,128,64,0.18)"
+            stroke="none"
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: step >= 3 ? 1 : 0, opacity: step >= 3 ? 1 : 0 }}
+            style={{ transformOrigin: `${SIZE / 2}px ${SIZE / 2}px` }}
+            transition={{ duration: 1.2, type: 'spring', bounce: 0.3 }}
+          />
+          {/* Data polygon border */}
+          <motion.polygon
+            points={polygonData}
+            fill="none"
+            stroke="var(--color-primary)"
+            strokeWidth="2"
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: step >= 3 ? 1 : 0, opacity: step >= 3 ? 1 : 0 }}
+            style={{ transformOrigin: `${SIZE / 2}px ${SIZE / 2}px` }}
+            transition={{ duration: 1.2, type: 'spring', bounce: 0.3 }}
+          />
+
+          {/* Labels */}
+          {outerPoints.map((p, i) => {
+            const labelR = R + 24;
+            const lp = toXY(angles[i], labelR);
+            return (
+              <motion.text
+                key={i}
+                x={lp.x} y={lp.y}
+                textAnchor="middle"
+                dominantBaseline="middle"
+                fill="rgba(234,217,190,0.7)"
+                fontSize="11"
+                fontFamily="var(--font-body)"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: step >= 2 ? 1 : 0 }}
+                transition={{ duration: 0.5, delay: 0.8 + i * 0.08 }}
+              >
+                {labels[i]}
+              </motion.text>
+            );
+          })}
+        </svg>
+      </div>
+
+      {/* 360° tagline */}
+      <motion.h1
+        style={{ position: 'absolute', bottom: '18vh', fontFamily: 'var(--font-display)', fontSize: '6.5vh', fontWeight: 800, color: 'var(--color-primary)', letterSpacing: '-0.03em', zIndex: 20 }}
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: step >= 4 ? 1 : 0, y: step >= 4 ? 0 : 30 }}
+        transition={{ duration: 1, ease: 'circOut' }}
+      >
+        360° holistic risk profiling.
+      </motion.h1>
 
       <div className="subtitle-overlay">
-        Resilium is an AI-powered personal resilience platform that analyzes who you are, where you live, and how you live — and turns that into a personalized action plan.
+        Resilium analyzes six key dimensions of your life — financial stability, health, skills, mobility, psychological resilience, and resources — to build a complete picture.
       </div>
     </motion.div>
   );

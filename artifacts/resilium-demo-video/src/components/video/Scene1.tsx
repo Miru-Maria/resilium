@@ -2,14 +2,16 @@ import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { sceneTransitions } from '@/lib/video/animations';
 
+const BASE = import.meta.env.BASE_URL;
+
 export function Scene1() {
   const [step, setStep] = useState(0);
 
   useEffect(() => {
     const timers = [
-      setTimeout(() => setStep(1), 5000), // "Most people aren't prepared."
-      setTimeout(() => setStep(2), 12000), // Reveal Resilium
-      setTimeout(() => setStep(3), 18000), // App preview
+      setTimeout(() => setStep(1), 5000),
+      setTimeout(() => setStep(2), 11000),
+      setTimeout(() => setStep(3), 17000),
     ];
     return () => timers.forEach(t => clearTimeout(t));
   }, []);
@@ -17,71 +19,70 @@ export function Scene1() {
   return (
     <motion.div
       className="absolute inset-0 flex flex-col items-center justify-center z-10"
+      style={{ background: 'var(--color-bg-light)' }}
       {...sceneTransitions.morphExpand}
     >
       <video
-        src="/videos/bg-particles.mp4"
-        autoPlay
-        loop
-        muted
-        className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-screen"
+        src={`${BASE}videos/bg-particles.mp4`}
+        autoPlay loop muted playsInline
+        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.25, mixBlendMode: 'screen', pointerEvents: 'none' }}
       />
-      
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[var(--color-bg-light)] opacity-80" />
+      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 50%, var(--color-bg-light) 100%)', opacity: 0.8 }} />
 
-      <motion.div className="relative z-20 flex flex-col items-center text-center px-[10vw]">
+      <motion.div style={{ position: 'relative', zIndex: 20, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '0 10vw', width: '100%' }}>
+
+        {/* Hook headline */}
         <motion.h1
-          className="font-display text-[6vh] md:text-[8vh] leading-[1.1] font-bold tracking-tight mb-[4vh] text-[var(--color-text-primary)]"
-          initial={{ opacity: 0, y: 50, filter: 'blur(10px)' }}
-          animate={{ 
-            opacity: step >= 0 && step < 2 ? 1 : 0, 
-            y: step >= 0 && step < 2 ? 0 : -50,
-            filter: step >= 0 && step < 2 ? 'blur(0px)' : 'blur(10px)'
+          style={{ fontFamily: 'var(--font-display)', fontSize: '8vh', lineHeight: 1.05, fontWeight: 800, letterSpacing: '-0.03em', marginBottom: '4vh', color: 'var(--color-text-primary)' }}
+          initial={{ opacity: 0, y: 60, filter: 'blur(12px)' }}
+          animate={{
+            opacity: step === 0 || step === 1 ? 1 : 0,
+            y: step === 0 || step === 1 ? 0 : -60,
+            filter: step === 0 || step === 1 ? 'blur(0px)' : 'blur(12px)'
           }}
-          transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
         >
-          You're one disruption away<br />
-          <span className="text-[var(--color-secondary)]">from chaos.</span>
+          You're one disruption<br />
+          <span style={{ color: 'var(--color-secondary)' }}>away from chaos.</span>
         </motion.h1>
 
-        <motion.h2
-          className="font-body text-[3vh] md:text-[4vh] text-[var(--color-text-secondary)]"
+        <motion.p
+          style={{ fontFamily: 'var(--font-body)', fontSize: '3.5vh', color: 'var(--color-text-secondary)', lineHeight: 1.4 }}
           initial={{ opacity: 0, y: 30 }}
-          animate={{ 
-            opacity: step >= 1 && step < 2 ? 1 : 0,
-            y: step >= 1 && step < 2 ? 0 : 30 
-          }}
+          animate={{ opacity: step >= 1 && step < 2 ? 1 : 0, y: step >= 1 && step < 2 ? 0 : 30 }}
           transition={{ duration: 1, ease: 'circOut' }}
         >
           Most people aren't prepared.
-        </motion.h2>
+        </motion.p>
 
+        {/* Resilium reveal */}
         <motion.div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center w-full"
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ 
+          style={{ position: 'absolute', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', top: '50%', transform: 'translateY(-50%)' }}
+          initial={{ opacity: 0, scale: 0.85 }}
+          animate={{
             opacity: step >= 2 ? 1 : 0,
-            scale: step >= 2 ? 1 : 0.8,
-            y: step >= 3 ? '-20vh' : '0vh'
+            scale: step >= 2 ? 1 : 0.85,
+            y: step >= 3 ? '-18vh' : '0vh',
           }}
-          transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
         >
-          <h1 className="font-display text-[10vh] font-bold tracking-tighter text-[var(--color-primary)]">Resilium</h1>
-          <p className="font-body text-[2.5vh] tracking-[0.2em] text-[var(--color-text-secondary)] mt-[1vh] uppercase">Personal Resilience Platform</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '2.5vh', marginBottom: '2vh' }}>
+            <img src={`${BASE}images/logo.png`} alt="Resilium" style={{ width: '9vh', height: '9vh', objectFit: 'contain' }} />
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '11vh', fontWeight: 800, letterSpacing: '-0.05em', color: 'var(--color-primary)', lineHeight: 1 }}>Resilium</h1>
+          </div>
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: '2.2vh', letterSpacing: '0.22em', color: 'var(--color-text-secondary)', textTransform: 'uppercase' }}>
+            Personal Resilience Platform
+          </p>
         </motion.div>
-        
-        {/* App Mockup reveal */}
+
+        {/* App mockup */}
         <motion.div
-          className="absolute top-[60vh] w-[60vw] h-[33.75vw] rounded-xl overflow-hidden border border-[var(--color-text-muted)] shadow-[0_0_50px_rgba(224,128,64,0.2)]"
-          initial={{ opacity: 0, y: '20vh', rotateX: 20, transformPerspective: 1000 }}
-          animate={{ 
-            opacity: step >= 3 ? 1 : 0,
-            y: step >= 3 ? '0vh' : '20vh',
-            rotateX: step >= 3 ? 0 : 20
-          }}
-          transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+          style={{ position: 'absolute', top: '56vh', width: '62vw', aspectRatio: '16/9', borderRadius: '1.2vh', overflow: 'hidden', border: '1px solid rgba(234,217,190,0.15)', boxShadow: '0 0 60px rgba(224,128,64,0.25), 0 30px 80px rgba(0,0,0,0.6)' }}
+          initial={{ opacity: 0, y: '25vh', rotateX: 18 }}
+          animate={{ opacity: step >= 3 ? 1 : 0, y: step >= 3 ? '0vh' : '25vh', rotateX: step >= 3 ? 4 : 18 }}
+          transition={{ duration: 1.6, ease: [0.16, 1, 0.3, 1] }}
         >
-          <img src="/images/resilium-thumbnail.png" className="w-full h-full object-cover" alt="Resilium App" />
+          <img src={`${BASE}images/resilium-thumbnail.png`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Resilium App" />
         </motion.div>
       </motion.div>
 
