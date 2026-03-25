@@ -16,17 +16,15 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const systemTheme = useColorScheme();
-  const [theme, setThemeState] = useState<ThemeType>(systemTheme === "light" ? "light" : "dark");
+  const [theme, setThemeState] = useState<ThemeType>("dark");
 
   useEffect(() => {
     AsyncStorage.getItem("resilium-theme").then((savedTheme) => {
       if (savedTheme === "light" || savedTheme === "dark") {
         setThemeState(savedTheme);
-      } else if (systemTheme) {
-        setThemeState(systemTheme);
       }
     });
-  }, [systemTheme]);
+  }, []);
 
   const setTheme = async (newTheme: ThemeType) => {
     setThemeState(newTheme);

@@ -33,10 +33,7 @@ function getInitialTheme(): Theme {
     const stored = localStorage.getItem("resilium-theme");
     if (stored === "light" || stored === "dark") return stored;
   } catch {}
-  if (typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches) {
-    return "dark";
-  }
-  return "light";
+  return "dark";
 }
 
 function Router() {

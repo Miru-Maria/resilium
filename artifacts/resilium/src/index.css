@@ -135,11 +135,11 @@
   }
 
   html {
-    color-scheme: light;
+    color-scheme: dark;
   }
 
-  html.dark {
-    color-scheme: dark;
+  html.light {
+    color-scheme: light;
   }
 
   body {
