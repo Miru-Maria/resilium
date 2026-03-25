@@ -348,7 +348,7 @@ export default function UxTestReportPage() {
               <h2 className="text-lg font-semibold text-foreground">Cross-Persona Analysis</h2>
               <Card className="print:border print:shadow-none">
                 <CardContent className="pt-6">
-                  <div className="prose prose-sm dark:prose-invert max-w-none">
+                  <div className="prose prose-sm prose-invert max-w-none prose-headings:text-foreground prose-p:text-foreground/90 prose-strong:text-foreground prose-li:text-foreground/90 prose-a:text-primary prose-hr:border-border/40">
                     <ReactMarkdown>{report.crossPersonaSummary}</ReactMarkdown>
                   </div>
                 </CardContent>
@@ -361,7 +361,8 @@ export default function UxTestReportPage() {
       <style>{`
         @media print {
           .print\\:hidden { display: none !important; }
-          body { background: white !important; }
+          body { background: white !important; color: black !important; }
+          .prose, .prose p, .prose li, .prose h1, .prose h2, .prose h3, .prose h4, .prose strong { color: black !important; }
           .prose h2 { font-size: 1rem; font-weight: 600; margin-top: 1rem; }
           .prose ul { margin-left: 1rem; }
           .prose li { margin-bottom: 0.25rem; }
