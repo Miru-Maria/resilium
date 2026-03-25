@@ -4,7 +4,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { ResilientIcon } from "@/components/resilient-icon";
 
 const LAST_UPDATED = "March 24, 2026";
-const DPO_EMAIL = "privacy@resilium.app";
+const CONTACT_EMAIL = "contact_resilium@pm.me";
 
 export default function PrivacyPage() {
   return (
@@ -25,23 +25,23 @@ export default function PrivacyPage() {
         </div>
 
         <p className="text-muted-foreground leading-relaxed">
-          Resilium ("we", "us", or "our") is committed to protecting your personal data and respecting your privacy. This Privacy Policy explains what information we collect, how we use it, and what rights you have under the General Data Protection Regulation (GDPR) and other applicable data protection laws.
+          Resilium is committed to protecting your personal data and respecting your privacy. This Privacy Policy explains what information is collected, how it is used, and what rights you have under the General Data Protection Regulation (GDPR) and other applicable data protection laws.
         </p>
 
-        <Section title="1. Who We Are">
+        <Section title="1. Who Is Responsible for Your Data">
           <p>
-            Resilium is operated by Resilium Ltd., a company registered in the European Union. We act as the <strong>data controller</strong> for the personal data you provide when using this service.
+            Resilium is an independent platform operated by a sole individual. Resilium acts as the <strong>data controller</strong> for the personal data you provide when using this service.
           </p>
           <p>
-            If you have any questions about this policy or your data, you can reach our Data Protection Officer (DPO) at:{" "}
-            <a href={`mailto:${DPO_EMAIL}`} className="text-primary underline underline-offset-4 hover:text-primary/80">
-              {DPO_EMAIL}
+            If you have any questions about this policy or your data, you can reach me at:{" "}
+            <a href={`mailto:${CONTACT_EMAIL}`} className="text-primary underline underline-offset-4 hover:text-primary/80">
+              {CONTACT_EMAIL}
             </a>
           </p>
         </Section>
 
-        <Section title="2. Data We Collect">
-          <p>When you complete the Resilium resilience assessment, we collect the following information:</p>
+        <Section title="2. Data Collected">
+          <p>When you complete the Resilium resilience assessment, the following information is collected:</p>
           <ul className="list-disc pl-6 space-y-1">
             <li>Geographic location (country or region)</li>
             <li>Income stability category</li>
@@ -55,26 +55,26 @@ export default function PrivacyPage() {
             <li>Primary risk concerns selected by you</li>
           </ul>
           <p>
-            We do not collect your name, email address, government ID, precise address, or financial account details as part of the assessment. We may collect technical data such as browser type, device type, and IP address for security and performance purposes.
+            Resilium does not collect your name, email address, government ID, precise address, or financial account details as part of the assessment. Technical data such as browser type, device type, and IP address may be collected for security and performance purposes.
           </p>
         </Section>
 
-        <Section title="3. How We Use Your Data">
-          <p>We process your data for the following purposes:</p>
+        <Section title="3. How Your Data Is Used">
+          <p>Your data is processed for the following purposes:</p>
           <ul className="list-disc pl-6 space-y-1">
             <li><strong>To provide the service:</strong> Generating your personalised resilience report and action plan.</li>
-            <li><strong>To improve the platform:</strong> Analysing aggregated, anonymised usage patterns to improve accuracy of our models and recommendations.</li>
+            <li><strong>To improve the platform:</strong> Analysing aggregated, anonymised usage patterns to improve accuracy of the models and recommendations.</li>
             <li><strong>For security and fraud prevention:</strong> Detecting and preventing misuse of the platform.</li>
           </ul>
-          <p>We do not use your data for advertising or sell it to third parties.</p>
+          <p>Your data is not used for advertising and is not sold to third parties.</p>
         </Section>
 
         <Section title="4. Legal Basis for Processing">
-          <p>We rely on the following legal bases under Article 6 GDPR:</p>
+          <p>Resilium relies on the following legal bases under Article 6 GDPR:</p>
           <ul className="list-disc pl-6 space-y-1">
             <li><strong>Performance of a contract (Art. 6(1)(b)):</strong> Processing is necessary to generate your resilience report as requested.</li>
-            <li><strong>Legitimate interests (Art. 6(1)(f)):</strong> We have a legitimate interest in maintaining platform security and improving our services, provided this does not override your rights.</li>
-            <li><strong>Consent (Art. 6(1)(a)):</strong> Where we process health-related information (e.g., health status), we rely on your explicit consent provided by voluntarily completing the assessment.</li>
+            <li><strong>Legitimate interests (Art. 6(1)(f)):</strong> There is a legitimate interest in maintaining platform security and improving the service, provided this does not override your rights.</li>
+            <li><strong>Consent (Art. 6(1)(a)):</strong> Where health-related information is processed (e.g., health status), this relies on your explicit consent provided by voluntarily completing the assessment.</li>
           </ul>
         </Section>
 
@@ -89,61 +89,61 @@ export default function PrivacyPage() {
 
         <Section title="6. Third-Party Sharing">
           <p>
-            We do not sell, rent, or share your personal data with third parties for their own marketing or commercial purposes.
+            Your personal data is not sold, rented, or shared with third parties for their own marketing or commercial purposes.
           </p>
-          <p>We may share data with carefully vetted sub-processors who help us operate the service, including:</p>
+          <p>Data may be shared with carefully vetted sub-processors who help operate the service, including:</p>
           <ul className="list-disc pl-6 space-y-1">
             <li><strong>Cloud infrastructure providers</strong> (hosting and database services)</li>
             <li><strong>AI model providers</strong> used to generate report content (data is transmitted securely and not used to train third-party models)</li>
           </ul>
           <p>
-            All sub-processors are bound by data processing agreements and must comply with GDPR requirements. We may also disclose data if required by law or to protect the rights and safety of users or the public.
+            All sub-processors are bound by data processing agreements and must comply with GDPR requirements. Data may also be disclosed if required by law or to protect the rights and safety of users or the public.
           </p>
         </Section>
 
         <Section title="7. International Transfers">
           <p>
-            If any of our sub-processors are located outside the European Economic Area (EEA), we ensure appropriate safeguards are in place, such as Standard Contractual Clauses (SCCs) approved by the European Commission, to protect your data during transfer.
+            If any sub-processors are located outside the European Economic Area (EEA), appropriate safeguards are in place, such as Standard Contractual Clauses (SCCs) approved by the European Commission, to protect your data during transfer.
           </p>
         </Section>
 
         <Section title="8. Your Rights Under GDPR">
           <p>As a data subject, you have the following rights:</p>
           <ul className="list-disc pl-6 space-y-2">
-            <li><strong>Right of access (Art. 15):</strong> You can request a copy of the personal data we hold about you.</li>
-            <li><strong>Right to rectification (Art. 16):</strong> You can ask us to correct inaccurate or incomplete data.</li>
-            <li><strong>Right to erasure (Art. 17):</strong> You can request that we delete your personal data ("right to be forgotten").</li>
+            <li><strong>Right of access (Art. 15):</strong> You can request a copy of the personal data Resilium holds about you.</li>
+            <li><strong>Right to rectification (Art. 16):</strong> You can request correction of inaccurate or incomplete data.</li>
+            <li><strong>Right to erasure (Art. 17):</strong> You can request deletion of your personal data ("right to be forgotten").</li>
             <li><strong>Right to data portability (Art. 20):</strong> You can request your data in a structured, machine-readable format.</li>
             <li><strong>Right to object (Art. 21):</strong> You can object to processing based on legitimate interests.</li>
-            <li><strong>Right to restrict processing (Art. 18):</strong> You can ask us to pause processing of your data in certain circumstances.</li>
+            <li><strong>Right to restrict processing (Art. 18):</strong> You can request a pause on processing of your data in certain circumstances.</li>
             <li><strong>Right to withdraw consent:</strong> Where processing is based on consent, you may withdraw it at any time without affecting the lawfulness of prior processing.</li>
           </ul>
           <p>
-            To exercise any of these rights, contact us at{" "}
-            <a href={`mailto:${DPO_EMAIL}`} className="text-primary underline underline-offset-4 hover:text-primary/80">
-              {DPO_EMAIL}
+            To exercise any of these rights, contact me at{" "}
+            <a href={`mailto:${CONTACT_EMAIL}`} className="text-primary underline underline-offset-4 hover:text-primary/80">
+              {CONTACT_EMAIL}
             </a>
-            . We will respond within 30 days. You also have the right to lodge a complaint with your national data protection supervisory authority.
+            . I will respond within 30 days. You also have the right to lodge a complaint with your national data protection supervisory authority.
           </p>
         </Section>
 
         <Section title="9. Cookies and Tracking">
           <p>
-            Resilium uses only essential cookies required for the platform to function (e.g., session management). We do not use tracking or advertising cookies. No third-party analytics scripts are embedded that would track you across websites.
+            Resilium uses only essential cookies required for the platform to function (e.g., session management). No tracking or advertising cookies are used. No third-party analytics scripts are embedded that would track you across websites.
           </p>
         </Section>
 
         <Section title="10. Data Security">
           <p>
-            We implement appropriate technical and organisational measures to protect your data, including encryption in transit (TLS), access controls, and regular security reviews. In the unlikely event of a data breach that poses a risk to your rights and freedoms, we will notify you and the relevant supervisory authority as required by GDPR.
+            Appropriate technical and organisational measures are in place to protect your data, including encryption in transit (TLS), access controls, and regular security reviews. In the unlikely event of a data breach that poses a risk to your rights and freedoms, you will be notified along with the relevant supervisory authority as required by GDPR.
           </p>
         </Section>
 
         <Section title="11. Children's Privacy">
           <p>
-            Resilium is not directed at children under the age of 16. We do not knowingly collect personal data from minors. If you believe a minor has provided us with their data, please contact us immediately at{" "}
-            <a href={`mailto:${DPO_EMAIL}`} className="text-primary underline underline-offset-4 hover:text-primary/80">
-              {DPO_EMAIL}
+            Resilium is not directed at children under the age of 16. Personal data from minors is not knowingly collected. If you believe a minor has provided their data through this platform, please contact me immediately at{" "}
+            <a href={`mailto:${CONTACT_EMAIL}`} className="text-primary underline underline-offset-4 hover:text-primary/80">
+              {CONTACT_EMAIL}
             </a>
             .
           </p>
@@ -151,15 +151,15 @@ export default function PrivacyPage() {
 
         <Section title="12. Changes to This Policy">
           <p>
-            We may update this Privacy Policy from time to time. When we do, we will update the "Last updated" date at the top of this page. We encourage you to review this page periodically. Continued use of the service after changes constitutes your acceptance of the updated policy.
+            This Privacy Policy may be updated from time to time. When changes are made, the "Last updated" date at the top of this page will reflect that. I encourage you to review this page periodically. Continued use of the service after changes constitutes your acceptance of the updated policy.
           </p>
         </Section>
 
         <div className="pt-4 border-t border-border/60">
           <p className="text-sm text-muted-foreground">
-            Questions? Contact our DPO at{" "}
-            <a href={`mailto:${DPO_EMAIL}`} className="text-primary underline underline-offset-4 hover:text-primary/80">
-              {DPO_EMAIL}
+            Questions? Contact me at{" "}
+            <a href={`mailto:${CONTACT_EMAIL}`} className="text-primary underline underline-offset-4 hover:text-primary/80">
+              {CONTACT_EMAIL}
             </a>
           </p>
         </div>

@@ -111,7 +111,7 @@ export default function LandingPage() {
           
           <h1 className="text-5xl md:text-7xl font-display font-bold tracking-tight text-foreground leading-[1.1] mb-6">
             You're one disruption away from{" "}
-            <span className="text-rose-600 dark:text-rose-400 italic relative">
+            <span className="text-rose-400 italic relative">
               chaos
               <svg className="absolute w-full h-2 -bottom-0.5 left-0 opacity-60" viewBox="0 0 100 8" preserveAspectRatio="none">
                 <path d="M0 4 Q 12 1 25 5 Q 38 9 50 4 Q 62 0 75 5 Q 88 9 100 4" stroke="currentColor" strokeWidth="3" fill="none" strokeLinecap="round"/>

@@ -185,7 +185,7 @@ export default function ResultsScreen() {
       <View style={[styles.center, { paddingTop: topPad }]}>
         <Feather name="alert-circle" size={48} color={colors.danger} />
         <Text style={styles.errorTitle}>Report Not Found</Text>
-        <Text style={styles.errorMsg}>We couldn't find your report. It may have expired.</Text>
+        <Text style={styles.errorMsg}>This report could not be found. It may have expired.</Text>
         <Pressable style={styles.retryBtn} onPress={() => router.replace("/")}>
           <Text style={styles.retryBtnText}>Go Home</Text>
         </Pressable>

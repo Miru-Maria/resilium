@@ -70,7 +70,7 @@ export default function ConsentScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     Alert.alert(
       "No Data Collected",
-      "If you decline, we cannot generate a personalized resilience report. No data will be stored.\n\nYou can return anytime to accept.",
+      "If you decline, no personalized resilience report can be generated. No data will be stored.\n\nYou can return anytime to accept.",
       [
         { text: "Cancel", style: "cancel" },
         {
@@ -106,11 +106,11 @@ export default function ConsentScreen() {
 
         <Text style={styles.title}>Your Privacy Matters</Text>
         <Text style={styles.subtitle}>
-          Before we analyze your resilience, we need your informed consent to collect and process the following personal data.
+          Before analyzing your resilience, your informed consent is needed to collect and process the following personal data.
         </Text>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>What we collect</Text>
+          <Text style={styles.sectionTitle}>What is collected</Text>
           {DATA_POINTS.map((item) => (
             <View key={item.label} style={styles.dataItem}>
               <View style={styles.dataIcon}>
@@ -133,7 +133,7 @@ export default function ConsentScreen() {
             <Feather name="eye-off" size={16} color={colors.primary} />
             <View style={styles.infoCardText}>
               <Text style={styles.infoCardTitle}>No Selling of Data</Text>
-              <Text style={styles.infoCardDesc}>We never sell or share your personal data with third parties for marketing.</Text>
+              <Text style={styles.infoCardDesc}>Your personal data is never sold or shared with third parties for marketing.</Text>
             </View>
           </View>
           <View style={styles.infoCard}>

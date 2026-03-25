@@ -167,7 +167,7 @@ export default function MyDataScreen() {
             <View style={styles.rightsCard}>
               <Text style={styles.rightsTitle}>Your GDPR Rights</Text>
               {[
-                { icon: "download", label: "Right to Access", desc: "Export all data we hold about you" },
+                { icon: "download", label: "Right to Access", desc: "Export all data Resilium holds about you" },
                 { icon: "trash-2", label: "Right to Erasure", desc: "Request permanent deletion of your data" },
                 { icon: "edit-2", label: "Right to Rectification", desc: "Correct inaccurate personal data" },
               ].map((right) => (
