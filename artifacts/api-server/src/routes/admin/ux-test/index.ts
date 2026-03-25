@@ -1,0 +1,180 @@
+import { Router, type IRouter, type Request, type Response } from "express";
+import { randomUUID } from "crypto";
+import { db, uxTestRunsTable, uxTestResultsTable } from "@workspace/db";
+import { eq, desc } from "drizzle-orm";
+import { PERSONAS } from "./personas.js";
+import { runUxTestSimulation, type ProgressEvent } from "./simulation.js";
+
+const router: IRouter = Router();
+
+function requireAdmin(req: Request, res: Response): boolean {
+  if (!req.isAuthenticated()) {
+    res.status(401).json({ error: "Unauthorized" });
+    return false;
+  }
+  return true;
+}
+
+router.get("/personas", (req: Request, res: Response) => {
+  if (!requireAdmin(req, res)) return;
+  res.json({
+    personas: PERSONAS.map((p) => ({
+      key: p.key,
+      name: p.name,
+      description: p.description,
+    })),
+  });
+});
+
+const activeStreams = new Map<string, Response[]>();
+
+router.post("/run", async (req: Request, res: Response) => {
+  if (!requireAdmin(req, res)) return;
+
+  const body = req.body as { personaKeys?: string[] };
+  const personaKeys = body.personaKeys ?? PERSONAS.map((p) => p.key);
+
+  const selectedPersonas = PERSONAS.filter((p) => personaKeys.includes(p.key));
+  if (selectedPersonas.length === 0) {
+    res.status(400).json({ error: "No valid personas selected" });
+    return;
+  }
+
+  const runId = randomUUID();
+
+  await db.insert(uxTestRunsTable).values({
+    runId,
+    personaCount: selectedPersonas.length,
+    status: "running",
+    startedAt: new Date(),
+  });
+
+  for (const persona of selectedPersonas) {
+    await db.insert(uxTestResultsTable).values({
+      runId,
+      personaKey: persona.key,
+      personaName: persona.name,
+      assessmentData: persona.assessmentData,
+      status: "pending",
+    });
+  }
+
+  const sendToStreams = (event: ProgressEvent) => {
+    const clients = activeStreams.get(runId) ?? [];
+    const data = `data: ${JSON.stringify(event)}\n\n`;
+    for (const client of clients) {
+      client.write(data);
+    }
+  };
+
+  runUxTestSimulation(runId, selectedPersonas, sendToStreams).catch((err: unknown) => {
+    const errorMsg = err instanceof Error ? err.message : String(err);
+    sendToStreams({ type: "run_failed", error: errorMsg, runId });
+  });
+
+  res.json({ runId });
+});
+
+router.get("/runs", async (req: Request, res: Response) => {
+  if (!requireAdmin(req, res)) return;
+
+  const runs = await db
+    .select()
+    .from(uxTestRunsTable)
+    .orderBy(desc(uxTestRunsTable.startedAt))
+    .limit(50);
+
+  res.json({
+    runs: runs.map((r) => ({
+      runId: r.runId,
+      startedAt: r.startedAt.toISOString(),
+      completedAt: r.completedAt?.toISOString() ?? null,
+      personaCount: r.personaCount,
+      status: r.status,
+    })),
+  });
+});
+
+router.get("/runs/:runId", async (req: Request, res: Response) => {
+  if (!requireAdmin(req, res)) return;
+
+  const { runId } = req.params;
+
+  const runs = await db
+    .select()
+    .from(uxTestRunsTable)
+    .where(eq(uxTestRunsTable.runId, runId))
+    .limit(1);
+
+  const run = runs[0];
+  if (!run) {
+    res.status(404).json({ error: "Run not found" });
+    return;
+  }
+
+  const results = await db
+    .select()
+    .from(uxTestResultsTable)
+    .where(eq(uxTestResultsTable.runId, runId));
+
+  const personaMap = new Map(PERSONAS.map((p) => [p.key, p]));
+
+  res.json({
+    runId: run.runId,
+    startedAt: run.startedAt.toISOString(),
+    completedAt: run.completedAt?.toISOString() ?? null,
+    personaCount: run.personaCount,
+    status: run.status,
+    crossPersonaSummary: run.crossPersonaSummary ?? null,
+    results: results.map((r) => {
+      const persona = personaMap.get(r.personaKey);
+      return {
+        personaKey: r.personaKey,
+        personaName: r.personaName,
+        personaDescription: persona?.description ?? "",
+        assessmentData: r.assessmentData,
+        scores: r.scores,
+        aiQualityRating: r.aiQualityRating,
+        aiQualityNotes: r.aiQualityNotes,
+        observations: r.observations,
+        status: r.status,
+        error: r.error,
+        completedAt: r.completedAt?.toISOString() ?? null,
+      };
+    }),
+  });
+});
+
+router.get("/runs/:runId/stream", (req: Request, res: Response) => {
+  if (!req.isAuthenticated()) {
+    res.status(401).end();
+    return;
+  }
+
+  const { runId } = req.params;
+
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+  res.flushHeaders();
+
+  const clients = activeStreams.get(runId) ?? [];
+  clients.push(res);
+  activeStreams.set(runId, clients);
+
+  const heartbeat = setInterval(() => {
+    res.write(": heartbeat\n\n");
+  }, 15000);
+
+  req.on("close", () => {
+    clearInterval(heartbeat);
+    const remaining = (activeStreams.get(runId) ?? []).filter((c) => c !== res);
+    if (remaining.length === 0) {
+      activeStreams.delete(runId);
+    } else {
+      activeStreams.set(runId, remaining);
+    }
+  });
+});
+
+export default router;

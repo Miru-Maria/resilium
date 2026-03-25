@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import { db, resilienceReportsTable, reportFeedbackTable } from "@workspace/db";
 import { desc } from "drizzle-orm";
 import { requireAdminSession } from "../../middlewares/adminAuth.js";
+import uxTestRouter from "./ux-test/index.js";
 
 const router: IRouter = Router();
 
@@ -165,5 +166,7 @@ router.get("/analytics", requireAdminSession, async (req, res) => {
     res.status(500).json({ error: "INTERNAL_ERROR", message: "Failed to fetch analytics." });
   }
 });
+
+router.use("/ux-test", uxTestRouter);
 
 export default router;

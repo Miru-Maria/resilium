@@ -13,6 +13,8 @@ import ProfilePage from "@/pages/profile";
 import NotFound from "@/pages/not-found";
 import AdminLoginPage from "@/pages/admin/login";
 import AdminDashboard from "@/pages/admin/dashboard";
+import UxTestingPage from "@/pages/admin/ux-testing";
+import UxTestReportPage from "@/pages/admin/ux-test-report";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -45,6 +47,8 @@ function Router() {
       <Route path="/admin/login" component={AdminLoginPage} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
       <Route path="/admin" component={AdminLoginPage} />
+      <Route path="/admin/ux-test" component={UxTestingPage} />
+      <Route path="/admin/ux-test/report/:runId" component={UxTestReportPage} />
       <Route component={NotFound} />
     </Switch>
   );

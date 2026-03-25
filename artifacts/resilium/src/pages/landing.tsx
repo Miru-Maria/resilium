@@ -76,6 +76,9 @@ export default function LandingPage() {
                 <DropdownMenuItem asChild>
                   <Link href="/profile" className="cursor-pointer">My Plans</Link>
                 </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/admin/ux-test" className="cursor-pointer">UX Testing</Link>
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={logout} className="cursor-pointer">
                   Sign Out

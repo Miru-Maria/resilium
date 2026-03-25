@@ -1,4 +1,4 @@
-import { pgTable, text, serial, real, boolean, jsonb, timestamp, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, real, boolean, jsonb, timestamp, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { usersTable } from "./auth";
@@ -84,3 +84,37 @@ export const progressSnapshotsTable = pgTable("progress_snapshots", {
 export const insertProgressSnapshotSchema = createInsertSchema(progressSnapshotsTable).omit({ id: true });
 export type InsertProgressSnapshot = z.infer<typeof insertProgressSnapshotSchema>;
 export type ProgressSnapshot = typeof progressSnapshotsTable.$inferSelect;
+
+export const uxTestRunsTable = pgTable("ux_test_runs", {
+  id: serial("id").primaryKey(),
+  runId: text("run_id").notNull().unique(),
+  startedAt: timestamp("started_at").defaultNow().notNull(),
+  completedAt: timestamp("completed_at"),
+  personaCount: integer("persona_count").notNull(),
+  status: text("status").notNull().default("running"),
+  crossPersonaSummary: text("cross_persona_summary"),
+});
+
+export const insertUxTestRunSchema = createInsertSchema(uxTestRunsTable).omit({ id: true });
+export type InsertUxTestRun = z.infer<typeof insertUxTestRunSchema>;
+export type UxTestRun = typeof uxTestRunsTable.$inferSelect;
+
+export const uxTestResultsTable = pgTable("ux_test_results", {
+  id: serial("id").primaryKey(),
+  runId: text("run_id").notNull(),
+  personaKey: text("persona_key").notNull(),
+  personaName: text("persona_name").notNull(),
+  assessmentData: jsonb("assessment_data").notNull(),
+  reportId: text("report_id"),
+  scores: jsonb("scores"),
+  aiQualityRating: integer("ai_quality_rating"),
+  aiQualityNotes: text("ai_quality_notes"),
+  observations: jsonb("observations"),
+  status: text("status").notNull().default("pending"),
+  error: text("error"),
+  completedAt: timestamp("completed_at"),
+});
+
+export const insertUxTestResultSchema = createInsertSchema(uxTestResultsTable).omit({ id: true });
+export type InsertUxTestResult = z.infer<typeof insertUxTestResultSchema>;
+export type UxTestResult = typeof uxTestResultsTable.$inferSelect;
