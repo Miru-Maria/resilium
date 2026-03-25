@@ -6,3 +6,9 @@ id = "Idq-hMXsmfbVatslIDfxJ"
 uri = "file://attached_assets/resilium-thumbnail.png"
 type = "image"
 title = "Resilium Thumbnail (16:9)"
+
+[[outputs]]
+id = "i3xfefbSFMe09bIyDJ9cs"
+uri = "file://attached_assets/resilium-demo-script.md"
+type = "text"
+title = "Resilium Demo Video Script"
