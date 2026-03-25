@@ -51,82 +51,82 @@
 
 /* ===================== LIGHT MODE ===================== */
 :root {
-  /* Forest green + warm sand — premium, grounded, calm */
-  --background: 120 8% 97%;       /* #F8FAF9 — slightly green-tinted off-white */
-  --foreground: 160 20% 14%;      /* #1A2E24 — very dark forest green */
+  /* Warm amber + deep navy on cream linen */
+  --background: 38 55% 96%;       /* #FBF5EB — warm cream linen */
+  --foreground: 225 40% 18%;      /* #1A2340 — deep navy */
 
-  --card: 0 0% 100%;
-  --card-foreground: 160 20% 14%;
-  --card-border: 120 6% 90%;      /* #E4EAE7 */
+  --card: 38 50% 99%;             /* #FFFCF7 — warm near-white */
+  --card-foreground: 225 40% 18%;
+  --card-border: 35 25% 88%;      /* #E6D9C7 — warm sand border */
 
-  --popover: 0 0% 100%;
-  --popover-foreground: 160 20% 14%;
-  --popover-border: 120 6% 90%;
+  --popover: 38 50% 99%;
+  --popover-foreground: 225 40% 18%;
+  --popover-border: 35 25% 88%;
 
-  --primary: 152 58% 38%;         /* #1E9E6A — vibrant emerald green */
+  --primary: 25 65% 52%;          /* #D47235 — warm amber */
   --primary-foreground: 0 0% 100%;
-  --primary-border: 152 58% 32%;
+  --primary-border: 25 65% 44%;
 
-  --secondary: 152 35% 87%;       /* #CCE8DA — soft mint green */
-  --secondary-foreground: 152 58% 25%;
-  --secondary-border: 152 25% 79%;
+  --secondary: 35 50% 88%;        /* #EDD9B8 — warm sand */
+  --secondary-foreground: 25 65% 25%;
+  --secondary-border: 35 35% 78%;
 
-  --muted: 120 6% 94%;            /* #EDF0EE */
-  --muted-foreground: 155 8% 44%; /* #67776F */
-  --muted-border: 120 6% 88%;
+  --muted: 38 25% 92%;            /* #EDE5D5 — pale linen */
+  --muted-foreground: 35 15% 48%; /* #8A7A65 — warm mid-tone */
+  --muted-border: 35 20% 85%;
 
-  --accent: 155 30% 93%;          /* #E2F0EB — very light teal tint */
-  --accent-foreground: 156 26% 24%;
-  --accent-border: 155 20% 86%;
+  --accent: 25 40% 90%;           /* #EED9CA — soft peach */
+  --accent-foreground: 25 65% 25%;
+  --accent-border: 25 30% 82%;
 
   --destructive: 0 65% 55%;
   --destructive-foreground: 0 0% 100%;
   --destructive-border: 0 65% 47%;
 
-  --border: 120 6% 90%;
-  --input: 120 6% 90%;
-  --ring: 152 58% 38%;
+  --border: 35 25% 85%;           /* #DDD0BE — warm sand */
+  --input: 35 25% 85%;
+  --ring: 25 65% 52%;
 
   --radius: 0.75rem;
 }
 
 /* ===================== DARK MODE ===================== */
 .dark {
-  /* Dark forest night — same brand DNA as light, just different lighting */
-  --background: 155 30% 7%;       /* #0B1812 — very dark forest green */
-  --foreground: 120 12% 91%;      /* #E6EDE9 — slightly green-tinted near-white */
+  /* Deep navy night with warm amber accent */
+  --background: 225 42% 9%;       /* #0D1225 — very deep navy */
+  --foreground: 38 40% 88%;       /* #EAD9BE — warm cream text */
 
-  --card: 155 25% 10%;            /* #0F2018 */
-  --card-foreground: 120 12% 91%;
-  --card-border: 155 20% 16%;     /* #192E24 */
+  --card: 225 38% 13%;            /* #141B30 — dark navy card */
+  --card-foreground: 38 40% 88%;
+  --card-border: 225 30% 20%;     /* #1E2B48 */
 
-  --popover: 155 25% 10%;
-  --popover-foreground: 120 12% 91%;
-  --popover-border: 155 20% 16%;
+  --popover: 225 38% 13%;
+  --popover-foreground: 38 40% 88%;
+  --popover-border: 225 30% 20%;
 
-  --primary: 154 55% 48%;         /* #2ECC8F — emerald teal — readable on dark */
-  --primary-foreground: 155 30% 7%;
-  --primary-border: 154 55% 40%;
+  --primary: 28 70% 58%;          /* #E08040 — bright amber on dark */
+  --primary-foreground: 225 42% 9%;
+  --primary-border: 28 70% 48%;
 
-  --secondary: 38 18% 28%;        /* #3D3528 — muted warm brown */
-  --secondary-foreground: 120 12% 85%;
-  --secondary-border: 38 18% 22%;
+  --secondary: 225 30% 20%;       /* #1E2B4A — muted navy */
+  --secondary-foreground: 38 30% 80%;
+  --secondary-border: 225 28% 16%;
 
-  --muted: 155 20% 13%;           /* #152219 */
-  --muted-foreground: 154 12% 55%;/* #7BA08E */
-  --muted-border: 155 18% 19%;
+  --muted: 225 30% 15%;           /* #161E38 */
+  --muted-foreground: 225 15% 55%;/* #7A85A8 — blue-grey */
+  --muted-border: 225 28% 22%;
 
-  --accent: 154 30% 14%;          /* #132419 */
-  --accent-foreground: 120 12% 91%;
-  --accent-border: 154 25% 20%;
+  --accent: 28 30% 18%;           /* #2E2018 — dark warm amber tint */
+  --accent-foreground: 38 40% 88%;
+  --accent-border: 28 25% 24%;
 
   --destructive: 0 65% 55%;
-  --destructive-foreground: 120 12% 91%;
+  --destructive-foreground: 38 40% 88%;
   --destructive-border: 0 65% 45%;
 
-  --border: 155 20% 16%;
-  --input: 155 20% 16%;
-  --ring: 154 55% 48%;
+  --border: 225 28% 20%;
+  --input: 225 28% 20%;
+  --ring: 28 70% 58%;
 }
 
 @layer base {
