@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
-  activeSection?: "mobile" | "gdpr" | "consent" | "ux-testing";
+  activeSection?: "dashboard" | "mobile" | "gdpr" | "consent" | "ux-testing";
 }
 
 export function getAdminToken(): string | null {
@@ -61,9 +61,10 @@ export function AdminLayout({ children, activeSection }: AdminLayoutProps) {
   if (!authed) return null;
 
   const navItems = [
+    { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard, key: "dashboard" },
     { href: "/admin/mobile", label: "Mobile", icon: Smartphone, key: "mobile" },
     { href: "/admin/gdpr", label: "GDPR", icon: Shield, key: "gdpr" },
-    { href: "/admin/consent-log", label: "Consent Log", icon: LayoutDashboard, key: "consent" },
+    { href: "/admin/consent-log", label: "Consent Log", icon: Shield, key: "consent" },
     { href: "/admin/ux-testing", label: "AI UX Tester", icon: FlaskConical, key: "ux-testing" },
   ];
 

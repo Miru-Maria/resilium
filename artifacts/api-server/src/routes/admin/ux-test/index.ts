@@ -146,6 +146,59 @@ router.get("/runs/:runId", async (req: Request, res: Response) => {
   });
 });
 
+router.delete("/runs/:runId", async (req: Request, res: Response) => {
+  if (!requireAdmin(req, res)) return;
+
+  const { runId } = req.params;
+
+  const existing = await db
+    .select()
+    .from(uxTestRunsTable)
+    .where(eq(uxTestRunsTable.runId, runId))
+    .limit(1);
+
+  if (!existing[0]) {
+    res.status(404).json({ error: "Run not found" });
+    return;
+  }
+
+  await db.delete(uxTestResultsTable).where(eq(uxTestResultsTable.runId, runId));
+  await db.delete(uxTestRunsTable).where(eq(uxTestRunsTable.runId, runId));
+
+  // Close any active SSE streams for this run
+  const clients = activeStreams.get(runId) ?? [];
+  for (const client of clients) {
+    try { client.end(); } catch { /* ignore */ }
+  }
+  activeStreams.delete(runId);
+
+  res.json({ success: true });
+});
+
+router.post("/runs/:runId/cancel", async (req: Request, res: Response) => {
+  if (!requireAdmin(req, res)) return;
+
+  const { runId } = req.params;
+
+  await db
+    .update(uxTestRunsTable)
+    .set({ status: "failed", completedAt: new Date() })
+    .where(eq(uxTestRunsTable.runId, runId));
+
+  await db
+    .update(uxTestResultsTable)
+    .set({ status: "failed", error: "Cancelled by admin", completedAt: new Date() })
+    .where(eq(uxTestResultsTable.runId, runId));
+
+  const clients = activeStreams.get(runId) ?? [];
+  for (const client of clients) {
+    try { client.write(`data: ${JSON.stringify({ type: "run_failed", error: "Cancelled", runId })}\n\n`); client.end(); } catch { /* ignore */ }
+  }
+  activeStreams.delete(runId);
+
+  res.json({ success: true });
+});
+
 router.get("/runs/:runId/stream", (req: Request, res: Response) => {
   // SSE can't send custom headers, so we accept token as query param too
   const authHeader = req.headers["authorization"];

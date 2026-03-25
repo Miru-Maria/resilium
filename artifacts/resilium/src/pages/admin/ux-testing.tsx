@@ -1,13 +1,27 @@
 import { useState, useEffect, useRef } from "react";
-import { Link, useLocation } from "wouter";
+import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, Play, CheckCircle2, XCircle, Clock, ChevronRight, ArrowLeft } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { AdminLayout, adminAuthHeaders, getAdminToken } from "./layout";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
+  Loader2, Play, CheckCircle2, XCircle, Clock, ChevronRight,
+  AlertCircle, RefreshCw, Trash2, Ban
+} from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { AdminLayout, getAdminToken } from "./layout";
 
 interface PersonaMeta {
   key: string;
@@ -36,14 +50,30 @@ function authH() { const t = getToken(); return t ? { Authorization: `Bearer ${t
 
 async function fetchPersonas(): Promise<{ personas: PersonaMeta[] }> {
   const res = await fetch("/api/admin/ux-test/personas", { headers: authH() });
-  if (!res.ok) throw new Error("Failed to fetch personas");
+  if (!res.ok) throw new Error(`Failed to fetch personas (${res.status})`);
   return res.json();
 }
 
 async function fetchRuns(): Promise<{ runs: RunSummary[] }> {
   const res = await fetch("/api/admin/ux-test/runs", { headers: authH() });
-  if (!res.ok) throw new Error("Failed to fetch runs");
+  if (!res.ok) throw new Error(`Failed to fetch runs (${res.status})`);
   return res.json();
+}
+
+async function deleteRun(runId: string): Promise<void> {
+  const res = await fetch(`/api/admin/ux-test/runs/${runId}`, {
+    method: "DELETE",
+    headers: authH(),
+  });
+  if (!res.ok) throw new Error("Failed to delete run");
+}
+
+async function cancelRun(runId: string): Promise<void> {
+  const res = await fetch(`/api/admin/ux-test/runs/${runId}/cancel`, {
+    method: "POST",
+    headers: authH(),
+  });
+  if (!res.ok) throw new Error("Failed to cancel run");
 }
 
 function getRatingColor(rating: number) {
@@ -61,25 +91,52 @@ function getRatingLabel(rating: number) {
 }
 
 export default function UxTestingPage() {
-  const [, navigate] = useLocation();
   const adminToken = getAdminToken();
+  const queryClient = useQueryClient();
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
   const [isRunning, setIsRunning] = useState(false);
   const [activeRunId, setActiveRunId] = useState<string | null>(null);
   const [personaProgress, setPersonaProgress] = useState<Map<string, PersonaProgress>>(new Map());
   const [runComplete, setRunComplete] = useState(false);
+  const [runError, setRunError] = useState<string | null>(null);
   const eventSourceRef = useRef<EventSource | null>(null);
 
-  const { data: personasData, isLoading: personasLoading } = useQuery({
+  const {
+    data: personasData,
+    isLoading: personasLoading,
+    error: personasError,
+    refetch: refetchPersonas,
+  } = useQuery({
     queryKey: ["ux-personas"],
     queryFn: fetchPersonas,
     enabled: !!adminToken,
+    retry: 1,
   });
 
-  const { data: runsData, isLoading: runsLoading, refetch: refetchRuns } = useQuery({
+  const {
+    data: runsData,
+    isLoading: runsLoading,
+    error: runsError,
+    refetch: refetchRuns,
+  } = useQuery({
     queryKey: ["ux-runs"],
     queryFn: fetchRuns,
     enabled: !!adminToken,
+    retry: 1,
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteRun,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["ux-runs"] });
+    },
+  });
+
+  const cancelMutation = useMutation({
+    mutationFn: cancelRun,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["ux-runs"] });
+    },
   });
 
   const personas = personasData?.personas ?? [];
@@ -118,6 +175,7 @@ export default function UxTestingPage() {
     if (selectedKeys.size === 0) return;
     setIsRunning(true);
     setRunComplete(false);
+    setRunError(null);
 
     const initialProgress = new Map<string, PersonaProgress>();
     for (const key of selectedKeys) {
@@ -135,7 +193,10 @@ export default function UxTestingPage() {
         body: JSON.stringify({ personaKeys: Array.from(selectedKeys) }),
       });
 
-      if (!res.ok) throw new Error("Failed to start run");
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({})) as { error?: string };
+        throw new Error(body.error ?? `Request failed (${res.status})`);
+      }
       const { runId } = await res.json() as { runId: string };
       setActiveRunId(runId);
 
@@ -175,10 +236,16 @@ export default function UxTestingPage() {
             next.set(data.personaKey!, { ...existing, status: "failed", error: data.error });
             return next;
           });
-        } else if (data.type === "run_completed" || data.type === "run_failed") {
+        } else if (data.type === "run_completed") {
           es.close();
           setIsRunning(false);
           setRunComplete(true);
+          refetchRuns();
+        } else if (data.type === "run_failed") {
+          es.close();
+          setIsRunning(false);
+          setRunComplete(true);
+          setRunError(data.error ?? "The test run encountered an error.");
           refetchRuns();
         }
       };
@@ -186,13 +253,16 @@ export default function UxTestingPage() {
       es.onerror = () => {
         es.close();
         setIsRunning(false);
+        setRunError("Lost connection to the test stream. The run may still be processing.");
+        refetchRuns();
       };
-    } catch {
+    } catch (err) {
       setIsRunning(false);
+      setRunError(err instanceof Error ? err.message : "Failed to start the test run.");
     }
   }
 
-  const allSelected = selectedKeys.size === personas.length;
+  const allSelected = selectedKeys.size === personas.length && personas.length > 0;
   const noneSelected = selectedKeys.size === 0;
 
   return (
@@ -211,15 +281,31 @@ export default function UxTestingPage() {
                   <h2 className="text-lg font-semibold text-foreground">Select Personas</h2>
                   <p className="text-sm text-muted-foreground">Choose which user personas to simulate in this test run</p>
                 </div>
-                <Button variant="outline" size="sm" onClick={toggleAll}>
-                  {allSelected ? "Deselect All" : "Select All"}
-                </Button>
+                {personas.length > 0 && (
+                  <Button variant="outline" size="sm" onClick={toggleAll}>
+                    {allSelected ? "Deselect All" : "Select All"}
+                  </Button>
+                )}
               </div>
 
               {personasLoading ? (
                 <div className="flex items-center gap-2 text-muted-foreground py-8 justify-center">
                   <Loader2 className="w-4 h-4 animate-spin" />
                   <span className="text-sm">Loading personas...</span>
+                </div>
+              ) : personasError ? (
+                <div className="flex flex-col items-center gap-3 py-8 text-center">
+                  <AlertCircle className="w-8 h-8 text-destructive" />
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Could not load personas</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {personasError instanceof Error ? personasError.message : "An error occurred"}
+                    </p>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={() => refetchPersonas()} className="gap-2">
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    Retry
+                  </Button>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -246,11 +332,26 @@ export default function UxTestingPage() {
               )}
             </div>
 
+            {runError && (
+              <div className="flex items-start gap-3 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3">
+                <AlertCircle className="w-4 h-4 text-destructive mt-0.5 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-destructive">Run failed</p>
+                  <p className="text-xs text-destructive/80 mt-0.5">{runError}</p>
+                </div>
+                <Button variant="ghost" size="sm" className="shrink-0 h-7 px-2 text-xs" onClick={() => setRunError(null)}>Dismiss</Button>
+              </div>
+            )}
+
             <div className="flex items-center justify-between pt-2">
               <p className="text-sm text-muted-foreground">
                 {selectedKeys.size} of {personas.length} personas selected
               </p>
-              <Button onClick={startRun} disabled={noneSelected || personasLoading} className="gap-2">
+              <Button
+                onClick={startRun}
+                disabled={noneSelected || personasLoading || !!personasError}
+                className="gap-2"
+              >
                 <Play className="w-4 h-4" />
                 Run UX Test
               </Button>
@@ -263,14 +364,19 @@ export default function UxTestingPage() {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-lg font-semibold text-foreground">
-                  {isRunning ? "Test in Progress" : "Test Complete"}
+                  {isRunning ? "Test in Progress" : runError ? "Test Failed" : "Test Complete"}
                 </h2>
                 <p className="text-sm text-muted-foreground">
-                  {isRunning ? "Simulating personas and evaluating reports..." : "All personas evaluated"}
+                  {isRunning
+                    ? "Simulating personas and evaluating reports — this may take several minutes..."
+                    : runError
+                    ? runError
+                    : "All personas evaluated successfully"}
                 </p>
               </div>
               {isRunning && <Loader2 className="w-5 h-5 animate-spin text-primary" />}
-              {runComplete && <CheckCircle2 className="w-5 h-5 text-emerald-500" />}
+              {runComplete && !runError && <CheckCircle2 className="w-5 h-5 text-emerald-500" />}
+              {runComplete && runError && <XCircle className="w-5 h-5 text-destructive" />}
             </div>
 
             <div className="space-y-2">
@@ -302,14 +408,24 @@ export default function UxTestingPage() {
               ))}
             </div>
 
-            {runComplete && activeRunId && (
+            {runComplete && (
               <div className="flex gap-3 pt-2">
-                <Link href={`/admin/ux-test/report/${activeRunId}`}>
-                  <Button className="gap-2">
-                    View Report <ChevronRight className="w-4 h-4" />
-                  </Button>
-                </Link>
-                <Button variant="outline" onClick={() => { setRunComplete(false); setActiveRunId(null); setPersonaProgress(new Map()); }}>
+                {activeRunId && !runError && (
+                  <Link href={`/admin/ux-test/report/${activeRunId}`}>
+                    <Button className="gap-2">
+                      View Report <ChevronRight className="w-4 h-4" />
+                    </Button>
+                  </Link>
+                )}
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setRunComplete(false);
+                    setActiveRunId(null);
+                    setPersonaProgress(new Map());
+                    setRunError(null);
+                  }}
+                >
                   Run Another Test
                 </Button>
               </div>
@@ -326,20 +442,37 @@ export default function UxTestingPage() {
               <Loader2 className="w-4 h-4 animate-spin" />
               <span className="text-sm">Loading runs...</span>
             </div>
+          ) : runsError ? (
+            <div className="flex flex-col items-center gap-3 py-4 text-center">
+              <AlertCircle className="w-6 h-6 text-destructive" />
+              <p className="text-sm text-muted-foreground">
+                {runsError instanceof Error ? runsError.message : "Failed to load previous runs"}
+              </p>
+              <Button variant="outline" size="sm" onClick={() => refetchRuns()} className="gap-2">
+                <RefreshCw className="w-3.5 h-3.5" />
+                Retry
+              </Button>
+            </div>
           ) : runs.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-6">No test runs yet — run your first UX test above</p>
           ) : (
             <div className="space-y-2">
               {runs.map((run) => (
-                <Link key={run.runId} href={`/admin/ux-test/report/${run.runId}`}>
-                  <div className="flex items-center justify-between p-4 rounded-lg border border-border/60 bg-card hover:bg-accent/40 transition-colors cursor-pointer">
+                <div
+                  key={run.runId}
+                  className="flex items-center justify-between p-4 rounded-lg border border-border/60 bg-card"
+                >
+                  <Link href={`/admin/ux-test/report/${run.runId}`} className="flex-1 min-w-0">
                     <div className="flex items-center gap-3">
-                      {run.status === "completed" && <CheckCircle2 className="w-4 h-4 text-emerald-500" />}
-                      {run.status === "running" && <Loader2 className="w-4 h-4 animate-spin text-primary" />}
-                      {run.status === "failed" && <XCircle className="w-4 h-4 text-destructive" />}
-                      <div>
+                      {run.status === "completed" && <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />}
+                      {run.status === "running" && <Loader2 className="w-4 h-4 animate-spin text-primary shrink-0" />}
+                      {run.status === "failed" && <XCircle className="w-4 h-4 text-destructive shrink-0" />}
+                      <div className="min-w-0">
                         <p className="text-sm font-medium text-foreground">
-                          {new Date(run.startedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                          {new Date(run.startedAt).toLocaleDateString("en-US", {
+                            month: "short", day: "numeric", year: "numeric",
+                            hour: "2-digit", minute: "2-digit",
+                          })}
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {run.personaCount} persona{run.personaCount !== 1 ? "s" : ""}
@@ -347,14 +480,69 @@ export default function UxTestingPage() {
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant={run.status === "completed" ? "outline" : run.status === "failed" ? "destructive" : "secondary"} className="text-xs capitalize">
-                        {run.status}
-                      </Badge>
+                  </Link>
+                  <div className="flex items-center gap-2 shrink-0 ml-3">
+                    <Badge
+                      variant={run.status === "completed" ? "outline" : run.status === "failed" ? "destructive" : "secondary"}
+                      className="text-xs capitalize"
+                    >
+                      {run.status}
+                    </Badge>
+                    {run.status === "running" && (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive" title="Cancel run">
+                            <Ban className="w-3.5 h-3.5" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Cancel test run?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This will mark the run as failed. Any in-progress persona simulations will be stopped.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Keep Running</AlertDialogCancel>
+                            <AlertDialogAction
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              onClick={() => cancelMutation.mutate(run.runId)}
+                            >
+                              Cancel Run
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    )}
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive" title="Delete run">
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete this test run?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This will permanently remove the run and all its results. This cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            onClick={() => deleteMutation.mutate(run.runId)}
+                          >
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                    <Link href={`/admin/ux-test/report/${run.runId}`}>
                       <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                    </div>
+                    </Link>
                   </div>
-                </Link>
+                </div>
               ))}
             </div>
           )}
