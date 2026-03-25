@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "Idq-hMXsmfbVatslIDfxJ"
+uri = "file://attached_assets/resilium-thumbnail.png"
+type = "image"
+title = "Resilium Thumbnail (16:9)"
