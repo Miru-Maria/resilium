@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Loader2, LayoutDashboard, Smartphone, Shield, LogOut } from "lucide-react";
+import { Loader2, LayoutDashboard, Smartphone, Shield, LogOut, FlaskConical } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
-  activeSection?: "mobile" | "gdpr" | "consent";
+  activeSection?: "mobile" | "gdpr" | "consent" | "ux-testing";
 }
 
 export function getAdminToken(): string | null {
@@ -64,12 +64,13 @@ export function AdminLayout({ children, activeSection }: AdminLayoutProps) {
     { href: "/admin/mobile", label: "Mobile", icon: Smartphone, key: "mobile" },
     { href: "/admin/gdpr", label: "GDPR", icon: Shield, key: "gdpr" },
     { href: "/admin/consent-log", label: "Consent Log", icon: LayoutDashboard, key: "consent" },
+    { href: "/admin/ux-testing", label: "AI UX Tester", icon: FlaskConical, key: "ux-testing" },
   ];
 
   return (
     <div className="min-h-screen bg-muted/30 flex">
       <aside className="w-56 min-h-screen bg-background border-r flex flex-col">
-        <div className="p-4 border-b flex items-center gap-2">
+        <div className="p-4 border-b flex items-center gap-2 cursor-pointer" onClick={() => navigate("/admin/dashboard")}>
           <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
             <Shield className="w-4 h-4 text-primary-foreground" />
           </div>

@@ -7,7 +7,7 @@ import {
 } from "recharts";
 import {
   ShieldAlert, LogOut, Loader2, AlertTriangle, FileText,
-  Star, Activity, MessageSquare
+  Star, Activity, MessageSquare, Smartphone, Shield, LayoutDashboard, FlaskConical
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -138,6 +138,20 @@ export default function AdminDashboard() {
             <span className="font-display font-bold text-lg text-primary">Resilium</span>
             <Badge variant="secondary" className="ml-2 text-xs">Admin</Badge>
           </div>
+          <nav className="hidden sm:flex items-center gap-1">
+            {[
+              { href: "/admin/mobile", label: "Mobile", icon: Smartphone },
+              { href: "/admin/gdpr", label: "GDPR", icon: Shield },
+              { href: "/admin/consent-log", label: "Consent Log", icon: LayoutDashboard },
+              { href: "/admin/ux-testing", label: "AI UX Tester", icon: FlaskConical },
+            ].map(({ href, label, icon: Icon }) => (
+              <Link key={href} href={href}>
+                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground gap-1.5">
+                  <Icon className="w-3.5 h-3.5" />{label}
+                </Button>
+              </Link>
+            ))}
+          </nav>
           <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground hover:text-foreground">
             <LogOut className="w-4 h-4 mr-2" /> Sign out
           </Button>
