@@ -1,6 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { randomUUID } from "crypto";
-import { db, uxTestRunsTable, uxTestResultsTable } from "@workspace/db";
+import { db, uxTestRunsTable, uxTestResultsTable, resilienceReportsTable } from "@workspace/db";
 import { eq, desc } from "drizzle-orm";
 import { PERSONAS } from "./personas.js";
 import { runUxTestSimulation, type ProgressEvent } from "./simulation.js";
@@ -164,6 +164,8 @@ router.delete("/runs/:runId", async (req: Request, res: Response) => {
 
   await db.delete(uxTestResultsTable).where(eq(uxTestResultsTable.runId, runId));
   await db.delete(uxTestRunsTable).where(eq(uxTestRunsTable.runId, runId));
+  // Clean up any test reports that were created for this run but not yet purged
+  await db.delete(resilienceReportsTable).where(eq(resilienceReportsTable.sessionId, `ux-test-${runId}`));
 
   // Close any active SSE streams for this run
   const clients = activeStreams.get(runId) ?? [];
@@ -189,6 +191,9 @@ router.post("/runs/:runId/cancel", async (req: Request, res: Response) => {
     .update(uxTestResultsTable)
     .set({ status: "failed", error: "Cancelled by admin", completedAt: new Date() })
     .where(eq(uxTestResultsTable.runId, runId));
+
+  // Clean up any test reports created before the cancel
+  await db.delete(resilienceReportsTable).where(eq(resilienceReportsTable.sessionId, `ux-test-${runId}`));
 
   const clients = activeStreams.get(runId) ?? [];
   for (const client of clients) {

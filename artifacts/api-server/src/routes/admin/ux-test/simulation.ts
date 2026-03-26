@@ -291,6 +291,18 @@ export async function runUxTestSimulation(
     onProgress({ type: "run_completed", runId });
   } catch (err) {
     const errorMsg = err instanceof Error ? err.message : String(err);
+
+    // Clean up any reports created before the failure so they don't pollute the main reports table
+    if (createdReportIds.length > 0) {
+      try {
+        await db
+          .delete(resilienceReportsTable)
+          .where(inArray(resilienceReportsTable.reportId, createdReportIds));
+      } catch {
+        // Best-effort cleanup — don't mask the original error
+      }
+    }
+
     await db
       .update(uxTestRunsTable)
       .set({ status: "failed", completedAt: new Date() })
