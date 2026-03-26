@@ -31,9 +31,7 @@ export default function LandingPage() {
 
       <header className="w-full py-6 px-6 lg:px-12 z-10 flex justify-between items-center">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-            <ResilientIcon className="w-5 h-5 text-primary-foreground" />
-          </div>
+          <ResilientIcon className="w-7 h-7" />
           <span className="font-display font-bold text-xl tracking-tight text-primary">Resilium</span>
         </div>
 
