@@ -7,6 +7,7 @@ import LandingPage from "@/pages/landing";
 import AssessmentPage from "@/pages/assessment";
 import ResultsPage from "@/pages/results";
 import PrivacyPage from "@/pages/privacy";
+import AboutPage from "@/pages/about";
 import ProfilePage from "@/pages/profile";
 import NotFound from "@/pages/not-found";
 import AdminLoginPage from "@/pages/admin/login";
@@ -33,6 +34,7 @@ function Router() {
       <Route path="/assess" component={AssessmentPage} />
       <Route path="/results/:reportId" component={ResultsPage} />
       <Route path="/privacy" component={PrivacyPage} />
+      <Route path="/about" component={AboutPage} />
       <Route path="/profile" component={ProfilePage} />
       <Route path="/admin/login" component={AdminLoginPage} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
