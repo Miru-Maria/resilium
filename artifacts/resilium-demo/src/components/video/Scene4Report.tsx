@@ -47,7 +47,7 @@ export function Scene4Report() {
         className="absolute inset-0 w-full h-full object-cover opacity-10"
       />
 
-      <div className="w-full flex h-full p-16 gap-16 relative z-10">
+      <div className="w-full flex h-full p-[4cqw] gap-[4cqw] relative z-10">
         {/* Left Column: Score & Radar */}
         <div className="w-1/2 flex flex-col items-center justify-center relative">
           
@@ -137,37 +137,37 @@ export function Scene4Report() {
         </div>
 
         {/* Right Column: Action Plan */}
-        <div className="w-1/2 flex flex-col justify-center gap-12">
+        <div className="w-1/2 flex flex-col justify-center gap-[3cqh]">
           {step >= 2 && (
             <motion.div
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8 }}
             >
-              <h3 className="text-3xl font-display text-[var(--color-error)] mb-8">
+              <h3 className="text-[2.5cqw] font-display text-[var(--color-error)] mb-[2cqh]">
                 Critical vulnerabilities — surfaced and ranked.
               </h3>
               
-              <div className="space-y-4">
+              <div className="space-y-[1.5cqh]">
                 {checklist.map((item, i) => (
                   <motion.div 
                     key={i}
-                    className="flex items-center gap-4 bg-[var(--color-bg-light)] border border-[var(--color-secondary)] p-4 rounded-lg"
+                    className="flex items-center gap-[1.5cqw] bg-[var(--color-bg-light)] border border-[var(--color-secondary)] p-[1.5cqw] rounded-lg"
                     initial={{ opacity: 0, x: 50 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.5, delay: i * 0.3 }}
                   >
                     <motion.div 
-                      className="w-6 h-6 rounded-full border-2 border-[var(--color-primary)] flex items-center justify-center"
+                      className="w-[2cqw] h-[2cqw] rounded-full border-2 border-[var(--color-primary)] flex items-center justify-center shrink-0"
                       initial={{ backgroundColor: 'transparent' }}
                       animate={{ backgroundColor: 'var(--color-primary)' }}
                       transition={{ delay: 1 + i * 0.3 }}
                     >
-                      <motion.svg viewBox="0 0 24 24" className="w-4 h-4 text-[var(--color-bg-dark)]" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 1.2 + i * 0.3 }}>
+                      <motion.svg viewBox="0 0 24 24" className="w-[1.2cqw] h-[1.2cqw] text-[var(--color-bg-dark)]" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 1.2 + i * 0.3 }}>
                         <polyline points="20 6 9 17 4 12" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
                       </motion.svg>
                     </motion.div>
-                    <span className="text-xl font-body text-[var(--color-text-primary)]">{item}</span>
+                    <span className="text-[1.5cqw] font-body text-[var(--color-text-primary)]">{item}</span>
                   </motion.div>
                 ))}
               </div>
@@ -176,7 +176,7 @@ export function Scene4Report() {
 
           {step >= 3 && (
             <motion.div
-              className="flex gap-4"
+              className="flex gap-[1cqw]"
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
@@ -184,7 +184,7 @@ export function Scene4Report() {
               {['30-day plan', '90-day plan', '12-month plan'].map((plan, i) => (
                 <motion.div
                   key={plan}
-                  className={`flex-1 p-4 rounded-xl text-center font-mono ${i === 0 ? 'bg-[var(--color-primary)] text-[var(--color-bg-dark)]' : 'bg-[var(--color-bg-light)] text-[var(--color-text-secondary)] border border-[var(--color-secondary)]'}`}
+                  className={`flex-1 p-[1cqw] rounded-xl text-center font-mono text-[1.2cqw] ${i === 0 ? 'bg-[var(--color-primary)] text-[var(--color-bg-dark)]' : 'bg-[var(--color-bg-light)] text-[var(--color-text-secondary)] border border-[var(--color-secondary)]'}`}
                   initial={{ scale: 0.8, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ delay: i * 0.2, type: "spring" }}

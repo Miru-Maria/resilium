@@ -77,7 +77,7 @@ export function Scene5Profile() {
 
       {/* Right Screen: Admin */}
       <motion.div 
-        className="w-1/2 p-16 flex flex-col justify-center bg-[#090C1A]"
+        className="w-1/2 p-[4cqw] flex flex-col justify-center bg-[#090C1A]"
         initial={{ x: '100%' }}
         animate={{ x: 0 }}
         transition={{ duration: 0.8, ease: "circOut" }}
@@ -88,11 +88,11 @@ export function Scene5Profile() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <h2 className="text-4xl font-display font-bold text-[var(--color-text-primary)] mb-8">
+            <h2 className="text-[3cqw] font-display font-bold text-[var(--color-text-primary)] mb-[2cqh]">
               Admin dashboard: platform health at a glance.
             </h2>
 
-            <div className="grid grid-cols-2 gap-4 mb-12">
+            <div className="grid grid-cols-2 gap-[2cqw] mb-[4cqh]">
               {[
                 { label: "Active Users", val: "12,402", color: "var(--color-primary)" },
                 { label: "Plans Generated", val: "48,193", color: "var(--color-success)" },
@@ -101,13 +101,13 @@ export function Scene5Profile() {
               ].map((stat, i) => (
                 <motion.div 
                   key={stat.label}
-                  className="bg-[var(--color-bg-light)] p-6 rounded-xl border border-[var(--color-secondary)]"
+                  className="bg-[var(--color-bg-light)] p-[1.5cqw] rounded-xl border border-[var(--color-secondary)]"
                   initial={{ scale: 0.9, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ delay: i * 0.1 }}
                 >
-                  <div className="text-sm font-mono text-[var(--color-text-secondary)] mb-2">{stat.label}</div>
-                  <div className="text-3xl font-display font-bold" style={{ color: stat.color }}>{stat.val}</div>
+                  <div className="text-[1cqw] font-mono text-[var(--color-text-secondary)] mb-[0.5cqw]">{stat.label}</div>
+                  <div className="text-[2.5cqw] font-display font-bold" style={{ color: stat.color }}>{stat.val}</div>
                 </motion.div>
               ))}
             </div>
@@ -121,13 +121,13 @@ export function Scene5Profile() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <div className="bg-[var(--color-bg-dark)] p-6 rounded-xl h-full flex items-center gap-6">
-              <div className="w-16 h-16 rounded-full bg-[rgba(224,128,64,0.1)] flex items-center justify-center text-[var(--color-primary)]">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            <div className="bg-[var(--color-bg-dark)] p-[1.5cqw] rounded-xl h-full flex items-center gap-[1.5cqw]">
+              <div className="w-[4cqw] h-[4cqw] rounded-full bg-[rgba(224,128,64,0.1)] flex items-center justify-center text-[var(--color-primary)]">
+                <svg width="60%" height="60%" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
               </div>
               <div>
-                <h4 className="text-xl font-display font-bold text-[var(--color-text-primary)]">AI UX Testing Suite</h4>
-                <p className="text-[var(--color-text-secondary)]">Autonomous personas, zero waiting.</p>
+                <h4 className="text-[1.5cqw] font-display font-bold text-[var(--color-text-primary)]">AI UX Testing Suite</h4>
+                <p className="text-[1.2cqw] text-[var(--color-text-secondary)]">Autonomous personas, zero waiting.</p>
               </div>
             </div>
           </motion.div>

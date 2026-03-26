@@ -45,11 +45,11 @@ export function Scene1Hook() {
           {crisisWords.map((word, i) => (
             <motion.div
               key={word}
-              className="absolute text-[var(--color-error)] text-xl font-mono tracking-widest font-bold opacity-40"
-              initial={{ rotate: i * (360 / crisisWords.length), x: 400 }}
+              className="absolute text-[var(--color-error)] text-[2cqw] font-mono tracking-widest font-bold opacity-40"
+              initial={{ rotate: i * (360 / crisisWords.length), x: '30cqw' }}
               animate={{
                 rotate: [i * (360 / crisisWords.length), i * (360 / crisisWords.length) + 360],
-                x: [400, 50],
+                x: ['30cqw', '5cqw'],
                 scale: [1, 0.5]
               }}
               transition={{ duration: 1.5, ease: "easeIn" }}
@@ -58,7 +58,7 @@ export function Scene1Hook() {
             </motion.div>
           ))}
           <motion.div
-            className="w-32 h-32 rounded-full bg-[var(--color-bg-light)] border border-[var(--color-secondary)] shadow-2xl flex items-center justify-center"
+            className="w-[10cqw] h-[10cqw] rounded-full bg-[var(--color-bg-light)] border border-[var(--color-secondary)] shadow-2xl flex items-center justify-center"
             initial={{ scale: 0 }}
             animate={{ scale: [0, 1.2, 0] }}
             transition={{ duration: 1.5, times: [0, 0.8, 1] }}
@@ -100,12 +100,12 @@ export function Scene1Hook() {
       {/* Resolution beat */}
       {step >= 2 && (
         <motion.div
-          className="absolute bottom-32 text-center"
+          className="absolute bottom-[15cqh] text-center"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          <p className="text-2xl text-[var(--color-text-primary)] font-body font-medium mb-4">
+          <p className="text-[2cqw] text-[var(--color-text-primary)] font-body font-medium mb-[2cqh]">
             Most people aren't prepared. <span className="text-[var(--color-primary)]">Resilium changes that.</span>
           </p>
         </motion.div>
@@ -114,12 +114,12 @@ export function Scene1Hook() {
       {/* Tagline reveal */}
       {step >= 3 && (
         <motion.div
-          className="absolute bottom-16 text-center w-full"
+          className="absolute bottom-[8cqh] text-center w-full"
           initial={{ opacity: 0, filter: 'blur(10px)' }}
           animate={{ opacity: 1, filter: 'blur(0px)' }}
           transition={{ duration: 1 }}
         >
-          <p className="text-xl text-[var(--color-text-muted)] font-mono tracking-widest uppercase">
+          <p className="text-[1.5cqw] text-[var(--color-text-muted)] font-mono tracking-widest uppercase">
             AI-powered personal resilience planning.
           </p>
         </motion.div>
