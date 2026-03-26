@@ -1,0 +1,31 @@
+kind = "video"
+previewPath = "/resilium-demo/"
+title = "Resilium — Demo Video"
+version = "1.0.0"
+id = "artifacts/resilium-demo"
+router = "path"
+
+[[integratedSkills]]
+name = "video-js"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/resilium-demo/" ]
+localPort = 24749
+
+[services.development]
+run = "pnpm --filter @workspace/resilium-demo run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/resilium-demo", "run", "build" ]
+publicDir = "artifacts/resilium-demo/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24749"
+BASE_PATH = "/resilium-demo/"

@@ -1,0 +1,23 @@
+We live in an era of constant disruption — economic shocks, job loss, health crises, geopolitical instability. Most people aren't prepared. Resilium changes that.
+Resilium is an AI-powered personal resilience platform that analyzes who you are, where you live, and how you live — and turns that into a personalized action plan.
+Click Get My Resilience Plan to begin.
+The assessment takes about ten minutes and covers eleven dimensions of personal preparedness.
+We start with mental resilience — ten short statements on how you handle stress, uncertainty, and crisis. Each one rated on a five-point scale.
+These shape the psychological half of your report and unlock growth-oriented or stability-oriented recommendations based on your profile.
+Then we capture where you are in the world — because geography affects your climate, economic, and political risk factors.
+Income stability, financial runway, whether you have dependents — these feed directly into your financial and resources scores.
+Your skills matter in a crisis. Practical abilities like coding, first aid, or speaking multiple languages all improve your resilience score.
+Finally, you tell us what risks keep you up at night. Job automation, inflation, climate events — your priorities shape the action plan.
+The AI builds your report in seconds.
+Your overall resilience score is calculated across six weighted categories: financial stability, health, skills, mobility, psychological resilience, and resources.
+The radar chart makes it immediately clear where your strengths are and where the gaps are. Here, financial and resources are the areas needing the most attention.
+Below the chart, the AI writes a personalized risk profile summary — a plain-English interpretation of your situation, not a generic template.
+Your mental resilience profile breaks down into six dimensions: stress tolerance, adaptability, learning agility, change management, emotional regulation, and social support. High scorers receive more ambitious, challenge-oriented recommendations.
+The platform surfaces your most critical vulnerabilities, ranked by severity — from critical down to low risk.
+Then comes the Action Checklist — a prioritized, interactive task list sorted by your weakest areas first. Check items off as you complete them and watch your progress toward four milestones: Momentum Building, Strong Foundation, Well Prepared, and Fully Resilient.
+Finally, the Strategic Action Plan lays out concrete steps over three time horizons — what to do in the next thirty days, the next three months, and the next year. Each item is tagged by category so you know exactly what domain it addresses.
+Running a new assessment and comparing it to an older one shows you a before-and-after overlay on the radar chart — so your progress is visible at a glance.
+Behind the scenes, the admin dashboard gives operators a real-time view of platform health.
+Charts show submission trends, demographic breakdowns, score distributions, and the most common risk concerns across the user base.
+There's also a built-in AI UX testing suite — it runs autonomous AI personas through the full assessment flow and rates the quality of each generated report, so you can continuously improve the product without waiting for real user feedback.
+Resilium. Know your vulnerabilities. Build your plan. Be ready for whatever comes next.

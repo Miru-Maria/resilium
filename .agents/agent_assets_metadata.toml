@@ -12,3 +12,9 @@ id = "i3xfefbSFMe09bIyDJ9cs"
 uri = "file://attached_assets/resilium-demo-script.md"
 type = "text"
 title = "Resilium Demo Video Script"
+
+[[outputs]]
+id = "MfJcuYcoDDGkdQYmTOOcC"
+uri = "file://resilium-demo-production-guide.txt"
+type = "text"
+title = "Resilium Demo — Production Guide & Script"

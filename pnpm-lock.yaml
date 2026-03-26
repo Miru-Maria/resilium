@@ -623,7 +623,7 @@ importers:
         specifier: 'catalog:'
         version: 3.25.76
 
-  artifacts/resilium-demo-video:
+  artifacts/resilium-demo:
     devDependencies:
       '@react-spring/web':
         specifier: ^10.0.3
