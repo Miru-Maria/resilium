@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation, Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -7,9 +7,13 @@ import { Slider } from "@/components/ui/slider";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { useSubmitAssessment } from "@workspace/api-client-react";
-import { Loader2, ArrowRight, ArrowLeft, CheckCircle2, AlertCircle, Brain } from "lucide-react";
+import { Loader2, ArrowRight, ArrowLeft, CheckCircle2, AlertCircle, Brain, Zap, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SiteFooter } from "@/components/site-footer";
+import { useAuth } from "@workspace/replit-auth-web";
+
+const FREE_LIMIT = 2;
+const ANON_COUNT_KEY = "resilium_free_count";
 
 import type { 
   AssessmentInput,
@@ -127,7 +131,42 @@ export default function AssessmentPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<{ code: string; message: string } | null>(null);
   const [currency, setCurrency] = useState<"USD" | "EUR" | "RON">("USD");
-  
+  const [gateChecked, setGateChecked] = useState(false);
+  const [gated, setGated] = useState(false);
+
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+
+  useEffect(() => {
+    if (authLoading) return;
+
+    const checkGate = async () => {
+      if (isAuthenticated && user) {
+        try {
+          const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+          const [subRes, countRes] = await Promise.all([
+            fetch(`${BASE}/api/users/me/subscription`, { credentials: "include" }),
+            fetch(`${BASE}/api/users/me/report-count`, { credentials: "include" }),
+          ]);
+          const sub = await subRes.json();
+          const { count } = await countRes.json();
+          if (!sub.isActive && count >= FREE_LIMIT) {
+            setGated(true);
+          }
+        } catch {
+          // On error, allow through (fail open)
+        }
+      } else {
+        const anonCount = parseInt(localStorage.getItem(ANON_COUNT_KEY) ?? "0", 10);
+        if (anonCount >= FREE_LIMIT) {
+          setGated(true);
+        }
+      }
+      setGateChecked(true);
+    };
+
+    checkGate();
+  }, [isAuthenticated, user, authLoading]);
+
   const [formData, setFormData] = useState<AssessmentInput>({
     location: "",
     incomeStability: "fixed",
@@ -174,6 +213,10 @@ export default function AssessmentPage() {
     setSubmitError(null);
     try {
       const report = await mutateAsync({ data: { ...formData, currency } as any });
+      if (!isAuthenticated) {
+        const prev = parseInt(localStorage.getItem(ANON_COUNT_KEY) ?? "0", 10);
+        localStorage.setItem(ANON_COUNT_KEY, String(prev + 1));
+      }
       setTimeout(() => {
         setLocation(`/results/${report.reportId}`);
       }, 1500);
@@ -229,6 +272,40 @@ export default function AssessmentPage() {
   const totalSubSteps = MR_QUESTIONS.length + (TOTAL_STEPS - 1);
   const currentSubStep = step === 1 ? mrStep : MR_QUESTIONS.length + (step - 2);
   const progressPercent = ((currentSubStep + 1) / totalSubSteps) * 100;
+
+  if (!gateChecked || authLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-10 h-10 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (gated) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
+        <div className="max-w-md w-full">
+          <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-6">
+            <Lock className="w-8 h-8 text-primary" />
+          </div>
+          <h2 className="text-2xl font-display font-bold mb-3">You've used your 2 free assessments</h2>
+          <p className="text-muted-foreground mb-8">
+            Upgrade to Resilium Pro for unlimited assessments, full progress tracking, and plan comparison tools.
+          </p>
+          <div className="flex flex-col gap-3">
+            <Link href="/pricing">
+              <Button className="w-full rounded-full gap-2 h-12 shadow-lg shadow-primary/20">
+                <Zap className="w-4 h-4" /> View Pricing
+              </Button>
+            </Link>
+            <Link href="/">
+              <Button variant="outline" className="w-full rounded-full h-12">Back to Home</Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (isSubmitting) {
     return (

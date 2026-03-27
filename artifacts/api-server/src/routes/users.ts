@@ -1,5 +1,5 @@
 import { Router, type IRouter, type Request, type Response } from "express";
-import { db, resilienceReportsTable, usersTable } from "@workspace/db";
+import { db, resilienceReportsTable, usersTable, subscriptionsTable } from "@workspace/db";
 import { and, eq, inArray, desc } from "drizzle-orm";
 import { openai } from "@workspace/integrations-openai-ai-server";
 
@@ -327,6 +327,50 @@ Return only valid JSON.`;
   } catch (err) {
     req.log.error({ err }, "Error comparing plans");
     res.status(500).json({ error: "Failed to compare plans" });
+  }
+});
+
+router.get("/me/subscription", async (req: Request, res: Response) => {
+  if (!req.isAuthenticated()) {
+    return res.json({ status: "anonymous", isActive: false });
+  }
+  try {
+    const userId = (req.user as any).id;
+    const subs = await db
+      .select()
+      .from(subscriptionsTable)
+      .where(eq(subscriptionsTable.userId, userId))
+      .limit(1);
+
+    if (subs.length === 0) {
+      return res.json({ status: "inactive", isActive: false });
+    }
+    const sub = subs[0];
+    const isActive = sub.status === "active" || sub.status === "cancel_scheduled";
+    return res.json({
+      status: sub.status,
+      isActive,
+      planName: sub.planName,
+      currentPeriodEnd: sub.currentPeriodEnd,
+    });
+  } catch (err) {
+    return res.status(500).json({ error: "Failed to fetch subscription" });
+  }
+});
+
+router.get("/me/report-count", async (req: Request, res: Response) => {
+  if (!req.isAuthenticated()) {
+    return res.json({ count: 0 });
+  }
+  try {
+    const userId = (req.user as any).id;
+    const reports = await db
+      .select({ reportId: resilienceReportsTable.reportId })
+      .from(resilienceReportsTable)
+      .where(eq(resilienceReportsTable.userId, userId));
+    return res.json({ count: reports.length });
+  } catch {
+    return res.json({ count: 0 });
   }
 });
 

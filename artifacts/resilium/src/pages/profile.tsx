@@ -1122,13 +1122,13 @@ function PlansTab({ plans, onDelete }: { plans: PlanSummary[]; onDelete: (id: st
         <div className="flex items-center justify-between gap-4 px-4 py-3 rounded-2xl bg-amber-500/10 border border-amber-500/30">
           <div className="flex items-center gap-2">
             <Award className="w-4 h-4 text-amber-500 flex-shrink-0" />
-            <p className="text-sm text-foreground/80">You've reached the {PLAN_LIMIT}-plan limit. Delete old plans to make room.</p>
+            <p className="text-sm text-foreground/80">You've reached the {PLAN_LIMIT}-plan limit. Delete old plans or upgrade for unlimited access.</p>
           </div>
-          {import.meta.env.VITE_STRIPE_PRO_URL && (
-            <a href={import.meta.env.VITE_STRIPE_PRO_URL} target="_blank" rel="noreferrer">
-              <Button size="sm" className="rounded-full flex-shrink-0">Upgrade</Button>
-            </a>
-          )}
+          <Link href="/pricing">
+            <Button size="sm" className="rounded-full flex-shrink-0 gap-1.5">
+              Upgrade
+            </Button>
+          </Link>
         </div>
       )}
 

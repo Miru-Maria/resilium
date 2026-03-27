@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { randomUUID } from "crypto";
 import { SubmitAssessmentBody, GetReportParams } from "@workspace/api-zod";
-import { db, resilienceReportsTable, checklistProgressTable, progressSnapshotsTable } from "@workspace/db";
+import { db, resilienceReportsTable, checklistProgressTable, progressSnapshotsTable, subscriptionsTable } from "@workspace/db";
 import { eq, and, count } from "drizzle-orm";
 import { calculateScores } from "./scoring.js";
 import { generateResilienceReport } from "./ai.js";
@@ -51,10 +51,18 @@ router.post("/assess", assessRateLimit, async (req, res) => {
         .from(resilienceReportsTable)
         .where(eq(resilienceReportsTable.userId, req.user.id));
 
-      if (planCount >= PLAN_LIMIT) {
+      const subs = await db
+        .select({ status: subscriptionsTable.status })
+        .from(subscriptionsTable)
+        .where(eq(subscriptionsTable.userId, req.user.id))
+        .limit(1);
+
+      const isSubscriber = subs.length > 0 && (subs[0].status === "active" || subs[0].status === "cancel_scheduled");
+
+      if (!isSubscriber && planCount >= PLAN_LIMIT) {
         res.status(400).json({
           error: "PLAN_LIMIT_EXCEEDED",
-          message: `You have reached the maximum of ${PLAN_LIMIT} saved plans. Please delete an existing plan before creating a new one.`,
+          message: `You have reached the maximum of ${PLAN_LIMIT} saved plans. Upgrade to Pro for unlimited access.`,
         });
         return;
       }

@@ -10,6 +10,7 @@ import ResultsPage from "@/pages/results";
 import PrivacyPage from "@/pages/privacy";
 import AboutPage from "@/pages/about";
 import ProfilePage from "@/pages/profile";
+import PricingPage from "@/pages/pricing";
 import NotFound from "@/pages/not-found";
 import AdminLoginPage from "@/pages/admin/login";
 import AdminDashboard from "@/pages/admin/dashboard";
@@ -51,6 +52,7 @@ function Router() {
       <Route path="/privacy" component={PrivacyPage} />
       <Route path="/about" component={AboutPage} />
       <Route path="/profile" component={ProfilePage} />
+      <Route path="/pricing" component={PricingPage} />
       <Route path="/admin/login" component={AdminLoginPage} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
       <Route path="/admin" component={AdminLoginPage} />
