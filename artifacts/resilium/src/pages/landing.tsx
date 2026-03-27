@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useEffect } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
@@ -30,6 +30,109 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+interface NParticle {
+  x: number; y: number;
+  vx: number; vy: number;
+  r: number;
+  isOrange: boolean;
+}
+
+function NeuralCanvas() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let animFrame: number;
+    let W = 0, H = 0;
+    const PARTICLE_COUNT = 90;
+    const CONNECTION_DIST = 170;
+    let particles: NParticle[] = [];
+
+    function init() {
+      W = canvas!.clientWidth || window.innerWidth;
+      H = canvas!.clientHeight || window.innerHeight;
+      canvas!.width = W;
+      canvas!.height = H;
+      particles = Array.from({ length: PARTICLE_COUNT }, () => ({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        vx: (Math.random() - 0.5) * 0.45,
+        vy: (Math.random() - 0.5) * 0.45,
+        r: Math.random() * 1.8 + 0.8,
+        isOrange: Math.random() > 0.45,
+      }));
+    }
+
+    function draw() {
+      ctx!.clearRect(0, 0, W, H);
+
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < CONNECTION_DIST) {
+            const alpha = (1 - dist / CONNECTION_DIST) * 0.22;
+            const bothOrange = particles[i].isOrange && particles[j].isOrange;
+            ctx!.beginPath();
+            ctx!.moveTo(particles[i].x, particles[i].y);
+            ctx!.lineTo(particles[j].x, particles[j].y);
+            ctx!.strokeStyle = bothOrange
+              ? `rgba(224,128,64,${alpha})`
+              : `rgba(100,120,210,${alpha * 0.8})`;
+            ctx!.lineWidth = 0.7;
+            ctx!.stroke();
+          }
+        }
+      }
+
+      for (const p of particles) {
+        const color = p.isOrange ? "224,128,64" : "100,120,210";
+        ctx!.beginPath();
+        ctx!.arc(p.x, p.y, p.r * 2.8, 0, Math.PI * 2);
+        ctx!.fillStyle = `rgba(${color},0.06)`;
+        ctx!.fill();
+        ctx!.beginPath();
+        ctx!.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx!.fillStyle = `rgba(${color},0.65)`;
+        ctx!.fill();
+
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < -10) p.x = W + 10;
+        else if (p.x > W + 10) p.x = -10;
+        if (p.y < -10) p.y = H + 10;
+        else if (p.y > H + 10) p.y = -10;
+      }
+
+      animFrame = requestAnimationFrame(draw);
+    }
+
+    function handleResize() { init(); }
+
+    init();
+    draw();
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      cancelAnimationFrame(animFrame);
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="absolute inset-0 w-full h-full"
+      style={{ opacity: 0.75 }}
+    />
+  );
+}
+
 function AnimatedBackground() {
   return (
     <>
@@ -48,59 +151,35 @@ function AnimatedBackground() {
           0%, 100% { transform: translate(0px, 0px) scale(1); }
           50%       { transform: translate(50px, 40px) scale(1.04); }
         }
-        @keyframes blob-drift-4 {
-          0%, 100% { transform: translate(0px, 0px) scale(1); }
-          30%       { transform: translate(-40px, -50px) scale(1.1); }
-          60%       { transform: translate(60px, 20px) scale(0.93); }
-        }
-        @keyframes blob-drift-5 {
-          0%, 100% { transform: translate(0px, 0px) scale(1); }
-          45%       { transform: translate(30px, -60px) scale(1.07); }
-        }
-        .blob { position: absolute; border-radius: 50%; filter: blur(80px); }
-        .blob-1 { animation: blob-drift-1 18s ease-in-out infinite; }
-        .blob-2 { animation: blob-drift-2 22s ease-in-out infinite; }
-        .blob-3 { animation: blob-drift-3 15s ease-in-out infinite; }
-        .blob-4 { animation: blob-drift-4 26s ease-in-out infinite; }
-        .blob-5 { animation: blob-drift-5 20s ease-in-out infinite; }
+        .blob { position: absolute; border-radius: 50%; filter: blur(90px); }
+        .blob-1 { animation: blob-drift-1 20s ease-in-out infinite; }
+        .blob-2 { animation: blob-drift-2 25s ease-in-out infinite; }
+        .blob-3 { animation: blob-drift-3 17s ease-in-out infinite; }
       `}</style>
 
-      {/* Dot grid */}
-      <div className="absolute inset-0 pointer-events-none" style={{
-        backgroundImage: "radial-gradient(circle, rgba(224,128,64,0.12) 1px, transparent 1px)",
-        backgroundSize: "40px 40px",
-      }} />
+      {/* Neural network canvas — hero height only */}
+      <NeuralCanvas />
 
-      {/* Gradient orbs */}
+      {/* Soft depth orbs behind the neural layer */}
       <div className="blob blob-1" style={{
         width: 700, height: 700,
-        top: "-15%", left: "-10%",
-        background: "radial-gradient(circle at 40% 40%, rgba(224,128,64,0.18) 0%, rgba(200,110,40,0.08) 50%, transparent 70%)",
+        top: "-15%", left: "-12%",
+        background: "radial-gradient(circle at 40% 40%, rgba(224,128,64,0.14) 0%, rgba(200,110,40,0.06) 50%, transparent 70%)",
       }} />
       <div className="blob blob-2" style={{
-        width: 600, height: 600,
-        top: "-5%", right: "-8%",
-        background: "radial-gradient(circle at 60% 40%, rgba(30,50,120,0.35) 0%, rgba(15,25,80,0.15) 55%, transparent 75%)",
+        width: 580, height: 580,
+        top: "-5%", right: "-10%",
+        background: "radial-gradient(circle at 60% 40%, rgba(30,50,130,0.32) 0%, rgba(15,25,80,0.12) 55%, transparent 75%)",
       }} />
       <div className="blob blob-3" style={{
-        width: 500, height: 500,
-        bottom: "10%", left: "20%",
-        background: "radial-gradient(circle at 50% 50%, rgba(180,100,30,0.12) 0%, transparent 65%)",
-      }} />
-      <div className="blob blob-4" style={{
-        width: 380, height: 380,
-        top: "35%", right: "15%",
-        background: "radial-gradient(circle at 50% 50%, rgba(224,128,64,0.10) 0%, transparent 65%)",
-      }} />
-      <div className="blob blob-5" style={{
-        width: 300, height: 300,
-        bottom: "5%", right: "5%",
-        background: "radial-gradient(circle at 50% 50%, rgba(50,80,160,0.20) 0%, transparent 65%)",
+        width: 420, height: 420,
+        bottom: "5%", left: "30%",
+        background: "radial-gradient(circle at 50% 50%, rgba(160,90,20,0.10) 0%, transparent 65%)",
       }} />
 
-      {/* Fade-to-background at bottom so content sections look clean */}
+      {/* Fade out downward */}
       <div className="absolute inset-0 pointer-events-none" style={{
-        background: "linear-gradient(to bottom, transparent 0%, transparent 50%, var(--background) 100%)",
+        background: "linear-gradient(to bottom, transparent 55%, rgba(13,18,37,0.85) 80%, rgb(13,18,37) 100%)",
       }} />
     </>
   );
@@ -111,8 +190,8 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col relative overflow-hidden">
-      {/* Animated background */}
-      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+      {/* Animated background — hero section only */}
+      <div className="absolute top-0 left-0 right-0 h-screen z-0 pointer-events-none overflow-hidden">
         <AnimatedBackground />
       </div>
 
@@ -217,7 +296,7 @@ export default function LandingPage() {
             transition={{ delay: 0.8, duration: 1 }}
             className="mt-16 flex flex-wrap items-center justify-center gap-8 text-sm text-muted-foreground"
           >
-            <span className="flex items-center gap-2"><Lock className="w-4 h-4 text-primary" /> No email required</span>
+            <span className="flex items-center gap-2"><TrendingUp className="w-4 h-4 text-primary" /> Sign in to save &amp; track progress</span>
             <span className="flex items-center gap-2"><Shield className="w-4 h-4 text-primary" /> Your data is never sold</span>
             <span className="flex items-center gap-2"><Zap className="w-4 h-4 text-primary" /> Results in under 15 minutes</span>
           </motion.div>

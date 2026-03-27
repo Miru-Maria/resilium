@@ -1,0 +1,71 @@
+UX & Usability
+Immediate friction points:
+
+The "UX Testing" link appears in the account dropdown for all signed-in users, not just admins — a potential security and confusion issue
+The landing page stat "1M+ Scenarios Simulated" has no grounding. On a credibility-first product, that kind of fabricated metric damages trust more than it helps
+The About page says "no account required" but saving a plan requires one — that copy should be reconciled
+Anonymous (unauthenticated) reports are generated and stored indefinitely — there's no cleanup mechanism, which will bloat the database over time
+After finishing an assessment without being signed in, there's no strong prompt to sign in and save the plan before the user navigates away — you're losing conversions right at the most motivated moment
+The profile page only shows score + date. No location, no "Financial: 72 / Health: 45"-style preview. Users can't quickly remember what each plan was about without opening it
+No rate limiting on report generation — a script could generate thousands of AI reports in minutes
+Good things worth keeping:
+
+The assessment flow is clean, fast, and visually polished. The 1-5 Likert scale with the large tap targets works well
+The radar chart comparison is genuinely differentiating
+The checklist / snapshot system on the results page is high-retention
+Design
+The landing page is a single screen of hero content, then 3 stats, then footer. There's no "How it works", no social proof, no example output — you're asking people to start a 10-question assessment with zero persuasion below the fold
+The mobile app and web app have different step counts (10 vs 11) and the mobile app lacks auth/plan saving — these two products are diverging in capability
+PDF export quality should be audited — if it's a raw browser print it's likely ugly
+Monetization
+The current model is fully free with no revenue path. Here's a realistic stack, ordered by effort-to-revenue:
+
+Stripe "Support Resilium" donation button on the results page — lowest effort, some conversion from satisfied users
+Freemium tier — "Resilium Pro" ($4.99/month or $39/year):
+Unlimited saved plans (free tier stays at 3, not 10)
+Styled PDF export with cover page and branding
+Re-assessment reminders by email ("Your plan is 90 days old")
+Progress line chart over all your plans
+Priority AI processing
+Team/Org plans ($29/month for up to 25 members): HR teams doing business continuity planning, NGOs, community organisations
+Affiliate recommendations on the results page: Emergency kit suppliers, budgeting tools (YNAB, Monarch), insurance comparison sites — contextual to the user's risk profile (e.g., low financial score → link to budgeting tools)
+B2B data insights: Sell anonymised, aggregated quarterly reports on "UK resilience trends" to insurers, local councils, think tanks
+Marketing & Audience
+Core audiences:
+
+Financial anxiety — r/personalfinance, r/UKPersonalFinance, FIRE community. Hook: "How many months could you survive a job loss?"
+Preppers and preparedness — r/preppers, r/survivalism, Prepared.com audience. Currently underserved by polished, non-paranoid tools
+Expats and digital nomads — highly mobile, uncertain about location risk, financial contingency planning
+Climate-affected regions — people in flood zones, wildfire areas, politically unstable regions
+HR and corporate — business continuity, employee wellbeing, pandemic planning post-COVID
+Channels:
+
+SEO content: "How prepared are you for a recession?", "Personal resilience score", "Emergency preparedness quiz" — these are low-competition, high-intent search terms
+Shareable score card: When users get their result, let them generate a shareable image ("I scored 68/100 on the Resilium Readiness Index. How do you score?") — organic social distribution built into the product itself
+Product Hunt launch: The AI + privacy-first angle is compelling for that audience
+Newsletter partnerships: Financial independence, emergency prep, and expat newsletters would feature this tool
+Admin
+No user management panel — you can't see who your users are, how many plans they've run, or block a bad actor
+No email notification when a GDPR request comes in — you could miss a legally time-sensitive request
+No CSV export of analytics data
+The UX tester admin link is exposed in the public dropdown
+No way to write a site-wide announcement (e.g., "We've updated our methodology — re-assess to see your updated score")
+Proposed Implementation Plan
+Here's how I'd sequence this, grouped into tasks:
+
+Priority	Task	Impact
+🔴 Now	Remove UX Testing from the public dropdown	Security
+🔴 Now	Soft-delete/TTL anonymous reports after 30 days	Operations
+🔴 Now	Add rate limiting to report generation	Security
+🟠 Soon	Redesign landing page below the fold with "How it works", sample output preview, and real trust signals	Conversion
+🟠 Soon	Save-prompt after assessment for unauthenticated users	Conversion
+🟠 Soon	Richer plan cards on profile page (show location + dimension scores)	UX
+🟠 Soon	GDPR email notification to admin on new request	Operations
+🟡 Next	Shareable score card (image) generated from results	Marketing
+🟡 Next	Stripe donation / "Support Resilium" on results page	Revenue
+🟡 Next	Progress line chart across plans on profile page	Retention
+🟡 Next	User management panel in admin	Operations
+🟢 Later	Freemium gating + Stripe Pro subscription	Revenue
+🟢 Later	Affiliate recommendation cards on results (contextual to gaps)	Revenue
+🟢 Later	Mobile auth parity (plan saving on iOS/Android)	UX parity
+🟢 Later	Site-wide announcement banner system	Admin
