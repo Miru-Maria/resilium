@@ -3,6 +3,7 @@ import { useLocation, Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Loader2, LayoutDashboard, Smartphone, Shield, LogOut, FlaskConical, Users, Megaphone } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ResilientIcon } from "@/components/resilient-icon";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -74,10 +75,11 @@ export function AdminLayout({ children, activeSection }: AdminLayoutProps) {
     <div className="min-h-screen bg-muted/30 flex">
       <aside className="w-56 min-h-screen bg-background border-r flex flex-col">
         <div className="p-4 border-b flex items-center gap-2 cursor-pointer" onClick={() => navigate("/admin/dashboard")}>
-          <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
-            <Shield className="w-4 h-4 text-primary-foreground" />
+          <ResilientIcon className="w-7 h-7" />
+          <div className="flex flex-col leading-none">
+            <span className="font-bold text-sm tracking-tight">Resilium</span>
+            <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">Admin</span>
           </div>
-          <span className="font-bold text-sm tracking-tight">Admin Panel</span>
         </div>
         <nav className="flex-1 p-3 space-y-1">
           {navItems.map((item) => (

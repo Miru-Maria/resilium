@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { ShieldAlert, Loader2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
+import { ResilientIcon } from "@/components/resilient-icon";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -44,7 +45,7 @@ export default function AdminLoginPage() {
       <div className="w-full max-w-md">
         <div className="flex flex-col items-center mb-8">
           <div className="flex items-center gap-2 mb-2">
-            <ShieldAlert className="w-8 h-8 text-primary" />
+            <ResilientIcon className="w-9 h-9" />
             <span className="font-display font-bold text-2xl text-primary">Resilium</span>
           </div>
           <p className="text-muted-foreground text-sm">Admin Dashboard</p>
