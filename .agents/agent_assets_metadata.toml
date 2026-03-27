@@ -18,3 +18,15 @@ id = "MfJcuYcoDDGkdQYmTOOcC"
 uri = "file://resilium-demo-production-guide.txt"
 type = "text"
 title = "Resilium Demo — Production Guide & Script"
+
+[[outputs]]
+id = "z406mj3hOoc546OouiJx4"
+uri = "file://docs/resilium-whitepaper.md"
+type = "text"
+title = "Resilium White Paper"
+
+[[outputs]]
+id = "Q449V_n6n-KFeSljtpaw8"
+uri = "file://docs/resilium-technical-spec.md"
+type = "text"
+title = "Resilium Technical Specification"
