@@ -23,7 +23,7 @@ export default function PrivacyPage() {
         </div>
 
         <p className="text-muted-foreground leading-relaxed">
-          Resilium is committed to protecting your personal data and respecting your privacy. This Privacy Policy explains what information is collected, how it is used, and what rights you have under the General Data Protection Regulation (GDPR) and other applicable data protection laws.
+          Resilium is committed to protecting your personal data and respecting your privacy. This Privacy Policy explains what information is collected, how it is used, and what rights you have under applicable data protection laws including the General Data Protection Regulation (GDPR).
         </p>
 
         <Section title="1. Who Is Responsible for Your Data">
@@ -51,6 +51,7 @@ export default function PrivacyPage() {
             <li>Emergency preparedness status</li>
             <li>Self-rated psychological resilience</li>
             <li>Primary risk concerns selected by you</li>
+            <li>Preferred currency (USD, EUR, or RON) for contextual advice</li>
           </ul>
           <p>
             Resilium does not collect your name, email address, government ID, precise address, or financial account details as part of the assessment. Technical data such as browser type, device type, and IP address may be collected for security and performance purposes.
@@ -60,28 +61,28 @@ export default function PrivacyPage() {
         <Section title="3. How Your Data Is Used">
           <p>Your data is processed for the following purposes:</p>
           <ul className="list-disc pl-6 space-y-1">
-            <li><strong>To provide the service:</strong> Generating your personalised resilience report and action plan.</li>
-            <li><strong>To improve the platform:</strong> Analysing aggregated, anonymised usage patterns to improve accuracy of the models and recommendations.</li>
+            <li><strong>To provide the service:</strong> Generating your personalized resilience report and action plan.</li>
+            <li><strong>To improve the platform:</strong> Analyzing aggregated, anonymized usage patterns to improve accuracy of the models and recommendations.</li>
             <li><strong>For security and fraud prevention:</strong> Detecting and preventing misuse of the platform.</li>
           </ul>
           <p>Your data is not used for advertising and is not sold to third parties.</p>
         </Section>
 
         <Section title="4. Legal Basis for Processing">
-          <p>Resilium relies on the following legal bases under Article 6 GDPR:</p>
+          <p>Resilium relies on the following legal bases under applicable data protection law:</p>
           <ul className="list-disc pl-6 space-y-1">
-            <li><strong>Performance of a contract (Art. 6(1)(b)):</strong> Processing is necessary to generate your resilience report as requested.</li>
-            <li><strong>Legitimate interests (Art. 6(1)(f)):</strong> There is a legitimate interest in maintaining platform security and improving the service, provided this does not override your rights.</li>
-            <li><strong>Consent (Art. 6(1)(a)):</strong> Where health-related information is processed (e.g., health status), this relies on your explicit consent provided by voluntarily completing the assessment.</li>
+            <li><strong>Performance of a contract:</strong> Processing is necessary to generate your resilience report as requested.</li>
+            <li><strong>Legitimate interests:</strong> There is a legitimate interest in maintaining platform security and improving the service, provided this does not override your rights.</li>
+            <li><strong>Consent:</strong> Where health-related information is processed (e.g., health status), this relies on your explicit consent provided by voluntarily completing the assessment.</li>
           </ul>
         </Section>
 
         <Section title="5. Data Retention">
           <p>
-            Your assessment data is stored for <strong>12 months</strong> from the date of submission, after which it is automatically and permanently deleted. Anonymised and aggregated statistics derived from your data may be retained indefinitely for research and improvement purposes.
+            Your assessment data is stored for <strong>12 months</strong> from the date of submission, after which it is automatically and permanently deleted. Anonymized and aggregated statistics derived from your data may be retained indefinitely for research and improvement purposes.
           </p>
           <p>
-            You may request deletion of your data at any time — see the "Your Rights" section below.
+            Anonymous assessments (completed without signing in) are deleted after <strong>30 days</strong> if not claimed by a user account. You may request deletion of your data at any time — see the "Your Rights" section below.
           </p>
         </Section>
 
@@ -95,25 +96,25 @@ export default function PrivacyPage() {
             <li><strong>AI model providers</strong> used to generate report content (data is transmitted securely and not used to train third-party models)</li>
           </ul>
           <p>
-            All sub-processors are bound by data processing agreements and must comply with GDPR requirements. Data may also be disclosed if required by law or to protect the rights and safety of users or the public.
+            All sub-processors are bound by data processing agreements and must comply with applicable data protection requirements. Data may also be disclosed if required by law or to protect the rights and safety of users or the public.
           </p>
         </Section>
 
         <Section title="7. International Transfers">
           <p>
-            If any sub-processors are located outside the European Economic Area (EEA), appropriate safeguards are in place, such as Standard Contractual Clauses (SCCs) approved by the European Commission, to protect your data during transfer.
+            If any sub-processors are located outside your country of residence, appropriate safeguards are in place — such as Standard Contractual Clauses (SCCs) — to protect your data during transfer and storage.
           </p>
         </Section>
 
-        <Section title="8. Your Rights Under GDPR">
-          <p>As a data subject, you have the following rights:</p>
+        <Section title="8. Your Rights">
+          <p>Depending on your jurisdiction, you may have the following rights regarding your personal data:</p>
           <ul className="list-disc pl-6 space-y-2">
-            <li><strong>Right of access (Art. 15):</strong> You can request a copy of the personal data Resilium holds about you.</li>
-            <li><strong>Right to rectification (Art. 16):</strong> You can request correction of inaccurate or incomplete data.</li>
-            <li><strong>Right to erasure (Art. 17):</strong> You can request deletion of your personal data ("right to be forgotten").</li>
-            <li><strong>Right to data portability (Art. 20):</strong> You can request your data in a structured, machine-readable format.</li>
-            <li><strong>Right to object (Art. 21):</strong> You can object to processing based on legitimate interests.</li>
-            <li><strong>Right to restrict processing (Art. 18):</strong> You can request a pause on processing of your data in certain circumstances.</li>
+            <li><strong>Right of access:</strong> You can request a copy of the personal data Resilium holds about you.</li>
+            <li><strong>Right to rectification:</strong> You can request correction of inaccurate or incomplete data.</li>
+            <li><strong>Right to erasure:</strong> You can request deletion of your personal data ("right to be forgotten").</li>
+            <li><strong>Right to data portability:</strong> You can request your data in a structured, machine-readable format.</li>
+            <li><strong>Right to object:</strong> You can object to processing based on legitimate interests.</li>
+            <li><strong>Right to restrict processing:</strong> You can request a pause on processing of your data in certain circumstances.</li>
             <li><strong>Right to withdraw consent:</strong> Where processing is based on consent, you may withdraw it at any time without affecting the lawfulness of prior processing.</li>
           </ul>
           <p>
@@ -121,7 +122,7 @@ export default function PrivacyPage() {
             <a href={`mailto:${CONTACT_EMAIL}`} className="text-primary underline underline-offset-4 hover:text-primary/80">
               {CONTACT_EMAIL}
             </a>
-            . I will respond within 30 days. You also have the right to lodge a complaint with your national data protection supervisory authority.
+            . I will respond within 30 days. You also have the right to lodge a complaint with your national or regional data protection authority.
           </p>
         </Section>
 
@@ -133,7 +134,7 @@ export default function PrivacyPage() {
 
         <Section title="10. Data Security">
           <p>
-            Appropriate technical and organisational measures are in place to protect your data, including encryption in transit (TLS), access controls, and regular security reviews. In the unlikely event of a data breach that poses a risk to your rights and freedoms, you will be notified along with the relevant supervisory authority as required by GDPR.
+            Appropriate technical and organizational measures are in place to protect your data, including encryption in transit (TLS), access controls, and regular security reviews. In the unlikely event of a data breach that poses a risk to your rights and freedoms, you will be notified along with the relevant supervisory authority as required by applicable law.
           </p>
         </Section>
 

@@ -24,6 +24,7 @@ import {
   ArrowRight,
   Lightbulb,
   ChevronRight,
+  MapPin,
 } from "lucide-react";
 import {
   AlertDialog,
@@ -57,6 +58,14 @@ interface PlanSummary {
   reportId: string;
   createdAt: string;
   scoreOverall: number;
+  scoreFinancial: number;
+  scoreHealth: number;
+  scoreSkills: number;
+  scoreMobility: number;
+  scorePsychological: number;
+  scoreResources: number;
+  location: string;
+  currency: string;
 }
 
 interface ScoreMap {
@@ -626,12 +635,45 @@ export default function ProfilePage() {
                           <Badge variant={variant} className="rounded-full text-xs">
                             {label}
                           </Badge>
+                          {plan.currency && plan.currency !== "USD" && (
+                            <Badge variant="outline" className="rounded-full text-xs border-border/60 text-muted-foreground">
+                              {plan.currency}
+                            </Badge>
+                          )}
                         </div>
-                        <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                          <CalendarDays className="w-3.5 h-3.5" />
-                          <span>
-                            {date.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })}
+                        <div className="flex items-center gap-3 flex-wrap">
+                          {plan.location && (
+                            <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                              <MapPin className="w-3 h-3" />
+                              {plan.location}
+                            </span>
+                          )}
+                          <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <CalendarDays className="w-3 h-3" />
+                            {date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}
                           </span>
+                        </div>
+                        {/* Mini dimension bars */}
+                        <div className="grid grid-cols-6 gap-1 pt-1">
+                          {[
+                            { key: "scoreFinancial", label: "Fin" },
+                            { key: "scoreHealth", label: "Hlt" },
+                            { key: "scoreSkills", label: "Skl" },
+                            { key: "scoreMobility", label: "Mob" },
+                            { key: "scorePsychological", label: "Psy" },
+                            { key: "scoreResources", label: "Res" },
+                          ].map(({ key, label: dimLabel }) => {
+                            const val = (plan as any)[key] ?? 0;
+                            const color = val >= 70 ? "bg-emerald-500" : val >= 40 ? "bg-amber-500" : "bg-destructive";
+                            return (
+                              <div key={key} className="flex flex-col items-center gap-0.5" title={`${dimLabel}: ${Math.round(val)}`}>
+                                <div className="w-full h-1 rounded-full bg-muted overflow-hidden">
+                                  <div className={`h-full rounded-full ${color}`} style={{ width: `${val}%` }} />
+                                </div>
+                                <span className="text-[9px] text-muted-foreground/70">{dimLabel}</span>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
 

@@ -23,6 +23,7 @@ type AssessmentInput = {
   hasEmergencySupplies: boolean;
   psychologicalResilience: number;
   riskConcerns: string[];
+  currency?: string;
 };
 
 type Scores = {
@@ -114,6 +115,7 @@ USER PROFILE:
 - Has emergency supplies: ${input.hasEmergencySupplies}
 - Psychological resilience (self-rated): ${input.psychologicalResilience}/10
 - Primary risk concerns: ${input.riskConcerns.join(", ")}
+- Preferred currency: ${input.currency ?? "USD"} (use this currency symbol and amounts in all financial advice and examples)
 
 RESILIENCE SCORES (0-100):
 - Overall: ${scores.overall}

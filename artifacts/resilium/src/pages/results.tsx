@@ -325,6 +325,19 @@ export default function ResultsPage() {
 
       <main className="max-w-6xl mx-auto px-6 pt-10 space-y-10">
 
+        {/* SAVE PROMPT for anonymous users */}
+        {!isAuthenticated && (
+          <div className="flex items-center gap-4 px-5 py-4 rounded-2xl bg-primary/5 border border-primary/20">
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-sm text-foreground">Your report is temporary</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Sign in to save this plan, track your progress over time, and compare against future assessments.</p>
+            </div>
+            <Button size="sm" className="rounded-full flex-shrink-0" onClick={login}>
+              <LogIn className="w-4 h-4 mr-2" /> Save My Plan
+            </Button>
+          </div>
+        )}
+
         {/* HERO SCORES SECTION */}
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <Card className="lg:col-span-1 border-none shadow-xl shadow-black/5 bg-gradient-to-b from-card to-muted/20 flex flex-col items-center justify-center p-8 text-center">

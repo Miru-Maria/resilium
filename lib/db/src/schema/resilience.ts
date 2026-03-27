@@ -10,6 +10,7 @@ export const resilienceReportsTable = pgTable("resilience_reports", {
   userId: varchar("user_id").references(() => usersTable.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 
+  currency: varchar("currency", { length: 3 }).default("USD"),
   location: text("location").notNull(),
   incomeStability: text("income_stability").notNull(),
   savingsMonths: real("savings_months").notNull(),

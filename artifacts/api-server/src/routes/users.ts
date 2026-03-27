@@ -19,6 +19,14 @@ router.get("/me/plans", async (req: Request, res: Response) => {
         reportId: resilienceReportsTable.reportId,
         createdAt: resilienceReportsTable.createdAt,
         scoreOverall: resilienceReportsTable.scoreOverall,
+        scoreFinancial: resilienceReportsTable.scoreFinancial,
+        scoreHealth: resilienceReportsTable.scoreHealth,
+        scoreSkills: resilienceReportsTable.scoreSkills,
+        scoreMobility: resilienceReportsTable.scoreMobility,
+        scorePsychological: resilienceReportsTable.scorePsychological,
+        scoreResources: resilienceReportsTable.scoreResources,
+        location: resilienceReportsTable.location,
+        currency: resilienceReportsTable.currency,
       })
       .from(resilienceReportsTable)
       .where(eq(resilienceReportsTable.userId, req.user.id))
@@ -29,6 +37,14 @@ router.get("/me/plans", async (req: Request, res: Response) => {
         reportId: p.reportId,
         createdAt: p.createdAt.toISOString(),
         scoreOverall: p.scoreOverall,
+        scoreFinancial: p.scoreFinancial,
+        scoreHealth: p.scoreHealth,
+        scoreSkills: p.scoreSkills,
+        scoreMobility: p.scoreMobility,
+        scorePsychological: p.scorePsychological,
+        scoreResources: p.scoreResources,
+        location: p.location,
+        currency: p.currency ?? "USD",
       })),
     });
   } catch (err) {

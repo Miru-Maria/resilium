@@ -126,6 +126,7 @@ export default function AssessmentPage() {
   const [mrStep, setMrStep] = useState(0); // sub-step within step 1
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<{ code: string; message: string } | null>(null);
+  const [currency, setCurrency] = useState<"USD" | "EUR" | "RON">("USD");
   
   const [formData, setFormData] = useState<AssessmentInput>({
     location: "",
@@ -172,7 +173,7 @@ export default function AssessmentPage() {
     setIsSubmitting(true);
     setSubmitError(null);
     try {
-      const report = await mutateAsync({ data: formData });
+      const report = await mutateAsync({ data: { ...formData, currency } as any });
       setTimeout(() => {
         setLocation(`/results/${report.reportId}`);
       }, 1500);
@@ -365,7 +366,7 @@ export default function AssessmentPage() {
                 </div>
               )}
 
-              {/* STEP 2: LOCATION */}
+              {/* STEP 2: LOCATION + CURRENCY */}
               {step === 2 && (
                 <div className="space-y-6">
                   <h2 className="text-3xl md:text-4xl font-display font-bold">Where are you based?</h2>
@@ -377,6 +378,26 @@ export default function AssessmentPage() {
                     value={formData.location}
                     onChange={(e) => updateField('location', e.target.value)}
                   />
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-muted-foreground">Preferred currency for financial advice</p>
+                    <div className="flex gap-3">
+                      {(["USD", "EUR", "RON"] as const).map((c) => (
+                        <button
+                          key={c}
+                          type="button"
+                          onClick={() => setCurrency(c)}
+                          className={cn(
+                            "flex-1 py-3 rounded-xl border-2 font-semibold text-sm transition-all duration-200",
+                            currency === c
+                              ? "border-primary bg-primary/10 text-primary"
+                              : "border-border bg-card text-muted-foreground hover:border-primary/40"
+                          )}
+                        >
+                          {c === "USD" ? "$ USD" : c === "EUR" ? "€ EUR" : "lei RON"}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               )}
 

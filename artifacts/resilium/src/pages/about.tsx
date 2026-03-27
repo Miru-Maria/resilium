@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "wouter";
 import { SiteFooter } from "@/components/site-footer";
 import { ResilientIcon } from "@/components/resilient-icon";
+import { Backpack, DollarSign, Globe, AlertTriangle } from "lucide-react";
 
 const CONTACT_EMAIL = "contact_resilium@pm.me";
 
@@ -31,7 +32,46 @@ export default function AboutPage() {
             Resilium exists to change that. It is a free, privacy-first assessment platform that helps you understand exactly where you stand across the dimensions that matter most when life becomes unpredictable: your finances, your skills, your health, your location, and your psychological capacity to adapt.
           </p>
           <p>
-            The result is a fully personalized resilience plan — concrete, actionable, and honest about your gaps — delivered immediately, with no account required.
+            The result is a fully personalized resilience plan — concrete, actionable, and honest about your gaps — delivered immediately. No account is required to complete an assessment and receive your plan. Create an account if you want to save your results, track your progress over time, or compare plans.
+          </p>
+        </Section>
+
+        <Section title="Who Uses Resilium">
+          <p>Resilium is built for English-speaking people around the world who take personal preparedness seriously — or want to start. Our primary communities include:</p>
+          <div className="grid sm:grid-cols-2 gap-4 not-prose mt-2">
+            {[
+              {
+                icon: <Backpack className="w-5 h-5 text-primary" />,
+                title: "Preppers & Self-Reliance Community",
+                desc: "You already stockpile, plan, and take preparedness seriously. Resilium gives you a structured, scored picture of where your gaps still are.",
+              },
+              {
+                icon: <DollarSign className="w-5 h-5 text-primary" />,
+                title: "The Financially Anxious",
+                desc: "Inflation, job insecurity, and economic volatility are real. Know exactly how many months of runway you have and what to prioritize.",
+              },
+              {
+                icon: <Globe className="w-5 h-5 text-primary" />,
+                title: "Expats & Digital Nomads",
+                desc: "Living abroad means location risk is real. Assess how your host country, mobility, and support network hold up under pressure.",
+              },
+              {
+                icon: <AlertTriangle className="w-5 h-5 text-primary" />,
+                title: "The Quietly Cautious",
+                desc: "You don't call yourself a prepper. But the news has you thinking. Resilium gives you a structured, honest starting point — no judgment.",
+              },
+            ].map(({ icon, title, desc }) => (
+              <div key={title} className="flex gap-3 p-4 rounded-xl border border-border/60 bg-card/40">
+                <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">{icon}</div>
+                <div>
+                  <p className="font-semibold text-sm text-foreground mb-1">{title}</p>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="mt-2">
+            Resilium is accessible worldwide with currency support for USD, EUR, and RON — with more regions being added.
           </p>
         </Section>
 
@@ -61,7 +101,7 @@ export default function AboutPage() {
             <li><strong>Stress Tolerance</strong> — capacity to function under sustained pressure without breakdown</li>
             <li><strong>Adaptability</strong> — willingness and ability to change course when circumstances demand it</li>
             <li><strong>Learning Agility</strong> — speed and openness to acquiring new skills when existing ones become insufficient</li>
-            <li><strong>Emotional Regulation</strong> — ability to manage fear, grief, and uncertainty without being paralysed by them</li>
+            <li><strong>Emotional Regulation</strong> — ability to manage fear, grief, and uncertainty without being paralyzed by them</li>
             <li><strong>Social Connection</strong> — quality and reliability of personal support networks</li>
           </ul>
           <p>
@@ -85,7 +125,7 @@ export default function AboutPage() {
             Generic resilience advice is everywhere. "Build an emergency fund." "Diversify your skills." "Stay connected to your community." These recommendations are true — and useless in isolation, because they ignore the specific constraints and strengths of your situation.
           </p>
           <p>
-            Resilium uses AI to generate plans that are genuinely personalised. The model reads your full profile — not just individual answers — and reasons about what matters most for <em>your</em> combination of circumstances. The output is written to be read by a human, not a checklist-ticking machine.
+            Resilium uses AI to generate plans that are genuinely personalized. The model reads your full profile — not just individual answers — and reasons about what matters most for <em>your</em> combination of circumstances. The output is written to be read by a human, not a checklist-ticking machine.
           </p>
           <p>
             Every plan identifies which pathway applies to your situation: a <strong>Growth pathway</strong> (for those who have a stable foundation and should build on it) or a <strong>Compensation pathway</strong> (for those who have critical gaps that need to be addressed before anything else). Both are constructive — one accelerates momentum, the other creates it where it's missing.
@@ -113,7 +153,7 @@ export default function AboutPage() {
 
         <Section title="About the Project">
           <p>
-            Resilium is independently operated by a sole individual — not a startup, not a VC-backed company, not a data broker wearing a wellness brand as a mask. The platform exists because the problem is real, the tools to address it are scattered and generic, and privacy-respecting alternatives to the surveillance-funded wellness industry are in short supply.
+            Resilium is independently operated — not a startup, not a VC-backed company, not a data broker wearing a wellness brand as a mask. The platform exists because the problem is real, the tools to address it are scattered and generic, and privacy-respecting alternatives to the surveillance-funded wellness industry are in short supply.
           </p>
           <p>
             The project is mission-driven: to help ordinary people make honest assessments of their vulnerability and take meaningful steps before a crisis forces their hand.

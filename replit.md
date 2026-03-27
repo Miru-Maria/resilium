@@ -76,10 +76,11 @@ Replit Auth sessions — sid (varchar PK), sess (jsonb), expire (timestamp)
 ### `resilience_reports` table
 Stores assessment inputs + generated report:
 - Input: location, incomeStability, savingsMonths, hasDependents, skills (jsonb), healthStatus, mobilityLevel, housingType, hasEmergencySupplies, psychologicalResilience, riskConcerns (jsonb), **mentalResilienceAnswers (jsonb)**
+- `currency` (varchar, default 'USD') — preferred currency (USD/EUR/RON) for AI financial advice
 - Scores: scoreOverall, scoreFinancial, scoreHealth, scoreSkills, scoreMobility, scorePsychological, scoreResources
-- Report: riskProfileSummary, topVulnerabilities (jsonb), actionPlan (jsonb), scenarioSimulations (jsonb), dailyHabits (jsonb)
+- MR sub-scores: mrStressTolerance, mrAdaptability, mrLearningAgility, mrChangeManagement, mrEmotionalRegulation, mrSocialSupport, mrComposite, mrPathway
+- Report: riskProfileSummary, topVulnerabilities (jsonb), actionPlan (jsonb), scenarioSimulations (jsonb), dailyHabits (jsonb), checklistsByArea (jsonb)
 - `sessionId` (varchar) — anonymous user tracking
-- `platform` (varchar) — 'web' or 'ios' / 'android'
 
 ### `gdpr_consents` table
 sessionId, platform, consentVersion, consentGivenAt, ipHash
@@ -151,7 +152,7 @@ Access at `/admin` (requires `ADMIN_USERNAME` / `ADMIN_PASSWORD` secrets):
 
 ## Web Frontend Pages
 
-- `/` — Landing page (hero, stats, features, CTA)
+- `/` — Landing page (hero, How it works, Who it's for [preppers/financially anxious/expats/cautious], What you'll get, Privacy, CTA)
 - `/consent` — GDPR consent screen (pre-assessment)
 - `/assessment` — 10-step assessment with Mental Resilience deep-dive
 - `/loading` — AI generation loading screen
@@ -190,6 +191,18 @@ Push method: GitHub Contents API via `@replit/connectors-sdk` token
 - `PORT` — Auto-assigned per artifact by Replit
 - `ADMIN_USERNAME` / `ADMIN_PASSWORD` — Admin dashboard credentials (secrets)
 - `EXPO_PUBLIC_DOMAIN` — Mobile app API domain (set in `.env` for mobile)
+
+## Key Conventions
+
+- **American English only** — No UK spellings. `paralyzed`, `personalized`, `organized`, `color`, `behavior`, etc.
+- **No HR/corporate angle** — Audience: preppers, financially anxious Americans, expats/digital nomads, the quietly cautious.
+- **Currency** — USD, EUR, RON supported. Picker at location step (step 2) in assessment. Stored in DB and passed to AI.
+- **Rate limiting** — `/api/resilience/assess` limited to 6 req/min per IP (skips for authenticated users).
+- **Anonymous TTL** — Anonymous reports (userId IS NULL) auto-deleted after 30 days. Cleanup runs on server startup + daily.
+- **UX Testing** — Admin-only route. NOT linked from the public nav dropdown.
+- **Profile plan cards** — Show location, currency badge, mini dimension score bars (Fin/Hlt/Skl/Mob/Psy/Res).
+- **Save prompt** — Results page shows a "Sign in to save" banner for unauthenticated users.
+- **Always dark** — No `.dark` class. Background `#0D1225`, primary `#E08040`, text `#EAD9BE`.
 
 ## GDPR Contact
 

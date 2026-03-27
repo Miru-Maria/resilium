@@ -2,7 +2,23 @@ import React from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { TrendingUp, Activity, ArrowRight, LogIn, User } from "lucide-react";
+import {
+  ArrowRight,
+  LogIn,
+  User,
+  Shield,
+  Brain,
+  MapPin,
+  TrendingUp,
+  CheckCircle2,
+  Lock,
+  ChevronRight,
+  Zap,
+  AlertTriangle,
+  Backpack,
+  Globe,
+  DollarSign,
+} from "lucide-react";
 import { SiteFooter } from "@/components/site-footer";
 import { useAuth } from "@workspace/replit-auth-web";
 import { ResilientIcon } from "@/components/resilient-icon";
@@ -26,9 +42,10 @@ export default function LandingPage() {
           alt="Abstract calming gradients"
           className="w-full h-full object-cover opacity-60 mix-blend-multiply dark:opacity-20 dark:mix-blend-screen"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/80 to-background"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/80 to-background" />
       </div>
 
+      {/* Header */}
       <header className="w-full py-6 px-6 lg:px-12 z-10 flex justify-between items-center">
         <div className="flex items-center gap-2">
           <ResilientIcon className="w-7 h-7" />
@@ -66,22 +83,15 @@ export default function LandingPage() {
                   ) : (
                     <User className="w-4 h-4" />
                   )}
-                  <span className="max-w-[100px] truncate">
-                    {user?.firstName || "Account"}
-                  </span>
+                  <span className="max-w-[100px] truncate">{user?.firstName || "Account"}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuItem asChild>
                   <Link href="/profile" className="cursor-pointer">My Plans</Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/admin/ux-test" className="cursor-pointer">UX Testing</Link>
-                </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={logout} className="cursor-pointer">
-                  Sign Out
-                </DropdownMenuItem>
+                <DropdownMenuItem onClick={logout} className="cursor-pointer">Sign Out</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
@@ -97,59 +107,211 @@ export default function LandingPage() {
         </div>
       </header>
 
-      <main className="flex-1 flex flex-col items-center justify-center px-6 text-center z-10 max-w-4xl mx-auto pt-12 pb-24">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: "easeOut" }}
-        >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/30 text-primary mb-8 border border-secondary/50 backdrop-blur-sm">
-            <Activity className="w-4 h-4" />
-            <span className="text-sm font-semibold uppercase tracking-wider">AI-Powered Risk Assessment</span>
-          </div>
-          
-          <h1 className="text-5xl md:text-7xl font-display font-bold tracking-tight text-foreground leading-[1.1] mb-6">
-            You're one disruption away from{" "}
-            <span className="text-rose-400 italic">
-              chaos
-            </span>. <br />
-            Check your{" "}
-            <span className="text-primary whitespace-nowrap font-extrabold">
-              readiness.
-            </span>
-          </h1>
-          
-          <p className="text-lg md:text-xl text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed">
-            Resilium analyzes your financial stability, skills, health, and location to build a personalized action plan for life's unpredictable moments.
-          </p>
-          
-          <Link href="/assess">
-            <Button size="lg" className="rounded-full h-16 px-10 text-lg font-semibold shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/30 hover:-translate-y-1 transition-all duration-300">
-              Get My Resilience Plan
-              <ArrowRight className="ml-2 w-5 h-5" />
-            </Button>
-          </Link>
-        </motion.div>
+      {/* Hero */}
+      <main className="flex-1 flex flex-col items-center z-10">
+        <div className="flex flex-col items-center text-center px-6 pt-12 pb-20 max-w-4xl mx-auto w-full">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+          >
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/30 text-primary mb-8 border border-secondary/50 backdrop-blur-sm">
+              <Brain className="w-4 h-4" />
+              <span className="text-sm font-semibold uppercase tracking-wider">AI-Powered Risk Assessment</span>
+            </div>
 
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8, duration: 1 }}
-          className="mt-24 grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-3xl border-t border-border/60 pt-12"
-        >
-          <div className="flex flex-col items-center">
-            <span className="text-4xl font-display font-bold text-primary mb-2">360°</span>
-            <span className="text-sm text-muted-foreground">Holistic Risk Profiling</span>
+            <h1 className="text-5xl md:text-7xl font-display font-bold tracking-tight text-foreground leading-[1.1] mb-6">
+              You're one disruption away from{" "}
+              <span className="text-rose-400 italic">chaos</span>.<br />
+              Check your{" "}
+              <span className="text-primary whitespace-nowrap font-extrabold">readiness.</span>
+            </h1>
+
+            <p className="text-lg md:text-xl text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed">
+              Resilium analyzes your financial stability, skills, health, and location to build a personalized action plan for life's unpredictable moments.
+            </p>
+
+            <Link href="/assess">
+              <Button size="lg" className="rounded-full h-16 px-10 text-lg font-semibold shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/30 hover:-translate-y-1 transition-all duration-300">
+                Get My Resilience Plan
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Button>
+            </Link>
+          </motion.div>
+
+          {/* Trust indicators */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8, duration: 1 }}
+            className="mt-16 flex flex-wrap items-center justify-center gap-8 text-sm text-muted-foreground"
+          >
+            <span className="flex items-center gap-2"><Lock className="w-4 h-4 text-primary" /> No email required</span>
+            <span className="flex items-center gap-2"><Shield className="w-4 h-4 text-primary" /> Your data is never sold</span>
+            <span className="flex items-center gap-2"><Zap className="w-4 h-4 text-primary" /> Results in under 15 minutes</span>
+          </motion.div>
+        </div>
+
+        {/* How it works */}
+        <section className="w-full bg-card/40 border-y border-border/60 py-20 px-6">
+          <div className="max-w-5xl mx-auto">
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary text-center mb-3">The Process</p>
+            <h2 className="text-3xl md:text-4xl font-display font-bold text-center mb-14">How it works</h2>
+            <div className="grid md:grid-cols-3 gap-8">
+              {[
+                {
+                  step: "01",
+                  icon: <Brain className="w-7 h-7 text-primary" />,
+                  title: "Answer the assessment",
+                  desc: "10–15 minutes of honest questions covering your finances, location, health, practical skills, housing situation, and psychological resilience under pressure.",
+                },
+                {
+                  step: "02",
+                  icon: <Zap className="w-7 h-7 text-primary" />,
+                  title: "AI builds your profile",
+                  desc: "Your answers are scored across six risk dimensions and fed to an AI that reasons about your specific vulnerabilities — not generic advice lifted from a checklist.",
+                },
+                {
+                  step: "03",
+                  icon: <CheckCircle2 className="w-7 h-7 text-primary" />,
+                  title: "Get your action plan",
+                  desc: "A full resilience report lands immediately: your score, your gaps, and a prioritized action plan broken into 30-day, 6-month, and long-term phases.",
+                },
+              ].map(({ step, icon, title, desc }) => (
+                <div key={step} className="relative flex flex-col gap-4 p-6 rounded-2xl bg-background border border-border/60">
+                  <span className="text-xs font-bold text-primary/40 tracking-widest">{step}</span>
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">{icon}</div>
+                  <h3 className="font-display font-bold text-lg">{title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="flex flex-col items-center">
-            <span className="text-4xl font-display font-bold text-primary mb-2">1M+</span>
-            <span className="text-sm text-muted-foreground">Scenarios Simulated</span>
+        </section>
+
+        {/* Who it's for */}
+        <section className="w-full py-20 px-6">
+          <div className="max-w-5xl mx-auto">
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary text-center mb-3">Who Uses Resilium</p>
+            <h2 className="text-3xl md:text-4xl font-display font-bold text-center mb-4">Built for people who prepare, not people who panic</h2>
+            <p className="text-center text-muted-foreground max-w-2xl mx-auto mb-14">
+              Resilium is used by people who take personal security seriously — wherever they are in the world.
+            </p>
+            <div className="grid sm:grid-cols-2 gap-6">
+              {[
+                {
+                  icon: <Backpack className="w-6 h-6 text-primary" />,
+                  title: "Preppers & Self-Reliance Community",
+                  desc: "You already stockpile, plan, and take preparedness seriously. Resilium gives you an honest, scored picture of where your gaps still are — and what to fix first.",
+                },
+                {
+                  icon: <DollarSign className="w-6 h-6 text-primary" />,
+                  title: "The Financially Anxious",
+                  desc: "Job insecurity, inflation, and economic volatility are real. Find out exactly how many months of runway you have — and what would happen if you lost your income tomorrow.",
+                },
+                {
+                  icon: <Globe className="w-6 h-6 text-primary" />,
+                  title: "Expats & Digital Nomads",
+                  desc: "Living internationally means location risk is real. Assess how your country of residence, mobility, and support network hold up when things go sideways.",
+                },
+                {
+                  icon: <AlertTriangle className="w-6 h-6 text-primary" />,
+                  title: "The Quietly Cautious",
+                  desc: "You don't call yourself a prepper. But the news has you thinking. Resilium gives you a structured, honest starting point — no judgment, no extreme ideology.",
+                },
+              ].map(({ icon, title, desc }) => (
+                <div key={title} className="flex gap-4 p-6 rounded-2xl border border-border/60 bg-card/40 hover:border-primary/30 transition-colors">
+                  <div className="flex-shrink-0 w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center">{icon}</div>
+                  <div>
+                    <h3 className="font-display font-semibold mb-2">{title}</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="flex flex-col items-center">
-            <span className="text-4xl font-display font-bold text-primary mb-2">100%</span>
-            <span className="text-sm text-muted-foreground">Personalized Action Plans</span>
+        </section>
+
+        {/* What you'll get */}
+        <section className="w-full bg-card/40 border-y border-border/60 py-20 px-6">
+          <div className="max-w-5xl mx-auto">
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary text-center mb-3">Your Report</p>
+            <h2 className="text-3xl md:text-4xl font-display font-bold text-center mb-14">What you'll walk away with</h2>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {[
+                {
+                  icon: <TrendingUp className="w-5 h-5 text-primary" />,
+                  title: "Your Resilience Score",
+                  desc: "A 0–100 composite score across six dimensions: Financial, Health, Skills, Mobility, Psychological, and Resources.",
+                },
+                {
+                  icon: <CheckCircle2 className="w-5 h-5 text-primary" />,
+                  title: "Prioritized Action Plan",
+                  desc: "30-day, 6-month, and long-term tasks — ordered by criticality for your specific situation, not a generic checklist.",
+                },
+                {
+                  icon: <Brain className="w-5 h-5 text-primary" />,
+                  title: "Mental Resilience Profile",
+                  desc: "A deep psychological assessment identifying your Growth or Compensation pathway and what it means for your planning.",
+                },
+                {
+                  icon: <AlertTriangle className="w-5 h-5 text-primary" />,
+                  title: "Scenario Stress Tests",
+                  desc: "AI-generated simulations of your top risks — job loss, supply chain failure, natural disaster — with your personal impact and recovery timeline.",
+                },
+                {
+                  icon: <MapPin className="w-5 h-5 text-primary" />,
+                  title: "Location Risk Analysis",
+                  desc: "How your geography affects your vulnerability — climate exposure, political stability, infrastructure resilience.",
+                },
+                {
+                  icon: <Shield className="w-5 h-5 text-primary" />,
+                  title: "Daily Resilience Habits",
+                  desc: "Recurring actions tailored to your profile that, compounded over time, move you from vulnerable to prepared.",
+                },
+              ].map(({ icon, title, desc }) => (
+                <div key={title} className="p-5 rounded-2xl border border-border/60 bg-background hover:border-primary/30 transition-colors">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">{icon}</div>
+                    <h3 className="font-semibold text-sm">{title}</h3>
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{desc}</p>
+                </div>
+              ))}
+            </div>
           </div>
-        </motion.div>
+        </section>
+
+        {/* Privacy promise */}
+        <section className="w-full py-20 px-6">
+          <div className="max-w-3xl mx-auto text-center">
+            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-6">
+              <Lock className="w-8 h-8 text-primary" />
+            </div>
+            <h2 className="text-2xl md:text-3xl font-display font-bold mb-4">Private by design</h2>
+            <p className="text-muted-foreground leading-relaxed mb-8 max-w-xl mx-auto">
+              No name. No email. No tracking pixels. Your assessment data is stored securely and automatically deleted after 12 months. We don't sell your data — ever. Read our{" "}
+              <Link href="/privacy" className="text-primary underline underline-offset-4 hover:text-primary/80">
+                Privacy Policy
+              </Link>
+              .
+            </p>
+          </div>
+        </section>
+
+        {/* Final CTA */}
+        <section className="w-full bg-primary/5 border-t border-primary/10 py-20 px-6">
+          <div className="max-w-2xl mx-auto text-center">
+            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">Ready to find out where you stand?</h2>
+            <p className="text-muted-foreground mb-8">Free. No account required. Takes 10–15 minutes.</p>
+            <Link href="/assess">
+              <Button size="lg" className="rounded-full h-14 px-10 text-base font-semibold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-1 transition-all duration-300">
+                Start the Assessment
+                <ChevronRight className="ml-1 w-5 h-5" />
+              </Button>
+            </Link>
+          </div>
+        </section>
       </main>
 
       <SiteFooter />

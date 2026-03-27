@@ -6,9 +6,33 @@ import { eq, and, count } from "drizzle-orm";
 import { calculateScores } from "./scoring.js";
 import { generateResilienceReport } from "./ai.js";
 import { PLAN_LIMIT } from "../users.js";
+import rateLimit from "express-rate-limit";
+
 const router: IRouter = Router();
 
-router.post("/assess", async (req, res) => {
+const VALID_CURRENCIES = ["USD", "EUR", "RON"] as const;
+type SupportedCurrency = typeof VALID_CURRENCIES[number];
+
+function parseCurrency(value: unknown): SupportedCurrency {
+  if (typeof value === "string" && (VALID_CURRENCIES as readonly string[]).includes(value)) {
+    return value as SupportedCurrency;
+  }
+  return "USD";
+}
+
+const assessRateLimit = rateLimit({
+  windowMs: 60 * 1000,
+  max: 6,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    error: "RATE_LIMITED",
+    message: "Too many assessment requests. Please wait a minute before trying again.",
+  },
+  skip: (req) => !!(req as any).isAuthenticated?.(),
+});
+
+router.post("/assess", assessRateLimit, async (req, res) => {
   try {
     const parseResult = SubmitAssessmentBody.safeParse(req.body);
     if (!parseResult.success) {
@@ -52,6 +76,8 @@ router.post("/assess", async (req, res) => {
 
     const { mentalResilienceSubScores, ...scores } = scoreResult;
 
+    const currency = parseCurrency(req.body.currency);
+
     const reportContent = await generateResilienceReport(
       {
         location: input.location,
@@ -65,6 +91,7 @@ router.post("/assess", async (req, res) => {
         hasEmergencySupplies: input.hasEmergencySupplies,
         psychologicalResilience: input.psychologicalResilience,
         riskConcerns: input.riskConcerns as string[],
+        currency,
       },
       scores,
       mentalResilienceSubScores
@@ -77,6 +104,7 @@ router.post("/assess", async (req, res) => {
       reportId,
       sessionId: input.sessionId ?? null,
       userId: req.isAuthenticated() ? req.user.id : null,
+      currency: currency,
       location: input.location,
       incomeStability: input.incomeStability,
       savingsMonths: input.savingsMonths,
