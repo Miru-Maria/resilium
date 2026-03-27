@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Loader2, LayoutDashboard, Smartphone, Shield, LogOut, FlaskConical } from "lucide-react";
+import { Loader2, LayoutDashboard, Smartphone, Shield, LogOut, FlaskConical, Users, Megaphone } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
-  activeSection?: "dashboard" | "mobile" | "gdpr" | "consent" | "ux-testing";
+  activeSection?: "dashboard" | "mobile" | "gdpr" | "consent" | "ux-testing" | "users" | "announcements";
 }
 
 export function getAdminToken(): string | null {
@@ -62,6 +62,8 @@ export function AdminLayout({ children, activeSection }: AdminLayoutProps) {
 
   const navItems = [
     { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard, key: "dashboard" },
+    { href: "/admin/users", label: "Users", icon: Users, key: "users" },
+    { href: "/admin/announcements", label: "Announcements", icon: Megaphone, key: "announcements" },
     { href: "/admin/mobile", label: "Mobile", icon: Smartphone, key: "mobile" },
     { href: "/admin/gdpr", label: "GDPR", icon: Shield, key: "gdpr" },
     { href: "/admin/consent-log", label: "Consent Log", icon: Shield, key: "consent" },

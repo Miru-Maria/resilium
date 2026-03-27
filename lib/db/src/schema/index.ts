@@ -21,3 +21,4 @@ export * from "./resilience";
 export * from "./auth";
 export * from "./gdpr";
 export * from "./feedback";
+export * from "./announcements";

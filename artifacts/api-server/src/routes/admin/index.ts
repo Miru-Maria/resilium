@@ -1,10 +1,11 @@
 import { Router, type IRouter } from "express";
-import { db, resilienceReportsTable, reportFeedbackTable } from "@workspace/db";
-import { desc } from "drizzle-orm";
+import { db, resilienceReportsTable, reportFeedbackTable, usersTable } from "@workspace/db";
+import { desc, eq, count, max } from "drizzle-orm";
 import { requireAdminSession, generateAdminToken, verifyAdminToken } from "../../middlewares/adminAuth.js";
 import uxTestRouter from "./ux-test/index.js";
 import adminGdprRouter from "./gdpr.js";
 import adminAnalyticsRouter from "./analytics.js";
+import adminAnnouncementsRouter from "./announcements.js";
 
 const router: IRouter = Router();
 
@@ -173,8 +174,47 @@ router.get("/analytics", requireAdminSession, async (req, res) => {
   }
 });
 
+router.get("/users", requireAdminSession, async (req, res) => {
+  try {
+    const planCounts = await db
+      .select({
+        userId: resilienceReportsTable.userId,
+        planCount: count(),
+        lastActive: max(resilienceReportsTable.createdAt),
+      })
+      .from(resilienceReportsTable)
+      .groupBy(resilienceReportsTable.userId);
+
+    const planCountMap = new Map(
+      planCounts.map((r) => [r.userId, { count: Number(r.planCount), lastActive: r.lastActive }])
+    );
+
+    const users = await db
+      .select()
+      .from(usersTable)
+      .orderBy(desc(usersTable.createdAt));
+
+    res.json({
+      users: users.map((u) => ({
+        id: u.id,
+        email: u.email,
+        firstName: u.firstName,
+        lastName: u.lastName,
+        profileImageUrl: u.profileImageUrl,
+        createdAt: u.createdAt.toISOString(),
+        planCount: planCountMap.get(u.id)?.count ?? 0,
+        lastActive: planCountMap.get(u.id)?.lastActive?.toISOString() ?? null,
+      })),
+    });
+  } catch (err) {
+    req.log.error({ err }, "Error fetching admin users");
+    res.status(500).json({ error: "Failed to fetch users" });
+  }
+});
+
 router.use("/ux-test", uxTestRouter);
 router.use("/gdpr", adminGdprRouter);
 router.use("/analytics", adminAnalyticsRouter);
+router.use("/announcements", adminAnnouncementsRouter);
 
 export default router;

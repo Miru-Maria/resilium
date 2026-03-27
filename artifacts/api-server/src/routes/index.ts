@@ -6,6 +6,7 @@ import usersRouter from "./users.js";
 import gdprRouter from "./gdpr/index.js";
 import adminRouter from "./admin/index.js";
 import feedbackRouter from "./feedback/index.js";
+import announcementsRouter from "./announcements.js";
 
 const router: IRouter = Router();
 
@@ -16,5 +17,6 @@ router.use("/users", usersRouter);
 router.use("/gdpr", gdprRouter);
 router.use("/admin", adminRouter);
 router.use("/feedback", feedbackRouter);
+router.use(announcementsRouter);
 
 export default router;

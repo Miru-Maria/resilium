@@ -18,6 +18,9 @@ import UxTestReportPage from "@/pages/admin/ux-test-report";
 import AdminMobilePage from "@/pages/admin/mobile";
 import AdminGdprPage from "@/pages/admin/gdpr";
 import AdminConsentLogPage from "@/pages/admin/consent-log";
+import AdminUsersPage from "@/pages/admin/users";
+import AdminAnnouncementsPage from "@/pages/admin/announcements";
+import { AnnouncementBanner } from "@/components/announcement-banner";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -39,6 +42,7 @@ function ScrollToTop() {
 function Router() {
   return (
     <>
+      <AnnouncementBanner />
       <ScrollToTop />
       <Switch>
       <Route path="/" component={LandingPage} />
@@ -55,6 +59,8 @@ function Router() {
       <Route path="/admin/mobile" component={AdminMobilePage} />
       <Route path="/admin/gdpr" component={AdminGdprPage} />
       <Route path="/admin/consent-log" component={AdminConsentLogPage} />
+      <Route path="/admin/users" component={AdminUsersPage} />
+      <Route path="/admin/announcements" component={AdminAnnouncementsPage} />
       <Route component={NotFound} />
       </Switch>
     </>

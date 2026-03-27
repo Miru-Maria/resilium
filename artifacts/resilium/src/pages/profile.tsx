@@ -8,6 +8,16 @@ import { useAuth } from "@workspace/replit-auth-web";
 import { ResilientIcon } from "@/components/resilient-icon";
 import { RadarChartView } from "@/components/radar-chart-view";
 import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  ReferenceLine,
+} from "recharts";
+import {
   Trash2,
   Eye,
   AlertTriangle,
@@ -25,6 +35,7 @@ import {
   Lightbulb,
   ChevronRight,
   MapPin,
+  LineChart as LineChartIcon,
 } from "lucide-react";
 import {
   AlertDialog,
@@ -537,6 +548,66 @@ export default function ProfilePage() {
                 <GitCompare className="w-4 h-4" /> Compare
                 <ChevronRight className="w-3.5 h-3.5" />
               </Button>
+            )}
+          </div>
+        )}
+
+        {/* Score Progress Chart */}
+        {!compareMode && plans.length >= 2 && (
+          <section className="mb-8">
+            <div className="flex items-center gap-2 mb-4">
+              <LineChartIcon className="w-5 h-5 text-primary" />
+              <h2 className="font-display font-bold text-xl">Score Progress</h2>
+            </div>
+            <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+              <ResponsiveContainer width="100%" height={220}>
+                <LineChart
+                  data={[...plans]
+                    .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+                    .map((p) => ({
+                      date: new Date(p.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+                      score: Math.round(p.scoreOverall),
+                    }))}
+                  margin={{ top: 5, right: 16, left: 0, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+                  <XAxis dataKey="date" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+                  <YAxis domain={[0, 100]} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} width={28} />
+                  <Tooltip
+                    contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 10, fontSize: 12 }}
+                    labelStyle={{ color: "hsl(var(--foreground))", fontWeight: 700 }}
+                    itemStyle={{ color: "#E08040" }}
+                    formatter={(v: number) => [`${v}/100`, "Score"]}
+                  />
+                  <ReferenceLine y={50} stroke="rgba(255,255,255,0.1)" strokeDasharray="4 4" />
+                  <Line
+                    type="monotone"
+                    dataKey="score"
+                    stroke="#E08040"
+                    strokeWidth={2.5}
+                    dot={{ fill: "#E08040", r: 4, strokeWidth: 0 }}
+                    activeDot={{ r: 6, fill: "#E08040", strokeWidth: 2, stroke: "hsl(var(--background))" }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </section>
+        )}
+
+        {/* Freemium upgrade nudge (appears at 5+ plans) */}
+        {!compareMode && plans.length >= 5 && !atLimit && (
+          <div className="mb-6 flex items-start gap-3 p-4 rounded-2xl bg-primary/5 border border-primary/20">
+            <TrendingUp className="w-5 h-5 flex-shrink-0 mt-0.5 text-primary" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-foreground">You're building real resilience.</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                You have {plans.length} plans saved. Upgrade to Pro for unlimited plans, priority AI analysis, and scheduled re-assessment reminders.
+              </p>
+            </div>
+            {import.meta.env.VITE_STRIPE_PRO_URL && (
+              <a href={import.meta.env.VITE_STRIPE_PRO_URL} target="_blank" rel="noopener noreferrer">
+                <Button size="sm" className="rounded-full flex-shrink-0">Upgrade</Button>
+              </a>
             )}
           </div>
         )}

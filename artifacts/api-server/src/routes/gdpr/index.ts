@@ -1,6 +1,7 @@
 import { Router, type IRouter } from "express";
 import { db, consentRecordsTable, gdprDataRequestsTable, resilienceReportsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
+import { sendGdprRequestNotification } from "../../lib/email.js";
 
 const router: IRouter = Router();
 
@@ -78,6 +79,8 @@ router.post("/data-request", async (req, res) => {
       type: String(type),
       status: type === "deletion" ? "pending" : "completed",
     });
+
+    sendGdprRequestNotification({ type: type as "deletion" | "export", sessionId: String(sessionId) }).catch(() => {});
 
     const message = type === "deletion"
       ? "Deletion request received. Your data will be deleted within 30 days."

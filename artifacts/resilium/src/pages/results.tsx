@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { Progress } from "@/components/ui/progress";
-import { Loader2, Download, Share2, AlertTriangle, CheckCircle, RefreshCcw, Activity, User, LogIn, Brain, TrendingUp, Award, Star } from "lucide-react";
+import { Loader2, Download, Share2, AlertTriangle, CheckCircle, RefreshCcw, Activity, User, LogIn, Brain, TrendingUp, Award, Star, ExternalLink, Heart, BookOpen, ShieldCheck, Zap, Package, Globe } from "lucide-react";
 import { ResilientIcon } from "@/components/resilient-icon";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
@@ -216,12 +216,22 @@ export default function ResultsPage() {
     return "text-destructive";
   };
 
-  const handleShare = () => {
-    navigator.clipboard.writeText(`My Resilium Score is ${Math.round(report.score.overall)}/100. Find out your survival readiness at Resilium.`);
+  const handleShare = async () => {
+    const shareUrl = window.location.href;
+    const shareText = `My Resilium Score is ${Math.round(report.score.overall)}/100. Find out your survival readiness.`;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: "My Resilium Score", text: shareText, url: shareUrl });
+        return;
+      } catch {}
+    }
+    navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
     toast({ title: "Copied to clipboard", description: "You can now paste and share your score." });
   };
 
   const handlePrint = () => window.print();
+
+  const donationUrl = (report as any).stripeUrl as string | undefined;
 
   // Checklist progress lookup
   const progressMap: Record<string, boolean> = {};
@@ -725,6 +735,122 @@ export default function ResultsPage() {
                   <RefreshCcw className="w-4 h-4 mr-2" /> Retake Assessment
                 </Button>
               </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* RESOURCE RECOMMENDATIONS */}
+        <section className="print:hidden">
+          <div className="flex items-center gap-3 mb-6">
+            <BookOpen className="w-6 h-6 text-primary" />
+            <h2 className="font-display font-bold text-2xl">Recommended Resources</h2>
+          </div>
+          <p className="text-muted-foreground mb-6">Tools and resources to accelerate your resilience journey.</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+            {[
+              {
+                icon: ShieldCheck,
+                title: "Ready.gov",
+                category: "Emergency Prep",
+                description: "Official U.S. government guide to disaster preparedness, emergency kits, and family plans.",
+                url: "https://ready.gov",
+                badge: "Free",
+              },
+              {
+                icon: Package,
+                title: "FEMA Emergency Kit Guide",
+                category: "Supplies",
+                description: "Build a 72-hour emergency supply kit with this comprehensive checklist from FEMA.",
+                url: "https://www.fema.gov/emergency-managers/individuals-communities/prepare-financially",
+                badge: "Free",
+              },
+              {
+                icon: Brain,
+                title: "Mental Health First Aid",
+                category: "Psychological",
+                description: "8-hour public education course that teaches how to identify and respond to mental health crises.",
+                url: "https://www.mentalhealthfirstaid.org",
+                badge: "Course",
+              },
+              {
+                icon: Globe,
+                title: "American Red Cross",
+                category: "Community",
+                description: "Disaster preparedness courses, first aid training, and local response network.",
+                url: "https://www.redcross.org/take-a-class",
+                badge: "Free",
+              },
+              {
+                icon: Zap,
+                title: "iReady Plan (US)",
+                category: "Financial",
+                description: "FEMA's guide to financial preparedness and building an emergency savings buffer.",
+                url: "https://www.fema.gov/emergency-managers/individuals-communities/prepare-financially",
+                badge: "Guide",
+              },
+              {
+                icon: TrendingUp,
+                title: "Coursera Resilience",
+                category: "Skills",
+                description: "University-led courses on resilience psychology, stress management, and adaptive skills.",
+                url: "https://www.coursera.org/search?query=resilience",
+                badge: "Courses",
+              },
+            ].map((r) => {
+              const Icon = r.icon;
+              return (
+                <a
+                  key={r.title}
+                  href={r.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex flex-col bg-card border border-border rounded-2xl p-5 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 transition-all"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <Icon className="w-5 h-5 text-primary" />
+                    </div>
+                    <span className="text-[10px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border">
+                      {r.badge}
+                    </span>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-[10px] uppercase tracking-wider text-primary font-semibold mb-1">{r.category}</p>
+                    <h3 className="font-bold text-sm mb-1.5 group-hover:text-primary transition-colors">{r.title}</h3>
+                    <p className="text-xs text-muted-foreground leading-relaxed">{r.description}</p>
+                  </div>
+                  <div className="mt-3 flex items-center gap-1 text-xs text-primary font-medium">
+                    Visit <ExternalLink className="w-3 h-3 ml-1" />
+                  </div>
+                </a>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* SUPPORT BANNER */}
+        <section className="print:hidden">
+          <div className="rounded-2xl border border-primary/20 bg-primary/5 p-8 text-center">
+            <Heart className="w-8 h-8 text-primary mx-auto mb-3" />
+            <h3 className="font-display font-bold text-xl mb-2">Support Resilium</h3>
+            <p className="text-muted-foreground text-sm max-w-md mx-auto mb-5">
+              Resilium is independent and free to use. If this report was helpful, consider a small contribution to keep it running and improving.
+            </p>
+            <div className="flex flex-wrap gap-3 justify-center">
+              {donationUrl ? (
+                <a href={donationUrl} target="_blank" rel="noopener noreferrer">
+                  <Button className="rounded-full gap-2">
+                    <Heart className="w-4 h-4" /> Support Resilium
+                  </Button>
+                </a>
+              ) : (
+                <Button className="rounded-full gap-2" onClick={handleShare}>
+                  <Share2 className="w-4 h-4" /> Share Your Score
+                </Button>
+              )}
+              <Button variant="outline" className="rounded-full gap-2" onClick={handleShare}>
+                <Share2 className="w-4 h-4" /> Share
+              </Button>
             </div>
           </div>
         </section>
