@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { useRoute } from "wouter";
 import { useGetReport, useGetChecklists, useUpdateChecklistItem, useGetSnapshots } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -17,6 +17,13 @@ import { SiteFooter } from "@/components/site-footer";
 import { useAuth } from "@workspace/replit-auth-web";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+const PADDLE_CLIENT_TOKEN = import.meta.env.VITE_PADDLE_CLIENT_TOKEN as string | undefined;
+const PADDLE_DONATION_PRICE_ID = import.meta.env.VITE_PADDLE_DONATION_PRICE_ID as string | undefined;
+
+declare global {
+  interface Window { Paddle?: any; }
+}
 
 function FeedbackWidget({ reportId }: { reportId: string }) {
   const storageKey = `feedback_submitted_${reportId}`;
@@ -231,7 +238,23 @@ export default function ResultsPage() {
 
   const handlePrint = () => window.print();
 
-  const donationUrl = import.meta.env.VITE_STRIPE_DONATION_URL as string | undefined || undefined;
+  useEffect(() => {
+    if (!PADDLE_CLIENT_TOKEN || window.Paddle) return;
+    const script = document.createElement("script");
+    script.src = "https://cdn.paddle.com/paddle/v2/paddle.js";
+    script.async = true;
+    script.onload = () => window.Paddle?.Initialize({ token: PADDLE_CLIENT_TOKEN });
+    document.head.appendChild(script);
+  }, []);
+
+  const handleDonate = () => {
+    if (!PADDLE_DONATION_PRICE_ID || !window.Paddle) return;
+    window.Paddle.Checkout.open({
+      items: [{ priceId: PADDLE_DONATION_PRICE_ID, quantity: 1 }],
+    });
+  };
+
+  const hasDonation = !!(PADDLE_CLIENT_TOKEN && PADDLE_DONATION_PRICE_ID);
 
   // Checklist progress lookup
   const progressMap: Record<string, boolean> = {};
@@ -848,12 +871,10 @@ export default function ResultsPage() {
               If this report was helpful, consider a small contribution to keep Resilium running and improving.
             </p>
             <div className="flex flex-wrap gap-3 justify-center">
-              {donationUrl ? (
-                <a href={donationUrl} target="_blank" rel="noopener noreferrer">
-                  <Button className="rounded-full gap-2">
-                    <Heart className="w-4 h-4" /> Support Resilium
-                  </Button>
-                </a>
+              {hasDonation ? (
+                <Button className="rounded-full gap-2" onClick={handleDonate}>
+                  <Heart className="w-4 h-4" /> Support Resilium — $5
+                </Button>
               ) : (
                 <Button className="rounded-full gap-2" onClick={handleShare}>
                   <Share2 className="w-4 h-4" /> Share Your Score
