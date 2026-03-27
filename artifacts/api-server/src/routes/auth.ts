@@ -261,6 +261,10 @@ router.post(
   },
 );
 
+router.get("/mobile-auth/redirect", (_req: Request, res: Response) => {
+  res.send(`<!DOCTYPE html><html><head><title>Signing you in…</title><style>body{margin:0;font-family:system-ui,sans-serif;background:#0D1225;color:#EAD9BE;display:flex;align-items:center;justify-content:center;height:100vh;text-align:center}p{font-size:16px;opacity:.7}</style></head><body><p>Authentication complete — you may close this window.</p></body></html>`);
+});
+
 router.post("/mobile-auth/logout", async (req: Request, res: Response) => {
   const sid = getSessionId(req);
   if (sid) {

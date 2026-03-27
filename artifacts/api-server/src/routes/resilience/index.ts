@@ -201,6 +201,51 @@ router.post("/assess", assessRateLimit, async (req, res) => {
   }
 });
 
+router.get("/my-reports", async (req, res) => {
+  if (!req.isAuthenticated()) {
+    res.status(401).json({ error: "UNAUTHORIZED", message: "Sign in to access your reports." });
+    return;
+  }
+  try {
+    const rows = await db
+      .select({
+        reportId: resilienceReportsTable.reportId,
+        createdAt: resilienceReportsTable.createdAt,
+        scoreOverall: resilienceReportsTable.scoreOverall,
+        scoreFinancial: resilienceReportsTable.scoreFinancial,
+        scoreHealth: resilienceReportsTable.scoreHealth,
+        scoreSkills: resilienceReportsTable.scoreSkills,
+        scoreMobility: resilienceReportsTable.scoreMobility,
+        scorePsychological: resilienceReportsTable.scorePsychological,
+        scoreResources: resilienceReportsTable.scoreResources,
+        location: resilienceReportsTable.location,
+        riskProfileSummary: resilienceReportsTable.riskProfileSummary,
+      })
+      .from(resilienceReportsTable)
+      .where(eq(resilienceReportsTable.userId, req.user.id))
+      .orderBy(resilienceReportsTable.createdAt);
+
+    res.json({ reports: rows.map(r => ({
+      reportId: r.reportId,
+      createdAt: r.createdAt.toISOString(),
+      location: r.location,
+      riskProfileSummary: r.riskProfileSummary,
+      score: {
+        overall: r.scoreOverall,
+        financial: r.scoreFinancial,
+        health: r.scoreHealth,
+        skills: r.scoreSkills,
+        mobility: r.scoreMobility,
+        psychological: r.scorePsychological,
+        resources: r.scoreResources,
+      },
+    })) });
+  } catch (err) {
+    req.log.error({ err }, "Error fetching user reports");
+    res.status(500).json({ error: "INTERNAL_ERROR", message: "Failed to fetch reports." });
+  }
+});
+
 router.get("/reports/:reportId", async (req, res) => {
   try {
     const parseResult = GetReportParams.safeParse(req.params);

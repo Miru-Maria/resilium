@@ -10,6 +10,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 
+import { useAuth } from "@/context/auth";
 import { useColors } from "@/context/theme";
 import { ColorsType } from "@/constants/colors";
 
@@ -29,6 +30,7 @@ export default function LoadingScreen() {
   const spinAnim = useRef(new Animated.Value(0)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
+  const { getAuthHeaders } = useAuth();
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
@@ -68,7 +70,7 @@ export default function LoadingScreen() {
         const parsed = JSON.parse(assessmentData);
         const res = await fetch(`https://${process.env.EXPO_PUBLIC_DOMAIN}/api/resilience/assess`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", ...getAuthHeaders() },
           body: JSON.stringify(parsed),
         });
 

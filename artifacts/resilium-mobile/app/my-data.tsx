@@ -14,6 +14,7 @@ import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 
 import { useSession } from "@/context/session";
+import { useAuth } from "@/context/auth";
 import { useColors } from "@/context/theme";
 import { ColorsType } from "@/constants/colors";
 
@@ -28,6 +29,7 @@ type ExportedData = {
 export default function MyDataScreen() {
   const insets = useSafeAreaInsets();
   const { sessionId, consentDate, revokeConsent, hasConsented } = useSession();
+  const { isSignedIn, user, signOut } = useAuth();
   const [exportData, setExportData] = useState<ExportedData | null>(null);
   const [isExporting, setIsExporting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -129,7 +131,48 @@ export default function MyDataScreen() {
         contentContainerStyle={[styles.scrollContent, { paddingBottom: bottomPad + 40 }]}
         showsVerticalScrollIndicator={false}
       >
-        {!hasConsented ? (
+        {isSignedIn && user && (
+          <View style={styles.profileCard}>
+            <View style={styles.profileRow}>
+              <View style={styles.profileAvatar}>
+                <Feather name="user" size={22} color={colors.primary} />
+              </View>
+              <View style={styles.profileInfo}>
+                <Text style={styles.profileName}>
+                  {[user.firstName, user.lastName].filter(Boolean).join(" ") || "Replit User"}
+                </Text>
+                {user.email ? <Text style={styles.profileEmail}>{user.email}</Text> : null}
+              </View>
+              <View style={styles.signedInBadge}>
+                <Feather name="check-circle" size={12} color={colors.success} />
+                <Text style={styles.signedInBadgeText}>Signed In</Text>
+              </View>
+            </View>
+            <Pressable
+              style={({ pressed }) => [styles.signOutBtn, pressed && styles.btnPressed]}
+              onPress={() => {
+                Alert.alert("Sign Out", "Are you sure you want to sign out?", [
+                  { text: "Cancel", style: "cancel" },
+                  {
+                    text: "Sign Out",
+                    style: "destructive",
+                    onPress: async () => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                      await signOut();
+                      router.replace("/");
+                    },
+                  },
+                ]);
+              }}
+              testID="sign-out-btn"
+            >
+              <Feather name="log-out" size={16} color={colors.danger} />
+              <Text style={styles.signOutText}>Sign Out</Text>
+            </Pressable>
+          </View>
+        )}
+
+        {!hasConsented && !isSignedIn ? (
           <View style={styles.noDataCard}>
             <Feather name="shield-off" size={40} color={colors.textMuted} />
             <Text style={styles.noDataTitle}>No Data Collected</Text>
@@ -362,4 +405,30 @@ const createStyles = (colors: ColorsType) => StyleSheet.create({
     fontFamily: "Inter_400Regular", fontSize: 12, color: colors.textMuted,
     lineHeight: 18, flex: 1,
   },
+  profileCard: {
+    backgroundColor: colors.surface, borderRadius: 16, padding: 18,
+    gap: 14, borderWidth: 1, borderColor: colors.primaryBorder,
+  },
+  profileRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+  profileAvatar: {
+    width: 46, height: 46, borderRadius: 23,
+    backgroundColor: colors.primaryMuted, alignItems: "center", justifyContent: "center",
+    borderWidth: 1, borderColor: colors.primaryBorder,
+  },
+  profileInfo: { flex: 1 },
+  profileName: { fontFamily: "Inter_700Bold", fontSize: 15, color: colors.text },
+  profileEmail: { fontFamily: "Inter_400Regular", fontSize: 12, color: colors.textMuted, marginTop: 2 },
+  signedInBadge: {
+    flexDirection: "row", alignItems: "center", gap: 4,
+    backgroundColor: colors.successMuted, borderRadius: 8,
+    paddingHorizontal: 8, paddingVertical: 4,
+    borderWidth: 1, borderColor: "rgba(34,197,94,0.2)",
+  },
+  signedInBadgeText: { fontFamily: "Inter_600SemiBold", fontSize: 11, color: colors.success },
+  signOutBtn: {
+    flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8,
+    backgroundColor: colors.dangerMuted, borderRadius: 12, paddingVertical: 12,
+    borderWidth: 1, borderColor: "rgba(255,69,69,0.15)",
+  },
+  signOutText: { fontFamily: "Inter_600SemiBold", fontSize: 14, color: colors.danger },
 });

@@ -16,6 +16,7 @@ import { setBaseUrl } from "@workspace/api-client-react";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { SessionProvider } from "@/context/session";
+import { AuthProvider } from "@/context/auth";
 import { ThemeProvider, useColors } from "@/context/theme";
 
 setBaseUrl(`https://${process.env.EXPO_PUBLIC_DOMAIN}`);
@@ -43,6 +44,8 @@ function RootLayoutNav() {
           <Stack.Screen name="loading" />
           <Stack.Screen name="results" />
           <Stack.Screen name="my-data" />
+          <Stack.Screen name="sign-in" />
+          <Stack.Screen name="my-plans" />
         </Stack>
       </KeyboardProvider>
     </GestureHandlerRootView>
@@ -70,9 +73,11 @@ export default function RootLayout() {
       <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
           <SessionProvider>
-            <ThemeProvider>
-              <RootLayoutNav />
-            </ThemeProvider>
+            <AuthProvider>
+              <ThemeProvider>
+                <RootLayoutNav />
+              </ThemeProvider>
+            </AuthProvider>
           </SessionProvider>
         </QueryClientProvider>
       </ErrorBoundary>

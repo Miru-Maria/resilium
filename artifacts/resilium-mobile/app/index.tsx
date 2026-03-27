@@ -14,12 +14,14 @@ import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 
 import { useSession } from "@/context/session";
+import { useAuth } from "@/context/auth";
 import { useColors } from "@/context/theme";
 import { ColorsType } from "@/constants/colors";
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const { hasConsented, isLoaded } = useSession();
+  const { isSignedIn, user } = useAuth();
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
@@ -30,7 +32,7 @@ export default function HomeScreen() {
 
   const handleStart = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    if (hasConsented) {
+    if (hasConsented || isSignedIn) {
       router.push("/assessment");
     } else {
       router.push("/consent");
@@ -40,6 +42,16 @@ export default function HomeScreen() {
   const handleMyData = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     router.push("/my-data");
+  };
+
+  const handleSignIn = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push("/sign-in");
+  };
+
+  const handleMyPlans = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push("/my-plans");
   };
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
@@ -61,10 +73,26 @@ export default function HomeScreen() {
           <Text style={styles.logoText}>Resilium</Text>
         </View>
         <View style={styles.headerActions}>
-          {hasConsented && (
-            <Pressable onPress={handleMyData} style={styles.iconBtn} hitSlop={12} testID="my-data-btn">
-              <Feather name="user" size={18} color={colors.textSecondary} />
-            </Pressable>
+          {isSignedIn ? (
+            <>
+              <Pressable onPress={handleMyPlans} style={styles.iconBtn} hitSlop={12} testID="my-plans-btn">
+                <Feather name="bookmark" size={18} color={colors.primary} />
+              </Pressable>
+              <Pressable onPress={handleMyData} style={styles.iconBtn} hitSlop={12} testID="my-data-btn">
+                <Feather name="user" size={18} color={colors.textSecondary} />
+              </Pressable>
+            </>
+          ) : (
+            <>
+              {hasConsented && (
+                <Pressable onPress={handleMyData} style={styles.iconBtn} hitSlop={12} testID="my-data-btn">
+                  <Feather name="user" size={18} color={colors.textSecondary} />
+                </Pressable>
+              )}
+              <Pressable onPress={handleSignIn} style={styles.signInHeaderBtn} hitSlop={8} testID="sign-in-header-btn">
+                <Text style={styles.signInHeaderText}>Sign In</Text>
+              </Pressable>
+            </>
           )}
         </View>
       </View>
@@ -115,6 +143,15 @@ export default function HomeScreen() {
       </View>
 
       <View style={styles.bottom}>
+        {isSignedIn && user && (
+          <Pressable onPress={handleMyPlans} style={styles.myPlansBanner}>
+            <Feather name="bookmark" size={14} color={colors.primary} />
+            <Text style={styles.myPlansBannerText}>
+              Signed in as {user.firstName || user.email || "you"} — view saved plans
+            </Text>
+            <Feather name="arrow-right" size={14} color={colors.primary} />
+          </Pressable>
+        )}
         <Pressable
           style={({ pressed }) => [styles.ctaButton, pressed && styles.ctaButtonPressed]}
           onPress={handleStart}
@@ -127,13 +164,14 @@ export default function HomeScreen() {
             end={{ x: 1, y: 0 }}
           >
             <Text style={styles.ctaText}>
-              {hasConsented ? "Start Assessment" : "Get Started"}
+              {hasConsented || isSignedIn ? "Start Assessment" : "Get Started"}
             </Text>
             <Feather name="arrow-right" size={18} color={colors.background} />
           </LinearGradient>
         </Pressable>
         <Text style={styles.privacyNote}>
-          <Feather name="lock" size={11} color={colors.textMuted} /> GDPR compliant · No account required
+          <Feather name="lock" size={11} color={colors.textMuted} />{" "}
+          {isSignedIn ? "Plans saved to your account" : "GDPR compliant · No account required"}
         </Text>
       </View>
     </View>
@@ -306,5 +344,35 @@ const createStyles = (colors: ColorsType) => StyleSheet.create({
     fontSize: 12,
     color: colors.textMuted,
     textAlign: "center",
+  },
+  signInHeaderBtn: {
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 20,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  signInHeaderText: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 13,
+    color: colors.text,
+  },
+  myPlansBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: colors.primaryMuted,
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: colors.primaryBorder,
+  },
+  myPlansBannerText: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 13,
+    color: colors.primary,
+    flex: 1,
   },
 });
