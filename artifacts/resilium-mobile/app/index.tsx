@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -16,12 +16,105 @@ import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 
+import Svg, { Circle, Line } from "react-native-svg";
+
 import { useSession } from "@/context/session";
 import { useAuth } from "@/context/auth";
 import { useColors } from "@/context/theme";
 import { ColorsType } from "@/constants/colors";
 
 const { width: SCREEN_W } = Dimensions.get("window");
+
+interface NParticle {
+  x: number; y: number;
+  vx: number; vy: number;
+  r: number;
+  isOrange: boolean;
+}
+
+function NeuralNetSVG({ width, height, opacity = 0.7 }: { width: number; height: number; opacity?: number }) {
+  const [, setTick] = useState(0);
+  const particlesRef = useRef<NParticle[]>([]);
+  const rafRef = useRef<ReturnType<typeof requestAnimationFrame> | null>(null);
+  const lastTimeRef = useRef(0);
+  const PARTICLE_COUNT = 22;
+  const CONN_DIST = Math.min(width, height) * 0.45;
+  const FPS_INTERVAL = 1000 / 20;
+
+  useEffect(() => {
+    particlesRef.current = Array.from({ length: PARTICLE_COUNT }, () => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      vx: (Math.random() - 0.5) * 0.5,
+      vy: (Math.random() - 0.5) * 0.5,
+      r: Math.random() * 1.6 + 0.9,
+      isOrange: Math.random() > 0.45,
+    }));
+
+    const animate = (time: number) => {
+      if (time - lastTimeRef.current >= FPS_INTERVAL) {
+        lastTimeRef.current = time;
+        for (const p of particlesRef.current) {
+          p.x += p.vx;
+          p.y += p.vy;
+          if (p.x < -10) p.x = width + 10;
+          else if (p.x > width + 10) p.x = -10;
+          if (p.y < -10) p.y = height + 10;
+          else if (p.y > height + 10) p.y = -10;
+        }
+        setTick((t) => t + 1);
+      }
+      rafRef.current = requestAnimationFrame(animate);
+    };
+
+    rafRef.current = requestAnimationFrame(animate);
+    return () => { if (rafRef.current != null) cancelAnimationFrame(rafRef.current); };
+  }, [width, height]);
+
+  const particles = particlesRef.current;
+  const lines: React.ReactNode[] = [];
+
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < CONN_DIST) {
+        const alpha = Math.round((1 - dist / CONN_DIST) * 0.28 * 255).toString(16).padStart(2, "0");
+        const bothOrange = particles[i].isOrange && particles[j].isOrange;
+        lines.push(
+          <Line
+            key={`${i}-${j}`}
+            x1={particles[i].x} y1={particles[i].y}
+            x2={particles[j].x} y2={particles[j].y}
+            stroke={bothOrange ? `#E08040${alpha}` : `#6478D2${alpha}`}
+            strokeWidth={0.7}
+          />
+        );
+      }
+    }
+  }
+
+  return (
+    <Svg
+      width={width}
+      height={height}
+      style={{ position: "absolute", top: 0, left: 0, opacity }}
+      pointerEvents="none"
+    >
+      {lines}
+      {particles.map((p, i) => {
+        const hex = p.isOrange ? "#E08040" : "#6478D2";
+        return (
+          <React.Fragment key={i}>
+            <Circle cx={p.x} cy={p.y} r={p.r * 2.8} fill={hex} fillOpacity={0.06} />
+            <Circle cx={p.x} cy={p.y} r={p.r} fill={hex} fillOpacity={0.7} />
+          </React.Fragment>
+        );
+      })}
+    </Svg>
+  );
+}
 
 function AnimatedOrb({
   style,
@@ -65,6 +158,7 @@ export default function HomeScreen() {
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
+  const [heroSize, setHeroSize] = useState({ width: SCREEN_W, height: 340 });
 
   const handleStart = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -161,7 +255,11 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* ── Hero ── */}
-        <View style={styles.hero}>
+        <View
+          style={styles.hero}
+          onLayout={(e) => setHeroSize({ width: e.nativeEvent.layout.width, height: e.nativeEvent.layout.height })}
+        >
+          <NeuralNetSVG width={heroSize.width} height={heroSize.height} opacity={0.55} />
           <View style={styles.heroBadge}>
             <Feather name="cpu" size={12} color={colors.primary} />
             <Text style={styles.heroBadgeText}>AI-POWERED RISK ASSESSMENT</Text>
@@ -350,7 +448,7 @@ export default function HomeScreen() {
           <Text style={styles.finalCtaTitle}>Ready to find out where you stand?</Text>
           <Text style={styles.finalCtaSub}>Free. No account required. Takes 10–15 minutes.</Text>
           <Pressable
-            style={({ pressed }) => [styles.ctaButton, pressed && styles.ctaButtonPressed]}
+            style={({ pressed }) => [styles.ctaButton, { alignSelf: "stretch" }, pressed && styles.ctaButtonPressed]}
             onPress={handleStart}
           >
             <LinearGradient
@@ -493,6 +591,7 @@ const createStyles = (colors: ColorsType) =>
       justifyContent: "center",
       gap: 10,
       paddingVertical: 18,
+      paddingHorizontal: 24,
     },
     ctaText: {
       fontFamily: "Inter_700Bold",
