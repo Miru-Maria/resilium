@@ -167,7 +167,7 @@ export default function LandingPage() {
           >
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/30 text-primary mb-8 border border-secondary/50 backdrop-blur-sm">
               <Brain className="w-4 h-4" />
-              <span className="text-sm font-semibold uppercase tracking-wider">AI-Powered Risk Assessment</span>
+              <span className="text-sm font-semibold uppercase tracking-wider">Personal Risk Assessment</span>
             </div>
 
             <h1 className="text-5xl md:text-7xl font-display font-bold tracking-tight text-foreground leading-[1.1] mb-6">

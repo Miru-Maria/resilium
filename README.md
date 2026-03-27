@@ -1,6 +1,6 @@
 # Resilium
 
-**AI-powered personal resilience planning platform.** Resilium assesses your readiness across six life dimensions — financial, health, skills, mobility, psychological, and resources — and generates a personalised action plan for navigating life's disruptions.
+**Personal resilience planning platform.** Resilium assesses your readiness across six life dimensions — financial, health, skills, mobility, psychological, and resources — and generates a personalised action plan for navigating life's disruptions.
 
 ---
 
@@ -74,7 +74,7 @@ The platform is available as both a **React web app** and an **Expo React Native
 - Feedback ratings aggregation
 - Mobile analytics panel (daily trends, score distribution, top locations)
 - GDPR request management (mark fulfilled, trigger deletion, download export)
-- AI-powered UX testing simulation (see below)
+- Automated UX testing simulation (see below)
 
 ### AI UX Testing (Admin)
 - 8 pre-built user personas — Urban Young Professional, Rural Retiree, Single Parent, Recent Graduate, Mid-Career Switcher, Expat, Freelancer, and Near-Retirement Worker

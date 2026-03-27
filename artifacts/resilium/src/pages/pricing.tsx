@@ -41,7 +41,7 @@ function usePaddle() {
 
 const FREE_FEATURES = [
   "2 full assessments",
-  "AI-powered resilience score",
+  "Personalised resilience score",
   "Personalised action plan",
   "PDF export",
   "GDPR-compliant data handling",

@@ -5,7 +5,7 @@
 
 ## 1. System Overview
 
-Resilium is a full-stack, multi-artifact monorepo application delivering AI-powered personal resilience assessment on web and mobile. The system is built as a pnpm workspace containing three deployed artifacts and three shared library packages.
+Resilium is a full-stack, multi-artifact monorepo application delivering personalised resilience assessment on web and mobile. The system is built as a pnpm workspace containing three deployed artifacts and three shared library packages.
 
 ### 1.1 Repository Structure
 

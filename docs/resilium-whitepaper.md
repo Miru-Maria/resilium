@@ -1,4 +1,4 @@
-# Resilium: AI-Powered Personal Resilience Planning
+# Resilium: Personal Resilience Planning
 ## White Paper — March 2026
 
 ---
@@ -7,7 +7,7 @@
 
 Modern life is increasingly fragile. Supply chain disruptions, economic volatility, climate events, geopolitical instability, and health crises have converged to create a world where personal preparedness is no longer optional — it is a survival skill. Yet most individuals have no structured, data-driven framework for assessing or improving their personal resilience.
 
-**Resilium** is an AI-powered personal resilience platform that quantifies an individual's readiness across six critical life dimensions — financial, physical, psychological, skills-based, mobility, and logistical resources — and delivers a personalised, actionable improvement roadmap. Unlike generic preparedness checklists or financial planning tools, Resilium combines validated psychological assessment methodology, real-time AI reasoning, and continuous progress tracking into a single, privacy-first platform available on both web and mobile.
+**Resilium** is a personal resilience platform that quantifies an individual's readiness across six critical life dimensions — financial, physical, psychological, skills-based, mobility, and logistical resources — and delivers a personalised, actionable improvement roadmap. Unlike generic preparedness checklists or financial planning tools, Resilium combines validated psychological assessment methodology, intelligent scoring, and continuous progress tracking into a single, privacy-first platform available on both web and mobile.
 
 This white paper sets out the problem space, the platform's methodology, the market opportunity, and the business case for Resilium as both a consumer product and an institutional partner opportunity.
 
@@ -50,7 +50,7 @@ Beyond material vulnerability, unpreparedness has documented psychological effec
 
 ### 2.1 Platform Overview
 
-Resilium is a full-stack digital platform delivering AI-powered resilience assessment and planning. Users complete a structured multi-dimensional assessment covering their financial position, physical health, psychological profile, skills portfolio, geographic context, and household logistics. A purpose-built AI engine processes these inputs against a multi-factor scoring model and generates a personalised resilience report containing:
+Resilium is a full-stack digital platform delivering personalised resilience assessment and planning. Users complete a structured multi-dimensional assessment covering their financial position, physical health, psychological profile, skills portfolio, geographic context, and household logistics. A purpose-built AI engine processes these inputs against a multi-factor scoring model and generates a personalised resilience report containing:
 
 - **An overall resilience score** (0–100) and six dimensional sub-scores
 - **A risk profile narrative** written in plain language
@@ -126,7 +126,7 @@ No direct competitor currently occupies the multi-dimensional personal resilienc
 - **BetterUp / Calm** — Psychological, no financial or logistical dimensions
 - **Personal Capital / YNAB** — Financial only, no preparedness dimension
 
-Resilium's integrated, AI-powered, multi-dimensional approach creates a defensible category position.
+Resilium's integrated, multi-dimensional approach creates a defensible category position.
 
 ---
 
@@ -193,7 +193,7 @@ Resilium's long-term vision is to become the global standard for individual and 
 
 ## 7. Conclusion
 
-Resilium represents a significant and currently unaddressed opportunity in the personal wellbeing technology space. The platform is fully built, live, and operational — serving users on web and mobile with a production-grade AI-powered assessment engine, secure data handling, and a clear monetisation path via Paddle subscription billing.
+Resilium represents a significant and currently unaddressed opportunity in the personal wellbeing technology space. The platform is fully built, live, and operational — serving users on web and mobile with a production-grade assessment engine, secure data handling, and a clear monetisation path via Paddle subscription billing.
 
 The convergence of rising systemic risk, growing individual awareness of personal vulnerability, and the maturation of large language model technology has created a precise window for a platform like Resilium to define and own a new category.
 

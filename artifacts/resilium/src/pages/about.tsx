@@ -111,7 +111,7 @@ export default function AboutPage() {
             custom={2}
             className="text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto mb-10"
           >
-            Resilium is a privacy-first platform that gives you an honest, AI-powered picture
+            Resilium is a privacy-first platform that gives you an honest, clear picture
             of where you stand — across the financial, physical, psychological, and logistical
             dimensions that actually determine how well you weather disruption.
           </motion.p>

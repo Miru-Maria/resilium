@@ -2,7 +2,7 @@
 
 ## Overview
 
-**Resilium** — An AI-powered personal resilience planning platform. Users complete a 10-step assessment (including a 10-question Mental Resilience deep-dive), receive an AI-generated Resilience Report (score 0–100, vulnerabilities, action plan, scenario simulations, daily habits), and can manage their data under GDPR. Includes a full admin dashboard for analytics, AI UX testing, consent management, user management, and site announcement banners. Results page includes resource recommendations, shareable score card (Web Share API), and optional Stripe donation link.
+**Resilium** — A personal resilience planning platform. Users complete a 10-step assessment (including a 10-question Mental Resilience deep-dive), receive an AI-generated Resilience Report (score 0–100, vulnerabilities, action plan, scenario simulations, daily habits), and can manage their data under GDPR. Includes a full admin dashboard for analytics, AI UX testing, consent management, user management, and site announcement banners. Results page includes resource recommendations, shareable score card (Web Share API), and optional Stripe donation link.
 
 pnpm workspace monorepo using TypeScript. Each package manages its own dependencies.
 
