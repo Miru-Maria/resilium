@@ -1,10 +1,13 @@
 import React, { useState, useMemo } from "react";
-import { View, Text, StyleSheet, Pressable, Platform, ActivityIndicator, Alert } from "react-native";
+import { View, Text, StyleSheet, Pressable, Platform, ActivityIndicator, Alert, Dimensions } from "react-native";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
+import { NeuralNetSVG } from "@/components/NeuralNetSVG";
+
+const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get("window");
 
 import { useAuth } from "@/context/auth";
 import { useColors } from "@/context/theme";
@@ -42,6 +45,7 @@ export default function SignInScreen() {
 
   return (
     <View style={[styles.container, { paddingTop: topPad, paddingBottom: bottomPad + 24 }]}>
+      <NeuralNetSVG width={SCREEN_W} height={SCREEN_H} opacity={0.45} />
       <LinearGradient
         colors={[colors.primaryMuted, "transparent"]}
         style={StyleSheet.absoluteFill}

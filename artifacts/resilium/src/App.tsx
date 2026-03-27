@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { NeuralCanvas } from "@/components/neural-canvas";
 
 import LandingPage from "@/pages/landing";
 import AssessmentPage from "@/pages/assessment";
@@ -40,9 +41,21 @@ function ScrollToTop() {
   return null;
 }
 
+function GlobalBackground() {
+  const [location] = useLocation();
+  if (location.startsWith("/admin")) return null;
+  return (
+    <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }}>
+      <NeuralCanvas opacity={0.42} particleCount={75} connectionDist={160} />
+    </div>
+  );
+}
+
 function Router() {
   return (
     <>
+      <GlobalBackground />
+      <div style={{ position: "relative", zIndex: 1 }}>
       <AnnouncementBanner />
       <ScrollToTop />
       <Switch>
@@ -65,6 +78,7 @@ function Router() {
       <Route path="/admin/announcements" component={AdminAnnouncementsPage} />
       <Route component={NotFound} />
       </Switch>
+      </div>
     </>
   );
 }

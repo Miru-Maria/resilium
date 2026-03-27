@@ -7,15 +7,18 @@ import {
   Pressable,
   Platform,
   Alert,
+  Dimensions,
 } from "react-native";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-
+import { NeuralNetSVG } from "@/components/NeuralNetSVG";
 import { useSession } from "@/context/session";
 import { useColors } from "@/context/theme";
 import { ColorsType } from "@/constants/colors";
+
+const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get("window");
 
 const CONSENT_VERSION = "1.0";
 
@@ -84,6 +87,7 @@ export default function ConsentScreen() {
 
   return (
     <View style={[styles.container, { paddingTop: topPad }]}>
+      <NeuralNetSVG width={SCREEN_W} height={SCREEN_H} opacity={0.4} />
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} style={styles.backBtn} hitSlop={12}>
           <Feather name="x" size={20} color={colors.textSecondary} />

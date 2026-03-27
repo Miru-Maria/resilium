@@ -5,14 +5,17 @@ import {
   StyleSheet,
   Animated,
   Platform,
+  Dimensions,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
-
+import { NeuralNetSVG } from "@/components/NeuralNetSVG";
 import { useAuth } from "@/context/auth";
 import { useColors } from "@/context/theme";
 import { ColorsType } from "@/constants/colors";
+
+const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get("window");
 
 const MESSAGES = [
   "Analyzing your risk profile...",
@@ -101,6 +104,7 @@ export default function LoadingScreen() {
 
   return (
     <View style={[styles.container, { paddingTop: topPadValue }]}>
+      <NeuralNetSVG width={SCREEN_W} height={SCREEN_H} opacity={0.5} />
       {error ? (
         <View style={styles.errorContainer}>
           <Feather name="alert-circle" size={48} color={colors.danger} />

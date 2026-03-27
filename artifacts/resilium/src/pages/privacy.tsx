@@ -8,7 +8,7 @@ const CONTACT_EMAIL = "contact_resilium@pm.me";
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen flex flex-col">
       <header className="w-full py-6 px-6 lg:px-12 border-b border-border/60">
         <Link href="/" className="flex items-center gap-2 w-fit">
           <ResilientIcon className="w-7 h-7" />

@@ -1,6 +1,5 @@
 import React from "react";
 import { Link } from "wouter";
-import { NeuralCanvas } from "@/components/neural-canvas";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import {
@@ -55,9 +54,6 @@ function AnimatedBackground() {
         .blob-3 { animation: blob-drift-3 17s ease-in-out infinite; }
       `}</style>
 
-      {/* Neural network canvas — hero height only */}
-      <NeuralCanvas />
-
       {/* Soft depth orbs behind the neural layer */}
       <div className="blob blob-1" style={{
         width: 700, height: 700,
@@ -87,7 +83,7 @@ export default function LandingPage() {
   const { user, isLoading, isAuthenticated, login, logout } = useAuth();
 
   return (
-    <div className="min-h-screen bg-background flex flex-col relative overflow-hidden">
+    <div className="min-h-screen flex flex-col relative overflow-hidden">
       {/* Animated background — hero section only */}
       <div className="absolute top-0 left-0 right-0 h-screen z-0 pointer-events-none overflow-hidden">
         <AnimatedBackground />

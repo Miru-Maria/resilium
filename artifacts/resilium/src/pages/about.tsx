@@ -3,7 +3,6 @@ import { Link } from "wouter";
 import { SiteFooter } from "@/components/site-footer";
 import { ResilientIcon } from "@/components/resilient-icon";
 import { Button } from "@/components/ui/button";
-import { NeuralCanvas } from "@/components/neural-canvas";
 import {
   Backpack,
   DollarSign,
@@ -37,7 +36,7 @@ const fadeUp = {
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen flex flex-col">
       {/* Header */}
       <header className="w-full py-6 px-6 lg:px-12 border-b border-border/60 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 w-fit">
@@ -53,9 +52,6 @@ export default function AboutPage() {
 
       {/* HERO */}
       <section className="relative overflow-hidden border-b border-border/60 min-h-[520px] flex flex-col">
-        {/* Neural network canvas background */}
-        <NeuralCanvas opacity={0.65} particleCount={80} />
-
         {/* Depth orb — amber glow top-left */}
         <div
           className="absolute pointer-events-none"

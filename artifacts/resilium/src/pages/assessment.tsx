@@ -302,7 +302,7 @@ export default function AssessmentPage() {
 
   if (!gateChecked || authLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="w-10 h-10 animate-spin text-primary" />
       </div>
     );
@@ -310,7 +310,7 @@ export default function AssessmentPage() {
 
   if (gated) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
+      <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
         <div className="max-w-md w-full">
           <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-6">
             <Lock className="w-8 h-8 text-primary" />
@@ -336,7 +336,7 @@ export default function AssessmentPage() {
 
   if (isSubmitting) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
+      <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
         <Loader2 className="w-16 h-16 text-primary animate-spin mb-8" />
         <h2 className="text-3xl font-display font-bold mb-4">Building Your Resilience Plan</h2>
         <div className="max-w-xs w-full space-y-4">
@@ -365,7 +365,7 @@ export default function AssessmentPage() {
   // Plan limit error screen
   if (submitError?.code === "PLAN_LIMIT_EXCEEDED") {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
+      <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
         <AlertCircle className="w-16 h-16 text-amber-500 mb-6" />
         <h2 className="text-2xl font-display font-bold mb-2">Plan Limit Reached</h2>
         <p className="text-muted-foreground max-w-md mb-8">{submitError.message}</p>
@@ -405,7 +405,7 @@ export default function AssessmentPage() {
     : `Step ${step - 1} of ${TOTAL_STEPS - 1}`;
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen flex flex-col">
       <header className="w-full p-6 lg:p-8 flex items-center justify-between z-10">
         <div className="font-display font-bold text-xl tracking-tight text-primary">Resilium</div>
         <div className="flex items-center gap-3">

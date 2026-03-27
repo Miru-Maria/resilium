@@ -11,9 +11,15 @@ interface NeuralCanvasProps {
   opacity?: number;
   particleCount?: number;
   connectionDist?: number;
+  className?: string;
 }
 
-export function NeuralCanvas({ opacity = 0.75, particleCount = 90, connectionDist = 170 }: NeuralCanvasProps) {
+export function NeuralCanvas({
+  opacity = 0.75,
+  particleCount = 90,
+  connectionDist = 170,
+  className = "absolute inset-0 w-full h-full",
+}: NeuralCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -50,29 +56,29 @@ export function NeuralCanvas({ opacity = 0.75, particleCount = 90, connectionDis
           const dy = particles[i].y - particles[j].y;
           const dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < connectionDist) {
-            const alpha = (1 - dist / connectionDist) * 0.22;
+            const alpha = (1 - dist / connectionDist) * 0.42;
             const bothOrange = particles[i].isOrange && particles[j].isOrange;
             ctx!.beginPath();
             ctx!.moveTo(particles[i].x, particles[i].y);
             ctx!.lineTo(particles[j].x, particles[j].y);
             ctx!.strokeStyle = bothOrange
               ? `rgba(224,128,64,${alpha})`
-              : `rgba(100,120,210,${alpha * 0.8})`;
-            ctx!.lineWidth = 0.7;
+              : `rgba(120,140,225,${alpha * 0.75})`;
+            ctx!.lineWidth = 1.0;
             ctx!.stroke();
           }
         }
       }
 
       for (const p of particles) {
-        const color = p.isOrange ? "224,128,64" : "100,120,210";
+        const color = p.isOrange ? "224,128,64" : "120,140,225";
         ctx!.beginPath();
         ctx!.arc(p.x, p.y, p.r * 2.8, 0, Math.PI * 2);
-        ctx!.fillStyle = `rgba(${color},0.06)`;
+        ctx!.fillStyle = `rgba(${color},0.13)`;
         ctx!.fill();
         ctx!.beginPath();
         ctx!.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx!.fillStyle = `rgba(${color},0.65)`;
+        ctx!.fillStyle = `rgba(${color},0.85)`;
         ctx!.fill();
 
         p.x += p.vx;
@@ -101,7 +107,7 @@ export function NeuralCanvas({ opacity = 0.75, particleCount = 90, connectionDis
   return (
     <canvas
       ref={canvasRef}
-      className="absolute inset-0 w-full h-full"
+      className={className}
       style={{ opacity }}
     />
   );

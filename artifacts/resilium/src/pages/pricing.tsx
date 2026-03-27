@@ -90,7 +90,7 @@ export default function PricingPage() {
   const isSuccess = new URLSearchParams(window.location.search).get("success") === "1";
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen flex flex-col">
       <header className="w-full px-6 py-5 flex items-center justify-between border-b border-border/40">
         <Link href="/">
           <span className="flex items-center gap-2 cursor-pointer">

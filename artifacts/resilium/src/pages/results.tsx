@@ -195,7 +195,7 @@ export default function ResultsPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center">
+      <div className="min-h-screen flex flex-col items-center justify-center">
         <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
         <p className="text-muted-foreground font-medium">Retrieving your resilience profile...</p>
       </div>
@@ -204,7 +204,7 @@ export default function ResultsPage() {
 
   if (error || !report) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
+      <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
         <AlertTriangle className="w-16 h-16 text-destructive mb-6" />
         <h2 className="text-2xl font-display font-bold mb-2">Report Not Found</h2>
         <p className="text-muted-foreground max-w-md mb-8">
@@ -322,7 +322,7 @@ export default function ResultsPage() {
   ] : [];
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen pb-24">
       {/* Header */}
       <header className="w-full bg-card border-b border-border sticky top-0 z-50 print:hidden">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">

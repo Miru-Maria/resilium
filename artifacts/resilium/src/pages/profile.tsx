@@ -1290,7 +1290,7 @@ export default function ProfilePage() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center">
+      <div className="min-h-screen flex flex-col items-center justify-center">
         <Loader2 className="w-10 h-10 text-primary animate-spin" />
       </div>
     );
@@ -1298,7 +1298,7 @@ export default function ProfilePage() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
+      <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
         <ResilientIcon className="w-16 h-16 text-primary mb-6 opacity-60" />
         <h2 className="text-2xl font-display font-bold mb-2">Sign in to view your profile</h2>
         <p className="text-muted-foreground max-w-md mb-8">
@@ -1312,7 +1312,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       {/* Header */}
       <header className="w-full bg-card border-b border-border sticky top-0 z-50">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
