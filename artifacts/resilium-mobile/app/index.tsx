@@ -434,7 +434,7 @@ export default function HomeScreen() {
             your data.
           </Text>
           <View style={styles.privacyChips}>
-            {["GDPR Compliant", "No account required", "Auto-deleted after 12 months"].map((chip) => (
+            {["GDPR Compliant", "Auto-deleted after 12 months"].map((chip) => (
               <View key={chip} style={styles.privacyChip}>
                 <Feather name="check" size={11} color={colors.success} />
                 <Text style={styles.privacyChipText}>{chip}</Text>
@@ -446,7 +446,7 @@ export default function HomeScreen() {
         {/* ── Final CTA ── */}
         <View style={styles.finalCta}>
           <Text style={styles.finalCtaTitle}>Ready to find out where you stand?</Text>
-          <Text style={styles.finalCtaSub}>Free. No account required. Takes 10–15 minutes.</Text>
+          <Text style={styles.finalCtaSub}>Takes 10–15 minutes to complete.</Text>
           <Pressable
             style={({ pressed }) => [styles.ctaButton, { alignSelf: "stretch" }, pressed && styles.ctaButtonPressed]}
             onPress={handleStart}
@@ -463,7 +463,7 @@ export default function HomeScreen() {
           </Pressable>
           <Text style={styles.privacyNote}>
             <Feather name="lock" size={11} color={colors.textMuted} />{" "}
-            {isSignedIn ? "Plans saved to your account" : "GDPR compliant · No account required"}
+            {isSignedIn ? "Plans saved to your account" : "GDPR compliant"}
           </Text>
         </View>
       </ScrollView>

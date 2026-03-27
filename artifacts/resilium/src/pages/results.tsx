@@ -845,7 +845,7 @@ export default function ResultsPage() {
             <Heart className="w-8 h-8 text-primary mx-auto mb-3" />
             <h3 className="font-display font-bold text-xl mb-2">Support Resilium</h3>
             <p className="text-muted-foreground text-sm max-w-md mx-auto mb-5">
-              Resilium is independent and free to use. If this report was helpful, consider a small contribution to keep it running and improving.
+              If this report was helpful, consider a small contribution to keep Resilium running and improving.
             </p>
             <div className="flex flex-wrap gap-3 justify-center">
               {donationUrl ? (

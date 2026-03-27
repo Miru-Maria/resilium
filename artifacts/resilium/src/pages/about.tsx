@@ -111,7 +111,7 @@ export default function AboutPage() {
             custom={2}
             className="text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto mb-10"
           >
-            Resilium is a free, privacy-first platform that gives you an honest, AI-powered picture
+            Resilium is a privacy-first platform that gives you an honest, AI-powered picture
             of where you stand — across the financial, physical, psychological, and logistical
             dimensions that actually determine how well you weather disruption.
           </motion.p>
@@ -407,7 +407,7 @@ export default function AboutPage() {
           <div className="flex flex-wrap gap-4 justify-center">
             <Link href="/assess">
               <Button size="lg" className="rounded-full px-8 gap-2 h-12">
-                Take the Free Assessment <ArrowRight className="w-4 h-4" />
+                Take the Assessment <ArrowRight className="w-4 h-4" />
               </Button>
             </Link>
             <a href={`mailto:${CONTACT_EMAIL}`}>

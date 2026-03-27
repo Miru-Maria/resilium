@@ -350,7 +350,7 @@ export default function LandingPage() {
         <section className="w-full bg-primary/5 border-t border-primary/10 py-20 px-6">
           <div className="max-w-2xl mx-auto text-center">
             <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">Ready to find out where you stand?</h2>
-            <p className="text-muted-foreground mb-8">Free. No account required. Takes 10–15 minutes.</p>
+            <p className="text-muted-foreground mb-8">Takes 10–15 minutes to complete.</p>
             <Link href="/assess">
               <Button size="lg" className="rounded-full h-14 px-10 text-base font-semibold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-1 transition-all duration-300">
                 Start the Assessment
