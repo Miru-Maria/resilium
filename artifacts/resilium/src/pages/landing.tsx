@@ -169,7 +169,7 @@ export default function LandingPage() {
 
             <h1 className="text-5xl md:text-7xl font-display font-bold tracking-tight text-foreground leading-[1.1] mb-6">
               You're one disruption away from{" "}
-              <span className="text-primary italic">chaos</span>.<br />
+              <span className="text-destructive italic">chaos</span>.<br />
               Check your{" "}
               <span className="text-primary whitespace-nowrap font-extrabold">readiness.</span>
             </h1>
