@@ -30,19 +30,90 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+function AnimatedBackground() {
+  return (
+    <>
+      <style>{`
+        @keyframes blob-drift-1 {
+          0%, 100% { transform: translate(0px, 0px) scale(1); }
+          33%       { transform: translate(60px, -40px) scale(1.06); }
+          66%       { transform: translate(-30px, 50px) scale(0.95); }
+        }
+        @keyframes blob-drift-2 {
+          0%, 100% { transform: translate(0px, 0px) scale(1); }
+          40%       { transform: translate(-70px, 50px) scale(1.08); }
+          70%       { transform: translate(40px, -30px) scale(0.96); }
+        }
+        @keyframes blob-drift-3 {
+          0%, 100% { transform: translate(0px, 0px) scale(1); }
+          50%       { transform: translate(50px, 40px) scale(1.04); }
+        }
+        @keyframes blob-drift-4 {
+          0%, 100% { transform: translate(0px, 0px) scale(1); }
+          30%       { transform: translate(-40px, -50px) scale(1.1); }
+          60%       { transform: translate(60px, 20px) scale(0.93); }
+        }
+        @keyframes blob-drift-5 {
+          0%, 100% { transform: translate(0px, 0px) scale(1); }
+          45%       { transform: translate(30px, -60px) scale(1.07); }
+        }
+        .blob { position: absolute; border-radius: 50%; filter: blur(80px); }
+        .blob-1 { animation: blob-drift-1 18s ease-in-out infinite; }
+        .blob-2 { animation: blob-drift-2 22s ease-in-out infinite; }
+        .blob-3 { animation: blob-drift-3 15s ease-in-out infinite; }
+        .blob-4 { animation: blob-drift-4 26s ease-in-out infinite; }
+        .blob-5 { animation: blob-drift-5 20s ease-in-out infinite; }
+      `}</style>
+
+      {/* Dot grid */}
+      <div className="absolute inset-0 pointer-events-none" style={{
+        backgroundImage: "radial-gradient(circle, rgba(224,128,64,0.12) 1px, transparent 1px)",
+        backgroundSize: "40px 40px",
+      }} />
+
+      {/* Gradient orbs */}
+      <div className="blob blob-1" style={{
+        width: 700, height: 700,
+        top: "-15%", left: "-10%",
+        background: "radial-gradient(circle at 40% 40%, rgba(224,128,64,0.18) 0%, rgba(200,110,40,0.08) 50%, transparent 70%)",
+      }} />
+      <div className="blob blob-2" style={{
+        width: 600, height: 600,
+        top: "-5%", right: "-8%",
+        background: "radial-gradient(circle at 60% 40%, rgba(30,50,120,0.35) 0%, rgba(15,25,80,0.15) 55%, transparent 75%)",
+      }} />
+      <div className="blob blob-3" style={{
+        width: 500, height: 500,
+        bottom: "10%", left: "20%",
+        background: "radial-gradient(circle at 50% 50%, rgba(180,100,30,0.12) 0%, transparent 65%)",
+      }} />
+      <div className="blob blob-4" style={{
+        width: 380, height: 380,
+        top: "35%", right: "15%",
+        background: "radial-gradient(circle at 50% 50%, rgba(224,128,64,0.10) 0%, transparent 65%)",
+      }} />
+      <div className="blob blob-5" style={{
+        width: 300, height: 300,
+        bottom: "5%", right: "5%",
+        background: "radial-gradient(circle at 50% 50%, rgba(50,80,160,0.20) 0%, transparent 65%)",
+      }} />
+
+      {/* Fade-to-background at bottom so content sections look clean */}
+      <div className="absolute inset-0 pointer-events-none" style={{
+        background: "linear-gradient(to bottom, transparent 0%, transparent 50%, var(--background) 100%)",
+      }} />
+    </>
+  );
+}
+
 export default function LandingPage() {
   const { user, isLoading, isAuthenticated, login, logout } = useAuth();
 
   return (
     <div className="min-h-screen bg-background flex flex-col relative overflow-hidden">
-      {/* Background Hero Image with Overlay */}
-      <div className="absolute inset-0 z-0 pointer-events-none">
-        <img
-          src={`${import.meta.env.BASE_URL}images/hero-abstract.png`}
-          alt="Abstract calming gradients"
-          className="w-full h-full object-cover opacity-60 mix-blend-multiply dark:opacity-20 dark:mix-blend-screen"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/80 to-background" />
+      {/* Animated background */}
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+        <AnimatedBackground />
       </div>
 
       {/* Header */}
