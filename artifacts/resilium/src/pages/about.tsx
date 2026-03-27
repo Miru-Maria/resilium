@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { SiteFooter } from "@/components/site-footer";
 import { ResilientIcon } from "@/components/resilient-icon";
 import { Button } from "@/components/ui/button";
+import { NeuralCanvas } from "@/components/neural-canvas";
 import {
   Backpack,
   DollarSign,
@@ -51,16 +52,42 @@ export default function AboutPage() {
       </header>
 
       {/* HERO */}
-      <section className="relative overflow-hidden border-b border-border/60">
-        {/* Background accent */}
+      <section className="relative overflow-hidden border-b border-border/60 min-h-[520px] flex flex-col">
+        {/* Neural network canvas background */}
+        <NeuralCanvas opacity={0.65} particleCount={80} />
+
+        {/* Depth orb — amber glow top-left */}
+        <div
+          className="absolute pointer-events-none"
+          style={{
+            width: 600, height: 600,
+            top: "-20%", left: "-10%",
+            borderRadius: "50%",
+            background: "radial-gradient(circle at 40% 40%, rgba(224,128,64,0.13) 0%, rgba(200,110,40,0.05) 50%, transparent 70%)",
+            filter: "blur(60px)",
+          }}
+        />
+        {/* Depth orb — indigo top-right */}
+        <div
+          className="absolute pointer-events-none"
+          style={{
+            width: 500, height: 500,
+            top: "-10%", right: "-8%",
+            borderRadius: "50%",
+            background: "radial-gradient(circle at 60% 40%, rgba(30,50,130,0.28) 0%, rgba(15,25,80,0.10) 55%, transparent 75%)",
+            filter: "blur(70px)",
+          }}
+        />
+
+        {/* Bottom fade into the page */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background:
-              "radial-gradient(ellipse 70% 60% at 50% 0%, rgba(224,128,64,0.10) 0%, transparent 70%)",
+            background: "linear-gradient(to bottom, transparent 50%, rgba(13,18,37,0.7) 85%, rgb(13,18,37) 100%)",
           }}
         />
-        <div className="relative z-10 max-w-4xl mx-auto px-6 py-20 text-center">
+
+        <div className="relative z-10 max-w-4xl mx-auto px-6 py-20 text-center flex-1 flex flex-col justify-center">
           <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={0}>
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold uppercase tracking-widest mb-6">
               <Brain className="w-3.5 h-3.5" /> About the Platform
