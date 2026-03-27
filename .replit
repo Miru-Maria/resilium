@@ -33,3 +33,5 @@ channel = "stable-25_05"
 
 [userenv.shared]
 VITE_PADDLE_CLIENT_TOKEN = "live_9915f1793d8195901c899274417"
+VITE_PADDLE_PRICE_ID = "pri_01kmrd5t8yv6ydpprvrbqqmh13"
+VITE_PADDLE_PRICE_ID_ANNUAL = "pri_01kmrd7v0qtzds49p61f8edddm"

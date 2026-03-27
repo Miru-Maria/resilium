@@ -8,7 +8,8 @@ import { ResilientIcon } from "@/components/resilient-icon";
 import { useAuth } from "@workspace/replit-auth-web";
 
 const PADDLE_CLIENT_TOKEN = import.meta.env.VITE_PADDLE_CLIENT_TOKEN as string | undefined;
-const PADDLE_PRICE_ID = import.meta.env.VITE_PADDLE_PRICE_ID as string | undefined;
+const PADDLE_PRICE_ID_MONTHLY = import.meta.env.VITE_PADDLE_PRICE_ID as string | undefined;
+const PADDLE_PRICE_ID_ANNUAL = import.meta.env.VITE_PADDLE_PRICE_ID_ANNUAL as string | undefined;
 
 declare global {
   interface Window {
@@ -52,28 +53,34 @@ const PRO_FEATURES = [
   "Full progress tracking & charts",
   "Scenario simulations",
   "Mental resilience deep-dive",
-  "Plan comparison & AI analysis",
+  "Plan comparison & analysis",
   "Priority support",
 ];
+
+type BillingPeriod = "monthly" | "annual";
 
 export default function PricingPage() {
   const [, setLocation] = useLocation();
   const { user, isAuthenticated, login } = useAuth();
   const paddleReady = usePaddle();
   const [loading, setLoading] = useState(false);
+  const [billing, setBilling] = useState<BillingPeriod>("monthly");
+
+  const isAnnual = billing === "annual";
+  const priceId = isAnnual ? PADDLE_PRICE_ID_ANNUAL : PADDLE_PRICE_ID_MONTHLY;
 
   const handleUpgrade = () => {
     if (!isAuthenticated) {
       login();
       return;
     }
-    if (!PADDLE_PRICE_ID || !window.Paddle) {
+    if (!priceId || !window.Paddle) {
       alert("Payment system is not configured yet. Please check back soon.");
       return;
     }
     setLoading(true);
     window.Paddle.Checkout.open({
-      items: [{ priceId: PADDLE_PRICE_ID, quantity: 1 }],
+      items: [{ priceId, quantity: 1 }],
       customData: { userId: (user as any)?.id ?? "" },
       successUrl: `${window.location.origin}${import.meta.env.BASE_URL}pricing?success=1`,
     });
@@ -130,7 +137,7 @@ export default function PricingPage() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-center mb-14"
+              className="text-center mb-10"
             >
               <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-primary bg-primary/10 rounded-full px-4 py-1.5 mb-6">
                 <Sparkles className="w-3.5 h-3.5" /> Simple Pricing
@@ -138,9 +145,36 @@ export default function PricingPage() {
               <h1 className="text-4xl md:text-5xl font-display font-bold mb-4">
                 Know exactly where you stand
               </h1>
-              <p className="text-muted-foreground text-lg max-w-xl mx-auto">
+              <p className="text-muted-foreground text-lg max-w-xl mx-auto mb-8">
                 Start with two full assessments at no cost. Upgrade for unlimited access and full progress tracking.
               </p>
+
+              {/* Billing toggle */}
+              <div className="inline-flex items-center gap-1 bg-muted/40 border border-border rounded-full p-1">
+                <button
+                  onClick={() => setBilling("monthly")}
+                  className={`px-5 py-1.5 rounded-full text-sm font-medium transition-all ${
+                    !isAnnual
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Monthly
+                </button>
+                <button
+                  onClick={() => setBilling("annual")}
+                  className={`px-5 py-1.5 rounded-full text-sm font-medium transition-all flex items-center gap-2 ${
+                    isAnnual
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Annual
+                  <span className="text-[10px] font-bold uppercase tracking-wide text-green-500 bg-green-500/10 rounded-full px-2 py-0.5">
+                    Save 27%
+                  </span>
+                </button>
+              </div>
             </motion.div>
 
             <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
@@ -175,6 +209,7 @@ export default function PricingPage() {
 
               {/* Pro tier */}
               <motion.div
+                key={billing}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
@@ -187,11 +222,25 @@ export default function PricingPage() {
                 </div>
                 <div className="mb-6">
                   <p className="text-sm font-bold uppercase tracking-widest text-primary mb-2">Pro</p>
-                  <div className="flex items-end gap-1">
-                    <span className="text-4xl font-display font-bold text-primary">$9</span>
-                    <span className="text-muted-foreground mb-1">/month</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">Cancel anytime</p>
+                  {isAnnual ? (
+                    <>
+                      <div className="flex items-end gap-1">
+                        <span className="text-4xl font-display font-bold text-primary">$79</span>
+                        <span className="text-muted-foreground mb-1">/year</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        ~$6.58/mo · <span className="text-green-500 font-medium">$29 cheaper than monthly</span>
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-end gap-1">
+                        <span className="text-4xl font-display font-bold text-primary">$9</span>
+                        <span className="text-muted-foreground mb-1">/month</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">Cancel anytime</p>
+                    </>
+                  )}
                 </div>
                 <ul className="space-y-3 flex-1 mb-8">
                   {PRO_FEATURES.map((f) => (
@@ -207,7 +256,11 @@ export default function PricingPage() {
                   disabled={loading}
                 >
                   <Zap className="w-4 h-4" />
-                  {!isAuthenticated ? "Sign in to upgrade" : "Upgrade to Pro"}
+                  {!isAuthenticated
+                    ? "Sign in to upgrade"
+                    : isAnnual
+                    ? "Get Pro — Annual"
+                    : "Get Pro — Monthly"}
                 </Button>
                 {!isAuthenticated && (
                   <p className="text-xs text-muted-foreground text-center mt-3">
@@ -222,7 +275,7 @@ export default function PricingPage() {
                 { icon: ShieldCheck, label: "GDPR Compliant" },
                 { icon: Lock, label: "Secure Payments" },
                 { icon: RefreshCw, label: "Cancel Anytime" },
-                { icon: BarChart2, label: "Real-time Analytics" },
+                { icon: BarChart2, label: "Progress Tracking" },
               ].map(({ icon: Icon, label }) => (
                 <div key={label} className="flex flex-col items-center gap-2 p-4 rounded-xl bg-muted/30 text-center">
                   <Icon className="w-5 h-5 text-primary" />
