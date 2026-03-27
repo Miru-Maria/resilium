@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { Progress } from "@/components/ui/progress";
-import { Loader2, Download, Share2, AlertTriangle, CheckCircle, RefreshCcw, Activity, User, LogIn, Brain, TrendingUp, Award, Star, ExternalLink, Heart, BookOpen, ShieldCheck, Zap, Package, Globe } from "lucide-react";
+import { Loader2, Download, Share2, AlertTriangle, CheckCircle, RefreshCcw, Activity, User, LogIn, Brain, TrendingUp, Award, Star, ExternalLink, Heart, BookOpen, ShieldCheck, Zap, Package, Globe, MapPin, Lock } from "lucide-react";
 import { ResilientIcon } from "@/components/resilient-icon";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
@@ -741,91 +741,102 @@ export default function ResultsPage() {
 
         {/* RESOURCE RECOMMENDATIONS */}
         <section className="print:hidden">
-          <div className="flex items-center gap-3 mb-6">
+          <div className="flex items-center gap-3 mb-2">
             <BookOpen className="w-6 h-6 text-primary" />
             <h2 className="font-display font-bold text-2xl">Recommended Resources</h2>
           </div>
-          <p className="text-muted-foreground mb-6">Tools and resources to accelerate your resilience journey.</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-            {[
-              {
-                icon: ShieldCheck,
-                title: "Ready.gov",
-                category: "Emergency Prep",
-                description: "Official U.S. government guide to disaster preparedness, emergency kits, and family plans.",
-                url: "https://ready.gov",
-                badge: "Free",
-              },
-              {
-                icon: Package,
-                title: "FEMA Emergency Kit Guide",
-                category: "Supplies",
-                description: "Build a 72-hour emergency supply kit with this comprehensive checklist from FEMA.",
-                url: "https://www.fema.gov/emergency-managers/individuals-communities/prepare-financially",
-                badge: "Free",
-              },
-              {
-                icon: Brain,
-                title: "Mental Health First Aid",
-                category: "Psychological",
-                description: "8-hour public education course that teaches how to identify and respond to mental health crises.",
-                url: "https://www.mentalhealthfirstaid.org",
-                badge: "Course",
-              },
-              {
-                icon: Globe,
-                title: "American Red Cross",
-                category: "Community",
-                description: "Disaster preparedness courses, first aid training, and local response network.",
-                url: "https://www.redcross.org/take-a-class",
-                badge: "Free",
-              },
-              {
-                icon: Zap,
-                title: "iReady Plan (US)",
-                category: "Financial",
-                description: "FEMA's guide to financial preparedness and building an emergency savings buffer.",
-                url: "https://www.fema.gov/emergency-managers/individuals-communities/prepare-financially",
-                badge: "Guide",
-              },
-              {
-                icon: TrendingUp,
-                title: "Coursera Resilience",
-                category: "Skills",
-                description: "University-led courses on resilience psychology, stress management, and adaptive skills.",
-                url: "https://www.coursera.org/search?query=resilience",
-                badge: "Courses",
-              },
-            ].map((r) => {
-              const Icon = r.icon;
-              return (
-                <a
-                  key={r.title}
-                  href={r.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex flex-col bg-card border border-border rounded-2xl p-5 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 transition-all"
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <Icon className="w-5 h-5 text-primary" />
-                    </div>
-                    <span className="text-[10px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border">
-                      {r.badge}
-                    </span>
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-[10px] uppercase tracking-wider text-primary font-semibold mb-1">{r.category}</p>
-                    <h3 className="font-bold text-sm mb-1.5 group-hover:text-primary transition-colors">{r.title}</h3>
-                    <p className="text-xs text-muted-foreground leading-relaxed">{r.description}</p>
-                  </div>
-                  <div className="mt-3 flex items-center gap-1 text-xs text-primary font-medium">
-                    Visit <ExternalLink className="w-3 h-3 ml-1" />
-                  </div>
-                </a>
-              );
-            })}
-          </div>
+          {(report as any)?.recommendedResources?.length > 0 ? (
+            <>
+              <div className="flex items-center gap-2 mb-6">
+                <MapPin className="w-4 h-4 text-primary" />
+                <p className="text-muted-foreground text-sm">
+                  Personalized for <span className="font-medium text-foreground">{report?.input?.location}</span> based on your scores, risk concerns, and checklist gaps — ordered by urgency.
+                </p>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                {((report as any).recommendedResources as Array<{title:string;category:string;description:string;url:string;badge:string;priority:string}>).map((r) => {
+                  const priorityConfig: Record<string, string> = {
+                    critical: "bg-destructive/10 text-destructive border-destructive/20",
+                    high: "bg-amber-500/10 text-amber-700 border-amber-500/20",
+                    medium: "bg-primary/10 text-primary border-primary/20",
+                    low: "bg-muted text-muted-foreground border-border",
+                  };
+                  const iconMap: Record<string, React.ElementType> = {
+                    "Emergency Prep": ShieldCheck,
+                    "Financial": TrendingUp,
+                    "Health": Brain,
+                    "Skills": Zap,
+                    "Psychological": Brain,
+                    "Community": Globe,
+                    "Legal": Lock,
+                    "Supplies": Package,
+                  };
+                  const Icon = iconMap[r.category] ?? BookOpen;
+                  return (
+                    <a
+                      key={r.title}
+                      href={r.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group flex flex-col bg-card border border-border rounded-2xl p-5 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 transition-all"
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                          <Icon className="w-5 h-5 text-primary" />
+                        </div>
+                        <div className="flex flex-col items-end gap-1">
+                          <span className={`text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full border ${priorityConfig[r.priority] ?? priorityConfig.low}`}>
+                            {r.priority}
+                          </span>
+                          <span className="text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border">
+                            {r.badge}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-[10px] uppercase tracking-wider text-primary font-semibold mb-1">{r.category}</p>
+                        <h3 className="font-bold text-sm mb-1.5 group-hover:text-primary transition-colors">{r.title}</h3>
+                        <p className="text-xs text-muted-foreground leading-relaxed">{r.description}</p>
+                      </div>
+                      <div className="mt-3 flex items-center gap-1 text-xs text-primary font-medium">
+                        Visit <ExternalLink className="w-3 h-3 ml-1" />
+                      </div>
+                    </a>
+                  );
+                })}
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="text-muted-foreground mb-6">Tools and resources to accelerate your resilience journey.</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                {[
+                  { icon: ShieldCheck, title: "Ready.gov", category: "Emergency Prep", description: "Official U.S. government guide to disaster preparedness, emergency kits, and family plans.", url: "https://ready.gov", badge: "Free" },
+                  { icon: Package, title: "FEMA Emergency Kit Guide", category: "Supplies", description: "Build a 72-hour emergency supply kit with this comprehensive checklist from FEMA.", url: "https://www.fema.gov/emergency-managers/individuals-communities/prepare-financially", badge: "Free" },
+                  { icon: Brain, title: "Mental Health First Aid", category: "Psychological", description: "8-hour public education course that teaches how to identify and respond to mental health crises.", url: "https://www.mentalhealthfirstaid.org", badge: "Course" },
+                  { icon: Globe, title: "American Red Cross", category: "Community", description: "Disaster preparedness courses, first aid training, and local response network.", url: "https://www.redcross.org/take-a-class", badge: "Free" },
+                  { icon: Zap, title: "iReady Plan (US)", category: "Financial", description: "FEMA's guide to financial preparedness and building an emergency savings buffer.", url: "https://www.fema.gov/emergency-managers/individuals-communities/prepare-financially", badge: "Guide" },
+                  { icon: TrendingUp, title: "Coursera Resilience", category: "Skills", description: "University-led courses on resilience psychology, stress management, and adaptive skills.", url: "https://www.coursera.org/search?query=resilience", badge: "Courses" },
+                ].map((r) => {
+                  const Icon = r.icon;
+                  return (
+                    <a key={r.title} href={r.url} target="_blank" rel="noopener noreferrer" className="group flex flex-col bg-card border border-border rounded-2xl p-5 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 transition-all">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0"><Icon className="w-5 h-5 text-primary" /></div>
+                        <span className="text-[10px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border">{r.badge}</span>
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-[10px] uppercase tracking-wider text-primary font-semibold mb-1">{r.category}</p>
+                        <h3 className="font-bold text-sm mb-1.5 group-hover:text-primary transition-colors">{r.title}</h3>
+                        <p className="text-xs text-muted-foreground leading-relaxed">{r.description}</p>
+                      </div>
+                      <div className="mt-3 flex items-center gap-1 text-xs text-primary font-medium">Visit <ExternalLink className="w-3 h-3 ml-1" /></div>
+                    </a>
+                  );
+                })}
+              </div>
+            </>
+          )}
         </section>
 
         {/* SUPPORT BANNER */}

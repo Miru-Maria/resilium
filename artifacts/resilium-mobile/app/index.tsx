@@ -122,13 +122,11 @@ export default function HomeScreen() {
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.logo}>
-          <View style={styles.logoIconWrap}>
-            <Image
-              source={require("../assets/logo.png")}
-              style={styles.logoIcon}
-              tintColor={colors.primary}
-            />
-          </View>
+          <Image
+            source={require("../assets/logo.png")}
+            style={styles.logoIcon}
+            tintColor={colors.primary}
+          />
           <Text style={styles.logoText}>Resilium</Text>
         </View>
         <View style={styles.headerActions}>
@@ -393,13 +391,6 @@ const createStyles = (colors: ColorsType) =>
       zIndex: 10,
     },
     logo: { flexDirection: "row", alignItems: "center", gap: 8 },
-    logoIconWrap: {
-      shadowColor: colors.primary,
-      shadowOffset: { width: 0, height: 0 },
-      shadowOpacity: 0.7,
-      shadowRadius: 8,
-      elevation: 6,
-    },
     logoIcon: { width: 26, height: 26 },
     logoText: {
       fontFamily: "Inter_700Bold",

@@ -137,6 +137,7 @@ router.post("/assess", assessRateLimit, async (req, res) => {
       scenarioSimulations: reportContent.scenarioSimulations,
       dailyHabits: reportContent.dailyHabits,
       checklistsByArea: reportContent.checklistsByArea ?? null,
+      recommendedResources: reportContent.recommendedResources ?? null,
       createdAt: now,
     });
 
@@ -176,6 +177,7 @@ router.post("/assess", assessRateLimit, async (req, res) => {
       scenarioSimulations: reportContent.scenarioSimulations,
       dailyHabits: reportContent.dailyHabits,
       checklistsByArea: reportContent.checklistsByArea ?? undefined,
+      recommendedResources: reportContent.recommendedResources ?? undefined,
       input: {
         location: input.location,
         incomeStability: input.incomeStability,
@@ -304,6 +306,7 @@ router.get("/reports/:reportId", async (req, res) => {
       scenarioSimulations: row.scenarioSimulations,
       dailyHabits: row.dailyHabits,
       checklistsByArea: row.checklistsByArea ?? undefined,
+      recommendedResources: (row as any).recommendedResources ?? undefined,
       input: {
         location: row.location,
         incomeStability: row.incomeStability as "fixed" | "freelance" | "unstable",

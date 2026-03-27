@@ -65,6 +65,15 @@ type DailyHabit = {
   category: string;
 };
 
+type RecommendedResource = {
+  title: string;
+  category: string;
+  description: string;
+  url: string;
+  badge: string;
+  priority: "critical" | "high" | "medium" | "low";
+};
+
 type ReportContent = {
   riskProfileSummary: string;
   topVulnerabilities: string[];
@@ -83,6 +92,7 @@ type ReportContent = {
     psychological: ChecklistItem[];
     resources: ChecklistItem[];
   };
+  recommendedResources: RecommendedResource[];
 };
 
 export async function generateResilienceReport(
@@ -176,7 +186,17 @@ Generate a JSON response with this exact structure:
     "resources": [
       {"id": "resources_1", "title": "item title", "description": "specific actionable description", "priority": "critical|high|medium|low", "pathway": "${pathway}"}
     ]
-  }
+  },
+  "recommendedResources": [
+    {
+      "title": "resource name",
+      "category": "Emergency Prep|Financial|Health|Skills|Psychological|Community|Legal",
+      "description": "why this resource is specifically relevant to this user's situation, location, and gaps",
+      "url": "https://actual-url.org",
+      "badge": "Free|Guide|Course|Tool|Contact",
+      "priority": "critical|high|medium|low"
+    }
+  ]
 }
 
 Requirements:
@@ -186,6 +206,13 @@ Requirements:
 - Scenario simulations: cover the top 3 risk concerns from the user's list
 - Daily habits: 6-8 habits across different categories
 - checklistsByArea: 4-8 items per area, ordered by priority descending (critical first). All item ids must be unique within their area (use area_1, area_2, etc.)
+- recommendedResources: 6-8 resources ordered by priority (critical first), personalized as follows:
+  * LOCATION-SPECIFIC: Include the national/regional emergency management agency, civil protection authority, and emergency contact number for the user's country/region. E.g., FEMA + ready.gov for USA; Civil Protection / IGSU + 112 for Romania; NHS + GOV.UK emergency prep for UK; AEMET/Protección Civil for Spain; etc.
+  * DISASTER-SPECIFIC: For each of the user's top risk concerns (e.g., earthquake, flood, pandemic, economic collapse, cyberattack), include the most authoritative regional resource addressing that specific threat.
+  * GAP-TARGETED: Include 2-3 resources directly addressing the user's lowest-scoring dimensions (financial tools for low financial score, mental health resources for low psychological score, first aid/medical courses for low health score, skills training for low skills score).
+  * CHECKLIST-SUPPORTING: Include at least one resource that helps the user fulfill critical checklist items they likely haven't completed yet (e.g., emergency supply kit builder, 72-hour kit guide, financial resilience workbook).
+  * Use real, working URLs. Prefer free government/NGO resources. Include paid courses only if they are uniquely valuable.
+  * priority reflects urgency for this specific user (critical = addresses their most critical vulnerability).
 - Voice: intelligent, grounded, strategic, empowering (not alarmist)
 - Be specific to the user's actual situation, not generic
 - Checklist items MUST reflect the ${pathway} pathway — ${pathway === "growth" ? "challenge-oriented, ambitious" : "scaffolded, confidence-building"}

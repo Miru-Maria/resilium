@@ -9,6 +9,7 @@ import {
   Share,
   Animated,
   Dimensions,
+  Linking,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -53,6 +54,15 @@ type Habit = {
   category: string;
 };
 
+type Resource = {
+  title: string;
+  category: string;
+  description: string;
+  url: string;
+  badge: string;
+  priority: "critical" | "high" | "medium" | "low";
+};
+
 type Report = {
   reportId: string;
   createdAt: string;
@@ -66,6 +76,8 @@ type Report = {
   };
   scenarioSimulations: Scenario[];
   dailyHabits: Habit[];
+  recommendedResources?: Resource[];
+  input?: { location?: string };
 };
 
 function RadarChart({ score, colors, styles }: { score: ScoreObj, colors: ColorsType, styles: any }) {
@@ -342,6 +354,64 @@ export default function ResultsScreen() {
             </View>
           ))}
         </View>
+
+        {/* Recommended Resources */}
+        {report.recommendedResources && report.recommendedResources.length > 0 && (
+          <View style={styles.sectionCard}>
+            <View style={styles.sectionHeader}>
+              <Feather name="book-open" size={16} color={colors.primary} />
+              <Text style={styles.sectionTitle}>Recommended Resources</Text>
+            </View>
+            {report.input?.location && (
+              <View style={styles.resourceLocationRow}>
+                <Feather name="map-pin" size={12} color={colors.primary} />
+                <Text style={styles.resourceLocationText}>
+                  Personalized for {report.input.location}
+                </Text>
+              </View>
+            )}
+            <View style={styles.resourceList}>
+              {report.recommendedResources.map((r, i) => {
+                const priorityStyle = {
+                  critical: { bg: colors.dangerMuted, text: colors.danger },
+                  high: { bg: colors.warningMuted, text: colors.warning },
+                  medium: { bg: colors.primaryMuted, text: colors.primary },
+                  low: { bg: colors.surface, text: colors.textMuted },
+                }[r.priority] ?? { bg: colors.surface, text: colors.textMuted };
+                return (
+                  <Pressable
+                    key={i}
+                    style={({ pressed }) => [styles.resourceCard, pressed && { opacity: 0.8 }]}
+                    onPress={() => Linking.openURL(r.url)}
+                  >
+                    <View style={styles.resourceCardTop}>
+                      <View style={styles.resourceIconWrap}>
+                        <Feather name="external-link" size={14} color={colors.primary} />
+                      </View>
+                      <View style={styles.resourceBadges}>
+                        <View style={[styles.resourcePriorityBadge, { backgroundColor: priorityStyle.bg }]}>
+                          <Text style={[styles.resourcePriorityText, { color: priorityStyle.text }]}>
+                            {r.priority.toUpperCase()}
+                          </Text>
+                        </View>
+                        <View style={styles.resourceTypeBadge}>
+                          <Text style={styles.resourceTypeText}>{r.badge}</Text>
+                        </View>
+                      </View>
+                    </View>
+                    <Text style={styles.resourceCategory}>{r.category}</Text>
+                    <Text style={styles.resourceTitle}>{r.title}</Text>
+                    <Text style={styles.resourceDesc}>{r.description}</Text>
+                    <View style={styles.resourceLink}>
+                      <Text style={styles.resourceLinkText}>Visit resource</Text>
+                      <Feather name="arrow-right" size={12} color={colors.primary} />
+                    </View>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
+        )}
 
         <View style={styles.bottomActions}>
           <Pressable style={styles.shareFullBtn} onPress={handleShare}>
@@ -742,5 +812,63 @@ const createStyles = (colors: ColorsType) => StyleSheet.create({
     fontFamily: "Inter_500Medium",
     fontSize: 14,
     color: colors.textMuted,
+  },
+  resourceLocationRow: {
+    flexDirection: "row", alignItems: "center", gap: 5,
+    marginBottom: 12,
+  },
+  resourceLocationText: {
+    fontFamily: "Inter_400Regular", fontSize: 12, color: colors.primary,
+  },
+  resourceList: { gap: 12 },
+  resourceCard: {
+    backgroundColor: colors.background,
+    borderRadius: 14, padding: 14,
+    borderWidth: 1, borderColor: colors.border,
+    gap: 6,
+  },
+  resourceCardTop: {
+    flexDirection: "row", alignItems: "center",
+    justifyContent: "space-between", marginBottom: 2,
+  },
+  resourceIconWrap: {
+    width: 32, height: 32, borderRadius: 9,
+    backgroundColor: colors.primaryMuted,
+    alignItems: "center", justifyContent: "center",
+  },
+  resourceBadges: { flexDirection: "row", gap: 5, alignItems: "center" },
+  resourcePriorityBadge: {
+    borderRadius: 10, paddingHorizontal: 7, paddingVertical: 3,
+  },
+  resourcePriorityText: {
+    fontFamily: "Inter_700Bold", fontSize: 8, letterSpacing: 0.8,
+  },
+  resourceTypeBadge: {
+    backgroundColor: colors.surface, borderRadius: 10,
+    paddingHorizontal: 7, paddingVertical: 3,
+    borderWidth: 1, borderColor: colors.border,
+  },
+  resourceTypeText: {
+    fontFamily: "Inter_600SemiBold", fontSize: 8,
+    color: colors.textMuted, letterSpacing: 0.5,
+  },
+  resourceCategory: {
+    fontFamily: "Inter_600SemiBold", fontSize: 10,
+    color: colors.primary, letterSpacing: 0.8, textTransform: "uppercase",
+  },
+  resourceTitle: {
+    fontFamily: "Inter_700Bold", fontSize: 14, color: colors.text,
+    letterSpacing: -0.2,
+  },
+  resourceDesc: {
+    fontFamily: "Inter_400Regular", fontSize: 12,
+    color: colors.textSecondary, lineHeight: 18,
+  },
+  resourceLink: {
+    flexDirection: "row", alignItems: "center", gap: 4,
+    marginTop: 4,
+  },
+  resourceLinkText: {
+    fontFamily: "Inter_600SemiBold", fontSize: 12, color: colors.primary,
   },
 });
