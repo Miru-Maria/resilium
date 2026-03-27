@@ -1,6 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
-import { db, resilienceReportsTable } from "@workspace/db";
-import { and, eq, count, inArray } from "drizzle-orm";
+import { db, resilienceReportsTable, usersTable } from "@workspace/db";
+import { and, eq, inArray, desc } from "drizzle-orm";
 import { openai } from "@workspace/integrations-openai-ai-server";
 
 const router: IRouter = Router();
@@ -95,6 +95,115 @@ router.delete("/me/plans/:reportId", async (req: Request, res: Response) => {
   }
 });
 
+// DELETE /me/plans — delete ALL plans for the authenticated user
+router.delete("/me/plans", async (req: Request, res: Response) => {
+  if (!req.isAuthenticated()) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+  try {
+    await db
+      .delete(resilienceReportsTable)
+      .where(eq(resilienceReportsTable.userId, req.user.id));
+    res.json({ success: true });
+  } catch (err) {
+    req.log.error({ err }, "Error deleting all plans");
+    res.status(500).json({ error: "Failed to delete all plans" });
+  }
+});
+
+// DELETE /me — delete all Resilium data for the user (account wipe)
+router.delete("/me", async (req: Request, res: Response) => {
+  if (!req.isAuthenticated()) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+  try {
+    await db
+      .delete(resilienceReportsTable)
+      .where(eq(resilienceReportsTable.userId, req.user.id));
+    await db
+      .delete(usersTable)
+      .where(eq(usersTable.id, req.user.id));
+    req.session.destroy(() => {});
+    res.json({ success: true });
+  } catch (err) {
+    req.log.error({ err }, "Error deleting account");
+    res.status(500).json({ error: "Failed to delete account" });
+  }
+});
+
+// GET /me/latest-checklist — return the most recent report's checklistsByArea + reportId
+router.get("/me/latest-checklist", async (req: Request, res: Response) => {
+  if (!req.isAuthenticated()) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+  try {
+    const rows = await db
+      .select({
+        reportId: resilienceReportsTable.reportId,
+        checklistsByArea: resilienceReportsTable.checklistsByArea,
+        location: resilienceReportsTable.location,
+        createdAt: resilienceReportsTable.createdAt,
+      })
+      .from(resilienceReportsTable)
+      .where(eq(resilienceReportsTable.userId, req.user.id))
+      .orderBy(desc(resilienceReportsTable.createdAt))
+      .limit(1);
+
+    if (!rows[0] || !rows[0].checklistsByArea) {
+      res.json({ reportId: null, checklistsByArea: null, location: null });
+      return;
+    }
+
+    res.json({
+      reportId: rows[0].reportId,
+      checklistsByArea: rows[0].checklistsByArea,
+      location: rows[0].location,
+      createdAt: rows[0].createdAt.toISOString(),
+    });
+  } catch (err) {
+    req.log.error({ err }, "Error fetching latest checklist");
+    res.status(500).json({ error: "Failed to fetch latest checklist" });
+  }
+});
+
+// GET /me/export — GDPR-style data export for the authenticated user
+router.get("/me/export", async (req: Request, res: Response) => {
+  if (!req.isAuthenticated()) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+  try {
+    const plans = await db
+      .select()
+      .from(resilienceReportsTable)
+      .where(eq(resilienceReportsTable.userId, req.user.id))
+      .orderBy(resilienceReportsTable.createdAt);
+
+    const exportData = {
+      userId: req.user.id,
+      email: req.user.email ?? null,
+      firstName: req.user.firstName ?? null,
+      lastName: req.user.lastName ?? null,
+      exportedAt: new Date().toISOString(),
+      totalPlans: plans.length,
+      plans: plans.map((p) => ({
+        ...p,
+        createdAt: p.createdAt.toISOString(),
+      })),
+    };
+
+    res.setHeader("Content-Disposition", `attachment; filename="resilium-data-export.json"`);
+    res.setHeader("Content-Type", "application/json");
+    res.json(exportData);
+  } catch (err) {
+    req.log.error({ err }, "Error exporting user data");
+    res.status(500).json({ error: "Failed to export data" });
+  }
+});
+
 router.post("/me/plans/compare", async (req: Request, res: Response) => {
   if (!req.isAuthenticated()) {
     res.status(401).json({ error: "Unauthorized" });
@@ -125,7 +234,6 @@ router.post("/me/plans/compare", async (req: Request, res: Response) => {
       return;
     }
 
-    // Order: A is earlier, B is later
     const sorted = rows.sort(
       (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
     );
@@ -152,7 +260,6 @@ router.post("/me/plans/compare", async (req: Request, res: Response) => {
     }, {} as Record<string, number>);
     deltas.overall = Math.round((scoreB.overall - scoreA.overall) * 10) / 10;
 
-    // AI conclusions
     const deltaLines = scoreKeys.map(k => {
       const d = deltas[k];
       return `${k.charAt(0).toUpperCase() + k.slice(1)}: ${scoreA[k].toFixed(0)} → ${scoreB[k].toFixed(0)} (${d >= 0 ? "+" : ""}${d})`;
