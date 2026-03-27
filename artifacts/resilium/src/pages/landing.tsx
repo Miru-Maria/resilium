@@ -12,7 +12,6 @@ import {
   MapPin,
   TrendingUp,
   CheckCircle2,
-  Lock,
   ChevronRight,
   Zap,
   AlertTriangle,
@@ -329,23 +328,6 @@ export default function LandingPage() {
                 </div>
               ))}
             </div>
-          </div>
-        </section>
-
-        {/* Privacy promise */}
-        <section className="w-full py-20 px-6">
-          <div className="max-w-3xl mx-auto text-center">
-            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-6">
-              <Lock className="w-8 h-8 text-primary" />
-            </div>
-            <h2 className="text-2xl md:text-3xl font-display font-bold mb-4">Private by design</h2>
-            <p className="text-muted-foreground leading-relaxed mb-8 max-w-xl mx-auto">
-              No name. No email. No tracking pixels. Your assessment data is stored securely and automatically deleted after 12 months. We don't sell your data — ever. Read our{" "}
-              <Link href="/privacy" className="text-primary underline underline-offset-4 hover:text-primary/80">
-                Privacy Policy
-              </Link>
-              .
-            </p>
           </div>
         </section>
 
