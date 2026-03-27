@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from "react";
 import { Link, useLocation } from "wouter";
+import { SiteFooter } from "@/components/site-footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -1394,6 +1395,7 @@ export default function ProfilePage() {
           </Tabs>
         )}
       </main>
+      <SiteFooter />
     </div>
   );
 }

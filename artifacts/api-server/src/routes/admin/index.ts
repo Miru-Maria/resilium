@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db, resilienceReportsTable, reportFeedbackTable, usersTable } from "@workspace/db";
-import { desc, eq, count, max } from "drizzle-orm";
+import { desc, eq, count, max, and, isNotNull } from "drizzle-orm";
 import { requireAdminSession, generateAdminToken, verifyAdminToken } from "../../middlewares/adminAuth.js";
 import uxTestRouter from "./ux-test/index.js";
 import adminGdprRouter from "./gdpr.js";
@@ -209,6 +209,59 @@ router.get("/users", requireAdminSession, async (req, res) => {
   } catch (err) {
     req.log.error({ err }, "Error fetching admin users");
     res.status(500).json({ error: "Failed to fetch users" });
+  }
+});
+
+router.get("/testimonials", requireAdminSession, async (req, res) => {
+  try {
+    const rows = await db
+      .select()
+      .from(reportFeedbackTable)
+      .where(and(isNotNull(reportFeedbackTable.comment)))
+      .orderBy(desc(reportFeedbackTable.createdAt))
+      .limit(200);
+
+    res.json({
+      testimonials: rows
+        .filter(r => r.comment && r.comment.trim().length > 0)
+        .map(r => ({
+          id: r.id,
+          reportId: r.reportId,
+          rating: r.rating,
+          comment: r.comment,
+          isPublished: r.isPublished,
+          createdAt: r.createdAt.toISOString(),
+        })),
+    });
+  } catch (err) {
+    req.log.error({ err }, "Error fetching testimonials");
+    res.status(500).json({ error: "INTERNAL_ERROR", message: "Failed to fetch testimonials." });
+  }
+});
+
+router.patch("/testimonials/:id", requireAdminSession, async (req, res) => {
+  try {
+    const id = parseInt(req.params["id"] as string, 10);
+    const { isPublished } = req.body as { isPublished?: boolean };
+
+    if (isNaN(id)) {
+      res.status(400).json({ error: "VALIDATION_ERROR", message: "Invalid testimonial id." });
+      return;
+    }
+    if (typeof isPublished !== "boolean") {
+      res.status(400).json({ error: "VALIDATION_ERROR", message: "isPublished must be a boolean." });
+      return;
+    }
+
+    await db
+      .update(reportFeedbackTable)
+      .set({ isPublished })
+      .where(eq(reportFeedbackTable.id, id));
+
+    res.json({ success: true });
+  } catch (err) {
+    req.log.error({ err }, "Error updating testimonial");
+    res.status(500).json({ error: "INTERNAL_ERROR", message: "Failed to update testimonial." });
   }
 });
 

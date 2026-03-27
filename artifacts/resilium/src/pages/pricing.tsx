@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { motion } from "framer-motion";
-import { CheckCircle2, Zap, ShieldCheck, BarChart2, RefreshCw, Lock, ArrowRight, Sparkles } from "lucide-react";
+import { CheckCircle2, Zap, ShieldCheck, BarChart2, RefreshCw, Lock, ArrowRight, Sparkles, XCircle, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SiteFooter } from "@/components/site-footer";
 import { ResilientIcon } from "@/components/resilient-icon";
@@ -41,21 +41,85 @@ function usePaddle() {
 }
 
 const FREE_FEATURES = [
-  "2 full assessments",
-  "Personalised resilience score",
-  "Personalised action plan",
+  "2 lifetime assessments",
+  "Full resilience score — all 6 dimensions",
+  "AI-generated action plan",
+  "Mental resilience profile",
   "PDF export",
   "GDPR-compliant data handling",
 ];
 
+const FREE_LIMITS = [
+  "No score history or trend tracking",
+  "No plan comparison between assessments",
+  "No scenario stress-testing",
+  "Reports archived after 12 months",
+];
+
 const PRO_FEATURES = [
+  "Everything in Starter",
   "Unlimited assessments",
-  "Full progress tracking & charts",
-  "Scenario simulations",
-  "Mental resilience deep-dive",
-  "Plan comparison & analysis",
+  "Score history & trend charts",
+  "AI plan comparison — what changed and why",
+  "Scenario stress-tests: job loss, relocation, disaster",
+  "Reports stored indefinitely",
   "Priority support",
 ];
+
+const FAQ_ITEMS = [
+  {
+    q: "Can I cancel my subscription at any time?",
+    a: "Yes. Cancel any time from your account settings or by contacting us. You keep Pro access until the end of your current billing period — no charges after that.",
+  },
+  {
+    q: "What happens to my data if I cancel?",
+    a: "Your reports and data are retained for 12 months after cancellation, giving you time to export or review them. You can also request full deletion at any time via the GDPR tools in your profile.",
+  },
+  {
+    q: "What happens to free (Starter) plans?",
+    a: "Starter accounts are never deleted automatically. Your 2 assessments and reports remain accessible. Reports are archived after 12 months, but you can download PDFs before then.",
+  },
+  {
+    q: "Is my assessment data private?",
+    a: "Yes. Your data is never sold to third parties. It is used only to generate your report and improve the platform's accuracy using anonymised aggregated statistics. Full details are in our Privacy Policy.",
+  },
+  {
+    q: "How is payment handled?",
+    a: "Payments are processed securely by Paddle, our authorised merchant of record. Your card details are never stored by Resilium — Paddle handles all billing and payment compliance.",
+  },
+  {
+    q: "Can I get a refund?",
+    a: "Yes — we offer a 14-day full refund on your initial subscription purchase. See our Refund Policy for full details.",
+  },
+  {
+    q: "What are the scenario stress-tests in Pro?",
+    a: "Pro users can run \"what if\" scenarios — for example, \"What if I lost my job next week?\" or \"What if I had to relocate urgently?\" The AI recalculates your resilience score under those conditions and shows your gap areas and recommended responses, without requiring a new full assessment.",
+  },
+  {
+    q: "How is Resilium different from generic advice online?",
+    a: "Generic resilience advice is one-size-fits-all. Resilium scores your specific situation across six dimensions — your financial runway, your skills, your location risk, your health, your housing, and your psychological resilience — and generates recommendations specific to your profile, not a generic checklist.",
+  },
+];
+
+function FaqItem({ q, a }: { q: string; a: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="rounded-xl border border-border bg-card overflow-hidden">
+      <button
+        className="w-full text-left px-5 py-4 flex items-center justify-between gap-3 font-medium text-sm hover:bg-muted/30 transition-colors"
+        onClick={() => setOpen(o => !o)}
+      >
+        <span>{q}</span>
+        <ChevronDown className={`w-4 h-4 flex-shrink-0 text-muted-foreground transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && (
+        <div className="px-5 pb-4 text-sm text-muted-foreground leading-relaxed border-t border-border/60 pt-3">
+          {a}
+        </div>
+      )}
+    </div>
+  );
+}
 
 type BillingPeriod = "monthly" | "annual";
 
@@ -192,10 +256,18 @@ export default function PricingPage() {
                     <span className="text-muted-foreground mb-1">/forever</span>
                   </div>
                 </div>
-                <ul className="space-y-3 flex-1 mb-8">
+                <ul className="space-y-3 flex-1 mb-4">
                   {FREE_FEATURES.map((f) => (
                     <li key={f} className="flex items-center gap-2.5 text-sm">
                       <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" />
+                      <span>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+                <ul className="space-y-2 mb-8 border-t border-border/60 pt-4">
+                  {FREE_LIMITS.map((f) => (
+                    <li key={f} className="flex items-center gap-2.5 text-sm text-muted-foreground">
+                      <XCircle className="w-4 h-4 text-muted-foreground/50 flex-shrink-0" />
                       <span>{f}</span>
                     </li>
                   ))}
@@ -282,6 +354,16 @@ export default function PricingPage() {
                   <span className="text-xs font-medium text-muted-foreground">{label}</span>
                 </div>
               ))}
+            </div>
+
+            {/* FAQ */}
+            <div className="mt-20 max-w-2xl mx-auto">
+              <h2 className="text-2xl font-display font-bold text-center mb-8">Frequently Asked Questions</h2>
+              <div className="space-y-3">
+                {FAQ_ITEMS.map(({ q, a }) => (
+                  <FaqItem key={q} q={q} a={a} />
+                ))}
+              </div>
             </div>
           </>
         )}

@@ -140,6 +140,7 @@ export default function AdminDashboard() {
           </div>
           <nav className="hidden sm:flex items-center gap-1">
             {[
+              { href: "/admin/testimonials", label: "Testimonials", icon: Star },
               { href: "/admin/mobile", label: "Mobile", icon: Smartphone },
               { href: "/admin/gdpr", label: "GDPR", icon: Shield },
               { href: "/admin/consent-log", label: "Consent Log", icon: LayoutDashboard },

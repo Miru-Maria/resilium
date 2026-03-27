@@ -30,3 +30,9 @@ id = "Q449V_n6n-KFeSljtpaw8"
 uri = "file://docs/resilium-technical-spec.md"
 type = "text"
 title = "Resilium Technical Specification"
+
+[[outputs]]
+id = "Q4XBEzA3JfF6YLyOhYCxs"
+uri = "file://attached_assets/resilium-marketing-banner.png"
+type = "image"
+title = "Resilium Marketing Banner (16:9)"

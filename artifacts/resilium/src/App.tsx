@@ -9,6 +9,8 @@ import LandingPage from "@/pages/landing";
 import AssessmentPage from "@/pages/assessment";
 import ResultsPage from "@/pages/results";
 import PrivacyPage from "@/pages/privacy";
+import TermsPage from "@/pages/terms";
+import RefundPage from "@/pages/refund";
 import AboutPage from "@/pages/about";
 import ProfilePage from "@/pages/profile";
 import PricingPage from "@/pages/pricing";
@@ -22,6 +24,7 @@ import AdminGdprPage from "@/pages/admin/gdpr";
 import AdminConsentLogPage from "@/pages/admin/consent-log";
 import AdminUsersPage from "@/pages/admin/users";
 import AdminAnnouncementsPage from "@/pages/admin/announcements";
+import AdminTestimonialsPage from "@/pages/admin/testimonials";
 import { AnnouncementBanner } from "@/components/announcement-banner";
 
 const queryClient = new QueryClient({
@@ -63,6 +66,8 @@ function Router() {
       <Route path="/assess" component={AssessmentPage} />
       <Route path="/results/:reportId" component={ResultsPage} />
       <Route path="/privacy" component={PrivacyPage} />
+      <Route path="/terms" component={TermsPage} />
+      <Route path="/refund" component={RefundPage} />
       <Route path="/about" component={AboutPage} />
       <Route path="/profile" component={ProfilePage} />
       <Route path="/pricing" component={PricingPage} />
@@ -76,6 +81,7 @@ function Router() {
       <Route path="/admin/consent-log" component={AdminConsentLogPage} />
       <Route path="/admin/users" component={AdminUsersPage} />
       <Route path="/admin/announcements" component={AdminAnnouncementsPage} />
+      <Route path="/admin/testimonials" component={AdminTestimonialsPage} />
       <Route component={NotFound} />
       </Switch>
       </div>

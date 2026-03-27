@@ -312,6 +312,16 @@ export default function ResultsPage() {
   // Mental resilience profile
   const mrProfile = (report as any).mentalResilienceProfile as MentalResilienceProfile | undefined;
 
+  // Percentile benchmarking
+  const [percentileData, setPercentileData] = useState<{ percentile: number | null; total: number } | null>(null);
+  useEffect(() => {
+    if (!report?.score?.overall) return;
+    fetch(`${BASE}/api/resilience/percentile?score=${encodeURIComponent(report.score.overall)}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(d => d && setPercentileData(d))
+      .catch(() => {});
+  }, [report?.score?.overall]);
+
   const mrDimensions = mrProfile ? [
     { label: "Stress Tolerance", value: mrProfile.stressTolerance },
     { label: "Adaptability", value: mrProfile.adaptability },
@@ -406,6 +416,25 @@ export default function ResultsPage() {
             <p className="text-xs text-muted-foreground mt-1">
               {report.score.overall >= 80 ? "Highly Resilient" : report.score.overall >= 60 ? "Well Prepared" : report.score.overall >= 40 ? "Moderately Prepared" : report.score.overall >= 20 ? "Developing Resilience" : "Critically Vulnerable"}
             </p>
+
+            {/* Percentile benchmark */}
+            {percentileData && percentileData.percentile !== null && (
+              <div className="mt-6 w-full px-2">
+                <div className="flex items-center justify-between text-xs mb-1.5">
+                  <span className="text-muted-foreground">vs. other users</span>
+                  <span className="font-semibold text-foreground">Top {100 - percentileData.percentile}%</span>
+                </div>
+                <div className="h-2 rounded-full bg-muted overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-primary/60 to-primary transition-all duration-700"
+                    style={{ width: `${percentileData.percentile}%` }}
+                  />
+                </div>
+                <p className="text-[10px] text-muted-foreground mt-1.5 text-center">
+                  You scored higher than {percentileData.percentile}% of {percentileData.total.toLocaleString()} users
+                </p>
+              </div>
+            )}
           </Card>
           
           <Card className="lg:col-span-2 border-none shadow-xl shadow-black/5 flex flex-col sm:flex-row items-center p-6 gap-6">

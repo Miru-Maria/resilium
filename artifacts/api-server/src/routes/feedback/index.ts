@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db, reportFeedbackTable, resilienceReportsTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 
 const router: IRouter = Router();
 
@@ -44,6 +44,31 @@ router.post("/", async (req, res) => {
   } catch (err) {
     req.log.error({ err }, "Error submitting feedback");
     res.status(500).json({ error: "INTERNAL_ERROR", message: "Failed to submit feedback." });
+  }
+});
+
+router.get("/testimonials", async (req, res) => {
+  try {
+    const testimonials = await db
+      .select({
+        id: reportFeedbackTable.id,
+        rating: reportFeedbackTable.rating,
+        comment: reportFeedbackTable.comment,
+        createdAt: reportFeedbackTable.createdAt,
+      })
+      .from(reportFeedbackTable)
+      .where(
+        and(
+          eq(reportFeedbackTable.isPublished, true),
+        )
+      )
+      .orderBy(desc(reportFeedbackTable.createdAt))
+      .limit(12);
+
+    res.json({ testimonials: testimonials.filter(t => t.rating >= 4 && t.comment && t.comment.trim().length > 0) });
+  } catch (err) {
+    req.log.error({ err }, "Error fetching testimonials");
+    res.status(500).json({ error: "INTERNAL_ERROR", message: "Failed to fetch testimonials." });
   }
 });
 

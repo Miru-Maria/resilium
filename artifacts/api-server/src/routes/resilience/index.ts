@@ -474,4 +474,26 @@ router.get("/reports/:reportId/snapshots", async (req, res) => {
   }
 });
 
+router.get("/percentile", async (req, res) => {
+  try {
+    const score = parseFloat(req.query["score"] as string);
+    if (isNaN(score) || score < 0 || score > 100) {
+      res.status(400).json({ error: "VALIDATION_ERROR", message: "score must be a number between 0 and 100." });
+      return;
+    }
+    const all = await db.select({ s: resilienceReportsTable.scoreOverall }).from(resilienceReportsTable);
+    const total = all.length;
+    if (total < 50) {
+      res.json({ percentile: null, total });
+      return;
+    }
+    const below = all.filter(r => r.s < score).length;
+    const percentile = Math.round((below / total) * 100);
+    res.json({ percentile, total });
+  } catch (err) {
+    req.log.error({ err }, "Error calculating percentile");
+    res.status(500).json({ error: "INTERNAL_ERROR", message: "Failed to calculate percentile." });
+  }
+});
+
 export default router;

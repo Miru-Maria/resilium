@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
@@ -17,6 +17,8 @@ import {
   Backpack,
   Globe,
   DollarSign,
+  Star,
+  Quote,
 } from "lucide-react";
 import { SiteFooter } from "@/components/site-footer";
 import { useAuth } from "@workspace/replit-auth-web";
@@ -29,6 +31,56 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+interface Testimonial {
+  id: number;
+  rating: number;
+  comment: string;
+  createdAt: string;
+}
+
+function TestimonialsSection() {
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    fetch(`${BASE}/api/feedback/testimonials`)
+      .then(r => r.ok ? r.json() : { testimonials: [] })
+      .then(d => {
+        setTestimonials(d.testimonials ?? []);
+        setLoaded(true);
+      })
+      .catch(() => setLoaded(true));
+  }, []);
+
+  if (!loaded || testimonials.length < 3) return null;
+
+  return (
+    <section className="w-full py-20 px-6 border-t border-border/60">
+      <div className="max-w-5xl mx-auto">
+        <p className="text-xs font-semibold uppercase tracking-widest text-primary text-center mb-3">From Our Users</p>
+        <h2 className="text-3xl md:text-4xl font-display font-bold text-center mb-14">What people are saying</h2>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {testimonials.slice(0, 6).map(t => (
+            <div key={t.id} className="p-5 rounded-2xl border border-border/60 bg-card/50 flex flex-col gap-3">
+              <Quote className="w-5 h-5 text-primary/40" />
+              <p className="text-sm leading-relaxed text-foreground/80 flex-1">"{t.comment}"</p>
+              <div className="flex items-center gap-1 mt-1">
+                {[1,2,3,4,5].map(s => (
+                  <Star
+                    key={s}
+                    className={`w-3.5 h-3.5 ${s <= t.rating ? "text-amber-400 fill-amber-400" : "text-muted-foreground/20"}`}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
 
 function AnimatedBackground() {
   return (
@@ -326,6 +378,9 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
+
+        {/* Testimonials — only rendered when 3+ approved entries exist */}
+        <TestimonialsSection />
 
         {/* Final CTA */}
         <section className="w-full bg-primary/5 border-t border-primary/10 py-20 px-6">
