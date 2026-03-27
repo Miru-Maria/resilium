@@ -216,7 +216,11 @@ export default function AdminDashboard() {
                         <XAxis type="number" tick={{ fontSize: 11 }} allowDecimals={false} />
                         <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={90} />
                         <Tooltip />
-                        <Bar dataKey="count" fill="#6366f1" radius={4} name="Count" />
+                        <Bar dataKey="count" radius={4} name="Count">
+                          {data.demographics[key].map((_, i) => (
+                            <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                          ))}
+                        </Bar>
                       </BarChart>
                     </ResponsiveContainer>
                   </CardContent>
