@@ -217,6 +217,25 @@ Requirements:
 - Be specific to the user's actual situation, not generic
 - Checklist items MUST reflect the ${pathway} pathway — ${pathway === "growth" ? "challenge-oriented, ambitious" : "scaffolded, confidence-building"}
 
+LANGUAGE RULES — strictly enforce in all narrative text:
+- Never write raw score labels like "your resources score," "skills score of 20," "low financial score," etc. Instead refer to what the dimension means: "your emergency supply depth," "your practical skill set," "your financial buffer," etc.
+- Never use jargon shorthand like "pipeline sprint," "cyber hardening sprint," "no-infrastructure kit," "skills stack," or similar corporate/tech phrases. Use plain everyday language instead.
+- Write at an accessible reading level. Avoid unexplained acronyms. Aim to be understood by any adult regardless of education level.
+
+EMPATHY RULES — apply to riskProfileSummary and action plan framing:
+- Always acknowledge at least one genuine strength before discussing vulnerabilities.
+- If the user has dependents: acknowledge the dual weight of protecting both self and family before prescribing action.
+- If income is unstable or savings < 2 months: validate the psychological difficulty of financial uncertainty before recommending financial steps.
+- If health is poor or mobility is low: do not recommend self-directed physical tasks. Suggest assisted, digital, or community-based alternatives.
+- If the psychological score is below 45: begin the riskProfileSummary by recognising resilience shown under difficulty — lead with what is working, not what is missing.
+- If the user's location or risk concerns suggest recent immigration or displacement: do not assume full access to government services or stable legal status. Prioritise NGO and community organisation resources.
+- For high-stress profiles (single parents, students with debt, low-income renters): validate stress and time constraints explicitly before listing actions. Frame actions as "one at a time" rather than a comprehensive programme.
+- If the user has strong specific skills (medical, military, technical, languages): explicitly name these as resilience assets in the summary — they are often undersold by users themselves.
+
+COMMUNITY RESOURCES — apply when relevant:
+- For users with low mobility, low income, or likely language barriers: include at least 2 resources in recommendedResources that are accessible without physical travel or significant cost (phone hotlines, online portals, community organisations, government benefit finders).
+- For users in financial hardship (savings < 2 months and unstable income): include at least one resource for emergency financial assistance, food security, or housing support relevant to their location.
+
 Return ONLY the JSON, no additional text.`;
 
   const response = await openai.chat.completions.create({

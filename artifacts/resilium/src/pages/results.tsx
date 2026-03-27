@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { Progress } from "@/components/ui/progress";
-import { Loader2, Download, Share2, AlertTriangle, CheckCircle, RefreshCcw, Activity, User, LogIn, Brain, TrendingUp, Award, Star, ExternalLink, Heart, BookOpen, ShieldCheck, Zap, Package, Globe, MapPin, Lock } from "lucide-react";
+import { Loader2, Download, Share2, AlertTriangle, CheckCircle, RefreshCcw, Activity, User, LogIn, Brain, TrendingUp, Award, Star, ExternalLink, Heart, BookOpen, ShieldCheck, Zap, Package, Globe, MapPin, Lock, Mail } from "lucide-react";
 import { ResilientIcon } from "@/components/resilient-icon";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
@@ -223,6 +223,22 @@ export default function ResultsPage() {
     return "text-destructive";
   };
 
+  const getScoreLabel = (score: number) => {
+    if (score >= 80) return "Strong";
+    if (score >= 60) return "Good";
+    if (score >= 40) return "Fair";
+    if (score >= 20) return "Low";
+    return "Critical";
+  };
+
+  const handleEmailReport = () => {
+    const subject = encodeURIComponent("My Resilium Resilience Report");
+    const body = encodeURIComponent(
+      `Here is a link to my Resilium resilience report:\n\n${window.location.href}\n\nOverall score: ${Math.round(report.score.overall)}/100`
+    );
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+  };
+
   const handleShare = async () => {
     const shareUrl = window.location.href;
     const shareText = `My Resilium Score is ${Math.round(report.score.overall)}/100. Find out your survival readiness.`;
@@ -316,6 +332,9 @@ export default function ResultsPage() {
             </div>
           </Link>
           <div className="flex items-center gap-3">
+            <Button variant="outline" size="sm" onClick={handleEmailReport} className="rounded-full">
+              <Mail className="w-4 h-4 mr-2" /> Email
+            </Button>
             <Button variant="outline" size="sm" onClick={handleShare} className="rounded-full">
               <Share2 className="w-4 h-4 mr-2" /> Share
             </Button>
@@ -381,8 +400,11 @@ export default function ResultsPage() {
               strokeWidth={16} 
               colorClass={getScoreColorClass(report.score.overall)} 
             />
-            <p className="mt-8 text-sm text-muted-foreground font-medium uppercase tracking-widest">
-              {report.score.overall >= 70 ? "Highly Resilient" : report.score.overall >= 40 ? "Moderately Prepared" : "Critically Vulnerable"}
+            <p className={cn("mt-8 text-sm font-bold uppercase tracking-widest", getScoreColorClass(report.score.overall))}>
+              {getScoreLabel(report.score.overall)}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {report.score.overall >= 80 ? "Highly Resilient" : report.score.overall >= 60 ? "Well Prepared" : report.score.overall >= 40 ? "Moderately Prepared" : report.score.overall >= 20 ? "Developing Resilience" : "Critically Vulnerable"}
             </p>
           </Card>
           
@@ -421,7 +443,12 @@ export default function ResultsPage() {
               {mrDimensions.map((dim) => (
                 <div key={dim.label} className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm font-semibold text-foreground">{dim.label}</span>
+                    <div>
+                      <span className="text-sm font-semibold text-foreground">{dim.label}</span>
+                      <span className={cn("ml-2 text-xs font-medium", getScoreColorClass(dim.value))}>
+                        {getScoreLabel(dim.value)}
+                      </span>
+                    </div>
                     <span className={cn("text-sm font-bold", getScoreColorClass(dim.value))}>{dim.value}/100</span>
                   </div>
                   <Progress value={dim.value} className="h-2" />

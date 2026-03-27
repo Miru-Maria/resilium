@@ -124,15 +124,30 @@ const DEFAULT_MR_ANSWERS: MentalResilienceAnswers = {
   socialSupport1: 3,
 };
 
+const PROGRESS_STEPS = [
+  "Reviewing your financial position…",
+  "Analysing your health and mobility profile…",
+  "Mapping your practical skills…",
+  "Assessing your psychological resilience…",
+  "Identifying your top vulnerabilities…",
+  "Running risk scenario simulations…",
+  "Building your personalised action plan…",
+  "Compiling your recommended resources…",
+  "Finalising your resilience report…",
+];
+
 export default function AssessmentPage() {
   const [, setLocation] = useLocation();
   const [step, setStep] = useState(1);
   const [mrStep, setMrStep] = useState(0); // sub-step within step 1
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [progressStep, setProgressStep] = useState(0);
   const [submitError, setSubmitError] = useState<{ code: string; message: string } | null>(null);
   const [currency, setCurrency] = useState<"USD" | "EUR" | "RON">("USD");
   const [gateChecked, setGateChecked] = useState(false);
   const [gated, setGated] = useState(false);
+  const [freeUsed, setFreeUsed] = useState(0);
+  const [isSubscribed, setIsSubscribed] = useState(false);
 
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
 
@@ -149,6 +164,8 @@ export default function AssessmentPage() {
           ]);
           const sub = await subRes.json();
           const { count } = await countRes.json();
+          setFreeUsed(count);
+          setIsSubscribed(!!sub.isActive);
           if (!sub.isActive && count >= FREE_LIMIT) {
             setGated(true);
           }
@@ -157,6 +174,7 @@ export default function AssessmentPage() {
         }
       } else {
         const anonCount = parseInt(localStorage.getItem(ANON_COUNT_KEY) ?? "0", 10);
+        setFreeUsed(anonCount);
         if (anonCount >= FREE_LIMIT) {
           setGated(true);
         }
@@ -166,6 +184,15 @@ export default function AssessmentPage() {
 
     checkGate();
   }, [isAuthenticated, user, authLoading]);
+
+  useEffect(() => {
+    if (!isSubmitting) return;
+    setProgressStep(0);
+    const interval = setInterval(() => {
+      setProgressStep(prev => (prev < PROGRESS_STEPS.length - 1 ? prev + 1 : prev));
+    }, 2200);
+    return () => clearInterval(interval);
+  }, [isSubmitting]);
 
   const [formData, setFormData] = useState<AssessmentInput>({
     location: "",
@@ -312,9 +339,25 @@ export default function AssessmentPage() {
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
         <Loader2 className="w-16 h-16 text-primary animate-spin mb-8" />
         <h2 className="text-3xl font-display font-bold mb-4">Building Your Resilience Plan</h2>
-        <p className="text-muted-foreground max-w-md animate-pulse">
-          Our AI is analyzing your vulnerabilities, simulating thousands of risk scenarios, and generating a personalized roadmap.
-        </p>
+        <div className="max-w-xs w-full space-y-4">
+          <div className="space-y-2">
+            {PROGRESS_STEPS.map((msg, i) => (
+              <div
+                key={i}
+                className={cn(
+                  "text-sm transition-all duration-500",
+                  i === progressStep
+                    ? "text-foreground font-medium"
+                    : i < progressStep
+                    ? "text-emerald-500 font-medium"
+                    : "text-muted-foreground/30"
+                )}
+              >
+                {i < progressStep ? "✓ " : i === progressStep ? "› " : ""}{msg}
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
@@ -366,6 +409,16 @@ export default function AssessmentPage() {
       <header className="w-full p-6 lg:p-8 flex items-center justify-between z-10">
         <div className="font-display font-bold text-xl tracking-tight text-primary">Resilium</div>
         <div className="flex items-center gap-3">
+          {!isSubscribed && freeUsed === FREE_LIMIT - 1 && (
+            <span className="text-xs font-medium px-3 py-1 rounded-full bg-amber-500/10 text-amber-700 border border-amber-500/20">
+              Last free assessment
+            </span>
+          )}
+          {!isSubscribed && freeUsed === 0 && (
+            <span className="text-xs font-medium text-muted-foreground">
+              Assessment 1 of {FREE_LIMIT}
+            </span>
+          )}
           <div className="text-sm font-medium text-muted-foreground">{stepLabel}</div>
         </div>
       </header>

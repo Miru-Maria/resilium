@@ -198,7 +198,7 @@ export default function LandingPage() {
           >
             <span className="flex items-center gap-2"><TrendingUp className="w-4 h-4 text-primary" /> Sign in to save &amp; track progress</span>
             <span className="flex items-center gap-2"><Shield className="w-4 h-4 text-primary" /> Your data is never sold</span>
-            <span className="flex items-center gap-2"><Zap className="w-4 h-4 text-primary" /> Results in under 15 minutes</span>
+            <span className="flex items-center gap-2"><Zap className="w-4 h-4 text-primary" /> Takes about 10 minutes</span>
           </motion.div>
         </div>
 
