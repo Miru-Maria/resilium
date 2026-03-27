@@ -193,6 +193,15 @@ export default function ResultsPage() {
     }
   }, [reportId, updateItem, refetchChecklist, toast]);
 
+  useEffect(() => {
+    if (!PADDLE_CLIENT_TOKEN || window.Paddle) return;
+    const script = document.createElement("script");
+    script.src = "https://cdn.paddle.com/paddle/v2/paddle.js";
+    script.async = true;
+    script.onload = () => window.Paddle?.Initialize({ token: PADDLE_CLIENT_TOKEN });
+    document.head.appendChild(script);
+  }, []);
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center">
@@ -253,15 +262,6 @@ export default function ResultsPage() {
   };
 
   const handlePrint = () => window.print();
-
-  useEffect(() => {
-    if (!PADDLE_CLIENT_TOKEN || window.Paddle) return;
-    const script = document.createElement("script");
-    script.src = "https://cdn.paddle.com/paddle/v2/paddle.js";
-    script.async = true;
-    script.onload = () => window.Paddle?.Initialize({ token: PADDLE_CLIENT_TOKEN });
-    document.head.appendChild(script);
-  }, []);
 
   const handleDonate = () => {
     if (!PADDLE_DONATION_PRICE_ID || !window.Paddle) return;
