@@ -231,7 +231,7 @@ export default function ResultsPage() {
 
   const handlePrint = () => window.print();
 
-  const donationUrl = (report as any).stripeUrl as string | undefined;
+  const donationUrl = import.meta.env.VITE_STRIPE_DONATION_URL as string | undefined || undefined;
 
   // Checklist progress lookup
   const progressMap: Record<string, boolean> = {};

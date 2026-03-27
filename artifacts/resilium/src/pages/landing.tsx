@@ -211,10 +211,8 @@ export default function LandingPage() {
           </Link>
 
           {!isLoading && isAuthenticated && (
-            <Link href="/profile">
-              <Button variant="ghost" className="rounded-full px-4 font-medium text-sm">
-                My Plans
-              </Button>
+            <Link href="/profile" className="text-sm text-foreground/80 hover:text-primary transition-colors font-medium hidden sm:block">
+              My Plans
             </Link>
           )}
 
@@ -272,7 +270,7 @@ export default function LandingPage() {
 
             <h1 className="text-5xl md:text-7xl font-display font-bold tracking-tight text-foreground leading-[1.1] mb-6">
               You're one disruption away from{" "}
-              <span className="text-rose-400 italic">chaos</span>.<br />
+              <span className="text-primary italic">chaos</span>.<br />
               Check your{" "}
               <span className="text-primary whitespace-nowrap font-extrabold">readiness.</span>
             </h1>

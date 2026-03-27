@@ -2,67 +2,159 @@ import React from "react";
 import { Link } from "wouter";
 import { SiteFooter } from "@/components/site-footer";
 import { ResilientIcon } from "@/components/resilient-icon";
-import { Backpack, DollarSign, Globe, AlertTriangle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Backpack,
+  DollarSign,
+  Globe,
+  AlertTriangle,
+  Brain,
+  Shield,
+  TrendingUp,
+  Zap,
+  ArrowRight,
+  CheckCircle2,
+  BarChart3,
+  Heart,
+  MapPin,
+  Lightbulb,
+  Users,
+  Lock,
+} from "lucide-react";
+import { motion } from "framer-motion";
 
 const CONTACT_EMAIL = "contact_resilium@pm.me";
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 24 },
+  visible: (i: number = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.55, delay: i * 0.08, ease: "easeOut" },
+  }),
+};
 
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <header className="w-full py-6 px-6 lg:px-12 border-b border-border/60">
+      {/* Header */}
+      <header className="w-full py-6 px-6 lg:px-12 border-b border-border/60 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 w-fit">
           <ResilientIcon className="w-7 h-7" />
           <span className="font-display font-bold text-xl tracking-tight text-primary">Resilium</span>
         </Link>
+        <Link href="/assess">
+          <Button size="sm" className="rounded-full px-5 gap-2">
+            Get My Plan <ArrowRight className="w-3.5 h-3.5" />
+          </Button>
+        </Link>
       </header>
 
-      <main className="flex-1 w-full max-w-3xl mx-auto px-6 py-12 space-y-10">
-        <div>
-          <h1 className="text-4xl font-display font-bold tracking-tight mb-3">About Resilium</h1>
-          <p className="text-muted-foreground leading-relaxed">
-            Building personal resilience before disruption arrives — not after.
-          </p>
+      {/* HERO */}
+      <section className="relative overflow-hidden border-b border-border/60">
+        {/* Background accent */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              "radial-gradient(ellipse 70% 60% at 50% 0%, rgba(224,128,64,0.10) 0%, transparent 70%)",
+          }}
+        />
+        <div className="relative z-10 max-w-4xl mx-auto px-6 py-20 text-center">
+          <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={0}>
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold uppercase tracking-widest mb-6">
+              <Brain className="w-3.5 h-3.5" /> About the Platform
+            </div>
+          </motion.div>
+          <motion.h1
+            variants={fadeUp}
+            initial="hidden"
+            animate="visible"
+            custom={1}
+            className="text-4xl md:text-6xl font-display font-bold tracking-tight mb-5"
+          >
+            Personal resilience,{" "}
+            <span className="text-primary">built on data</span><br />
+            not guesswork.
+          </motion.h1>
+          <motion.p
+            variants={fadeUp}
+            initial="hidden"
+            animate="visible"
+            custom={2}
+            className="text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto mb-10"
+          >
+            Resilium is a free, privacy-first platform that gives you an honest, AI-powered picture
+            of where you stand — across the financial, physical, psychological, and logistical
+            dimensions that actually determine how well you weather disruption.
+          </motion.p>
+          <motion.div
+            variants={fadeUp}
+            initial="hidden"
+            animate="visible"
+            custom={3}
+            className="flex flex-wrap gap-4 justify-center"
+          >
+            <Link href="/assess">
+              <Button size="lg" className="rounded-full px-8 gap-2 h-12">
+                Take the Assessment <ArrowRight className="w-4 h-4" />
+              </Button>
+            </Link>
+            <Link href="/privacy">
+              <Button variant="outline" size="lg" className="rounded-full px-8 h-12 border-primary/20">
+                Privacy Policy
+              </Button>
+            </Link>
+          </motion.div>
         </div>
+      </section>
 
-        <Section title="What is Resilium">
-          <p>
-            Most people don't think about personal resilience until something goes wrong — a job loss, a health crisis, a natural disaster, a geopolitical shock. By then, the window to prepare has already closed.
-          </p>
-          <p>
-            Resilium exists to change that. It is a free, privacy-first assessment platform that helps you understand exactly where you stand across the dimensions that matter most when life becomes unpredictable: your finances, your skills, your health, your location, and your psychological capacity to adapt.
-          </p>
-          <p>
-            The result is a fully personalized resilience plan — concrete, actionable, and honest about your gaps — delivered immediately. No account is required to complete an assessment and receive your plan. Create an account if you want to save your results, track your progress over time, or compare plans.
-          </p>
-        </Section>
+      {/* QUICK STATS */}
+      <section className="border-b border-border/60 bg-card/30">
+        <div className="max-w-5xl mx-auto px-6 py-10 grid grid-cols-2 md:grid-cols-4 gap-6">
+          {[
+            { icon: BarChart3, value: "6", label: "Resilience dimensions scored" },
+            { icon: Brain, value: "10", label: "Mental resilience data points" },
+            { icon: Zap, value: "~15 min", label: "To your full report" },
+            { icon: Lock, value: "0", label: "Pieces of PII required" },
+          ].map(({ icon: Icon, value, label }) => (
+            <div key={label} className="flex flex-col items-center text-center gap-2">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-1">
+                <Icon className="w-5 h-5 text-primary" />
+              </div>
+              <p className="text-2xl font-display font-bold text-foreground">{value}</p>
+              <p className="text-xs text-muted-foreground leading-snug">{label}</p>
+            </div>
+          ))}
+        </div>
+      </section>
 
-        <Section title="Who Uses Resilium">
-          <p>Resilium is built for English-speaking people around the world who take personal preparedness seriously — or want to start. Our primary communities include:</p>
-          <div className="grid sm:grid-cols-2 gap-4 not-prose mt-2">
+      {/* WHAT IS RESILIUM */}
+      <section className="border-b border-border/60">
+        <div className="max-w-5xl mx-auto px-6 py-16 grid md:grid-cols-2 gap-12 items-center">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">The Problem</p>
+            <h2 className="text-3xl font-display font-bold mb-5">Most people don't prepare until it's too late.</h2>
+            <p className="text-muted-foreground leading-relaxed mb-4">
+              A job loss, health crisis, natural disaster, or geopolitical shock arrives without warning. By the time the threat is visible, the window to prepare has already closed.
+            </p>
+            <p className="text-muted-foreground leading-relaxed mb-4">
+              Generic resilience advice — "build an emergency fund," "diversify your skills" — is true and useless in isolation. It ignores your specific situation.
+            </p>
+            <p className="text-muted-foreground leading-relaxed">
+              Resilium uses AI to analyze your full profile and deliver a plan built around exactly who you are and where you actually stand right now.
+            </p>
+          </div>
+          <div className="space-y-3">
             {[
-              {
-                icon: <Backpack className="w-5 h-5 text-primary" />,
-                title: "Preppers & Self-Reliance Community",
-                desc: "You already stockpile, plan, and take preparedness seriously. Resilium gives you a structured, scored picture of where your gaps still are.",
-              },
-              {
-                icon: <DollarSign className="w-5 h-5 text-primary" />,
-                title: "The Financially Anxious",
-                desc: "Inflation, job insecurity, and economic volatility are real. Know exactly how many months of runway you have and what to prioritize.",
-              },
-              {
-                icon: <Globe className="w-5 h-5 text-primary" />,
-                title: "Expats & Digital Nomads",
-                desc: "Living abroad means location risk is real. Assess how your host country, mobility, and support network hold up under pressure.",
-              },
-              {
-                icon: <AlertTriangle className="w-5 h-5 text-primary" />,
-                title: "The Quietly Cautious",
-                desc: "You don't call yourself a prepper. But the news has you thinking. Resilium gives you a structured, honest starting point — no judgment.",
-              },
-            ].map(({ icon, title, desc }) => (
-              <div key={title} className="flex gap-3 p-4 rounded-xl border border-border/60 bg-card/40">
-                <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">{icon}</div>
+              { icon: TrendingUp, title: "Scored across 6 dimensions", desc: "Financial, skills, health, mobility, psychological resilience, and emergency resources — each scored 0–100 with context." },
+              { icon: Lightbulb, title: "AI-personalized, not generic", desc: "Your plan reflects your specific circumstances. Not a checklist. A prioritized roadmap built around your gaps." },
+              { icon: Shield, title: "Privacy-first by design", desc: "No name or email required for your assessment. Your data is never sold, shared, or used for ads." },
+            ].map(({ icon: Icon, title, desc }) => (
+              <div key={title} className="flex gap-4 p-4 rounded-2xl border border-border/60 bg-card/40">
+                <div className="flex-shrink-0 w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center mt-0.5">
+                  <Icon className="w-5 h-5 text-primary" />
+                </div>
                 <div>
                   <p className="font-semibold text-sm text-foreground mb-1">{title}</p>
                   <p className="text-xs text-muted-foreground leading-relaxed">{desc}</p>
@@ -70,115 +162,237 @@ export default function AboutPage() {
               </div>
             ))}
           </div>
-          <p className="mt-2">
-            Resilium is accessible worldwide with currency support for USD, EUR, and RON — with more regions being added.
-          </p>
-        </Section>
+        </div>
+      </section>
 
-        <Section title="How It Works">
-          <p>Resilium follows a three-step process designed to be fast, rigorous, and useful:</p>
-          <ol className="list-decimal pl-6 space-y-3">
-            <li>
-              <strong>Complete the assessment.</strong> A structured set of questions covers your logistical situation (finances, housing, location, health, skills, dependents) and your psychological resilience profile. The assessment takes around 10–15 minutes to complete honestly.
-            </li>
-            <li>
-              <strong>AI analysis.</strong> Your responses are processed by an AI model trained to identify patterns, surface vulnerabilities, and recognize genuine strengths — across both the mental and practical dimensions of resilience.
-            </li>
-            <li>
-              <strong>Receive your personalized resilience plan.</strong> You get a detailed, human-readable report that reflects your specific situation. Not generic tips — a prioritized action plan built around who you are and where you actually are right now.
-            </li>
-          </ol>
-        </Section>
+      {/* WHO USES RESILIUM */}
+      <section className="border-b border-border/60 bg-card/20">
+        <div className="max-w-5xl mx-auto px-6 py-16">
+          <div className="text-center mb-10">
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Who It's For</p>
+            <h2 className="text-3xl font-display font-bold">Built for people who take preparedness seriously</h2>
+            <p className="text-muted-foreground mt-3 max-w-xl mx-auto">Resilium works for a range of mindsets — from dedicated preppers to people who just want to stop feeling blindsided.</p>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-4">
+            {[
+              {
+                icon: Backpack,
+                title: "Preppers & Self-Reliance Community",
+                desc: "You already stockpile, plan, and take preparedness seriously. Resilium gives you a structured, scored picture of where your gaps still are — and prioritizes what to work on next.",
+              },
+              {
+                icon: DollarSign,
+                title: "The Financially Anxious",
+                desc: "Inflation, job insecurity, and economic volatility are real. Know exactly how many months of runway you have and what to prioritize to get from vulnerable to stable.",
+              },
+              {
+                icon: Globe,
+                title: "Expats & Digital Nomads",
+                desc: "Living abroad means location risk is real. Assess how your host country, mobility, and support network hold up under pressure — including scenarios that affect cross-border stability.",
+              },
+              {
+                icon: AlertTriangle,
+                title: "The Quietly Cautious",
+                desc: "You don't call yourself a prepper. But the news has you thinking. Resilium gives you a structured, honest starting point — no ideology, no judgment, just useful signal.",
+              },
+            ].map(({ icon: Icon, title, desc }) => (
+              <div key={title} className="flex gap-4 p-5 rounded-2xl border border-border/60 bg-card/50 hover:border-primary/30 transition-colors">
+                <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mt-0.5">
+                  <Icon className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm text-foreground mb-1.5">{title}</p>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="text-center text-sm text-muted-foreground mt-8">
+            Currency support for <strong className="text-foreground">USD, EUR, and RON</strong> — accessible worldwide.
+          </p>
+        </div>
+      </section>
 
-        <Section title="The Assessment Methodology">
-          <p>
-            Resilium's assessment is built around two interconnected pillars that together determine how well a person can weather disruption.
-          </p>
-          <p>
-            <strong>Mental Resilience dimensions</strong> capture the psychological traits that allow people to stay functional and adaptive under pressure:
-          </p>
-          <ul className="list-disc pl-6 space-y-1">
-            <li><strong>Stress Tolerance</strong> — capacity to function under sustained pressure without breakdown</li>
-            <li><strong>Adaptability</strong> — willingness and ability to change course when circumstances demand it</li>
-            <li><strong>Learning Agility</strong> — speed and openness to acquiring new skills when existing ones become insufficient</li>
-            <li><strong>Emotional Regulation</strong> — ability to manage fear, grief, and uncertainty without being paralyzed by them</li>
-            <li><strong>Social Connection</strong> — quality and reliability of personal support networks</li>
-          </ul>
-          <p>
-            <strong>Logistics dimensions</strong> capture the concrete, material factors that either cushion disruption or amplify it:
-          </p>
-          <ul className="list-disc pl-6 space-y-1">
-            <li><strong>Location</strong> — geographic risk exposure (climate, conflict, infrastructure fragility)</li>
-            <li><strong>Finances</strong> — income stability, savings runway, debt exposure</li>
-            <li><strong>Health</strong> — physical mobility, medical dependency, access to care</li>
-            <li><strong>Housing</strong> — security of tenure and suitability of living situation</li>
-            <li><strong>Skills</strong> — practical and transferable capabilities that retain value across scenarios</li>
-            <li><strong>Dependents</strong> — responsibilities that increase complexity and resource demands</li>
-          </ul>
-          <p>
-            The interplay between these two pillars is what Resilium's model is designed to map. Strong logistics with fragile psychology leads to rigidity, not resilience. Strong psychology with precarious logistics leads to courage without capacity. Both matter.
-          </p>
-        </Section>
+      {/* HOW IT WORKS */}
+      <section className="border-b border-border/60">
+        <div className="max-w-5xl mx-auto px-6 py-16">
+          <div className="text-center mb-12">
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">The Process</p>
+            <h2 className="text-3xl font-display font-bold">From questions to action plan in three steps</h2>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              {
+                step: "01",
+                icon: Brain,
+                title: "Complete the assessment",
+                desc: "A structured set of questions covers your logistical situation — finances, housing, location, health, skills, dependents — and a 10-question mental resilience deep-dive. Takes 10–15 minutes to complete honestly.",
+              },
+              {
+                step: "02",
+                icon: Zap,
+                title: "AI analysis",
+                desc: "Your responses are processed by an AI model that identifies patterns, surfaces vulnerabilities, and recognizes genuine strengths across both the mental and practical dimensions of resilience.",
+              },
+              {
+                step: "03",
+                icon: TrendingUp,
+                title: "Your personalized plan",
+                desc: "A detailed, human-readable report that reflects your specific situation. Not generic tips — a prioritized action plan built around who you are and where you actually are right now.",
+              },
+            ].map(({ step, icon: Icon, title, desc }) => (
+              <div key={step} className="relative p-6 rounded-2xl border border-border/60 bg-card/40">
+                <div className="text-4xl font-display font-bold text-primary/15 mb-4 leading-none">{step}</div>
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+                  <Icon className="w-5 h-5 text-primary" />
+                </div>
+                <h3 className="font-display font-bold text-base mb-2">{title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-        <Section title="AI-Powered Analysis">
-          <p>
-            Generic resilience advice is everywhere. "Build an emergency fund." "Diversify your skills." "Stay connected to your community." These recommendations are true — and useless in isolation, because they ignore the specific constraints and strengths of your situation.
-          </p>
-          <p>
-            Resilium uses AI to generate plans that are genuinely personalized. The model reads your full profile — not just individual answers — and reasons about what matters most for <em>your</em> combination of circumstances. The output is written to be read by a human, not a checklist-ticking machine.
-          </p>
-          <p>
-            Every plan identifies which pathway applies to your situation: a <strong>Growth pathway</strong> (for those who have a stable foundation and should build on it) or a <strong>Compensation pathway</strong> (for those who have critical gaps that need to be addressed before anything else). Both are constructive — one accelerates momentum, the other creates it where it's missing.
-          </p>
-        </Section>
+      {/* METHODOLOGY */}
+      <section className="border-b border-border/60 bg-card/20">
+        <div className="max-w-5xl mx-auto px-6 py-16">
+          <div className="text-center mb-12">
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">The Methodology</p>
+            <h2 className="text-3xl font-display font-bold">Two pillars. Six dimensions.</h2>
+            <p className="text-muted-foreground mt-3 max-w-xl mx-auto">
+              Strong logistics with fragile psychology leads to rigidity, not resilience. Strong psychology with precarious logistics leads to courage without capacity. Both matter.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Mental */}
+            <div className="rounded-2xl border border-primary/20 bg-primary/5 p-6">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">
+                  <Brain className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-display font-bold">Mental Resilience</h3>
+                  <p className="text-xs text-muted-foreground">Psychological capacity under pressure</p>
+                </div>
+              </div>
+              <ul className="space-y-2.5">
+                {[
+                  ["Stress Tolerance", "Function under sustained pressure without breakdown"],
+                  ["Adaptability", "Willingness to change course when circumstances demand it"],
+                  ["Learning Agility", "Speed and openness to acquiring new skills"],
+                  ["Emotional Regulation", "Managing fear, grief, and uncertainty without paralysis"],
+                  ["Social Connection", "Quality and reliability of personal support networks"],
+                ].map(([name, desc]) => (
+                  <li key={name} className="flex gap-3">
+                    <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                    <div>
+                      <span className="text-sm font-semibold text-foreground">{name}</span>
+                      <span className="text-xs text-muted-foreground"> — {desc}</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-        <Section title="Privacy by Design">
-          <p>
-            Resilium was built from day one with privacy as a core constraint, not an afterthought.
+            {/* Logistics */}
+            <div className="rounded-2xl border border-border/60 bg-card/40 p-6">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center">
+                  <MapPin className="w-5 h-5 text-muted-foreground" />
+                </div>
+                <div>
+                  <h3 className="font-display font-bold">Logistics & Resources</h3>
+                  <p className="text-xs text-muted-foreground">Material factors that cushion or amplify disruption</p>
+                </div>
+              </div>
+              <ul className="space-y-2.5">
+                {[
+                  ["Finances", "Income stability, savings runway, debt exposure"],
+                  ["Skills", "Practical and transferable capabilities that retain value"],
+                  ["Health", "Physical mobility, medical dependency, access to care"],
+                  ["Mobility", "Security of housing tenure and suitability of location"],
+                  ["Emergency Resources", "Supplies and preparations for acute disruption"],
+                  ["Location", "Geographic risk exposure — climate, conflict, infrastructure"],
+                ].map(([name, desc]) => (
+                  <li key={name} className="flex gap-3">
+                    <CheckCircle2 className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5" />
+                    <div>
+                      <span className="text-sm font-semibold text-foreground">{name}</span>
+                      <span className="text-xs text-muted-foreground"> — {desc}</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* PRIVACY */}
+      <section className="border-b border-border/60">
+        <div className="max-w-5xl mx-auto px-6 py-16">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Privacy by Design</p>
+              <h2 className="text-3xl font-display font-bold mb-5">
+                Built for people who don't want to be tracked.
+              </h2>
+              <p className="text-muted-foreground leading-relaxed mb-6">
+                Resilium was built from day one with privacy as a core constraint, not an afterthought. You don't need to give us your name, email, or any identifying information to complete an assessment and receive your full plan.
+              </p>
+              <Link href="/privacy" className="text-sm text-primary font-medium hover:underline underline-offset-4 flex items-center gap-1">
+                Read the full Privacy Policy <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { icon: Lock, text: "No name or email required for your assessment" },
+                { icon: Shield, text: "Your data is never sold or shared with third parties" },
+                { icon: Users, text: "GDPR-compliant — you retain all rights to your data" },
+                { icon: CheckCircle2, text: "Assessment data auto-deleted after 12 months" },
+              ].map(({ icon: Icon, text }) => (
+                <div key={text} className="p-4 rounded-2xl border border-border/60 bg-card/40 flex flex-col gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Icon className="w-4 h-4 text-primary" />
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ABOUT THE PROJECT */}
+      <section className="border-b border-border/60 bg-card/20">
+        <div className="max-w-3xl mx-auto px-6 py-16 text-center">
+          <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-5">
+            <Heart className="w-6 h-6 text-primary" />
+          </div>
+          <h2 className="text-3xl font-display font-bold mb-5">About the Project</h2>
+          <p className="text-muted-foreground leading-relaxed mb-4">
+            Resilium is independently operated — not a startup, not VC-backed, not a data broker wearing a wellness brand as a mask. The platform exists because the problem is real, the tools to address it are scattered and generic, and privacy-respecting alternatives are in short supply.
           </p>
-          <ul className="list-disc pl-6 space-y-1">
-            <li>No name or email address is collected as part of the assessment.</li>
-            <li>Your data is never sold, rented, or shared with third parties for commercial purposes.</li>
-            <li>Assessment data is automatically deleted after 12 months.</li>
-            <li>The platform is fully GDPR-compliant and you retain all rights to your data.</li>
-          </ul>
-          <p>
-            You can read the full details in the{" "}
-            <Link href="/privacy" className="text-primary underline underline-offset-4 hover:text-primary/80">
-              Privacy Policy
+          <p className="text-muted-foreground leading-relaxed mb-8">
+            The mission is straightforward: help ordinary people make honest assessments of their vulnerability and take meaningful steps before a crisis forces their hand.
+          </p>
+          <div className="flex flex-wrap gap-4 justify-center">
+            <Link href="/assess">
+              <Button size="lg" className="rounded-full px-8 gap-2 h-12">
+                Take the Free Assessment <ArrowRight className="w-4 h-4" />
+              </Button>
             </Link>
-            .
-          </p>
-        </Section>
-
-        <Section title="About the Project">
-          <p>
-            Resilium is independently operated — not a startup, not a VC-backed company, not a data broker wearing a wellness brand as a mask. The platform exists because the problem is real, the tools to address it are scattered and generic, and privacy-respecting alternatives to the surveillance-funded wellness industry are in short supply.
-          </p>
-          <p>
-            The project is mission-driven: to help ordinary people make honest assessments of their vulnerability and take meaningful steps before a crisis forces their hand.
-          </p>
-          <p>
-            Questions, feedback, or concerns? Reach out at:{" "}
-            <a href={`mailto:${CONTACT_EMAIL}`} className="text-primary underline underline-offset-4 hover:text-primary/80">
-              {CONTACT_EMAIL}
+            <a href={`mailto:${CONTACT_EMAIL}`}>
+              <Button variant="outline" size="lg" className="rounded-full px-8 h-12 border-primary/20">
+                Contact Us
+              </Button>
             </a>
-          </p>
-        </Section>
-      </main>
+          </div>
+        </div>
+      </section>
 
       <SiteFooter />
     </div>
-  );
-}
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section className="space-y-3">
-      <h2 className="text-xl font-display font-bold">{title}</h2>
-      <div className="space-y-3 text-foreground/80 leading-relaxed [&_strong]:text-foreground [&_strong]:font-semibold">
-        {children}
-      </div>
-    </section>
   );
 }
