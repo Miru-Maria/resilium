@@ -1,0 +1,27 @@
+kind = "mobile"
+previewPath = "/resilium-mobile/"
+title = "Resilium Mobile"
+version = "1.0.0"
+id = "artifacts/resilium-mobile"
+router = "expo-domain"
+
+[[integratedSkills]]
+name = "expo"
+version = "1.0.0"
+
+[[services]]
+ensurePreviewReachable = "/status"
+name = "expo"
+paths = [ "/resilium-mobile/" ]
+localPort = 24837
+
+[services.development]
+run = "pnpm --filter @workspace/resilium-mobile run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/resilium-mobile", "run", "build" ]
+run = [ "pnpm", "--filter", "@workspace/resilium-mobile", "run", "serve" ]
+
+[services.env]
+PORT = "24837"
+BASE_PATH = "/resilium-mobile/"

@@ -1,0 +1,883 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: Resilium API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: resilience
+    description: Resilience assessment and reporting
+  - name: Auth
+    description: Browser and mobile authentication endpoints.
+  - name: users
+    description: User profile and plan management
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /resilience/assess:
+    post:
+      operationId: submitAssessment
+      tags: [resilience]
+      summary: Submit resilience assessment
+      description: Submit questionnaire answers and receive AI-generated resilience report
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssessmentInput"
+      responses:
+        "200":
+          description: Resilience report generated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResilienceReport"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /resilience/reports/{reportId}:
+    get:
+      operationId: getReport
+      tags: [resilience]
+      summary: Get a saved resilience report
+      parameters:
+        - name: reportId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Resilience report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResilienceReport"
+        "404":
+          description: Report not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/user:
+    get:
+      tags: [Auth]
+      operationId: getCurrentAuthUser
+      summary: Get the currently authenticated user
+      parameters:
+        - $ref: '#/components/parameters/AuthorizationSessionHeader'
+        - $ref: '#/components/parameters/SessionCookie'
+      responses:
+        '200':
+          description: Auth status resolved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthUserEnvelope'
+  /login:
+    get:
+      tags: [Auth]
+      operationId: beginBrowserLogin
+      summary: Start the browser OIDC login flow
+      parameters:
+        - name: returnTo
+          in: query
+          required: false
+          description: Relative path to redirect to after login (must start with `/`). Defaults to `/`.
+          schema:
+            type: string
+      responses:
+        '302':
+          description: Redirect to the OIDC authorization endpoint.
+  /callback:
+    get:
+      tags: [Auth]
+      operationId: handleBrowserLoginCallback
+      summary: Complete the browser OIDC login flow
+      parameters:
+        - name: code
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: state
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: iss
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uri
+      responses:
+        '302':
+          description: Redirect to the `returnTo` path on success (defaults to `/`) or `/api/login` on failure.
+  /logout:
+    get:
+      tags: [Auth]
+      operationId: logoutBrowserSession
+      summary: Clear the session and begin OIDC logout
+      parameters:
+        - $ref: '#/components/parameters/AuthorizationSessionHeader'
+        - $ref: '#/components/parameters/SessionCookie'
+      responses:
+        '302':
+          description: Redirect to the OIDC provider logout URL.
+  /mobile-auth/token-exchange:
+    post:
+      tags: [Auth]
+      operationId: exchangeMobileAuthorizationCode
+      summary: Exchange a mobile OIDC code for a session token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MobileTokenExchangeRequest'
+      responses:
+        '200':
+          description: Session created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MobileTokenExchangeSuccess'
+        '400':
+          description: Missing or invalid required fields.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: Token did not contain usable claims.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: Token exchange failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+  /mobile-auth/logout:
+    post:
+      tags: [Auth]
+      operationId: logoutMobileSession
+      summary: Delete a mobile session token
+      parameters:
+        - $ref: '#/components/parameters/AuthorizationSessionHeader'
+      responses:
+        '200':
+          description: Logout processed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogoutSuccess'
+
+  /users/me/plans:
+    get:
+      tags: [users]
+      operationId: getMyPlans
+      summary: Get the authenticated user's saved plans
+      parameters:
+        - $ref: '#/components/parameters/SessionCookie'
+      responses:
+        '200':
+          description: List of saved plans
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyPlansResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /users/me/plans/{reportId}:
+    delete:
+      tags: [users]
+      operationId: deleteMyPlan
+      summary: Delete a saved plan belonging to the authenticated user
+      parameters:
+        - name: reportId
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/SessionCookie'
+      responses:
+        '200':
+          description: Plan deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogoutSuccess'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: Plan not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /resilience/reports/{reportId}/checklists:
+    get:
+      operationId: getChecklists
+      tags: [resilience]
+      summary: Get checklist progress for a report
+      parameters:
+        - name: reportId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Checklist progress
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChecklistProgressResponse"
+        "404":
+          description: Report not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /resilience/reports/{reportId}/checklists/{area}/{itemId}:
+    patch:
+      operationId: updateChecklistItem
+      tags: [resilience]
+      summary: Mark or unmark a checklist item as complete
+      parameters:
+        - name: reportId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: area
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateChecklistItemBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChecklistItemProgress"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /resilience/reports/{reportId}/snapshots:
+    get:
+      operationId: getSnapshots
+      tags: [resilience]
+      summary: Get progress snapshots for a session
+      parameters:
+        - name: reportId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Snapshots
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SnapshotsResponse"
+
+components:
+  parameters:
+    AuthorizationSessionHeader:
+      name: Authorization
+      in: header
+      required: false
+      description: Opaque session token — `Bearer <sid>`.
+      schema:
+        type: string
+    SessionCookie:
+      name: sid
+      in: cookie
+      required: false
+      description: Browser session cookie.
+      schema:
+        type: string
+
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+      required:
+        - error
+        - message
+
+    ErrorEnvelope:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+
+    AuthUser:
+      type: object
+      required: [id, email, firstName, lastName, profileImageUrl]
+      properties:
+        id:
+          type: string
+        email:
+          type: [string, 'null']
+          format: email
+        firstName:
+          type: [string, 'null']
+        lastName:
+          type: [string, 'null']
+        profileImageUrl:
+          type: [string, 'null']
+
+    AuthUserEnvelope:
+      type: object
+      required: [user]
+      properties:
+        user:
+          oneOf:
+            - $ref: '#/components/schemas/AuthUser'
+            - type: 'null'
+
+    MobileTokenExchangeRequest:
+      type: object
+      required: [code, code_verifier, redirect_uri, state]
+      properties:
+        code:
+          type: string
+          minLength: 1
+        code_verifier:
+          type: string
+          minLength: 1
+        redirect_uri:
+          type: string
+          minLength: 1
+          format: uri
+        state:
+          type: string
+          minLength: 1
+        nonce:
+          type: string
+          minLength: 1
+
+    MobileTokenExchangeSuccess:
+      type: object
+      required: [token]
+      properties:
+        token:
+          type: string
+
+    LogoutSuccess:
+      type: object
+      required: [success]
+      properties:
+        success:
+          type: boolean
+          const: true
+
+    PlanSummary:
+      type: object
+      required: [reportId, createdAt, scoreOverall]
+      properties:
+        reportId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        scoreOverall:
+          type: number
+
+    MyPlansResponse:
+      type: object
+      required: [plans]
+      properties:
+        plans:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlanSummary'
+
+    MentalResilienceAnswers:
+      type: object
+      description: Answers to the 10 mental resilience questions (1-5 Likert scale each)
+      properties:
+        stressTolerance1:
+          type: integer
+          minimum: 1
+          maximum: 5
+        stressTolerance2:
+          type: integer
+          minimum: 1
+          maximum: 5
+        adaptability1:
+          type: integer
+          minimum: 1
+          maximum: 5
+        adaptability2:
+          type: integer
+          minimum: 1
+          maximum: 5
+        learningAgility1:
+          type: integer
+          minimum: 1
+          maximum: 5
+        changeManagement1:
+          type: integer
+          minimum: 1
+          maximum: 5
+        changeManagement2:
+          type: integer
+          minimum: 1
+          maximum: 5
+        emotionalRegulation1:
+          type: integer
+          minimum: 1
+          maximum: 5
+        emotionalRegulation2:
+          type: integer
+          minimum: 1
+          maximum: 5
+        socialSupport1:
+          type: integer
+          minimum: 1
+          maximum: 5
+      required:
+        - stressTolerance1
+        - stressTolerance2
+        - adaptability1
+        - adaptability2
+        - learningAgility1
+        - changeManagement1
+        - changeManagement2
+        - emotionalRegulation1
+        - emotionalRegulation2
+        - socialSupport1
+
+    AssessmentInput:
+      type: object
+      properties:
+        location:
+          type: string
+          description: Country or region
+        incomeStability:
+          type: string
+          enum: [fixed, freelance, unstable]
+          description: Income stability type
+        savingsMonths:
+          type: number
+          description: Months of savings runway
+        hasDependents:
+          type: boolean
+          description: Whether user has dependents
+        skills:
+          type: array
+          items:
+            type: string
+            enum: [digital, physical, survival, medical, financial, language, none]
+          description: Skills the user has
+        healthStatus:
+          type: string
+          enum: [excellent, good, fair, poor]
+          description: Overall health status
+        mobilityLevel:
+          type: string
+          enum: [high, medium, low]
+          description: Ability to relocate or travel
+        housingType:
+          type: string
+          enum: [own, rent, family, nomadic, other]
+          description: Current housing situation
+        hasEmergencySupplies:
+          type: boolean
+          description: Access to emergency food/water supplies
+        psychologicalResilience:
+          type: number
+          minimum: 1
+          maximum: 10
+          description: Self-rated psychological resilience (1-10)
+        riskConcerns:
+          type: array
+          items:
+            type: string
+            enum: [job_loss, war_conflict, inflation, illness, natural_disaster, political_instability, supply_chain, cyber_attack, pandemic, financial_crisis]
+          description: Primary risk concerns
+        sessionId:
+          type: string
+          description: Optional session ID for saving reports
+        mentalResilienceAnswers:
+          $ref: "#/components/schemas/MentalResilienceAnswers"
+      required:
+        - location
+        - incomeStability
+        - savingsMonths
+        - hasDependents
+        - skills
+        - healthStatus
+        - mobilityLevel
+        - housingType
+        - hasEmergencySupplies
+        - psychologicalResilience
+        - riskConcerns
+
+    MentalResilienceProfile:
+      type: object
+      properties:
+        stressTolerance:
+          type: number
+          minimum: 0
+          maximum: 100
+        adaptability:
+          type: number
+          minimum: 0
+          maximum: 100
+        learningAgility:
+          type: number
+          minimum: 0
+          maximum: 100
+        changeManagement:
+          type: number
+          minimum: 0
+          maximum: 100
+        emotionalRegulation:
+          type: number
+          minimum: 0
+          maximum: 100
+        socialSupport:
+          type: number
+          minimum: 0
+          maximum: 100
+        composite:
+          type: number
+          minimum: 0
+          maximum: 100
+        pathway:
+          type: string
+          enum: [growth, compensation]
+      required:
+        - stressTolerance
+        - adaptability
+        - learningAgility
+        - changeManagement
+        - emotionalRegulation
+        - socialSupport
+        - composite
+        - pathway
+
+    ChecklistItem:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        priority:
+          type: string
+          enum: [critical, high, medium, low]
+        pathway:
+          type: string
+          enum: [growth, compensation]
+      required:
+        - id
+        - title
+        - description
+        - priority
+        - pathway
+
+    ResilienceScore:
+      type: object
+      properties:
+        overall:
+          type: number
+          minimum: 0
+          maximum: 100
+        financial:
+          type: number
+          minimum: 0
+          maximum: 100
+        health:
+          type: number
+          minimum: 0
+          maximum: 100
+        skills:
+          type: number
+          minimum: 0
+          maximum: 100
+        mobility:
+          type: number
+          minimum: 0
+          maximum: 100
+        psychological:
+          type: number
+          minimum: 0
+          maximum: 100
+        resources:
+          type: number
+          minimum: 0
+          maximum: 100
+      required:
+        - overall
+        - financial
+        - health
+        - skills
+        - mobility
+        - psychological
+        - resources
+
+    ActionItem:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        priority:
+          type: string
+          enum: [critical, high, medium, low]
+        category:
+          type: string
+      required:
+        - title
+        - description
+        - priority
+        - category
+
+    ScenarioSimulation:
+      type: object
+      properties:
+        scenario:
+          type: string
+        impact:
+          type: string
+          enum: [severe, high, moderate, low]
+        description:
+          type: string
+        immediateSteps:
+          type: array
+          items:
+            type: string
+        timeToRecover:
+          type: string
+      required:
+        - scenario
+        - impact
+        - description
+        - immediateSteps
+        - timeToRecover
+
+    DailyHabit:
+      type: object
+      properties:
+        habit:
+          type: string
+        frequency:
+          type: string
+          enum: [daily, weekly, monthly]
+        category:
+          type: string
+      required:
+        - habit
+        - frequency
+        - category
+
+    ResilienceReport:
+      type: object
+      properties:
+        reportId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        score:
+          $ref: "#/components/schemas/ResilienceScore"
+        mentalResilienceProfile:
+          $ref: "#/components/schemas/MentalResilienceProfile"
+        riskProfileSummary:
+          type: string
+        topVulnerabilities:
+          type: array
+          items:
+            type: string
+          minItems: 3
+          maxItems: 5
+        actionPlan:
+          type: object
+          properties:
+            shortTerm:
+              type: array
+              items:
+                $ref: "#/components/schemas/ActionItem"
+            midTerm:
+              type: array
+              items:
+                $ref: "#/components/schemas/ActionItem"
+            longTerm:
+              type: array
+              items:
+                $ref: "#/components/schemas/ActionItem"
+          required:
+            - shortTerm
+            - midTerm
+            - longTerm
+        scenarioSimulations:
+          type: array
+          items:
+            $ref: "#/components/schemas/ScenarioSimulation"
+        dailyHabits:
+          type: array
+          items:
+            $ref: "#/components/schemas/DailyHabit"
+        checklistsByArea:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: "#/components/schemas/ChecklistItem"
+        input:
+          $ref: "#/components/schemas/AssessmentInput"
+      required:
+        - reportId
+        - createdAt
+        - score
+        - riskProfileSummary
+        - topVulnerabilities
+        - actionPlan
+        - scenarioSimulations
+        - dailyHabits
+        - input
+
+    ChecklistItemProgress:
+      type: object
+      properties:
+        area:
+          type: string
+        itemId:
+          type: string
+        completed:
+          type: boolean
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - area
+        - itemId
+        - completed
+
+    ChecklistProgressResponse:
+      type: object
+      properties:
+        progress:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChecklistItemProgress"
+      required:
+        - progress
+
+    UpdateChecklistItemBody:
+      type: object
+      properties:
+        completed:
+          type: boolean
+      required:
+        - completed
+
+    ProgressSnapshot:
+      type: object
+      properties:
+        reportId:
+          type: string
+        snapshotAt:
+          type: string
+          format: date-time
+        score:
+          $ref: "#/components/schemas/ResilienceScore"
+        mrComposite:
+          type: number
+          nullable: true
+      required:
+        - reportId
+        - snapshotAt
+        - score
+
+    SnapshotsResponse:
+      type: object
+      properties:
+        snapshots:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProgressSnapshot"
+      required:
+        - snapshots

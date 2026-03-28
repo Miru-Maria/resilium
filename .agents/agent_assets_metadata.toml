@@ -1,0 +1,44 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "Idq-hMXsmfbVatslIDfxJ"
+uri = "file://attached_assets/resilium-thumbnail.png"
+type = "image"
+title = "Resilium Thumbnail (16:9)"
+
+[[outputs]]
+id = "i3xfefbSFMe09bIyDJ9cs"
+uri = "file://attached_assets/resilium-demo-script.md"
+type = "text"
+title = "Resilium Demo Video Script"
+
+[[outputs]]
+id = "MfJcuYcoDDGkdQYmTOOcC"
+uri = "file://resilium-demo-production-guide.txt"
+type = "text"
+title = "Resilium Demo — Production Guide & Script"
+
+[[outputs]]
+id = "z406mj3hOoc546OouiJx4"
+uri = "file://docs/resilium-whitepaper.md"
+type = "text"
+title = "Resilium White Paper"
+
+[[outputs]]
+id = "Q449V_n6n-KFeSljtpaw8"
+uri = "file://docs/resilium-technical-spec.md"
+type = "text"
+title = "Resilium Technical Specification"
+
+[[outputs]]
+id = "Q4XBEzA3JfF6YLyOhYCxs"
+uri = "file://attached_assets/resilium-marketing-banner.png"
+type = "image"
+title = "Resilium Marketing Banner — Brain + Arms"
+
+[[outputs]]
+id = "DvgYbAGIoTsI5VUwifuRu"
+uri = "file://attached_assets/resilium-marketing-banner.svg"
+type = "image"
+title = "Resilium Marketing Banner SVG — Matches PNG (2 fixes applied)"

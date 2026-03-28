@@ -1,0 +1,32 @@
+Paddle replied and approved the domain, but requested the following be updated: 
+-   Add links to your Terms, Refund pages to the website's footer.
+-   We could not locate a URL for your Refund Policy.
+-   We could not locate a URL for your Terms and Conditions.
+Please fix all of these in the best way possible. 
+
+I agree that scientific credibility would be interesting, how can do that without lying, what part of our methodology uses scientific (backed) methods of evaluation?
+I agree social proof would be wonder, I wouldn't mind a second in it's own dedicated page or where you think it wouldn't clutter to only appear once positive feedback is give ie above 3 stars and helpful reviews/words in the feedback are reported into the admin dashboard. I would like the ability to review and approve said testimonials before they are shown on the site.
+A sample/demo report page so users know what they're buying into, sounds awesome.
+Would a Weekly "Check-in" nudge email or push notification be good and not too close to span territory? 
+
+A scenario teaser on landing ("What if you lost your job next week?") that hooks users before asking for full assessment would be something. Possibly a well animated 10 second demo video that plays once on page load and then stops, and can be replayed at user discretion (play/stop button) demonstrating this scenario teaser would be very interesting.
+
+I would also like a banner of the app that I can use for marketing materials that is very engaging. It doesn't have be displayed on the site anywhere at all, but I will download it and use it. 
+
+How would it be best to set up benchmarking (e.g. Benchmarking	Driven shows "Your score vs. national average") and where?
+
+Your assessment suggestions have been noted but I don't want a teaser, they have the starter mode already and the teaser would be the scenario teaser above that gets them hooked. The part referencing anonymous users won't be implemented I don't want any anonymous users, the free users can create an account and delete it after their 2 report limit is reached if they don't want to pay monthly or yearly.
+
+For the results page there already is a streaming approach where the narrative appears sentence by sentence would feel much faster, no change needed there. 
+
+The score is great, but there's no "compared to others" context. A distribution bar ("You're in the top 35% of users") would make the number meaningful rather than abstract.
+
+I would absolutely love to better define the Pro subscription. You said
+- The Pro features listed ("Scenario simulations", "Mental resilience deep-dive", "Plan comparison & analysis") aren't clearly differentiated from what free users already get. The value proposition for upgrading is blurry -> lets fix this and differentiate considerably.
+- No confirmation email or in-app confirmation after upgrading (the Paddle webhook exists but we haven't verified it writes to the DB and triggers anything in the UI). Can we fix this?
+
+An FAQ on the pricing page (cancellation, data retention, what happens to free plans, privacy), if you think this is relevant please create it.
+
+SEO content — no blog, no "resilience for expats / job loss / natural disasters" landing pages that would capture search traffic -> search traffic from where, how would you propose we address this?
+
+Mobile app — currently auth-only, no assessment or report viewing on mobile, the assessment on the app seems to be missing the mental resilience part entirely. am I wrong?

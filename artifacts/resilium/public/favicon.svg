@@ -1,0 +1,43 @@
+<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="180" height="180" rx="36" fill="#D47235"/>
+
+  <!-- Left arm — bicep swell pushes outward left -->
+  <path
+    d="M26 161 C4 139, 0 101, 11 71 C19 53, 38 41, 56 34"
+    stroke="white" stroke-width="14" fill="none" stroke-linecap="round"/>
+
+  <!-- Right arm — mirror -->
+  <path
+    d="M154 161 C176 139, 180 101, 169 71 C161 53, 142 41, 124 34"
+    stroke="white" stroke-width="14" fill="none" stroke-linecap="round"/>
+
+  <!-- Left hemisphere -->
+  <path
+    d="M90 26 C79 26, 64 30, 56 41 C49 53, 49 71, 56 83 C60 90, 64 94, 68 102 L90 102 L90 26 Z"
+    fill="white" fill-opacity="0.18"
+    stroke="white" stroke-width="10" stroke-linejoin="round"/>
+
+  <!-- Right hemisphere -->
+  <path
+    d="M90 26 C101 26, 116 30, 124 41 C131 53, 131 71, 124 83 C120 90, 116 94, 112 102 L90 102 L90 26 Z"
+    fill="white" fill-opacity="0.18"
+    stroke="white" stroke-width="10" stroke-linejoin="round"/>
+
+  <!-- Longitudinal fissure -->
+  <line x1="90" y1="26" x2="90" y2="102" stroke="white" stroke-width="9" stroke-linecap="round"/>
+
+  <!-- Left gyri -->
+  <path d="M60 49 Q71 41, 83 49"  stroke="white" stroke-width="7.5" fill="none" stroke-linecap="round"/>
+  <path d="M53 71 Q64 64, 79 71"  stroke="white" stroke-width="7.5" fill="none" stroke-linecap="round"/>
+  <path d="M56 90 Q68 83, 79 90"  stroke="white" stroke-width="7"   fill="none" stroke-linecap="round"/>
+
+  <!-- Right gyri -->
+  <path d="M120 49 Q109 41, 97 49"   stroke="white" stroke-width="7.5" fill="none" stroke-linecap="round"/>
+  <path d="M127 71 Q116 64, 101 71"  stroke="white" stroke-width="7.5" fill="none" stroke-linecap="round"/>
+  <path d="M124 90 Q112 83, 101 90"  stroke="white" stroke-width="7"   fill="none" stroke-linecap="round"/>
+
+  <!-- Brainstem -->
+  <path
+    d="M71 102 Q71 116, 90 116 Q109 116, 109 102"
+    stroke="white" stroke-width="10" fill="none" stroke-linecap="round"/>
+</svg>
