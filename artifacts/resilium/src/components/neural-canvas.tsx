@@ -15,7 +15,7 @@ interface NeuralCanvasProps {
 }
 
 export function NeuralCanvas({
-  opacity = 0.75,
+  opacity = 0.85,
   particleCount = 90,
   connectionDist = 170,
   className = "absolute inset-0 w-full h-full",
@@ -56,15 +56,15 @@ export function NeuralCanvas({
           const dy = particles[i].y - particles[j].y;
           const dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < connectionDist) {
-            const alpha = (1 - dist / connectionDist) * 0.42;
+            const alpha = (1 - dist / connectionDist) * 0.58;
             const bothOrange = particles[i].isOrange && particles[j].isOrange;
             ctx!.beginPath();
             ctx!.moveTo(particles[i].x, particles[i].y);
             ctx!.lineTo(particles[j].x, particles[j].y);
             ctx!.strokeStyle = bothOrange
               ? `rgba(224,128,64,${alpha})`
-              : `rgba(120,140,225,${alpha * 0.75})`;
-            ctx!.lineWidth = 1.0;
+              : `rgba(120,140,225,${alpha * 0.88})`;
+            ctx!.lineWidth = 1.2;
             ctx!.stroke();
           }
         }
@@ -74,11 +74,11 @@ export function NeuralCanvas({
         const color = p.isOrange ? "224,128,64" : "120,140,225";
         ctx!.beginPath();
         ctx!.arc(p.x, p.y, p.r * 2.8, 0, Math.PI * 2);
-        ctx!.fillStyle = `rgba(${color},0.13)`;
+        ctx!.fillStyle = `rgba(${color},0.20)`;
         ctx!.fill();
         ctx!.beginPath();
         ctx!.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx!.fillStyle = `rgba(${color},0.85)`;
+        ctx!.fillStyle = `rgba(${color},0.92)`;
         ctx!.fill();
 
         p.x += p.vx;

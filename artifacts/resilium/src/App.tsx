@@ -51,7 +51,7 @@ function GlobalBackground() {
   if (location.startsWith("/admin")) return null;
   return (
     <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }}>
-      <NeuralCanvas opacity={0.42} particleCount={75} connectionDist={160} />
+      <NeuralCanvas opacity={0.52} particleCount={75} connectionDist={160} />
     </div>
   );
 }
