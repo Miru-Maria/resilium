@@ -75,7 +75,7 @@ Our initial SAM is ~$1.5B combining wellness and direct-to-consumer. We are not 
 
 **Purpose:** Maximize top-of-funnel volume. The free report has standalone value — it creates a "wow" moment users want to share. Each share is a referral loop.
 
-### Pro Tier ($12.99/month or $99/year)
+### Pro Tier ($9/month or $79/year)
 - Unlimited plan saves and history
 - AI Plan (GPT-5 powered 90-day action roadmap)
 - Scenario stress-testing (job loss, health crisis, relocation, natural disaster)
@@ -98,7 +98,7 @@ Our initial SAM is ~$1.5B combining wellness and direct-to-consumer. We are not 
 | Free→Pro conversion | 1,440 | 5% |
 | Annual plan uptake (of Pro) | 576 | 40% |
 
-**Year 1 MRR target:** $18,700/month → ~$224K ARR
+**Year 1 MRR target:** $11,600/month → ~$139K ARR
 
 ---
 
@@ -140,7 +140,7 @@ Deploy paid budget only after organic signals confirm which angles convert. Star
 - **Google Search** — target "emergency preparedness plan", "financial resilience assessment" (high intent, bottom of funnel)
 - **Meta** — lookalike audiences off email list; video creative showing the app flow
 
-Target blended CAC < $18 for free users, < $65 for Pro conversions (LTV > $130 at $10.83 blended ARPU × 12 month average retention).
+Target blended CAC < $18 for free users, < $65 for Pro conversions (LTV > $96 at ~$8/month blended ARPU × 12 month average retention).
 
 ### 4.4 B2B Partnerships (Growth — 15%)
 
@@ -173,9 +173,9 @@ Target blended CAC < $18 for free users, < $65 for Pro conversions (LTV > $130 a
 
 ## 6. Pricing Rationale
 
-**$12.99/month** places Resilium in the "utility SaaS" tier alongside apps like YNAB ($14.99/month) and Headspace ($12.99/month). Research shows this price point minimizes "too cheap to be credible" perception while staying below the $15 psychological friction threshold for direct card-entry without a trial.
+**$9/month** sits in the "utility SaaS" tier — competitive with tools like YNAB ($14.99/month) and Headspace ($12.99/month) while remaining below the $10 psychological friction threshold for direct card-entry without a trial. It's priced to feel like a no-brainer rather than a commitment.
 
-**$99/year** = ~$8.25/month, representing a 36% discount. Annual plans dramatically improve LTV and reduce churn (monthly churn for annual plans is typically 4–6% vs. 12–18% for monthly).
+**$79/year** = ~$6.58/month, representing a 27% discount vs. paying monthly. Annual plans dramatically improve LTV and reduce churn (monthly churn for annual plans is typically 4–6% vs. 12–18% for monthly).
 
 **Teams pricing** at $5–$8/seat/month scales with headcount. No per-seat floor for SMBs; minimum contract $99/month for teams under 20 seats.
 
@@ -208,10 +208,10 @@ The natural lifecycle is quarterly — resilience scores change as life circumst
 |---|---|---|
 | Public launch (web) | Q2 2026 | 500 assessments in first week |
 | App Store launch | Q3 2026 | 1,000 installs in first month |
-| $10K MRR | Q3 2026 | ~770 Pro subscribers |
+| $10K MRR | Q3 2026 | ~1,110 Pro subscribers |
 | First B2B pilot | Q4 2026 | 1 company, 50+ seats |
-| $50K MRR | Q1 2027 | ~3,850 Pro subscribers or equiv. mix |
-| $1M ARR | Q4 2027 | ~6,400 annual subscribers + B2B |
+| $50K MRR | Q1 2027 | ~5,560 Pro subscribers or equiv. mix |
+| $1M ARR | Q4 2027 | ~9,250 subscribers + B2B |
 
 ---
 

@@ -76,23 +76,50 @@ function StarRating({ rating }: { rating: number }) {
   );
 }
 
+interface PlatformSplit {
+  totalMobile: number;
+  totalWeb: number;
+  totalAll: number;
+}
+
+const RADIAN = Math.PI / 180;
+const renderPieLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, name }: any) => {
+  if (percent < 0.04) return null;
+  const radius = innerRadius + (outerRadius - innerRadius) * 0.55;
+  const x = cx + radius * Math.cos(-midAngle * RADIAN);
+  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+  return (
+    <text x={x} y={y} fill="white" textAnchor="middle" dominantBaseline="central" fontSize={11} fontWeight={600}>
+      {`${(percent * 100).toFixed(0)}%`}
+    </text>
+  );
+};
+
 export default function AdminDashboard() {
   const [, setLocation] = useLocation();
   const [data, setData] = useState<AnalyticsData | null>(null);
+  const [platformSplit, setPlatformSplit] = useState<PlatformSplit | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch(`${BASE}/api/admin/analytics`, { headers: adminAuthHeaders() });
-        if (res.status === 401) {
+        const [analyticsRes, mobileRes] = await Promise.all([
+          fetch(`${BASE}/api/admin/analytics`, { headers: adminAuthHeaders() }),
+          fetch(`${BASE}/api/admin/analytics/mobile`, { headers: adminAuthHeaders() }),
+        ]);
+        if (analyticsRes.status === 401) {
           localStorage.removeItem("admin_token");
           setLocation("/admin/login");
           return;
         }
-        if (!res.ok) throw new Error("Failed to load analytics");
-        setData(await res.json());
+        if (!analyticsRes.ok) throw new Error("Failed to load analytics");
+        setData(await analyticsRes.json());
+        if (mobileRes.ok) {
+          const md = await mobileRes.json();
+          setPlatformSplit({ totalMobile: md.totalMobile, totalWeb: md.totalWeb, totalAll: md.totalAll });
+        }
       } catch (e: any) {
         setError(e.message ?? "Failed to load analytics");
       } finally {
@@ -181,6 +208,43 @@ export default function AdminDashboard() {
               <StatCard title="Avg Overall Score" value={`${data.overview.avgOverall}/100`} icon={Activity} description="Across all users" />
               <StatCard title="Feedback Received" value={data.feedback.totalFeedback} icon={MessageSquare} description={data.feedback.totalFeedback > 0 ? `Avg rating: ${data.feedback.avgRating}/5` : "No feedback yet"} />
             </div>
+
+            {platformSplit && (
+              <Card className="border-none shadow-md">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base font-display flex items-center gap-2">
+                    <Smartphone className="w-4 h-4 text-primary" /> Platform Breakdown
+                  </CardTitle>
+                  <CardDescription className="text-xs">Mobile app vs web across all assessments</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-3 gap-4 mb-4">
+                    <div className="text-center">
+                      <p className="text-2xl font-bold font-display text-primary">{platformSplit.totalMobile}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">Mobile</p>
+                    </div>
+                    <div className="text-center border-x border-border">
+                      <p className="text-2xl font-bold font-display">{platformSplit.totalWeb}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">Web</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-2xl font-bold font-display text-muted-foreground">
+                        {platformSplit.totalAll > 0 ? `${Math.round((platformSplit.totalMobile / platformSplit.totalAll) * 100)}%` : "—"}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5">Mobile Share</p>
+                    </div>
+                  </div>
+                  <div className="w-full h-2 rounded-full bg-muted overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-primary transition-all"
+                      style={{ width: platformSplit.totalAll > 0 ? `${(platformSplit.totalMobile / platformSplit.totalAll) * 100}%` : "0%" }}
+                    />
+                  </div>
+                  <a href="/admin/mobile" className="text-xs text-primary hover:underline mt-3 block">View full mobile analytics →</a>
+                </CardContent>
+              </Card>
+            )}
+
             <Card className="border-none shadow-md">
               <CardHeader>
                 <CardTitle className="text-base font-display">Reports per Day (Last 30 Days)</CardTitle>
@@ -235,15 +299,24 @@ export default function AdminDashboard() {
                   {data.demographics.location.length === 0 ? (
                     <p className="text-muted-foreground text-sm text-center py-8">No data yet</p>
                   ) : (
-                    <ResponsiveContainer width="100%" height={220}>
+                    <ResponsiveContainer width="100%" height={280}>
                       <PieChart>
-                        <Pie data={data.demographics.location} dataKey="count" nameKey="name" cx="50%" cy="50%" outerRadius={80} label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false}>
+                        <Pie
+                          data={data.demographics.location}
+                          dataKey="count"
+                          nameKey="name"
+                          cx="50%"
+                          cy="45%"
+                          outerRadius={95}
+                          labelLine={false}
+                          label={renderPieLabel}
+                        >
                           {data.demographics.location.map((_, i) => (
                             <Cell key={i} fill={COLORS[i % COLORS.length]} />
                           ))}
                         </Pie>
-                        <Tooltip />
-                        <Legend />
+                        <Tooltip formatter={(v: number) => [v, "Reports"]} />
+                        <Legend wrapperStyle={{ fontSize: 12, paddingTop: 8 }} />
                       </PieChart>
                     </ResponsiveContainer>
                   )}
