@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import {
   View, Text, StyleSheet, ScrollView, Pressable, Platform, ActivityIndicator,
+  Modal,
 } from "react-native";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -45,6 +46,9 @@ export default function MyPlansScreen() {
   const [plans, setPlans] = useState<PlanSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [compareResult, setCompareResult] = useState<string | null>(null);
+  const [comparing, setComparing] = useState(false);
+  const [showCompare, setShowCompare] = useState(false);
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
@@ -68,6 +72,30 @@ export default function MyPlansScreen() {
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
   }, [isSignedIn]);
+
+  const handleComparePlans = async () => {
+    if (plans.length < 2) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setComparing(true);
+    setShowCompare(true);
+    try {
+      const sorted = [...plans].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+      const ids = [sorted[sorted.length - 2].reportId, sorted[sorted.length - 1].reportId];
+      const domain = process.env.EXPO_PUBLIC_DOMAIN;
+      const res = await fetch(`https://${domain}/api/users/me/plans/compare`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        body: JSON.stringify({ reportIdA: ids[0], reportIdB: ids[1] }),
+      });
+      if (!res.ok) throw new Error("Comparison failed");
+      const data = await res.json();
+      setCompareResult(data.comparison ?? data.analysis ?? JSON.stringify(data));
+    } catch (e: any) {
+      setCompareResult("Could not generate comparison: " + (e.message || "unknown error"));
+    } finally {
+      setComparing(false);
+    }
+  };
 
   const formatDate = (iso: string) =>
     new Date(iso).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
@@ -124,6 +152,91 @@ export default function MyPlansScreen() {
             <Text style={styles.countLabel}>
               {plans.length} saved plan{plans.length !== 1 ? "s" : ""}
             </Text>
+
+            {plans.length >= 2 && (() => {
+              const sorted = [...plans].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+              return (
+                <View style={styles.trendCard}>
+                  <View style={styles.trendHeader}>
+                    <Feather name="trending-up" size={14} color={colors.primary} />
+                    <Text style={styles.trendTitle}>Score Trend</Text>
+                  </View>
+                  <View style={styles.trendRow}>
+                    {sorted.map((plan, i) => {
+                      const next = sorted[i + 1];
+                      const color = scoreColor(plan.score.overall, colors);
+                      const diff = next ? next.score.overall - plan.score.overall : null;
+                      return (
+                        <React.Fragment key={plan.reportId}>
+                          <View style={styles.trendDotWrap}>
+                            <Text style={[styles.trendScoreVal, { color }]}>{plan.score.overall}</Text>
+                            <View style={[styles.trendDot, { backgroundColor: color }]} />
+                            <Text style={styles.trendDateLabel}>
+                              {new Date(plan.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                            </Text>
+                          </View>
+                          {diff != null && (
+                            <View style={styles.trendConnector}>
+                              <Feather
+                                name={diff > 0 ? "trending-up" : diff < 0 ? "trending-down" : "minus"}
+                                size={12}
+                                color={diff > 0 ? colors.success : diff < 0 ? colors.danger : colors.textMuted}
+                              />
+                              <Text style={[styles.trendDiff, { color: diff > 0 ? colors.success : diff < 0 ? colors.danger : colors.textMuted }]}>
+                                {diff > 0 ? "+" : ""}{diff}
+                              </Text>
+                            </View>
+                          )}
+                        </React.Fragment>
+                      );
+                    })}
+                  </View>
+                  <Pressable
+                    style={({ pressed }) => [styles.compareBtn, pressed && { opacity: 0.75 }]}
+                    onPress={handleComparePlans}
+                    disabled={comparing}
+                  >
+                    {comparing
+                      ? <ActivityIndicator size="small" color={colors.background} />
+                      : <Feather name="git-compare" size={14} color={colors.background} />
+                    }
+                    <Text style={styles.compareBtnText}>
+                      {comparing ? "Comparing…" : "Compare Last Two Plans (AI)"}
+                    </Text>
+                  </Pressable>
+                </View>
+              );
+            })()}
+
+            <Modal
+              visible={showCompare}
+              animationType="slide"
+              presentationStyle="pageSheet"
+              onRequestClose={() => setShowCompare(false)}
+            >
+              <View style={[styles.modalContainer, { paddingTop: topPad + 8, paddingBottom: bottomPad + 20 }]}>
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}>Plan Comparison</Text>
+                  <Pressable onPress={() => setShowCompare(false)} hitSlop={16}>
+                    <Feather name="x" size={22} color={colors.textSecondary} />
+                  </Pressable>
+                </View>
+                <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20 }}>
+                  {comparing
+                    ? (
+                      <View style={{ alignItems: "center", gap: 16, paddingTop: 60 }}>
+                        <ActivityIndicator color={colors.primary} size="large" />
+                        <Text style={styles.loadingText}>Analysing your progress…</Text>
+                      </View>
+                    )
+                    : (
+                      <Text style={styles.compareResultText}>{compareResult}</Text>
+                    )
+                  }
+                </ScrollView>
+              </View>
+            </Modal>
+
             {[...plans].reverse().map((plan, i) => (
               <Pressable
                 key={plan.reportId}
@@ -252,4 +365,34 @@ const createStyles = (colors: ColorsType) => StyleSheet.create({
   subScoreLabel: { fontFamily: "Inter_400Regular", fontSize: 10, color: colors.textMuted, width: 56 },
   planFooter: { flexDirection: "row", alignItems: "center", justifyContent: "flex-end", gap: 4, marginTop: 2 },
   viewText: { fontFamily: "Inter_600SemiBold", fontSize: 13, color: colors.primary },
+  trendCard: {
+    backgroundColor: colors.surface, borderRadius: 16, padding: 16,
+    borderWidth: 1, borderColor: colors.border, gap: 12,
+  },
+  trendHeader: { flexDirection: "row", alignItems: "center", gap: 6 },
+  trendTitle: { fontFamily: "Inter_600SemiBold", fontSize: 14, color: colors.text },
+  trendRow: { flexDirection: "row", alignItems: "center", flexWrap: "wrap", gap: 4 },
+  trendDotWrap: { alignItems: "center", gap: 4 },
+  trendScoreVal: { fontFamily: "Inter_700Bold", fontSize: 13 },
+  trendDot: { width: 10, height: 10, borderRadius: 5 },
+  trendDateLabel: { fontFamily: "Inter_400Regular", fontSize: 10, color: colors.textMuted },
+  trendConnector: { alignItems: "center", gap: 2, paddingBottom: 10 },
+  trendDiff: { fontFamily: "Inter_600SemiBold", fontSize: 10 },
+  compareBtn: {
+    flexDirection: "row", alignItems: "center", gap: 8,
+    backgroundColor: colors.primary, borderRadius: 10,
+    paddingVertical: 10, paddingHorizontal: 14, justifyContent: "center",
+  },
+  compareBtnText: { fontFamily: "Inter_600SemiBold", fontSize: 13, color: colors.background },
+  modalContainer: { flex: 1, backgroundColor: colors.background },
+  modalHeader: {
+    flexDirection: "row", justifyContent: "space-between", alignItems: "center",
+    paddingHorizontal: 20, paddingVertical: 14,
+    borderBottomWidth: 1, borderBottomColor: colors.border,
+  },
+  modalTitle: { fontFamily: "Inter_700Bold", fontSize: 18, color: colors.text, letterSpacing: -0.3 },
+  compareResultText: {
+    fontFamily: "Inter_400Regular", fontSize: 14, color: colors.text,
+    lineHeight: 22,
+  },
 });

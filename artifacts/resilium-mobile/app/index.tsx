@@ -90,6 +90,11 @@ export default function HomeScreen() {
     router.push("/my-plans");
   };
 
+  const handlePricing = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push("/pricing");
+  };
+
   return (
     <View style={[styles.root, { paddingTop: topPad }]}>
       {/* Animated background orbs */}
@@ -138,6 +143,9 @@ export default function HomeScreen() {
               <Pressable onPress={handleMyPlans} style={styles.iconBtn} hitSlop={12} testID="my-plans-btn">
                 <Feather name="bookmark" size={18} color={colors.primary} />
               </Pressable>
+              <Pressable onPress={handlePricing} style={styles.iconBtn} hitSlop={12} testID="pricing-btn">
+                <Feather name="tag" size={18} color={colors.textSecondary} />
+              </Pressable>
               <Pressable onPress={handleMyData} style={styles.iconBtn} hitSlop={12} testID="my-data-btn">
                 <Feather name="user" size={18} color={colors.textSecondary} />
               </Pressable>
@@ -149,6 +157,9 @@ export default function HomeScreen() {
                   <Feather name="user" size={18} color={colors.textSecondary} />
                 </Pressable>
               )}
+              <Pressable onPress={handlePricing} style={styles.iconBtn} hitSlop={8} testID="pricing-btn">
+                <Feather name="tag" size={18} color={colors.textSecondary} />
+              </Pressable>
               <Pressable onPress={handleSignIn} style={styles.signInHeaderBtn} hitSlop={8} testID="sign-in-header-btn">
                 <Text style={styles.signInHeaderText}>Sign In</Text>
               </Pressable>

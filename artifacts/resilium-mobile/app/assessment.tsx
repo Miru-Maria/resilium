@@ -39,16 +39,16 @@ type AssessmentData = {
 };
 
 const MR_QUESTIONS = [
-  { key: "stressTolerance",       dimension: "STRESS TOLERANCE",      question: "When facing an unexpected crisis, I remain calm and think clearly under pressure." },
-  { key: "adaptability",          dimension: "ADAPTABILITY",          question: "When circumstances change drastically, I find new strategies and adjust quickly." },
-  { key: "socialSupport",         dimension: "SOCIAL SUPPORT",        question: "I have a reliable network of people I can turn to in a serious crisis." },
-  { key: "purposeClarity",        dimension: "SENSE OF PURPOSE",      question: "Even in the most difficult situations, I have a clear sense of what I am working toward." },
-  { key: "emotionalRecovery",     dimension: "EMOTIONAL RECOVERY",    question: "After a setback or traumatic event, I am able to bounce back within days rather than weeks." },
-  { key: "resourcefulness",       dimension: "RESOURCEFULNESS",       question: "When conventional solutions fail, I am skilled at improvising with what is available." },
-  { key: "proactivePreparation",  dimension: "PROACTIVE PREPARATION", question: "I regularly take concrete steps to prepare for future uncertainties before they arise." },
-  { key: "boundarySetting",       dimension: "BOUNDARY SETTING",      question: "Under sustained pressure, I am able to protect my energy and avoid complete emotional burnout." },
-  { key: "crisisLeadership",      dimension: "CRISIS LEADERSHIP",     question: "In emergency situations, others naturally look to me for direction and I step up confidently." },
-  { key: "longTermThinking",      dimension: "LONG-TERM THINKING",    question: "Even during a crisis, I remain focused on long-term outcomes rather than just immediate relief." },
+  { key: "stressTolerance1",    dimension: "STRESS TOLERANCE",    question: "When facing an unexpected crisis, I remain calm and think clearly under pressure." },
+  { key: "stressTolerance2",    dimension: "STRESS TOLERANCE",    question: "I recover quickly after a stressful event and return to normal functioning." },
+  { key: "adaptability1",       dimension: "ADAPTABILITY",        question: "I adjust my plans smoothly when circumstances change unexpectedly." },
+  { key: "adaptability2",       dimension: "ADAPTABILITY",        question: "I find it easy to embrace new routines or environments." },
+  { key: "learningAgility1",    dimension: "LEARNING AGILITY",    question: "I actively seek out new skills or knowledge when I notice a gap in my preparedness." },
+  { key: "changeManagement1",   dimension: "CHANGE MANAGEMENT",   question: "I proactively prepare for major life changes rather than reacting after the fact." },
+  { key: "changeManagement2",   dimension: "CHANGE MANAGEMENT",   question: "I feel confident navigating large-scale uncertainty (economic, political, social)." },
+  { key: "emotionalRegulation1",dimension: "EMOTIONAL REGULATION",question: "I manage anxiety and fear productively without being paralyzed by them." },
+  { key: "emotionalRegulation2",dimension: "EMOTIONAL REGULATION",question: "I can maintain a positive outlook during extended periods of difficulty." },
+  { key: "socialSupport1",      dimension: "SOCIAL SUPPORT",      question: "I have a reliable support network I can call on during a major crisis." },
 ];
 
 const TOTAL_STEPS = 10;

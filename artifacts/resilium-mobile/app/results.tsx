@@ -63,6 +63,23 @@ type Resource = {
   priority: "critical" | "high" | "medium" | "low";
 };
 
+type MentalResilienceProfile = {
+  stressTolerance: number;
+  adaptability: number;
+  learningAgility: number;
+  changeManagement: number;
+  emotionalRegulation: number;
+  socialSupport: number;
+  composite: number;
+  pathway: "growth" | "compensation";
+};
+
+type ChecklistItem = {
+  id: string;
+  title: string;
+  description?: string;
+};
+
 type Report = {
   reportId: string;
   createdAt: string;
@@ -77,6 +94,8 @@ type Report = {
   scenarioSimulations: Scenario[];
   dailyHabits: Habit[];
   recommendedResources?: Resource[];
+  mentalResilienceProfile?: MentalResilienceProfile;
+  checklistsByArea?: Record<string, ChecklistItem[]>;
   input?: { location?: string };
 };
 
@@ -151,6 +170,8 @@ export default function ResultsScreen() {
   const [activeTab, setActiveTab] = useState<"shortTerm" | "midTerm" | "longTerm">("shortTerm");
   const [expandedScenario, setExpandedScenario] = useState<number | null>(null);
   const [copied, setCopied] = useState(false);
+  const [percentileData, setPercentileData] = useState<{ percentile: number; total: number } | null>(null);
+  const [checklistProgress, setChecklistProgress] = useState<Record<string, boolean>>({});
 
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -168,6 +189,45 @@ export default function ResultsScreen() {
     enabled: !!reportId,
     retry: 2,
   });
+
+  React.useEffect(() => {
+    if (!report?.score?.overall) return;
+    fetch(`https://${process.env.EXPO_PUBLIC_DOMAIN}/api/resilience/percentile?score=${report.score.overall}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(d => d?.percentile != null && setPercentileData(d))
+      .catch(() => {});
+  }, [report?.score?.overall]);
+
+  React.useEffect(() => {
+    if (!reportId) return;
+    fetch(`https://${process.env.EXPO_PUBLIC_DOMAIN}/api/resilience/reports/${reportId}/checklists`)
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (!d?.progress) return;
+        const map: Record<string, boolean> = {};
+        d.progress.forEach((p: { area: string; itemId: string; completed: boolean }) => {
+          map[`${p.area}::${p.itemId}`] = p.completed;
+        });
+        setChecklistProgress(map);
+      })
+      .catch(() => {});
+  }, [reportId]);
+
+  const handleChecklistToggle = async (area: string, itemId: string) => {
+    Haptics.selectionAsync();
+    const key = `${area}::${itemId}`;
+    const current = checklistProgress[key] ?? false;
+    setChecklistProgress(prev => ({ ...prev, [key]: !current }));
+    try {
+      await fetch(`https://${process.env.EXPO_PUBLIC_DOMAIN}/api/resilience/reports/${reportId}/checklists/${area}/${itemId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ completed: !current }),
+      });
+    } catch {
+      setChecklistProgress(prev => ({ ...prev, [key]: current }));
+    }
+  };
 
   const handleShare = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -241,10 +301,62 @@ export default function ResultsScreen() {
           </View>
         </View>
 
+        {percentileData != null && (
+          <View style={styles.percentileCard}>
+            <Feather name="users" size={13} color={colors.primary} />
+            <Text style={styles.percentileText}>
+              You scored higher than{" "}
+              <Text style={[styles.percentileBold, { color: colors.primary }]}>{percentileData.percentile}%</Text>
+              {" "}of {percentileData.total.toLocaleString()} users
+            </Text>
+          </View>
+        )}
+
         <View style={styles.sectionCard}>
           <Text style={styles.sectionTitle}>Category Scores</Text>
           <RadarChart score={report.score} colors={colors} styles={styles} />
         </View>
+
+        {report.mentalResilienceProfile && (
+          <View style={styles.sectionCard}>
+            <View style={styles.sectionHeader}>
+              <Feather name="activity" size={16} color={colors.primary} />
+              <Text style={styles.sectionTitle}>Mental Resilience Profile</Text>
+            </View>
+            <View style={[styles.pathwayBadge, report.mentalResilienceProfile.pathway === "growth" ? styles.pathwayGrowth : styles.pathwayComp]}>
+              <Feather
+                name={report.mentalResilienceProfile.pathway === "growth" ? "trending-up" : "shield"}
+                size={14}
+                color={report.mentalResilienceProfile.pathway === "growth" ? colors.success : colors.primary}
+              />
+              <Text style={[styles.pathwayText, { color: report.mentalResilienceProfile.pathway === "growth" ? colors.success : colors.primary }]}>
+                {report.mentalResilienceProfile.pathway === "growth" ? "Growth Pathway" : "Compensation Pathway"}
+                {"  "}
+                <Text style={styles.pathwayScore}>{report.mentalResilienceProfile.composite}/100 composite</Text>
+              </Text>
+            </View>
+            {([
+              { key: "stressTolerance", label: "Stress Tolerance" },
+              { key: "adaptability", label: "Adaptability" },
+              { key: "learningAgility", label: "Learning Agility" },
+              { key: "changeManagement", label: "Change Management" },
+              { key: "emotionalRegulation", label: "Emotional Regulation" },
+              { key: "socialSupport", label: "Social Support" },
+            ] as { key: keyof MentalResilienceProfile; label: string }[]).map(({ key, label }) => {
+              const val = report.mentalResilienceProfile![key] as number;
+              const barColor = val >= 70 ? colors.success : val >= 40 ? "#F59E0B" : colors.danger;
+              return (
+                <View key={key} style={styles.mrDimRow}>
+                  <Text style={styles.mrDimLabel}>{label}</Text>
+                  <View style={styles.mrBarTrack}>
+                    <View style={[styles.mrBarFill, { width: `${val}%` as any, backgroundColor: barColor }]} />
+                  </View>
+                  <Text style={[styles.mrDimVal, { color: barColor }]}>{val}</Text>
+                </View>
+              );
+            })}
+          </View>
+        )}
 
         <View style={styles.sectionCard}>
           <View style={styles.sectionHeader}>
@@ -410,6 +522,45 @@ export default function ResultsScreen() {
                 );
               })}
             </View>
+          </View>
+        )}
+
+        {report.checklistsByArea && Object.keys(report.checklistsByArea).length > 0 && (
+          <View style={styles.sectionCard}>
+            <View style={styles.sectionHeader}>
+              <Feather name="check-square" size={16} color={colors.primary} />
+              <Text style={styles.sectionTitle}>Action Checklist</Text>
+            </View>
+            <Text style={styles.checklistSubtitle}>Track your progress across each area</Text>
+            {Object.entries(report.checklistsByArea).map(([area, items]) => {
+              const areaKey = area as string;
+              const completedCount = items.filter(item => checklistProgress[`${areaKey}::${item.id}`]).length;
+              return (
+                <View key={area} style={styles.checklistArea}>
+                  <View style={styles.checklistAreaHeader}>
+                    <Text style={styles.checklistAreaTitle}>{area}</Text>
+                    <Text style={styles.checklistAreaProgress}>{completedCount}/{items.length}</Text>
+                  </View>
+                  {items.map(item => {
+                    const done = checklistProgress[`${areaKey}::${item.id}`] ?? false;
+                    return (
+                      <Pressable
+                        key={item.id}
+                        style={styles.checklistItem}
+                        onPress={() => handleChecklistToggle(areaKey, item.id)}
+                      >
+                        <View style={[styles.checklistBox, done && styles.checklistBoxDone]}>
+                          {done && <Feather name="check" size={11} color={colors.background} />}
+                        </View>
+                        <Text style={[styles.checklistItemText, done && styles.checklistItemTextDone]}>
+                          {item.title}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              );
+            })}
           </View>
         )}
 
@@ -870,5 +1021,86 @@ const createStyles = (colors: ColorsType) => StyleSheet.create({
   },
   resourceLinkText: {
     fontFamily: "Inter_600SemiBold", fontSize: 12, color: colors.primary,
+  },
+  percentileCard: {
+    flexDirection: "row", alignItems: "center", gap: 7,
+    backgroundColor: colors.surface, borderRadius: 12, paddingVertical: 10,
+    paddingHorizontal: 14, borderWidth: 1, borderColor: colors.primary + "33",
+  },
+  percentileText: {
+    fontFamily: "Inter_400Regular", fontSize: 13, color: colors.textSecondary,
+    flex: 1,
+  },
+  percentileBold: {
+    fontFamily: "Inter_700Bold", fontSize: 13,
+  },
+  pathwayBadge: {
+    flexDirection: "row", alignItems: "center", gap: 8,
+    borderRadius: 10, paddingVertical: 8, paddingHorizontal: 12,
+    marginBottom: 14, borderWidth: 1,
+  },
+  pathwayGrowth: {
+    backgroundColor: colors.success + "15", borderColor: colors.success + "40",
+  },
+  pathwayComp: {
+    backgroundColor: colors.primary + "15", borderColor: colors.primary + "40",
+  },
+  pathwayText: {
+    fontFamily: "Inter_600SemiBold", fontSize: 13, flex: 1,
+  },
+  pathwayScore: {
+    fontFamily: "Inter_400Regular", fontSize: 12, color: colors.textMuted,
+  },
+  mrDimRow: {
+    flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8,
+  },
+  mrDimLabel: {
+    fontFamily: "Inter_400Regular", fontSize: 12, color: colors.textSecondary, width: 120,
+  },
+  mrBarTrack: {
+    flex: 1, height: 5, borderRadius: 3, backgroundColor: colors.border, overflow: "hidden",
+  },
+  mrBarFill: {
+    height: "100%", borderRadius: 3,
+  },
+  mrDimVal: {
+    fontFamily: "Inter_700Bold", fontSize: 12, width: 28, textAlign: "right",
+  },
+  checklistSubtitle: {
+    fontFamily: "Inter_400Regular", fontSize: 13, color: colors.textMuted, marginBottom: 12,
+  },
+  checklistArea: {
+    marginBottom: 16,
+  },
+  checklistAreaHeader: {
+    flexDirection: "row", justifyContent: "space-between", alignItems: "center",
+    marginBottom: 8,
+  },
+  checklistAreaTitle: {
+    fontFamily: "Inter_600SemiBold", fontSize: 13,
+    color: colors.text, textTransform: "capitalize",
+  },
+  checklistAreaProgress: {
+    fontFamily: "Inter_400Regular", fontSize: 12, color: colors.textMuted,
+  },
+  checklistItem: {
+    flexDirection: "row", alignItems: "center", gap: 10,
+    paddingVertical: 6,
+  },
+  checklistBox: {
+    width: 20, height: 20, borderRadius: 5,
+    borderWidth: 1.5, borderColor: colors.border,
+    alignItems: "center", justifyContent: "center",
+    backgroundColor: colors.background,
+  },
+  checklistBoxDone: {
+    backgroundColor: colors.primary, borderColor: colors.primary,
+  },
+  checklistItemText: {
+    fontFamily: "Inter_400Regular", fontSize: 13,
+    color: colors.text, flex: 1, lineHeight: 18,
+  },
+  checklistItemTextDone: {
+    color: colors.textMuted, textDecorationLine: "line-through",
   },
 });
