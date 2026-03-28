@@ -1,4 +1,4 @@
-import express, { type Express } from "express";
+import express, { type Express, type Request, type Response, type NextFunction } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import session from "express-session";
@@ -8,6 +8,7 @@ import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
 import { authMiddleware } from "./middlewares/authMiddleware";
+import { recordServerError, startCron } from "./lib/cron.js";
 
 const app: Express = express();
 
@@ -67,5 +68,18 @@ app.use(
 app.use(authMiddleware);
 
 app.use("/api", router);
+
+// Error-rate tracking middleware — counts 5xx responses and alerts admin
+app.use((_req: Request, res: Response, next: NextFunction) => {
+  res.on("finish", () => {
+    if (res.statusCode >= 500) {
+      recordServerError(`${res.statusCode} ${_req.method} ${_req.path}`);
+    }
+  });
+  next();
+});
+
+// Start background cron jobs
+startCron();
 
 export default app;

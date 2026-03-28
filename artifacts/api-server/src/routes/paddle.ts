@@ -3,6 +3,7 @@ import { db, subscriptionsTable, usersTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { createHmac } from "crypto";
 import { logger } from "../lib/logger";
+import { sendProUpgradeEmail } from "../lib/email.js";
 
 const router = Router();
 
@@ -99,6 +100,21 @@ router.post(
       }
 
       logger.info({ userId, status: resolvedStatus, eventType }, "Subscription updated");
+
+      // Send Pro upgrade email on first activation
+      if (resolvedStatus === "active" && (eventType === "subscription.created" || eventType === "subscription.updated")) {
+        try {
+          const userRows = await db.select({ email: usersTable.email, firstName: usersTable.firstName })
+            .from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+          if (userRows[0]?.email) {
+            sendProUpgradeEmail({
+              email: userRows[0].email,
+              firstName: userRows[0].firstName,
+              periodEnd: currentPeriodEnd ?? null,
+            }).catch(() => {});
+          }
+        } catch { /* non-fatal */ }
+      }
     } catch (err) {
       logger.error({ err }, "Failed to update subscription");
       return res.status(500).json({ error: "DB error" });

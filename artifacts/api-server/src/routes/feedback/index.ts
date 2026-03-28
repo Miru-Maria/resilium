@@ -34,13 +34,23 @@ router.post("/", async (req, res) => {
       return;
     }
 
+    const commentStr = typeof comment === "string" ? comment.trim() : null;
+
+    const BLOCKED_WORDS = ["spam", "fuck", "shit", "ass", "bitch", "cunt", "dick", "bastard", "idiot", "stupid", "scam", "fake", "fraud"];
+    const autoPublish =
+      rating >= 4 &&
+      commentStr !== null &&
+      commentStr.length >= 20 &&
+      !BLOCKED_WORDS.some(w => commentStr.toLowerCase().includes(w));
+
     await db.insert(reportFeedbackTable).values({
       reportId,
       rating,
-      comment: typeof comment === "string" ? comment : null,
+      comment: commentStr,
+      isPublished: autoPublish,
     });
 
-    res.status(201).json({ success: true });
+    res.status(201).json({ success: true, autoPublished: autoPublish });
   } catch (err) {
     req.log.error({ err }, "Error submitting feedback");
     res.status(500).json({ error: "INTERNAL_ERROR", message: "Failed to submit feedback." });
