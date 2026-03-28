@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resilium — White Paper March 2026</title>
+<style>
+  :root {
+    --bg: #0D1225;
+    --bg2: #141928;
+    --bg3: #1a2035;
+    --border: #2a3450;
+    --orange: #E08040;
+    --orange-light: #f0a060;
+    --text: #EAD9BE;
+    --text-muted: #8899b0;
+    --text-dim: #5a6a80;
+    --success: #2ECC8F;
+    --heading: #f0e8d8;
+    --accent2: #6080c0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-size: 16px;
+    line-height: 1.8;
+  }
+
+  /* COVER */
+  .cover {
+    background: linear-gradient(160deg, #0a0f1e 0%, #0D1225 40%, #141928 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 80px 80px 60px;
+    border-bottom: 2px solid var(--orange);
+    page-break-after: always;
+  }
+
+  .cover-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .cover-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .cover-brand-icon {
+    width: 44px;
+    height: 44px;
+    background: var(--orange);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+  }
+
+  .cover-brand-name {
+    font-family: 'Georgia', serif;
+    font-size: 22px;
+    color: var(--heading);
+    letter-spacing: -0.5px;
+  }
+
+  .cover-brand-name span { color: var(--orange); }
+
+  .cover-type {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    padding-top: 4px;
+  }
+
+  .cover-hero {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 80px 0 60px;
+  }
+
+  .cover-tag {
+    display: inline-block;
+    background: rgba(224,128,64,0.12);
+    border: 1px solid var(--orange);
+    color: var(--orange);
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 2px;
+    margin-bottom: 28px;
+    width: fit-content;
+  }
+
+  .cover-title {
+    font-family: 'Georgia', serif;
+    font-size: 64px;
+    font-weight: normal;
+    color: var(--heading);
+    line-height: 1.05;
+    letter-spacing: -2px;
+    margin-bottom: 16px;
+    max-width: 700px;
+  }
+
+  .cover-title .highlight { color: var(--orange); }
+
+  .cover-subtitle {
+    font-size: 20px;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-bottom: 48px;
+    max-width: 560px;
+    line-height: 1.5;
+  }
+
+  .cover-pull-quote {
+    max-width: 560px;
+    border-left: 3px solid var(--orange);
+    padding-left: 20px;
+    font-size: 17px;
+    color: var(--text-muted);
+    font-style: italic;
+    line-height: 1.6;
+  }
+
+  .cover-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-top: 40px;
+    border-top: 1px solid var(--border);
+  }
+
+  .cover-footer-left {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+
+  .cover-stats {
+    display: flex;
+    gap: 48px;
+  }
+
+  .cover-stat { text-align: right; }
+
+  .cover-stat .num {
+    font-family: 'Georgia', serif;
+    font-size: 28px;
+    color: var(--orange);
+    display: block;
+  }
+
+  .cover-stat .lbl {
+    font-family: 'Courier New', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  /* EXEC SUMMARY BAND */
+  .exec-band {
+    background: rgba(224,128,64,0.07);
+    border-top: 1px solid rgba(224,128,64,0.25);
+    border-bottom: 1px solid rgba(224,128,64,0.25);
+    padding: 48px 80px;
+  }
+
+  .exec-band h2 {
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 20px;
+  }
+
+  .exec-band p {
+    font-size: 18px;
+    color: var(--text);
+    line-height: 1.75;
+    max-width: 800px;
+  }
+
+  /* CONTAINER */
+  .container {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 72px 48px;
+  }
+
+  /* SECTION HEADERS */
+  .section-header {
+    margin-bottom: 36px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+
+  .section-num {
+    font-family: 'Courier New', monospace;
+    font-size: 48px;
+    color: rgba(224,128,64,0.08);
+    position: absolute;
+    right: 0;
+    top: -8px;
+    line-height: 1;
+    user-select: none;
+  }
+
+  h2.section-title {
+    font-family: 'Georgia', serif;
+    font-size: 36px;
+    font-weight: normal;
+    color: var(--heading);
+    letter-spacing: -1px;
+    margin-bottom: 6px;
+  }
+
+  .section-intro {
+    font-size: 16px;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  h3 {
+    font-family: 'Georgia', serif;
+    font-size: 20px;
+    font-weight: normal;
+    color: var(--text);
+    margin: 40px 0 14px;
+  }
+
+  p { margin-bottom: 18px; }
+
+  strong { color: var(--heading); font-weight: bold; }
+
+  /* TABLES */
+  .table-wrap { overflow-x: auto; margin: 28px 0; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+
+  thead th {
+    background: rgba(224,128,64,0.1);
+    color: var(--orange);
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 10px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--orange);
+  }
+
+  tbody tr { border-bottom: 1px solid var(--border); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+  td { padding: 11px 16px; color: var(--text); vertical-align: top; }
+
+  /* CALLOUT */
+  .callout {
+    border-radius: 8px;
+    padding: 22px 26px;
+    margin: 28px 0;
+    border: 1px solid;
+  }
+
+  .callout.orange {
+    background: rgba(224,128,64,0.05);
+    border-color: rgba(224,128,64,0.2);
+  }
+
+  .callout.green {
+    background: rgba(46,204,143,0.05);
+    border-color: rgba(46,204,143,0.2);
+  }
+
+  .callout-label {
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .callout.orange .callout-label { color: var(--orange); }
+  .callout.green .callout-label { color: var(--success); }
+  .callout p { margin-bottom: 0; font-size: 15px; }
+
+  /* DIMENSION CARDS */
+  .dim-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin: 28px 0;
+  }
+
+  .dim-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 22px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .dim-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--orange);
+  }
+
+  .dim-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+  }
+
+  .dim-name {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--orange);
+  }
+
+  .dim-weight {
+    font-family: 'Georgia', serif;
+    font-size: 22px;
+    color: var(--heading);
+  }
+
+  .dim-desc {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    line-height: 1.55;
+  }
+
+  /* STAT TRIO */
+  .stat-trio {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin: 28px 0;
+    text-align: center;
+  }
+
+  .stat-box {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px 16px;
+  }
+
+  .stat-box .stat-num {
+    font-family: 'Georgia', serif;
+    font-size: 40px;
+    color: var(--orange);
+    line-height: 1;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .stat-box .stat-src {
+    font-size: 12px;
+    color: var(--text-dim);
+    font-style: italic;
+  }
+
+  /* PATHWAY BOXES */
+  .pathway-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin: 28px 0;
+  }
+
+  .pathway-box {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 22px 24px;
+  }
+
+  .pathway-box .pname {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 4px;
+  }
+
+  .pathway-box .ptrigger {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+    font-family: 'Courier New', monospace;
+  }
+
+  .pathway-box .pdesc {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.55;
+  }
+
+  /* UEC TABLE */
+  .uec-highlight {
+    background: rgba(224,128,64,0.08);
+    font-weight: bold;
+    color: var(--orange) !important;
+  }
+
+  /* FOOTER */
+  .doc-footer {
+    text-align: center;
+    padding: 48px 48px 40px;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 12px;
+    line-height: 1.8;
+  }
+
+  .footer-logo {
+    font-family: 'Georgia', serif;
+    font-size: 18px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .footer-logo span { color: var(--orange); }
+
+  @media print {
+    body { background: white; color: #111; font-size: 12pt; }
+    .cover { background: #0D1225; }
+    .exec-band { background: #f9f6f2; }
+    .container { padding: 32pt 48pt; }
+    td, p { color: #111; }
+    h2.section-title, h3 { color: #111; }
+    .dim-card, .stat-box, .pathway-box { background: #f8f9fc; border-color: #ddd; }
+  }
+</style>
+</head>
+<body>
+
+<!-- COVER PAGE -->
+<div class="cover">
+  <div class="cover-top">
+    <div class="cover-brand">
+      <div class="cover-brand-icon">🧠</div>
+      <div>
+        <div class="cover-brand-name">Resil<span>ium</span></div>
+        <div class="cover-type">Personal Resilience Platform</div>
+      </div>
+    </div>
+    <div class="cover-type" style="text-align:right;">March 2026<br>White Paper</div>
+  </div>
+
+  <div class="cover-hero">
+    <div class="cover-tag">White Paper</div>
+    <h1 class="cover-title">Know your readiness.<br><span class="highlight">Build your resilience.</span></h1>
+    <div class="cover-subtitle">A data-driven platform for personal resilience assessment, planning, and continuous improvement.</div>
+    <div class="cover-pull-quote">
+      "Resilium is the first platform to integrate financial, physical, psychological, skills, mobility, and resource assessment into a single, AI-powered, privacy-first resilience score."
+    </div>
+  </div>
+
+  <div class="cover-footer">
+    <div class="cover-footer-left">
+      Confidential — for authorised recipients only<br>
+      © 2026 Resilium. All rights reserved.
+    </div>
+    <div class="cover-stats">
+      <div class="cover-stat">
+        <span class="num">6</span>
+        <span class="lbl">Dimensions</span>
+      </div>
+      <div class="cover-stat">
+        <span class="num">0–100</span>
+        <span class="lbl">Resilience Score</span>
+      </div>
+      <div class="cover-stat">
+        <span class="num">Web + Mobile</span>
+        <span class="lbl">Platforms</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EXECUTIVE SUMMARY BAND -->
+<div class="exec-band">
+  <h2>Executive Summary</h2>
+  <p>Modern life is increasingly fragile. Supply chain disruptions, economic volatility, climate events, geopolitical instability, and health crises have converged to make personal preparedness a survival skill. Yet most individuals have no structured, data-driven framework for assessing or improving their resilience. <strong>Resilium</strong> fills that gap — quantifying readiness across six critical life dimensions and delivering a personalised, actionable improvement roadmap through validated psychological methodology, transparent deterministic scoring, and AI-generated planning. The platform is fully built, live, and operational on both web and mobile.</p>
+</div>
+
+<!-- BODY -->
+<div class="container">
+
+  <!-- 1. THE PROBLEM -->
+  <section style="margin-bottom:72px;">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2 class="section-title">The Problem</h2>
+      <div class="section-intro">Why resilience planning is broken — and why it matters now.</div>
+    </div>
+
+    <h3>1.1 Individuals Are Unprepared</h3>
+    <p>Research consistently shows that the majority of individuals in developed economies are poorly positioned to withstand even moderate disruption:</p>
+
+    <div class="stat-trio">
+      <div class="stat-box">
+        <span class="stat-num">68%</span>
+        of Americans would struggle to cover an unexpected $1,000 expense
+        <div class="stat-src">Federal Reserve, 2024</div>
+      </div>
+      <div class="stat-box">
+        <span class="stat-num">&lt;40%</span>
+        of households have an emergency supply kit
+        <div class="stat-src">FEMA, 2023</div>
+      </div>
+      <div class="stat-box">
+        <span class="stat-num">54%</span>
+        report high stress when facing unexpected life changes
+        <div class="stat-src">APA, 2024</div>
+      </div>
+    </div>
+
+    <p>These are not peripheral statistics. They describe the baseline condition of the majority of the population entering a decade defined by accelerating disruption — from economic volatility and climate events to geopolitical instability and automated workforce displacement.</p>
+
+    <h3>1.2 Existing Tools Are Inadequate</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Tool Category</th><th>Coverage</th><th>Critical Gaps</th></tr></thead>
+        <tbody>
+          <tr><td>Financial advisors</td><td>Financial savings, investments</td><td>No psychological or logistical assessment</td></tr>
+          <tr><td>Emergency preparedness guides</td><td>Physical supplies, evacuation</td><td>No personalisation, no progress tracking</td></tr>
+          <tr><td>Mental health apps</td><td>Psychological wellbeing</td><td>No integration with material factors</td></tr>
+          <tr><td>HR resilience training</td><td>Workplace-specific coping</td><td>No personal or family dimension</td></tr>
+          <tr><td>Government portals</td><td>Generic checklists</td><td>No AI reasoning, no action prioritisation</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>No existing tool integrates all six dimensions of resilience into a single, continuous, personalised assessment and improvement system.</p>
+
+    <h3>1.3 The Psychological Cost of Unpreparedness</h3>
+    <p>Beyond material vulnerability, unpreparedness has documented psychological effects. Chronic anxiety about financial fragility, housing insecurity, and health uncertainty are leading contributors to stress-related illness, reduced cognitive performance, and interpersonal conflict. Resilium addresses this directly — the platform's psychological assessment uses validated constructs from organisational and positive psychology to surface an individual's mental preparedness profile alongside their material one.</p>
+  </section>
+
+  <!-- 2. THE SOLUTION -->
+  <section style="margin-bottom:72px;">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2 class="section-title">The Solution</h2>
+      <div class="section-intro">A complete, multi-dimensional resilience assessment and planning platform.</div>
+    </div>
+
+    <h3>2.1 What Resilium Delivers</h3>
+    <p>Users complete a structured multi-dimensional assessment covering their financial position, physical health, psychological profile, skills portfolio, geographic context, and household logistics. A purpose-built AI engine processes these inputs and generates a personalised resilience report containing:</p>
+
+    <div class="callout orange">
+      <div class="callout-label">Report Contents</div>
+      <p><strong>Overall Resilience Score (0–100)</strong> · Six dimensional sub-scores · Plain-language risk profile narrative · Top vulnerability identification · Prioritised action plan (short, mid, and long-term) · Scenario stress-tests (Pro) · Daily habits · Persistent interactive checklists · Resource recommendations</p>
+    </div>
+
+    <h3>2.2 The Six Resilience Dimensions</h3>
+
+    <div class="dim-grid">
+      <div class="dim-card">
+        <div class="dim-header">
+          <div class="dim-name">Financial</div>
+          <div class="dim-weight">25%</div>
+        </div>
+        <div class="dim-desc">Savings depth in months of runway, income stability (fixed/freelance/unstable), and dependency load. The dimension with the most immediate survival impact.</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-header">
+          <div class="dim-name">Skills</div>
+          <div class="dim-weight">20%</div>
+        </div>
+        <div class="dim-desc">Breadth of transferable competencies: digital, physical, survival, medical, financial, and language skills. Provides economic optionality and direct practical value in disruption scenarios.</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-header">
+          <div class="dim-name">Health</div>
+          <div class="dim-weight">15%</div>
+        </div>
+        <div class="dim-desc">Self-reported health status and medical skill possession. Poor health dramatically reduces a household's resilience ceiling regardless of financial strength.</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-header">
+          <div class="dim-name">Mobility</div>
+          <div class="dim-weight">15%</div>
+        </div>
+        <div class="dim-desc">Ability to relocate and access transportation, informed by mobility level, housing type, and dependency constraints. A critically underappreciated vulnerability in financial-first planning.</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-header">
+          <div class="dim-name">Psychological</div>
+          <div class="dim-weight">15%</div>
+        </div>
+        <div class="dim-desc">Mental Resilience Composite from a 10-question validated assessment across six sub-dimensions. Distinct from any self-rating — compares perceived vs. assessed psychological preparedness.</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-header">
+          <div class="dim-name">Resources</div>
+          <div class="dim-weight">10%</div>
+        </div>
+        <div class="dim-desc">Emergency supply depth, survival skill possession, and financial skill backup. The first line of practical defence in any disruption scenario.</div>
+      </div>
+    </div>
+
+    <h3>2.3 The Mental Resilience Assessment</h3>
+    <p>A distinguishing feature of Resilium is its structured psychological evaluation. Unlike superficial stress questionnaires, the platform's 10-question Mental Resilience Assessment targets validated constructs from organisational and positive psychology. Each question uses a 1–5 behavioural frequency scale ("Rarely" to "Almost always") across six sub-dimensions: stress tolerance, adaptability, learning agility, change management, emotional regulation, and social support.</p>
+    <p>The resulting Mental Resilience Composite (MRC) directly informs the AI's planning strategy through <strong>pathway classification</strong>:</p>
+
+    <div class="pathway-grid">
+      <div class="pathway-box">
+        <div class="pname">Growth Pathway</div>
+        <div class="ptrigger">MRC ≥ 60</div>
+        <div class="pdesc">User has psychological headroom for ambitious, challenge-oriented goals. AI generates assertive, forward-looking action plans with longer horizons and opportunity-focused language.</div>
+      </div>
+      <div class="pathway-box">
+        <div class="pname">Compensation Pathway</div>
+        <div class="ptrigger">MRC &lt; 60</div>
+        <div class="pdesc">User should focus on stabilisation before expansion. AI generates emotionally scaffolded plans with shorter milestones, reassurance-forward language, and confidence-building priorities.</div>
+      </div>
+    </div>
+
+    <p>The MRC also functions as a cross-area modifier: users on the compensation pathway receive a proportional dampening of their Financial and Skills scores, reflecting the documented compounding effect of psychological pressure on practical capability under crisis conditions.</p>
+
+    <h3>2.4 Scenario Stress-Tests (Pro)</h3>
+    <p>Pro subscribers access a scenario simulation suite that models the impact of specific disruptions on their current resilience profile. Each simulation provides per-dimension impact estimates, a recovery timeline, and scenario-specific action steps. Available scenarios: <strong>Job Loss, Natural Disaster, Health Crisis, Relocation</strong>. This transforms Resilium from a snapshot tool into a forward-planning instrument — users can answer "what if?" before a crisis, not after.</p>
+
+    <h3>2.5 AI Engine</h3>
+    <p>Resilium uses OpenAI's <strong>gpt-5.2</strong> model via Replit's AI Integrations proxy for report narrative generation. Critically, the AI is not used for scoring — scoring is deterministic and auditable. The AI functions as a language and reasoning layer that synthesises multi-dimensional score data into coherent narrative, identifies non-obvious interaction effects between dimensions, and generates action plans calibrated to each user's geographic, economic, and psychological context.</p>
+  </section>
+
+  <!-- 3. MARKET -->
+  <section style="margin-bottom:72px;">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2 class="section-title">Market Opportunity</h2>
+      <div class="section-intro">A white space between personal finance and personal preparedness.</div>
+    </div>
+
+    <h3>3.1 Total Addressable Market</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Segment</th><th>Global Market Size (2025)</th><th>Growth Rate</th></tr></thead>
+        <tbody>
+          <tr><td>Personal finance &amp; wellness apps</td><td>$11.4B</td><td>14% CAGR</td></tr>
+          <tr><td>Mental health &amp; wellbeing platforms</td><td>$6.2B</td><td>18% CAGR</td></tr>
+          <tr><td>Emergency preparedness products &amp; services</td><td>$3.8B</td><td>9% CAGR</td></tr>
+          <tr><td>Online education &amp; skills development</td><td>$185B</td><td>13% CAGR</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Resilium operates in the white space between personal finance and personal preparedness — a gap that no major platform currently occupies.</p>
+
+    <h3>3.2 Target Audiences</h3>
+    <p><strong>Primary:</strong> Working adults aged 28–55 in developed economies who are aware of systemic risk but lack a structured self-assessment framework. Digitally literate, financially active, willing to invest time in personal development.</p>
+    <p><strong>Secondary:</strong> Employers, HR departments, and professional associations seeking quantified employee resilience data for workforce continuity planning.</p>
+    <p><strong>Tertiary:</strong> Government agencies, NGOs, and community resilience programmes seeking scalable citizen preparedness tools.</p>
+
+    <h3>3.3 Competitive Landscape</h3>
+    <p>No direct competitor currently occupies the multi-dimensional personal resilience assessment space. Adjacent players:</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Competitor</th><th>Category</th><th>Gap vs Resilium</th></tr></thead>
+        <tbody>
+          <tr><td>Ready.gov / FEMA portals</td><td>Government preparedness</td><td>Generic, no AI, no personalisation</td></tr>
+          <tr><td>Life360 / Prepared</td><td>Family safety</td><td>Location-focused, no assessment layer</td></tr>
+          <tr><td>BetterUp / Calm</td><td>Mental health</td><td>Psychological dimension only</td></tr>
+          <tr><td>Personal Capital / YNAB</td><td>Personal finance</td><td>Financial only, no preparedness layer</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Resilium's integrated, multi-dimensional approach — combining psychological profiling, material assessment, AI-generated planning, and scenario simulation — creates a defensible category position with no direct incumbent.</p>
+  </section>
+
+  <!-- 4. BUSINESS MODEL -->
+  <section style="margin-bottom:72px;">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <h2 class="section-title">Business Model</h2>
+      <div class="section-intro">Freemium subscription with institutional licensing upside.</div>
+    </div>
+
+    <h3>4.1 Freemium Subscription</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Tier</th><th>Price</th><th>Features</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Free</strong></td>
+            <td>£0</td>
+            <td>2 complete assessments with full AI reports. Demonstrates full product value before any paywall.</td>
+          </tr>
+          <tr class="uec-highlight">
+            <td><strong>Pro</strong></td>
+            <td>£9/month or £79/year</td>
+            <td>Unlimited assessments · Longitudinal progress tracking · Scenario stress-test suite (4 scenarios) · Plan comparison with AI analysis · Priority support</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Payment processing via <strong>Paddle</strong> (subscription billing + donation option). Webhook events verified via HMAC-SHA256 signature. No credit card data ever touches Resilium servers.</p>
+
+    <h3>4.2 Unit Economics (Projected)</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Metric</th><th>Conservative</th><th>Base Case</th><th>Optimistic</th></tr></thead>
+        <tbody>
+          <tr><td>Free → Pro conversion rate</td><td>2%</td><td class="uec-highlight">5%</td><td>10%</td></tr>
+          <tr><td>Monthly Pro churn</td><td>8%</td><td class="uec-highlight">5%</td><td>3%</td></tr>
+          <tr><td>Average revenue per user (annual)</td><td>$79</td><td class="uec-highlight">$99</td><td>$108</td></tr>
+          <tr><td>LTV at projected churn</td><td>$198</td><td class="uec-highlight">$297</td><td>$540</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>4.3 Institutional Revenue (Phase 2)</h3>
+    <p>Employer and institutional licensing represents a high-value expansion path. An API-accessible version of the assessment engine could be licensed to corporate HR departments for workforce resilience measurement, insurance companies for risk profiling, and government resilience programmes for population-scale assessment and intervention targeting.</p>
+  </section>
+
+  <!-- 5. PRIVACY -->
+  <section style="margin-bottom:72px;">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <h2 class="section-title">Privacy, Ethics &amp; Compliance</h2>
+      <div class="section-intro">Privacy-first by design. GDPR-compliant. Fully auditable scoring.</div>
+    </div>
+
+    <div class="callout green">
+      <div class="callout-label">Privacy by Design</div>
+      <p>All personal assessment data is encrypted in transit (TLS) and at rest. User data is never sold or shared with third parties. Anonymous assessments are automatically purged after 30 days. Full GDPR compliance: data export and complete account deletion available at any time from both web and mobile.</p>
+    </div>
+
+    <h3>5.1 AI Transparency</h3>
+    <p>Resilium's scoring methodology is deterministic and auditable — not a black box. The AI is used only for language generation, not scoring decisions. Users receive a full breakdown by dimension, enabling them to understand and scrutinise every aspect of their assessment result. This transparency is fundamental to user trust and regulatory compliance.</p>
+
+    <h3>5.2 Data Minimisation</h3>
+    <p>Only information strictly necessary for scoring is collected. No continuous location tracking, no background data collection, no third-party analytics SDKs with opaque data practices.</p>
+
+    <h3>5.3 Consent Management</h3>
+    <p>Versioned, timestamped consent is captured before any data collection on both web and mobile. Consent records are stored indefinitely as legal records, with a full admin audit trail for all GDPR-related actions. Users can request data export or full deletion at any time — from the mobile app's My Data screen or via the web profile.</p>
+
+    <h3>5.4 No Medical or Financial Advice</h3>
+    <p>Resilium explicitly does not provide medical, financial, or legal advice. All outputs are framed as educational self-assessment tools. Appropriate disclaimers are embedded throughout the user journey.</p>
+  </section>
+
+  <!-- 6. PLATFORM MATURITY -->
+  <section style="margin-bottom:72px;">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <h2 class="section-title">Platform Maturity</h2>
+      <div class="section-intro">Fully built, tested, and operational.</div>
+    </div>
+
+    <div class="callout orange">
+      <div class="callout-label">Status</div>
+      <p>Resilium is not a prototype. The platform is complete, deployed on production infrastructure, and serving users on both web and mobile today.</p>
+    </div>
+
+    <h3>6.1 Web Application</h3>
+    <p>React 19 / Vite 7 / TypeScript. Dark-only brand palette (<code>#0D1225</code> background, <code>#E08040</code> orange primary). Pages: Landing, About, Demo, Pricing, Assessment, Results, Scenario Runner (Pro), Profile, Privacy, Terms, Refund Policy, Admin Dashboard.</p>
+
+    <h3>6.2 Mobile Application</h3>
+    <p>Expo SDK 53 (React Native). Same dark brand palette. Screens: Home, Consent, Assessment (10 steps with haptic feedback), Loading, Results, My Data. Push notification support with 30-day check-in reminders. Haptic feedback throughout assessment. Neural network SVG animation on home screen.</p>
+
+    <h3>6.3 API Server</h3>
+    <p>Node.js 24 / Express 5 / TypeScript. Esbuild-compiled single bundle. 30+ endpoints covering resilience assessment, scenario simulations, user management, GDPR, subscriptions, push notifications, and admin functions. Rate limiting, HMAC webhook verification, OIDC session management.</p>
+
+    <h3>6.4 Admin Dashboard</h3>
+    <p>Six-tab analytics view (Overview, Demographics, Score Analytics, Risk Concerns, Reports, Feedback). Mobile analytics panel. GDPR management with audit trail and consent log. Site announcement system. AI UX testing framework with 8 built-in personas, live SSE progress streaming, and per-persona quality scoring.</p>
+
+    <h3>6.5 Infrastructure</h3>
+    <p>Deployed on Replit's managed cloud. Replit-managed PostgreSQL 16. Automatic TLS. 12 production database tables with automated GDPR cleanup. Drizzle ORM with schema-as-code migrations. Paddle subscription billing with full webhook lifecycle handling.</p>
+  </section>
+
+  <!-- 7. IMPACT VISION -->
+  <section style="margin-bottom:72px;">
+    <div class="section-header">
+      <span class="section-num">07</span>
+      <h2 class="section-title">Impact Vision</h2>
+      <div class="section-intro">Resilience as a universal right, not a premium service.</div>
+    </div>
+
+    <p>Resilience is a measurable, improvable quantity. Resilium exists to make that measurement accessible to every individual — not just those who can afford bespoke advisors or have the background to self-educate across all six dimensions simultaneously.</p>
+
+    <p>A population that understands its own vulnerabilities is better positioned to address them. Communities where individuals have taken concrete preparedness steps recover faster from disruptions, place less pressure on emergency services, and sustain social cohesion through crises.</p>
+
+    <div class="callout orange">
+      <div class="callout-label">Long-Term Vision</div>
+      <p>Resilium's long-term goal is to become the global standard for individual and community resilience measurement — a platform whose scores are as understood and acted upon as credit scores, but oriented toward durability rather than debt.</p>
+    </div>
+  </section>
+
+  <!-- 8. CONCLUSION -->
+  <section style="margin-bottom:40px;">
+    <div class="section-header">
+      <span class="section-num">08</span>
+      <h2 class="section-title">Conclusion</h2>
+    </div>
+
+    <p>Resilium represents a significant and currently unaddressed opportunity in the personal wellbeing technology space. The platform is fully built, live, and operational — serving users on web and mobile with a production-grade assessment engine, secure data handling, and a clear monetisation path via Paddle subscription billing.</p>
+
+    <p>The convergence of rising systemic risk, growing individual awareness of personal vulnerability, and the maturation of large language model technology has created a precise window for a platform like Resilium to define and own a new category.</p>
+
+    <p>We are actively seeking <strong>strategic partnerships</strong>, <strong>distribution relationships</strong>, and <strong>investment conversations</strong> to accelerate growth.</p>
+  </section>
+
+</div>
+
+<!-- FOOTER -->
+<div class="doc-footer">
+  <div class="footer-logo">Resil<span>ium</span></div>
+  <p>Personal Resilience Planning Platform — White Paper — March 2026</p>
+  <p style="margin-top:6px;">Confidential — for authorised recipients only</p>
+  <p style="margin-top:6px;">© 2026 Resilium. All rights reserved.</p>
+</div>
+
+</body>
+</html>
