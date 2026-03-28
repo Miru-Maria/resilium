@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { Progress } from "@/components/ui/progress";
-import { Loader2, Download, Share2, AlertTriangle, CheckCircle, RefreshCcw, Activity, User, LogIn, Brain, TrendingUp, Award, Star, ExternalLink, Heart, BookOpen, ShieldCheck, Zap, Package, Globe, MapPin, Lock, Mail } from "lucide-react";
+import { Loader2, Download, Printer, Share2, AlertTriangle, CheckCircle, RefreshCcw, Activity, User, LogIn, Brain, TrendingUp, Award, Star, ExternalLink, Heart, BookOpen, ShieldCheck, Zap, Package, Globe, MapPin, Lock, Mail } from "lucide-react";
 import { ResilientIcon } from "@/components/resilient-icon";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
@@ -349,7 +349,7 @@ export default function ResultsPage() {
               <Share2 className="w-4 h-4 mr-2" /> Share
             </Button>
             <Button variant="default" size="sm" onClick={handlePrint} className="rounded-full">
-              <Download className="w-4 h-4 mr-2" /> Save PDF
+              <Printer className="w-4 h-4 mr-2" /> Print / Save PDF
             </Button>
 
             {isAuthenticated ? (
