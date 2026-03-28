@@ -448,7 +448,7 @@ const createStyles = (colors: ColorsType) =>
     },
     heroTitleChaos: {
       fontStyle: "italic",
-      color: colors.danger,
+      color: "#D74242",
     },
     heroTitleReadiness: {
       color: colors.primary,
