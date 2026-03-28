@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   View,
   Text,
@@ -29,18 +29,29 @@ type ExportedData = {
 export default function MyDataScreen() {
   const insets = useSafeAreaInsets();
   const { sessionId, consentDate, revokeConsent, hasConsented } = useSession();
-  const { isSignedIn, user, signOut } = useAuth();
+  const { isSignedIn, user, signOut, getAuthHeaders } = useAuth();
   const [exportData, setExportData] = useState<ExportedData | null>(null);
   const [isExporting, setIsExporting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [exportDone, setExportDone] = useState(false);
   const [deleteDone, setDeleteDone] = useState(false);
+  const [subscription, setSubscription] = useState<{ status: string; isActive: boolean; planName?: string; currentPeriodEnd?: string } | null>(null);
 
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
+
+  useEffect(() => {
+    if (!isSignedIn) return;
+    fetch(`https://${process.env.EXPO_PUBLIC_DOMAIN}/api/users/me/subscription`, {
+      headers: getAuthHeaders(),
+    })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => d && setSubscription(d))
+      .catch(() => {});
+  }, [isSignedIn]);
 
   const handleExport = async () => {
     if (!sessionId) return;
@@ -169,6 +180,41 @@ export default function MyDataScreen() {
               <Feather name="log-out" size={16} color={colors.danger} />
               <Text style={styles.signOutText}>Sign Out</Text>
             </Pressable>
+          </View>
+        )}
+
+        {isSignedIn && subscription && (
+          <View style={styles.subscriptionCard}>
+            <View style={styles.subscriptionRow}>
+              <View style={[styles.planBadge, subscription.isActive ? styles.planBadgePro : styles.planBadgeFree]}>
+                <Feather name={subscription.isActive ? "zap" : "user"} size={12} color={subscription.isActive ? colors.primary : colors.textMuted} />
+                <Text style={[styles.planBadgeText, { color: subscription.isActive ? colors.primary : colors.textMuted }]}>
+                  {subscription.isActive ? "Pro" : "Free"}
+                </Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.subscriptionTitle}>
+                  {subscription.isActive ? (subscription.planName ?? "Resilium Pro") : "Resilium Free"}
+                </Text>
+                {subscription.isActive && subscription.currentPeriodEnd && (
+                  <Text style={styles.subscriptionExpiry}>
+                    Renews {new Date(subscription.currentPeriodEnd).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                  </Text>
+                )}
+                {!subscription.isActive && (
+                  <Text style={styles.subscriptionExpiry}>2 saved plans · core features</Text>
+                )}
+              </View>
+            </View>
+            {!subscription.isActive && (
+              <Pressable
+                style={({ pressed }) => [styles.upgradeSubBtn, pressed && { opacity: 0.85 }]}
+                onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); router.push("/pricing"); }}
+              >
+                <Feather name="zap" size={14} color={colors.background} />
+                <Text style={styles.upgradeSubBtnText}>Upgrade to Pro</Text>
+              </Pressable>
+            )}
           </View>
         )}
 
@@ -431,4 +477,28 @@ const createStyles = (colors: ColorsType) => StyleSheet.create({
     borderWidth: 1, borderColor: "rgba(255,69,69,0.15)",
   },
   signOutText: { fontFamily: "Inter_600SemiBold", fontSize: 14, color: colors.danger },
+  subscriptionCard: {
+    backgroundColor: colors.surface, borderRadius: 18, padding: 18,
+    borderWidth: 1, borderColor: colors.border, gap: 12,
+  },
+  subscriptionRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+  planBadge: {
+    flexDirection: "row", alignItems: "center", gap: 4, borderRadius: 8,
+    paddingHorizontal: 10, paddingVertical: 5,
+    borderWidth: 1,
+  },
+  planBadgePro: {
+    backgroundColor: colors.primaryMuted, borderColor: colors.primaryBorder,
+  },
+  planBadgeFree: {
+    backgroundColor: colors.surface, borderColor: colors.border,
+  },
+  planBadgeText: { fontFamily: "Inter_700Bold", fontSize: 12, letterSpacing: 0.4 },
+  subscriptionTitle: { fontFamily: "Inter_600SemiBold", fontSize: 15, color: colors.text },
+  subscriptionExpiry: { fontFamily: "Inter_400Regular", fontSize: 12, color: colors.textMuted, marginTop: 2 },
+  upgradeSubBtn: {
+    flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6,
+    backgroundColor: colors.primary, borderRadius: 10, paddingVertical: 11,
+  },
+  upgradeSubBtnText: { fontFamily: "Inter_600SemiBold", fontSize: 14, color: colors.background },
 });
