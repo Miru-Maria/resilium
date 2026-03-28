@@ -158,9 +158,6 @@ export default function LandingPage() {
           <Link href="/pricing" className="text-sm text-muted-foreground hover:text-primary transition-colors hidden sm:block">
             Pricing
           </Link>
-          <Link href="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors hidden sm:block">
-            Privacy Policy
-          </Link>
 
           {!isLoading && isAuthenticated && (
             <Link href="/profile" className="text-sm text-foreground/80 hover:text-primary transition-colors font-medium hidden sm:block">
