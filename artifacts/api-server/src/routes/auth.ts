@@ -7,6 +7,8 @@ import {
   LogoutMobileSessionResponse,
 } from "@workspace/api-zod";
 import { db, usersTable } from "@workspace/db";
+import { eq } from "drizzle-orm";
+import { sendWelcomeEmail } from "../lib/email.js";
 import {
   clearSession,
   getOidcConfig,
@@ -57,29 +59,30 @@ function getSafeReturnTo(value: unknown): string {
   return value;
 }
 
-async function upsertUser(claims: Record<string, unknown>) {
+async function upsertUser(claims: Record<string, unknown>): Promise<{ user: typeof usersTable.$inferSelect; isNew: boolean }> {
+  const userId = claims.sub as string;
   const userData = {
-    id: claims.sub as string,
+    id: userId,
     email: (claims.email as string) || null,
     firstName: (claims.first_name as string) || null,
     lastName: (claims.last_name as string) || null,
-    profileImageUrl: (claims.profile_image_url || claims.picture) as
-      | string
-      | null,
+    profileImageUrl: (claims.profile_image_url || claims.picture) as string | null,
   };
+
+  const existing = await db.select({ id: usersTable.id }).from(usersTable).where(
+    eq(usersTable.id, userId)
+  ).limit(1);
 
   const [user] = await db
     .insert(usersTable)
     .values(userData)
     .onConflictDoUpdate({
       target: usersTable.id,
-      set: {
-        ...userData,
-        updatedAt: new Date(),
-      },
+      set: { ...userData, updatedAt: new Date() },
     })
     .returning();
-  return user;
+
+  return { user, isNew: existing.length === 0 };
 }
 
 router.get("/auth/user", (req: Request, res: Response) => {
@@ -164,9 +167,13 @@ router.get("/callback", async (req: Request, res: Response) => {
     return;
   }
 
-  const dbUser = await upsertUser(
+  const { user: dbUser, isNew } = await upsertUser(
     claims as unknown as Record<string, unknown>,
   );
+
+  if (isNew && dbUser.email) {
+    sendWelcomeEmail({ email: dbUser.email, firstName: dbUser.firstName }).catch(() => {});
+  }
 
   const now = Math.floor(Date.now() / 1000);
   const sessionData: SessionData = {
@@ -234,9 +241,13 @@ router.post(
         return;
       }
 
-      const dbUser = await upsertUser(
+      const { user: dbUser, isNew: isMobileNew } = await upsertUser(
         claims as unknown as Record<string, unknown>,
       );
+
+      if (isMobileNew && dbUser.email) {
+        sendWelcomeEmail({ email: dbUser.email, firstName: dbUser.firstName }).catch(() => {});
+      }
 
       const now = Math.floor(Date.now() / 1000);
       const sessionData: SessionData = {
