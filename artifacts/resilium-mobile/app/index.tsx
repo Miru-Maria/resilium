@@ -331,27 +331,6 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* ── Privacy ── */}
-        <View style={[styles.section, styles.sectionAlt]}>
-          <View style={styles.privacyIconWrap}>
-            <Feather name="lock" size={28} color={colors.primary} />
-          </View>
-          <Text style={styles.sectionTitle}>Private by design</Text>
-          <Text style={styles.privacyBody}>
-            No name. No email. No tracking pixels. Your assessment data is stored
-            securely and automatically deleted after 12 months. We never sell
-            your data.
-          </Text>
-          <View style={styles.privacyChips}>
-            {["GDPR Compliant", "Auto-deleted after 12 months"].map((chip) => (
-              <View key={chip} style={styles.privacyChip}>
-                <Feather name="check" size={11} color={colors.success} />
-                <Text style={styles.privacyChipText}>{chip}</Text>
-              </View>
-            ))}
-          </View>
-        </View>
-
         {/* ── Final CTA ── */}
         <View style={styles.finalCta}>
           <Text style={styles.finalCtaTitle}>Ready to find out where you stand?</Text>
@@ -648,41 +627,6 @@ const createStyles = (colors: ColorsType) =>
       fontSize: 12,
       color: colors.textMuted,
       lineHeight: 18,
-    },
-
-    /* Privacy */
-    privacyIconWrap: {
-      width: 58,
-      height: 58,
-      borderRadius: 16,
-      backgroundColor: colors.primaryMuted,
-      alignItems: "center",
-      justifyContent: "center",
-      alignSelf: "center",
-    },
-    privacyBody: {
-      fontFamily: "Inter_400Regular",
-      fontSize: 14,
-      color: colors.textSecondary,
-      lineHeight: 22,
-      textAlign: "center",
-    },
-    privacyChips: { flexDirection: "row", flexWrap: "wrap", gap: 8, justifyContent: "center" },
-    privacyChip: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 5,
-      backgroundColor: colors.successMuted,
-      borderRadius: 20,
-      paddingHorizontal: 10,
-      paddingVertical: 5,
-      borderWidth: 1,
-      borderColor: "rgba(34,197,94,0.15)",
-    },
-    privacyChipText: {
-      fontFamily: "Inter_500Medium",
-      fontSize: 11,
-      color: colors.success,
     },
 
     /* Final CTA */
