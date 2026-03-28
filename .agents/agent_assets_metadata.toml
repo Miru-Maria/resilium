@@ -36,3 +36,9 @@ id = "Q4XBEzA3JfF6YLyOhYCxs"
 uri = "file://attached_assets/resilium-marketing-banner.png"
 type = "image"
 title = "Resilium Marketing Banner — Brain + Arms"
+
+[[outputs]]
+id = "DvgYbAGIoTsI5VUwifuRu"
+uri = "file://attached_assets/resilium-marketing-banner.svg"
+type = "image"
+title = "Resilium Marketing Banner (SVG — pixel-perfect)"
