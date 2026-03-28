@@ -1,0 +1,42 @@
+an honest checklist of what's left based on the full state of the project Resilium:
+
+Mobile distribution
+
+ App Store (iOS) submission — Expo app needs to be built and submitted to Apple
+ Google Play submission — same for Android
+ App icon and splash screen review — worth a final check before store submission
+ Push notification setup — opt-in prompt and any future nudges (e.g. "Time to reassess your plan")
+ 
+ 
+
+Paddle webhook end-to-end test — ❌ still to do
+Welcome/onboarding email — ❌ still to do
+So there are exactly two things remaining: the Paddle webhook verification and transactional emails. Want me to tackle those now? The webhook test involves sending a real test event through Paddle's sandbox and confirming the DB update and Pro unlock work end-to-end. The email setup would need a transactional email provider — do you have a preference (Resend, SendGrid, Postmark), or should I check what's already configured in the project?
+
+yes please, but first, I have a question, not something to fix or execute just your opinion: the site and the app in their current state, if we get the pricing and payments working, the app on both android and apple stores, and the marketing and distribution strategy works, etc., is this the type of app that could potentially run itself most of the time, is the type of project that needs a lot of input from me or can it be self-sufficient? If not is there way we can do that to a reasonable degree?
+
+Honest answer: yes, to a meaningful degree — more than most apps, actually. Here's my thinking:
+
+What already runs itself:
+
+The core loop — user arrives, takes assessment, gets a report, optionally upgrades — is fully automated end-to-end. The AI generates personalised plans and scenario results on demand with no human in the loop. Payments process through Paddle automatically. GDPR data deletion happens on a schedule. The consent system, the scoring engine, the percentile benchmarking — none of that needs you.
+
+The admin dashboard gives you a read-only view of everything without needing to touch the database directly. The AI UX tester can autonomously simulate new users and flag quality regressions without you running it.
+
+What will need occasional attention:
+
+Realistically, three things require periodic human judgment:
+
+Content quality — the AI prompt quality degrades over time as GPT models update, and edge-case reports (unusual demographics, extreme scores) can produce odd output. You'd want to spot-check occasionally, maybe once a month.
+
+Testimonial moderation — the admin dashboard lets you publish or suppress testimonials, but someone has to actually do it.
+
+Support — a small percentage of users will email about billing issues, data deletion requests, or bugs. This is low volume for a consumer SaaS at early scale but not zero.
+
+What could make it more self-sufficient:
+
+The biggest gap right now is that there's no automatic alerting — if the API goes down, the AI starts returning garbage, or a Paddle webhook starts failing silently, you won't know until a user complains. Adding basic uptime monitoring and error alerting (something like a weekly email digest of key metrics + any error spikes) would mean you only need to look at the app when it tells you something is wrong.
+
+The other lever is making the testimonial moderation smarter — the API already stores ratings and comments, and we could auto-publish anything ≥4 stars with a non-empty comment and no flagged language, reducing manual review to only the edge cases.
+
+Bottom line: If payments and distribution are working, this is very close to a lifestyle business that runs mostly unattended. The core product doesn't require you. What takes ongoing time is customer trust — support, content quality, and knowing when something breaks. We can systematically reduce all three with alerting and a smarter auto-moderation rule.
