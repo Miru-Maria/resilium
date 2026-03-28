@@ -180,11 +180,6 @@ export default function HomeScreen() {
           onLayout={(e) => setHeroSize({ width: e.nativeEvent.layout.width, height: e.nativeEvent.layout.height })}
         >
           <NeuralNetSVG width={heroSize.width} height={heroSize.height} opacity={0.55} />
-          <View style={styles.heroBadge}>
-            <Feather name="cpu" size={12} color={colors.primary} />
-            <Text style={styles.heroBadgeText}>AI-POWERED RISK ASSESSMENT</Text>
-          </View>
-
           <Text style={styles.heroTitle}>
             {"You're one disruption\naway from "}
             <Text style={styles.heroTitleChaos}>chaos</Text>
