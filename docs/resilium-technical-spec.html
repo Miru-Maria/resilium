@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resilium — Full Technical Specification v2.0</title>
+<style>
+  :root {
+    --bg: #0D1225;
+    --bg2: #141928;
+    --bg3: #1a2035;
+    --border: #2a3450;
+    --orange: #E08040;
+    --orange-light: #f0a060;
+    --text: #EAD9BE;
+    --text-muted: #8899b0;
+    --text-dim: #5a6a80;
+    --success: #2ECC8F;
+    --heading: #f0e8d8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-size: 15px;
+    line-height: 1.75;
+    padding: 0;
+  }
+
+  /* Cover page */
+  .cover {
+    background: linear-gradient(160deg, #0D1225 0%, #141928 50%, #1a2035 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 60px 40px;
+    border-bottom: 2px solid var(--orange);
+    page-break-after: always;
+  }
+
+  .cover-logo {
+    width: 72px;
+    height: 72px;
+    background: var(--orange);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 32px;
+    font-size: 32px;
+  }
+
+  .cover-badge {
+    display: inline-block;
+    background: rgba(224,128,64,0.15);
+    border: 1px solid var(--orange);
+    color: var(--orange);
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 5px 16px;
+    border-radius: 3px;
+    margin-bottom: 28px;
+  }
+
+  .cover h1 {
+    font-family: 'Georgia', serif;
+    font-size: 52px;
+    font-weight: normal;
+    color: var(--heading);
+    letter-spacing: -1px;
+    margin-bottom: 12px;
+    line-height: 1.1;
+  }
+
+  .cover h1 span { color: var(--orange); }
+
+  .cover .subtitle {
+    font-size: 22px;
+    color: var(--text-muted);
+    font-weight: normal;
+    margin-bottom: 48px;
+    font-style: italic;
+  }
+
+  .cover-meta {
+    display: flex;
+    gap: 48px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .cover-meta-item {
+    text-align: center;
+  }
+
+  .cover-meta-item .label {
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .cover-meta-item .value {
+    font-size: 16px;
+    color: var(--text);
+  }
+
+  /* Layout */
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 60px 48px;
+  }
+
+  /* TOC */
+  .toc {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 36px 40px;
+    margin-bottom: 60px;
+    page-break-after: always;
+  }
+
+  .toc h2 {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 24px;
+  }
+
+  .toc ol {
+    list-style: none;
+    counter-reset: toc;
+  }
+
+  .toc > ol > li {
+    counter-increment: toc;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 16px;
+  }
+
+  .toc > ol > li:last-child { border-bottom: none; }
+
+  .toc > ol > li::before {
+    content: counter(toc, decimal-leading-zero);
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    color: var(--orange);
+    min-width: 28px;
+    padding-top: 1px;
+  }
+
+  .toc a {
+    color: var(--text);
+    text-decoration: none;
+    font-size: 14px;
+  }
+
+  .toc a:hover { color: var(--orange); }
+
+  /* Sections */
+  section {
+    margin-bottom: 64px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 32px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-num {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    color: var(--orange);
+    background: rgba(224,128,64,0.1);
+    border: 1px solid rgba(224,128,64,0.3);
+    padding: 4px 10px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  h2 {
+    font-family: 'Georgia', serif;
+    font-size: 28px;
+    font-weight: normal;
+    color: var(--heading);
+    letter-spacing: -0.5px;
+  }
+
+  h3 {
+    font-family: 'Georgia', serif;
+    font-size: 18px;
+    font-weight: normal;
+    color: var(--text);
+    margin: 32px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px dashed var(--border);
+  }
+
+  h4 {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin: 24px 0 10px;
+  }
+
+  p { margin-bottom: 16px; color: var(--text); }
+
+  /* Tables */
+  .table-wrap { overflow-x: auto; margin: 24px 0; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+  }
+
+  thead th {
+    background: rgba(224,128,64,0.12);
+    color: var(--orange);
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--orange);
+  }
+
+  tbody tr { border-bottom: 1px solid var(--border); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+
+  td {
+    padding: 10px 14px;
+    vertical-align: top;
+    color: var(--text);
+  }
+
+  td code {
+    background: rgba(224,128,64,0.1);
+    color: var(--orange-light);
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-family: 'Courier New', monospace;
+  }
+
+  /* Code blocks */
+  pre {
+    background: #080e1c;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--orange);
+    border-radius: 6px;
+    padding: 20px 24px;
+    overflow-x: auto;
+    margin: 20px 0;
+  }
+
+  pre code {
+    font-family: 'Courier New', monospace;
+    font-size: 12.5px;
+    color: #c8d8f0;
+    background: none;
+    padding: 0;
+    line-height: 1.6;
+  }
+
+  code {
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    background: rgba(224,128,64,0.1);
+    color: var(--orange-light);
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+
+  /* Callout boxes */
+  .callout {
+    background: rgba(46,204,143,0.06);
+    border: 1px solid rgba(46,204,143,0.25);
+    border-radius: 6px;
+    padding: 18px 22px;
+    margin: 20px 0;
+  }
+
+  .callout.orange {
+    background: rgba(224,128,64,0.06);
+    border-color: rgba(224,128,64,0.25);
+  }
+
+  .callout .callout-label {
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--success);
+    margin-bottom: 6px;
+  }
+
+  .callout.orange .callout-label { color: var(--orange); }
+
+  /* Score formula boxes */
+  .formula {
+    background: #080e1c;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px 24px;
+    margin: 20px 0;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    color: #c8d8f0;
+    line-height: 1.8;
+  }
+
+  /* Dimension grid */
+  .dim-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin: 24px 0;
+  }
+
+  .dim-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px;
+  }
+
+  .dim-card .dim-name {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 4px;
+  }
+
+  .dim-card .dim-weight {
+    font-size: 28px;
+    color: var(--heading);
+    font-family: 'Georgia', serif;
+    margin-bottom: 8px;
+  }
+
+  .dim-card .dim-desc {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  /* Footer */
+  .doc-footer {
+    text-align: center;
+    padding: 40px 48px;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 12px;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.5px;
+  }
+
+  /* Print */
+  @media print {
+    body { background: white; color: #1a1a2e; font-size: 12pt; }
+    .cover { background: #0D1225; min-height: auto; padding: 80pt 60pt; }
+    .container { padding: 40pt 48pt; max-width: none; }
+    pre, .formula { background: #f4f6fa; border-color: #ccc; }
+    pre code, .formula { color: #1a1a2e; }
+    h2, h3 { color: #1a1a2e; }
+    td, p { color: #1a1a2e; }
+    .dim-card { background: #f8f9fc; border-color: #ddd; }
+    .toc { background: #f8f9fc; border-color: #ddd; }
+  }
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="cover">
+  <div class="cover-logo">🧠</div>
+  <div class="cover-badge">Technical Document</div>
+  <h1>Resil<span>ium</span></h1>
+  <div class="subtitle">Full Technical Specification</div>
+  <div class="cover-meta">
+    <div class="cover-meta-item">
+      <span class="label">Version</span>
+      <span class="value">2.0</span>
+    </div>
+    <div class="cover-meta-item">
+      <span class="label">Date</span>
+      <span class="value">March 2026</span>
+    </div>
+    <div class="cover-meta-item">
+      <span class="label">Classification</span>
+      <span class="value">Confidential</span>
+    </div>
+    <div class="cover-meta-item">
+      <span class="label">Status</span>
+      <span class="value">Production</span>
+    </div>
+  </div>
+</div>
+
+<!-- BODY -->
+<div class="container">
+
+  <!-- TOC -->
+  <div class="toc">
+    <h2>Table of Contents</h2>
+    <ol>
+      <li><a href="#s1">System Overview</a></li>
+      <li><a href="#s2">Technology Stack</a></li>
+      <li><a href="#s3">Database Schema</a></li>
+      <li><a href="#s4">API Specification</a></li>
+      <li><a href="#s5">Scoring Methodology</a></li>
+      <li><a href="#s6">AI Pipeline</a></li>
+      <li><a href="#s7">Authentication &amp; Security</a></li>
+      <li><a href="#s8">Freemium Access Control</a></li>
+      <li><a href="#s9">Frontend Architecture</a></li>
+      <li><a href="#s10">Mobile Application</a></li>
+      <li><a href="#s11">Data Privacy &amp; GDPR</a></li>
+      <li><a href="#s12">Infrastructure &amp; Deployment</a></li>
+      <li><a href="#s13">Performance Characteristics</a></li>
+      <li><a href="#s14">Testing &amp; Quality</a></li>
+    </ol>
+  </div>
+
+  <!-- 1. SYSTEM OVERVIEW -->
+  <section id="s1">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2>System Overview</h2>
+    </div>
+    <p>Resilium is a full-stack, multi-artifact monorepo application delivering personalised resilience assessment on web and mobile. The system is built as a pnpm workspace containing three deployed artifacts and two shared library packages.</p>
+
+    <h3>1.1 Repository Structure</h3>
+    <pre><code>resilium/
+├── artifacts/
+│   ├── api-server/          # Express 5 REST API (Node.js 24)
+│   ├── resilium/            # React + Vite web application
+│   └── resilium-mobile/     # Expo (React Native) mobile application
+├── lib/
+│   ├── db/                  # Drizzle ORM schema + migrations
+│   └── replit-auth-web/     # Shared Replit Auth hook (useAuth)
+└── pnpm-workspace.yaml</code></pre>
+
+    <h3>1.2 Artifact Summary</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Artifact</th><th>Runtime</th><th>Port</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td><code>api-server</code></td><td>Node.js 24</td><td><code>$PORT</code> (8080 dev)</td><td>REST API, AI orchestration, auth, webhooks</td></tr>
+          <tr><td><code>resilium</code></td><td>Vite 7 / React 19</td><td><code>$PORT</code> (5173 dev)</td><td>Web frontend (SPA)</td></tr>
+          <tr><td><code>resilium-mobile</code></td><td>Expo SDK 53</td><td><code>$PORT</code></td><td>React Native app (web + iOS + Android)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 2. TECH STACK -->
+  <section id="s2">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2>Technology Stack</h2>
+    </div>
+
+    <h3>2.1 Backend</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Layer</th><th>Technology</th><th>Version</th></tr></thead>
+        <tbody>
+          <tr><td>Runtime</td><td>Node.js</td><td>24 LTS</td></tr>
+          <tr><td>Framework</td><td>Express</td><td>5.x</td></tr>
+          <tr><td>Language</td><td>TypeScript</td><td>5.9.x</td></tr>
+          <tr><td>ORM</td><td>Drizzle ORM</td><td>0.39.x</td></tr>
+          <tr><td>Database</td><td>PostgreSQL</td><td>16</td></tr>
+          <tr><td>Session store</td><td>connect-pg-simple</td><td>pg-backed</td></tr>
+          <tr><td>Authentication</td><td>Replit Auth (OpenID Connect / PKCE)</td><td>—</td></tr>
+          <tr><td>AI provider</td><td>OpenAI gpt-5.2 via Replit AI Integrations</td><td>gpt-5.2</td></tr>
+          <tr><td>Rate limiting</td><td>express-rate-limit</td><td>7.x</td></tr>
+          <tr><td>Build</td><td>esbuild</td><td>0.24.x</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>2.2 Frontend (Web)</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Layer</th><th>Technology</th><th>Version</th></tr></thead>
+        <tbody>
+          <tr><td>Framework</td><td>React</td><td>19.x</td></tr>
+          <tr><td>Build tool</td><td>Vite</td><td>7.x</td></tr>
+          <tr><td>Routing</td><td>Wouter</td><td>3.x</td></tr>
+          <tr><td>Data fetching</td><td>TanStack React Query</td><td>5.x</td></tr>
+          <tr><td>UI components</td><td>shadcn/ui (Radix UI primitives)</td><td>—</td></tr>
+          <tr><td>Styling</td><td>Tailwind CSS</td><td>4.x</td></tr>
+          <tr><td>Animation</td><td>Framer Motion</td><td>12.x</td></tr>
+          <tr><td>Charts</td><td>Recharts</td><td>2.x</td></tr>
+          <tr><td>Payments</td><td>Paddle.js v2 (overlay checkout)</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>2.3 Mobile</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Layer</th><th>Technology</th><th>Version</th></tr></thead>
+        <tbody>
+          <tr><td>Framework</td><td>Expo</td><td>SDK 53</td></tr>
+          <tr><td>React Native</td><td>React Native</td><td>0.79.x</td></tr>
+          <tr><td>Navigation</td><td>Expo Router (file-based)</td><td>6.x</td></tr>
+          <tr><td>Animations</td><td>React Native Reanimated</td><td>3.x</td></tr>
+          <tr><td>Notifications</td><td>expo-notifications</td><td>—</td></tr>
+          <tr><td>Haptics</td><td>expo-haptics</td><td>—</td></tr>
+          <tr><td>SVG</td><td>react-native-svg</td><td>15.x</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 3. DATABASE -->
+  <section id="s3">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2>Database Schema</h2>
+    </div>
+    <p>All tables use PostgreSQL 16 via Drizzle ORM. Schema is pushed using <code>drizzle-kit push</code>. No manual SQL migrations are written — the Drizzle schema is the single source of truth.</p>
+
+    <h3>3.1 Core Tables</h3>
+
+    <h4>resilience_reports</h4>
+    <pre><code>id                    SERIAL PRIMARY KEY
+report_id             TEXT UNIQUE NOT NULL        -- public UUID
+session_id            TEXT                        -- anonymous session tracking
+user_id               VARCHAR REFERENCES users(id) ON DELETE CASCADE
+created_at            TIMESTAMP DEFAULT NOW()
+currency              VARCHAR(3) DEFAULT 'USD'    -- USD | EUR | RON
+location              TEXT NOT NULL
+income_stability      TEXT NOT NULL               -- fixed | freelance | unstable
+savings_months        REAL NOT NULL
+has_dependents        BOOLEAN NOT NULL
+skills                JSONB NOT NULL
+health_status         TEXT NOT NULL
+mobility_level        TEXT NOT NULL
+housing_type          TEXT NOT NULL
+has_emergency_supplies BOOLEAN NOT NULL
+
+-- Mental Resilience sub-scores (0–100 normalised)
+mr_stress_tolerance    REAL
+mr_adaptability        REAL
+mr_learning_agility    REAL
+mr_change_management   REAL
+mr_emotional_regulation REAL
+mr_social_support      REAL
+mr_composite           REAL     -- simple mean of 6 sub-scores
+mr_pathway             TEXT     -- growth | compensation | null
+
+-- Dimension scores (0–100)
+score_overall         REAL NOT NULL
+score_financial       REAL NOT NULL
+score_health          REAL NOT NULL
+score_skills          REAL NOT NULL
+score_mobility        REAL NOT NULL
+score_psychological   REAL NOT NULL
+score_resources       REAL NOT NULL
+
+-- AI-generated content (JSONB)
+risk_profile_summary  TEXT NOT NULL
+top_vulnerabilities   JSONB NOT NULL
+action_plan           JSONB NOT NULL
+scenario_simulations  JSONB NOT NULL
+daily_habits          JSONB NOT NULL
+checklists_by_area    JSONB</code></pre>
+
+    <h4>subscriptions</h4>
+    <pre><code>id                      SERIAL PRIMARY KEY
+user_id                 VARCHAR NOT NULL REFERENCES users(id) ON DELETE CASCADE
+paddle_subscription_id  TEXT UNIQUE
+paddle_customer_id      TEXT
+status                  TEXT NOT NULL DEFAULT 'inactive'
+                        -- inactive | active | cancel_scheduled | past_due | cancelled
+plan_name               TEXT DEFAULT 'Pro'
+current_period_end      TIMESTAMP</code></pre>
+
+    <h4>push_tokens</h4>
+    <pre><code>id           SERIAL PRIMARY KEY
+session_id   TEXT NOT NULL
+token        TEXT NOT NULL
+platform     TEXT          -- ios | android | web
+created_at   TIMESTAMP DEFAULT NOW()</code></pre>
+
+    <h4>Additional tables</h4>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Table</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td><code>users</code></td><td>Replit Auth user records (upserted on login)</td></tr>
+          <tr><td><code>sessions</code></td><td>express-session PostgreSQL store</td></tr>
+          <tr><td><code>checklist_progress</code></td><td>Per-report, per-item checklist completion state</td></tr>
+          <tr><td><code>progress_snapshots</code></td><td>Historical score snapshots for trend charts</td></tr>
+          <tr><td><code>gdpr_consent</code></td><td>Versioned, timestamped consent records</td></tr>
+          <tr><td><code>gdpr_requests</code></td><td>Data export/deletion request queue</td></tr>
+          <tr><td><code>gdpr_admin_actions</code></td><td>Audit trail of all admin GDPR actions</td></tr>
+          <tr><td><code>feedback</code></td><td>Per-report star ratings and comments</td></tr>
+          <tr><td><code>site_announcements</code></td><td>Admin-controlled platform-wide banners</td></tr>
+          <tr><td><code>ux_test_runs / ux_test_results</code></td><td>AI persona UX testing framework</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 4. API -->
+  <section id="s4">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <h2>API Specification</h2>
+    </div>
+    <p>Base path: <code>/api</code>. Authentication: Replit Auth session cookie (<code>connect.sid</code>) for user routes; admin cookie-based session for admin routes.</p>
+
+    <h3>4.1 Assessment &amp; Reports</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>POST</code></td><td><code>/resilience/assess</code></td><td>Optional</td><td>Submit assessment; triggers scoring and AI report generation</td></tr>
+          <tr><td><code>GET</code></td><td><code>/resilience/reports/:reportId</code></td><td>Optional</td><td>Fetch report by public ID</td></tr>
+          <tr><td><code>GET</code></td><td><code>/resilience/reports/:reportId/checklists</code></td><td>Optional</td><td>Fetch checklist items and completion state</td></tr>
+          <tr><td><code>PATCH</code></td><td><code>/resilience/reports/:reportId/checklists/:area/:itemId</code></td><td>Required</td><td>Toggle checklist item</td></tr>
+          <tr><td><code>GET</code></td><td><code>/resilience/reports/:reportId/snapshots</code></td><td>Optional</td><td>Historical score snapshots</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>4.2 Scenario Simulations (Pro)</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>POST</code></td><td><code>/scenarios</code></td><td>Required (Pro)</td><td>Generate stress-test for an existing report. Body: <code>{ reportId, scenario }</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>4.3 User Management</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Method</th><th>Endpoint</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>GET</code></td><td><code>/users/me/plans</code></td><td>List user's saved reports</td></tr>
+          <tr><td><code>DELETE</code></td><td><code>/users/me/plans/:reportId</code></td><td>Delete a specific report</td></tr>
+          <tr><td><code>DELETE</code></td><td><code>/users/me/plans</code></td><td>Delete all reports</td></tr>
+          <tr><td><code>DELETE</code></td><td><code>/users/me</code></td><td>Full account deletion (GDPR)</td></tr>
+          <tr><td><code>GET</code></td><td><code>/users/me/report-count</code></td><td>Count of saved reports</td></tr>
+          <tr><td><code>GET</code></td><td><code>/users/me/export</code></td><td>Full data export (JSON)</td></tr>
+          <tr><td><code>GET</code></td><td><code>/users/me/latest-checklist</code></td><td>Latest report's checklist</td></tr>
+          <tr><td><code>POST</code></td><td><code>/users/me/compare-plans</code></td><td>AI comparison of two plan IDs</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>4.4 Authentication</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Method</th><th>Endpoint</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>GET</code></td><td><code>/auth/user</code></td><td>Current session user</td></tr>
+          <tr><td><code>GET</code></td><td><code>/login</code></td><td>Initiate Replit Auth OIDC flow</td></tr>
+          <tr><td><code>GET</code></td><td><code>/callback</code></td><td>OIDC callback handler</td></tr>
+          <tr><td><code>GET</code></td><td><code>/logout</code></td><td>Clear session</td></tr>
+          <tr><td><code>POST</code></td><td><code>/auth/mobile-token</code></td><td>Exchange OIDC token for mobile session</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>4.5 Subscriptions &amp; Payments</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>GET</code></td><td><code>/subscription/status</code></td><td>Required</td><td>Returns <code>{ isPro, status, currentPeriodEnd }</code></td></tr>
+          <tr><td><code>POST</code></td><td><code>/webhooks/paddle</code></td><td>Signature</td><td>Paddle subscription lifecycle events</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>4.6 Push Notifications</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Method</th><th>Endpoint</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>POST</code></td><td><code>/push-tokens</code></td><td>Register Expo push token. Body: <code>{ token, platform?, sessionId }</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>4.7 GDPR</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Method</th><th>Endpoint</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>POST</code></td><td><code>/gdpr/consent</code></td><td>Log versioned consent record</td></tr>
+          <tr><td><code>GET</code></td><td><code>/gdpr/export/:sessionId</code></td><td>Export all data for a session</td></tr>
+          <tr><td><code>POST</code></td><td><code>/gdpr/data-request</code></td><td>Submit deletion or export request</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>4.8 Admin (admin session required)</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Method</th><th>Endpoint</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>POST</code></td><td><code>/admin/login</code></td><td>Authenticate with credentials</td></tr>
+          <tr><td><code>GET</code></td><td><code>/admin/session</code></td><td>Validate admin session</td></tr>
+          <tr><td><code>GET</code></td><td><code>/admin/analytics</code></td><td>Full platform analytics aggregate</td></tr>
+          <tr><td><code>GET</code></td><td><code>/admin/analytics/mobile</code></td><td>Mobile-specific metrics</td></tr>
+          <tr><td><code>GET/POST/PATCH/DELETE</code></td><td><code>/admin/announcements</code></td><td>Site announcement management</td></tr>
+          <tr><td><code>POST</code></td><td><code>/admin/ux-test/run</code></td><td>Start persona simulation run</td></tr>
+          <tr><td><code>GET</code></td><td><code>/admin/ux-test/runs/:runId/stream</code></td><td>SSE live progress stream</td></tr>
+          <tr><td><code>GET</code></td><td><code>/admin/gdpr/requests</code></td><td>List data requests</td></tr>
+          <tr><td><code>POST</code></td><td><code>/admin/gdpr/requests/:id/fulfill</code></td><td>Mark request fulfilled</td></tr>
+          <tr><td><code>GET</code></td><td><code>/admin/gdpr/consent-log</code></td><td>Paginated consent audit log</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 5. SCORING -->
+  <section id="s5">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <h2>Scoring Methodology</h2>
+    </div>
+
+    <div class="callout orange">
+      <div class="callout-label">Important</div>
+      All scoring is deterministic. No AI is involved in score calculation. The algorithm runs server-side in <code>scoring.ts</code> and is auditable in full.
+    </div>
+
+    <h3>5.1 Dimension Weights</h3>
+
+    <div class="dim-grid">
+      <div class="dim-card">
+        <div class="dim-name">Financial</div>
+        <div class="dim-weight">25%</div>
+        <div class="dim-desc">Income stability, savings runway, dependents</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Skills</div>
+        <div class="dim-weight">20%</div>
+        <div class="dim-desc">Breadth of transferable skills across 6 categories</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Health</div>
+        <div class="dim-weight">15%</div>
+        <div class="dim-desc">Health status and medical skill possession</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Mobility</div>
+        <div class="dim-weight">15%</div>
+        <div class="dim-desc">Mobility level, housing type, dependency load</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Psychological</div>
+        <div class="dim-weight">15%</div>
+        <div class="dim-desc">Mental Resilience Composite from 10-question assessment</div>
+      </div>
+      <div class="dim-card">
+        <div class="dim-name">Resources</div>
+        <div class="dim-weight">10%</div>
+        <div class="dim-desc">Emergency supplies, survival and financial skills</div>
+      </div>
+    </div>
+
+    <h3>5.2 Mental Resilience Composite (MRC)</h3>
+    <p>Ten Likert questions (1–5 scale) map to six sub-dimensions. Each is normalised to 0–100:</p>
+    <div class="formula">subScore = round(((avg − 1) / 4) × 100)
+
+MRC = round(mean of all 6 sub-scores)   // equal weight (1/6 each)
+
+Pathway:
+  growth       → MRC ≥ 60  (challenge-oriented framing)
+  compensation → MRC &lt; 60  (stabilisation-first framing)</div>
+
+    <h3>5.3 Psychological Modifier</h3>
+    <p>On the compensation pathway, a cross-area modifier dampens Financial and Skills scores to reflect the compounding effect of psychological pressure:</p>
+    <div class="formula">modifier = 0.85 + (MRC / 60) × 0.15
+  // MRC = 0  → modifier = 0.85  (15% dampening)
+  // MRC = 59 → modifier ≈ 0.998 (negligible dampening)
+  // growth pathway → modifier = 1.0 (no dampening)</div>
+
+    <h3>5.4 Overall Score Formula</h3>
+    <div class="formula">overall = (financial  × modifier × 0.25) +
+          (health                    × 0.15) +
+          (skills    × modifier × 0.20) +
+          (mobility                  × 0.15) +
+          (psychological             × 0.15) +
+          (resources                 × 0.10)
+
+All scores clamped to [0, 100].</div>
+  </section>
+
+  <!-- 6. AI -->
+  <section id="s6">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <h2>AI Pipeline</h2>
+    </div>
+
+    <h3>6.1 Model &amp; Infrastructure</h3>
+    <p>AI calls use OpenAI's <strong>gpt-5.2</strong> model via Replit's AI Integrations proxy. The API key is provisioned automatically by the platform — the server never stores or exposes it.</p>
+
+    <h3>6.2 Report Generation Flow</h3>
+    <pre><code>1. Score calculation (deterministic, ~1ms)
+2. Prompt construction from scores + input data + MRC pathway
+3. OpenAI API call (full response awaited)
+4. Response parsed into structured JSON schema:
+   - riskProfileSummary
+   - topVulnerabilities  [{ area, description, severity }]
+   - actionPlan          [{ timeframe, action, priority, area }]
+   - scenarioSimulations [{ scenario, impact, mitigation }]
+   - dailyHabits         [{ habit, rationale, difficulty }]
+   - checklistsByArea    { area: [{ itemId, text, priority }] }
+   - recommendedResources [{ title, url, category }]
+5. Full report written to database
+6. Report ID returned to client
+   (malformed responses trigger retry, max 2 attempts)</code></pre>
+
+    <h3>6.3 Pathway-Aware Framing</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Pathway</th><th>AI Framing Strategy</th></tr></thead>
+        <tbody>
+          <tr><td>Growth (MRC ≥ 60)</td><td>Challenge-oriented; ambitious long-horizon goals; opportunity-focused language</td></tr>
+          <tr><td>Compensation (MRC &lt; 60)</td><td>Emotionally scaffolded; stability-first; short milestones; reassurance-forward</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>6.4 Scenario Simulations (Pro)</h3>
+    <p>Separate AI call for each scenario. Input: full report context + scenario type. Output: per-dimension impact deltas, recovery timeline estimate, tailored action steps. Scenarios: <code>job_loss</code>, <code>natural_disaster</code>, <code>health_crisis</code>, <code>relocation</code>.</p>
+  </section>
+
+  <!-- 7. AUTH -->
+  <section id="s7">
+    <div class="section-header">
+      <span class="section-num">07</span>
+      <h2>Authentication &amp; Security</h2>
+    </div>
+
+    <h3>7.1 User Auth (Replit Auth / OIDC)</h3>
+    <p>Replit-managed OpenID Connect with PKCE. On callback, user record is upserted into <code>users</code> table. Session cookie: <code>HttpOnly</code>, <code>Secure</code>, <code>SameSite: lax</code>, 24-hour TTL.</p>
+
+    <h3>7.2 Admin Auth</h3>
+    <p>Cookie-based session using <code>ADMIN_USERNAME</code> / <code>ADMIN_PASSWORD</code> secrets. All <code>/api/admin/*</code> routes protected by middleware. Sessions expire after 24 hours.</p>
+
+    <h3>7.3 Paddle Webhook Verification</h3>
+    <pre><code>const signed = `${timestamp}:${rawBody}`;
+const expected = createHmac("sha256", PADDLE_WEBHOOK_SECRET)
+  .update(signed).digest("hex");
+assert(expected === h1); // from Paddle-Signature header</code></pre>
+
+    <h3>7.4 Rate Limiting</h3>
+    <p>Anonymous assessment submissions: 6 per minute per IP via express-rate-limit. Authenticated users bypass this limit.</p>
+  </section>
+
+  <!-- 8. FREEMIUM -->
+  <section id="s8">
+    <div class="section-header">
+      <span class="section-num">08</span>
+      <h2>Freemium Access Control</h2>
+    </div>
+
+    <div class="callout">
+      <div class="callout-label">Free limit</div>
+      <code>FREE_LIMIT = 2</code> — two complete assessments available at no charge for all users.
+    </div>
+
+    <h3>8.1 Anonymous Users</h3>
+    <p>Count tracked in <code>localStorage</code> (<code>resilium_free_count</code>). At 2, the assessment page shows a paywall screen. A counter ("X of 2 free assessments used") is displayed in the assessment header throughout.</p>
+
+    <h3>8.2 Authenticated Non-Subscribers</h3>
+    <p>On page load, two parallel calls: <code>GET /subscription/status</code> and <code>GET /users/me/report-count</code>. If <code>!isPro &amp;&amp; count ≥ 2</code>, paywall shown. Gate fails open on API error.</p>
+
+    <h3>8.3 Pro Subscribers</h3>
+    <p><code>isPro: true</code> (status <code>active</code> or <code>cancel_scheduled</code>) bypasses all assessment gates and unlocks the Scenario Simulations runner at <code>/scenarios/:reportId</code>.</p>
+  </section>
+
+  <!-- 9. FRONTEND -->
+  <section id="s9">
+    <div class="section-header">
+      <span class="section-num">09</span>
+      <h2>Frontend Architecture</h2>
+    </div>
+
+    <h3>9.1 Web App Pages</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Route</th><th>Description</th><th>Auth</th></tr></thead>
+        <tbody>
+          <tr><td><code>/</code></td><td>Landing — hero, value proposition, sign-in</td><td>No</td></tr>
+          <tr><td><code>/about</code></td><td>About Resilium</td><td>No</td></tr>
+          <tr><td><code>/demo</code></td><td>Static fictional demo report for "Alex M."</td><td>No</td></tr>
+          <tr><td><code>/pricing</code></td><td>Pro plan pricing and comparison</td><td>No</td></tr>
+          <tr><td><code>/assess</code></td><td>10-step assessment (gated at 2 free)</td><td>No (gated)</td></tr>
+          <tr><td><code>/results/:reportId</code></td><td>Full AI report, radar chart, checklists, feedback</td><td>No</td></tr>
+          <tr><td><code>/scenarios/:reportId</code></td><td>Scenario stress-test runner</td><td>Yes (Pro)</td></tr>
+          <tr><td><code>/profile</code></td><td>Saved reports, progress tracking, account</td><td>Yes</td></tr>
+          <tr><td><code>/privacy</code></td><td>Privacy Policy</td><td>No</td></tr>
+          <tr><td><code>/terms</code></td><td>Terms &amp; Conditions</td><td>No</td></tr>
+          <tr><td><code>/refund</code></td><td>Refund Policy</td><td>No</td></tr>
+          <tr><td><code>/admin/*</code></td><td>Admin dashboard and tools</td><td>Admin</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>9.2 Design System</h3>
+    <p>Dark-only UI. Brand tokens:</p>
+    <pre><code>background: #0D1225   // deep navy
+primary:    #E08040   // brand orange
+text:       #EAD9BE   // warm cream
+card:       #141928
+success:    #10B981</code></pre>
+  </section>
+
+  <!-- 10. MOBILE -->
+  <section id="s10">
+    <div class="section-header">
+      <span class="section-num">10</span>
+      <h2>Mobile Application</h2>
+    </div>
+
+    <h3>10.1 Screens</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>File</th><th>Route</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>app/index.tsx</code></td><td><code>/</code></td><td>Landing with neural network animation</td></tr>
+          <tr><td><code>app/consent.tsx</code></td><td><code>/consent</code></td><td>GDPR disclosure</td></tr>
+          <tr><td><code>app/assessment.tsx</code></td><td><code>/assessment</code></td><td>10-step native assessment with haptics</td></tr>
+          <tr><td><code>app/loading.tsx</code></td><td><code>/loading</code></td><td>Animated AI generation progress</td></tr>
+          <tr><td><code>app/results.tsx</code></td><td><code>/results</code></td><td>Score rings, action plan, share</td></tr>
+          <tr><td><code>app/my-data.tsx</code></td><td><code>/my-data</code></td><td>View, export, or delete personal data</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>10.2 Push Notifications</h3>
+    <p>On home screen launch, the app requests notification permissions. On grant: retrieves Expo push token, registers it at <code>POST /api/push-tokens</code>, and schedules a local 30-day check-in reminder via expo-notifications.</p>
+  </section>
+
+  <!-- 11. GDPR -->
+  <section id="s11">
+    <div class="section-header">
+      <span class="section-num">11</span>
+      <h2>Data Privacy &amp; GDPR</h2>
+    </div>
+
+    <h3>11.1 Data Retention</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Data Type</th><th>Retention</th><th>Deletion Path</th></tr></thead>
+        <tbody>
+          <tr><td>Anonymous reports</td><td>30 days</td><td>Auto-purged on startup + 24h cron</td></tr>
+          <tr><td>Authenticated reports</td><td>Until user deletion</td><td><code>DELETE /api/users/me</code></td></tr>
+          <tr><td>Session data</td><td>24 hours</td><td>Automatic expiry</td></tr>
+          <tr><td>Consent records</td><td>Indefinite</td><td>Legal record — manual admin only</td></tr>
+          <tr><td>GDPR requests</td><td>Indefinite</td><td>Legal record — manual admin only</td></tr>
+          <tr><td>Push tokens</td><td>Until session deletion</td><td>Cascade on session delete</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>11.2 Account Deletion</h3>
+    <p><code>DELETE /api/users/me</code> deletes all reports, checklist progress, subscriptions, push tokens, and the user record in a single transaction.</p>
+  </section>
+
+  <!-- 12. INFRA -->
+  <section id="s12">
+    <div class="section-header">
+      <span class="section-num">12</span>
+      <h2>Infrastructure &amp; Deployment</h2>
+    </div>
+
+    <h3>12.1 Environment Variables</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Variable</th><th>Scope</th><th>Required</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td><code>DATABASE_URL</code></td><td>API server</td><td>Yes</td><td>PostgreSQL connection string</td></tr>
+          <tr><td><code>SESSION_SECRET</code></td><td>API server</td><td>Yes</td><td>Express session signing key</td></tr>
+          <tr><td><code>ADMIN_USERNAME</code></td><td>API server</td><td>Yes</td><td>Admin panel credentials</td></tr>
+          <tr><td><code>ADMIN_PASSWORD</code></td><td>API server</td><td>Yes</td><td>Admin panel credentials</td></tr>
+          <tr><td><code>PADDLE_WEBHOOK_SECRET</code></td><td>API server</td><td>Payments</td><td>Webhook HMAC verification</td></tr>
+          <tr><td><code>VITE_PADDLE_CLIENT_TOKEN</code></td><td>Web</td><td>Payments</td><td>Paddle.js initialisation</td></tr>
+          <tr><td><code>VITE_PADDLE_PRICE_ID</code></td><td>Web</td><td>Payments</td><td>Monthly Pro price ID</td></tr>
+          <tr><td><code>VITE_PADDLE_PRICE_ID_ANNUAL</code></td><td>Web</td><td>Payments</td><td>Annual Pro price ID</td></tr>
+          <tr><td><code>VITE_PADDLE_DONATION_PRICE_ID</code></td><td>Web</td><td>No</td><td>Donation price ID</td></tr>
+          <tr><td><code>AI_INTEGRATIONS_OPENAI_BASE_URL</code></td><td>API server</td><td>Yes</td><td>Auto-provisioned by Replit</td></tr>
+          <tr><td><code>AI_INTEGRATIONS_OPENAI_API_KEY</code></td><td>API server</td><td>Yes</td><td>Auto-provisioned by Replit</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>12.2 Database Push</h3>
+    <pre><code>cd lib/db && pnpm run push-force
+# Executes: drizzle-kit push --force --config ./drizzle.config.ts</code></pre>
+  </section>
+
+  <!-- 13. PERFORMANCE -->
+  <section id="s13">
+    <div class="section-header">
+      <span class="section-num">13</span>
+      <h2>Performance Characteristics</h2>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Metric</th><th>Observed</th><th>Target</th></tr></thead>
+        <tbody>
+          <tr><td>API cold start</td><td>~843ms (esbuild bundle)</td><td>&lt;2s</td></tr>
+          <tr><td>Assessment AI generation</td><td>8–15s</td><td>&lt;20s</td></tr>
+          <tr><td>Web app initial load (dev HMR)</td><td>~180ms</td><td>&lt;2s prod</td></tr>
+          <tr><td>Database query (reports list)</td><td>&lt;10ms</td><td>&lt;50ms</td></tr>
+          <tr><td>Anonymous report cleanup</td><td>&lt;100ms</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>AI generation latency is the primary user-facing performance constraint. A loading screen with animated messaging manages user expectation during the 8–15s generation window.</p>
+  </section>
+
+  <!-- 14. TESTING -->
+  <section id="s14">
+    <div class="section-header">
+      <span class="section-num">14</span>
+      <h2>Testing &amp; Quality</h2>
+    </div>
+
+    <h3>14.1 AI UX Testing Framework</h3>
+    <p>8 built-in personas each run the full assessment pipeline. A second AI evaluator scores each resulting report on quality, relevance, and empathy (0–10). A cross-persona synthesis report is generated at run end. Live progress via SSE. Exportable as Markdown/PDF.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Persona</th></tr></thead>
+        <tbody>
+          <tr><td>Urban Young Professional</td></tr>
+          <tr><td>Rural Retiree</td></tr>
+          <tr><td>Single Parent</td></tr>
+          <tr><td>Recent Graduate</td></tr>
+          <tr><td>Mid-Career Switcher</td></tr>
+          <tr><td>Expat</td></tr>
+          <tr><td>Freelancer</td></tr>
+          <tr><td>Near-Retirement Worker</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>14.2 End-to-End Testing</h3>
+    <p>Playwright-based tests cover assessment flow, results rendering, admin login, GDPR data operations, and freemium paywall gating.</p>
+  </section>
+
+</div>
+
+<div class="doc-footer">
+  Resilium Technical Specification — Version 2.0 — March 2026 — Confidential
+  &nbsp;|&nbsp; © 2026 Resilium. All rights reserved.
+</div>
+
+</body>
+</html>
