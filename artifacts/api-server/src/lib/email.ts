@@ -4,7 +4,8 @@ const resend = process.env["RESEND_API_KEY"]
   ? new Resend(process.env["RESEND_API_KEY"])
   : null;
 
-const FROM = "Resilium <hello@resilium.app>";
+// TODO: update to "Resilium <hello@resilium.app>" once domain is verified in Resend
+const FROM = process.env["RESEND_FROM"] ?? "Resilium <onboarding@resend.dev>";
 const ADMIN_TO = process.env["ADMIN_EMAIL"] ?? "contact_resilium@pm.me";
 const APP_URL = process.env["APP_URL"] ?? "https://resilium.app";
 
