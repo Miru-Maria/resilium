@@ -7,7 +7,7 @@
 
 Modern life is increasingly fragile. Supply chain disruptions, economic volatility, climate events, geopolitical instability, and health crises have converged to create a world where personal preparedness is no longer optional — it is a survival skill. Yet most individuals have no structured, data-driven framework for assessing or improving their personal resilience.
 
-**Resilium** is a personal resilience platform that quantifies an individual's readiness across six critical life dimensions — financial, physical, psychological, skills-based, mobility, and logistical resources — and delivers a personalised, actionable improvement roadmap. Unlike generic preparedness checklists or financial planning tools, Resilium combines validated psychological assessment methodology, intelligent scoring, and continuous progress tracking into a single, privacy-first platform available on both web and mobile.
+**Resilium** is a personal resilience platform that quantifies an individual's readiness across six critical life dimensions — financial, health, psychological, skills, mobility, and resources — and delivers a personalised, actionable improvement roadmap. Unlike generic preparedness checklists or single-domain financial planning tools, Resilium combines validated psychological assessment methodology, transparent deterministic scoring, AI-powered narrative generation, and continuous progress tracking into a single, privacy-first platform available on both web and mobile.
 
 This white paper sets out the problem space, the platform's methodology, the market opportunity, and the business case for Resilium as both a consumer product and an institutional partner opportunity.
 
@@ -28,21 +28,21 @@ These are not peripheral statistics. They describe the baseline condition of the
 
 ### 1.2 Existing Tools Are Inadequate
 
-Current offerings address fragments of the resilience problem:
+Current offerings address fragments of the resilience problem in isolation:
 
 | Tool Category | Coverage | Gaps |
 |---|---|---|
 | Financial advisors | Financial savings, investments | No psychological or logistical assessment |
 | Emergency preparedness guides | Physical supplies, evacuation plans | No personalisation, no progress tracking |
 | Mental health apps | Psychological wellbeing | No integration with material factors |
-| HR resilience training | Workplace-specific coping | No personal/family dimension |
+| HR resilience training | Workplace-specific coping | No personal or family dimension |
 | Government preparedness portals | Generic checklists | No AI reasoning, no action prioritisation |
 
-No existing tool integrates all six dimensions of resilience into a single, continuous, personalised assessment.
+No existing tool integrates all six dimensions of resilience into a single, continuous, personalised assessment and improvement system.
 
 ### 1.3 The Psychological Cost of Unpreparedness
 
-Beyond material vulnerability, unpreparedness has documented psychological effects. Chronic anxiety about financial fragility, housing insecurity, and health uncertainty are leading contributors to stress-related illness, reduced cognitive performance, and interpersonal conflict. Resilium addresses this directly: the platform's psychological resilience module uses validated constructs — stress tolerance, adaptability, learning agility, emotional regulation, and social support — to surface an individual's mental preparedness profile alongside their material one.
+Beyond material vulnerability, unpreparedness has documented psychological effects. Chronic anxiety about financial fragility, housing insecurity, and health uncertainty are leading contributors to stress-related illness, reduced cognitive performance, and interpersonal conflict. Resilium addresses this directly: the platform's psychological resilience module uses validated constructs — stress tolerance, adaptability, learning agility, change management, emotional regulation, and social support — to surface an individual's mental preparedness profile alongside their material one, enabling a complete and honest picture of readiness.
 
 ---
 
@@ -53,44 +53,72 @@ Beyond material vulnerability, unpreparedness has documented psychological effec
 Resilium is a full-stack digital platform delivering personalised resilience assessment and planning. Users complete a structured multi-dimensional assessment covering their financial position, physical health, psychological profile, skills portfolio, geographic context, and household logistics. A purpose-built AI engine processes these inputs against a multi-factor scoring model and generates a personalised resilience report containing:
 
 - **An overall resilience score** (0–100) and six dimensional sub-scores
-- **A risk profile narrative** written in plain language
+- **A risk profile narrative** written in plain language, tailored to the user's psychological pathway
 - **Top vulnerability identification** — the specific factors most likely to cause failure under stress
-- **A prioritised action plan** with 90-day, 6-month, and 12-month milestones
-- **Scenario simulations** modelling how the user's position would hold up under specific disruptions (job loss, natural disaster, health crisis, market crash)
-- **A domain-specific checklist** organised by improvement area
-- **Resource recommendations** matched to the user's specific vulnerabilities
+- **A prioritised action plan** with short, mid, and long-term milestones per area
+- **Scenario stress-tests** (Pro) — simulations of how the user's position would hold up under specific disruptions (job loss, natural disaster, health crisis, relocation), with impact estimates and tailored recovery steps
+- **Domain-specific checklists** organised by improvement area, with persistent completion tracking
+- **Daily habits** personalised to the user's weak areas and psychological pathway
+- **Resource recommendations** matched to specific vulnerabilities
 
 ### 2.2 The Six Resilience Dimensions
 
-Resilium scores users across six interdependent dimensions, each weighted and calibrated based on the user's geographic, economic, and personal context:
+Resilium scores users across six interdependent dimensions, each weighted and calibrated based on the user's geographic, economic, and personal context.
 
-**Financial Resilience** — Savings depth (months of runway), income stability, debt exposure, and ability to withstand income disruption. This is the most commonly cited dimension in personal finance literature and the one with the most immediate survival impact.
+**Financial Resilience (25%)** — Savings depth in months of runway, income stability classification, and dependency load. This is the most commonly cited dimension in personal finance literature and the one with the most immediate survival impact during a disruption.
 
-**Physical & Health Resilience** — Self-reported health status, mobility, access to healthcare, and physical capacity to respond to crisis situations. Poor health dramatically reduces a household's resilience ceiling regardless of financial strength.
+**Skills Resilience (20%)** — The breadth of an individual's transferable skill set across digital, physical, survival, medical, financial, and language competencies. Skills provide both economic optionality and direct practical value in disruption scenarios.
 
-**Psychological Resilience** — A 10-question structured assessment across six validated sub-dimensions: stress tolerance, adaptability, learning agility, change management, emotional regulation, and social support. This produces a Mental Resilience Composite (MRC) score distinct from the self-rated psychological score, enabling comparison between perceived and assessed resilience.
+**Health Resilience (15%)** — Self-reported health status and medical skill possession. Poor health dramatically reduces a household's resilience ceiling regardless of financial strength.
 
-**Skills Resilience** — The breadth and market relevance of an individual's transferable skill set. Skills such as medical training, mechanical ability, digital competency, and language fluency provide both economic optionality and direct practical value in disruption scenarios.
+**Mobility Resilience (15%)** — The ability to relocate and access transportation, informed by mobility level, housing type, and dependency constraints. Individuals with high financial resilience but zero mobility have critically underappreciated vulnerability.
 
-**Mobility & Logistics Resilience** — The ability to relocate, access transportation, and maintain supply of essential goods. Individuals with high financial resilience but zero mobility (e.g., single-car households in rural areas) have critically underappreciated vulnerability.
+**Psychological Resilience (15%)** — A 10-question structured assessment across six validated sub-dimensions: stress tolerance, adaptability, learning agility, change management, emotional regulation, and social support. This produces a Mental Resilience Composite (MRC) score distinct from any self-rating, enabling comparison between perceived and assessed psychological preparedness.
 
-**Resource Resilience** — Emergency supply depth, access to community networks, housing security, and redundant infrastructure (backup power, water, communications).
+**Resource Resilience (10%)** — Emergency supply depth, survival skill possession, and financial skill backup. The first line of practical defence in any disruption scenario.
 
 ### 2.3 The Mental Resilience Assessment
 
 A distinguishing feature of Resilium is its structured psychological evaluation. Unlike superficial stress questionnaires, the platform's 10-question Mental Resilience Assessment is designed around validated constructs from organisational psychology and positive psychology research. Each question targets a specific sub-dimension and is rated on a 1–5 behavioural frequency scale ("Rarely" to "Almost always").
 
-The resulting Mental Resilience Composite informs the AI's pathfinding logic: users scoring high on adaptability but low on stress tolerance receive different action plan priorities than users with the inverse profile.
+The six sub-dimensions:
 
-### 2.4 AI Engine
+| Sub-Dimension | Questions |
+|---|---|
+| Stress Tolerance | 2 (averaged) |
+| Adaptability | 2 (averaged) |
+| Learning Agility | 1 |
+| Change Management | 2 (averaged) |
+| Emotional Regulation | 2 (averaged) |
+| Social Support | 1 |
 
-Resilium's AI engine uses large language model reasoning (OpenAI GPT-4 class) to generate contextually appropriate, individually tailored report narratives and action plans. The AI is not used as a scoring mechanism — scoring is deterministic and transparent — but as a language and reasoning layer that:
+The resulting Mental Resilience Composite (MRC) is calculated as the equal-weighted mean of all six sub-dimension scores, normalised to 0–100.
+
+**Pathway classification:**
+- **Growth pathway** (MRC ≥ 60): The user has psychological headroom for ambitious, challenge-oriented goals. The AI generates an assertive, forward-looking action plan.
+- **Compensation pathway** (MRC < 60): The user should focus on stabilisation and confidence-building before expansion. The AI generates an emotionally scaffolded, step-by-step plan with shorter horizons.
+
+Critically, the MRC also functions as a cross-area modifier: users on the compensation pathway receive a proportional dampening of their Financial and Skills scores (between −1% and −15%), reflecting the documented compounding effect of psychological pressure on practical capability under crisis conditions.
+
+### 2.4 Scenario Stress-Tests
+
+Pro subscribers access a scenario simulation suite that models the impact of specific disruptions on their current resilience profile. Each simulation provides:
+
+- Per-dimension impact delta (how each area would change under the scenario)
+- An estimated recovery timeline
+- Scenario-specific action steps and resource recommendations
+
+Available scenarios: **Job Loss**, **Natural Disaster**, **Health Crisis**, **Relocation**. This feature transforms Resilium from a snapshot tool into a forward-planning instrument — users can answer "what if?" before the scenario happens, rather than after.
+
+### 2.5 AI Engine
+
+Resilium's AI engine uses large language model reasoning (OpenAI gpt-5.2 class) to generate contextually appropriate, individually tailored report narratives and action plans. The AI is not used as a scoring mechanism — scoring is deterministic and transparent — but as a language and reasoning layer that:
 
 - Synthesises multi-dimensional score data into coherent narrative
-- Identifies non-obvious interaction effects (e.g., high mobility + low financial resilience = specific evacuation risk pattern)
+- Identifies non-obvious interaction effects between dimensions (e.g., high mobility + low financial resilience = specific evacuation risk pattern)
 - Generates scenario simulations calibrated to the user's specific profile
 - Produces action plans that respect the user's stated constraints and priorities
-- Adapts recommendation framing to the user's geographic and economic context
+- Adapts recommendation framing to the user's geographic, economic, and psychological context
 
 ---
 
@@ -107,7 +135,7 @@ Personal resilience and preparedness sits at the intersection of several high-gr
 | Emergency preparedness products & services | $3.8B | 9% CAGR |
 | Online education & skills development | $185B | 13% CAGR |
 
-Resilium operates in a defined white space between the personal finance and personal preparedness categories, a gap that no major platform currently occupies.
+Resilium operates in a defined white space between the personal finance and personal preparedness categories — a gap that no major platform currently occupies.
 
 ### 3.2 Target Audience
 
@@ -121,12 +149,12 @@ Resilium operates in a defined white space between the personal finance and pers
 
 No direct competitor currently occupies the multi-dimensional personal resilience assessment space at the individual consumer level. Adjacent competitors include:
 
-- **Ready.gov / FEMA portals** — Government, generic, no personalisation
-- **Life360 / Prepared** — Family safety, location-focused, no AI assessment
-- **BetterUp / Calm** — Psychological, no financial or logistical dimensions
+- **Ready.gov / FEMA portals** — Government, generic, no personalisation, no AI
+- **Life360 / Prepared** — Family safety, location-focused, no assessment layer
+- **BetterUp / Calm** — Psychological dimension only, no financial or logistical factors
 - **Personal Capital / YNAB** — Financial only, no preparedness dimension
 
-Resilium's integrated, multi-dimensional approach creates a defensible category position.
+Resilium's integrated, multi-dimensional approach — combining psychological profiling, material assessment, AI-generated planning, and scenario simulation — creates a defensible category position.
 
 ---
 
@@ -136,26 +164,28 @@ Resilium's integrated, multi-dimensional approach creates a defensible category 
 
 Resilium operates on a freemium subscription model:
 
-**Starter (Free):** Two complete assessments, full AI-generated report, PDF export, GDPR-compliant data handling. Designed to demonstrate full product value before monetisation.
+**Free Tier:** Two complete assessments with full AI-generated reports. Designed to demonstrate the platform's full value before monetisation is requested.
 
-**Pro ($9/month or $79/year):** Unlimited assessments, longitudinal progress tracking with trend visualisation, scenario simulation suite, plan comparison with AI analysis, priority support.
+**Pro (£9/month or £79/year via Paddle):** Unlimited assessments, longitudinal progress tracking with trend visualisation, scenario stress-test suite (4 scenarios), plan comparison with AI analysis, and priority support. Pro users also access the full scenario runner page and unlock advanced report features.
+
+**Donation option:** A one-time donation is available on the results page for users who wish to support the platform without committing to a subscription.
 
 ### 4.2 Unit Economics (Projected)
 
 | Metric | Conservative | Base Case | Optimistic |
 |---|---|---|---|
-| Monthly free→paid conversion rate | 2% | 5% | 10% |
-| Monthly churn (Pro) | 8% | 5% | 3% |
+| Free → Pro conversion rate | 2% | 5% | 10% |
+| Monthly Pro churn | 8% | 5% | 3% |
 | Average revenue per user (annual) | $79 | $99 | $108 |
-| LTV at base case | $198 | $297 | $540 |
+| LTV at base case churn | $198 | $297 | $540 |
 
 ### 4.3 Institutional Revenue (Phase 2)
 
-Employer and institutional licensing represents a high-value, high-margin revenue stream. An API-accessible version of the assessment engine could be licensed to:
+Employer and institutional licensing represents a high-value, high-margin expansion path. An API-accessible version of the assessment engine could be licensed to:
 
-- Corporate HR departments for workforce resilience measurement
-- Insurance companies for risk profiling
-- Government resilience programmes for population-scale assessment
+- Corporate HR departments for workforce resilience measurement and benchmarking
+- Insurance companies for risk profiling and product personalisation
+- Government resilience programmes for population-scale assessment and intervention targeting
 
 ---
 
@@ -167,13 +197,14 @@ Resilium is built on a privacy-first architecture:
 
 - All personal assessment data is encrypted in transit (TLS) and at rest
 - User data is never sold or shared with third parties
-- Anonymous assessments (without account creation) are automatically deleted after 30 days
-- Full GDPR compliance: users can export all their data or request complete account deletion at any time
-- Data minimisation: only the information strictly necessary for scoring is collected
+- Anonymous assessments (without account creation) are automatically purged after 30 days
+- Full GDPR compliance: users can export all their data or request complete deletion at any time, from both web and mobile
+- Data minimisation: only information strictly necessary for scoring is collected
+- Versioned, timestamped consent is captured before any data collection on both web and mobile
 
 ### 5.2 AI Transparency
 
-Resilium's scoring methodology is deterministic and auditable. The AI is used only for language generation, not for scoring decisions. Users receive a score breakdown by dimension, enabling them to understand and contest any aspect of their assessment.
+Resilium's scoring methodology is deterministic and auditable. The AI is used only for language generation and reasoning, not for scoring decisions. Users receive a full score breakdown by dimension, enabling them to understand and scrutinise every aspect of their assessment result.
 
 ### 5.3 No Medical or Financial Advice
 
@@ -181,9 +212,24 @@ Resilium explicitly does not provide medical, financial, or legal advice. All ou
 
 ---
 
-## 6. Impact Vision
+## 6. Platform Maturity
 
-Resilience is a measurable, improvable quantity. Resilium exists to make that measurement accessible to every individual, not just those who can afford bespoke advisors or have the background to self-educate across all six dimensions simultaneously.
+Resilium is fully built, tested, and operational. The platform features:
+
+- **Web application** — React 19 / Vite 7 / TypeScript with Tailwind CSS and shadcn/ui; dark-only brand palette (`#0D1225` background, `#E08040` orange primary)
+- **Mobile application** — Expo SDK 53 (React Native); identical dark palette; push notification support (30-day check-in reminders); haptic feedback throughout assessment
+- **API server** — Node.js 24 / Express 5; esbuild compilation; full OpenAPI specification
+- **Database** — PostgreSQL 16 with Drizzle ORM; 12 production tables; automated GDPR cleanup
+- **Authentication** — Replit Auth (OIDC/PKCE) for users; cookie-based admin authentication
+- **Payments** — Paddle subscription billing with HMAC-verified webhooks
+- **AI UX testing** — 8 built-in persona simulations with AI-evaluated quality scoring and live SSE progress streaming; exportable reports
+- **Admin dashboard** — 6-tab analytics, mobile metrics, GDPR management, consent audit log, site announcement system
+
+---
+
+## 7. Impact Vision
+
+Resilience is a measurable, improvable quantity. Resilium exists to make that measurement accessible to every individual — not just those who can afford bespoke advisors or have the background to self-educate across all six dimensions simultaneously.
 
 A population that understands its own vulnerabilities is better positioned to address them. Communities where individuals have taken concrete preparedness steps recover faster from disruptions, place less pressure on emergency services, and sustain social cohesion through crises.
 
@@ -191,7 +237,7 @@ Resilium's long-term vision is to become the global standard for individual and 
 
 ---
 
-## 7. Conclusion
+## 8. Conclusion
 
 Resilium represents a significant and currently unaddressed opportunity in the personal wellbeing technology space. The platform is fully built, live, and operational — serving users on web and mobile with a production-grade assessment engine, secure data handling, and a clear monetisation path via Paddle subscription billing.
 
@@ -201,6 +247,6 @@ We are actively seeking strategic partnerships, distribution relationships, and 
 
 ---
 
-*Contact: Available through the platform at resilium.replit.app*
+*Contact: Available through the platform*
 
 *© 2026 Resilium. All rights reserved.*

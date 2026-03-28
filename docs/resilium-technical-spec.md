@@ -1,5 +1,5 @@
 # Resilium: Full Technical Specification
-## Version 1.0 — March 2026
+## Version 2.0 — March 2026
 
 ---
 
@@ -12,13 +12,12 @@ Resilium is a full-stack, multi-artifact monorepo application delivering persona
 ```
 resilium/
 ├── artifacts/
-│   ├── api-server/          # Express.js REST API (Node.js)
+│   ├── api-server/          # Express 5 REST API (Node.js 24)
 │   ├── resilium/            # React + Vite web application
 │   └── resilium-mobile/     # Expo (React Native) mobile application
 ├── lib/
 │   ├── db/                  # Drizzle ORM schema + migrations
-│   ├── api-client-react/    # Auto-generated typed API client (React hooks)
-│   └── integrations-*/      # AI provider integration wrappers
+│   └── replit-auth-web/     # Shared Replit Auth hook for web
 └── pnpm-workspace.yaml
 ```
 
@@ -26,7 +25,7 @@ resilium/
 
 | Artifact | Runtime | Port | Purpose |
 |---|---|---|---|
-| `api-server` | Node.js 20 | `$PORT` (8080 dev) | REST API, AI orchestration, auth, webhooks |
+| `api-server` | Node.js 24 | `$PORT` (8080 dev) | REST API, AI orchestration, auth, webhooks |
 | `resilium` | Vite 7 / React 19 | `$PORT` (5173 dev) | Web frontend (SPA) |
 | `resilium-mobile` | Expo SDK 53 | `$PORT` | React Native app (web + iOS + Android) |
 
@@ -38,16 +37,14 @@ resilium/
 
 | Layer | Technology | Version |
 |---|---|---|
-| Runtime | Node.js | 20 LTS |
-| Framework | Fastify-style Express.js | 4.x |
-| Language | TypeScript | 5.x |
+| Runtime | Node.js | 24 LTS |
+| Framework | Express | 5.x |
+| Language | TypeScript | 5.9.x |
 | ORM | Drizzle ORM | 0.39.x |
 | Database | PostgreSQL | 16 (Replit managed) |
 | Session store | connect-pg-simple | pg-backed sessions |
 | Authentication | Replit Auth (OpenID Connect / PKCE) | — |
-| AI provider | OpenAI (GPT-4 class) via Replit AI Integrations proxy | gpt-4o |
-| Logging | Pino + pino-http | 9.x |
-| HTTP server | Fastify/Express | — |
+| AI provider | OpenAI gpt-5.2 via Replit AI Integrations proxy | gpt-5.2 |
 | Rate limiting | express-rate-limit | 7.x |
 | Build | esbuild (via custom build.mjs) | 0.24.x |
 
@@ -64,7 +61,6 @@ resilium/
 | Animation | Framer Motion | 12.x |
 | Charts | Recharts | 2.x |
 | Icons | Lucide React | — |
-| Type generation | Orval (OpenAPI → React hooks) | — |
 | Payments | Paddle.js v2 (overlay checkout) | — |
 
 ### 2.3 Mobile
@@ -75,6 +71,8 @@ resilium/
 | React Native | React Native | 0.79.x |
 | Navigation | Expo Router (file-based) | 6.x |
 | Animations | React Native Reanimated | 3.x |
+| Notifications | expo-notifications | — |
+| Haptics | expo-haptics | — |
 | Gradients | Expo Linear Gradient | — |
 | SVG | react-native-svg | 15.x |
 | Icons | @expo/vector-icons (Feather) | — |
@@ -85,9 +83,7 @@ resilium/
 | Package | Purpose |
 |---|---|
 | `@workspace/db` | Drizzle schema, types, and database client |
-| `@workspace/api-client-react` | Auto-generated typed React Query hooks from OpenAPI spec |
-| `@workspace/api-zod` | Zod validation schemas shared between server and client |
-| `@workspace/integrations-openai-ai-server` | OpenAI client wrapper via Replit AI proxy |
+| `@workspace/replit-auth-web` | Shared Replit Auth hook (`useAuth`) for web |
 
 ---
 
@@ -99,13 +95,13 @@ All tables use PostgreSQL via Drizzle ORM. Schema is pushed using `drizzle-kit p
 
 #### `users`
 ```sql
-id            VARCHAR PRIMARY KEY DEFAULT gen_random_uuid()
-email         VARCHAR UNIQUE
-first_name    VARCHAR
-last_name     VARCHAR
+id                VARCHAR PRIMARY KEY DEFAULT gen_random_uuid()
+email             VARCHAR UNIQUE
+first_name        VARCHAR
+last_name         VARCHAR
 profile_image_url VARCHAR
-created_at    TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-updated_at    TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+created_at        TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+updated_at        TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 ```
 Populated and maintained by Replit Auth on every login via upsert.
 
@@ -132,19 +128,19 @@ has_dependents        BOOLEAN NOT NULL
 skills                JSONB NOT NULL              -- string[]
 health_status         TEXT NOT NULL               -- excellent | good | fair | poor
 mobility_level        TEXT NOT NULL               -- high | medium | low
-housing_type          TEXT NOT NULL               -- own | rent | family | shelter
+housing_type          TEXT NOT NULL               -- own | rent | family | nomadic | other
 has_emergency_supplies BOOLEAN NOT NULL
 psychological_resilience REAL NOT NULL            -- 1–10 self-rating
 risk_concerns         JSONB NOT NULL              -- string[]
 
--- Mental Resilience sub-scores (0–100 normalised)
+-- Mental Resilience sub-scores (0–100 normalised from 1–5 Likert)
 mr_stress_tolerance   REAL
 mr_adaptability       REAL
 mr_learning_agility   REAL
 mr_change_management  REAL
 mr_emotional_regulation REAL
 mr_social_support     REAL
-mr_composite          REAL                        -- weighted average
+mr_composite          REAL                        -- simple mean of 6 sub-scores
 mr_pathway            TEXT                        -- growth | compensation | null
 
 -- Dimension scores (0–100)
@@ -156,7 +152,7 @@ score_mobility        REAL NOT NULL
 score_psychological   REAL NOT NULL
 score_resources       REAL NOT NULL
 
--- AI-generated content
+-- AI-generated content (JSONB)
 risk_profile_summary  TEXT NOT NULL
 top_vulnerabilities   JSONB NOT NULL
 action_plan           JSONB NOT NULL
@@ -206,8 +202,20 @@ score_resources     REAL NOT NULL
 mr_composite        REAL
 ```
 
+#### `push_tokens`
+```sql
+id           SERIAL PRIMARY KEY
+session_id   TEXT NOT NULL
+token        TEXT NOT NULL
+platform     TEXT                -- ios | android | web
+created_at   TIMESTAMP DEFAULT NOW()
+```
+Stores Expo push tokens for server-initiated notifications.
+
 #### Additional Tables
+- `gdpr_consent` — versioned consent records with session ID, version string, and timestamp
 - `gdpr_requests` — tracks data export/deletion requests with contact email and request type
+- `gdpr_admin_actions` — audit trail of all admin GDPR actions
 - `feedback` — per-report star ratings and free-text comments
 - `site_announcements` — admin-controlled platform-wide banners
 - `ux_test_runs` / `ux_test_results` — AI persona-driven UX testing framework
@@ -218,165 +226,267 @@ mr_composite        REAL
 
 Base path: `/api`
 
-Authentication: Replit Auth session cookie (`connect.sid`) or admin bearer token.
+Authentication: Replit Auth session cookie (`connect.sid`) for user routes; admin cookie-based session for admin routes.
 
 ### 4.1 Assessment & Reports
 
 | Method | Endpoint | Auth | Description |
 |---|---|---|---|
-| `POST` | `/resilience/assess` | Optional | Submit assessment, trigger AI scoring |
+| `POST` | `/resilience/assess` | Optional | Submit assessment; triggers scoring and AI report generation |
 | `GET` | `/resilience/reports/:reportId` | Optional | Fetch report by public ID |
-| `GET` | `/resilience/reports/:reportId/checklists` | Optional | Fetch checklist progress |
-| `PATCH` | `/resilience/reports/:reportId/checklists/:area/:itemId` | Required | Toggle checklist item |
+| `GET` | `/resilience/reports/:reportId/checklists` | Optional | Fetch checklist items and completion state |
+| `PATCH` | `/resilience/reports/:reportId/checklists/:area/:itemId` | Required | Toggle checklist item completion |
+| `GET` | `/resilience/reports/:reportId/snapshots` | Optional | Historical score snapshots for a report |
 
 **POST `/resilience/assess` — Request body:**
 ```typescript
 {
-  location: string                  // free text geographic location
-  currency: "USD" | "EUR" | "RON"
+  location: string                   // free text geographic location
+  currency?: "USD" | "EUR" | "RON"
   incomeStability: "fixed" | "freelance" | "unstable"
-  savingsMonths: number             // 0–36+
+  savingsMonths: number              // 0–36+
   hasDependents: boolean
-  skills: SkillsItem[]             // multi-select enum
+  skills: string[]                   // digital | physical | survival | medical | financial | language | none
   healthStatus: "excellent" | "good" | "fair" | "poor"
   mobilityLevel: "high" | "medium" | "low"
-  housingType: "own" | "rent" | "family" | "shelter"
+  housingType: "own" | "rent" | "family" | "nomadic" | "other"
   hasEmergencySupplies: boolean
-  psychologicalResilience: number   // 1–10
-  riskConcerns: RiskConcernsItem[]  // multi-select enum
+  psychologicalResilience: number    // 1–10 fallback self-rating
+  riskConcerns: string[]
   mentalResilienceAnswers: {
-    stressTolerance1: 1|2|3|4|5
-    stressTolerance2: 1|2|3|4|5
-    adaptability1:    1|2|3|4|5
-    adaptability2:    1|2|3|4|5
-    learningAgility1: 1|2|3|4|5
-    changeManagement1:1|2|3|4|5
-    changeManagement2:1|2|3|4|5
-    emotionalRegulation1: 1|2|3|4|5
-    emotionalRegulation2: 1|2|3|4|5
-    socialSupport1:   1|2|3|4|5
+    stressTolerance1:      1|2|3|4|5
+    stressTolerance2:      1|2|3|4|5
+    adaptability1:         1|2|3|4|5
+    adaptability2:         1|2|3|4|5
+    learningAgility1:      1|2|3|4|5
+    changeManagement1:     1|2|3|4|5
+    changeManagement2:     1|2|3|4|5
+    emotionalRegulation1:  1|2|3|4|5
+    emotionalRegulation2:  1|2|3|4|5
+    socialSupport1:        1|2|3|4|5
   }
 }
 ```
 
-**Rate limiting:** Anonymous users: 6 requests/60s. Authenticated users: unlimited.
+**Rate limiting:** 6 submissions per minute per IP for anonymous users.
 
-### 4.2 User Management
+### 4.2 Scenario Simulations (Pro)
 
 | Method | Endpoint | Auth | Description |
 |---|---|---|---|
-| `GET` | `/users/me/plans` | Required | List user's saved plans |
-| `DELETE` | `/users/me/plans/:reportId` | Required | Delete a specific plan |
-| `DELETE` | `/users/me/plans` | Required | Delete all plans |
+| `POST` | `/scenarios` | Required (Pro) | Generate scenario stress-test for an existing report |
+
+**POST `/scenarios` — Request body:**
+```typescript
+{
+  reportId: string       // existing report UUID
+  scenario: string       // "job_loss" | "natural_disaster" | "health_crisis" | "relocation"
+}
+```
+
+Returns scenario impact delta on each dimension, recovery timeline estimate, and tailored action steps.
+
+### 4.3 User Management
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `GET` | `/users/me/plans` | Required | List user's saved reports |
+| `DELETE` | `/users/me/plans/:reportId` | Required | Delete a specific report |
+| `DELETE` | `/users/me/plans` | Required | Delete all reports |
 | `DELETE` | `/users/me` | Required | Full account deletion (GDPR) |
-| `GET` | `/users/me/subscription` | Required | Current subscription status |
 | `GET` | `/users/me/report-count` | Required | Count of saved reports |
 | `GET` | `/users/me/export` | Required | Full data export (JSON) |
 | `GET` | `/users/me/latest-checklist` | Required | Latest report's checklist data |
 | `POST` | `/users/me/compare-plans` | Required | AI comparison of two plan IDs |
 
-### 4.3 Authentication
+### 4.4 Authentication
 
 | Method | Endpoint | Description |
 |---|---|---|
 | `GET` | `/auth/user` | Current session user |
-| `GET` | `/auth/login` | Initiate Replit Auth OIDC flow |
-| `GET` | `/auth/callback` | OIDC callback handler |
-| `GET` | `/auth/logout` | Clear session |
+| `GET` | `/login` | Initiate Replit Auth OIDC flow |
+| `GET` | `/callback` | OIDC callback handler |
+| `GET` | `/logout` | Clear session |
+| `POST` | `/auth/mobile-token` | Exchange OIDC token for mobile session |
 
-### 4.4 Payments (Paddle)
+### 4.5 Subscriptions
 
 | Method | Endpoint | Auth | Description |
 |---|---|---|---|
-| `POST` | `/paddle/webhook` | Signature | Receive Paddle subscription events |
+| `GET` | `/subscription/status` | Required | Returns `{ isPro, status, currentPeriodEnd }` |
+| `POST` | `/webhooks/paddle` | Signature | Receive Paddle subscription lifecycle events |
 
 **Webhook events handled:**
 - `subscription.activated` → set status `active`
-- `subscription.updated` → update status and period end
+- `subscription.updated` → update status and `current_period_end`
 - `subscription.cancelled` → set status `cancelled`
 - `subscription.past_due` → set status `past_due`
 
 **Signature verification:** HMAC-SHA256 over `{timestamp}:{rawBody}` using `PADDLE_WEBHOOK_SECRET`.
 
-### 4.5 Admin (Bearer token required)
+### 4.6 GDPR
 
 | Method | Endpoint | Description |
 |---|---|---|
-| `POST` | `/admin/login` | Exchange credentials for JWT |
-| `GET` | `/admin/session` | Validate token |
-| `POST` | `/admin/logout` | Invalidate token |
+| `POST` | `/gdpr/consent` | Log versioned consent record |
+| `GET` | `/gdpr/export/:sessionId` | Export all data for a session |
+| `POST` | `/gdpr/data-request` | Submit deletion or export request |
+
+### 4.7 Push Notifications
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/push-tokens` | Register Expo push token (body: `{ token, platform?, sessionId }`) |
+
+### 4.8 Admin (cookie-based admin session required)
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/admin/login` | Authenticate with `ADMIN_USERNAME` / `ADMIN_PASSWORD` |
+| `GET` | `/admin/session` | Validate admin session |
 | `GET` | `/admin/analytics` | Full platform analytics aggregate |
-| `GET` | `/admin/users` | User table with plan counts |
-
-### 4.6 Supporting Endpoints
-
-| Method | Endpoint | Description |
-|---|---|---|
+| `GET` | `/admin/analytics/mobile` | Mobile-specific metrics |
+| `GET` | `/admin/ux-test/personas` | List available UX test personas |
+| `POST` | `/admin/ux-test/run` | Start a persona simulation run |
+| `GET` | `/admin/ux-test/runs` | List past simulation runs |
+| `GET` | `/admin/ux-test/runs/:runId` | Get run details and per-persona scores |
+| `GET` | `/admin/ux-test/runs/:runId/stream` | SSE live progress stream |
+| `GET` | `/admin/gdpr/requests` | List data requests |
+| `POST` | `/admin/gdpr/requests/:id/fulfill` | Mark request fulfilled |
+| `GET` | `/admin/gdpr/requests/:id/export` | Download export package |
+| `GET` | `/admin/gdpr/consent-log` | Paginated consent audit log |
 | `GET` | `/announcements` | Active site announcements |
 | `POST` | `/admin/announcements` | Create announcement |
-| `PATCH` | `/admin/announcements/:id` | Toggle active state |
+| `PATCH` | `/admin/announcements/:id` | Toggle announcement active state |
 | `DELETE` | `/admin/announcements/:id` | Delete announcement |
-| `POST` | `/feedback` | Submit report feedback/rating |
-| `POST` | `/gdpr/request` | Submit data request |
-| `GET` | `/health` | Health check |
+
+### 4.9 Supporting
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/feedback` | Submit report star rating + comment |
+| `GET` | `/health` | Health check (returns `{ status: "ok" }`) |
 
 ---
 
 ## 5. Scoring Methodology
 
-Scoring is entirely deterministic. No AI is involved in score calculation. The algorithm runs server-side in `scoring.ts`.
+All scoring is deterministic. No AI is involved in score calculation. The algorithm runs server-side in `scoring.ts`.
 
 ### 5.1 Dimension Weights
 
 | Dimension | Weight |
 |---|---|
 | Financial | 25% |
-| Psychological | 20% |
+| Skills | 20% |
 | Health | 15% |
-| Skills | 15% |
 | Mobility | 15% |
+| Psychological | 15% |
 | Resources | 10% |
 
-### 5.2 Financial Score Components
+### 5.2 Financial Score
 
-- Savings depth (0–6 months: 0–60 points; 6–12 months: 60–85 points; 12+ months: 85–100 points)
-- Income stability modifier: Fixed +10, Freelance 0, Unstable −15
-- Dependents penalty: −10 if `hasDependents`
-- Geographic cost-of-living adjustment applied based on location text
+| Input | Contribution |
+|---|---|
+| Income stability: fixed | +40 pts |
+| Income stability: freelance | +25 pts |
+| Income stability: unstable | +10 pts |
+| Savings ≥ 12 months | +40 pts |
+| Savings 6–11 months | +30 pts |
+| Savings 3–5 months | +20 pts |
+| Savings 1–2 months | +10 pts |
+| Savings < 1 month | +0 pts |
+| No dependents | +20 pts |
+| Has dependents | +5 pts |
 
-### 5.3 Mental Resilience Composite
+### 5.3 Skills Score
 
-The 10-question MRC assessment produces six sub-dimension scores:
+| Skill | Points |
+|---|---|
+| Survival | 25 |
+| Digital | 20 |
+| Physical | 20 |
+| Medical | 20 |
+| Financial | 15 |
+| Language | 15 |
+| None | 0 |
+
+Multiple skills sum; capped at 100.
+
+### 5.4 Health Score
+
+| Input | Contribution |
+|---|---|
+| Health: excellent | +60 pts |
+| Health: good | +45 pts |
+| Health: fair | +25 pts |
+| Health: poor | +10 pts |
+| Has medical skill | +20 pts |
+| Base | +20 pts |
+
+### 5.5 Mobility Score
+
+| Input | Contribution |
+|---|---|
+| Mobility: high | +50 pts |
+| Mobility: medium | +30 pts |
+| Mobility: low | +10 pts |
+| Housing: nomadic | +40 pts |
+| Housing: rent | +30 pts |
+| Housing: family | +25 pts |
+| Housing: own | +20 pts |
+| Housing: other | +15 pts |
+| No dependents | +10 pts |
+
+### 5.6 Resources Score
+
+| Input | Contribution |
+|---|---|
+| Has emergency supplies | +50 pts |
+| Has survival skill | +30 pts |
+| Has financial skill | +20 pts |
+
+### 5.7 Mental Resilience Composite (MRC)
+
+The 10 Likert questions (1–5 scale) map to six sub-dimensions:
 
 ```
-stress_tolerance     = mean(stressTolerance1, stressTolerance2) / 5 × 100
-adaptability         = mean(adaptability1, adaptability2) / 5 × 100
-learning_agility     = learningAgility1 / 5 × 100
-change_management    = mean(changeManagement1, changeManagement2) / 5 × 100
-emotional_regulation = mean(emotionalRegulation1, emotionalRegulation2) / 5 × 100
-social_support       = socialSupport1 / 5 × 100
+stressTolerance    = mean(stressTolerance1, stressTolerance2)
+adaptability       = mean(adaptability1, adaptability2)
+learningAgility    = learningAgility1
+changeManagement   = mean(changeManagement1, changeManagement2)
+emotionalRegulation = mean(emotionalRegulation1, emotionalRegulation2)
+socialSupport      = socialSupport1
 
-MRC = (stress_tolerance × 0.20) +
-      (adaptability × 0.20) +
-      (learning_agility × 0.15) +
-      (change_management × 0.15) +
-      (emotional_regulation × 0.20) +
-      (social_support × 0.10)
+Each sub-score normalised to 0–100:
+  subScore = round(((avg - 1) / 4) × 100)
+
+MRC = round(mean of all six sub-scores)       -- equal weight (1/6 each)
 ```
 
 **Pathway classification:**
-- `growth`: MRC ≥ 70 — user has headroom for challenge
-- `compensation`: MRC < 70 — user should focus on stabilisation before expansion
-- `null`: insufficient data
+- `growth`: MRC ≥ 60 — user has capacity for challenge-oriented goals
+- `compensation`: MRC < 60 — user should focus on stabilisation before expansion
 
-The MRC feeds into the psychological dimension score alongside the self-rated resilience score (weighted 60% MRC, 40% self-rating).
+**Cross-area psychological modifier (compensation pathway only):**
+```
+modifier = 0.85 + (MRC / 60) × 0.15
+  -- MRC=0  → modifier 0.85 (15% dampening)
+  -- MRC=59 → modifier ~0.998 (≈ no dampening)
 
-### 5.4 Overall Score
+Financial and Skills scores are multiplied by modifier before weighting.
+Health, Mobility, and Resources are unaffected.
+```
+
+### 5.8 Overall Score
 
 ```
-overall = (financial × 0.25) + (psychological × 0.20) +
-          (health × 0.15) + (skills × 0.15) +
-          (mobility × 0.15) + (resources × 0.10)
+overall = (financial × modifier × 0.25) +
+          (health × 0.15) +
+          (skills × modifier × 0.20) +
+          (mobility × 0.15) +
+          (psychological × 0.15) +
+          (resources × 0.10)
 ```
 
 All scores are clamped to [0, 100].
@@ -387,14 +497,14 @@ All scores are clamped to [0, 100].
 
 ### 6.1 Architecture
 
-The AI layer uses OpenAI's GPT-4o model via Replit's AI Integrations proxy, which handles API key management and billing. The server never stores or exposes the raw API key.
+The AI layer uses OpenAI's gpt-5.2 model via Replit's AI Integrations proxy, which handles API key management and billing. The server never stores or exposes the raw API key.
 
 ### 6.2 Report Generation Flow
 
 ```
 1. Score calculation (deterministic, ~1ms)
-2. Prompt construction from score context + input data
-3. OpenAI API call (streaming not used; full response awaited)
+2. Prompt construction from score context + input data + MRC pathway
+3. OpenAI API call (full response awaited; not streamed)
 4. Response parsed into structured JSON:
    - riskProfileSummary (text)
    - topVulnerabilities (array of {area, description, severity})
@@ -407,20 +517,33 @@ The AI layer uses OpenAI's GPT-4o model via Replit's AI Integrations proxy, whic
 6. Report ID returned to client
 ```
 
+Malformed AI responses trigger a retry (max 2 attempts) before returning an error.
+
 ### 6.3 AI Prompt Design
 
 The system prompt establishes Resilium as a personal resilience advisor. The user prompt injects:
 - All six dimension scores and sub-scores
-- The MRC score and pathway classification
+- The MRC composite and pathway classification
 - Geographic context (location)
 - Key vulnerability flags derived from inputs
 - Currency preference (affects financial framing)
 
-The prompt instructs the model to produce responses in a specific JSON schema, validated server-side before storage. Malformed AI responses trigger a retry (max 2 attempts).
+The MRC pathway directly changes the AI's framing strategy:
+- **Growth pathway:** Challenge-oriented language; ambitious action plan; longer-horizon goals
+- **Compensation pathway:** Emotionally scaffolded language; stability-first priorities; shorter-horizon milestones
 
-### 6.4 Plan Comparison AI
+### 6.4 Scenario Simulations
 
-A separate AI call handles the `POST /users/me/compare-plans` endpoint. Two full report objects are provided to the model, which produces a comparative analysis identifying improvements, regressions, and recommended next steps between two assessment dates.
+Each scenario stress-test (`/api/scenarios`) is a separate AI call that receives the full report context plus the scenario type. The model returns:
+- Impact delta per dimension (e.g., "Financial −25, Skills +5")
+- Recovery timeline estimate
+- Scenario-specific action steps and resources
+
+Scenarios supported: `job_loss`, `natural_disaster`, `health_crisis`, `relocation`.
+
+### 6.5 Plan Comparison AI
+
+`POST /api/users/me/compare-plans` receives two full report objects and returns a comparative analysis identifying improvements, regressions, and recommended next steps between two assessment dates.
 
 ---
 
@@ -437,19 +560,17 @@ Resilium uses Replit's managed OpenID Connect implementation:
 5. Session established via `express-session` with PostgreSQL store
 6. `authMiddleware` populates `req.user` on all authenticated requests
 
-Session cookies are `HttpOnly`, `Secure` (production), `SameSite: lax`, and expire after 24 hours.
+Session cookies are `HttpOnly`, `Secure` (production), `SameSite: lax`, 24-hour TTL.
 
 ### 7.2 Admin Authentication
 
-Admin routes use a separate JWT-based system:
+Admin routes use a cookie-based session:
 - Credentials (`ADMIN_USERNAME`, `ADMIN_PASSWORD`) stored as environment secrets
-- Successful login returns a signed JWT bearer token
-- All admin routes validate the token via `Authorization: Bearer {token}` header
-- Tokens expire after 8 hours
+- Successful login sets a signed HTTP-only cookie
+- All `/api/admin/*` routes validate the admin cookie via middleware
+- Admin sessions expire after 24 hours
 
 ### 7.3 Paddle Webhook Security
-
-All Paddle webhook payloads are verified via HMAC-SHA256 signature before processing:
 
 ```typescript
 const signed = `${timestamp}:${rawBody}`;
@@ -463,131 +584,128 @@ Raw request body is captured before JSON parsing to ensure signature integrity.
 
 ### 7.4 Rate Limiting
 
-Anonymous assessment submissions are rate-limited to 6 per minute per IP. Authenticated users bypass this limit. Admin login attempts are not explicitly rate-limited but require credential match.
+Anonymous assessment submissions: 6 per minute per IP (express-rate-limit).
 
 ---
 
 ## 8. Freemium Access Control
 
-### 8.1 Anonymous Users
+### 8.1 Free Limit
 
-Assessment count tracked in browser `localStorage` under key `resilium_free_count`. On the client, if count ≥ 2, the assessment page renders a paywall screen before any form elements are shown. The backend enforces no hard limit on anonymous submissions (rate limiting provides the guard), as anonymous reports are auto-purged after 30 days.
+`FREE_LIMIT = 2`. Two complete assessments are available at no charge for all users.
 
-### 8.2 Authenticated Users (No Subscription)
+### 8.2 Anonymous Users
+
+Assessment count tracked in browser `localStorage` under key `resilium_free_count`. If count ≥ 2, the assessment page renders a paywall screen before any form elements are shown. A progress counter ("X of 2 free assessments used") is displayed in the assessment header throughout.
+
+### 8.3 Authenticated Users (No Subscription)
 
 On assessment page load, two parallel API calls are made:
-- `GET /api/users/me/subscription` — returns `{ isActive: boolean, status: string }`
+- `GET /api/subscription/status` — returns `{ isPro, status, currentPeriodEnd }`
 - `GET /api/users/me/report-count` — returns `{ count: number }`
 
-If `!isActive && count >= 2`, the paywall screen is shown. Gate fails open (on API error, user is allowed through).
+If `!isPro && count >= 2`, the paywall screen is shown. Gate fails open on API error.
 
-### 8.3 Authenticated Users (Active Subscription)
+### 8.4 Pro Subscribers
 
-`isActive: true` (status `active` or `cancel_scheduled`) bypasses all frontend gates. The backend also skips the `PLAN_LIMIT` check for subscribers when processing assessment submissions.
-
-### 8.4 Plan Storage Limit
-
-Non-subscribing authenticated users are limited to 10 stored plans (`PLAN_LIMIT = 10`). This backend check occurs on every `POST /resilience/assess` for authenticated requests. Active subscribers are exempt.
+`isPro: true` (status `active` or `cancel_scheduled`) bypasses all assessment gates. Pro users also unlock the Scenario Simulations runner at `/scenarios/:reportId`.
 
 ---
 
 ## 9. Frontend Architecture
 
-### 9.1 Web Application
+### 9.1 Web Application Pages
 
-The React SPA uses Wouter for lightweight client-side routing. All routes are registered in `App.tsx`:
-
-| Route | Component | Auth required |
+| Route | Description | Auth |
 |---|---|---|
-| `/` | `LandingPage` | No |
-| `/assess` | `AssessmentPage` | No (gated) |
-| `/results/:reportId` | `ResultsPage` | No |
-| `/profile` | `ProfilePage` | Yes |
-| `/pricing` | `PricingPage` | No |
-| `/about` | `AboutPage` | No |
-| `/privacy` | `PrivacyPage` | No |
-| `/admin/*` | Admin pages | Admin JWT |
-
-TanStack React Query manages all server state with a shared `QueryClient`. The API client is auto-generated from the OpenAPI specification using Orval, providing fully typed request/response hooks.
+| `/` | Landing page — hero, value proposition, sign-in | No |
+| `/about` | About Resilium | No |
+| `/demo` | Static fictional demo report for "Alex M." | No |
+| `/pricing` | Pro plan pricing and comparison | No |
+| `/assess` | 11-step assessment (gated at 2 free) | No (gated) |
+| `/results/:reportId` | Full AI report, radar chart, checklists, feedback | No |
+| `/scenarios/:reportId` | Scenario stress-test runner | Yes (Pro) |
+| `/profile` | Saved reports, progress tracking, account settings | Yes |
+| `/privacy` | Privacy Policy | No |
+| `/terms` | Terms & Conditions | No |
+| `/refund` | Refund Policy | No |
+| `/admin/login` | Admin login | No |
+| `/admin/dashboard` | Analytics overview (6 tabs) | Admin |
+| `/admin/ux-test` | AI persona UX testing runner | Admin |
+| `/admin/ux-test/report/:runId` | Per-run results | Admin |
+| `/admin/mobile` | Mobile analytics | Admin |
+| `/admin/gdpr` | GDPR request management | Admin |
+| `/admin/consent-log` | Consent audit trail | Admin |
 
 ### 9.2 Assessment Flow
 
-The assessment is a single-page multi-step form with 11 steps:
+The assessment is a multi-step single-page form. Step 1 is the Mental Resilience questionnaire — 10 Likert-scale questions shown one at a time with a sub-step progress counter. Steps 2–11 cover location, income, savings, dependents, skills, health, mobility, housing, emergency supplies, psychological self-rating, and risk concerns. Navigation is animated via Framer Motion `AnimatePresence`. State is held in a single `formData` React state object.
 
-- **Step 1:** Mental Resilience Assessment (10 sub-questions with `mrStep` sub-counter)
-- **Steps 2–11:** Geographic, financial, health, skills, housing, supplies, psychological, and risk questions
+### 9.3 Results Page
 
-State is managed via React `useState` with a single `formData` object. Progress is calculated as a proportion of total sub-steps (MR questions + remaining steps). Navigation is animated via Framer Motion `AnimatePresence`.
+Displays: overall score ring (CircularProgress), dimension bar chart, radar chart (Recharts), mental resilience profile (Growth vs. Compensation), top vulnerabilities, action plan (tabbed by timeframe), scenario simulations (accordion), daily habits, and interactive checklists. Authenticated users can also save their plan from this page.
 
-### 9.3 Profile Architecture
+### 9.4 Demo Page
 
-The Profile page implements a 4-tab architecture:
+`/demo` presents a pre-populated fictional report for "Alex M." showing all results sections and Pro-gated scenario teasers. Linked from the landing navigation to showcase product value without requiring assessment completion.
 
-1. **Overview** — Score summary cards, trend line chart (Recharts), most-improved / focus-area highlights
-2. **Plans** — Plan cards with individual deletion, compare mode (select 2 → AI analysis modal)
-3. **Checklist** — Persistent per-item progress loaded from DB, collapsible by area
-4. **Account** — GDPR export, reminder preferences, danger zone (delete all plans, delete account)
+### 9.5 Profile Architecture
 
-### 9.4 Admin Dashboard
+Four-tab layout:
+1. **Overview** — Score trend chart, most-improved / focus-area highlights
+2. **Plans** — Plan cards with delete; compare mode (select 2 → AI analysis modal)
+3. **Checklist** — DB-persisted item progress; collapsible by area
+4. **Account** — GDPR export, delete all plans, delete account
 
-Admin pages use a shared `AdminLayout` component (sidebar navigation, authentication check, JWT management) and cover:
+### 9.6 Admin Dashboard
 
-- Analytics dashboard (Recharts bar/line/pie/radar charts)
-- User management table
-- Announcements management
-- GDPR request log
-- Consent log
-- AI UX testing runner (dispatches persona-based assessment runs)
+Admin pages use a shared `AdminLayout` component (sidebar navigation, session check). Six-tab analytics view: Overview, Demographics, Score Analytics, Risk Concerns, Reports, Feedback. Sidebar links to Mobile Analytics, GDPR Management, Consent Log, and UX Testing. Site announcements can be created and toggled active/inactive.
 
 ---
 
 ## 10. Mobile Application
 
-### 10.1 Architecture
-
-The Expo app uses file-based routing via Expo Router. Key screens:
+### 10.1 Screens
 
 | File | Route | Description |
 |---|---|---|
-| `app/index.tsx` | `/` | Landing / home screen |
-| `app/assessment.tsx` | `/assessment` | Multi-step assessment form |
-| `app/results.tsx` | `/results` | Report display screen |
+| `app/index.tsx` | `/` | Landing — hero, feature highlights, "Get Started" CTA |
+| `app/consent.tsx` | `/consent` | GDPR disclosure and data collection agreement |
+| `app/assessment.tsx` | `/assessment` | 10-step native assessment |
+| `app/loading.tsx` | `/loading` | Animated AI generation progress |
+| `app/results.tsx` | `/results` | Score rings, action plan, share button |
+| `app/my-data.tsx` | `/my-data` | View, export, or delete personal data |
 
 ### 10.2 Design System
 
-The mobile app implements a custom design system independent of the web's shadcn/ui, using native React Native components styled inline. Core design tokens:
+Dark-only palette:
 
 ```typescript
 const colors = {
-  background: "#0D1225",    // deep navy
-  primary: "#E08040",       // orange brand
-  primaryDark: "#C06820",
-  card: "#141928",
-  text: "#E8EAF2",
-  textMuted: "#6B7280",
-  success: "#10B981",
+  background:   "#0D1225",  // deep navy
+  primary:      "#E08040",  // brand orange
+  primaryDark:  "#C06820",
+  card:         "#141928",
+  text:         "#E8EAF2",
+  textMuted:    "#6B7280",
+  success:      "#10B981",
 }
 ```
 
-Typography uses Inter (body) and Playfair Display (headings) loaded via Expo Google Fonts.
+Typography: Inter (body) and Playfair Display (headings) via Expo Google Fonts.
 
-### 10.3 Neural Network Animation
+### 10.3 Push Notifications
 
-The landing screen features a procedurally animated SVG neural network rendered via `react-native-svg`:
+On the home screen, the app requests notification permissions and, on grant:
+1. Retrieves an Expo push token via `expo-notifications`
+2. Registers the token at `POST /api/push-tokens`
+3. Schedules a local check-in reminder 30 days from first launch
 
-- 22 particles with randomised initial positions and velocities
-- Connection lines drawn between particles within `min(w,h) × 0.45` distance
-- Animation runs at 20fps cap via `requestAnimationFrame`
-- Positioned absolutely behind hero content with `pointerEvents="none"`
-- Responsive: measures hero section via `onLayout` and scales to fill
+Haptic feedback is provided via `expo-haptics` throughout the assessment flow.
 
-### 10.4 Assessment (Mobile)
+### 10.4 Neural Network Animation
 
-The mobile assessment mirrors the web assessment data model exactly, posting to the same `POST /api/resilience/assess` endpoint. Differences from web:
-
-- Flat `ScrollView`-based layout rather than the web's fixed-height animated cards
-- Touch-optimised input components (large tap targets, native pickers)
-- Results navigated to via Expo Router `router.push('/results')`
+Landing screen background: 22 animated SVG particles with randomised velocities rendered via `react-native-svg`. Connection lines drawn between particles within `min(w,h) × 0.45` distance. Capped at 20fps via `requestAnimationFrame`. Positioned absolutely behind hero content with `pointerEvents="none"`.
 
 ---
 
@@ -597,11 +715,13 @@ The mobile assessment mirrors the web assessment data model exactly, posting to 
 
 | Data Type | Retention | Deletion path |
 |---|---|---|
-| Anonymous reports | 30 days | Auto-purged by cron job on API startup |
-| Authenticated reports | Until user deletion | `DELETE /api/users/me` or `DELETE /api/users/me/plans` |
+| Anonymous reports | 30 days | Auto-purged on API startup + 24-hour cron |
+| Authenticated reports | Until user deletion | `DELETE /api/users/me` or per-plan deletion |
 | Session data | 24 hours | Automatic expiry |
-| GDPR requests | Indefinite (legal record) | Manual admin action |
+| Consent records | Indefinite (legal record) | Manual admin action only |
+| GDPR requests | Indefinite (legal record) | Manual admin action only |
 | Subscription records | Until account deletion | Cascade on user delete |
+| Push tokens | Until session deletion | Cascade on session delete |
 
 ### 11.2 Automated Cleanup
 
@@ -614,23 +734,26 @@ db.delete(resilienceReportsTable).where(
 
 ### 11.3 User Data Export
 
-`GET /api/users/me/export` returns a complete JSON object containing:
+`GET /api/users/me/export` returns a JSON object containing:
 - User profile data
 - All resilience reports (full objects)
 - Checklist progress
 - Subscription status
-- GDPR request history
+- GDPR consent records
 
-Delivered as `application/json` with `Content-Disposition: attachment` for browser download.
+Delivered as `application/json` with `Content-Disposition: attachment`.
 
-### 11.4 Account Deletion
+### 11.4 Consent Management
 
-`DELETE /api/users/me` performs:
+GDPR consent is captured before any data collection on both web and mobile. Records stored in `gdpr_consent` table with versioned consent strings. All admin GDPR actions (fulfill, delete, export) are written to `gdpr_admin_actions` audit table. Admins access the full paginated consent audit log at `/admin/consent-log`.
+
+### 11.5 Account Deletion
+
+`DELETE /api/users/me` performs within a single transaction:
 1. Delete all resilience reports (cascades to checklist progress)
 2. Delete subscription record
-3. Delete user record (cascades to sessions)
-
-All operations within a single transaction where possible.
+3. Delete push tokens
+4. Delete user record (cascades to sessions)
 
 ---
 
@@ -643,40 +766,43 @@ Resilium is deployed on Replit's managed cloud infrastructure:
 - **Compute:** Managed containerised execution environment
 - **Database:** Replit-managed PostgreSQL 16 (accessed via `DATABASE_URL`)
 - **TLS:** Automatic TLS termination at edge (mTLS for preview, full TLS in production)
-- **CDN:** Replit edge proxy handles routing and caching
+- **CDN:** Replit edge proxy handles routing
 - **Domain:** `*.replit.app` with custom domain support
 
 ### 12.2 Environment Variables
 
 | Variable | Scope | Required | Purpose |
 |---|---|---|---|
-| `DATABASE_URL` | Shared | Yes | PostgreSQL connection string |
-| `SESSION_SECRET` | Shared | Yes | Express session signing key |
-| `ADMIN_USERNAME` | Shared | Yes | Admin panel credentials |
-| `ADMIN_PASSWORD` | Shared | Yes | Admin panel credentials |
-| `VITE_PADDLE_CLIENT_TOKEN` | Shared | For payments | Paddle.js frontend token |
-| `VITE_PADDLE_PRICE_ID` | Shared | For payments | Monthly subscription price ID |
-| `VITE_PADDLE_PRICE_ID_ANNUAL` | Shared | For payments | Annual subscription price ID |
-| `PADDLE_WEBHOOK_SECRET` | Shared | For payments | Webhook signature verification |
-| `STRIPE_DONATION_URL` | Shared | No | Optional donation link |
+| `DATABASE_URL` | API server | Yes | PostgreSQL connection string |
+| `SESSION_SECRET` | API server | Yes | Express session signing key |
+| `ADMIN_USERNAME` | API server | Yes | Admin panel credentials |
+| `ADMIN_PASSWORD` | API server | Yes | Admin panel credentials |
+| `PADDLE_WEBHOOK_SECRET` | API server | For payments | Webhook HMAC verification |
+| `VITE_PADDLE_CLIENT_TOKEN` | Web frontend | For payments | Paddle.js initialisation token |
+| `VITE_PADDLE_PRICE_ID` | Web frontend | For payments | Monthly Pro subscription price ID |
+| `VITE_PADDLE_PRICE_ID_ANNUAL` | Web frontend | For payments | Annual Pro subscription price ID |
+| `VITE_PADDLE_DONATION_PRICE_ID` | Web frontend | No | Donation price ID |
+| `AI_INTEGRATIONS_OPENAI_BASE_URL` | API server | Yes | Auto-provisioned by Replit AI Integrations |
+| `AI_INTEGRATIONS_OPENAI_API_KEY` | API server | Yes | Auto-provisioned by Replit AI Integrations |
+| `REPLIT_DOMAINS` | Shared | Yes | Auto-provisioned by Replit |
+| `REPL_ID` | Shared | Yes | Auto-provisioned by Replit |
 
 ### 12.3 Build Process
 
-**API Server:** TypeScript source transpiled and bundled via esbuild into a single `dist/index.mjs`. Source maps generated for production debugging. Bundle size: ~2.7MB (includes all dependencies).
+**API Server:** TypeScript compiled and bundled via esbuild into a single `dist/index.mjs`. Bundle size: ~2.7MB.
 
 **Web app:** Vite production build with tree-shaking, code splitting, and asset fingerprinting. `BASE_URL` injected at build time for path-prefixed proxy routing.
 
-**Mobile app:** Expo web build via Metro bundler for web deployment. Native builds (iOS/Android) via EAS Build (external to Replit).
+**Mobile app:** Expo web build via Metro bundler for web deployment. Native builds (iOS/Android) via EAS Build.
 
 ### 12.4 Database Migrations
 
-Schema changes are applied using Drizzle Kit's push mode:
 ```bash
 cd lib/db && pnpm run push-force
 # Executes: drizzle-kit push --force --config ./drizzle.config.ts
 ```
 
-No manual SQL migrations are written. The Drizzle schema is the single source of truth.
+No manual SQL migrations are written. Drizzle schema is the single source of truth.
 
 ---
 
@@ -686,11 +812,11 @@ No manual SQL migrations are written. The Drizzle schema is the single source of
 |---|---|---|
 | API cold start | ~843ms (esbuild bundle) | <2s |
 | Assessment AI generation | 8–15s | <20s |
-| Web app initial load (dev) | ~180ms HMR | <2s prod |
+| Web app initial load (dev HMR) | ~180ms | <2s prod |
 | Database query (reports list) | <10ms | <50ms |
 | Anonymous report cleanup | <100ms | — |
 
-AI generation latency is the primary user-facing performance constraint. The assessment submission endpoint streams no partial results; the full report is awaited before redirect. A loading state with animated messaging manages user expectation during this window.
+AI generation latency is the primary user-facing performance constraint. The assessment submission endpoint awaits the full AI response before redirecting. A loading screen with animated messaging and progress indicators manages user expectation during this window.
 
 ---
 
@@ -698,32 +824,28 @@ AI generation latency is the primary user-facing performance constraint. The ass
 
 ### 14.1 Input Validation
 
-All API inputs are validated using Zod schemas defined in `@workspace/api-zod`. Validation errors return structured `VALIDATION_ERROR` responses with field-level detail.
+All API request bodies are validated server-side. Invalid requests return structured 400 errors.
 
-### 14.2 Error Handling
+### 14.2 AI UX Testing Framework
 
-All API routes use try/catch with Pino logger error recording. Client receives typed error codes (`PLAN_LIMIT_EXCEEDED`, `RATE_LIMITED`, `VALIDATION_ERROR`, `UNAUTHORIZED`) enabling typed client-side error handling.
+The admin dashboard includes an automated end-to-end AI evaluation system:
 
-### 14.3 AI Response Validation
+**8 built-in personas:**
+- Urban Young Professional
+- Rural Retiree
+- Single Parent
+- Recent Graduate
+- Mid-Career Switcher
+- Expat
+- Freelancer
+- Near-Retirement Worker
 
-AI-generated report content is validated structurally before database insertion. If the AI returns malformed JSON or fails schema validation, a retry is attempted (max 2). Persistent failure returns a 500 with a user-facing message.
+Each persona runs the full assessment pipeline. A separate AI evaluator scores each resulting report on quality, relevance, and empathy (0–10). A cross-persona summary report is generated at the end of each run. Live progress is streamed via SSE. Reports are exportable as Markdown or printable PDF.
 
----
+### 14.3 End-to-End Testing
 
-## 15. Roadmap
-
-| Priority | Feature | Status |
-|---|---|---|
-| High | Paddle payment integration | In progress (credentials pending) |
-| High | Mobile auth parity (sign in from app) | Planned |
-| Medium | Email notification on plan milestone | Planned |
-| Medium | Employer/team dashboard | Planned |
-| Medium | API access for institutional partners | Planned |
-| Low | iOS/Android native distribution (EAS Build) | Planned |
-| Low | Webhooks for third-party integrations | Planned |
+Playwright-based tests run against the full stack to validate assessment flow, results rendering, admin login, and GDPR data operations.
 
 ---
 
-*Document version: 1.0*
-*Last updated: March 2026*
-*Platform: Resilium v1.0 (production)*
+*Resilium Technical Specification — Version 2.0 — March 2026*
