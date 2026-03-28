@@ -47,6 +47,7 @@ function RootLayoutNav() {
           <Stack.Screen name="sign-in" />
           <Stack.Screen name="my-plans" />
           <Stack.Screen name="pricing" />
+          <Stack.Screen name="scenarios" />
         </Stack>
       </KeyboardProvider>
     </GestureHandlerRootView>

@@ -10,6 +10,7 @@ import {
   Animated,
   Dimensions,
   Linking,
+  TextInput,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -172,6 +173,10 @@ export default function ResultsScreen() {
   const [copied, setCopied] = useState(false);
   const [percentileData, setPercentileData] = useState<{ percentile: number; total: number } | null>(null);
   const [checklistProgress, setChecklistProgress] = useState<Record<string, boolean>>({});
+  const [feedbackRating, setFeedbackRating] = useState<number | null>(null);
+  const [feedbackComment, setFeedbackComment] = useState("");
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
+  const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
 
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -226,6 +231,24 @@ export default function ResultsScreen() {
       });
     } catch {
       setChecklistProgress(prev => ({ ...prev, [key]: current }));
+    }
+  };
+
+  const handleFeedbackSubmit = async () => {
+    if (!feedbackRating || !reportId) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setFeedbackSubmitting(true);
+    try {
+      await fetch(`https://${process.env.EXPO_PUBLIC_DOMAIN}/api/feedback`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reportId, rating: feedbackRating, comment: feedbackComment.trim() || undefined }),
+      });
+      setFeedbackSubmitted(true);
+    } catch {
+      // fail silently — don't block user for feedback errors
+    } finally {
+      setFeedbackSubmitting(false);
     }
   };
 
@@ -564,10 +587,60 @@ export default function ResultsScreen() {
           </View>
         )}
 
+        <View style={styles.feedbackCard}>
+          {feedbackSubmitted ? (
+            <View style={styles.feedbackThanks}>
+              <Feather name="check-circle" size={22} color={colors.success} />
+              <Text style={styles.feedbackThanksText}>Thank you for your feedback!</Text>
+            </View>
+          ) : (
+            <>
+              <Text style={styles.feedbackTitle}>How was your report?</Text>
+              <Text style={styles.feedbackSub}>Your rating helps us improve.</Text>
+              <View style={styles.starsRow}>
+                {[1, 2, 3, 4, 5].map(star => (
+                  <Pressable key={star} onPress={() => { Haptics.selectionAsync(); setFeedbackRating(star); }} hitSlop={8}>
+                    <Feather
+                      name="star"
+                      size={30}
+                      color={feedbackRating != null && star <= feedbackRating ? "#F59E0B" : colors.border}
+                    />
+                  </Pressable>
+                ))}
+              </View>
+              {feedbackRating != null && (
+                <>
+                  <TextInput
+                    style={styles.feedbackInput}
+                    placeholder="Add a comment (optional)…"
+                    placeholderTextColor={colors.textMuted}
+                    value={feedbackComment}
+                    onChangeText={setFeedbackComment}
+                    multiline
+                    maxLength={500}
+                  />
+                  <Pressable
+                    style={({ pressed }) => [styles.feedbackSubmitBtn, pressed && { opacity: 0.8 }, feedbackSubmitting && { opacity: 0.6 }]}
+                    onPress={handleFeedbackSubmit}
+                    disabled={feedbackSubmitting}
+                  >
+                    <Text style={styles.feedbackSubmitText}>{feedbackSubmitting ? "Submitting…" : "Submit Feedback"}</Text>
+                  </Pressable>
+                </>
+              )}
+            </>
+          )}
+        </View>
+
         <View style={styles.bottomActions}>
           <Pressable style={styles.shareFullBtn} onPress={handleShare}>
             <Feather name="share-2" size={16} color={colors.background} />
             <Text style={styles.shareFullBtnText}>{copied ? "Link Copied!" : "Share Report"}</Text>
+          </Pressable>
+
+          <Pressable style={styles.scenarioBtn} onPress={() => router.push({ pathname: "/scenarios", params: { reportId } })}>
+            <Feather name="zap" size={16} color={colors.primary} />
+            <Text style={styles.scenarioBtnText}>Run Scenario Stress-Test (Pro)</Text>
           </Pressable>
 
           <Pressable style={styles.retakeBtn} onPress={() => router.push("/assessment")}>
@@ -1103,4 +1176,30 @@ const createStyles = (colors: ColorsType) => StyleSheet.create({
   checklistItemTextDone: {
     color: colors.textMuted, textDecorationLine: "line-through",
   },
+  feedbackCard: {
+    backgroundColor: colors.surface, borderRadius: 18, padding: 20,
+    borderWidth: 1, borderColor: colors.border, alignItems: "center", gap: 10,
+  },
+  feedbackTitle: { fontFamily: "Inter_700Bold", fontSize: 16, color: colors.text, letterSpacing: -0.3 },
+  feedbackSub: { fontFamily: "Inter_400Regular", fontSize: 13, color: colors.textMuted },
+  starsRow: { flexDirection: "row", gap: 10, paddingVertical: 4 },
+  feedbackInput: {
+    width: "100%", borderRadius: 10, borderWidth: 1, borderColor: colors.border,
+    backgroundColor: colors.background, padding: 12,
+    fontFamily: "Inter_400Regular", fontSize: 14, color: colors.text,
+    minHeight: 72, textAlignVertical: "top",
+  },
+  feedbackSubmitBtn: {
+    backgroundColor: colors.primary, borderRadius: 10,
+    paddingVertical: 10, paddingHorizontal: 24, alignSelf: "stretch", alignItems: "center",
+  },
+  feedbackSubmitText: { fontFamily: "Inter_600SemiBold", fontSize: 14, color: colors.background },
+  feedbackThanks: { flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 8 },
+  feedbackThanksText: { fontFamily: "Inter_600SemiBold", fontSize: 15, color: colors.success },
+  scenarioBtn: {
+    flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8,
+    borderRadius: 12, borderWidth: 1, borderColor: colors.primary + "55",
+    paddingVertical: 12, backgroundColor: colors.primary + "10",
+  },
+  scenarioBtnText: { fontFamily: "Inter_600SemiBold", fontSize: 14, color: colors.primary },
 });
