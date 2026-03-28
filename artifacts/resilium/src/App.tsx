@@ -25,6 +25,8 @@ import AdminConsentLogPage from "@/pages/admin/consent-log";
 import AdminUsersPage from "@/pages/admin/users";
 import AdminAnnouncementsPage from "@/pages/admin/announcements";
 import AdminTestimonialsPage from "@/pages/admin/testimonials";
+import DemoPage from "@/pages/demo";
+import ScenariosPage from "@/pages/scenarios";
 import { AnnouncementBanner } from "@/components/announcement-banner";
 
 const queryClient = new QueryClient({
@@ -82,6 +84,8 @@ function Router() {
       <Route path="/admin/users" component={AdminUsersPage} />
       <Route path="/admin/announcements" component={AdminAnnouncementsPage} />
       <Route path="/admin/testimonials" component={AdminTestimonialsPage} />
+      <Route path="/demo" component={DemoPage} />
+      <Route path="/scenarios/:reportId" component={ScenariosPage} />
       <Route component={NotFound} />
       </Switch>
       </div>

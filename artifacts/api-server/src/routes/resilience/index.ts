@@ -7,6 +7,7 @@ import { calculateScores } from "./scoring.js";
 import { generateResilienceReport } from "./ai.js";
 import { PLAN_LIMIT } from "../users.js";
 import rateLimit from "express-rate-limit";
+import scenariosRouter from "./scenarios.js";
 
 const router: IRouter = Router();
 
@@ -495,5 +496,7 @@ router.get("/percentile", async (req, res) => {
     res.status(500).json({ error: "INTERNAL_ERROR", message: "Failed to calculate percentile." });
   }
 });
+
+router.use(scenariosRouter);
 
 export default router;

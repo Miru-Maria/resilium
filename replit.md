@@ -4,6 +4,12 @@
 
 **Resilium** — A personal resilience planning platform. Users complete a 10-step assessment (including a 10-question Mental Resilience deep-dive), receive an AI-generated Resilience Report (score 0–100, vulnerabilities, action plan, scenario simulations, daily habits), and can manage their data under GDPR. Includes a full admin dashboard for analytics, AI UX testing, consent management, user management, and site announcement banners. Results page includes resource recommendations, shareable score card (Web Share API), email report (mailto), and Paddle donation button. Freemium: 2 free assessments for anon/free users; paywall counter visible in assessment header; Pro subscriptions via Paddle.
 
+### Post-Roadmap Features (completed)
+- **Demo page** (`/demo`): Static fictional sample report for "Alex M." — full results UI, Pro teasers, scenario section. Linked from landing nav.
+- **Scenario stress-tests** (`/scenarios/:reportId`): Pro-gated. User picks a crisis scenario (job loss, health crisis, natural disaster, relocation), AI re-analyzes with adjusted parameters, returns delta scores + tailored action steps. "Run Stress Test" CTA on results page links here.
+- **Subscription status** (`GET /api/subscription/status`): Returns `{isPro, status, currentPeriodEnd}`. Pro badge shown on profile AccountTab. Verifies live Paddle subscription.
+- **Mobile push notifications**: `expo-notifications@~0.32.16` installed. After consent, requests permission, schedules a 30-day local check-in notification, and registers push token to `POST /api/push-tokens` for future server-sent pushes.
+
 pnpm workspace monorepo using TypeScript. Each package manages its own dependencies.
 
 ## Stack

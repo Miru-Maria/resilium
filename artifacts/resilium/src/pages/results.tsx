@@ -787,6 +787,24 @@ export default function ResultsPage() {
                 </AccordionItem>
               ))}
             </Accordion>
+
+            {/* RUN DEEPER STRESS TEST CTA */}
+            <div className="mt-6 rounded-2xl border border-primary/20 bg-primary/5 p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 print:hidden">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <Zap className="w-4 h-4 text-primary" />
+                  <span className="font-bold text-sm text-primary uppercase tracking-wide">Pro Feature</span>
+                </div>
+                <p className="font-bold text-base">Run a deeper stress test</p>
+                <p className="text-sm text-muted-foreground">Choose a specific crisis scenario — job loss, health emergency, natural disaster, or relocating abroad — and see AI-powered delta scores with tailored action steps.</p>
+              </div>
+              <Link href={`/scenarios/${reportId}`}>
+                <Button className="rounded-full h-11 px-6 shrink-0 gap-2">
+                  <Activity className="w-4 h-4" />
+                  Run Stress Test
+                </Button>
+              </Link>
+            </div>
           </div>
 
           {/* HABITS SIDEBAR */}

@@ -152,6 +152,9 @@ export default function LandingPage() {
           <Link href="/about" className="text-sm text-muted-foreground hover:text-primary transition-colors hidden sm:block">
             About
           </Link>
+          <Link href="/demo" className="text-sm text-muted-foreground hover:text-primary transition-colors hidden sm:block">
+            Demo
+          </Link>
           <Link href="/pricing" className="text-sm text-muted-foreground hover:text-primary transition-colors hidden sm:block">
             Pricing
           </Link>

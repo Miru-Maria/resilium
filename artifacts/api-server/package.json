@@ -24,7 +24,8 @@
     "openid-client": "^6.8.2",
     "pg": "^8.20.0",
     "pino": "^9",
-    "pino-http": "^10"
+    "pino-http": "^10",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@types/connect-pg-simple": "^7.0.3",

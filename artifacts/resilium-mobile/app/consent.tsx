@@ -9,6 +9,7 @@ import {
   Alert,
   Dimensions,
 } from "react-native";
+import { setupNotifications } from "@/utils/notifications";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
@@ -60,6 +61,9 @@ export default function ConsentScreen() {
         });
       } catch {
       }
+
+      // Request notification permission and schedule monthly check-in (non-blocking)
+      setupNotifications(process.env.EXPO_PUBLIC_DOMAIN ?? "").catch(() => {});
 
       router.replace("/assessment");
     } catch (e) {

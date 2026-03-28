@@ -8,6 +8,8 @@ import adminRouter from "./admin/index.js";
 import feedbackRouter from "./feedback/index.js";
 import announcementsRouter from "./announcements.js";
 import paddleRouter from "./paddle.js";
+import subscriptionRouter from "./subscription.js";
+import pushTokensRouter from "./push-tokens.js";
 
 const router: IRouter = Router();
 
@@ -20,5 +22,7 @@ router.use("/admin", adminRouter);
 router.use("/feedback", feedbackRouter);
 router.use(announcementsRouter);
 router.use(paddleRouter);
+router.use(subscriptionRouter);
+router.use(pushTokensRouter);
 
 export default router;

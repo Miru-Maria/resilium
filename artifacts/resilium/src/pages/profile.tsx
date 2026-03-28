@@ -811,6 +811,16 @@ function AccountTab({ user, plans, onAllPlansDeleted }: {
   onAllPlansDeleted: () => void;
 }) {
   const { toast } = useToast();
+
+  const { data: subStatus } = useQuery({
+    queryKey: ["subscription-status"],
+    queryFn: async () => {
+      const r = await fetch("/api/subscription/status", { credentials: "include" });
+      if (!r.ok) return null;
+      return r.json() as Promise<{ isPro: boolean; status: string; planName?: string; currentPeriodEnd?: string | null; cancelScheduled?: boolean }>;
+    },
+    staleTime: 60_000,
+  });
   const [, navigate] = useLocation();
   const [deleteAllOpen, setDeleteAllOpen] = useState(false);
   const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
@@ -912,6 +922,56 @@ function AccountTab({ user, plans, onAllPlansDeleted }: {
             {user.email && <p className="text-sm text-muted-foreground mt-0.5 truncate">{user.email}</p>}
             <p className="text-xs text-muted-foreground/60 mt-1">Managed by Replit Auth · read-only</p>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Subscription status card */}
+      <Card className="border-none shadow-md">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base font-display flex items-center gap-2">
+            <Shield className="w-4 h-4 text-primary" /> Subscription
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {!subStatus ? (
+            <div className="h-10 bg-muted/40 rounded-xl animate-pulse" />
+          ) : subStatus.isPro ? (
+            <div className="flex items-center justify-between gap-4 p-4 rounded-2xl bg-primary/5 border border-primary/20">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-primary/15 flex items-center justify-center">
+                  <Flame className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <p className="font-bold text-sm text-foreground">
+                    {subStatus.planName ?? "Pro"} Plan
+                    {subStatus.cancelScheduled && <span className="ml-2 text-xs text-amber-600 font-medium">(cancels at period end)</span>}
+                  </p>
+                  {subStatus.currentPeriodEnd && (
+                    <p className="text-xs text-muted-foreground">
+                      {subStatus.cancelScheduled ? "Access until" : "Renews"}{" "}
+                      {new Date(subStatus.currentPeriodEnd).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <Badge className="bg-primary/15 text-primary border-primary/20 rounded-full text-xs font-bold">Pro</Badge>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between gap-4 p-4 rounded-2xl bg-muted/30 border border-border">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-muted flex items-center justify-center">
+                  <Shield className="w-5 h-5 text-muted-foreground" />
+                </div>
+                <div>
+                  <p className="font-bold text-sm text-foreground">Starter Plan</p>
+                  <p className="text-xs text-muted-foreground">Upgrade for score history, scenario stress-tests, and more</p>
+                </div>
+              </div>
+              <Link href="/pricing">
+                <Button size="sm" className="rounded-full flex-shrink-0">Upgrade</Button>
+              </Link>
+            </div>
+          )}
         </CardContent>
       </Card>
 
