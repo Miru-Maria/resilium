@@ -5,7 +5,7 @@ import { openai } from "@workspace/integrations-openai-ai-server";
 
 const router: IRouter = Router();
 
-const PLAN_LIMIT = 10;
+const PLAN_LIMIT = 2;
 
 router.get("/me/plans", async (req: Request, res: Response) => {
   if (!req.isAuthenticated()) {

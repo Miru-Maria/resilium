@@ -45,15 +45,14 @@ const FREE_FEATURES = [
   "Full resilience score — all 6 dimensions",
   "AI-generated action plan",
   "Mental resilience profile",
-  "PDF export",
+  "Print / Save PDF",
   "GDPR-compliant data handling",
 ];
 
 const FREE_LIMITS = [
-  "No score history or trend tracking",
+  "No long-term trend tracking",
   "No plan comparison between assessments",
   "No scenario stress-testing",
-  "Reports archived after 12 months",
 ];
 
 const PRO_FEATURES = [
@@ -61,9 +60,7 @@ const PRO_FEATURES = [
   "Unlimited assessments",
   "Score history & trend charts",
   "AI plan comparison — what changed and why",
-  "Scenario stress-tests: job loss, relocation, disaster",
-  "Reports stored indefinitely",
-  "Priority support",
+  "Scenario stress-tests: job loss, health crisis, relocation, disaster",
 ];
 
 const FAQ_ITEMS = [
@@ -73,11 +70,11 @@ const FAQ_ITEMS = [
   },
   {
     q: "What happens to my data if I cancel?",
-    a: "Your reports and data are retained for 12 months after cancellation, giving you time to export or review them. You can also request full deletion at any time via the GDPR tools in your profile.",
+    a: "Your reports and data remain accessible after cancellation. You can also request full deletion at any time via the GDPR tools in your profile.",
   },
   {
     q: "What happens to free (Starter) plans?",
-    a: "Starter accounts are never deleted automatically. Your 2 assessments and reports remain accessible. Reports are archived after 12 months, but you can download PDFs before then.",
+    a: "Starter accounts are never deleted automatically. Your 2 assessments and reports remain accessible indefinitely. You can request full data deletion at any time via the GDPR tools in your profile.",
   },
   {
     q: "Is my assessment data private?",
