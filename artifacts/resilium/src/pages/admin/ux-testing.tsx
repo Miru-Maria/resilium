@@ -100,6 +100,7 @@ export default function UxTestingPage() {
   const [runComplete, setRunComplete] = useState(false);
   const [runError, setRunError] = useState<string | null>(null);
   const eventSourceRef = useRef<EventSource | null>(null);
+  const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const {
     data: personasData,
@@ -151,8 +152,42 @@ export default function UxTestingPage() {
   useEffect(() => {
     return () => {
       eventSourceRef.current?.close();
+      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
     };
   }, []);
+
+  async function pollRunStatus(runId: string) {
+    try {
+      const res = await fetch(`/api/admin/ux-test/runs/${runId}`, { headers: authH() });
+      if (!res.ok) return;
+      const data = await res.json() as {
+        status: string;
+        results: { personaKey: string; personaName: string; status: string; aiQualityRating?: number; error?: string }[];
+      };
+
+      setPersonaProgress((prev) => {
+        const next = new Map(prev);
+        for (const r of data.results) {
+          const existing = next.get(r.personaKey) ?? { personaKey: r.personaKey, personaName: r.personaName, status: "pending" as const };
+          next.set(r.personaKey, {
+            ...existing,
+            status: r.status as PersonaProgress["status"],
+            aiQualityRating: r.aiQualityRating,
+            error: r.error,
+          });
+        }
+        return next;
+      });
+
+      if (data.status === "completed" || data.status === "failed") {
+        if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+        setIsRunning(false);
+        setRunComplete(true);
+        if (data.status === "failed") setRunError("The test run encountered an error.");
+        refetchRuns();
+      }
+    } catch { /* ignore poll errors — will retry */ }
+  }
 
   function togglePersona(key: string) {
     setSelectedKeys((prev) => {
@@ -252,9 +287,12 @@ export default function UxTestingPage() {
 
       es.onerror = () => {
         es.close();
-        setIsRunning(false);
-        setRunError("Lost connection to the test stream. The run may still be processing.");
-        refetchRuns();
+        // Stream dropped (proxy timeout or network blip) — switch to polling
+        // so the run continues silently in the background without alarming the user
+        if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = setInterval(() => pollRunStatus(runId), 5000);
+        // Do one immediate poll so the UI updates right away
+        pollRunStatus(runId);
       };
     } catch (err) {
       setIsRunning(false);
