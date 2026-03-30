@@ -108,6 +108,24 @@ router.post("/assess", assessRateLimit, async (req, res) => {
       mentalResilienceSubScores
     );
 
+    // Inject coaching referral for users with low psychological resilience
+    const APP_URL = process.env["APP_URL"] ?? "https://resilium.app";
+    if (scores.psychological < 50) {
+      const coachingResource = {
+        title: "1:1 Mental Resilience Coaching",
+        category: "Psychological",
+        description:
+          "Resilium maps the gap — a coach helps close it. Cristiana Paun offers tailored 1:1 sessions designed around your Resilium report, for people whose psychological resilience signals a need for structured human support alongside the practical action plan.",
+        url: `${APP_URL}/coaching?ref=resilium&score=${scores.psychological}`,
+        badge: "1:1 Session",
+        priority: "high" as const,
+      };
+      reportContent.recommendedResources = [
+        coachingResource,
+        ...(reportContent.recommendedResources ?? []),
+      ];
+    }
+
     const reportId = randomUUID();
     const now = new Date();
 
