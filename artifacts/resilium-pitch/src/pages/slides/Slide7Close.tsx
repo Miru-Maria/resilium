@@ -34,93 +34,69 @@ export default function Slide7Close() {
         </div>
 
         <div className="flex items-stretch w-full" style={a("0.38s", "scaleIn")}>
-          <div className="flex-1 flex flex-col items-center justify-center gap-[1.2vh] px-[2vw]">
-            <div
-              className="text-[9vw] font-black leading-none"
-              style={{ color: "#E08040", fontFamily: "Playfair Display, serif" }}
-            >
-              4
+          <div className="flex-1 flex flex-col items-center px-[2vw]">
+            <div style={{ height: "17vh", display: "flex", alignItems: "flex-end", paddingBottom: "0.8vh" }}>
+              <div
+                className="text-[9vw] font-black leading-none"
+                style={{ color: "#E08040", fontFamily: "Playfair Display, serif", textShadow: "0 0 28px rgba(224,128,64,0.55), 0 0 60px rgba(224,128,64,0.2)" }}
+              >
+                4
+              </div>
             </div>
-            <div
-              className="text-[1.4vw] font-medium text-center"
-              style={{ color: "#EAD9BE", fontFamily: "Inter, sans-serif" }}
-            >
-              Replit artifacts
-            </div>
-            <div
-              className="text-[1.2vw] font-light text-center"
-              style={{ color: "#8A7A6A", fontFamily: "Inter, sans-serif" }}
-            >
-              deployed
+            <div style={{ height: "7vh", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.4vh" }}>
+              <div className="text-[1.4vw] font-medium text-center" style={{ color: "#EAD9BE", fontFamily: "Inter, sans-serif" }}>Replit artifacts</div>
+              <div className="text-[1.2vw] font-light text-center" style={{ color: "#8A7A6A", fontFamily: "Inter, sans-serif" }}>deployed</div>
             </div>
           </div>
 
           <div className="w-[1px] self-stretch" style={{ background: "rgba(224,128,64,0.2)" }} />
 
-          <div className="flex-1 flex flex-col items-center justify-center gap-[1.2vh] px-[2vw]">
-            <div
-              className="text-[9vw] font-black leading-none"
-              style={{ color: "#E08040", fontFamily: "Playfair Display, serif" }}
-            >
-              6
+          <div className="flex-1 flex flex-col items-center px-[2vw]">
+            <div style={{ height: "17vh", display: "flex", alignItems: "flex-end", paddingBottom: "0.8vh" }}>
+              <div
+                className="text-[9vw] font-black leading-none"
+                style={{ color: "#E08040", fontFamily: "Playfair Display, serif", textShadow: "0 0 28px rgba(224,128,64,0.55), 0 0 60px rgba(224,128,64,0.2)" }}
+              >
+                6
+              </div>
             </div>
-            <div
-              className="text-[1.4vw] font-medium text-center"
-              style={{ color: "#EAD9BE", fontFamily: "Inter, sans-serif" }}
-            >
-              Resilience dimensions
-            </div>
-            <div
-              className="text-[1.2vw] font-light text-center"
-              style={{ color: "#8A7A6A", fontFamily: "Inter, sans-serif" }}
-            >
-              scored
+            <div style={{ height: "7vh", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.4vh" }}>
+              <div className="text-[1.4vw] font-medium text-center" style={{ color: "#EAD9BE", fontFamily: "Inter, sans-serif" }}>Resilience dimensions</div>
+              <div className="text-[1.2vw] font-light text-center" style={{ color: "#8A7A6A", fontFamily: "Inter, sans-serif" }}>scored</div>
             </div>
           </div>
 
           <div className="w-[1px] self-stretch" style={{ background: "rgba(224,128,64,0.2)" }} />
 
-          <div className="flex-1 flex flex-col items-center justify-center gap-[1.2vh] px-[2vw]">
-            <div
-              className="text-[9vw] font-black leading-none"
-              style={{ color: "#E8A830", fontFamily: "Playfair Display, serif" }}
-            >
-              3
+          <div className="flex-1 flex flex-col items-center px-[2vw]">
+            <div style={{ height: "17vh", display: "flex", alignItems: "flex-end", paddingBottom: "0.8vh" }}>
+              <div
+                className="text-[9vw] font-black leading-none"
+                style={{ color: "#E08040", fontFamily: "Playfair Display, serif", textShadow: "0 0 28px rgba(224,128,64,0.55), 0 0 60px rgba(224,128,64,0.2)" }}
+              >
+                3
+              </div>
             </div>
-            <div
-              className="text-[1.4vw] font-medium text-center"
-              style={{ color: "#EAD9BE", fontFamily: "Inter, sans-serif" }}
-            >
-              Revenue streams
-            </div>
-            <div
-              className="text-[1.2vw] font-light text-center"
-              style={{ color: "#8A7A6A", fontFamily: "Inter, sans-serif" }}
-            >
-              active
+            <div style={{ height: "7vh", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.4vh" }}>
+              <div className="text-[1.4vw] font-medium text-center" style={{ color: "#EAD9BE", fontFamily: "Inter, sans-serif" }}>Revenue streams</div>
+              <div className="text-[1.2vw] font-light text-center" style={{ color: "#8A7A6A", fontFamily: "Inter, sans-serif" }}>active</div>
             </div>
           </div>
 
-          <div className="w-[1px] self-stretch" style={{ background: "rgba(232,168,48,0.2)" }} />
+          <div className="w-[1px] self-stretch" style={{ background: "rgba(224,128,64,0.2)" }} />
 
-          <div className="flex-1 flex flex-col items-center justify-center gap-[1.2vh] px-[2vw]">
-            <div
-              className="text-[9vw] font-black leading-none"
-              style={{ color: "#E8A830", fontFamily: "Playfair Display, serif" }}
-            >
-              1
+          <div className="flex-1 flex flex-col items-center px-[2vw]">
+            <div style={{ height: "17vh", display: "flex", alignItems: "flex-end", paddingBottom: "0.8vh" }}>
+              <div
+                className="text-[9vw] font-black leading-none"
+                style={{ color: "#E08040", fontFamily: "Playfair Display, serif", textShadow: "0 0 28px rgba(224,128,64,0.55), 0 0 60px rgba(224,128,64,0.2)" }}
+              >
+                1
+              </div>
             </div>
-            <div
-              className="text-[1.4vw] font-medium text-center"
-              style={{ color: "#EAD9BE", fontFamily: "Inter, sans-serif" }}
-            >
-              Coaching partnership
-            </div>
-            <div
-              className="text-[1.2vw] font-light text-center"
-              style={{ color: "#8A7A6A", fontFamily: "Inter, sans-serif" }}
-            >
-              live
+            <div style={{ height: "7vh", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.4vh" }}>
+              <div className="text-[1.4vw] font-medium text-center" style={{ color: "#EAD9BE", fontFamily: "Inter, sans-serif" }}>Coaching partnership</div>
+              <div className="text-[1.2vw] font-light text-center" style={{ color: "#8A7A6A", fontFamily: "Inter, sans-serif" }}>live</div>
             </div>
           </div>
         </div>
