@@ -207,6 +207,9 @@ export default function CoachingPage() {
             Learn More
           </a>
         </div>
+        <p style={{ marginTop: "20px", fontSize: "13px", color: C.muted }}>
+          Coaching provided by <strong style={{ color: C.badgeText }}>Phoenix Insight Coaching</strong>
+        </p>
       </section>
 
       {/* What your score is telling you */}
@@ -284,7 +287,7 @@ export default function CoachingPage() {
             { icon: <TrendingUp size={20} />, title: "Adaptive habits for uncertain environments", text: "Building routines that hold up under pressure, not just when life is smooth. Aligned with your financial and daily preparation goals." },
             { icon: <Shield size={20} />, title: "Change management and processing disruption", text: "Working through the emotional weight of major life changes — job loss, relocation, health changes — without it derailing your recovery." },
             { icon: <Heart size={20} />, title: "Confidence after setbacks", text: "Rebuilding your sense of agency after financial stress, health challenges, or mobility limitations. This is where sustainable change actually starts." },
-            { icon: <MessageCircle size={20} />, title: "Functional health & mental resilience", text: "Your physical health and psychological capacity are deeply connected. Cristiana's functional approach looks at the root patterns — sleep, stress load, nervous system regulation — that directly affect how resilient you feel." },
+            { icon: <MessageCircle size={20} />, title: "Functional health & mental resilience", text: "Your physical health and psychological capacity are deeply connected. Phoenix Insight Coaching's functional approach looks at the root patterns — sleep, stress load, nervous system regulation — that directly affect how resilient you feel." },
             { icon: <CheckCircle size={20} />, title: "A personalised plan alongside Resilium", text: "Sessions can be structured around your Resilium report. We work the psychological dimension while you execute the practical action plan on your own." },
           ].map(({ icon, title, text }) => (
             <div key={title} style={{
@@ -339,11 +342,14 @@ export default function CoachingPage() {
             fontFamily: "'Playfair Display', Georgia, serif",
             fontSize: "26px",
             fontWeight: 700,
-            margin: "0 0 6px",
+            margin: "0 0 4px",
             color: C.headingDark,
           }}>
             Cristiana Paun
           </h2>
+          <p style={{ fontSize: "12px", color: C.muted, marginBottom: "6px" }}>
+            Phoenix Insight Coaching
+          </p>
           <p style={{ fontSize: "13px", fontWeight: 600, color: C.primary, marginBottom: "20px", letterSpacing: "0.05em", textTransform: "uppercase" as const }}>
             Integrative Health Coach
           </p>
@@ -453,7 +459,7 @@ export default function CoachingPage() {
         fontSize: "12px",
         color: C.muted,
       }}>
-        This coaching service is independent of Resilium. Resilium is a risk assessment tool; coaching is provided by Cristiana Paun separately.
+        This coaching service is independent of Resilium. Resilium is a risk assessment tool; coaching is provided by Phoenix Insight Coaching separately.
         <span style={{ margin: "0 8px", opacity: 0.4 }}>·</span>
         <Link href="/" style={{ color: C.badgeText, textDecoration: "none" }}>Return to Resilium</Link>
       </div>
