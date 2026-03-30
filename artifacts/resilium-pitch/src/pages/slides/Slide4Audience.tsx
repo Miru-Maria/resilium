@@ -1,0 +1,112 @@
+export default function Slide4Audience() {
+  return (
+    <div className="relative w-screen h-screen overflow-hidden" style={{ background: "#0D1225" }}>
+      <div
+        className="absolute left-0 top-0 h-full w-[40vw]"
+        style={{ background: "linear-gradient(180deg, #1A2240 0%, #0D1225 100%)" }}
+      />
+      <div
+        className="absolute inset-0"
+        style={{ background: "radial-gradient(ellipse at 20% 80%, rgba(232,168,48,0.06) 0%, transparent 55%)" }}
+      />
+
+      <div className="relative h-full flex px-[8vw] py-[7vh] gap-[6vw]">
+        <div className="flex flex-col justify-center" style={{ flex: "0 0 32vw" }}>
+          <div
+            className="text-[1.2vw] font-semibold tracking-[0.18em] uppercase mb-[1.5vh]"
+            style={{ color: "#E08040", fontFamily: "Inter, sans-serif" }}
+          >
+            Who It&apos;s For
+          </div>
+          <h2
+            className="text-[4.2vw] font-black leading-[1.05] tracking-tight mb-[2.5vh]"
+            style={{ fontFamily: "Playfair Display, serif", color: "#EAD9BE" }}
+          >
+            The quietly prepared.
+          </h2>
+          <p
+            className="text-[1.5vw] font-light leading-relaxed"
+            style={{ color: "#8A7A6A", fontFamily: "Inter, sans-serif" }}
+          >
+            Not doomsday preppers. Not fearmongers. People who look at an uncertain world and want a clear-eyed plan — not anxiety.
+          </p>
+          <div
+            className="mt-[3vh] h-[2px] w-[6vw]"
+            style={{ background: "linear-gradient(90deg, #E08040, transparent)" }}
+          />
+        </div>
+
+        <div className="flex flex-col gap-[2.5vh] justify-center flex-1">
+          <div
+            className="rounded-xl px-[2vw] py-[2vh]"
+            style={{ background: "rgba(26,34,64,0.7)", borderLeft: "3px solid #E08040" }}
+          >
+            <div
+              className="text-[1.6vw] font-bold mb-[0.5vh]"
+              style={{ color: "#EAD9BE", fontFamily: "Playfair Display, serif" }}
+            >
+              The Financially Anxious
+            </div>
+            <div
+              className="text-[1.3vw] font-light"
+              style={{ color: "#8A7A6A", fontFamily: "Inter, sans-serif" }}
+            >
+              Stable income, uncertain future — want to know if their safety net is real.
+            </div>
+          </div>
+          <div
+            className="rounded-xl px-[2vw] py-[2vh]"
+            style={{ background: "rgba(26,34,64,0.7)", borderLeft: "3px solid #E08040" }}
+          >
+            <div
+              className="text-[1.6vw] font-bold mb-[0.5vh]"
+              style={{ color: "#EAD9BE", fontFamily: "Playfair Display, serif" }}
+            >
+              Expats &amp; Digital Nomads
+            </div>
+            <div
+              className="text-[1.3vw] font-light"
+              style={{ color: "#8A7A6A", fontFamily: "Inter, sans-serif" }}
+            >
+              Living across borders, managing multi-currency exposure and relocation risk.
+            </div>
+          </div>
+          <div
+            className="rounded-xl px-[2vw] py-[2vh]"
+            style={{ background: "rgba(26,34,64,0.7)", borderLeft: "3px solid #E8A830" }}
+          >
+            <div
+              className="text-[1.6vw] font-bold mb-[0.5vh]"
+              style={{ color: "#EAD9BE", fontFamily: "Playfair Display, serif" }}
+            >
+              Preparedness Planners
+            </div>
+            <div
+              className="text-[1.3vw] font-light"
+              style={{ color: "#8A7A6A", fontFamily: "Inter, sans-serif" }}
+            >
+              Already thinking ahead — want an objective score, not guesswork.
+            </div>
+          </div>
+          <div
+            className="rounded-xl px-[2vw] py-[2vh]"
+            style={{ background: "rgba(26,34,64,0.7)", borderLeft: "3px solid #E8A830" }}
+          >
+            <div
+              className="text-[1.6vw] font-bold mb-[0.5vh]"
+              style={{ color: "#EAD9BE", fontFamily: "Playfair Display, serif" }}
+            >
+              The Cautiously Aware
+            </div>
+            <div
+              className="text-[1.3vw] font-light"
+              style={{ color: "#8A7A6A", fontFamily: "Inter, sans-serif" }}
+            >
+              Don&apos;t call themselves preppers — but they&apos;re quietly paying attention.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

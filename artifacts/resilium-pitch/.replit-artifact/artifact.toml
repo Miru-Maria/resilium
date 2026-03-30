@@ -1,0 +1,31 @@
+kind = "slides"
+previewPath = "/resilium-pitch/"
+title = "Resilium Pitch Deck"
+version = "1.0.0"
+id = "artifacts/resilium-pitch"
+router = "path"
+
+[[integratedSkills]]
+name = "slides"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/resilium-pitch/" ]
+localPort = 18286
+
+[services.development]
+run = "pnpm --filter @workspace/resilium-pitch run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/resilium-pitch", "run", "build" ]
+publicDir = "artifacts/resilium-pitch/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "18286"
+BASE_PATH = "/resilium-pitch/"
