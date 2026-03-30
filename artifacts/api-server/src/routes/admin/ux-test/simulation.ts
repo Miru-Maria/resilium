@@ -33,7 +33,7 @@ USER PROFILE:
 - Location: ${personaData.location}
 - Income stability: ${personaData.incomeStability}
 - Savings: ${personaData.savingsMonths} months
-- Dependents: ${personaData.hasDependents}
+- Dependents: ${personaData.dependentCount === 0 ? "None" : personaData.dependentCount === 1 ? "One" : personaData.dependentCount === 2 ? "Two or three" : "Four or more"}
 - Skills: ${personaData.skills.join(", ")}
 - Health: ${personaData.healthStatus}
 - Mobility: ${personaData.mobilityLevel}
@@ -143,7 +143,8 @@ export async function runUxTestSimulation(
           location: input.location,
           incomeStability: input.incomeStability,
           savingsMonths: input.savingsMonths,
-          hasDependents: input.hasDependents,
+          dependentCount: input.dependentCount,
+          relocationReadiness: input.relocationReadiness ?? undefined,
           skills: input.skills,
           healthStatus: input.healthStatus,
           mobilityLevel: input.mobilityLevel,
@@ -161,7 +162,8 @@ export async function runUxTestSimulation(
             location: input.location,
             incomeStability: input.incomeStability,
             savingsMonths: input.savingsMonths,
-            hasDependents: input.hasDependents,
+            dependentCount: input.dependentCount,
+            relocationReadiness: input.relocationReadiness ?? undefined,
             skills: input.skills,
             healthStatus: input.healthStatus,
             mobilityLevel: input.mobilityLevel,
@@ -184,7 +186,8 @@ export async function runUxTestSimulation(
           location: input.location,
           incomeStability: input.incomeStability,
           savingsMonths: input.savingsMonths,
-          hasDependents: input.hasDependents,
+          dependentCount: input.dependentCount,
+          relocationReadiness: input.relocationReadiness ?? null,
           skills: input.skills,
           healthStatus: input.healthStatus,
           mobilityLevel: input.mobilityLevel,
