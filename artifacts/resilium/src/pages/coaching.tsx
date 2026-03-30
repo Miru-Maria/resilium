@@ -372,7 +372,7 @@ export default function CoachingPage() {
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "20px" }}>
           {[
-            { step: "01", title: "Free discovery call", text: "30 minutes. No pressure. We look at your Resilium report together and see if there's a fit." },
+            { step: "01", title: "Free discovery call", text: "50–60 minutes. No pressure. We look at your Resilium report together and see if there's a fit." },
             { step: "02", title: "Tailored programme", text: "A coaching plan built around your specific score, circumstances, and goals — not a generic template." },
             { step: "03", title: "Ongoing support", text: "Bi-weekly or weekly sessions, plus async support between sessions when you need it." },
           ].map(({ step, title, text }) => (
@@ -418,7 +418,7 @@ export default function CoachingPage() {
             Ready to work on the part that matters most?
           </h2>
           <p style={{ fontSize: "16px", color: "#D4B08A", lineHeight: 1.7, marginBottom: "32px" }}>
-            The free discovery call is 30 minutes with no obligation. Bring your Resilium report and we'll take it from there.
+            The free discovery call is 50–60 minutes with no obligation. Bring your Resilium report and we'll take it from there.
           </p>
           <a
             href={COACHING_URL}
