@@ -94,12 +94,12 @@ export default function Slide8Final() {
     <div className="relative w-screen h-screen overflow-hidden" style={{ background: "#0D1225" }}>
       {!allSlides && <NeuralCanvas />}
 
-      {/* Glow radiating FROM the logo position — reversed: bright at top-centre, fading down */}
+      {/* Halo glow — dark navy at logo centre, soft amber ombre radiating outward */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse at 50% 36%, rgba(224,128,64,0.2) 0%, rgba(224,128,64,0.07) 30%, transparent 62%)",
+            "radial-gradient(ellipse at 50% 38%, transparent 16%, rgba(224,128,64,0.22) 34%, rgba(224,128,64,0.08) 54%, transparent 70%)",
         }}
       />
       {/* Edge vignette to keep corners dark */}
@@ -107,7 +107,7 @@ export default function Slide8Final() {
         className="absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse at 50% 50%, transparent 38%, rgba(13,18,37,0.55) 100%)",
+            "radial-gradient(ellipse at 50% 50%, transparent 36%, rgba(13,18,37,0.5) 100%)",
         }}
       />
 
