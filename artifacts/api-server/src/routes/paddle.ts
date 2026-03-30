@@ -24,14 +24,10 @@ function verifyPaddleSignature(rawBody: string, signatureHeader: string | undefi
 
 router.post(
   "/paddle/webhook",
-  (req, _res, next) => {
-    let rawBody = "";
-    req.on("data", (chunk: Buffer) => { rawBody += chunk.toString("utf8"); });
-    req.on("end", () => { (req as any).rawBody = rawBody; next(); });
-  },
   async (req, res) => {
     const webhookSecret = process.env["PADDLE_WEBHOOK_SECRET"];
-    const rawBody = (req as any).rawBody ?? "";
+    // express.raw() (registered in app.ts before express.json()) captures the body as a Buffer
+    const rawBody = Buffer.isBuffer(req.body) ? req.body.toString("utf8") : JSON.stringify(req.body);
 
     if (webhookSecret) {
       const sig = req.headers["paddle-signature"] as string | undefined;
