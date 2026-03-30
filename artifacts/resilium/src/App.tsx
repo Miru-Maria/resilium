@@ -26,6 +26,7 @@ import AdminUsersPage from "@/pages/admin/users";
 import AdminAnnouncementsPage from "@/pages/admin/announcements";
 import AdminTestimonialsPage from "@/pages/admin/testimonials";
 import ConsentPage from "@/pages/consent";
+import CoachingPage from "@/pages/coaching";
 import DemoPage from "@/pages/demo";
 import ScenariosPage from "@/pages/scenarios";
 import { AnnouncementBanner } from "@/components/announcement-banner";
@@ -49,7 +50,7 @@ function ScrollToTop() {
 
 function GlobalBackground() {
   const [location] = useLocation();
-  if (location.startsWith("/admin")) return null;
+  if (location.startsWith("/admin") || location === "/coaching") return null;
   return (
     <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }}>
       <NeuralCanvas opacity={0.52} particleCount={75} connectionDist={160} />
@@ -86,6 +87,7 @@ function Router() {
       <Route path="/admin/users" component={AdminUsersPage} />
       <Route path="/admin/announcements" component={AdminAnnouncementsPage} />
       <Route path="/admin/testimonials" component={AdminTestimonialsPage} />
+      <Route path="/coaching" component={CoachingPage} />
       <Route path="/demo" component={DemoPage} />
       <Route path="/scenarios/:reportId" component={ScenariosPage} />
       <Route component={NotFound} />
