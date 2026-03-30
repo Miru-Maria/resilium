@@ -14,6 +14,7 @@ import { useAuth } from "@workspace/replit-auth-web";
 
 const FREE_LIMIT = 2;
 const ANON_COUNT_KEY = "resilium_free_count";
+const SESSION_KEY = "resilium_session_id";
 
 import type { 
   AssessmentInput,
@@ -198,7 +199,8 @@ export default function AssessmentPage() {
     location: "",
     incomeStability: "fixed",
     savingsMonths: 3,
-    hasDependents: false,
+    dependentCount: 0,
+    relocationReadiness: undefined,
     skills: [],
     healthStatus: "good",
     mobilityLevel: "medium",
@@ -239,7 +241,8 @@ export default function AssessmentPage() {
     setIsSubmitting(true);
     setSubmitError(null);
     try {
-      const report = await mutateAsync({ data: { ...formData, currency } as any });
+      const sessionId = localStorage.getItem(SESSION_KEY) ?? undefined;
+      const report = await mutateAsync({ data: { ...formData, currency, sessionId } as any });
       if (!isAuthenticated) {
         const prev = parseInt(localStorage.getItem(ANON_COUNT_KEY) ?? "0", 10);
         localStorage.setItem(ANON_COUNT_KEY, String(prev + 1));
@@ -588,27 +591,27 @@ export default function AssessmentPage() {
               {/* STEP 5: DEPENDENTS */}
               {step === 5 && (
                 <div className="space-y-6">
-                  <h2 className="text-3xl md:text-4xl font-display font-bold">Do you have dependents?</h2>
-                  <p className="text-muted-foreground text-lg">Children, elderly parents, or anyone financially/physically reliant on you.</p>
+                  <h2 className="text-3xl md:text-4xl font-display font-bold">How many dependents do you have?</h2>
+                  <p className="text-muted-foreground text-lg">Children, elderly parents, or anyone financially or physically reliant on you.</p>
                   <div className="grid grid-cols-2 gap-4">
-                    <Card 
-                      className={cn(
-                        "p-8 cursor-pointer flex flex-col items-center justify-center gap-4 transition-all duration-200",
-                        formData.hasDependents === true ? "step-card-active" : "hover:border-primary/30"
-                      )}
-                      onClick={() => updateField('hasDependents', true)}
-                    >
-                      <span className="text-2xl font-bold">Yes</span>
-                    </Card>
-                    <Card 
-                      className={cn(
-                        "p-8 cursor-pointer flex flex-col items-center justify-center gap-4 transition-all duration-200",
-                        formData.hasDependents === false ? "step-card-active" : "hover:border-primary/30"
-                      )}
-                      onClick={() => updateField('hasDependents', false)}
-                    >
-                      <span className="text-2xl font-bold">No</span>
-                    </Card>
+                    {[
+                      { value: 0, label: 'None', desc: 'No dependents' },
+                      { value: 1, label: 'One', desc: 'One dependent' },
+                      { value: 2, label: 'Two or three', desc: '2–3 dependents' },
+                      { value: 3, label: 'Four or more', desc: '4+ dependents' },
+                    ].map((opt) => (
+                      <Card
+                        key={opt.value}
+                        className={cn(
+                          "p-6 cursor-pointer flex flex-col items-center justify-center gap-2 transition-all duration-200",
+                          formData.dependentCount === opt.value ? "step-card-active" : "hover:border-primary/30"
+                        )}
+                        onClick={() => updateField('dependentCount', opt.value as any)}
+                      >
+                        <span className="text-xl font-bold">{opt.label}</span>
+                        <span className="text-xs text-muted-foreground">{opt.desc}</span>
+                      </Card>
+                    ))}
                   </div>
                 </div>
               )}
@@ -647,15 +650,15 @@ export default function AssessmentPage() {
 
               {/* STEP 7: HEALTH & MOBILITY */}
               {step === 7 && (
-                <div className="space-y-8">
+                <div className="space-y-7 overflow-y-auto max-h-[420px] pr-1">
                   <div>
-                    <h2 className="text-2xl font-display font-bold mb-4">Overall Health Status</h2>
+                    <h2 className="text-xl font-display font-bold mb-3">Overall Health Status</h2>
                     <div className="flex gap-2">
                       {['excellent', 'good', 'fair', 'poor'].map(opt => (
                         <Button 
                           key={opt}
                           variant={formData.healthStatus === opt ? "default" : "outline"}
-                          className="flex-1 capitalize rounded-xl h-12"
+                          className="flex-1 capitalize rounded-xl h-11 text-sm"
                           onClick={() => updateField('healthStatus', opt as AssessmentInputHealthStatus)}
                         >
                           {opt}
@@ -664,18 +667,46 @@ export default function AssessmentPage() {
                     </div>
                   </div>
                   <div>
-                    <h2 className="text-2xl font-display font-bold mb-4">Mobility Level</h2>
-                    <p className="text-sm text-muted-foreground mb-4">How easily could you relocate internationally or travel long distances?</p>
+                    <h2 className="text-xl font-display font-bold mb-1">Physical Capability</h2>
+                    <p className="text-sm text-muted-foreground mb-3">How physically capable are you of handling demanding situations?</p>
                     <div className="flex gap-2">
-                      {['high', 'medium', 'low'].map(opt => (
+                      {[
+                        { id: 'high', label: 'High' },
+                        { id: 'medium', label: 'Medium' },
+                        { id: 'low', label: 'Low' },
+                      ].map(opt => (
                         <Button 
-                          key={opt}
-                          variant={formData.mobilityLevel === opt ? "default" : "outline"}
-                          className="flex-1 capitalize rounded-xl h-12"
-                          onClick={() => updateField('mobilityLevel', opt as AssessmentInputMobilityLevel)}
+                          key={opt.id}
+                          variant={formData.mobilityLevel === opt.id ? "default" : "outline"}
+                          className="flex-1 rounded-xl h-11 text-sm"
+                          onClick={() => updateField('mobilityLevel', opt.id as AssessmentInputMobilityLevel)}
                         >
-                          {opt}
+                          {opt.label}
                         </Button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-display font-bold mb-1">Relocation Readiness</h2>
+                    <p className="text-sm text-muted-foreground mb-3">How quickly could you pack up and relocate if you had to?</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {[
+                        { id: 'immediate', label: 'Immediately', desc: 'Could leave within days' },
+                        { id: 'within_month', label: 'Within a month', desc: 'Need a few weeks' },
+                        { id: 'within_3months', label: 'Within 3 months', desc: 'Need time to sort things' },
+                        { id: 'difficult', label: 'Very difficult', desc: 'Tied down for the foreseeable future' },
+                      ].map(opt => (
+                        <Card
+                          key={opt.id}
+                          className={cn(
+                            "p-3 cursor-pointer transition-all duration-200",
+                            formData.relocationReadiness === opt.id ? "step-card-active" : "hover:border-primary/30"
+                          )}
+                          onClick={() => updateField('relocationReadiness', opt.id as any)}
+                        >
+                          <div className="font-semibold text-sm">{opt.label}</div>
+                          <div className="text-xs text-muted-foreground">{opt.desc}</div>
+                        </Card>
                       ))}
                     </div>
                   </div>
