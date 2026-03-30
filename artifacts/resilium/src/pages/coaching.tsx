@@ -82,14 +82,14 @@ export default function CoachingPage() {
         <NeuralCanvas
           colorA="232,73,15"
           colorB="232,168,48"
-          opacity={0.55}
+          opacity={0.72}
           particleCount={60}
           connectionDist={145}
           className="w-full h-full"
         />
       </div>
       {/* Warm parchment wash over canvas — keeps text legible */}
-      <div style={{ position: "fixed", inset: 0, zIndex: 1, background: "rgba(249,246,242,0.62)", pointerEvents: "none" }} />
+      <div style={{ position: "fixed", inset: 0, zIndex: 1, background: "rgba(249,246,242,0.52)", pointerEvents: "none" }} />
 
       {/* All page content sits above canvas + wash */}
       <div style={{ position: "relative", zIndex: 2 }}>
