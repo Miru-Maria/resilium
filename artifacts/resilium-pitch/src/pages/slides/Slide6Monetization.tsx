@@ -1,3 +1,7 @@
+const allSlides = typeof window !== "undefined" && window.location.pathname.toLowerCase().endsWith("/allslides");
+const a = (delay: string, kf = "fadeUp") =>
+  allSlides ? {} : { animation: `${kf} 0.75s cubic-bezier(0.22,1,0.36,1) both`, animationDelay: delay };
+
 export default function Slide6Monetization() {
   return (
     <div className="relative w-screen h-screen overflow-hidden" style={{ background: "#0D1225" }}>
@@ -14,32 +18,32 @@ export default function Slide6Monetization() {
         <div className="flex flex-col justify-center" style={{ flex: "0 0 36vw" }}>
           <div
             className="text-[1.2vw] font-semibold tracking-[0.18em] uppercase mb-[1.5vh]"
-            style={{ color: "#E08040", fontFamily: "Inter, sans-serif" }}
+            style={{ color: "#E08040", fontFamily: "Inter, sans-serif", ...a("0.1s", "fadeIn") }}
           >
             Monetization
           </div>
           <h2
             className="text-[4vw] font-black leading-[1.05] tracking-tight mb-[2.5vh]"
-            style={{ fontFamily: "Playfair Display, serif", color: "#EAD9BE" }}
+            style={{ fontFamily: "Playfair Display, serif", color: "#EAD9BE", ...a("0.2s", "slideInLeft") }}
           >
             Revenue built in from day one.
           </h2>
           <p
             className="text-[1.5vw] font-light leading-relaxed mb-[3vh]"
-            style={{ color: "#8A7A6A", fontFamily: "Inter, sans-serif" }}
+            style={{ color: "#8A7A6A", fontFamily: "Inter, sans-serif", ...a("0.38s", "fadeUp") }}
           >
             Three compounding revenue streams designed to grow with the user — not extract from them.
           </p>
           <div
             className="h-[2px]"
-            style={{ background: "linear-gradient(90deg, #E08040, rgba(224,128,64,0.1))", width: "8vw" }}
+            style={{ background: "linear-gradient(90deg, #E08040, rgba(224,128,64,0.1))", width: "8vw", ...a("0.5s", "fadeIn") }}
           />
         </div>
 
         <div className="flex flex-col gap-[3vh] justify-center flex-1">
           <div
             className="rounded-2xl px-[2.5vw] py-[2.5vh]"
-            style={{ background: "rgba(26,34,64,0.85)", border: "1px solid rgba(224,128,64,0.3)" }}
+            style={{ background: "rgba(26,34,64,0.85)", border: "1px solid rgba(224,128,64,0.3)", ...a("0.35s", "slideInRight") }}
           >
             <div className="flex items-center justify-between mb-[1vh]">
               <div
@@ -65,7 +69,7 @@ export default function Slide6Monetization() {
 
           <div
             className="rounded-2xl px-[2.5vw] py-[2.5vh]"
-            style={{ background: "rgba(26,34,64,0.85)", border: "1px solid rgba(224,128,64,0.3)" }}
+            style={{ background: "rgba(26,34,64,0.85)", border: "1px solid rgba(224,128,64,0.3)", ...a("0.5s", "slideInRight") }}
           >
             <div className="flex items-center justify-between mb-[1vh]">
               <div
@@ -91,7 +95,7 @@ export default function Slide6Monetization() {
 
           <div
             className="rounded-2xl px-[2.5vw] py-[2.5vh]"
-            style={{ background: "rgba(26,34,64,0.85)", border: "1px solid rgba(232,168,48,0.3)" }}
+            style={{ background: "rgba(26,34,64,0.85)", border: "1px solid rgba(232,168,48,0.3)", ...a("0.65s", "slideInRight") }}
           >
             <div className="flex items-center justify-between mb-[1vh]">
               <div

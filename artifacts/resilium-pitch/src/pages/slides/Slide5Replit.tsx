@@ -1,3 +1,7 @@
+const allSlides = typeof window !== "undefined" && window.location.pathname.toLowerCase().endsWith("/allslides");
+const a = (delay: string, kf = "fadeUp") =>
+  allSlides ? {} : { animation: `${kf} 0.75s cubic-bezier(0.22,1,0.36,1) both`, animationDelay: delay };
+
 export default function Slide5Replit() {
   return (
     <div className="relative w-screen h-screen overflow-hidden" style={{ background: "#0D1225" }}>
@@ -15,13 +19,13 @@ export default function Slide5Replit() {
       <div className="relative h-full flex flex-col px-[8vw] py-[7vh]">
         <div
           className="text-[1.2vw] font-semibold tracking-[0.18em] uppercase mb-[1vh]"
-          style={{ color: "#E08040", fontFamily: "Inter, sans-serif" }}
+          style={{ color: "#E08040", fontFamily: "Inter, sans-serif", ...a("0.1s", "fadeIn") }}
         >
           Built on Replit
         </div>
         <h2
           className="text-[4vw] font-black tracking-tight mb-[4vh]"
-          style={{ fontFamily: "Playfair Display, serif", color: "#EAD9BE" }}
+          style={{ fontFamily: "Playfair Display, serif", color: "#EAD9BE", ...a("0.2s", "slideInLeft") }}
         >
           Four artifacts. One cohesive platform.
         </h2>
@@ -29,7 +33,7 @@ export default function Slide5Replit() {
         <div className="grid gap-[2vh]" style={{ gridTemplateColumns: "1fr 1fr", flex: 1 }}>
           <div
             className="rounded-2xl px-[2.5vw] py-[2.5vh] flex flex-col gap-[1vh]"
-            style={{ background: "rgba(26,34,64,0.9)", border: "1px solid rgba(224,128,64,0.25)" }}
+            style={{ background: "rgba(26,34,64,0.9)", border: "1px solid rgba(224,128,64,0.25)", ...a("0.35s", "fadeUp") }}
           >
             <div
               className="text-[1.2vw] font-bold tracking-widest uppercase"
@@ -53,7 +57,7 @@ export default function Slide5Replit() {
 
           <div
             className="rounded-2xl px-[2.5vw] py-[2.5vh] flex flex-col gap-[1vh]"
-            style={{ background: "rgba(26,34,64,0.9)", border: "1px solid rgba(224,128,64,0.25)" }}
+            style={{ background: "rgba(26,34,64,0.9)", border: "1px solid rgba(224,128,64,0.25)", ...a("0.45s", "fadeUp") }}
           >
             <div
               className="text-[1.2vw] font-bold tracking-widest uppercase"
@@ -71,13 +75,13 @@ export default function Slide5Replit() {
               className="text-[1.3vw] font-light leading-relaxed"
               style={{ color: "#8A7A6A", fontFamily: "Inter, sans-serif" }}
             >
-              Full assessment on iOS and Android, push notifications, GDPR data management, score sharing
+              Full assessment on Android (Google Play), push notifications, GDPR data management, score sharing
             </div>
           </div>
 
           <div
             className="rounded-2xl px-[2.5vw] py-[2.5vh] flex flex-col gap-[1vh]"
-            style={{ background: "rgba(26,34,64,0.9)", border: "1px solid rgba(232,168,48,0.25)" }}
+            style={{ background: "rgba(26,34,64,0.9)", border: "1px solid rgba(232,168,48,0.25)", ...a("0.55s", "fadeUp") }}
           >
             <div
               className="text-[1.2vw] font-bold tracking-widest uppercase"
@@ -101,7 +105,7 @@ export default function Slide5Replit() {
 
           <div
             className="rounded-2xl px-[2.5vw] py-[2.5vh] flex flex-col gap-[1vh]"
-            style={{ background: "rgba(26,34,64,0.9)", border: "1px solid rgba(232,168,48,0.25)" }}
+            style={{ background: "rgba(26,34,64,0.9)", border: "1px solid rgba(232,168,48,0.25)", ...a("0.65s", "fadeUp") }}
           >
             <div
               className="text-[1.2vw] font-bold tracking-widest uppercase"
