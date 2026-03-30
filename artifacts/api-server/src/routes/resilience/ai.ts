@@ -15,7 +15,9 @@ type AssessmentInput = {
   location: string;
   incomeStability: string;
   savingsMonths: number;
-  hasDependents: boolean;
+  dependentCount?: number;
+  hasDependents?: boolean;
+  relocationReadiness?: string;
   skills: string[];
   healthStatus: string;
   mobilityLevel: string;
@@ -117,7 +119,7 @@ USER PROFILE:
 - Location: ${input.location}
 - Income stability: ${input.incomeStability}
 - Savings runway: ${input.savingsMonths} months
-- Has dependents: ${input.hasDependents}
+- Dependents: ${input.dependentCount === 0 ? "None" : input.dependentCount === 1 ? "One" : input.dependentCount === 2 ? "Two or three" : "Four or more"}
 - Skills: ${input.skills.join(", ") || "none"}
 - Health status: ${input.healthStatus}
 - Mobility level: ${input.mobilityLevel}
