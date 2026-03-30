@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
-import { ArrowLeft, CheckCircle, CalendarDays, MessageCircle, TrendingUp, Heart, Brain, Shield } from "lucide-react";
+import { ArrowLeft, CheckCircle, MessageCircle, TrendingUp, Heart, Brain, Shield } from "lucide-react";
 import { NeuralCanvas } from "../components/neural-canvas";
 
 const COACHING_URL = "https://healing-through-understanding.replit.app/contact";
@@ -111,22 +111,6 @@ export default function CoachingPage() {
           <ArrowLeft size={14} />
           Back to Resilium
         </Link>
-        <a
-          href={COACHING_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            background: C.primary,
-            color: "#FFFFFF",
-            borderRadius: "8px",
-            padding: "8px 18px",
-            fontSize: "13px",
-            fontWeight: 700,
-            textDecoration: "none",
-          }}
-        >
-          Book a Free Call
-        </a>
       </div>
 
       {/* Hero */}
@@ -170,7 +154,7 @@ export default function CoachingPage() {
 
         <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" as const }}>
           <a
-            href={COACHING_URL}
+            href="https://healing-through-understanding.replit.app/services"
             target="_blank"
             rel="noopener noreferrer"
             style={{
@@ -184,24 +168,6 @@ export default function CoachingPage() {
               display: "inline-flex",
               alignItems: "center",
               gap: "8px",
-            }}
-          >
-            <CalendarDays size={16} />
-            Book a Free Discovery Call
-          </a>
-          <a
-            href={COACHING_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              background: "transparent",
-              color: C.primary,
-              padding: "15px 28px",
-              borderRadius: "12px",
-              fontWeight: 600,
-              fontSize: "15px",
-              textDecoration: "none",
-              border: `1.5px solid ${C.primary}`,
             }}
           >
             Learn More
