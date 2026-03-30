@@ -31,16 +31,29 @@ type AssessmentInput = {
   location: string;
   incomeStability: "fixed" | "freelance" | "unstable";
   savingsMonths: number;
-  hasDependents: boolean;
+  // New: count 0=none, 1=one, 2=two-three, 3=four+
+  // Legacy boolean hasDependents kept for backward compat
+  dependentCount?: number;
+  hasDependents?: boolean;
   skills: string[];
   healthStatus: "excellent" | "good" | "fair" | "poor";
   mobilityLevel: "high" | "medium" | "low";
   housingType: "own" | "rent" | "family" | "nomadic" | "other";
+  // New: explicit relocation readiness
+  relocationReadiness?: "immediate" | "within_month" | "within_3months" | "difficult";
   hasEmergencySupplies: boolean;
   psychologicalResilience: number;
   riskConcerns: string[];
   mentalResilienceAnswers?: MentalResilienceAnswers;
 };
+
+// Resolve dependentCount from either new field or legacy boolean
+function resolveDependentCount(input: AssessmentInput): number {
+  if (typeof input.dependentCount === "number") return input.dependentCount;
+  // Legacy fallback
+  if (input.hasDependents === true) return 2; // assume moderate burden
+  return 0;
+}
 
 // Normalize a Likert dimension score (1-5 avg) to 0-100
 function likertToScore(avg: number): number {
@@ -103,8 +116,8 @@ export function calculateScores(input: AssessmentInput) {
   }
 
   // Mental resilience composite acts as a cross-area modifier:
-  // - growth pathway (composite >= 60): no dampening, scores are used as-is
-  // - compensation pathway (composite < 60): effective scores are slightly dampened
+  // - growth pathway (composite >= 60): no dampening, scores used as-is
+  // - compensation pathway (composite < 60): effective scores slightly dampened
   //   to reflect that psychological pressure compounds other vulnerabilities
   let modifier = 1.0;
   if (mentalResilienceSubScores && mentalResilienceSubScores.pathway === "compensation") {
@@ -133,38 +146,45 @@ export function calculateScores(input: AssessmentInput) {
   };
 }
 
+// ─── FINANCIAL (25%) ─────────────────────────────────────────────────────────
+// income(40) + savings(40) + dependents(0-20) = max 100
 function calculateFinancialScore(input: AssessmentInput): number {
   let score = 0;
 
-  const incomeScores = { fixed: 40, freelance: 25, unstable: 10 };
-  score += incomeScores[input.incomeStability];
+  const incomeScores = { fixed: 40, freelance: 28, unstable: 12 };
+  score += incomeScores[input.incomeStability] ?? 0;
 
   if (input.savingsMonths >= 12) score += 40;
   else if (input.savingsMonths >= 6) score += 30;
   else if (input.savingsMonths >= 3) score += 20;
   else if (input.savingsMonths >= 1) score += 10;
-  else score += 0;
 
-  if (!input.hasDependents) score += 20;
-  else score += 5;
+  // 0=none → +20, 1=one → +12, 2=two-three → +5, 3=four+ → +0
+  const dc = resolveDependentCount(input);
+  if (dc === 0) score += 20;
+  else if (dc === 1) score += 12;
+  else if (dc === 2) score += 5;
+  // 3+ adds 0
 
   return Math.min(100, score);
 }
 
+// ─── HEALTH (15%) ─────────────────────────────────────────────────────────────
+// status(15-80) + medical skill(20) = max 100
+// No phantom +20 bonus
 function calculateHealthScore(input: AssessmentInput): number {
   let score = 0;
 
-  const healthScores = { excellent: 60, good: 45, fair: 25, poor: 10 };
-  score += healthScores[input.healthStatus];
+  const healthScores = { excellent: 80, good: 60, fair: 35, poor: 15 };
+  score += healthScores[input.healthStatus] ?? 15;
 
-  const hasMedical = input.skills.includes("medical");
-  if (hasMedical) score += 20;
-
-  score += 20;
+  if (input.skills.includes("medical")) score += 20;
 
   return Math.min(100, score);
 }
 
+// ─── SKILLS (20%) ─────────────────────────────────────────────────────────────
+// Sum of individual skill values, floored at 10 (basic life competency)
 function calculateSkillsScore(input: AssessmentInput): number {
   const skillValues: Record<string, number> = {
     digital: 20,
@@ -181,31 +201,69 @@ function calculateSkillsScore(input: AssessmentInput): number {
     score += skillValues[skill] ?? 0;
   }
 
-  return Math.min(100, score);
+  // Floor: everyone has basic life competency
+  return Math.min(100, Math.max(10, score));
 }
 
+// ─── MOBILITY (15%) ──────────────────────────────────────────────────────────
+// Physical capability(10-50) + geographic flexibility(10-40) + dependents bonus(0-10)
+// = max 100
 function calculateMobilityScore(input: AssessmentInput): number {
   let score = 0;
 
-  const mobilityScores = { high: 50, medium: 30, low: 10 };
-  score += mobilityScores[input.mobilityLevel];
+  // Physical capability dimension
+  const physicalScores = { high: 50, medium: 30, low: 10 };
+  score += physicalScores[input.mobilityLevel] ?? 10;
 
-  const housingScores = { own: 20, rent: 30, family: 25, nomadic: 40, other: 15 };
-  score += housingScores[input.housingType];
+  // Geographic flexibility dimension
+  if (input.relocationReadiness) {
+    const readinessScores: Record<string, number> = {
+      immediate: 40,
+      within_month: 30,
+      within_3months: 20,
+      difficult: 10,
+    };
+    score += readinessScores[input.relocationReadiness] ?? 20;
+  } else {
+    // Legacy fallback: derive flexibility from housing type
+    const housingFlexScores: Record<string, number> = {
+      nomadic: 35,
+      rent: 25,
+      family: 20,
+      other: 15,
+      own: 10,
+    };
+    score += housingFlexScores[input.housingType] ?? 15;
+  }
 
-  if (!input.hasDependents) score += 10;
+  // Dependents mobility burden
+  const dc = resolveDependentCount(input);
+  if (dc === 0) score += 10;
+  else if (dc === 1) score += 5;
+  // 2+ adds 0
 
   return Math.min(100, score);
 }
 
+// ─── RESOURCES (10%) ─────────────────────────────────────────────────────────
+// Physical assets: emergency supplies + housing stability (separate from mobility flexibility)
+// Floored at 10
 function calculateResourcesScore(input: AssessmentInput): number {
   let score = 0;
 
+  // Physical stockpile
   if (input.hasEmergencySupplies) score += 50;
 
-  const financialSkill = input.skills.includes("financial") ? 20 : 0;
-  const survivalSkill = input.skills.includes("survival") ? 30 : 0;
-  score += financialSkill + survivalSkill;
+  // Housing as a stability asset (own = major asset; nomadic = no fixed base)
+  const housingStabilityScores: Record<string, number> = {
+    own: 40,
+    family: 30,
+    rent: 20,
+    other: 10,
+    nomadic: 5,
+  };
+  score += housingStabilityScores[input.housingType] ?? 10;
 
-  return Math.min(100, score);
+  // Floor: everyone has some minimal resources
+  return Math.min(100, Math.max(10, score));
 }
