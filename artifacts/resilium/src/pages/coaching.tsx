@@ -1,19 +1,20 @@
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
 import { ArrowLeft, CheckCircle, CalendarDays, MessageCircle, TrendingUp, Heart, Brain, Shield } from "lucide-react";
+import { NeuralCanvas } from "../components/neural-canvas";
 
 const COACHING_URL = "https://healing-through-understanding.replit.app/contact";
 
 // Phoenix brand tokens
 const C = {
-  bg:         "#F9F6F2",
+  bg:         "rgba(249,246,242,0.88)",
   fg:         "#2E2219",
   primary:    "#E8490F",
   gold:       "#E8A830",
   accent:     "#EDE3D6",
   muted:      "#7A6D62",
-  cardBg:     "#F9F6F2",
-  sectionAlt: "#EDE3D6",
+  cardBg:     "rgba(249,246,242,0.80)",
+  sectionAlt: "rgba(237,227,214,0.82)",
   dark:       "#3D1F08",
   darkMid:    "#5C3015",
   badgeBg:    "#F5E8D5",
@@ -68,12 +69,30 @@ export default function CoachingPage() {
   return (
     <div style={{
       minHeight: "100vh",
-      background: C.bg,
+      background: "#F9F6F2",
       color: C.fg,
       fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
+      position: "relative",
     }}>
       {/* Google Fonts — Playfair Display for headings */}
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&display=swap');`}</style>
+
+      {/* Neural canvas — Phoenix ember × gold, behind all content */}
+      <div style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none" }}>
+        <NeuralCanvas
+          colorA="232,73,15"
+          colorB="232,168,48"
+          opacity={0.28}
+          particleCount={60}
+          connectionDist={145}
+          className="w-full h-full"
+        />
+      </div>
+      {/* Warm parchment wash over canvas — keeps text legible */}
+      <div style={{ position: "fixed", inset: 0, zIndex: 1, background: "rgba(249,246,242,0.78)", pointerEvents: "none" }} />
+
+      {/* All page content sits above canvas + wash */}
+      <div style={{ position: "relative", zIndex: 2 }}>
 
       {/* Top nav */}
       <div style={{
@@ -427,7 +446,7 @@ export default function CoachingPage() {
 
       {/* Footer note */}
       <div style={{
-        background: C.sectionAlt,
+        background: "rgba(237,227,214,0.88)",
         borderTop: `1px solid ${C.accent}`,
         padding: "20px 24px",
         textAlign: "center",
@@ -438,6 +457,8 @@ export default function CoachingPage() {
         <span style={{ margin: "0 8px", opacity: 0.4 }}>·</span>
         <Link href="/" style={{ color: C.badgeText, textDecoration: "none" }}>Return to Resilium</Link>
       </div>
+
+      </div>{/* end content z-index wrapper */}
     </div>
   );
 }
