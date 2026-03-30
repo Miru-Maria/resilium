@@ -228,7 +228,7 @@ export default function LandingPage() {
               Resilium analyzes your financial stability, skills, health, and location to build a personalized action plan for life's unpredictable moments.
             </p>
 
-            <Link href="/assess">
+            <Link href="/consent">
               <Button size="lg" className="rounded-full h-16 px-10 text-lg font-semibold shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/30 hover:-translate-y-1 transition-all duration-300">
                 Get My Resilience Plan
                 <ArrowRight className="ml-2 w-5 h-5" />
@@ -387,7 +387,7 @@ export default function LandingPage() {
           <div className="max-w-2xl mx-auto text-center">
             <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">Ready to find out where you stand?</h2>
             <p className="text-muted-foreground mb-8">Takes 10–15 minutes to complete.</p>
-            <Link href="/assess">
+            <Link href="/consent">
               <Button size="lg" className="rounded-full h-14 px-10 text-base font-semibold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-1 transition-all duration-300">
                 Start the Assessment
                 <ChevronRight className="ml-1 w-5 h-5" />

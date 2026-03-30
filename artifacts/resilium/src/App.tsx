@@ -25,6 +25,7 @@ import AdminConsentLogPage from "@/pages/admin/consent-log";
 import AdminUsersPage from "@/pages/admin/users";
 import AdminAnnouncementsPage from "@/pages/admin/announcements";
 import AdminTestimonialsPage from "@/pages/admin/testimonials";
+import ConsentPage from "@/pages/consent";
 import DemoPage from "@/pages/demo";
 import ScenariosPage from "@/pages/scenarios";
 import { AnnouncementBanner } from "@/components/announcement-banner";
@@ -65,6 +66,7 @@ function Router() {
       <ScrollToTop />
       <Switch>
       <Route path="/" component={LandingPage} />
+      <Route path="/consent" component={ConsentPage} />
       <Route path="/assess" component={AssessmentPage} />
       <Route path="/results/:reportId" component={ResultsPage} />
       <Route path="/privacy" component={PrivacyPage} />

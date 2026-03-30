@@ -14,6 +14,7 @@ import { useAuth } from "@workspace/replit-auth-web";
 
 const FREE_LIMIT = 2;
 const ANON_COUNT_KEY = "resilium_free_count";
+const SESSION_KEY = "resilium_session_id";
 
 import type { 
   AssessmentInput,
@@ -239,7 +240,8 @@ export default function AssessmentPage() {
     setIsSubmitting(true);
     setSubmitError(null);
     try {
-      const report = await mutateAsync({ data: { ...formData, currency } as any });
+      const sessionId = localStorage.getItem(SESSION_KEY) ?? undefined;
+      const report = await mutateAsync({ data: { ...formData, currency, sessionId } as any });
       if (!isAuthenticated) {
         const prev = parseInt(localStorage.getItem(ANON_COUNT_KEY) ?? "0", 10);
         localStorage.setItem(ANON_COUNT_KEY, String(prev + 1));
