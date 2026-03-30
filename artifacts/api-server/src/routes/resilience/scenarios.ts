@@ -83,7 +83,7 @@ router.post("/scenarios/:reportId", scenarioRateLimit, async (req, res) => {
       scenarioContext = `The user loses their primary income source for ${months} months (unemployment duration). They have ${report.savingsMonths} months of savings currently. Income stability was "${report.incomeStability}".`;
     } else if (scenario === "health_crisis") {
       const severity = parameters?.medicalSeverity ?? "moderate";
-      scenarioContext = `The user experiences a ${severity} health crisis that may prevent work for weeks or months. Current health status: "${report.healthStatus}". They ${report.hasDependents ? "have" : "do not have"} dependents.`;
+      scenarioContext = `The user experiences a ${severity} health crisis that may prevent work for weeks or months. Current health status: "${report.healthStatus}". They have ${report.dependentCount === 0 ? "no" : report.dependentCount === 1 ? "one" : report.dependentCount === 2 ? "two or three" : "four or more"} dependents.`;
     } else if (scenario === "natural_disaster") {
       const type = parameters?.disasterType ?? "flood";
       scenarioContext = `A ${type} occurs in or near the user's area (${report.location}). Housing type: ${report.housingType}. They ${report.hasEmergencySupplies ? "have" : "do not have"} emergency supplies. Mobility level: ${report.mobilityLevel}.`;
@@ -103,7 +103,7 @@ Current resilience profile:
 - Mobility: ${Math.round(report.scoreMobility)}/100 (housing: ${report.housingType}, mobility: ${report.mobilityLevel})
 - Psychological: ${Math.round(report.scorePsychological)}/100
 - Resources: ${Math.round(report.scoreResources)}/100 (supplies: ${report.hasEmergencySupplies ? "yes" : "no"})
-- Dependents: ${report.hasDependents ? "yes" : "no"}
+- Dependents: ${report.dependentCount === 0 ? "none" : report.dependentCount === 1 ? "one" : report.dependentCount === 2 ? "two or three" : "four or more"}
 - Risk concerns: ${(report.riskConcerns as string[]).join(", ")}
 `;
 
