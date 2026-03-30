@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { Loader2, ArrowLeft, Download, Printer, Star, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface PersonaResult {
   personaKey: string;
@@ -348,8 +349,62 @@ export default function UxTestReportPage() {
               <h2 className="text-lg font-semibold text-foreground">Cross-Persona Analysis</h2>
               <Card className="print:border print:shadow-none">
                 <CardContent className="pt-6">
-                  <div className="prose prose-sm prose-invert max-w-none prose-headings:text-foreground prose-p:text-foreground/90 prose-strong:text-foreground prose-li:text-foreground/90 prose-a:text-primary prose-hr:border-border/40">
-                    <ReactMarkdown>{report.crossPersonaSummary}</ReactMarkdown>
+                  <div className="space-y-5 text-sm text-foreground/90 leading-relaxed">
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        h1: ({ children }) => (
+                          <h3 className="text-base font-bold text-foreground mb-1 mt-2">{children}</h3>
+                        ),
+                        h2: ({ children }) => (
+                          <h4 className="text-sm font-semibold text-foreground uppercase tracking-wide mt-5 mb-2 border-b border-border/40 pb-1">{children}</h4>
+                        ),
+                        h3: ({ children }) => (
+                          <h5 className="text-sm font-semibold text-foreground mt-3 mb-1">{children}</h5>
+                        ),
+                        p: ({ children }) => (
+                          <p className="text-sm text-foreground/85 leading-relaxed mb-2">{children}</p>
+                        ),
+                        ul: ({ children }) => (
+                          <ul className="space-y-1 mb-3 pl-1">{children}</ul>
+                        ),
+                        ol: ({ children }) => (
+                          <ol className="space-y-1 mb-3 pl-1 list-decimal list-inside">{children}</ol>
+                        ),
+                        li: ({ children }) => (
+                          <li className="text-sm text-foreground/85 flex gap-2 items-start">
+                            <span className="text-primary mt-0.5 shrink-0">·</span>
+                            <span className="flex-1">{children}</span>
+                          </li>
+                        ),
+                        strong: ({ children }) => (
+                          <strong className="font-semibold text-foreground">{children}</strong>
+                        ),
+                        hr: () => <Separator className="my-4" />,
+                        table: ({ children }) => (
+                          <div className="overflow-x-auto rounded-lg border border-border/50 mb-4">
+                            <table className="w-full text-sm border-collapse">{children}</table>
+                          </div>
+                        ),
+                        thead: ({ children }) => (
+                          <thead className="bg-muted/50">{children}</thead>
+                        ),
+                        tbody: ({ children }) => (
+                          <tbody className="divide-y divide-border/30">{children}</tbody>
+                        ),
+                        tr: ({ children }) => (
+                          <tr className="hover:bg-muted/30 transition-colors">{children}</tr>
+                        ),
+                        th: ({ children }) => (
+                          <th className="px-4 py-2 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wide whitespace-nowrap">{children}</th>
+                        ),
+                        td: ({ children }) => (
+                          <td className="px-4 py-2.5 text-sm text-foreground/85 align-top">{children}</td>
+                        ),
+                      }}
+                    >
+                      {report.crossPersonaSummary}
+                    </ReactMarkdown>
                   </div>
                 </CardContent>
               </Card>
