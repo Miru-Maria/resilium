@@ -52,7 +52,15 @@
     "position": 7,
     "filepath": "src/pages/slides/Slide7Close.tsx",
     "title": "What's Next",
-    "description": "Closing slide with key metrics and roadmap.",
+    "description": "Clean roadmap text and key metrics — no banner, consistent with prior slides.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "b8c9d0e1-f2a3-4567-bcde-678901234567",
+    "position": 8,
+    "filepath": "src/pages/slides/Slide8Final.tsx",
+    "title": "Final",
+    "description": "Closing slide — neon Resilium logo, closing line, URL.",
     "speakerNotes": ""
   }
 ]
