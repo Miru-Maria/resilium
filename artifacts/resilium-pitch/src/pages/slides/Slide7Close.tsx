@@ -35,7 +35,7 @@ export default function Slide7Close() {
 
         <div className="flex items-stretch w-full" style={a("0.38s", "scaleIn")}>
           <div className="flex-1 flex flex-col items-center px-[2vw]">
-            <div style={{ height: "17vh", display: "flex", alignItems: "flex-end", paddingBottom: "0.8vh" }}>
+            <div style={{ height: "17vh", display: "flex", alignItems: "flex-end", paddingBottom: "2.5vh" }}>
               <div
                 className="text-[9vw] font-black leading-none"
                 style={{ color: "#E08040", fontFamily: "Playfair Display, serif", textShadow: "0 0 28px rgba(224,128,64,0.55), 0 0 60px rgba(224,128,64,0.2)" }}
@@ -52,7 +52,7 @@ export default function Slide7Close() {
           <div className="w-[1px] self-stretch" style={{ background: "rgba(224,128,64,0.2)" }} />
 
           <div className="flex-1 flex flex-col items-center px-[2vw]">
-            <div style={{ height: "17vh", display: "flex", alignItems: "flex-end", paddingBottom: "0.8vh" }}>
+            <div style={{ height: "17vh", display: "flex", alignItems: "flex-end", paddingBottom: "2.5vh" }}>
               <div
                 className="text-[9vw] font-black leading-none"
                 style={{ color: "#E08040", fontFamily: "Playfair Display, serif", textShadow: "0 0 28px rgba(224,128,64,0.55), 0 0 60px rgba(224,128,64,0.2)" }}
@@ -69,7 +69,7 @@ export default function Slide7Close() {
           <div className="w-[1px] self-stretch" style={{ background: "rgba(224,128,64,0.2)" }} />
 
           <div className="flex-1 flex flex-col items-center px-[2vw]">
-            <div style={{ height: "17vh", display: "flex", alignItems: "flex-end", paddingBottom: "0.8vh" }}>
+            <div style={{ height: "17vh", display: "flex", alignItems: "flex-end", paddingBottom: "2.5vh" }}>
               <div
                 className="text-[9vw] font-black leading-none"
                 style={{ color: "#E08040", fontFamily: "Playfair Display, serif", textShadow: "0 0 28px rgba(224,128,64,0.55), 0 0 60px rgba(224,128,64,0.2)" }}
@@ -86,10 +86,10 @@ export default function Slide7Close() {
           <div className="w-[1px] self-stretch" style={{ background: "rgba(224,128,64,0.2)" }} />
 
           <div className="flex-1 flex flex-col items-center px-[2vw]">
-            <div style={{ height: "17vh", display: "flex", alignItems: "flex-end", paddingBottom: "0.8vh" }}>
+            <div style={{ height: "17vh", display: "flex", alignItems: "flex-end", paddingBottom: "2.5vh" }}>
               <div
-                className="text-[9vw] font-black leading-none"
-                style={{ color: "#E08040", fontFamily: "Playfair Display, serif", textShadow: "0 0 28px rgba(224,128,64,0.55), 0 0 60px rgba(224,128,64,0.2)" }}
+                className="font-black leading-none"
+                style={{ fontSize: "10.5vw", color: "#E08040", fontFamily: "Playfair Display, serif", textShadow: "0 0 28px rgba(224,128,64,0.55), 0 0 60px rgba(224,128,64,0.2)" }}
               >
                 1
               </div>
