@@ -47,7 +47,8 @@ export const SubmitAssessmentBody = zod.object({
     .enum(["fixed", "freelance", "unstable"])
     .describe("Income stability type"),
   savingsMonths: zod.number().describe("Months of savings runway"),
-  hasDependents: zod.boolean().describe("Whether user has dependents"),
+  dependentCount: zod.number().min(0).max(3).describe("Number of dependents (0=none, 1=one, 2=two-three, 3=four+)"),
+  relocationReadiness: zod.enum(["immediate", "within_month", "within_3months", "difficult"]).optional(),
   skills: zod
     .array(
       zod.enum([
@@ -357,7 +358,8 @@ export const SubmitAssessmentResponse = zod.object({
       .enum(["fixed", "freelance", "unstable"])
       .describe("Income stability type"),
     savingsMonths: zod.number().describe("Months of savings runway"),
-    hasDependents: zod.boolean().describe("Whether user has dependents"),
+    dependentCount: zod.number().min(0).max(3).describe("Number of dependents (0=none, 1=one, 2=two-three, 3=four+)"),
+    relocationReadiness: zod.enum(["immediate", "within_month", "within_3months", "difficult"]).optional(),
     skills: zod
       .array(
         zod.enum([
@@ -685,7 +687,8 @@ export const GetReportResponse = zod.object({
       .enum(["fixed", "freelance", "unstable"])
       .describe("Income stability type"),
     savingsMonths: zod.number().describe("Months of savings runway"),
-    hasDependents: zod.boolean().describe("Whether user has dependents"),
+    dependentCount: zod.number().min(0).max(3).describe("Number of dependents (0=none, 1=one, 2=two-three, 3=four+)"),
+    relocationReadiness: zod.enum(["immediate", "within_month", "within_3months", "difficult"]).optional(),
     skills: zod
       .array(
         zod.enum([
