@@ -81,7 +81,7 @@ export default function Slide3Solution() {
           >
             <div
               className="text-[3vw] font-black mb-[1.5vh]"
-              style={{ color: "#E8A830", fontFamily: "Playfair Display, serif" }}
+              style={{ color: "#E08040", fontFamily: "Playfair Display, serif" }}
             >
               03
             </div>

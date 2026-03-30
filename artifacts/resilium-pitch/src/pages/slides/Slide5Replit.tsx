@@ -81,11 +81,11 @@ export default function Slide5Replit() {
 
           <div
             className="rounded-2xl px-[2.5vw] py-[2.5vh] flex flex-col gap-[1vh]"
-            style={{ background: "rgba(26,34,64,0.9)", border: "1px solid rgba(232,168,48,0.25)", ...a("0.55s", "fadeUp") }}
+            style={{ background: "rgba(26,34,64,0.9)", border: "1px solid rgba(224,128,64,0.25)", ...a("0.55s", "fadeUp") }}
           >
             <div
               className="text-[1.2vw] font-bold tracking-widest uppercase"
-              style={{ color: "#E8A830", fontFamily: "Inter, sans-serif" }}
+              style={{ color: "#E08040", fontFamily: "Inter, sans-serif" }}
             >
               API Server
             </div>
@@ -105,11 +105,11 @@ export default function Slide5Replit() {
 
           <div
             className="rounded-2xl px-[2.5vw] py-[2.5vh] flex flex-col gap-[1vh]"
-            style={{ background: "rgba(26,34,64,0.9)", border: "1px solid rgba(232,168,48,0.25)", ...a("0.65s", "fadeUp") }}
+            style={{ background: "rgba(26,34,64,0.9)", border: "1px solid rgba(224,128,64,0.25)", ...a("0.65s", "fadeUp") }}
           >
             <div
               className="text-[1.2vw] font-bold tracking-widest uppercase"
-              style={{ color: "#E8A830", fontFamily: "Inter, sans-serif" }}
+              style={{ color: "#E08040", fontFamily: "Inter, sans-serif" }}
             >
               AI Integration
             </div>

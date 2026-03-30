@@ -39,7 +39,7 @@ export default function Slide8Final() {
             className="text-[1.6vw] font-medium mb-[3vh]"
             style={{ color: "#E08040", fontFamily: "Inter, sans-serif", letterSpacing: "0.04em", ...a("0.48s", "fadeUp") }}
           >
-            resilium.replit.app
+            resilium-ai.replit.app
           </div>
         </div>
 

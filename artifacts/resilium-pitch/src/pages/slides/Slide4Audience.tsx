@@ -77,7 +77,7 @@ export default function Slide4Audience() {
           </div>
           <div
             className="rounded-xl px-[2vw] py-[2vh]"
-            style={{ background: "rgba(26,34,64,0.7)", borderLeft: "3px solid #E8A830", ...a("0.65s", "slideInRight") }}
+            style={{ background: "rgba(26,34,64,0.7)", borderLeft: "3px solid #E08040", ...a("0.65s", "slideInRight") }}
           >
             <div
               className="text-[1.6vw] font-bold mb-[0.5vh]"
@@ -94,7 +94,7 @@ export default function Slide4Audience() {
           </div>
           <div
             className="rounded-xl px-[2vw] py-[2vh]"
-            style={{ background: "rgba(26,34,64,0.7)", borderLeft: "3px solid #E8A830", ...a("0.8s", "slideInRight") }}
+            style={{ background: "rgba(26,34,64,0.7)", borderLeft: "3px solid #E08040", ...a("0.8s", "slideInRight") }}
           >
             <div
               className="text-[1.6vw] font-bold mb-[0.5vh]"

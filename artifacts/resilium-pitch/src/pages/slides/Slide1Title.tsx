@@ -25,7 +25,7 @@ export default function Slide1Title() {
           <div className="w-[3px] h-[3vh]" style={{ background: "#E08040" }} />
           <span
             className="text-[1.3vw] font-medium tracking-[0.22em] uppercase"
-            style={{ color: "#E8A830", fontFamily: "Inter, sans-serif" }}
+            style={{ color: "#E08040", fontFamily: "Inter, sans-serif" }}
           >
             Replit Agent 4 Buildathon
           </span>
@@ -63,7 +63,7 @@ export default function Slide1Title() {
             className="text-[1.2vw] font-medium tracking-wide"
             style={{ color: "#E08040", fontFamily: "Inter, sans-serif" }}
           >
-            resilium.replit.app
+            resilium-ai.replit.app
           </div>
         </div>
       </div>
