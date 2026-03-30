@@ -35,6 +35,8 @@ app.use(
 );
 app.use(cors({ credentials: true, origin: true }));
 app.use(cookieParser());
+// Capture raw body for Paddle webhook HMAC verification before express.json() consumes it
+app.use("/api/paddle/webhook", express.raw({ type: "*/*" }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
