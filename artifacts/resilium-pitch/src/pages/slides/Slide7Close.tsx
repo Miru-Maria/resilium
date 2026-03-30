@@ -33,71 +33,48 @@ export default function Slide7Close() {
           </h2>
         </div>
 
-        <div className="flex items-stretch w-full" style={a("0.38s", "scaleIn")}>
-          <div className="flex-1 flex flex-col items-center px-[2vw]">
-            <div style={{ height: "17vh", display: "flex", alignItems: "flex-end", paddingBottom: "0.8vh" }}>
-              <div
-                className="text-[9vw] font-black leading-none"
-                style={{ color: "#E08040", fontFamily: "Playfair Display, serif", textShadow: "0 0 28px rgba(224,128,64,0.55), 0 0 60px rgba(224,128,64,0.2)" }}
-              >
-                4
-              </div>
-            </div>
-            <div style={{ height: "7vh", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.4vh" }}>
-              <div className="text-[1.4vw] font-medium text-center" style={{ color: "#EAD9BE", fontFamily: "Inter, sans-serif" }}>Replit artifacts</div>
-              <div className="text-[1.2vw] font-light text-center" style={{ color: "#8A7A6A", fontFamily: "Inter, sans-serif" }}>deployed</div>
-            </div>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1px 1fr 1px 1fr 1px 1fr",
+            gridTemplateRows: "1fr 4vh auto",
+            width: "100%",
+            flex: "1 1 0",
+            ...a("0.38s", "scaleIn"),
+          }}
+        >
+          <div style={{ gridColumn: 2, gridRow: "1 / 4", background: "rgba(224,128,64,0.2)" }} />
+          <div style={{ gridColumn: 4, gridRow: "1 / 4", background: "rgba(224,128,64,0.2)" }} />
+          <div style={{ gridColumn: 6, gridRow: "1 / 4", background: "rgba(224,128,64,0.2)" }} />
+
+          <div style={{ gridColumn: 1, gridRow: 1, display: "flex", justifyContent: "center", alignItems: "flex-end", paddingBottom: "1vh" }}>
+            <span style={{ fontSize: "9vw", fontWeight: 900, lineHeight: 1, fontFamily: "Playfair Display, serif", color: "#E08040", textShadow: "0 0 28px rgba(224,128,64,0.55), 0 0 60px rgba(224,128,64,0.2)" }}>4</span>
+          </div>
+          <div style={{ gridColumn: 3, gridRow: 1, display: "flex", justifyContent: "center", alignItems: "flex-end", paddingBottom: "1vh" }}>
+            <span style={{ fontSize: "9vw", fontWeight: 900, lineHeight: 1, fontFamily: "Playfair Display, serif", color: "#E08040", textShadow: "0 0 28px rgba(224,128,64,0.55), 0 0 60px rgba(224,128,64,0.2)" }}>6</span>
+          </div>
+          <div style={{ gridColumn: 5, gridRow: 1, display: "flex", justifyContent: "center", alignItems: "flex-end", paddingBottom: "1vh" }}>
+            <span style={{ fontSize: "9vw", fontWeight: 900, lineHeight: 1, fontFamily: "Playfair Display, serif", color: "#E08040", textShadow: "0 0 28px rgba(224,128,64,0.55), 0 0 60px rgba(224,128,64,0.2)" }}>3</span>
+          </div>
+          <div style={{ gridColumn: 7, gridRow: 1, display: "flex", justifyContent: "center", alignItems: "flex-end", paddingBottom: "1vh" }}>
+            <span style={{ fontSize: "9vw", fontWeight: 900, lineHeight: 1, fontFamily: "Playfair Display, serif", color: "#E08040", textShadow: "0 0 28px rgba(224,128,64,0.55), 0 0 60px rgba(224,128,64,0.2)" }}>1</span>
           </div>
 
-          <div className="w-[1px] self-stretch" style={{ background: "rgba(224,128,64,0.2)" }} />
-
-          <div className="flex-1 flex flex-col items-center px-[2vw]">
-            <div style={{ height: "17vh", display: "flex", alignItems: "flex-end", paddingBottom: "0.8vh" }}>
-              <div
-                className="text-[9vw] font-black leading-none"
-                style={{ color: "#E08040", fontFamily: "Playfair Display, serif", textShadow: "0 0 28px rgba(224,128,64,0.55), 0 0 60px rgba(224,128,64,0.2)" }}
-              >
-                6
-              </div>
-            </div>
-            <div style={{ height: "7vh", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.4vh" }}>
-              <div className="text-[1.4vw] font-medium text-center" style={{ color: "#EAD9BE", fontFamily: "Inter, sans-serif" }}>Resilience dimensions</div>
-              <div className="text-[1.2vw] font-light text-center" style={{ color: "#8A7A6A", fontFamily: "Inter, sans-serif" }}>scored</div>
-            </div>
+          <div style={{ gridColumn: 1, gridRow: 3, display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5vh" }}>
+            <span style={{ fontSize: "1.4vw", fontWeight: 500, color: "#EAD9BE", fontFamily: "Inter, sans-serif", textAlign: "center" }}>Replit artifacts</span>
+            <span style={{ fontSize: "1.2vw", fontWeight: 300, color: "#8A7A6A", fontFamily: "Inter, sans-serif", textAlign: "center" }}>deployed</span>
           </div>
-
-          <div className="w-[1px] self-stretch" style={{ background: "rgba(224,128,64,0.2)" }} />
-
-          <div className="flex-1 flex flex-col items-center px-[2vw]">
-            <div style={{ height: "17vh", display: "flex", alignItems: "flex-end", paddingBottom: "0.8vh" }}>
-              <div
-                className="text-[9vw] font-black leading-none"
-                style={{ color: "#E08040", fontFamily: "Playfair Display, serif", textShadow: "0 0 28px rgba(224,128,64,0.55), 0 0 60px rgba(224,128,64,0.2)" }}
-              >
-                3
-              </div>
-            </div>
-            <div style={{ height: "7vh", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.4vh" }}>
-              <div className="text-[1.4vw] font-medium text-center" style={{ color: "#EAD9BE", fontFamily: "Inter, sans-serif" }}>Revenue streams</div>
-              <div className="text-[1.2vw] font-light text-center" style={{ color: "#8A7A6A", fontFamily: "Inter, sans-serif" }}>active</div>
-            </div>
+          <div style={{ gridColumn: 3, gridRow: 3, display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5vh" }}>
+            <span style={{ fontSize: "1.4vw", fontWeight: 500, color: "#EAD9BE", fontFamily: "Inter, sans-serif", textAlign: "center" }}>Resilience dimensions</span>
+            <span style={{ fontSize: "1.2vw", fontWeight: 300, color: "#8A7A6A", fontFamily: "Inter, sans-serif", textAlign: "center" }}>scored</span>
           </div>
-
-          <div className="w-[1px] self-stretch" style={{ background: "rgba(224,128,64,0.2)" }} />
-
-          <div className="flex-1 flex flex-col items-center px-[2vw]">
-            <div style={{ height: "17vh", display: "flex", alignItems: "flex-end", paddingBottom: "0.8vh" }}>
-              <div
-                className="text-[9vw] font-black leading-none"
-                style={{ color: "#E08040", fontFamily: "Playfair Display, serif", textShadow: "0 0 28px rgba(224,128,64,0.55), 0 0 60px rgba(224,128,64,0.2)" }}
-              >
-                1
-              </div>
-            </div>
-            <div style={{ height: "7vh", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.4vh" }}>
-              <div className="text-[1.4vw] font-medium text-center" style={{ color: "#EAD9BE", fontFamily: "Inter, sans-serif" }}>Coaching partnership</div>
-              <div className="text-[1.2vw] font-light text-center" style={{ color: "#8A7A6A", fontFamily: "Inter, sans-serif" }}>live</div>
-            </div>
+          <div style={{ gridColumn: 5, gridRow: 3, display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5vh" }}>
+            <span style={{ fontSize: "1.4vw", fontWeight: 500, color: "#EAD9BE", fontFamily: "Inter, sans-serif", textAlign: "center" }}>Revenue streams</span>
+            <span style={{ fontSize: "1.2vw", fontWeight: 300, color: "#8A7A6A", fontFamily: "Inter, sans-serif", textAlign: "center" }}>active</span>
+          </div>
+          <div style={{ gridColumn: 7, gridRow: 3, display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5vh" }}>
+            <span style={{ fontSize: "1.4vw", fontWeight: 500, color: "#EAD9BE", fontFamily: "Inter, sans-serif", textAlign: "center" }}>Coaching partnership</span>
+            <span style={{ fontSize: "1.2vw", fontWeight: 300, color: "#8A7A6A", fontFamily: "Inter, sans-serif", textAlign: "center" }}>live</span>
           </div>
         </div>
 
