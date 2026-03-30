@@ -27,7 +27,8 @@ type AssessmentData = {
   location: string;
   incomeStability: "fixed" | "freelance" | "unstable";
   savingsMonths: number;
-  hasDependents: boolean;
+  dependentCount: number;
+  relocationReadiness?: "immediate" | "within_month" | "within_3months" | "difficult";
   skills: string[];
   healthStatus: "excellent" | "good" | "fair" | "poor";
   mobilityLevel: "high" | "medium" | "low";
@@ -57,7 +58,7 @@ const STEPS = [
   { title: "Where are you based?",        subtitle: "Your location affects climate, political, and economic risk factors." },
   { title: "Income stability?",           subtitle: "How consistent and secure is your main income source?" },
   { title: "Financial runway?",           subtitle: "Months of expenses covered by savings if income stopped today." },
-  { title: "Do you have dependents?",     subtitle: "Children, elderly parents, or others financially reliant on you." },
+  { title: "How many dependents?",         subtitle: "Children, elderly parents, or others financially or physically reliant on you." },
   { title: "Practical skills?",           subtitle: "Select all skills you actively possess." },
   { title: "Health & mobility?",          subtitle: "Your physical readiness to handle crisis situations." },
   { title: "Housing situation?",          subtitle: "Where you currently live and your flexibility to move." },
@@ -150,7 +151,8 @@ export default function AssessmentScreen() {
     location: "",
     incomeStability: "fixed",
     savingsMonths: 3,
-    hasDependents: false,
+    dependentCount: 0,
+    relocationReadiness: undefined,
     skills: [],
     healthStatus: "good",
     mobilityLevel: "medium",
@@ -404,16 +406,22 @@ export default function AssessmentScreen() {
             )}
 
             {step === 3 && (
-              <View style={styles.yesNoGrid}>
-                {(["true", "false"] as const).map((val) => {
-                  const isYes = val === "true";
-                  const selected = data.hasDependents === isYes;
+              <View style={styles.optionList}>
+                {([
+                  { value: 0, label: "None", desc: "No dependents", icon: "user" },
+                  { value: 1, label: "One", desc: "One dependent", icon: "user-plus" },
+                  { value: 2, label: "Two or three", desc: "2–3 dependents", icon: "users" },
+                  { value: 3, label: "Four or more", desc: "4+ dependents", icon: "users" },
+                ] as const).map((opt) => {
+                  const selected = data.dependentCount === opt.value;
                   return (
-                    <OptionCard key={val} styles={styles} selected={selected} onPress={() => { Haptics.selectionAsync(); update("hasDependents", isYes); }}>
-                      <View style={styles.yesNoCard}>
-                        <Feather name={isYes ? "users" : "user"} size={28} color={selected ? colors.primary : colors.textMuted} />
-                        <Text style={[styles.yesNoLabel, selected && styles.yesNoLabelSelected]}>{isYes ? "Yes" : "No"}</Text>
-                        <Text style={styles.yesNoDesc}>{isYes ? "I have dependents" : "No dependents"}</Text>
+                    <OptionCard key={opt.value} styles={styles} selected={selected} onPress={() => { Haptics.selectionAsync(); update("dependentCount", opt.value); }}>
+                      <View style={styles.optionCardInner}>
+                        <View style={styles.optionCardText}>
+                          <Text style={[styles.optionLabel, selected && styles.optionLabelSelected]}>{opt.label}</Text>
+                          <Text style={styles.optionDesc}>{opt.desc}</Text>
+                        </View>
+                        {selected && <Feather name="check-circle" size={20} color={colors.primary} />}
                       </View>
                     </OptionCard>
                   );
@@ -462,8 +470,8 @@ export default function AssessmentScreen() {
                   ))}
                 </View>
 
-                <Text style={[styles.subSectionTitle, { marginTop: 24 }]}>Mobility Level</Text>
-                <Text style={styles.subSectionDesc}>How easily could you relocate internationally?</Text>
+                <Text style={[styles.subSectionTitle, { marginTop: 24 }]}>Physical Capability</Text>
+                <Text style={styles.subSectionDesc}>How physically capable are you of handling demanding situations?</Text>
                 <View style={styles.segmentRow}>
                   {(["high", "medium", "low"] as const).map((opt) => (
                     <Pressable
@@ -476,6 +484,30 @@ export default function AssessmentScreen() {
                       </Text>
                     </Pressable>
                   ))}
+                </View>
+
+                <Text style={[styles.subSectionTitle, { marginTop: 24 }]}>Relocation Readiness</Text>
+                <Text style={styles.subSectionDesc}>How quickly could you pack up and relocate if needed?</Text>
+                <View style={styles.optionList}>
+                  {([
+                    { id: "immediate", label: "Immediately", desc: "Could leave within days" },
+                    { id: "within_month", label: "Within a month", desc: "Need a few weeks to prepare" },
+                    { id: "within_3months", label: "Within 3 months", desc: "Need time to sort things out" },
+                    { id: "difficult", label: "Very difficult", desc: "Tied down for the foreseeable future" },
+                  ] as const).map((opt) => {
+                    const selected = data.relocationReadiness === opt.id;
+                    return (
+                      <OptionCard key={opt.id} styles={styles} selected={selected} onPress={() => { Haptics.selectionAsync(); update("relocationReadiness", opt.id); }}>
+                        <View style={styles.optionCardInner}>
+                          <View style={styles.optionCardText}>
+                            <Text style={[styles.optionLabel, selected && styles.optionLabelSelected]}>{opt.label}</Text>
+                            <Text style={styles.optionDesc}>{opt.desc}</Text>
+                          </View>
+                          {selected && <Feather name="check-circle" size={20} color={colors.primary} />}
+                        </View>
+                      </OptionCard>
+                    );
+                  })}
                 </View>
               </View>
             )}
