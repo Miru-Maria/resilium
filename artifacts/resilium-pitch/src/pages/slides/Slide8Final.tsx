@@ -101,36 +101,19 @@ export default function Slide8Final() {
 
       <div className="relative h-full flex px-[5vw] py-[6vh] items-center">
 
-        {/* Left — key build stats */}
+        {/* Left — user outcomes */}
         <div
-          className="flex flex-col gap-[3.2vh] justify-center"
+          className="flex flex-col gap-[3.5vh] justify-center"
           style={{ flex: "0 0 18vw", ...a("0.25s", "fadeUp") }}
         >
           {[
-            { n: "4", label: "artifacts", sub: "web · mobile · API · AI" },
-            { n: "6", label: "dimensions", sub: "resilience scored" },
-            { n: "3", label: "revenue streams", sub: "live from day one" },
-            { n: "1", label: "coaching partner", sub: "Phoenix Insight" },
-          ].map(({ n, label, sub }) => (
-            <div key={label} style={{ display: "flex", alignItems: "baseline", gap: "0.9vw" }}>
-              <span
-                style={{
-                  fontSize: "2.8vw",
-                  fontWeight: 900,
-                  color: "#E08040",
-                  fontFamily: "Playfair Display, serif",
-                  lineHeight: 1,
-                  textShadow: "0 0 18px rgba(224,128,64,0.45)",
-                  minWidth: "3.5vw",
-                  textAlign: "right" as const,
-                }}
-              >
-                {n}
-              </span>
-              <div>
-                <div style={{ fontSize: "1.15vw", fontWeight: 500, color: "#EAD9BE", fontFamily: "Inter, sans-serif" }}>{label}</div>
-                <div style={{ fontSize: "0.95vw", fontWeight: 300, color: "#8A7A6A", fontFamily: "Inter, sans-serif" }}>{sub}</div>
-              </div>
+            { headline: "Clarity over anxiety", body: "Know exactly where you stand — not a vague feeling, a number." },
+            { headline: "A plan, not a prayer", body: "Structured actions that come directly from your own score." },
+            { headline: "Real coaching when it counts", body: "AI flags the gap; a human helps close it." },
+          ].map(({ headline, body }) => (
+            <div key={headline}>
+              <div style={{ fontSize: "1.2vw", fontWeight: 600, color: "#EAD9BE", fontFamily: "Playfair Display, serif", marginBottom: "0.5vh" }}>{headline}</div>
+              <div style={{ fontSize: "0.95vw", fontWeight: 300, color: "#8A7A6A", fontFamily: "Inter, sans-serif", lineHeight: 1.5 }}>{body}</div>
             </div>
           ))}
         </div>
@@ -142,7 +125,7 @@ export default function Slide8Final() {
               src={`${base}resilium-logo.png`}
               crossOrigin="anonymous"
               alt="Resilium — Know your readiness. Build your resilience."
-              style={{ width: "28vw", height: "28vw", objectFit: "contain", mixBlendMode: "screen" }}
+              style={{ width: "38vw", height: "38vw", objectFit: "contain", mixBlendMode: "screen", filter: "contrast(1.12) brightness(1.06) saturate(1.1)" }}
             />
           </div>
           <div
@@ -159,23 +142,19 @@ export default function Slide8Final() {
           </div>
         </div>
 
-        {/* Right — tech stack */}
+        {/* Right — why it scales */}
         <div
-          className="flex flex-col gap-[2.8vh] justify-center"
+          className="flex flex-col gap-[3.5vh] justify-center"
           style={{ flex: "0 0 18vw", ...a("0.25s", "fadeUp") }}
         >
           {[
-            { label: "Replit Auth", sub: "OIDC · PKCE · sessions" },
-            { label: "Paddle", sub: "subscriptions · webhooks" },
-            { label: "GPT-5.2", sub: "via Replit AI proxy" },
-            { label: "Resend", sub: "transactional email" },
-          ].map(({ label, sub }) => (
-            <div
-              key={label}
-              style={{ borderLeft: "2px solid rgba(224,128,64,0.28)", paddingLeft: "1.1vw" }}
-            >
-              <div style={{ fontSize: "1.15vw", fontWeight: 600, color: "#EAD9BE", fontFamily: "Inter, sans-serif" }}>{label}</div>
-              <div style={{ fontSize: "0.95vw", fontWeight: 300, color: "#8A7A6A", fontFamily: "Inter, sans-serif" }}>{sub}</div>
+            { headline: "Earns passively", body: "Subscriptions, referral commissions, coaching fees — revenue compounds as users engage." },
+            { headline: "Zero ops burden", body: "Fully Replit-hosted. No servers to manage, no infra bill to dread." },
+            { headline: "Borderless by design", body: "Built for expats and nomads from day one — no geographic lock-in." },
+          ].map(({ headline, body }) => (
+            <div key={headline} style={{ borderLeft: "2px solid rgba(224,128,64,0.28)", paddingLeft: "1.1vw" }}>
+              <div style={{ fontSize: "1.2vw", fontWeight: 600, color: "#EAD9BE", fontFamily: "Playfair Display, serif", marginBottom: "0.5vh" }}>{headline}</div>
+              <div style={{ fontSize: "0.95vw", fontWeight: 300, color: "#8A7A6A", fontFamily: "Inter, sans-serif", lineHeight: 1.5 }}>{body}</div>
             </div>
           ))}
         </div>
