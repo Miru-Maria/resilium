@@ -142,7 +142,7 @@ export default function Slide8Final() {
               src={`${base}resilium-logo.png`}
               crossOrigin="anonymous"
               alt="Resilium — Know your readiness. Build your resilience."
-              style={{ width: "28vw", height: "28vw", objectFit: "contain" }}
+              style={{ width: "28vw", height: "28vw", objectFit: "contain", mixBlendMode: "screen" }}
             />
           </div>
           <div
