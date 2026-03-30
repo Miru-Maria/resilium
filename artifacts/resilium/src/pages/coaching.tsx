@@ -245,7 +245,7 @@ export default function CoachingPage() {
             { icon: <TrendingUp size={20} />, title: "Adaptive habits for uncertain environments", text: "Building routines that hold up under pressure, not just when life is smooth. Aligned with your financial and daily preparation goals." },
             { icon: <Shield size={20} />, title: "Change management and processing disruption", text: "Working through the emotional weight of major life changes — job loss, relocation, health changes — without it derailing your recovery." },
             { icon: <Heart size={20} />, title: "Confidence after setbacks", text: "Rebuilding your sense of agency after financial stress, health challenges, or mobility limitations. This is where sustainable change actually starts." },
-            { icon: <MessageCircle size={20} />, title: "Integrative nutrition & wellbeing", text: "Your physical health and mental resilience are deeply connected. Cristiana's integrative approach addresses both — because your body is part of your preparedness." },
+            { icon: <MessageCircle size={20} />, title: "Functional health & mental resilience", text: "Your physical health and psychological capacity are deeply connected. Cristiana's functional approach looks at the root patterns — sleep, stress load, nervous system regulation — that directly affect how resilient you feel." },
             { icon: <CheckCircle size={20} />, title: "A personalised plan alongside Resilium", text: "Sessions can be structured around your Resilium report. We work the psychological dimension while you execute the practical action plan on your own." },
           ].map(({ icon, title, text }) => (
             <div key={title} style={{
@@ -303,10 +303,10 @@ export default function CoachingPage() {
             Cristiana Paun
           </h2>
           <p style={{ fontSize: "13px", fontWeight: 600, color: "#9B6A3A", marginBottom: "20px", letterSpacing: "0.05em", textTransform: "uppercase" as const }}>
-            Integrative Nutrition Health Coach
+            Integrative Health Coach
           </p>
           <p style={{ fontSize: "16px", lineHeight: 1.8, color: "#4A2E14", maxWidth: "560px", margin: "0 auto 24px" }}>
-            Cristiana works with people navigating uncertainty, health transitions, and life disruptions. Her integrative approach connects physical wellbeing, nutrition, and mental resilience — because lasting stability is built from the inside out.
+            Cristiana takes a functional approach to health coaching — working with the whole person to understand the root patterns behind stress, burnout, and low resilience. Her focus is mental resilience: building the internal capacity that makes every other area of your life more stable.
           </p>
           <p style={{ fontSize: "15px", lineHeight: 1.7, color: "#6B4226", maxWidth: "520px", margin: "0 auto" }}>
             She works specifically with Resilium users whose assessments surface a gap between their practical preparation and their inner capacity to carry it out — the gap no checklist can close.
