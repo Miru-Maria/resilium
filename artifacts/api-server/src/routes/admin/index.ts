@@ -75,12 +75,27 @@ router.get("/analytics", requireAdminSession, async (req, res) => {
       return Object.entries(map).map(([name, count]) => ({ name, count }));
     };
 
+    const DEPENDENT_LABELS: Record<string, string> = { "0": "None", "1": "1 dependent", "2": "2–3 dependents", "3": "4+ dependents" };
+    const RELOCATION_LABELS: Record<string, string> = { "immediate": "Immediate", "within_month": "Within a month", "within_3months": "Within 3 months", "difficult": "Difficult" };
+
+    const countByLabel = (arr: typeof reports, field: keyof typeof reports[0], labels: Record<string, string>) => {
+      const map: Record<string, number> = {};
+      for (const r of arr) {
+        const raw = String(r[field] ?? "unknown");
+        const label = labels[raw] ?? raw;
+        map[label] = (map[label] ?? 0) + 1;
+      }
+      return Object.entries(map).map(([name, count]) => ({ name, count }));
+    };
+
     const demographics = {
       location: countBy(reports, "location"),
       incomeStability: countBy(reports, "incomeStability"),
       healthStatus: countBy(reports, "healthStatus"),
       housingType: countBy(reports, "housingType"),
       mobilityLevel: countBy(reports, "mobilityLevel"),
+      dependentCount: countByLabel(reports, "dependentCount", DEPENDENT_LABELS),
+      relocationReadiness: countByLabel(reports, "relocationReadiness", RELOCATION_LABELS),
     };
 
     // Score analytics

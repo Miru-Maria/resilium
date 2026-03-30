@@ -30,6 +30,8 @@ interface AnalyticsData {
     healthStatus: { name: string; count: number }[];
     housingType: { name: string; count: number }[];
     mobilityLevel: { name: string; count: number }[];
+    dependentCount: { name: string; count: number }[];
+    relocationReadiness: { name: string; count: number }[];
   };
   scoreAnalytics: {
     avgScores: { category: string; avg: number }[];
@@ -270,6 +272,8 @@ export default function AdminDashboard() {
                 { label: "Health Status", key: "healthStatus" as const },
                 { label: "Housing Type", key: "housingType" as const },
                 { label: "Mobility Level", key: "mobilityLevel" as const },
+                { label: "Dependents", key: "dependentCount" as const },
+                { label: "Relocation Readiness", key: "relocationReadiness" as const },
               ].map(({ label, key }) => (
                 <Card key={key} className="border-none shadow-md">
                   <CardHeader className="pb-2">
@@ -279,7 +283,7 @@ export default function AdminDashboard() {
                     <ResponsiveContainer width="100%" height={180}>
                       <BarChart data={data.demographics[key]} layout="vertical">
                         <XAxis type="number" tick={{ fontSize: 11 }} allowDecimals={false} />
-                        <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={90} />
+                        <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={110} />
                         <Tooltip />
                         <Bar dataKey="count" radius={4} name="Count">
                           {data.demographics[key].map((_, i) => (
