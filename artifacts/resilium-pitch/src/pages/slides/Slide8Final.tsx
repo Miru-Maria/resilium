@@ -112,8 +112,8 @@ export default function Slide8Final() {
             { headline: "Real coaching when it counts", body: "AI flags the gap; a human helps close it." },
           ].map(({ headline, body }) => (
             <div key={headline}>
-              <div style={{ fontSize: "1.2vw", fontWeight: 600, color: "#EAD9BE", fontFamily: "Playfair Display, serif", marginBottom: "0.5vh" }}>{headline}</div>
-              <div style={{ fontSize: "0.95vw", fontWeight: 300, color: "#8A7A6A", fontFamily: "Inter, sans-serif", lineHeight: 1.5 }}>{body}</div>
+              <div style={{ fontSize: "1.4vw", fontWeight: 600, color: "#EAD9BE", fontFamily: "Playfair Display, serif", marginBottom: "0.5vh" }}>{headline}</div>
+              <div style={{ fontSize: "1.1vw", fontWeight: 300, color: "#8A7A6A", fontFamily: "Inter, sans-serif", lineHeight: 1.5 }}>{body}</div>
             </div>
           ))}
         </div>
@@ -153,8 +153,8 @@ export default function Slide8Final() {
             { headline: "Borderless by design", body: "Built for expats and nomads from day one — no geographic lock-in." },
           ].map(({ headline, body }) => (
             <div key={headline} style={{ borderLeft: "2px solid rgba(224,128,64,0.28)", paddingLeft: "1.1vw" }}>
-              <div style={{ fontSize: "1.2vw", fontWeight: 600, color: "#EAD9BE", fontFamily: "Playfair Display, serif", marginBottom: "0.5vh" }}>{headline}</div>
-              <div style={{ fontSize: "0.95vw", fontWeight: 300, color: "#8A7A6A", fontFamily: "Inter, sans-serif", lineHeight: 1.5 }}>{body}</div>
+              <div style={{ fontSize: "1.4vw", fontWeight: 600, color: "#EAD9BE", fontFamily: "Playfair Display, serif", marginBottom: "0.5vh" }}>{headline}</div>
+              <div style={{ fontSize: "1.1vw", fontWeight: 300, color: "#8A7A6A", fontFamily: "Inter, sans-serif", lineHeight: 1.5 }}>{body}</div>
             </div>
           ))}
         </div>
