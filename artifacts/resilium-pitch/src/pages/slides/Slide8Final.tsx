@@ -89,7 +89,7 @@ export default function Slide8Final() {
         </div>
 
         {/* Centre — logo + text */}
-        <div className="flex-1 flex flex-col items-center justify-center" style={{ gap: "0.8vh" }}>
+        <div className="flex-1 flex flex-col items-center justify-center" style={{ gap: 0 }}>
 
           {/* Neon brain image — mix-blend-mode:screen dissolves the dark bg */}
           <div style={{ ...a("0.1s", "scaleIn") }}>
@@ -116,7 +116,6 @@ export default function Slide8Final() {
             fontFamily: "Plus Jakarta Sans, sans-serif",
             letterSpacing: "-0.01em",
             lineHeight: 1,
-            marginTop: "-2vh",
             ...a("0.3s", "fadeUp"),
           }}>
             Resilium
@@ -130,6 +129,7 @@ export default function Slide8Final() {
             fontFamily: "Inter, sans-serif",
             textAlign: "center",
             letterSpacing: "0.04em",
+            marginTop: "0.6vh",
             ...a("0.42s", "fadeUp"),
           }}>
             Know your readiness.&nbsp;&nbsp;Build your resilience.
@@ -142,7 +142,7 @@ export default function Slide8Final() {
             color: AMBER,
             fontFamily: "Inter, sans-serif",
             letterSpacing: "0.05em",
-            marginTop: "0.4vh",
+            marginTop: "1.6vh",
             ...a("0.54s", "fadeUp"),
           }}>
             resilium-ai.replit.app
