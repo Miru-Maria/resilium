@@ -108,7 +108,7 @@ export default function Slide8Final() {
         >
           {[
             { headline: "Clarity over anxiety", body: "Know exactly where you stand — not a vague feeling, a number." },
-            { headline: "A plan, not a prayer", body: "Structured actions that come directly from your own score." },
+            { headline: "A plan, not doom-scrolling", body: "Structured actions that come directly from your own score." },
             { headline: "Real coaching when it counts", body: "AI flags the gap; a human helps close it." },
           ].map(({ headline, body }) => (
             <div key={headline}>
