@@ -4,6 +4,11 @@ import { ArrowLeft, CheckCircle, MessageCircle, TrendingUp, Heart, Brain, Shield
 import { NeuralCanvas } from "../components/neural-canvas";
 
 const COACHING_URL = "https://healing-through-understanding.replit.app/contact";
+const BASE = typeof window !== "undefined" ? (import.meta as any).env?.BASE_URL?.replace(/\/$/, "") ?? "" : "";
+
+function trackCoachingClick() {
+  fetch(`${BASE}/api/coaching/track`, { method: "POST" }).catch(() => {});
+}
 
 // Phoenix brand tokens
 const C = {
@@ -396,6 +401,7 @@ export default function CoachingPage() {
             href={COACHING_URL}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={trackCoachingClick}
             style={{
               display: "inline-block",
               background: C.primary,

@@ -30,7 +30,18 @@ const assessRateLimit = rateLimit({
     error: "RATE_LIMITED",
     message: "Too many assessment requests. Please wait a minute before trying again.",
   },
-  skip: (req) => !!(req as any).isAuthenticated?.(),
+  // Only skip rate limiting for active Pro subscribers — not all authenticated users
+  skip: async (req) => {
+    if (!(req as any).isAuthenticated?.()) return false;
+    try {
+      const subs = await db
+        .select({ status: subscriptionsTable.status })
+        .from(subscriptionsTable)
+        .where(eq(subscriptionsTable.userId, (req as any).user.id))
+        .limit(1);
+      return subs.length > 0 && (subs[0].status === "active" || subs[0].status === "cancel_scheduled");
+    } catch { return false; }
+  },
 });
 
 router.post("/assess", assessRateLimit, async (req, res) => {

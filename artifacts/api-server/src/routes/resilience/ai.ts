@@ -240,20 +240,31 @@ COMMUNITY RESOURCES — apply when relevant:
 
 Return ONLY the JSON, no additional text.`;
 
-  const response = await openai.chat.completions.create({
-    model: "gpt-5.2",
-    max_completion_tokens: 8192,
-    messages: [
-      { role: "system", content: "You are a resilience planning expert. Always respond with valid JSON only." },
-      { role: "user", content: prompt }
-    ],
-    response_format: { type: "json_object" }
-  });
+  const callAI = async (): Promise<ReportContent> => {
+    const response = await openai.chat.completions.create({
+      model: "gpt-5.2",
+      max_completion_tokens: 8192,
+      messages: [
+        { role: "system", content: "You are a resilience planning expert. Always respond with valid JSON only." },
+        { role: "user", content: prompt }
+      ],
+      response_format: { type: "json_object" }
+    });
 
-  const content = response.choices[0]?.message?.content;
-  if (!content) {
-    throw new Error("No content returned from AI");
+    const content = response.choices[0]?.message?.content;
+    if (!content) throw new Error("No content returned from AI");
+
+    const parsed = JSON.parse(content) as ReportContent;
+    if (!parsed.riskProfileSummary || !parsed.actionPlan) {
+      throw new Error("AI response missing required fields");
+    }
+    return parsed;
+  };
+
+  try {
+    return await callAI();
+  } catch (firstErr) {
+    await new Promise(r => setTimeout(r, 1500));
+    return await callAI();
   }
-
-  return JSON.parse(content) as ReportContent;
 }
