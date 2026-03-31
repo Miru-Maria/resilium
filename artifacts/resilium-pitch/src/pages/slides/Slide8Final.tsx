@@ -6,84 +6,141 @@ const allSlides =
 const a = (delay: string, kf = "fadeUp") =>
   allSlides ? {} : { animation: `${kf} 0.75s cubic-bezier(0.22,1,0.36,1) both`, animationDelay: delay };
 
-const C = "#E08040";
-const S = { fill: "none", stroke: C, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
+const AMBER = "#E08040";
 
-function BrainLogo({ style }: { style?: React.CSSProperties }) {
+/* ── Neon draw helper ──────────────────────────────────────────────── */
+function neon(ctx: CanvasRenderingContext2D, draw: () => void, color: string, width: number) {
+  const passes = [
+    { lw: width * 3.5, blur: 28, alpha: 0.25 },
+    { lw: width * 2,   blur: 14, alpha: 0.50 },
+    { lw: width,       blur: 4,  alpha: 1.00 },
+  ];
+  for (const { lw, blur, alpha } of passes) {
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.lineWidth   = lw;
+    ctx.shadowColor = color;
+    ctx.shadowBlur  = blur;
+    ctx.globalAlpha = alpha;
+    ctx.lineCap     = "round";
+    ctx.lineJoin    = "round";
+    draw();
+    ctx.stroke();
+    ctx.restore();
+  }
+}
+
+/* ── Brain + Arms canvas ───────────────────────────────────────────── */
+function BrainCanvas() {
+  const ref = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const dpr = window.devicePixelRatio || 1;
+    const W = 580, H = 320;
+    el.width  = W * dpr;
+    el.height = H * dpr;
+    el.style.width  = W + "px";
+    el.style.height = H + "px";
+    const ctx = el.getContext("2d")!;
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0, 0, W, H);
+
+    /* --- purple ambient blob --- */
+    const g = ctx.createRadialGradient(290, 115, 10, 290, 115, 155);
+    g.addColorStop(0,   "rgba(88,22,130,0.75)");
+    g.addColorStop(0.6, "rgba(60,15,95,0.3)");
+    g.addColorStop(1,   "rgba(13,18,37,0)");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+
+    /* ── helper: build a path then stroke neon ── */
+    const stroke = (draw: () => void, w = 3) => neon(ctx, () => { ctx.beginPath(); draw(); }, AMBER, w);
+
+    /* ── BRAIN ── */
+
+    /* left lobe outer */
+    stroke(() => {
+      ctx.moveTo(278, 55);
+      ctx.bezierCurveTo(250, 34, 188, 38, 166, 64);
+      ctx.bezierCurveTo(136, 72, 126, 100, 144, 124);
+      ctx.bezierCurveTo(124, 136, 122, 166, 144, 180);
+      ctx.bezierCurveTo(156, 196, 184, 204, 212, 196);
+      ctx.bezierCurveTo(226, 208, 246, 212, 252, 204);
+    });
+
+    /* right lobe outer */
+    stroke(() => {
+      ctx.moveTo(302, 55);
+      ctx.bezierCurveTo(330, 34, 392, 38, 414, 64);
+      ctx.bezierCurveTo(444, 72, 454, 100, 436, 124);
+      ctx.bezierCurveTo(456, 136, 458, 166, 436, 180);
+      ctx.bezierCurveTo(424, 196, 396, 204, 368, 196);
+      ctx.bezierCurveTo(354, 208, 334, 212, 328, 204);
+    });
+
+    /* top bridge */
+    stroke(() => {
+      ctx.moveTo(278, 55);
+      ctx.bezierCurveTo(278, 42, 302, 42, 302, 55);
+    });
+
+    /* bottom join */
+    stroke(() => {
+      ctx.moveTo(252, 204);
+      ctx.bezierCurveTo(262, 216, 318, 216, 328, 204);
+    });
+
+    /* centre groove */
+    stroke(() => { ctx.moveTo(290, 55); ctx.lineTo(290, 214); }, 2);
+
+    /* left wrinkles */
+    stroke(() => { ctx.moveTo(180, 84); ctx.bezierCurveTo(192, 70, 214, 76, 206, 94); }, 2);
+    stroke(() => { ctx.moveTo(164, 116); ctx.bezierCurveTo(178, 104, 200, 110, 192, 128); }, 2);
+    stroke(() => { ctx.moveTo(168, 150); ctx.bezierCurveTo(182, 140, 202, 145, 196, 162); }, 2);
+
+    /* right wrinkles (mirror x → 580−x) */
+    stroke(() => { ctx.moveTo(400, 84); ctx.bezierCurveTo(388, 70, 366, 76, 374, 94); }, 2);
+    stroke(() => { ctx.moveTo(416, 116); ctx.bezierCurveTo(402, 104, 380, 110, 388, 128); }, 2);
+    stroke(() => { ctx.moveTo(412, 150); ctx.bezierCurveTo(398, 140, 378, 145, 384, 162); }, 2);
+
+    /* ── LEFT ARM ── */
+    stroke(() => {
+      ctx.moveTo(144, 114);
+      ctx.bezierCurveTo(114, 114, 62, 138, 44, 174);
+      ctx.bezierCurveTo(28, 200, 34, 234, 54, 250);
+      ctx.bezierCurveTo(64, 264, 90, 270, 110, 262);
+      ctx.bezierCurveTo(122, 274, 144, 272, 152, 260);
+      ctx.bezierCurveTo(162, 270, 182, 266, 182, 250);
+      ctx.bezierCurveTo(190, 238, 186, 212, 172, 200);
+      ctx.bezierCurveTo(180, 184, 178, 156, 162, 144);
+      ctx.bezierCurveTo(156, 130, 146, 118, 144, 114);
+    });
+
+    /* ── RIGHT ARM (mirror: x → 580−x) ── */
+    stroke(() => {
+      ctx.moveTo(436, 114);
+      ctx.bezierCurveTo(466, 114, 518, 138, 536, 174);
+      ctx.bezierCurveTo(552, 200, 546, 234, 526, 250);
+      ctx.bezierCurveTo(516, 264, 490, 270, 470, 262);
+      ctx.bezierCurveTo(458, 274, 436, 272, 428, 260);
+      ctx.bezierCurveTo(418, 270, 398, 266, 398, 250);
+      ctx.bezierCurveTo(390, 238, 394, 212, 408, 200);
+      ctx.bezierCurveTo(400, 184, 402, 156, 418, 144);
+      ctx.bezierCurveTo(424, 130, 434, 118, 436, 114);
+    });
+  }, []);
+
   return (
-    <svg
-      viewBox="0 25 300 210"
-      style={{ width: "30vw", overflow: "visible", display: "block", ...style }}
-    >
-      <defs>
-        {/* Layered neon glow — outer halo + inner crispness */}
-        <filter id="ng" x="-120%" y="-120%" width="340%" height="340%">
-          <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="outer" />
-          <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="inner" />
-          <feMerge>
-            <feMergeNode in="outer" />
-            <feMergeNode in="inner" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
-        {/* Soft ambient blob behind brain */}
-        <filter id="blob" x="-150%" y="-150%" width="400%" height="400%">
-          <feGaussianBlur stdDeviation="28" />
-        </filter>
-      </defs>
-
-      {/* Purple ambient glow */}
-      <ellipse cx="150" cy="100" rx="108" ry="68" fill="rgba(78,28,112,0.7)" filter="url(#blob)" />
-
-      {/* ── BRAIN ── */}
-      {/* Left lobe */}
-      <path {...S} strokeWidth="2.8" filter="url(#ng)"
-        d="M 148,42 C 130,26 98,30 86,52 C 74,60 70,82 82,96 C 70,108 72,130 86,140 C 94,154 114,162 134,156 C 140,168 148,172 150,167"
-      />
-      {/* Right lobe */}
-      <path {...S} strokeWidth="2.8" filter="url(#ng)"
-        d="M 152,42 C 170,26 202,30 214,52 C 226,60 230,82 218,96 C 230,108 228,130 214,140 C 206,154 186,162 166,156 C 160,168 152,172 150,167"
-      />
-      {/* Top centre arch */}
-      <path {...S} strokeWidth="2.8" filter="url(#ng)"
-        d="M 148,42 C 148,35 152,35 152,42"
-      />
-      {/* Longitudinal groove */}
-      <line x1="150" y1="42" x2="150" y2="166" {...S} strokeWidth="1.8" filter="url(#ng)" />
-
-      {/* Left wrinkles */}
-      <path {...S} strokeWidth="1.7" filter="url(#ng)" d="M 100,68 C 110,57 124,63 118,76" />
-      <path {...S} strokeWidth="1.7" filter="url(#ng)" d="M 90,97 C 102,88 116,93 110,106" />
-      <path {...S} strokeWidth="1.7" filter="url(#ng)" d="M 95,123 C 108,116 122,121 116,132" />
-
-      {/* Right wrinkles */}
-      <path {...S} strokeWidth="1.7" filter="url(#ng)" d="M 200,68 C 190,57 176,63 182,76" />
-      <path {...S} strokeWidth="1.7" filter="url(#ng)" d="M 210,97 C 198,88 184,93 190,106" />
-      <path {...S} strokeWidth="1.7" filter="url(#ng)" d="M 205,123 C 192,116 178,121 184,132" />
-
-      {/* ── LEFT ARM ── */}
-      {/* Outer (bicep) sweep down */}
-      <path {...S} strokeWidth="2.8" filter="url(#ng)"
-        d="M 82,96 C 56,98 24,118 14,150 C 6,174 18,200 36,210"
-      />
-      {/* Fist and inner arm back up */}
-      <path {...S} strokeWidth="2.8" filter="url(#ng)"
-        d="M 36,210 C 44,220 60,222 70,216 C 76,224 90,221 94,211 C 100,217 112,213 112,202 C 118,192 114,174 103,166 C 110,152 108,132 97,122 C 92,112 87,103 82,97"
-      />
-
-      {/* ── RIGHT ARM (mirror x → 300−x) ── */}
-      {/* Outer (bicep) sweep down */}
-      <path {...S} strokeWidth="2.8" filter="url(#ng)"
-        d="M 218,96 C 244,98 276,118 286,150 C 294,174 282,200 264,210"
-      />
-      {/* Fist and inner arm back up */}
-      <path {...S} strokeWidth="2.8" filter="url(#ng)"
-        d="M 264,210 C 256,220 240,222 230,216 C 224,224 210,221 206,211 C 200,217 188,213 188,202 C 182,192 186,174 197,166 C 190,152 192,132 203,122 C 208,112 213,103 218,97"
-      />
-    </svg>
+    <canvas
+      ref={ref}
+      style={{ display: "block", imageRendering: "crisp-edges" }}
+    />
   );
 }
 
+/* ── Background neural network ─────────────────────────────────────── */
 function NeuralCanvas() {
   const ref = useRef<HTMLCanvasElement>(null);
 
@@ -92,14 +149,9 @@ function NeuralCanvas() {
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-
-    const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
+    const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
     resize();
     window.addEventListener("resize", resize);
-
     const COUNT = 60;
     const nodes = Array.from({ length: COUNT }, () => ({
       x: Math.random() * window.innerWidth,
@@ -108,10 +160,8 @@ function NeuralCanvas() {
       vy: (Math.random() - 0.5) * 0.28,
       r: Math.random() * 1.8 + 0.8,
     }));
-
     const MAX_DIST = 170;
     let raf: number;
-
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       for (const n of nodes) {
@@ -121,35 +171,29 @@ function NeuralCanvas() {
       }
       for (let i = 0; i < nodes.length; i++) {
         for (let j = i + 1; j < nodes.length; j++) {
-          const dx = nodes[i].x - nodes[j].x;
-          const dy = nodes[i].y - nodes[j].y;
+          const dx = nodes[i].x - nodes[j].x, dy = nodes[i].y - nodes[j].y;
           const dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < MAX_DIST) {
             ctx.strokeStyle = `rgba(224,128,64,${(1 - dist / MAX_DIST) * 0.22})`;
             ctx.lineWidth = 0.7;
-            ctx.beginPath();
-            ctx.moveTo(nodes[i].x, nodes[i].y);
-            ctx.lineTo(nodes[j].x, nodes[j].y);
-            ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(nodes[i].x, nodes[i].y); ctx.lineTo(nodes[j].x, nodes[j].y); ctx.stroke();
           }
         }
       }
       for (const n of nodes) {
-        ctx.beginPath();
-        ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(224,128,64,0.45)";
-        ctx.fill();
+        ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(224,128,64,0.45)"; ctx.fill();
       }
       raf = requestAnimationFrame(draw);
     };
     draw();
-
     return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", resize); };
   }, []);
 
   return <canvas ref={ref} className="absolute inset-0 w-full h-full" style={{ pointerEvents: "none" }} />;
 }
 
+/* ── Slide ──────────────────────────────────────────────────────────── */
 export default function Slide8Final() {
   return (
     <div className="relative w-screen h-screen overflow-hidden" style={{ background: "#0D1225" }}>
@@ -164,9 +208,9 @@ export default function Slide8Final() {
         {/* Left — user outcomes */}
         <div className="flex flex-col gap-[3.5vh] justify-center" style={{ flex: "0 0 18vw", ...a("0.25s", "fadeUp") }}>
           {[
-            { headline: "Clarity over anxiety", body: "Know exactly where you stand — not a vague feeling, a number." },
-            { headline: "A plan, not doom-scrolling", body: "Structured actions that come directly from your own score." },
-            { headline: "Real coaching when it counts", body: "AI flags the gap; a human helps close it." },
+            { headline: "Clarity over anxiety",        body: "Know exactly where you stand — not a vague feeling, a number." },
+            { headline: "A plan, not doom-scrolling",  body: "Structured actions that come directly from your own score." },
+            { headline: "Real coaching when it counts",body: "AI flags the gap; a human helps close it." },
           ].map(({ headline, body }) => (
             <div key={headline}>
               <div style={{ fontSize: "1.4vw", fontWeight: 600, color: "#EAD9BE", fontFamily: "Playfair Display, serif", marginBottom: "0.5vh" }}>{headline}</div>
@@ -175,18 +219,18 @@ export default function Slide8Final() {
           ))}
         </div>
 
-        {/* Centre — coded logo */}
-        <div className="flex-1 flex flex-col items-center justify-center" style={{ gap: "1.6vh" }}>
-          <div style={a("0.1s", "scaleIn")}>
-            <BrainLogo />
+        {/* Centre — canvas logo + text */}
+        <div className="flex-1 flex flex-col items-center justify-center" style={{ gap: "1.2vh" }}>
+          <div style={{ transform: "scale(0.78)", transformOrigin: "top center", ...a("0.1s", "scaleIn") }}>
+            <BrainCanvas />
           </div>
-          <div style={{ fontSize: "3.8vw", fontWeight: 900, color: "#FFFFFF", fontFamily: "Inter, sans-serif", letterSpacing: "0.12em", lineHeight: 1, ...a("0.3s", "fadeUp") }}>
+          <div style={{ fontSize: "3.6vw", fontWeight: 900, color: "#FFFFFF", fontFamily: "Inter, sans-serif", letterSpacing: "0.14em", lineHeight: 1, marginTop: "-1vh", ...a("0.3s", "fadeUp") }}>
             RESILIUM
           </div>
-          <div style={{ fontSize: "1.25vw", fontWeight: 300, color: "#C4B09A", fontFamily: "Inter, sans-serif", textAlign: "center", letterSpacing: "0.04em", ...a("0.42s", "fadeUp") }}>
-            Know your readiness. Build your resilience.
+          <div style={{ fontSize: "1.2vw", fontWeight: 300, color: "#C4B09A", fontFamily: "Inter, sans-serif", textAlign: "center", letterSpacing: "0.04em", ...a("0.42s", "fadeUp") }}>
+            Know your readiness.&nbsp;&nbsp;Build your resilience.
           </div>
-          <div style={{ fontSize: "1.3vw", fontWeight: 600, color: C, fontFamily: "Inter, sans-serif", letterSpacing: "0.05em", marginTop: "0.6vh", ...a("0.54s", "fadeUp") }}>
+          <div style={{ fontSize: "1.3vw", fontWeight: 600, color: AMBER, fontFamily: "Inter, sans-serif", letterSpacing: "0.05em", marginTop: "0.4vh", ...a("0.54s", "fadeUp") }}>
             resilium-ai.replit.app
           </div>
         </div>
@@ -194,8 +238,8 @@ export default function Slide8Final() {
         {/* Right — why it scales */}
         <div className="flex flex-col gap-[3.5vh] justify-center" style={{ flex: "0 0 18vw", ...a("0.25s", "fadeUp") }}>
           {[
-            { headline: "Earns passively", body: "Subscriptions, referral commissions, coaching fees — revenue compounds as users engage." },
-            { headline: "Zero ops burden", body: "Fully Replit-hosted. No servers to manage, no infra bill to dread." },
+            { headline: "Earns passively",      body: "Subscriptions, referral commissions, coaching fees — revenue compounds as users engage." },
+            { headline: "Zero ops burden",      body: "Fully Replit-hosted. No servers to manage, no infra bill to dread." },
             { headline: "Borderless by design", body: "Built for expats and nomads from day one — no geographic lock-in." },
           ].map(({ headline, body }) => (
             <div key={headline} style={{ borderLeft: "2px solid rgba(224,128,64,0.28)", paddingLeft: "1.1vw" }}>
