@@ -122,10 +122,10 @@ export default function Slide8Final() {
         <div className="flex-1 flex flex-col items-center justify-center gap-[2.5vh]">
           <div style={a("0.1s", "scaleIn")}>
             <img
-              src={`${base}resilium-logo-v2.png`}
+              src={`${base}resilium-logo.png`}
               crossOrigin="anonymous"
               alt="Resilium — Know your readiness. Build your resilience."
-              style={{ width: "38vw", height: "38vw", objectFit: "contain", mixBlendMode: "screen", filter: "brightness(1.15) contrast(1.08) saturate(1.2)" }}
+              style={{ width: "38vw", height: "38vw", objectFit: "contain", mixBlendMode: "screen", filter: "contrast(1.12) brightness(1.06) saturate(1.1)" }}
             />
           </div>
           <div
