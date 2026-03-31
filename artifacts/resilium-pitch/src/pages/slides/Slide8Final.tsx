@@ -224,8 +224,8 @@ export default function Slide8Final() {
           <div style={{ transform: "scale(0.78)", transformOrigin: "top center", ...a("0.1s", "scaleIn") }}>
             <BrainCanvas />
           </div>
-          <div style={{ fontSize: "3.6vw", fontWeight: 900, color: "#FFFFFF", fontFamily: "Inter, sans-serif", letterSpacing: "0.14em", lineHeight: 1, marginTop: "-1vh", ...a("0.3s", "fadeUp") }}>
-            RESILIUM
+          <div style={{ fontSize: "3.6vw", fontWeight: 700, color: "#E08040", fontFamily: "Playfair Display, serif", letterSpacing: "-0.01em", lineHeight: 1, marginTop: "-1vh", ...a("0.3s", "fadeUp") }}>
+            Resilium
           </div>
           <div style={{ fontSize: "1.2vw", fontWeight: 300, color: "#C4B09A", fontFamily: "Inter, sans-serif", textAlign: "center", letterSpacing: "0.04em", ...a("0.42s", "fadeUp") }}>
             Know your readiness.&nbsp;&nbsp;Build your resilience.
