@@ -59,3 +59,9 @@ id = "yZ6cDouKR-9bpkNle1Pps"
 uri = "file://.local/outputs/Resilium-AI-Web.pptx"
 type = "slides"
 title = "Resilium AI Web.pptx"
+
+[[outputs]]
+id = "Fl4bNXUzytCq3QUOTcbKS"
+uri = "file://exports/resilium-pitch-deck.pptx"
+type = "slides"
+title = "Resilium Pitch Deck (PowerPoint)"
