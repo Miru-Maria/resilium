@@ -1,3 +1,4 @@
+const base = import.meta.env.BASE_URL;
 const allSlides = typeof window !== "undefined" && window.location.pathname.toLowerCase().endsWith("/allslides");
 const a = (delay: string, kf = "fadeUp") =>
   allSlides ? {} : { animation: `${kf} 0.75s cubic-bezier(0.22,1,0.36,1) both`, animationDelay: delay };
@@ -10,9 +11,22 @@ const SUB   = { fontSize: "1.2vw", fontWeight: 300, color: "#8A7A6A", fontFamily
 export default function Slide7Close() {
   return (
     <div className="relative w-screen h-screen overflow-hidden" style={{ background: "#0D1225" }}>
+      {/* Photo background — same treatment as slide 2 */}
+      <img
+        src={`${base}hero-problem.png`}
+        className="absolute inset-0 w-full h-full object-cover"
+        style={{ opacity: 0.32 }}
+        alt=""
+      />
+      {/* Dark gradient overlay for legibility */}
       <div
         className="absolute inset-0"
-        style={{ background: "radial-gradient(ellipse at 50% 100%, rgba(224,128,64,0.1) 0%, transparent 55%)" }}
+        style={{ background: "linear-gradient(180deg, rgba(13,18,37,0.72) 0%, rgba(13,18,37,0.92) 65%)" }}
+      />
+      {/* Amber radial accent */}
+      <div
+        className="absolute inset-0"
+        style={{ background: "radial-gradient(ellipse at 50% 100%, rgba(224,128,64,0.08) 0%, transparent 55%)" }}
       />
       <div
         className="absolute bottom-0 left-0 right-0 h-[2px]"
