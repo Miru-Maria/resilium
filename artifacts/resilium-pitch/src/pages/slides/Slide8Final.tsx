@@ -125,7 +125,7 @@ export default function Slide8Final() {
               src={`${base}resilium-logo-v2.png`}
               crossOrigin="anonymous"
               alt="Resilium — Know your readiness. Build your resilience."
-              style={{ width: "38vw", height: "38vw", objectFit: "contain", filter: "brightness(0.82) saturate(0.85) sepia(0.35) hue-rotate(-15deg)" }}
+              style={{ width: "38vw", height: "38vw", objectFit: "contain", filter: "brightness(0.82) saturate(0.85) sepia(0.35) hue-rotate(-15deg)", maskImage: "radial-gradient(ellipse at center, black 52%, transparent 78%)", WebkitMaskImage: "radial-gradient(ellipse at center, black 52%, transparent 78%)" }}
             />
           </div>
           <div
