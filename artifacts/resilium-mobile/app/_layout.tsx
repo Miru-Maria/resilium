@@ -48,6 +48,8 @@ function RootLayoutNav() {
           <Stack.Screen name="my-plans" />
           <Stack.Screen name="pricing" />
           <Stack.Screen name="scenarios" />
+          <Stack.Screen name="about" />
+          <Stack.Screen name="coaching" />
         </Stack>
       </KeyboardProvider>
     </GestureHandlerRootView>

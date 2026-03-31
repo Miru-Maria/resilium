@@ -2,6 +2,7 @@ import cron from "node-cron";
 import { db, subscriptionsTable, reportFeedbackTable, resilienceReportsTable } from "@workspace/db";
 import { gte, sql } from "drizzle-orm";
 import { sendAdminDigest, sendErrorAlert, sendReassessmentReminder } from "./email.js";
+import { sendPushNotificationsToUsers } from "./push.js";
 import { logger } from "./logger.js";
 
 // ─── In-memory error rate tracking ───────────────────────────────────────────
@@ -88,6 +89,8 @@ async function runReassessmentReminders() {
     const users = rows.rows as Array<{ user_id: string; last_score: number; last_at: Date; email: string; first_name: string | null }>;
     logger.info({ count: users.length }, "Re-assessment reminder candidates");
 
+    const userIds: string[] = users.map(u => u.user_id);
+
     for (const u of users) {
       const daysSince = Math.round((Date.now() - new Date(u.last_at).getTime()) / (1000 * 60 * 60 * 24));
       await sendReassessmentReminder({
@@ -96,6 +99,16 @@ async function runReassessmentReminders() {
         lastScore: Math.round(u.last_score),
         daysSince,
       }).catch(() => {});
+    }
+
+    // Also send push notifications to users who have registered a token
+    if (userIds.length > 0) {
+      await sendPushNotificationsToUsers(
+        userIds,
+        "Time for your monthly check-in",
+        "A lot can change in 30 days. Retake your Resilium assessment to see where you stand.",
+        { screen: "assessment" }
+      ).catch(() => {});
     }
   } catch (err) {
     logger.error({ err }, "Failed to run re-assessment reminders");

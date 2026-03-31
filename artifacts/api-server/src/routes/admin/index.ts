@@ -6,6 +6,7 @@ import uxTestRouter from "./ux-test/index.js";
 import adminGdprRouter from "./gdpr.js";
 import adminAnalyticsRouter from "./analytics.js";
 import adminAnnouncementsRouter from "./announcements.js";
+import { getCoachingClickCount } from "../../lib/cron.js";
 
 const router: IRouter = Router();
 
@@ -278,6 +279,10 @@ router.patch("/testimonials/:id", requireAdminSession, async (req, res) => {
     req.log.error({ err }, "Error updating testimonial");
     res.status(500).json({ error: "INTERNAL_ERROR", message: "Failed to update testimonial." });
   }
+});
+
+router.get("/coaching-stats", requireAdminSession, (req, res) => {
+  res.json({ coachingClicksTotal: getCoachingClickCount() });
 });
 
 router.use("/ux-test", uxTestRouter);

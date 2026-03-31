@@ -7,7 +7,7 @@ import {
 } from "recharts";
 import {
   ShieldAlert, LogOut, Loader2, AlertTriangle, FileText,
-  Star, Activity, MessageSquare, Smartphone, Shield, LayoutDashboard, FlaskConical
+  Star, Activity, MessageSquare, Smartphone, Shield, LayoutDashboard, FlaskConical, ExternalLink
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -101,15 +101,17 @@ export default function AdminDashboard() {
   const [, setLocation] = useLocation();
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [platformSplit, setPlatformSplit] = useState<PlatformSplit | null>(null);
+  const [coachingClicks, setCoachingClicks] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
       try {
-        const [analyticsRes, mobileRes] = await Promise.all([
+        const [analyticsRes, mobileRes, coachingRes] = await Promise.all([
           fetch(`${BASE}/api/admin/analytics`, { headers: adminAuthHeaders() }),
           fetch(`${BASE}/api/admin/analytics/mobile`, { headers: adminAuthHeaders() }),
+          fetch(`${BASE}/api/admin/coaching-stats`, { headers: adminAuthHeaders() }),
         ]);
         if (analyticsRes.status === 401) {
           localStorage.removeItem("admin_token");
@@ -121,6 +123,10 @@ export default function AdminDashboard() {
         if (mobileRes.ok) {
           const md = await mobileRes.json();
           setPlatformSplit({ totalMobile: md.totalMobile, totalWeb: md.totalWeb, totalAll: md.totalAll });
+        }
+        if (coachingRes.ok) {
+          const cd = await coachingRes.json();
+          setCoachingClicks(cd.coachingClicksTotal ?? 0);
         }
       } catch (e: any) {
         setError(e.message ?? "Failed to load analytics");
@@ -205,10 +211,11 @@ export default function AdminDashboard() {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <StatCard title="Total Reports" value={data.overview.totalReports} icon={FileText} description="All time submissions" />
               <StatCard title="Avg Overall Score" value={`${data.overview.avgOverall}/100`} icon={Activity} description="Across all users" />
               <StatCard title="Feedback Received" value={data.feedback.totalFeedback} icon={MessageSquare} description={data.feedback.totalFeedback > 0 ? `Avg rating: ${data.feedback.avgRating}/5` : "No feedback yet"} />
+              <StatCard title="Coaching Clicks" value={coachingClicks ?? "—"} icon={ExternalLink} description="Since last server restart" />
             </div>
 
             {platformSplit && (
