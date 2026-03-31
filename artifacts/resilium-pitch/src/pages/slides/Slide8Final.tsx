@@ -116,6 +116,7 @@ export default function Slide8Final() {
             fontFamily: "Plus Jakarta Sans, sans-serif",
             letterSpacing: "-0.01em",
             lineHeight: 1,
+            marginTop: "-2vh",
             ...a("0.3s", "fadeUp"),
           }}>
             Resilium
