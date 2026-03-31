@@ -53,3 +53,9 @@ id = "DvgYbAGIoTsI5VUwifuRu"
 uri = "file://attached_assets/resilium-marketing-banner.svg"
 type = "image"
 title = "Resilium Marketing Banner SVG — Matches PNG (2 fixes applied)"
+
+[[outputs]]
+id = "yZ6cDouKR-9bpkNle1Pps"
+uri = "file://.local/outputs/Resilium-AI-Web.pptx"
+type = "slides"
+title = "Resilium AI Web.pptx"
