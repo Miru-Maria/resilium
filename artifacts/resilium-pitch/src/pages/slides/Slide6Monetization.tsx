@@ -24,7 +24,7 @@ export default function Slide6Monetization() {
           </div>
           <h2
             className="text-[4vw] font-black leading-[1.05] tracking-tight mb-[2.5vh]"
-            style={{ fontFamily: "Playfair Display, serif", color: "#EAD9BE", ...a("0.2s", "slideInLeft") }}
+            style={{ fontFamily: "Plus Jakarta Sans, sans-serif", color: "#EAD9BE", ...a("0.2s", "slideInLeft") }}
           >
             Revenue built in from day one.
           </h2>
@@ -48,7 +48,7 @@ export default function Slide6Monetization() {
             <div className="flex items-center justify-between mb-[1vh]">
               <div
                 className="text-[1.6vw] font-bold"
-                style={{ color: "#EAD9BE", fontFamily: "Playfair Display, serif" }}
+                style={{ color: "#EAD9BE", fontFamily: "Plus Jakarta Sans, sans-serif" }}
               >
                 Freemium Model
               </div>
@@ -74,7 +74,7 @@ export default function Slide6Monetization() {
             <div className="flex items-center justify-between mb-[1vh]">
               <div
                 className="text-[1.6vw] font-bold"
-                style={{ color: "#EAD9BE", fontFamily: "Playfair Display, serif" }}
+                style={{ color: "#EAD9BE", fontFamily: "Plus Jakarta Sans, sans-serif" }}
               >
                 Pro Subscriptions
               </div>
@@ -100,7 +100,7 @@ export default function Slide6Monetization() {
             <div className="flex items-center justify-between mb-[1vh]">
               <div
                 className="text-[1.6vw] font-bold"
-                style={{ color: "#EAD9BE", fontFamily: "Playfair Display, serif" }}
+                style={{ color: "#EAD9BE", fontFamily: "Plus Jakarta Sans, sans-serif" }}
               >
                 Coaching Referral
               </div>

@@ -25,7 +25,7 @@ export default function Slide5Replit() {
         </div>
         <h2
           className="text-[4vw] font-black tracking-tight mb-[4vh]"
-          style={{ fontFamily: "Playfair Display, serif", color: "#EAD9BE", ...a("0.2s", "slideInLeft") }}
+          style={{ fontFamily: "Plus Jakarta Sans, sans-serif", color: "#EAD9BE", ...a("0.2s", "slideInLeft") }}
         >
           Four artifacts. One cohesive platform.
         </h2>
@@ -43,7 +43,7 @@ export default function Slide5Replit() {
             </div>
             <div
               className="text-[1.7vw] font-bold"
-              style={{ color: "#EAD9BE", fontFamily: "Playfair Display, serif" }}
+              style={{ color: "#EAD9BE", fontFamily: "Plus Jakarta Sans, sans-serif" }}
             >
               React + Vite
             </div>
@@ -67,7 +67,7 @@ export default function Slide5Replit() {
             </div>
             <div
               className="text-[1.7vw] font-bold"
-              style={{ color: "#EAD9BE", fontFamily: "Playfair Display, serif" }}
+              style={{ color: "#EAD9BE", fontFamily: "Plus Jakarta Sans, sans-serif" }}
             >
               Expo + React Native
             </div>
@@ -91,7 +91,7 @@ export default function Slide5Replit() {
             </div>
             <div
               className="text-[1.7vw] font-bold"
-              style={{ color: "#EAD9BE", fontFamily: "Playfair Display, serif" }}
+              style={{ color: "#EAD9BE", fontFamily: "Plus Jakarta Sans, sans-serif" }}
             >
               Express + PostgreSQL
             </div>
@@ -115,7 +115,7 @@ export default function Slide5Replit() {
             </div>
             <div
               className="text-[1.7vw] font-bold"
-              style={{ color: "#EAD9BE", fontFamily: "Playfair Display, serif" }}
+              style={{ color: "#EAD9BE", fontFamily: "Plus Jakarta Sans, sans-serif" }}
             >
               GPT-5.2 via Replit
             </div>

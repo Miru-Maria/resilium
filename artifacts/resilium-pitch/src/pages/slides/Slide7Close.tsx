@@ -2,7 +2,7 @@ const allSlides = typeof window !== "undefined" && window.location.pathname.toLo
 const a = (delay: string, kf = "fadeUp") =>
   allSlides ? {} : { animation: `${kf} 0.75s cubic-bezier(0.22,1,0.36,1) both`, animationDelay: delay };
 
-const NUM = { fontSize: "4.8vw", fontWeight: 900, lineHeight: 1, fontFamily: "Playfair Display, serif", color: "#E08040", textShadow: "0 0 24px rgba(224,128,64,0.5), 0 0 50px rgba(224,128,64,0.18)", minWidth: "6.5vw", textAlign: "right" as const };
+const NUM = { fontSize: "4.8vw", fontWeight: 900, lineHeight: 1, fontFamily: "Plus Jakarta Sans, sans-serif", color: "#E08040", textShadow: "0 0 24px rgba(224,128,64,0.5), 0 0 50px rgba(224,128,64,0.18)", minWidth: "6.5vw", textAlign: "right" as const };
 const RULE = { width: "1px", height: "4.5vh", background: "rgba(224,128,64,0.3)", flexShrink: 0 };
 const LABEL = { fontSize: "1.6vw", fontWeight: 500, color: "#EAD9BE", fontFamily: "Inter, sans-serif" };
 const SUB   = { fontSize: "1.2vw", fontWeight: 300, color: "#8A7A6A", fontFamily: "Inter, sans-serif" };
@@ -28,7 +28,7 @@ export default function Slide7Close() {
             Where We Are
           </div>
           <h2
-            style={{ fontSize: "4.5vw", fontWeight: 900, lineHeight: 1.0, letterSpacing: "-0.02em", fontFamily: "Playfair Display, serif", color: "#EAD9BE", ...a("0.2s", "fadeUp") }}
+            style={{ fontSize: "4.5vw", fontWeight: 900, lineHeight: 1.0, letterSpacing: "-0.02em", fontFamily: "Plus Jakarta Sans, sans-serif", color: "#EAD9BE", ...a("0.2s", "fadeUp") }}
           >
             The foundation is live.
           </h2>

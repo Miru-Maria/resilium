@@ -28,7 +28,7 @@ export default function Slide2Problem() {
 
         <h2
           className="text-[5vw] font-black leading-[1.0] tracking-tight mb-[5vh]"
-          style={{ fontFamily: "Playfair Display, serif", color: "#EAD9BE", maxWidth: "72vw", ...a("0.25s", "slideInLeft") }}
+          style={{ fontFamily: "Plus Jakarta Sans, sans-serif", color: "#EAD9BE", maxWidth: "72vw", ...a("0.25s", "slideInLeft") }}
         >
           Disruption doesn&apos;t announce itself.
         </h2>
@@ -37,7 +37,7 @@ export default function Slide2Problem() {
           <div style={{ flex: "0 0 auto", ...a("0.45s", "fadeUp") }}>
             <div
               className="text-[9vw] font-black leading-none"
-              style={{ color: "#E08040", fontFamily: "Playfair Display, serif" }}
+              style={{ color: "#E08040", fontFamily: "Plus Jakarta Sans, sans-serif" }}
             >
               56%
             </div>
@@ -58,7 +58,7 @@ export default function Slide2Problem() {
             <div style={a("0.6s", "slideInRight")}>
               <div
                 className="text-[2.8vw] font-bold mb-[0.8vh]"
-                style={{ color: "#EAD9BE", fontFamily: "Playfair Display, serif" }}
+                style={{ color: "#EAD9BE", fontFamily: "Plus Jakarta Sans, sans-serif" }}
               >
                 No map for uncertainty
               </div>
@@ -72,7 +72,7 @@ export default function Slide2Problem() {
             <div style={a("0.75s", "slideInRight")}>
               <div
                 className="text-[2.8vw] font-bold mb-[0.8vh]"
-                style={{ color: "#EAD9BE", fontFamily: "Playfair Display, serif" }}
+                style={{ color: "#EAD9BE", fontFamily: "Plus Jakarta Sans, sans-serif" }}
               >
                 Gut feel is not a plan
               </div>

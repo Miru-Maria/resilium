@@ -40,7 +40,7 @@ export default function Slide1Title() {
           </div>
           <h1
             className="text-[7vw] leading-[0.92] tracking-tight font-black mb-[3vh]"
-            style={{ fontFamily: "Playfair Display, serif", color: "#EAD9BE", ...a("0.35s", "slideInLeft") }}
+            style={{ fontFamily: "Plus Jakarta Sans, sans-serif", color: "#EAD9BE", ...a("0.35s", "slideInLeft") }}
           >
             Resilium
           </h1>

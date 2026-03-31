@@ -24,7 +24,7 @@ export default function Slide4Audience() {
           </div>
           <h2
             className="text-[4.2vw] font-black leading-[1.05] tracking-tight mb-[2.5vh]"
-            style={{ fontFamily: "Playfair Display, serif", color: "#EAD9BE", ...a("0.2s", "slideInLeft") }}
+            style={{ fontFamily: "Plus Jakarta Sans, sans-serif", color: "#EAD9BE", ...a("0.2s", "slideInLeft") }}
           >
             The quietly prepared.
           </h2>
@@ -47,7 +47,7 @@ export default function Slide4Audience() {
           >
             <div
               className="text-[1.6vw] font-bold mb-[0.5vh]"
-              style={{ color: "#EAD9BE", fontFamily: "Playfair Display, serif" }}
+              style={{ color: "#EAD9BE", fontFamily: "Plus Jakarta Sans, sans-serif" }}
             >
               The Financially Anxious
             </div>
@@ -64,7 +64,7 @@ export default function Slide4Audience() {
           >
             <div
               className="text-[1.6vw] font-bold mb-[0.5vh]"
-              style={{ color: "#EAD9BE", fontFamily: "Playfair Display, serif" }}
+              style={{ color: "#EAD9BE", fontFamily: "Plus Jakarta Sans, sans-serif" }}
             >
               Expats &amp; Digital Nomads
             </div>
@@ -81,7 +81,7 @@ export default function Slide4Audience() {
           >
             <div
               className="text-[1.6vw] font-bold mb-[0.5vh]"
-              style={{ color: "#EAD9BE", fontFamily: "Playfair Display, serif" }}
+              style={{ color: "#EAD9BE", fontFamily: "Plus Jakarta Sans, sans-serif" }}
             >
               Preparedness Planners
             </div>
@@ -98,7 +98,7 @@ export default function Slide4Audience() {
           >
             <div
               className="text-[1.6vw] font-bold mb-[0.5vh]"
-              style={{ color: "#EAD9BE", fontFamily: "Playfair Display, serif" }}
+              style={{ color: "#EAD9BE", fontFamily: "Plus Jakarta Sans, sans-serif" }}
             >
               The Cautiously Aware
             </div>

@@ -21,7 +21,7 @@ export default function Slide3Solution() {
         </div>
         <h2
           className="text-[4vw] font-black tracking-tight mb-[5vh]"
-          style={{ fontFamily: "Playfair Display, serif", color: "#EAD9BE", ...a("0.2s", "slideInLeft") }}
+          style={{ fontFamily: "Plus Jakarta Sans, sans-serif", color: "#EAD9BE", ...a("0.2s", "slideInLeft") }}
         >
           A personal resilience score — and the plan to improve it.
         </h2>
@@ -33,13 +33,13 @@ export default function Slide3Solution() {
           >
             <div
               className="text-[3vw] font-black mb-[1.5vh]"
-              style={{ color: "#E08040", fontFamily: "Playfair Display, serif" }}
+              style={{ color: "#E08040", fontFamily: "Plus Jakarta Sans, sans-serif" }}
             >
               01
             </div>
             <div
               className="text-[1.8vw] font-bold mb-[1vh]"
-              style={{ color: "#EAD9BE", fontFamily: "Playfair Display, serif" }}
+              style={{ color: "#EAD9BE", fontFamily: "Plus Jakarta Sans, sans-serif" }}
             >
               10-Step Assessment
             </div>
@@ -57,13 +57,13 @@ export default function Slide3Solution() {
           >
             <div
               className="text-[3vw] font-black mb-[1.5vh]"
-              style={{ color: "#E08040", fontFamily: "Playfair Display, serif" }}
+              style={{ color: "#E08040", fontFamily: "Plus Jakarta Sans, sans-serif" }}
             >
               02
             </div>
             <div
               className="text-[1.8vw] font-bold mb-[1vh]"
-              style={{ color: "#EAD9BE", fontFamily: "Playfair Display, serif" }}
+              style={{ color: "#EAD9BE", fontFamily: "Plus Jakarta Sans, sans-serif" }}
             >
               AI-Generated Report
             </div>
@@ -81,13 +81,13 @@ export default function Slide3Solution() {
           >
             <div
               className="text-[3vw] font-black mb-[1.5vh]"
-              style={{ color: "#E08040", fontFamily: "Playfair Display, serif" }}
+              style={{ color: "#E08040", fontFamily: "Plus Jakarta Sans, sans-serif" }}
             >
               03
             </div>
             <div
               className="text-[1.8vw] font-bold mb-[1vh]"
-              style={{ color: "#EAD9BE", fontFamily: "Playfair Display, serif" }}
+              style={{ color: "#EAD9BE", fontFamily: "Plus Jakarta Sans, sans-serif" }}
             >
               Track Progress
             </div>

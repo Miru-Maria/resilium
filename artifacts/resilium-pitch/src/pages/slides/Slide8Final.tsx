@@ -82,7 +82,7 @@ export default function Slide8Final() {
             { headline: "Real coaching when it counts", body: "AI flags the gap; a human helps close it." },
           ].map(({ headline, body }) => (
             <div key={headline}>
-              <div style={{ fontSize: "1.4vw", fontWeight: 600, color: "#EAD9BE", fontFamily: "Playfair Display, serif", marginBottom: "0.5vh" }}>{headline}</div>
+              <div style={{ fontSize: "1.4vw", fontWeight: 600, color: "#EAD9BE", fontFamily: "Plus Jakarta Sans, sans-serif", marginBottom: "0.5vh" }}>{headline}</div>
               <div style={{ fontSize: "1.1vw", fontWeight: 300, color: "#8A7A6A", fontFamily: "Inter, sans-serif", lineHeight: 1.5 }}>{body}</div>
             </div>
           ))}
@@ -101,8 +101,8 @@ export default function Slide8Final() {
                 height: "26vw",
                 objectFit: "contain",
                 mixBlendMode: "screen",
-                maskImage: "radial-gradient(ellipse 88% 88% at 50% 50%, black 52%, transparent 82%)",
-                WebkitMaskImage: "radial-gradient(ellipse 88% 88% at 50% 50%, black 52%, transparent 82%)",
+                maskImage: "radial-gradient(ellipse 92% 84% at 50% 47%, black 34%, transparent 62%)",
+                WebkitMaskImage: "radial-gradient(ellipse 92% 84% at 50% 47%, black 34%, transparent 62%)",
                 display: "block",
               }}
             />
@@ -113,7 +113,7 @@ export default function Slide8Final() {
             fontSize: "3.6vw",
             fontWeight: 700,
             color: AMBER,
-            fontFamily: "Playfair Display, serif",
+            fontFamily: "Plus Jakarta Sans, sans-serif",
             letterSpacing: "-0.01em",
             lineHeight: 1,
             ...a("0.3s", "fadeUp"),
@@ -156,7 +156,7 @@ export default function Slide8Final() {
             { headline: "Borderless by design", body: "Built for expats and nomads from day one — no geographic lock-in." },
           ].map(({ headline, body }) => (
             <div key={headline} style={{ borderLeft: "2px solid rgba(224,128,64,0.28)", paddingLeft: "1.1vw" }}>
-              <div style={{ fontSize: "1.4vw", fontWeight: 600, color: "#EAD9BE", fontFamily: "Playfair Display, serif", marginBottom: "0.5vh" }}>{headline}</div>
+              <div style={{ fontSize: "1.4vw", fontWeight: 600, color: "#EAD9BE", fontFamily: "Plus Jakarta Sans, sans-serif", marginBottom: "0.5vh" }}>{headline}</div>
               <div style={{ fontSize: "1.1vw", fontWeight: 300, color: "#8A7A6A", fontFamily: "Inter, sans-serif", lineHeight: 1.5 }}>{body}</div>
             </div>
           ))}
