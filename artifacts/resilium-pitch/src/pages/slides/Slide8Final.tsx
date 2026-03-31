@@ -101,8 +101,8 @@ export default function Slide8Final() {
                 height: "26vw",
                 objectFit: "contain",
                 mixBlendMode: "screen",
-                maskImage: "radial-gradient(ellipse 92% 84% at 50% 47%, black 34%, transparent 62%)",
-                WebkitMaskImage: "radial-gradient(ellipse 92% 84% at 50% 47%, black 34%, transparent 62%)",
+                maskImage: "radial-gradient(ellipse 92% 84% at 50% 47%, black 24%, transparent 50%)",
+                WebkitMaskImage: "radial-gradient(ellipse 92% 84% at 50% 47%, black 24%, transparent 50%)",
                 display: "block",
               }}
             />
@@ -110,7 +110,7 @@ export default function Slide8Final() {
 
           {/* Brand name — matches website navbar logo exactly */}
           <div style={{
-            fontSize: "3.6vw",
+            fontSize: "4.2vw",
             fontWeight: 700,
             color: AMBER,
             fontFamily: "Plus Jakarta Sans, sans-serif",
@@ -123,7 +123,7 @@ export default function Slide8Final() {
 
           {/* Tagline */}
           <div style={{
-            fontSize: "1.2vw",
+            fontSize: "1.45vw",
             fontWeight: 300,
             color: "#C4B09A",
             fontFamily: "Inter, sans-serif",
