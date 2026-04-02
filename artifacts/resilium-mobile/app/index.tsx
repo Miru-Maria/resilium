@@ -360,6 +360,17 @@ export default function HomeScreen() {
             {isSignedIn ? "Plans saved to your account" : "GDPR compliant"}
           </Text>
         </View>
+
+        {/* ── Footer Links ── */}
+        <View style={styles.footerLinks}>
+          <Pressable onPress={() => router.push("/about")} style={styles.footerLink}>
+            <Text style={styles.footerLinkText}>About</Text>
+          </Pressable>
+          <Text style={styles.footerDot}>·</Text>
+          <Pressable onPress={() => router.push("/coaching")} style={styles.footerLink}>
+            <Text style={styles.footerLinkText}>Get Coaching</Text>
+          </Pressable>
+        </View>
       </ScrollView>
     </View>
   );
@@ -659,5 +670,26 @@ const createStyles = (colors: ColorsType) =>
       fontSize: 13,
       color: colors.textSecondary,
       textAlign: "center",
+    },
+
+    /* Footer links */
+    footerLinks: {
+      flexDirection: "row",
+      justifyContent: "center",
+      alignItems: "center",
+      gap: 8,
+      marginTop: 32,
+      marginBottom: 8,
+    },
+    footerLink: { padding: 8 },
+    footerLinkText: {
+      fontFamily: "Inter_500Medium",
+      fontSize: 13,
+      color: colors.primary,
+    },
+    footerDot: {
+      fontFamily: "Inter_400Regular",
+      fontSize: 13,
+      color: colors.textMuted,
     },
   });

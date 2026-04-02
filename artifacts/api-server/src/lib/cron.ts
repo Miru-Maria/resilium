@@ -1,6 +1,6 @@
 import cron from "node-cron";
 import { db, subscriptionsTable, reportFeedbackTable, resilienceReportsTable } from "@workspace/db";
-import { gte, sql } from "drizzle-orm";
+import { and, eq, gte, sql } from "drizzle-orm";
 import { sendAdminDigest, sendErrorAlert, sendReassessmentReminder } from "./email.js";
 import { sendPushNotificationsToUsers } from "./push.js";
 import { logger } from "./logger.js";

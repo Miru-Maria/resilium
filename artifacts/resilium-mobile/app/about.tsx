@@ -53,7 +53,7 @@ export default function AboutScreen() {
             { icon: "heart",       label: "Health",    desc: "Physical health, medical access, and mobility capacity." },
             { icon: "cpu",         label: "Skills",    desc: "Practical skills that matter when systems fail." },
             { icon: "map-pin",     label: "Mobility",  desc: "Your ability to relocate quickly when needed." },
-            { icon: "brain",       label: "Psychological", desc: "Stress tolerance, adaptability, and emotional regulation." },
+            { icon: "activity",    label: "Psychological", desc: "Stress tolerance, adaptability, and emotional regulation." },
             { icon: "package",     label: "Resources", desc: "Emergency supplies, housing stability, and social network." },
           ].map(({ icon, label, desc }) => (
             <View key={label} style={s.dimRow}>

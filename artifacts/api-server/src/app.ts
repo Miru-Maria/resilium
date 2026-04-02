@@ -69,9 +69,7 @@ app.use(
 
 app.use(authMiddleware);
 
-app.use("/api", router);
-
-// Error-rate tracking middleware — counts 5xx responses and alerts admin
+// Error-rate tracking middleware — must be BEFORE routes so finish listener is attached
 app.use((_req: Request, res: Response, next: NextFunction) => {
   res.on("finish", () => {
     if (res.statusCode >= 500) {
@@ -80,6 +78,8 @@ app.use((_req: Request, res: Response, next: NextFunction) => {
   });
   next();
 });
+
+app.use("/api", router);
 
 // Start background cron jobs
 startCron();
