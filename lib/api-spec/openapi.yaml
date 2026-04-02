@@ -575,6 +575,10 @@ components:
         sessionId:
           type: string
           description: Optional session ID for saving reports
+        ageBracket:
+          type: string
+          enum: [18-24, 25-34, 35-44, 45-54, 55-64, 65+]
+          description: Age bracket of the user — affects scoring modifiers for financial runway and health vulnerability
         mentalResilienceAnswers:
           $ref: "#/components/schemas/MentalResilienceAnswers"
       required:

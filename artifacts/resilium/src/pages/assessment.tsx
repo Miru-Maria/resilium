@@ -18,6 +18,7 @@ const SESSION_KEY = "resilium_session_id";
 
 import type { 
   AssessmentInput,
+  AssessmentInputAgeBracket,
   AssessmentInputIncomeStability,
   AssessmentInputHealthStatus,
   AssessmentInputMobilityLevel,
@@ -28,8 +29,9 @@ import type {
 } from "@workspace/api-client-react/src/generated/api.schemas";
 
 // Step 1 is the new mental resilience deep-assessment
-// Steps 2-11 are the original 10 steps shifted by +1
-const TOTAL_STEPS = 11;
+// Step 3 is age bracket (new)
+// Steps 4-12 are the original steps 3-11 shifted by +1
+const TOTAL_STEPS = 12;
 
 type MentalResilienceQuestion = {
   key: keyof MentalResilienceAnswers;
@@ -197,6 +199,7 @@ export default function AssessmentPage() {
 
   const [formData, setFormData] = useState<AssessmentInput>({
     location: "",
+    ageBracket: undefined,
     incomeStability: "fixed",
     savingsMonths: 3,
     dependentCount: 0,
@@ -266,8 +269,9 @@ export default function AssessmentPage() {
     switch(step) {
       case 1: return true; // all MR questions have a default value
       case 2: return formData.location.trim().length > 1;
-      case 6: return formData.skills.length > 0;
-      case 11: return formData.riskConcerns.length > 0;
+      case 3: return !!formData.ageBracket;
+      case 7: return formData.skills.length > 0;
+      case 12: return formData.riskConcerns.length > 0;
       default: return true;
     }
   };
@@ -464,14 +468,15 @@ export default function AssessmentPage() {
           <span className="text-xs font-semibold text-primary/70">
             {step === 1 ? "Mental Resilience" :
              step === 2 ? "Location" :
-             step === 3 ? "Income" :
-             step === 4 ? "Financial Runway" :
-             step === 5 ? "Dependents" :
-             step === 6 ? "Skills" :
-             step === 7 ? "Health & Mobility" :
-             step === 8 ? "Housing" :
-             step === 9 ? "Emergency Supplies" :
-             step === 10 ? "Preparedness" :
+             step === 3 ? "Age Bracket" :
+             step === 4 ? "Income" :
+             step === 5 ? "Financial Runway" :
+             step === 6 ? "Dependents" :
+             step === 7 ? "Skills" :
+             step === 8 ? "Health & Mobility" :
+             step === 9 ? "Housing" :
+             step === 10 ? "Emergency Supplies" :
+             step === 11 ? "Psychological" :
              "Risk Profile"}
           </span>
           <span className="text-xs text-muted-foreground">{Math.round(progressPercent)}%</span>
@@ -582,8 +587,38 @@ export default function AssessmentPage() {
                 </div>
               )}
 
-              {/* STEP 3: INCOME */}
+              {/* STEP 3: AGE BRACKET */}
               {step === 3 && (
+                <div className="space-y-6">
+                  <h2 className="text-3xl md:text-4xl font-display font-bold">What's your age bracket?</h2>
+                  <p className="text-muted-foreground text-lg">Age shapes your financial time-horizon and baseline health vulnerability — it affects how we weight your scores.</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    {([
+                      { id: "18-24", label: "18–24", desc: "Early career" },
+                      { id: "25-34", label: "25–34", desc: "Building phase" },
+                      { id: "35-44", label: "35–44", desc: "Established" },
+                      { id: "45-54", label: "45–54", desc: "Peak earning" },
+                      { id: "55-64", label: "55–64", desc: "Pre-retirement" },
+                      { id: "65+",   label: "65+",   desc: "Retirement age" },
+                    ] as { id: AssessmentInputAgeBracket; label: string; desc: string }[]).map((opt) => (
+                      <Card
+                        key={opt.id}
+                        className={cn(
+                          "p-5 cursor-pointer flex flex-col items-center justify-center gap-1 transition-all duration-200 text-center",
+                          formData.ageBracket === opt.id ? "step-card-active" : "hover:border-primary/30"
+                        )}
+                        onClick={() => updateField("ageBracket", opt.id)}
+                      >
+                        <span className="text-xl font-bold">{opt.label}</span>
+                        <span className="text-xs text-muted-foreground">{opt.desc}</span>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* STEP 4: INCOME */}
+              {step === 4 && (
                 <div className="space-y-6">
                   <h2 className="text-3xl md:text-4xl font-display font-bold">How stable is your income?</h2>
                   <div className="grid gap-4">
@@ -613,8 +648,8 @@ export default function AssessmentPage() {
                 </div>
               )}
 
-              {/* STEP 4: SAVINGS */}
-              {step === 4 && (
+              {/* STEP 5: SAVINGS */}
+              {step === 5 && (
                 <div className="space-y-8">
                   <h2 className="text-3xl md:text-4xl font-display font-bold">What is your financial runway?</h2>
                   <p className="text-muted-foreground text-lg">If you lost your income today, how many months could you survive on savings without going into debt?</p>
@@ -636,8 +671,8 @@ export default function AssessmentPage() {
                 </div>
               )}
 
-              {/* STEP 5: DEPENDENTS */}
-              {step === 5 && (
+              {/* STEP 6: DEPENDENTS */}
+              {step === 6 && (
                 <div className="space-y-6">
                   <h2 className="text-3xl md:text-4xl font-display font-bold">How many dependents do you have?</h2>
                   <p className="text-muted-foreground text-lg">Children, elderly parents, or anyone financially or physically reliant on you.</p>
@@ -664,8 +699,8 @@ export default function AssessmentPage() {
                 </div>
               )}
 
-              {/* STEP 6: SKILLS */}
-              {step === 6 && (
+              {/* STEP 7: SKILLS */}
+              {step === 7 && (
                 <div className="space-y-6 h-full overflow-y-auto pr-2">
                   <h2 className="text-3xl md:text-4xl font-display font-bold">What practical skills do you possess?</h2>
                   <p className="text-muted-foreground">Select all that apply.</p>
@@ -696,8 +731,8 @@ export default function AssessmentPage() {
                 </div>
               )}
 
-              {/* STEP 7: HEALTH & MOBILITY */}
-              {step === 7 && (
+              {/* STEP 8: HEALTH & MOBILITY */}
+              {step === 8 && (
                 <div className="space-y-7 overflow-y-auto max-h-[420px] pr-1">
                   <div>
                     <h2 className="text-xl font-display font-bold mb-3">Overall Health Status</h2>
@@ -761,8 +796,8 @@ export default function AssessmentPage() {
                 </div>
               )}
 
-              {/* STEP 8: HOUSING */}
-              {step === 8 && (
+              {/* STEP 9: HOUSING */}
+              {step === 9 && (
                 <div className="space-y-6">
                   <h2 className="text-3xl md:text-4xl font-display font-bold">Current housing situation?</h2>
                   <div className="grid grid-cols-1 gap-3">
@@ -788,8 +823,8 @@ export default function AssessmentPage() {
                 </div>
               )}
 
-              {/* STEP 9: EMERGENCY SUPPLIES */}
-              {step === 9 && (
+              {/* STEP 10: EMERGENCY SUPPLIES */}
+              {step === 10 && (
                 <div className="space-y-6">
                   <h2 className="text-3xl md:text-4xl font-display font-bold">Emergency Preparedness</h2>
                   <p className="text-muted-foreground text-lg">Do you have immediate access to at least 14 days of emergency food, water, and essential medicines?</p>
@@ -816,8 +851,8 @@ export default function AssessmentPage() {
                 </div>
               )}
 
-              {/* STEP 10: PSYCHOLOGICAL (self-rating, kept for context/comparison) */}
-              {step === 10 && (
+              {/* STEP 11: PSYCHOLOGICAL (self-rating, kept for context/comparison) */}
+              {step === 11 && (
                 <div className="space-y-8 text-center">
                   <h2 className="text-3xl md:text-4xl font-display font-bold text-left">Self-Rated Resilience</h2>
                   <p className="text-muted-foreground text-lg text-left">On a scale of 1-10, how well do you handle severe stress, ambiguity, and rapid change? (For comparison with your detailed profile.)</p>
@@ -842,8 +877,8 @@ export default function AssessmentPage() {
                 </div>
               )}
 
-              {/* STEP 11: RISKS */}
-              {step === 11 && (
+              {/* STEP 12: RISKS */}
+              {step === 12 && (
                 <div className="space-y-6 h-full overflow-y-auto pr-2">
                   <h2 className="text-3xl md:text-4xl font-display font-bold">Primary Risk Concerns</h2>
                   <p className="text-muted-foreground">Select the risks you feel least prepared for (choose at least one).</p>

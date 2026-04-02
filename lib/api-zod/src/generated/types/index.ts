@@ -9,6 +9,7 @@
 export * from "./actionItem";
 export * from "./actionItemPriority";
 export * from "./assessmentInput";
+export * from "./assessmentInputAgeBracket";
 export * from "./assessmentInputHealthStatus";
 export * from "./assessmentInputHousingType";
 export * from "./assessmentInputIncomeStability";

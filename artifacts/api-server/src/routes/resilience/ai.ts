@@ -13,6 +13,7 @@ type MentalResilienceSubScores = {
 
 type AssessmentInput = {
   location: string;
+  ageBracket?: string;
   incomeStability: string;
   savingsMonths: number;
   dependentCount?: number;
@@ -117,6 +118,7 @@ export async function generateResilienceReport(
 
 USER PROFILE:
 - Location: ${input.location}
+- Age bracket: ${input.ageBracket ?? "not specified"}
 - Income stability: ${input.incomeStability}
 - Savings runway: ${input.savingsMonths} months
 - Dependents: ${input.dependentCount === 0 ? "None" : input.dependentCount === 1 ? "One" : input.dependentCount === 2 ? "Two or three" : "Four or more"}

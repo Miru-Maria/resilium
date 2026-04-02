@@ -29,6 +29,7 @@ type MentalResilienceSubScores = {
 
 type AssessmentInput = {
   location: string;
+  ageBracket?: string;
   incomeStability: "fixed" | "freelance" | "unstable";
   savingsMonths: number;
   // New: count 0=none, 1=one, 2=two-three, 3=four+
@@ -46,6 +47,22 @@ type AssessmentInput = {
   riskConcerns: string[];
   mentalResilienceAnswers?: MentalResilienceAnswers;
 };
+
+// ─── Age modifiers ────────────────────────────────────────────────────────────
+// Financial: reflects time-horizon risk. A 60-year-old with 3 months savings
+//   is in a fundamentally different position than a 25-year-old with the same.
+// Health: reflects baseline vulnerability that self-reported status underweights.
+function getAgeModifiers(ageBracket?: string): { financial: number; health: number } {
+  switch (ageBracket) {
+    case "18-24": return { financial: +10, health: +12 };
+    case "25-34": return { financial: +5,  health: +6  };
+    case "35-44": return { financial:  0,  health:  0  };  // baseline
+    case "45-54": return { financial: -5,  health: -5  };
+    case "55-64": return { financial: -12, health: -10 };
+    case "65+":   return { financial: -8,  health: -15 };
+    default:      return { financial:  0,  health:  0  };
+  }
+}
 
 // Resolve dependentCount from either new field or legacy boolean
 function resolveDependentCount(input: AssessmentInput): number {
@@ -98,8 +115,9 @@ export function computeMentalResilienceSubScores(
 }
 
 export function calculateScores(input: AssessmentInput) {
-  const financial = calculateFinancialScore(input);
-  const health = calculateHealthScore(input);
+  const ageMods = getAgeModifiers(input.ageBracket);
+  const financial = Math.min(100, Math.max(0, calculateFinancialScore(input) + ageMods.financial));
+  const health = Math.min(100, Math.max(0, calculateHealthScore(input) + ageMods.health));
   const skills = calculateSkillsScore(input);
   const mobility = calculateMobilityScore(input);
   const resources = calculateResourcesScore(input);

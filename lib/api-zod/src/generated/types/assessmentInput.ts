@@ -5,6 +5,7 @@
  * Resilium API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { AssessmentInputAgeBracket } from "./assessmentInputAgeBracket";
 import type { AssessmentInputHealthStatus } from "./assessmentInputHealthStatus";
 import type { AssessmentInputHousingType } from "./assessmentInputHousingType";
 import type { AssessmentInputIncomeStability } from "./assessmentInputIncomeStability";
@@ -20,14 +21,8 @@ export interface AssessmentInput {
   incomeStability: AssessmentInputIncomeStability;
   /** Months of savings runway */
   savingsMonths: number;
-  /**
-   * Number of dependents (0=none, 1=one, 2=two-three, 3=four+)
-   * @minimum 0
-   * @maximum 3
-   */
-  dependentCount: number;
-  /** How quickly the user could relocate if needed */
-  relocationReadiness?: 'immediate' | 'within_month' | 'within_3months' | 'difficult';
+  /** Whether user has dependents */
+  hasDependents: boolean;
   /** Skills the user has */
   skills: AssessmentInputSkillsItem[];
   /** Overall health status */
@@ -48,5 +43,7 @@ export interface AssessmentInput {
   riskConcerns: AssessmentInputRiskConcernsItem[];
   /** Optional session ID for saving reports */
   sessionId?: string;
+  /** Age bracket of the user — affects scoring modifiers for financial runway and health vulnerability */
+  ageBracket?: AssessmentInputAgeBracket;
   mentalResilienceAnswers?: MentalResilienceAnswers;
 }

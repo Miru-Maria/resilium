@@ -47,8 +47,7 @@ export const SubmitAssessmentBody = zod.object({
     .enum(["fixed", "freelance", "unstable"])
     .describe("Income stability type"),
   savingsMonths: zod.number().describe("Months of savings runway"),
-  dependentCount: zod.number().min(0).max(3).describe("Number of dependents (0=none, 1=one, 2=two-three, 3=four+)"),
-  relocationReadiness: zod.enum(["immediate", "within_month", "within_3months", "difficult"]).optional(),
+  hasDependents: zod.boolean().describe("Whether user has dependents"),
   skills: zod
     .array(
       zod.enum([
@@ -99,6 +98,12 @@ export const SubmitAssessmentBody = zod.object({
     .string()
     .optional()
     .describe("Optional session ID for saving reports"),
+  ageBracket: zod
+    .enum(["18-24", "25-34", "35-44", "45-54", "55-64", "65+"])
+    .optional()
+    .describe(
+      "Age bracket of the user — affects scoring modifiers for financial runway and health vulnerability",
+    ),
   mentalResilienceAnswers: zod
     .object({
       stressTolerance1: zod
@@ -358,8 +363,7 @@ export const SubmitAssessmentResponse = zod.object({
       .enum(["fixed", "freelance", "unstable"])
       .describe("Income stability type"),
     savingsMonths: zod.number().describe("Months of savings runway"),
-    dependentCount: zod.number().min(0).max(3).describe("Number of dependents (0=none, 1=one, 2=two-three, 3=four+)"),
-    relocationReadiness: zod.enum(["immediate", "within_month", "within_3months", "difficult"]).optional(),
+    hasDependents: zod.boolean().describe("Whether user has dependents"),
     skills: zod
       .array(
         zod.enum([
@@ -410,6 +414,12 @@ export const SubmitAssessmentResponse = zod.object({
       .string()
       .optional()
       .describe("Optional session ID for saving reports"),
+    ageBracket: zod
+      .enum(["18-24", "25-34", "35-44", "45-54", "55-64", "65+"])
+      .optional()
+      .describe(
+        "Age bracket of the user — affects scoring modifiers for financial runway and health vulnerability",
+      ),
     mentalResilienceAnswers: zod
       .object({
         stressTolerance1: zod
@@ -687,8 +697,7 @@ export const GetReportResponse = zod.object({
       .enum(["fixed", "freelance", "unstable"])
       .describe("Income stability type"),
     savingsMonths: zod.number().describe("Months of savings runway"),
-    dependentCount: zod.number().min(0).max(3).describe("Number of dependents (0=none, 1=one, 2=two-three, 3=four+)"),
-    relocationReadiness: zod.enum(["immediate", "within_month", "within_3months", "difficult"]).optional(),
+    hasDependents: zod.boolean().describe("Whether user has dependents"),
     skills: zod
       .array(
         zod.enum([
@@ -739,6 +748,12 @@ export const GetReportResponse = zod.object({
       .string()
       .optional()
       .describe("Optional session ID for saving reports"),
+    ageBracket: zod
+      .enum(["18-24", "25-34", "35-44", "45-54", "55-64", "65+"])
+      .optional()
+      .describe(
+        "Age bracket of the user — affects scoring modifiers for financial runway and health vulnerability",
+      ),
     mentalResilienceAnswers: zod
       .object({
         stressTolerance1: zod

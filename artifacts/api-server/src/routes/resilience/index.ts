@@ -81,6 +81,7 @@ router.post("/assess", assessRateLimit, async (req, res) => {
     }
     const scoreResult = calculateScores({
       location: input.location,
+      ageBracket: input.ageBracket ?? undefined,
       incomeStability: input.incomeStability,
       savingsMonths: input.savingsMonths,
       dependentCount: input.dependentCount,
@@ -102,6 +103,7 @@ router.post("/assess", assessRateLimit, async (req, res) => {
     const reportContent = await generateResilienceReport(
       {
         location: input.location,
+        ageBracket: input.ageBracket ?? undefined,
         incomeStability: input.incomeStability,
         savingsMonths: input.savingsMonths,
         dependentCount: input.dependentCount,
@@ -145,6 +147,7 @@ router.post("/assess", assessRateLimit, async (req, res) => {
       sessionId: input.sessionId ?? null,
       userId: req.isAuthenticated() ? req.user.id : null,
       currency: currency,
+      ageBracket: input.ageBracket ?? null,
       location: input.location,
       incomeStability: input.incomeStability,
       savingsMonths: input.savingsMonths,

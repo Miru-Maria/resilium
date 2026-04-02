@@ -11,6 +11,7 @@ export const resilienceReportsTable = pgTable("resilience_reports", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 
   currency: varchar("currency", { length: 3 }).default("USD"),
+  ageBracket: text("age_bracket"),
   location: text("location").notNull(),
   incomeStability: text("income_stability").notNull(),
   savingsMonths: real("savings_months").notNull(),
