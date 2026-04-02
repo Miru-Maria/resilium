@@ -55,7 +55,7 @@ function TestimonialsSection() {
       .catch(() => setLoaded(true));
   }, []);
 
-  if (!loaded || testimonials.length < 3) return null;
+  if (!loaded || testimonials.length === 0) return null;
 
   return (
     <section className="w-full py-20 px-6 border-t border-border/60">

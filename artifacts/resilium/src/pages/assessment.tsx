@@ -460,6 +460,22 @@ export default function AssessmentPage() {
 
       <div className="w-full max-w-md mx-auto px-6 mb-8">
         <Progress value={progressPercent} className="h-2" />
+        <div className="flex items-center justify-between mt-2 px-0.5">
+          <span className="text-xs font-semibold text-primary/70">
+            {step === 1 ? "Mental Resilience" :
+             step === 2 ? "Location" :
+             step === 3 ? "Income" :
+             step === 4 ? "Financial Runway" :
+             step === 5 ? "Dependents" :
+             step === 6 ? "Skills" :
+             step === 7 ? "Health & Mobility" :
+             step === 8 ? "Housing" :
+             step === 9 ? "Emergency Supplies" :
+             step === 10 ? "Preparedness" :
+             "Risk Profile"}
+          </span>
+          <span className="text-xs text-muted-foreground">{Math.round(progressPercent)}%</span>
+        </div>
       </div>
 
       <main className="flex-1 flex flex-col items-center justify-center w-full max-w-2xl mx-auto px-6 pb-24">

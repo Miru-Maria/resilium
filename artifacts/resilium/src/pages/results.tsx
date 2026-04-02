@@ -211,6 +211,15 @@ export default function ResultsPage() {
       .catch(() => {});
   }, [report?.score?.overall]);
 
+  const [isPro, setIsPro] = useState(false);
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    fetch(`${BASE}/api/users/me/subscription`, { credentials: "include" })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => d && setIsPro(!!d.isActive))
+      .catch(() => {});
+  }, [isAuthenticated]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center">
@@ -499,6 +508,37 @@ export default function ResultsPage() {
           </section>
         )}
 
+        {/* COACHING CARD — contextual for low psychological / mental resilience score */}
+        {(report.score.psychological < 40 || (mrProfile && mrProfile.composite < 40)) && (
+          <section className="rounded-3xl border border-amber-500/20 bg-gradient-to-br from-amber-500/5 to-orange-500/5 p-6 md:p-8 print:hidden">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full">
+                Phoenix Insight Coaching
+              </span>
+            </div>
+            <h3 className="font-display font-bold text-xl text-foreground mb-2">
+              A score this low often reflects patterns data can't fix.
+            </h3>
+            <p className="text-muted-foreground text-sm leading-relaxed mb-5 max-w-2xl">
+              Psychological resilience is the foundation everything else rests on. A low score here usually reflects accumulated stress, unprocessed disruption, or simply not having had the space to build those muscles yet — not a character flaw.
+              <br /><br />
+              Cristiana Paun at <strong className="text-foreground">Phoenix Insight Coaching</strong> specialises in 1:1 sessions built directly around your Resilium profile. The first call is free, with no commitment.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <Link href="/coaching">
+                <Button className="rounded-full gap-2 bg-amber-600 hover:bg-amber-700 text-white shadow-md shadow-amber-600/20">
+                  <Heart className="w-4 h-4" /> Explore Coaching
+                </Button>
+              </Link>
+              <a href="https://healing-through-understanding.replit.app/contact" target="_blank" rel="noopener noreferrer">
+                <Button variant="outline" className="rounded-full gap-2 border-amber-500/30 text-amber-700 dark:text-amber-400 hover:bg-amber-500/5">
+                  <ExternalLink className="w-4 h-4" /> Book a Free Call
+                </Button>
+              </a>
+            </div>
+          </section>
+        )}
+
         {/* TOP VULNERABILITIES */}
         <section>
           <div className="flex items-center gap-3 mb-6">
@@ -665,6 +705,34 @@ export default function ResultsPage() {
             ))}
           </Tabs>
         </section>
+
+        {/* PRO UPSELL — shown to free users after the action plan */}
+        {!isPro && (
+          <section className="rounded-3xl border border-primary/20 bg-primary/5 p-6 md:p-8 print:hidden">
+            <div className="flex items-center gap-2 mb-3">
+              <Zap className="w-4 h-4 text-primary" />
+              <span className="text-[10px] font-bold uppercase tracking-widest text-primary">Resilium Pro</span>
+            </div>
+            <h3 className="font-display font-bold text-xl mb-2">
+              See if you're actually getting stronger over time.
+            </h3>
+            <p className="text-muted-foreground text-sm leading-relaxed mb-5 max-w-2xl">
+              Your plan is solid — but resilience is a moving target. Pro lets you reassess as often as you want, tracks your score across all six dimensions month by month, and shows you exactly what's changed and why so you always act on the right things.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <Link href="/pricing">
+                <Button className="rounded-full gap-2 shadow-md shadow-primary/20">
+                  <Zap className="w-4 h-4" /> Upgrade to Pro — $9/mo
+                </Button>
+              </Link>
+              <Link href="/pricing">
+                <Button variant="outline" className="rounded-full gap-2">
+                  See what's included
+                </Button>
+              </Link>
+            </div>
+          </section>
+        )}
 
         {/* PROGRESS SECTION */}
         {(snapshots.length >= 2 || totalItems > 0) && (

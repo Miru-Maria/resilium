@@ -56,11 +56,11 @@ const FREE_LIMITS = [
 ];
 
 const PRO_FEATURES = [
-  "Everything in Starter",
-  "Unlimited assessments",
-  "Score history & trend charts",
-  "AI plan comparison — what changed and why",
-  "Scenario stress-tests: job loss, health crisis, relocation, disaster",
+  "Unlimited reassessments — measure your growth month by month",
+  "See exactly how your resilience is trending and whether you're getting stronger",
+  "Know what changed between plans and why — so you act on the right things",
+  "Model crises before they hit: job loss, health emergency, relocation, disaster",
+  "Carry a clear 90-day action list that updates every time you reassess",
 ];
 
 const FAQ_ITEMS = [
@@ -204,10 +204,10 @@ export default function PricingPage() {
                 <Sparkles className="w-3.5 h-3.5" /> Simple Pricing
               </span>
               <h1 className="text-4xl md:text-5xl font-display font-bold mb-4">
-                Know exactly where you stand
+                Know if you're getting stronger
               </h1>
               <p className="text-muted-foreground text-lg max-w-xl mx-auto mb-8">
-                Start with two full assessments at no cost. Upgrade for unlimited access and full progress tracking.
+                Two full assessments for free. Upgrade to track your progress over time, compare plans, and model crisis scenarios before they hit.
               </p>
 
               {/* Billing toggle */}
