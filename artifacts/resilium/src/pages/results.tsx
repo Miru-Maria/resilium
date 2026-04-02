@@ -202,6 +202,15 @@ export default function ResultsPage() {
     document.head.appendChild(script);
   }, []);
 
+  const [percentileData, setPercentileData] = useState<{ percentile: number | null; total: number } | null>(null);
+  useEffect(() => {
+    if (!report?.score?.overall) return;
+    fetch(`${BASE}/api/resilience/percentile?score=${encodeURIComponent(report.score.overall)}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(d => d && setPercentileData(d))
+      .catch(() => {});
+  }, [report?.score?.overall]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center">
@@ -311,16 +320,6 @@ export default function ResultsPage() {
 
   // Mental resilience profile
   const mrProfile = (report as any).mentalResilienceProfile as MentalResilienceProfile | undefined;
-
-  // Percentile benchmarking
-  const [percentileData, setPercentileData] = useState<{ percentile: number | null; total: number } | null>(null);
-  useEffect(() => {
-    if (!report?.score?.overall) return;
-    fetch(`${BASE}/api/resilience/percentile?score=${encodeURIComponent(report.score.overall)}`)
-      .then(r => r.ok ? r.json() : null)
-      .then(d => d && setPercentileData(d))
-      .catch(() => {});
-  }, [report?.score?.overall]);
 
   const mrDimensions = mrProfile ? [
     { label: "Stress Tolerance", value: mrProfile.stressTolerance },
@@ -507,7 +506,7 @@ export default function ResultsPage() {
             <h2 className="font-display font-bold text-2xl">Critical Vulnerabilities</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {report.topVulnerabilities.map((vuln, idx) => (
+            {(report.topVulnerabilities ?? []).map((vuln, idx) => (
               <div key={idx} className="bg-destructive/10 border border-destructive/20 text-destructive-foreground px-5 py-4 rounded-2xl flex items-start gap-3">
                 <div className="w-6 h-6 rounded-full bg-destructive/20 flex items-center justify-center flex-shrink-0 mt-0.5">
                   <span className="text-xs font-bold text-destructive">{idx + 1}</span>
@@ -642,7 +641,7 @@ export default function ResultsPage() {
             
             {(['shortTerm', 'midTerm', 'longTerm'] as const).map((period) => (
               <TabsContent key={period} value={period} className="space-y-4 focus-visible:outline-none focus-visible:ring-0">
-                {report.actionPlan[period].map((item, i) => (
+                {(report.actionPlan?.[period] ?? []).map((item, i) => (
                   <div key={i} className="flex flex-col sm:flex-row sm:items-center gap-4 p-5 rounded-2xl border border-border/60 hover:border-primary/30 hover:bg-muted/10 transition-colors">
                     <div className="flex-1 space-y-1">
                       <div className="flex items-center gap-2 mb-1">
@@ -751,7 +750,7 @@ export default function ResultsPage() {
             <p className="text-muted-foreground mb-6">How your profile holds up against your primary risk concerns.</p>
             
             <Accordion type="single" collapsible className="w-full space-y-3">
-              {report.scenarioSimulations.map((scenario, idx) => (
+              {(report.scenarioSimulations ?? []).map((scenario, idx) => (
                 <AccordionItem key={idx} value={`item-${idx}`} className="bg-card border border-border rounded-2xl overflow-hidden px-2 shadow-sm">
                   <AccordionTrigger className="hover:no-underline px-4 py-5">
                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-left w-full pr-4">
@@ -772,7 +771,7 @@ export default function ResultsPage() {
                       <div className="bg-muted/30 p-4 rounded-xl">
                         <h5 className="font-bold text-sm mb-2 uppercase tracking-wide">Immediate Survival Steps</h5>
                         <ul className="list-disc pl-5 space-y-1 text-sm text-foreground">
-                          {scenario.immediateSteps.map((step, i) => (
+                          {(scenario.immediateSteps ?? []).map((step, i) => (
                             <li key={i}>{step}</li>
                           ))}
                         </ul>
@@ -812,7 +811,7 @@ export default function ResultsPage() {
             <h2 className="font-display font-bold text-2xl mb-2">Daily Habits</h2>
             <Card className="border-none shadow-lg shadow-black/5 bg-primary text-primary-foreground">
               <CardContent className="p-6 space-y-4">
-                {report.dailyHabits.map((habit, idx) => (
+                {(report.dailyHabits ?? []).map((habit, idx) => (
                   <div key={idx} className="flex gap-3 pb-4 border-b border-primary-foreground/10 last:border-0 last:pb-0">
                     <div className="mt-1">
                       <CheckCircle className="w-5 h-5 text-secondary" />

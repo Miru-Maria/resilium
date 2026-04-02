@@ -247,9 +247,8 @@ export default function AssessmentPage() {
         const prev = parseInt(localStorage.getItem(ANON_COUNT_KEY) ?? "0", 10);
         localStorage.setItem(ANON_COUNT_KEY, String(prev + 1));
       }
-      setTimeout(() => {
-        setLocation(`/results/${report.reportId}`);
-      }, 1500);
+      localStorage.setItem("resilium_last_report_id", report.reportId);
+      setLocation(`/results/${report.reportId}`);
     } catch (error: any) {
       console.error("Assessment submission failed", error);
       const body = error?.response?.data || error?.data;
@@ -341,7 +340,8 @@ export default function AssessmentPage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
         <Loader2 className="w-16 h-16 text-primary animate-spin mb-8" />
-        <h2 className="text-3xl font-display font-bold mb-4">Building Your Resilience Plan</h2>
+        <h2 className="text-3xl font-display font-bold mb-2">Building Your Resilience Plan</h2>
+        <p className="text-muted-foreground text-sm mb-8">AI analysis usually takes 60–90 seconds — please keep this tab open.</p>
         <div className="max-w-xs w-full space-y-4">
           <div className="space-y-2">
             {PROGRESS_STEPS.map((msg, i) => (
@@ -378,6 +378,38 @@ export default function AssessmentPage() {
           </Link>
           <Button variant="outline" className="rounded-full" onClick={() => setSubmitError(null)}>
             Go Back
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Generic error screen (e.g. network timeout or server error)
+  if (submitError?.code === "UNKNOWN") {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
+        <AlertCircle className="w-16 h-16 text-destructive mb-6" />
+        <h2 className="text-2xl font-display font-bold mb-2">Analysis Timed Out</h2>
+        <p className="text-muted-foreground max-w-md mb-2">
+          AI analysis can take up to 90 seconds. Your report may have been created in the background.
+        </p>
+        {isAuthenticated ? (
+          <p className="text-muted-foreground max-w-md mb-8">
+            Check <strong>My Plans</strong> — your report might already be there.
+          </p>
+        ) : (
+          <p className="text-muted-foreground max-w-md mb-8">
+            If you were signed in, your report would be saved to your profile automatically.
+          </p>
+        )}
+        <div className="flex flex-wrap justify-center gap-3">
+          {isAuthenticated && (
+            <Link href="/profile">
+              <Button className="rounded-full">Check My Plans</Button>
+            </Link>
+          )}
+          <Button variant="outline" className="rounded-full" onClick={() => setSubmitError(null)}>
+            Try Again
           </Button>
         </div>
       </div>
