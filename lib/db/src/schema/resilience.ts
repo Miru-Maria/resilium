@@ -123,3 +123,21 @@ export const uxTestResultsTable = pgTable("ux_test_results", {
 export const insertUxTestResultSchema = createInsertSchema(uxTestResultsTable).omit({ id: true });
 export type InsertUxTestResult = z.infer<typeof insertUxTestResultSchema>;
 export type UxTestResult = typeof uxTestResultsTable.$inferSelect;
+
+// ─── Assessment Drafts ────────────────────────────────────────────────────────
+// Persists in-progress assessment state so users can resume where they left off.
+// One row per user (upsert); anonymous users use sessionId only.
+export const assessmentDraftsTable = pgTable("assessment_drafts", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => usersTable.id, { onDelete: "cascade" }),
+  sessionId: text("session_id"),
+  draftData: jsonb("draft_data").notNull(),
+  currentStep: integer("current_step").notNull().default(1),
+  currentMrStep: integer("current_mr_step").notNull().default(0),
+  language: text("language").default("en"),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertAssessmentDraftSchema = createInsertSchema(assessmentDraftsTable).omit({ id: true });
+export type InsertAssessmentDraft = z.infer<typeof insertAssessmentDraftSchema>;
+export type AssessmentDraft = typeof assessmentDraftsTable.$inferSelect;

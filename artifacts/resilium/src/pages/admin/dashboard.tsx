@@ -32,6 +32,7 @@ interface AnalyticsData {
     mobilityLevel: { name: string; count: number }[];
     dependentCount: { name: string; count: number }[];
     relocationReadiness: { name: string; count: number }[];
+    ageBracket: { name: string; count: number }[];
   };
   scoreAnalytics: {
     avgScores: { category: string; avg: number }[];
@@ -275,6 +276,7 @@ export default function AdminDashboard() {
           <TabsContent value="demographics" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {[
+                { label: "Age Bracket", key: "ageBracket" as const },
                 { label: "Income Stability", key: "incomeStability" as const },
                 { label: "Health Status", key: "healthStatus" as const },
                 { label: "Housing Type", key: "housingType" as const },

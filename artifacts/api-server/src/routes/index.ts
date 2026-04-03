@@ -11,6 +11,7 @@ import paddleRouter from "./paddle.js";
 import subscriptionRouter from "./subscription.js";
 import pushTokensRouter from "./push-tokens.js";
 import coachingRouter from "./coaching.js";
+import draftsRouter from "./drafts.js";
 
 const router: IRouter = Router();
 
@@ -26,5 +27,6 @@ router.use(paddleRouter);
 router.use(subscriptionRouter);
 router.use(pushTokensRouter);
 router.use(coachingRouter);
+router.use("/drafts", draftsRouter);
 
 export default router;

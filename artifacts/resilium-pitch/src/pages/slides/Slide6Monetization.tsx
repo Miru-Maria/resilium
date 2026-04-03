@@ -63,7 +63,7 @@ export default function Slide6Monetization() {
               className="text-[1.3vw] font-light"
               style={{ color: "#8A7A6A", fontFamily: "Inter, sans-serif" }}
             >
-              Unlimited for Pro — scenario simulations, full history, coaching referral access.
+              Unlimited assessments for Pro — full 7-dimension scoring, progress history, scenario simulations, draft resume, and coaching referral access.
             </div>
           </div>
 

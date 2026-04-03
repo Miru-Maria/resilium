@@ -41,13 +41,13 @@ export default function Slide3Solution() {
               className="text-[1.8vw] font-bold mb-[1vh]"
               style={{ color: "#EAD9BE", fontFamily: "Plus Jakarta Sans, sans-serif" }}
             >
-              10-Step Assessment
+              12-Step Assessment
             </div>
             <div
               className="text-[1.4vw] font-light leading-relaxed"
               style={{ color: "#8A7A6A", fontFamily: "Inter, sans-serif" }}
             >
-              Financial runway, skills, health, mobility, housing, mental resilience deep-dive — six weighted dimensions, answered in under 5 minutes.
+              Financial runway, skills, health, mobility, housing, mental resilience deep-dive, and social capital — seven weighted dimensions, answered in under 8 minutes. Available in English & Romanian.
             </div>
           </div>
 

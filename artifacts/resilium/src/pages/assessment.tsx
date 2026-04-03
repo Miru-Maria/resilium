@@ -15,6 +15,7 @@ import { useAuth } from "@workspace/replit-auth-web";
 const FREE_LIMIT = 3;
 const ANON_COUNT_KEY = "resilium_free_count";
 const SESSION_KEY = "resilium_session_id";
+const DRAFT_KEY = "resilium_assessment_draft_v2";
 
 import type { 
   AssessmentInput,
@@ -621,6 +622,9 @@ export default function AssessmentPage() {
   const [savingsPreferNotToSay, setSavingsPreferNotToSay] = useState(false);
   const [incomePreferNotToSay, setIncomePreferNotToSay] = useState(false);
   const [lang, setLang] = useState<Language>("en");
+  const [draftLoaded, setDraftLoaded] = useState(false);
+  const [showResumeBanner, setShowResumeBanner] = useState(false);
+  const [resumeDraft, setResumeDraft] = useState<any>(null);
 
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const t = T[lang];
@@ -685,6 +689,46 @@ export default function AssessmentPage() {
 
   const { mutateAsync } = useSubmitAssessment();
 
+  // ── Draft persistence ─────────────────────────────────────────────────────
+  // Load saved draft once on mount (before user starts interacting)
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY);
+      if (raw) {
+        const saved = JSON.parse(raw);
+        const savedAt = saved?.savedAt ? new Date(saved.savedAt).getTime() : 0;
+        if (Date.now() - savedAt < 7 * 24 * 60 * 60 * 1000) {
+          setResumeDraft(saved);
+          setShowResumeBanner(true);
+        } else {
+          localStorage.removeItem(DRAFT_KEY);
+        }
+      }
+    } catch {}
+    setDraftLoaded(true);
+  }, []);
+
+  // Auto-save every 1.5s whenever form state changes (debounced)
+  useEffect(() => {
+    if (!draftLoaded) return;
+    const timer = setTimeout(() => {
+      try {
+        localStorage.setItem(DRAFT_KEY, JSON.stringify({
+          formData,
+          step,
+          mrStep,
+          lang,
+          currency,
+          customCurrency,
+          savingsPreferNotToSay,
+          incomePreferNotToSay,
+          savedAt: new Date().toISOString(),
+        }));
+      } catch {}
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [formData, step, mrStep, lang, currency, customCurrency, savingsPreferNotToSay, incomePreferNotToSay, draftLoaded]);
+
   const handleNext = () => {
     if (step === MR_STEP) {
       if (mrStep < MR_QUESTIONS.length - 1) {
@@ -732,6 +776,7 @@ export default function AssessmentPage() {
         localStorage.setItem(ANON_COUNT_KEY, String(prev + 1));
       }
       localStorage.setItem("resilium_last_report_id", report.reportId);
+      localStorage.removeItem(DRAFT_KEY);
       setLocation(`/results/${report.reportId}`);
     } catch (error: any) {
       console.error("Assessment submission failed", error);
@@ -823,6 +868,34 @@ export default function AssessmentPage() {
         return { ...prev, [field]: [...current, value] };
       }
     });
+  };
+
+  const formatDraftAge = (savedAt: string) => {
+    const mins = Math.round((Date.now() - new Date(savedAt).getTime()) / 60000);
+    if (mins < 1) return "just now";
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.round(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    return `${Math.round(hrs / 24)}d ago`;
+  };
+
+  const applyDraft = () => {
+    if (!resumeDraft) return;
+    if (resumeDraft.formData) setFormData(resumeDraft.formData);
+    if (resumeDraft.step) setStep(resumeDraft.step);
+    if (resumeDraft.mrStep != null) setMrStep(resumeDraft.mrStep);
+    if (resumeDraft.lang) setLang(resumeDraft.lang);
+    if (resumeDraft.currency) setCurrency(resumeDraft.currency);
+    if (resumeDraft.customCurrency != null) setCustomCurrency(resumeDraft.customCurrency);
+    if (resumeDraft.savingsPreferNotToSay != null) setSavingsPreferNotToSay(resumeDraft.savingsPreferNotToSay);
+    if (resumeDraft.incomePreferNotToSay != null) setIncomePreferNotToSay(resumeDraft.incomePreferNotToSay);
+    setShowResumeBanner(false);
+  };
+
+  const dismissDraft = () => {
+    localStorage.removeItem(DRAFT_KEY);
+    setShowResumeBanner(false);
+    setResumeDraft(null);
   };
 
   const totalSubSteps = (TOTAL_STEPS - 1) + MR_QUESTIONS.length;
@@ -949,6 +1022,39 @@ export default function AssessmentPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[9999] focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-lg focus:text-sm focus:font-medium"
+      >
+        Skip to main content
+      </a>
+
+      {/* Resume draft banner */}
+      {showResumeBanner && resumeDraft && (
+        <div
+          role="alert"
+          aria-live="polite"
+          className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/95 backdrop-blur-sm"
+        >
+          <div className="max-w-2xl mx-auto px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold text-foreground">Resume where you left off?</p>
+              <p className="text-xs text-muted-foreground">
+                Step {resumeDraft.step ?? 1} of {TOTAL_STEPS} · Saved {formatDraftAge(resumeDraft.savedAt)}
+              </p>
+            </div>
+            <div className="flex gap-2 shrink-0">
+              <Button size="sm" variant="outline" className="rounded-full h-8 text-xs" onClick={dismissDraft}>
+                Start fresh
+              </Button>
+              <Button size="sm" className="rounded-full h-8 text-xs" onClick={applyDraft}>
+                Resume
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <header className="w-full p-6 lg:p-8 flex items-center justify-between z-10">
         <div className="font-display font-bold text-xl tracking-tight text-primary">Resilium</div>
         <div className="flex items-center gap-3">
@@ -997,7 +1103,7 @@ export default function AssessmentPage() {
         </div>
       </div>
 
-      <main className="flex-1 flex flex-col items-center w-full max-w-2xl mx-auto px-6 pb-24">
+      <main id="main-content" className="flex-1 flex flex-col items-center w-full max-w-2xl mx-auto px-6 pb-24">
         <div className="w-full relative">
           <AnimatePresence mode="wait" custom={1}>
             <motion.div

@@ -89,6 +89,10 @@ router.get("/analytics", requireAdminSession, async (req, res) => {
       return Object.entries(map).map(([name, count]) => ({ name, count }));
     };
 
+    const AGE_BRACKET_LABELS: Record<string, string> = {
+      "18-24": "18–24", "25-34": "25–34", "35-44": "35–44",
+      "45-54": "45–54", "55-64": "55–64", "65+": "65+"
+    };
     const demographics = {
       location: countBy(reports, "location"),
       incomeStability: countBy(reports, "incomeStability"),
@@ -97,14 +101,18 @@ router.get("/analytics", requireAdminSession, async (req, res) => {
       mobilityLevel: countBy(reports, "mobilityLevel"),
       dependentCount: countByLabel(reports, "dependentCount", DEPENDENT_LABELS),
       relocationReadiness: countByLabel(reports, "relocationReadiness", RELOCATION_LABELS),
+      ageBracket: countByLabel(reports.filter(r => r.ageBracket), "ageBracket", AGE_BRACKET_LABELS),
     };
 
     // Score analytics
-    const scoreCategories = ["scoreFinancial", "scoreHealth", "scoreSkills", "scoreMobility", "scorePsychological", "scoreResources"] as const;
-    const avgScores = scoreCategories.map(cat => ({
-      category: cat.replace("score", ""),
-      avg: totalReports > 0 ? reports.reduce((sum, r) => sum + r[cat], 0) / totalReports : 0,
-    }));
+    const scoreCategories = ["scoreFinancial", "scoreHealth", "scoreSkills", "scoreMobility", "scorePsychological", "scoreResources", "scoreSocialCapital"] as const;
+    const avgScores = scoreCategories.map(cat => {
+      const validReports = reports.filter(r => r[cat] != null);
+      return {
+        category: cat.replace("score", ""),
+        avg: validReports.length > 0 ? validReports.reduce((sum, r) => sum + (r[cat] ?? 0), 0) / validReports.length : 0,
+      };
+    });
 
     // Overall score histogram (buckets of 10)
     const histogramData: { range: string; count: number }[] = [];
