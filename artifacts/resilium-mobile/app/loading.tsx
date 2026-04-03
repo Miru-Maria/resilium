@@ -58,7 +58,7 @@ export default function LoadingScreen() {
         const parsed = JSON.parse(assessmentData);
         const res = await fetch(`https://${process.env.EXPO_PUBLIC_DOMAIN}/api/resilience/assess`, {
           method: "POST",
-          headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+          headers: { "Content-Type": "application/json", ...await getAuthHeaders() },
           body: JSON.stringify(parsed),
         });
 

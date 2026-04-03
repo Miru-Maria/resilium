@@ -13,11 +13,24 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { setBaseUrl } from "@workspace/api-client-react";
+import { ClerkProvider, ClerkLoaded } from "@clerk/expo";
+import * as SecureStore from "expo-secure-store";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { SessionProvider } from "@/context/session";
-import { AuthProvider } from "@/context/auth";
 import { ThemeProvider, useColors } from "@/context/theme";
+
+const tokenCache = {
+  async getToken(key: string) {
+    try { return await SecureStore.getItemAsync(key); } catch { return null; }
+  },
+  async saveToken(key: string, value: string) {
+    try { await SecureStore.setItemAsync(key, value); } catch {}
+  },
+  async clearToken(key: string) {
+    try { await SecureStore.deleteItemAsync(key); } catch {}
+  },
+};
 
 setBaseUrl(`https://${process.env.EXPO_PUBLIC_DOMAIN}`);
 
@@ -75,15 +88,20 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <ErrorBoundary>
-        <QueryClientProvider client={queryClient}>
-          <SessionProvider>
-            <AuthProvider>
-              <ThemeProvider>
-                <RootLayoutNav />
-              </ThemeProvider>
-            </AuthProvider>
-          </SessionProvider>
-        </QueryClientProvider>
+        <ClerkProvider
+          publishableKey={process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY ?? ""}
+          tokenCache={tokenCache}
+        >
+          <ClerkLoaded>
+            <QueryClientProvider client={queryClient}>
+              <SessionProvider>
+                <ThemeProvider>
+                  <RootLayoutNav />
+                </ThemeProvider>
+              </SessionProvider>
+            </QueryClientProvider>
+          </ClerkLoaded>
+        </ClerkProvider>
       </ErrorBoundary>
     </SafeAreaProvider>
   );

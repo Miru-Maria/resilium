@@ -1,4 +1,5 @@
-import { Router } from "express";
+import { Router, type Request } from "express";
+import { getAuth } from "@clerk/express";
 import { db, resilienceReportsTable, subscriptionsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
@@ -7,6 +8,11 @@ import { logger } from "../../lib/logger.js";
 import rateLimit from "express-rate-limit";
 
 const router = Router();
+
+function getUserId(req: Request): string | null {
+  const auth = getAuth(req);
+  return (auth?.sessionClaims?.userId as string | undefined) || auth?.userId || null;
+}
 
 const scenarioRateLimit = rateLimit({
   windowMs: 60 * 1000,
@@ -35,7 +41,7 @@ const SCENARIO_LABELS: Record<string, string> = {
 };
 
 router.post("/scenarios/:reportId", scenarioRateLimit, async (req, res) => {
-  const userId = (req as any).user?.id;
+  const userId = getUserId(req);
   if (!userId) {
     return res.status(401).json({ error: "Authentication required for scenario analysis" });
   }

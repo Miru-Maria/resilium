@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAuth } from "@workspace/replit-auth-web";
+import { useUser, useAuth, useClerk } from "@clerk/react";
 import { ResilientIcon } from "@/components/resilient-icon";
 import { RadarChartView } from "@/components/radar-chart-view";
 import {
@@ -1332,7 +1332,13 @@ function PlansTab({ plans, onDelete }: { plans: PlanSummary[]; onDelete: (id: st
 
 // ─── Main Page ───────────────────────────────────────────────────────────────
 export default function ProfilePage() {
-  const { user, isLoading: authLoading, isAuthenticated, login, logout } = useAuth();
+  const { user, isLoaded } = useUser();
+  const { isSignedIn } = useAuth();
+  const { openSignIn, signOut } = useClerk();
+  const authLoading = !isLoaded;
+  const isAuthenticated = !!isSignedIn;
+  const login = () => openSignIn({});
+  const logout = () => signOut({ redirectUrl: "/" });
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -1386,8 +1392,8 @@ export default function ProfilePage() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="rounded-full flex items-center gap-2">
-                {user?.profileImageUrl ? (
-                  <img src={user.profileImageUrl} alt={user.firstName || "User"} className="w-5 h-5 rounded-full object-cover" />
+                {user?.imageUrl ? (
+                  <img src={user.imageUrl} alt={user.firstName || "User"} className="w-5 h-5 rounded-full object-cover" />
                 ) : (
                   <User className="w-4 h-4" />
                 )}
@@ -1395,7 +1401,7 @@ export default function ProfilePage() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem className="font-medium text-muted-foreground text-xs truncate">{user?.email}</DropdownMenuItem>
+              <DropdownMenuItem className="font-medium text-muted-foreground text-xs truncate">{user?.primaryEmailAddress?.emailAddress}</DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={logout} className="cursor-pointer">Sign Out</DropdownMenuItem>
             </DropdownMenuContent>

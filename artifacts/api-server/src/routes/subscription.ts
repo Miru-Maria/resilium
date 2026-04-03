@@ -1,4 +1,5 @@
-import { Router } from "express";
+import { Router, type Request } from "express";
+import { getAuth } from "@clerk/express";
 import { db, subscriptionsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { logger } from "../lib/logger";
@@ -6,7 +7,8 @@ import { logger } from "../lib/logger";
 const router = Router();
 
 router.get("/subscription/status", async (req, res) => {
-  const userId = (req as any).user?.id;
+  const auth = getAuth(req);
+  const userId = (auth?.sessionClaims?.userId as string | undefined) || auth?.userId;
   if (!userId) {
     return res.json({ isPro: false, status: "unauthenticated" });
   }

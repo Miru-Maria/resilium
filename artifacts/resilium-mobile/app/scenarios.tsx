@@ -65,7 +65,7 @@ export default function ScenariosScreen() {
       const domain = process.env.EXPO_PUBLIC_DOMAIN;
       const res = await fetch(`https://${domain}/api/resilience/scenarios/${reportId}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        headers: { "Content-Type": "application/json", ...await getAuthHeaders() },
         body: JSON.stringify(body),
       });
       if (res.status === 403) { setProError(true); return; }

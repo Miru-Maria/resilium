@@ -5,7 +5,7 @@ import { CheckCircle2, Zap, ShieldCheck, BarChart2, RefreshCw, Lock, ArrowRight,
 import { Button } from "@/components/ui/button";
 import { SiteFooter } from "@/components/site-footer";
 import { ResilientIcon } from "@/components/resilient-icon";
-import { useAuth } from "@workspace/replit-auth-web";
+import { useUser, useAuth, useClerk } from "@clerk/react";
 
 const PADDLE_CLIENT_TOKEN = import.meta.env.VITE_PADDLE_CLIENT_TOKEN as string | undefined;
 const PADDLE_PRICE_ID_MONTHLY = import.meta.env.VITE_PADDLE_PRICE_ID as string | undefined;
@@ -122,7 +122,11 @@ type BillingPeriod = "monthly" | "annual";
 
 export default function PricingPage() {
   const [, setLocation] = useLocation();
-  const { user, isAuthenticated, login } = useAuth();
+  const { user } = useUser();
+  const { isSignedIn } = useAuth();
+  const { openSignIn } = useClerk();
+  const isAuthenticated = !!isSignedIn;
+  const login = () => openSignIn({});
   const paddleReady = usePaddle();
   const [loading, setLoading] = useState(false);
   const [billing, setBilling] = useState<BillingPeriod>("monthly");
@@ -142,7 +146,7 @@ export default function PricingPage() {
     setLoading(true);
     window.Paddle.Checkout.open({
       items: [{ priceId, quantity: 1 }],
-      customData: { userId: (user as any)?.id ?? "" },
+      customData: { userId: user?.id ?? "" },
       successUrl: `${window.location.origin}${import.meta.env.BASE_URL}pricing?success=1`,
     });
     setLoading(false);

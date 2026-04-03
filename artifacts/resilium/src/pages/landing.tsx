@@ -21,7 +21,7 @@ import {
   Quote,
 } from "lucide-react";
 import { SiteFooter } from "@/components/site-footer";
-import { useAuth } from "@workspace/replit-auth-web";
+import { useUser, useAuth, useClerk } from "@clerk/react";
 
 import { ResilientIcon } from "@/components/resilient-icon";
 import {
@@ -133,7 +133,13 @@ function AnimatedBackground() {
 }
 
 export default function LandingPage() {
-  const { user, isLoading, isAuthenticated, login, logout } = useAuth();
+  const { user, isLoaded } = useUser();
+  const { isSignedIn } = useAuth();
+  const { openSignIn, signOut } = useClerk();
+  const isLoading = !isLoaded;
+  const isAuthenticated = !!isSignedIn;
+  const login = () => openSignIn({});
+  const logout = () => signOut({ redirectUrl: "/" });
 
   return (
     <div className="min-h-screen flex flex-col relative overflow-hidden">
@@ -172,9 +178,9 @@ export default function LandingPage() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="rounded-full px-4 border-primary/20 hover:bg-primary/5 font-medium flex items-center gap-2">
-                  {user?.profileImageUrl ? (
+                  {user?.imageUrl ? (
                     <img
-                      src={user.profileImageUrl}
+                      src={user.imageUrl}
                       alt={user.firstName || "User"}
                       className="w-5 h-5 rounded-full object-cover"
                     />

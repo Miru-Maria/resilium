@@ -25,7 +25,7 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - **Frontend**: React + Vite, Tailwind CSS, framer-motion, recharts
 - **Mobile**: Expo + React Native (Expo Router, `@expo/vector-icons`, expo-haptics)
 - **AI**: OpenAI via Replit AI Integrations (gpt-5.2)
-- **Auth**: Replit OIDC (PKCE), express-session
+- **Auth**: Clerk (web: `@clerk/react`, API: `@clerk/express`, mobile: `@clerk/expo`) — replaced Replit Auth in April 2026
 
 ## Application Architecture
 

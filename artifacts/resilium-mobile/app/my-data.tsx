@@ -45,12 +45,13 @@ export default function MyDataScreen() {
 
   useEffect(() => {
     if (!isSignedIn) return;
-    fetch(`https://${process.env.EXPO_PUBLIC_DOMAIN}/api/users/me/subscription`, {
-      headers: getAuthHeaders(),
-    })
-      .then(r => r.ok ? r.json() : null)
-      .then(d => d && setSubscription(d))
-      .catch(() => {});
+    (async () => {
+      try {
+        const headers = await getAuthHeaders();
+        const r = await fetch(`https://${process.env.EXPO_PUBLIC_DOMAIN}/api/users/me/subscription`, { headers });
+        if (r.ok) setSubscription(await r.json());
+      } catch {}
+    })();
   }, [isSignedIn]);
 
   const handleExport = async () => {

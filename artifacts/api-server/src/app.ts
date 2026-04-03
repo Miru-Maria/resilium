@@ -1,13 +1,10 @@
 import express, { type Express, type Request, type Response, type NextFunction } from "express";
 import cors from "cors";
-import cookieParser from "cookie-parser";
-import session from "express-session";
-import connectPgSimple from "connect-pg-simple";
-import pg from "pg";
+import { clerkMiddleware } from "@clerk/express";
+import { CLERK_PROXY_PATH, clerkProxyMiddleware } from "./middlewares/clerkProxyMiddleware";
 import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
-import { authMiddleware } from "./middlewares/authMiddleware";
 import { recordServerError, startCron } from "./lib/cron.js";
 
 const app: Express = express();
@@ -33,41 +30,16 @@ app.use(
     },
   }),
 );
+app.use(CLERK_PROXY_PATH, clerkProxyMiddleware());
+
 app.use(cors({ credentials: true, origin: true }));
-app.use(cookieParser());
+
 // Capture raw body for Paddle webhook HMAC verification before express.json() consumes it
 app.use("/api/paddle/webhook", express.raw({ type: "*/*" }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const sessionSecret = process.env["SESSION_SECRET"];
-if (!sessionSecret) {
-  throw new Error("SESSION_SECRET environment variable is required.");
-}
-
-const PgSession = connectPgSimple(session);
-const pgPool = new pg.Pool({ connectionString: process.env["DATABASE_URL"] });
-
-app.use(
-  session({
-    store: new PgSession({
-      pool: pgPool,
-      tableName: "sessions",
-      createTableIfMissing: false,
-    }),
-    secret: sessionSecret,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 24 * 60 * 60 * 1000,
-      sameSite: "lax",
-    },
-  }),
-);
-
-app.use(authMiddleware);
+app.use(clerkMiddleware());
 
 // Error-rate tracking middleware — must be BEFORE routes so finish listener is attached
 app.use((_req: Request, res: Response, next: NextFunction) => {

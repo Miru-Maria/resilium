@@ -10,7 +10,7 @@ import { useSubmitAssessment } from "@workspace/api-client-react";
 import { Loader2, ArrowRight, ArrowLeft, CheckCircle2, AlertCircle, Brain, Zap, Lock, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SiteFooter } from "@/components/site-footer";
-import { useAuth } from "@workspace/replit-auth-web";
+import { useUser, useAuth } from "@clerk/react";
 
 const FREE_LIMIT = 3;
 const ANON_COUNT_KEY = "resilium_free_count";
@@ -639,7 +639,10 @@ export default function AssessmentPage() {
   const [showResumeBanner, setShowResumeBanner] = useState(false);
   const [resumeDraft, setResumeDraft] = useState<any>(null);
 
-  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { user, isLoaded } = useUser();
+  const { isSignedIn } = useAuth();
+  const authLoading = !isLoaded;
+  const isAuthenticated = !!isSignedIn;
   const t = T[lang];
 
   useEffect(() => {

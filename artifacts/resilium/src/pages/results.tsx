@@ -14,7 +14,7 @@ import { ResilientIcon } from "@/components/resilient-icon";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { SiteFooter } from "@/components/site-footer";
-import { useAuth } from "@workspace/replit-auth-web";
+import { useUser, useAuth, useClerk } from "@clerk/react";
 import { ShareScorecardModal } from "@/components/share-scorecard-modal";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -161,7 +161,12 @@ export default function ResultsPage() {
   const [, params] = useRoute("/results/:reportId");
   const reportId = params?.reportId || "";
   const { toast } = useToast();
-  const { user, isAuthenticated, login, logout } = useAuth();
+  const { user } = useUser();
+  const { isSignedIn } = useAuth();
+  const { openSignIn, signOut } = useClerk();
+  const isAuthenticated = !!isSignedIn;
+  const login = () => openSignIn({});
+  const logout = () => signOut({ redirectUrl: "/" });
   const queryClient = useQueryClient();
   const [shareScorecardOpen, setShareScorecardOpen] = useState(false);
 
@@ -369,9 +374,9 @@ export default function ResultsPage() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="sm" className="rounded-full flex items-center gap-2">
-                    {user?.profileImageUrl ? (
+                    {user?.imageUrl ? (
                       <img
-                        src={user.profileImageUrl}
+                        src={user.imageUrl}
                         alt={user.firstName || "User"}
                         className="w-5 h-5 rounded-full object-cover"
                       />

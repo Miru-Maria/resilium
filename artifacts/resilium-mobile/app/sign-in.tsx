@@ -5,17 +5,19 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
+import * as WebBrowser from "expo-web-browser";
+import { useSSO } from "@clerk/expo";
 import { NeuralNetSVG } from "@/components/NeuralNetSVG";
-
-const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get("window");
-
-import { useAuth } from "@/context/auth";
 import { useColors } from "@/context/theme";
 import { ColorsType } from "@/constants/colors";
 
+WebBrowser.maybeCompleteAuthSession();
+
+const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get("window");
+
 export default function SignInScreen() {
   const insets = useSafeAreaInsets();
-  const { signIn } = useAuth();
+  const { startSSOFlow } = useSSO();
   const [loading, setLoading] = useState(false);
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -27,11 +29,14 @@ export default function SignInScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setLoading(true);
     try {
-      const result = await signIn();
-      if (result.success) {
+      const { createdSessionId, setActive } = await startSSOFlow({ strategy: "oauth_google" });
+      if (createdSessionId && setActive) {
+        await setActive({ session: createdSessionId });
         router.replace("/");
-      } else if (result.error && result.error !== "Cancelled") {
-        Alert.alert("Sign-in failed", result.error || "Please try again.");
+      }
+    } catch (e: any) {
+      if (e?.message !== "Cancelled") {
+        Alert.alert("Sign-in failed", e?.message || "Please try again.");
       }
     } finally {
       setLoading(false);
@@ -104,7 +109,7 @@ export default function SignInScreen() {
             ) : (
               <>
                 <Feather name="log-in" size={18} color={colors.background} />
-                <Text style={styles.signInText}>Sign in with Replit</Text>
+                <Text style={styles.signInText}>Sign in with Google</Text>
               </>
             )}
           </LinearGradient>
@@ -115,7 +120,7 @@ export default function SignInScreen() {
         </Pressable>
 
         <Text style={styles.note}>
-          <Feather name="lock" size={11} color={colors.textMuted} /> No extra account needed — your existing Replit account works.
+          <Feather name="lock" size={11} color={colors.textMuted} /> Your account is secured and private.
         </Text>
       </View>
     </View>

@@ -61,16 +61,19 @@ export default function MyPlansScreen() {
       return;
     }
     const domain = process.env.EXPO_PUBLIC_DOMAIN;
-    fetch(`https://${domain}/api/resilience/my-reports`, {
-      headers: getAuthHeaders(),
-    })
-      .then(async (res) => {
+    (async () => {
+      try {
+        const headers = await getAuthHeaders();
+        const res = await fetch(`https://${domain}/api/resilience/my-reports`, { headers });
         if (!res.ok) throw new Error("Failed to load plans");
         const data = await res.json();
         setPlans(data.reports);
-      })
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
+      } catch (e: any) {
+        setError(e.message);
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, [isSignedIn]);
 
   const handleComparePlans = async () => {
@@ -84,7 +87,7 @@ export default function MyPlansScreen() {
       const domain = process.env.EXPO_PUBLIC_DOMAIN;
       const res = await fetch(`https://${domain}/api/users/me/plans/compare`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        headers: { "Content-Type": "application/json", ...await getAuthHeaders() },
         body: JSON.stringify({ reportIdA: ids[0], reportIdB: ids[1] }),
       });
       if (!res.ok) throw new Error("Comparison failed");

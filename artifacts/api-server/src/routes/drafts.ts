@@ -1,11 +1,17 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { getAuth } from "@clerk/express";
 import { db, assessmentDraftsTable } from "@workspace/db";
 import { eq, and, or, isNull } from "drizzle-orm";
 
 const router: IRouter = Router();
 
+function getUserId(req: Request): string | null {
+  const auth = getAuth(req);
+  return (auth?.sessionClaims?.userId as string | undefined) || auth?.userId || null;
+}
+
 function getDraftWhere(req: Request) {
-  const userId = req.isAuthenticated() ? req.user.id : null;
+  const userId = getUserId(req);
   const sessionId = (req.body?.sessionId as string | undefined) || (req.query["sessionId"] as string | undefined);
 
   if (userId) return eq(assessmentDraftsTable.userId, userId);
@@ -15,7 +21,7 @@ function getDraftWhere(req: Request) {
 
 router.get("/assessment", async (req: Request, res: Response) => {
   try {
-    const userId = req.isAuthenticated() ? req.user.id : null;
+    const userId = getUserId(req);
     const sessionId = req.query["sessionId"] as string | undefined;
 
     if (!userId && !sessionId) {
@@ -50,7 +56,7 @@ router.put("/assessment", async (req: Request, res: Response) => {
       return;
     }
 
-    const userId = req.isAuthenticated() ? req.user.id : null;
+    const userId = getUserId(req);
 
     if (!userId && !sessionId) {
       res.status(400).json({ error: "VALIDATION_ERROR", message: "sessionId required for anonymous drafts." });
@@ -101,7 +107,7 @@ router.put("/assessment", async (req: Request, res: Response) => {
 
 router.delete("/assessment", async (req: Request, res: Response) => {
   try {
-    const userId = req.isAuthenticated() ? req.user.id : null;
+    const userId = getUserId(req);
     const sessionId = req.query["sessionId"] as string | undefined;
 
     if (userId) {

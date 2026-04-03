@@ -1,13 +1,21 @@
-import { Router, type IRouter } from "express";
+import { Router, type IRouter, type Request } from "express";
+import { getAuth, createClerkClient } from "@clerk/express";
 import { randomUUID } from "crypto";
 import { SubmitAssessmentBody, GetReportParams } from "@workspace/api-zod";
 import { db, resilienceReportsTable, checklistProgressTable, progressSnapshotsTable, subscriptionsTable } from "@workspace/db";
 import { eq, and, count } from "drizzle-orm";
+
 import { calculateScores } from "./scoring.js";
 import { generateResilienceReport } from "./ai.js";
 import { PLAN_LIMIT } from "../users.js";
 import rateLimit from "express-rate-limit";
 import scenariosRouter from "./scenarios.js";
+import { sendWelcomeEmail } from "../../lib/email.js";
+
+function getUserId(req: Request): string | null {
+  const auth = getAuth(req);
+  return (auth?.sessionClaims?.userId as string | undefined) || auth?.userId || null;
+}
 
 const router: IRouter = Router();
 
@@ -34,12 +42,13 @@ const assessRateLimit = rateLimit({
   },
   // Only skip rate limiting for active Pro subscribers — not all authenticated users
   skip: async (req) => {
-    if (!(req as any).isAuthenticated?.()) return false;
+    const userId = getUserId(req as Request);
+    if (!userId) return false;
     try {
       const subs = await db
         .select({ status: subscriptionsTable.status })
         .from(subscriptionsTable)
-        .where(eq(subscriptionsTable.userId, (req as any).user.id))
+        .where(eq(subscriptionsTable.userId, userId))
         .limit(1);
       return subs.length > 0 && (subs[0].status === "active" || subs[0].status === "cancel_scheduled");
     } catch { return false; }
@@ -59,16 +68,19 @@ router.post("/assess", assessRateLimit, async (req, res) => {
 
     const input = parseResult.data;
 
-    if (req.isAuthenticated()) {
-      const [{ planCount }] = await db
+    const userId = getUserId(req);
+    let planCount = 0;
+    if (userId) {
+      const [{ planCount: pc }] = await db
         .select({ planCount: count() })
         .from(resilienceReportsTable)
-        .where(eq(resilienceReportsTable.userId, req.user.id));
+        .where(eq(resilienceReportsTable.userId, userId));
+      planCount = pc;
 
       const subs = await db
         .select({ status: subscriptionsTable.status })
         .from(subscriptionsTable)
-        .where(eq(subscriptionsTable.userId, req.user.id))
+        .where(eq(subscriptionsTable.userId, userId))
         .limit(1);
 
       const isSubscriber = subs.length > 0 && (subs[0].status === "active" || subs[0].status === "cancel_scheduled");
@@ -157,7 +169,7 @@ router.post("/assess", assessRateLimit, async (req, res) => {
     await db.insert(resilienceReportsTable).values({
       reportId,
       sessionId: input.sessionId ?? null,
-      userId: req.isAuthenticated() ? req.user.id : null,
+      userId: userId ?? null,
       currency: currency,
       ageBracket: input.ageBracket ?? null,
       location: input.location,
@@ -197,6 +209,20 @@ router.post("/assess", assessRateLimit, async (req, res) => {
       recommendedResources: reportContent.recommendedResources ?? null,
       createdAt: now,
     });
+
+    // Fire welcome email on first authenticated plan (fire-and-forget)
+    if (userId && typeof planCount === "number" && planCount === 0) {
+      (async () => {
+        try {
+          const clerkClient = createClerkClient({ secretKey: process.env["CLERK_SECRET_KEY"] });
+          const clerkUser = await clerkClient.users.getUser(userId);
+          const email = clerkUser.emailAddresses[0]?.emailAddress;
+          if (email) {
+            await sendWelcomeEmail({ email, firstName: clerkUser.firstName });
+          }
+        } catch { /* non-critical */ }
+      })();
+    }
 
     // Save a progress snapshot if sessionId is provided
     if (input.sessionId) {
@@ -263,7 +289,8 @@ router.post("/assess", assessRateLimit, async (req, res) => {
 });
 
 router.get("/my-reports", async (req, res) => {
-  if (!req.isAuthenticated()) {
+  const myReportsUserId = getUserId(req);
+  if (!myReportsUserId) {
     res.status(401).json({ error: "UNAUTHORIZED", message: "Sign in to access your reports." });
     return;
   }
@@ -283,7 +310,7 @@ router.get("/my-reports", async (req, res) => {
         riskProfileSummary: resilienceReportsTable.riskProfileSummary,
       })
       .from(resilienceReportsTable)
-      .where(eq(resilienceReportsTable.userId, req.user.id))
+      .where(eq(resilienceReportsTable.userId, myReportsUserId))
       .orderBy(resilienceReportsTable.createdAt);
 
     res.json({ reports: rows.map(r => ({

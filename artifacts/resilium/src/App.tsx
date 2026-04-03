@@ -1,6 +1,7 @@
 import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
-import { useEffect } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
+import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
+import { ClerkProvider, SignIn, SignUp, useClerk } from "@clerk/react";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { NeuralCanvas } from "@/components/neural-canvas";
@@ -32,6 +33,16 @@ import DemoPage from "@/pages/demo";
 import ScenariosPage from "@/pages/scenarios";
 import { AnnouncementBanner } from "@/components/announcement-banner";
 
+const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY as string | undefined;
+const clerkProxyUrl = import.meta.env.VITE_CLERK_PROXY_URL as string | undefined;
+const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+function stripBase(path: string): string {
+  return basePath && path.startsWith(basePath)
+    ? path.slice(basePath.length) || "/"
+    : path;
+}
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -40,6 +51,39 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+function ClerkQueryClientCacheInvalidator() {
+  const { addListener } = useClerk();
+  const qc = useQueryClient();
+  const prevUserIdRef = useRef<string | null | undefined>(undefined);
+  useEffect(() => {
+    const unsub = addListener(({ user }) => {
+      const uid = user?.id ?? null;
+      if (prevUserIdRef.current !== undefined && prevUserIdRef.current !== uid) {
+        qc.clear();
+      }
+      prevUserIdRef.current = uid;
+    });
+    return unsub;
+  }, [addListener, qc]);
+  return null;
+}
+
+function SignInPage() {
+  return (
+    <div style={{ display: "flex", justifyContent: "center", padding: "4rem 1rem", minHeight: "60vh", alignItems: "center" }}>
+      <SignIn routing="path" path={`${basePath}/sign-in`} signUpUrl={`${basePath}/sign-up`} />
+    </div>
+  );
+}
+
+function SignUpPage() {
+  return (
+    <div style={{ display: "flex", justifyContent: "center", padding: "4rem 1rem", minHeight: "60vh", alignItems: "center" }}>
+      <SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in`} />
+    </div>
+  );
+}
 
 function ScrollToTop() {
   const [location] = useLocation();
@@ -92,6 +136,8 @@ function Router() {
       <Route path="/coaching" component={CoachingPage} />
       <Route path="/demo" component={DemoPage} />
       <Route path="/scenarios/:reportId" component={ScenariosPage} />
+      <Route path="/sign-in/*?" component={SignInPage} />
+      <Route path="/sign-up/*?" component={SignUpPage} />
       <Route component={NotFound} />
       </Switch>
       </div>
@@ -99,16 +145,31 @@ function Router() {
   );
 }
 
+function ClerkProviderWithRoutes() {
+  const [, setLocation] = useLocation();
+  return (
+    <ClerkProvider
+      publishableKey={clerkPubKey ?? ""}
+      proxyUrl={clerkProxyUrl}
+      routerPush={(to) => setLocation(stripBase(to))}
+      routerReplace={(to) => setLocation(stripBase(to), { replace: true })}
+    >
+      <QueryClientProvider client={queryClient}>
+        <ClerkQueryClientCacheInvalidator />
+        <TooltipProvider>
+          <Router />
+          <Toaster />
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ClerkProvider>
+  );
+}
+
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <Router />
-        </WouterRouter>
-        <Toaster />
-      </TooltipProvider>
-    </QueryClientProvider>
+    <WouterRouter base={basePath}>
+      <ClerkProviderWithRoutes />
+    </WouterRouter>
   );
 }
 

@@ -6,7 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { ResilientIcon } from "@/components/resilient-icon";
 import { SiteFooter } from "@/components/site-footer";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@workspace/replit-auth-web";
+import { useAuth } from "@clerk/react";
 import {
   Loader2, ArrowRight, ArrowLeft, Zap, Activity, AlertTriangle,
   Shield, TrendingDown, TrendingUp, Minus, ExternalLink, Lock,
@@ -177,7 +177,8 @@ function DeltaIndicator({ delta }: { delta: number }) {
 export default function ScenariosPage() {
   const [, params] = useRoute("/scenarios/:reportId");
   const reportId = params?.reportId ?? "";
-  const { isAuthenticated } = useAuth();
+  const { isSignedIn } = useAuth();
+  const isAuthenticated = !!isSignedIn;
 
   const [subStatus, setSubStatus] = useState<{ isPro: boolean } | null>(null);
   const [selectedScenario, setSelectedScenario] = useState<ScenarioKey | null>(null);

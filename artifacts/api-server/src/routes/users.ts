@@ -1,14 +1,21 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { getAuth, createClerkClient } from "@clerk/express";
 import { db, resilienceReportsTable, usersTable, subscriptionsTable } from "@workspace/db";
 import { and, eq, inArray, desc } from "drizzle-orm";
 import { openai } from "@workspace/integrations-openai-ai-server";
 
 const router: IRouter = Router();
 
-const PLAN_LIMIT = 2;
+export const PLAN_LIMIT = 2;
+
+function getUserId(req: Request): string | null {
+  const auth = getAuth(req);
+  return (auth?.sessionClaims?.userId as string | undefined) || auth?.userId || null;
+}
 
 router.get("/me/plans", async (req: Request, res: Response) => {
-  if (!req.isAuthenticated()) {
+  const userId = getUserId(req);
+  if (!userId) {
     res.status(401).json({ error: "Unauthorized" });
     return;
   }
@@ -29,7 +36,7 @@ router.get("/me/plans", async (req: Request, res: Response) => {
         currency: resilienceReportsTable.currency,
       })
       .from(resilienceReportsTable)
-      .where(eq(resilienceReportsTable.userId, req.user.id))
+      .where(eq(resilienceReportsTable.userId, userId))
       .orderBy(resilienceReportsTable.createdAt);
 
     res.json({
@@ -54,7 +61,8 @@ router.get("/me/plans", async (req: Request, res: Response) => {
 });
 
 router.delete("/me/plans/:reportId", async (req: Request, res: Response) => {
-  if (!req.isAuthenticated()) {
+  const userId = getUserId(req);
+  if (!userId) {
     res.status(401).json({ error: "Unauthorized" });
     return;
   }
@@ -74,7 +82,7 @@ router.delete("/me/plans/:reportId", async (req: Request, res: Response) => {
       return;
     }
 
-    if (row.userId !== req.user.id) {
+    if (row.userId !== userId) {
       res.status(404).json({ error: "Plan not found" });
       return;
     }
@@ -84,7 +92,7 @@ router.delete("/me/plans/:reportId", async (req: Request, res: Response) => {
       .where(
         and(
           eq(resilienceReportsTable.reportId, reportId),
-          eq(resilienceReportsTable.userId, req.user.id),
+          eq(resilienceReportsTable.userId, userId),
         ),
       );
 
@@ -95,16 +103,16 @@ router.delete("/me/plans/:reportId", async (req: Request, res: Response) => {
   }
 });
 
-// DELETE /me/plans — delete ALL plans for the authenticated user
 router.delete("/me/plans", async (req: Request, res: Response) => {
-  if (!req.isAuthenticated()) {
+  const userId = getUserId(req);
+  if (!userId) {
     res.status(401).json({ error: "Unauthorized" });
     return;
   }
   try {
     await db
       .delete(resilienceReportsTable)
-      .where(eq(resilienceReportsTable.userId, req.user.id));
+      .where(eq(resilienceReportsTable.userId, userId));
     res.json({ success: true });
   } catch (err) {
     req.log.error({ err }, "Error deleting all plans");
@@ -112,20 +120,19 @@ router.delete("/me/plans", async (req: Request, res: Response) => {
   }
 });
 
-// DELETE /me — delete all Resilium data for the user (account wipe)
 router.delete("/me", async (req: Request, res: Response) => {
-  if (!req.isAuthenticated()) {
+  const userId = getUserId(req);
+  if (!userId) {
     res.status(401).json({ error: "Unauthorized" });
     return;
   }
   try {
     await db
       .delete(resilienceReportsTable)
-      .where(eq(resilienceReportsTable.userId, req.user.id));
+      .where(eq(resilienceReportsTable.userId, userId));
     await db
       .delete(usersTable)
-      .where(eq(usersTable.id, req.user.id));
-    req.session.destroy(() => {});
+      .where(eq(usersTable.id, userId));
     res.json({ success: true });
   } catch (err) {
     req.log.error({ err }, "Error deleting account");
@@ -133,9 +140,9 @@ router.delete("/me", async (req: Request, res: Response) => {
   }
 });
 
-// GET /me/latest-checklist — return the most recent report's checklistsByArea + reportId
 router.get("/me/latest-checklist", async (req: Request, res: Response) => {
-  if (!req.isAuthenticated()) {
+  const userId = getUserId(req);
+  if (!userId) {
     res.status(401).json({ error: "Unauthorized" });
     return;
   }
@@ -148,7 +155,7 @@ router.get("/me/latest-checklist", async (req: Request, res: Response) => {
         createdAt: resilienceReportsTable.createdAt,
       })
       .from(resilienceReportsTable)
-      .where(eq(resilienceReportsTable.userId, req.user.id))
+      .where(eq(resilienceReportsTable.userId, userId))
       .orderBy(desc(resilienceReportsTable.createdAt))
       .limit(1);
 
@@ -169,9 +176,9 @@ router.get("/me/latest-checklist", async (req: Request, res: Response) => {
   }
 });
 
-// GET /me/export — GDPR-style data export for the authenticated user
 router.get("/me/export", async (req: Request, res: Response) => {
-  if (!req.isAuthenticated()) {
+  const userId = getUserId(req);
+  if (!userId) {
     res.status(401).json({ error: "Unauthorized" });
     return;
   }
@@ -179,14 +186,29 @@ router.get("/me/export", async (req: Request, res: Response) => {
     const plans = await db
       .select()
       .from(resilienceReportsTable)
-      .where(eq(resilienceReportsTable.userId, req.user.id))
+      .where(eq(resilienceReportsTable.userId, userId))
       .orderBy(resilienceReportsTable.createdAt);
 
+    let email: string | null = null;
+    let firstName: string | null = null;
+    let lastName: string | null = null;
+
+    try {
+      const auth = getAuth(req);
+      if (auth?.userId) {
+        const clerkClient = createClerkClient({ secretKey: process.env["CLERK_SECRET_KEY"] });
+        const clerkUser = await clerkClient.users.getUser(auth.userId);
+        email = clerkUser.emailAddresses[0]?.emailAddress ?? null;
+        firstName = clerkUser.firstName ?? null;
+        lastName = clerkUser.lastName ?? null;
+      }
+    } catch { }
+
     const exportData = {
-      userId: req.user.id,
-      email: req.user.email ?? null,
-      firstName: req.user.firstName ?? null,
-      lastName: req.user.lastName ?? null,
+      userId,
+      email,
+      firstName,
+      lastName,
       exportedAt: new Date().toISOString(),
       totalPlans: plans.length,
       plans: plans.map((p) => ({
@@ -205,7 +227,8 @@ router.get("/me/export", async (req: Request, res: Response) => {
 });
 
 router.post("/me/plans/compare", async (req: Request, res: Response) => {
-  if (!req.isAuthenticated()) {
+  const userId = getUserId(req);
+  if (!userId) {
     res.status(401).json({ error: "Unauthorized" });
     return;
   }
@@ -225,7 +248,7 @@ router.post("/me/plans/compare", async (req: Request, res: Response) => {
       .where(
         and(
           inArray(resilienceReportsTable.reportId, [reportIdA, reportIdB]),
-          eq(resilienceReportsTable.userId, req.user.id)
+          eq(resilienceReportsTable.userId, userId)
         )
       );
 
@@ -331,11 +354,11 @@ Return only valid JSON.`;
 });
 
 router.get("/me/subscription", async (req: Request, res: Response) => {
-  if (!req.isAuthenticated()) {
+  const userId = getUserId(req);
+  if (!userId) {
     return res.json({ status: "anonymous", isActive: false });
   }
   try {
-    const userId = (req.user as any).id;
     const subs = await db
       .select()
       .from(subscriptionsTable)
@@ -359,11 +382,11 @@ router.get("/me/subscription", async (req: Request, res: Response) => {
 });
 
 router.get("/me/report-count", async (req: Request, res: Response) => {
-  if (!req.isAuthenticated()) {
+  const userId = getUserId(req);
+  if (!userId) {
     return res.json({ count: 0 });
   }
   try {
-    const userId = (req.user as any).id;
     const reports = await db
       .select({ reportId: resilienceReportsTable.reportId })
       .from(resilienceReportsTable)
@@ -374,5 +397,4 @@ router.get("/me/report-count", async (req: Request, res: Response) => {
   }
 });
 
-export { PLAN_LIMIT };
 export default router;
