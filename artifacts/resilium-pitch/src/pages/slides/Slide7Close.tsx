@@ -39,7 +39,7 @@ export default function Slide7Close() {
           <div
             style={{ fontSize: "1.2vw", fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: "#E08040", fontFamily: "Inter, sans-serif", marginBottom: "1.8vh" }}
           >
-            Where We Are
+            Where I Am
           </div>
           <h2
             style={{ fontSize: "4.5vw", fontWeight: 900, lineHeight: 1.0, letterSpacing: "-0.02em", fontFamily: "Plus Jakarta Sans, sans-serif", color: "#EAD9BE", ...a("0.2s", "fadeUp") }}
