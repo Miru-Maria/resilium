@@ -11,6 +11,7 @@ import {
   Dimensions,
   Linking,
   TextInput,
+  type DimensionValue,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -18,6 +19,8 @@ import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import * as Clipboard from "expo-clipboard";
 import { useQuery } from "@tanstack/react-query";
+import ViewShot from "react-native-view-shot";
+import * as Sharing from "expo-sharing";
 
 import { useColors } from "@/context/theme";
 import { ColorsType } from "@/constants/colors";
@@ -177,6 +180,8 @@ export default function ResultsScreen() {
   const [feedbackComment, setFeedbackComment] = useState("");
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
   const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
+  const [sharingScorecard, setSharingScorecard] = useState(false);
+  const scorecardRef = useRef<ViewShot | null>(null);
 
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -264,6 +269,32 @@ export default function ResultsScreen() {
     try {
       await Share.share({ message: msg, url });
     } catch {}
+  };
+
+  const handleShareScorecard = async () => {
+    if (!scorecardRef.current?.capture || !report) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setSharingScorecard(true);
+    try {
+      const tmpUri = await scorecardRef.current.capture();
+      const isAvailable = await Sharing.isAvailableAsync();
+      if (isAvailable) {
+        await Sharing.shareAsync(tmpUri, {
+          mimeType: "image/png",
+          dialogTitle: "Share your Resilium Scorecard",
+          UTI: "public.png",
+        });
+      } else {
+        const url = `https://${process.env.EXPO_PUBLIC_DOMAIN}/results/${reportId}`;
+        await Share.share({
+          message: `My Resilium Score is ${Math.round(report.score.overall)}/100. Check yours at ${url}`,
+          title: "My Resilium Scorecard",
+        });
+      }
+    } catch {
+    } finally {
+      setSharingScorecard(false);
+    }
   };
 
   if (isLoading) {
@@ -638,6 +669,17 @@ export default function ResultsScreen() {
             <Text style={styles.shareFullBtnText}>{copied ? "Link Copied!" : "Share Report"}</Text>
           </Pressable>
 
+          <Pressable
+            style={[styles.scorecardShareBtn, sharingScorecard && { opacity: 0.6 }]}
+            onPress={handleShareScorecard}
+            disabled={sharingScorecard}
+          >
+            <Feather name="image" size={16} color={colors.primary} />
+            <Text style={styles.scorecardShareBtnText}>
+              {sharingScorecard ? "Generating…" : "Share Scorecard Image"}
+            </Text>
+          </Pressable>
+
           <Pressable style={styles.scenarioBtn} onPress={() => router.push({ pathname: "/scenarios", params: { reportId } })}>
             <Feather name="zap" size={16} color={colors.primary} />
             <Text style={styles.scenarioBtnText}>Run Scenario Stress-Test (Pro)</Text>
@@ -654,9 +696,229 @@ export default function ResultsScreen() {
           </Pressable>
         </View>
       </ScrollView>
+
+      {/* Hidden scorecard for image capture — off-screen only, no opacity:0 for reliable capture */}
+      <ViewShot
+        ref={scorecardRef}
+        options={{ format: "png", quality: 1.0 }}
+        style={styles.hiddenScorecard}
+        collapsable={false}
+      >
+        <MobileScorecardImage score={report.score} scoreLabel={scoreLabel} scoreColor={scoreColor} mentalResilienceProfile={report.mentalResilienceProfile} />
+      </ViewShot>
     </View>
   );
 }
+
+function MobileScorecardImage({
+  score,
+  scoreLabel,
+  scoreColor,
+  mentalResilienceProfile,
+}: {
+  score: ScoreObj;
+  scoreLabel: string;
+  scoreColor: string;
+  mentalResilienceProfile?: MentalResilienceProfile;
+}) {
+  const CATEGORIES = [
+    { key: "financial" as const, label: "Financial" },
+    { key: "health" as const, label: "Health" },
+    { key: "skills" as const, label: "Skills" },
+    { key: "mobility" as const, label: "Mobility" },
+    { key: "psychological" as const, label: "Psychological" },
+    { key: "resources" as const, label: "Resources" },
+  ];
+
+  const getBarColor = (val: number) =>
+    val >= 70 ? "#10b981" : val >= 40 ? "#f59e0b" : "#ef4444";
+
+  return (
+    <View style={scorecardStyles.card}>
+      {/* Header */}
+      <View style={scorecardStyles.header}>
+        <View style={scorecardStyles.logoRow}>
+          <Text style={scorecardStyles.logoIcon}>🛡️</Text>
+          <Text style={scorecardStyles.logoText}>Resilium</Text>
+        </View>
+        <Text style={scorecardStyles.url}>resilium.app</Text>
+      </View>
+
+      {/* Score circle */}
+      <View style={scorecardStyles.scoreSection}>
+        <Text style={scorecardStyles.scoreLabel}>MY RESILIENCE SCORE</Text>
+        <View style={[scorecardStyles.scoreCircle, { borderColor: scoreColor }]}>
+          <Text style={[scorecardStyles.scoreNumber, { color: scoreColor }]}>
+            {Math.round(score.overall)}
+          </Text>
+          <Text style={scorecardStyles.scoreMax}>/100</Text>
+        </View>
+        <View style={[scorecardStyles.labelBadge, { backgroundColor: scoreColor + "20", borderColor: scoreColor + "40" }]}>
+          <Text style={[scorecardStyles.labelBadgeText, { color: scoreColor }]}>{scoreLabel}</Text>
+        </View>
+        {mentalResilienceProfile && (
+          <View style={scorecardStyles.pathwayRow}>
+            <Text style={[scorecardStyles.pathwayText, { color: mentalResilienceProfile.pathway === "growth" ? "#10b981" : "#e08240" }]}>
+              {mentalResilienceProfile.pathway === "growth" ? "↑ Growth Pathway" : "◆ Compensation Pathway"}
+            </Text>
+          </View>
+        )}
+      </View>
+
+      {/* Category bars */}
+      <View style={scorecardStyles.categories}>
+        <Text style={scorecardStyles.categoriesTitle}>CATEGORY BREAKDOWN</Text>
+        {CATEGORIES.map(({ key, label }) => {
+          const val = Math.round(score[key]);
+          const color = getBarColor(val);
+          return (
+            <View key={key} style={scorecardStyles.catRow}>
+              <Text style={scorecardStyles.catLabel}>{label}</Text>
+              <View style={scorecardStyles.catBarTrack}>
+                <View style={[scorecardStyles.catBarFill, { width: `${val}%` as DimensionValue, backgroundColor: color }]} />
+              </View>
+              <Text style={[scorecardStyles.catVal, { color }]}>{val}</Text>
+            </View>
+          );
+        })}
+      </View>
+
+      {/* Footer */}
+      <Text style={scorecardStyles.footer}>
+        Discover your score at{" "}
+        <Text style={{ color: "#e08240" }}>resilium.app</Text>
+      </Text>
+    </View>
+  );
+}
+
+const scorecardStyles = StyleSheet.create({
+  card: {
+    width: 1080,
+    height: 1080,
+    backgroundColor: "#0f1c14",
+    padding: 64,
+    justifyContent: "space-between",
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  logoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  logoIcon: {
+    fontSize: 32,
+  },
+  logoText: {
+    fontSize: 36,
+    fontFamily: "Inter_700Bold",
+    color: "#e08240",
+    letterSpacing: -0.5,
+  },
+  url: {
+    fontSize: 20,
+    color: "#6b7280",
+    fontFamily: "Inter_400Regular",
+  },
+  scoreSection: {
+    alignItems: "center",
+    gap: 20,
+  },
+  scoreLabel: {
+    fontSize: 18,
+    color: "#9ca3af",
+    fontFamily: "Inter_700Bold",
+    letterSpacing: 3,
+  },
+  scoreCircle: {
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    borderWidth: 14,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  scoreNumber: {
+    fontSize: 80,
+    fontFamily: "Inter_700Bold",
+    letterSpacing: -3,
+    lineHeight: 84,
+  },
+  scoreMax: {
+    fontSize: 18,
+    color: "#6b7280",
+    fontFamily: "Inter_400Regular",
+  },
+  labelBadge: {
+    borderWidth: 1.5,
+    borderRadius: 40,
+    paddingHorizontal: 32,
+    paddingVertical: 10,
+  },
+  labelBadgeText: {
+    fontSize: 24,
+    fontFamily: "Inter_700Bold",
+    letterSpacing: -0.5,
+  },
+  pathwayRow: {
+    backgroundColor: "rgba(255,255,255,0.05)",
+    borderRadius: 30,
+    paddingHorizontal: 24,
+    paddingVertical: 10,
+  },
+  pathwayText: {
+    fontSize: 18,
+    fontFamily: "Inter_700Bold",
+  },
+  categories: {
+    gap: 16,
+  },
+  categoriesTitle: {
+    fontSize: 14,
+    color: "#6b7280",
+    fontFamily: "Inter_700Bold",
+    letterSpacing: 2,
+    marginBottom: 4,
+  },
+  catRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+  },
+  catLabel: {
+    fontSize: 16,
+    color: "#9ca3af",
+    fontFamily: "Inter_400Regular",
+    width: 150,
+  },
+  catBarTrack: {
+    flex: 1,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: "rgba(255,255,255,0.08)",
+    overflow: "hidden",
+  },
+  catBarFill: {
+    height: "100%",
+    borderRadius: 6,
+  },
+  catVal: {
+    fontSize: 16,
+    fontFamily: "Inter_700Bold",
+    width: 40,
+    textAlign: "right",
+  },
+  footer: {
+    fontSize: 16,
+    color: "#4b5563",
+    fontFamily: "Inter_400Regular",
+    textAlign: "center",
+  },
+});
 
 const createStyles = (colors: ColorsType) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
@@ -1202,4 +1464,18 @@ const createStyles = (colors: ColorsType) => StyleSheet.create({
     paddingVertical: 12, backgroundColor: colors.primary + "10",
   },
   scenarioBtnText: { fontFamily: "Inter_600SemiBold", fontSize: 14, color: colors.primary },
+  scorecardShareBtn: {
+    flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8,
+    borderRadius: 12, borderWidth: 1.5, borderColor: colors.primary + "66",
+    paddingVertical: 13, backgroundColor: colors.primary + "15",
+  },
+  scorecardShareBtnText: { fontFamily: "Inter_700Bold", fontSize: 14, color: colors.primary },
+  hiddenScorecard: {
+    position: "absolute",
+    left: -9999,
+    top: -9999,
+    width: 1080,
+    height: 1080,
+    pointerEvents: "none",
+  },
 });

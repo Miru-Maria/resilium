@@ -9,12 +9,13 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { Progress } from "@/components/ui/progress";
-import { Loader2, Download, Printer, Share2, AlertTriangle, CheckCircle, RefreshCcw, Activity, User, LogIn, Brain, TrendingUp, Award, Star, ExternalLink, Heart, BookOpen, ShieldCheck, Zap, Package, Globe, MapPin, Lock, Mail } from "lucide-react";
+import { Loader2, Download, Printer, Share2, AlertTriangle, CheckCircle, RefreshCcw, Activity, User, LogIn, Brain, TrendingUp, Award, Star, ExternalLink, Heart, BookOpen, ShieldCheck, Zap, Package, Globe, MapPin, Lock, Mail, ImageDown } from "lucide-react";
 import { ResilientIcon } from "@/components/resilient-icon";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { SiteFooter } from "@/components/site-footer";
 import { useAuth } from "@workspace/replit-auth-web";
+import { ShareScorecardModal } from "@/components/share-scorecard-modal";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -162,6 +163,7 @@ export default function ResultsPage() {
   const { toast } = useToast();
   const { user, isAuthenticated, login, logout } = useAuth();
   const queryClient = useQueryClient();
+  const [shareScorecardOpen, setShareScorecardOpen] = useState(false);
 
   const { data: report, isLoading, error } = useGetReport(reportId, {
     query: {
@@ -355,6 +357,9 @@ export default function ResultsPage() {
             </Button>
             <Button variant="outline" size="sm" onClick={handleShare} className="rounded-full">
               <Share2 className="w-4 h-4 mr-2" /> Share
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setShareScorecardOpen(true)} className="rounded-full bg-primary/5 border-primary/30 text-primary hover:bg-primary/10">
+              <ImageDown className="w-4 h-4 mr-2" /> Share Score
             </Button>
             <Button variant="default" size="sm" onClick={handlePrint} className="rounded-full">
               <Printer className="w-4 h-4 mr-2" /> Print / Save PDF
@@ -1036,6 +1041,20 @@ export default function ResultsPage() {
       </main>
 
       <SiteFooter />
+
+      <ShareScorecardModal
+        isOpen={shareScorecardOpen}
+        onClose={() => setShareScorecardOpen(false)}
+        score={report.score}
+        overallLabel={
+          report.score.overall >= 80 ? "Highly Resilient" :
+          report.score.overall >= 60 ? "Well Prepared" :
+          report.score.overall >= 40 ? "Moderately Prepared" :
+          report.score.overall >= 20 ? "Developing Resilience" :
+          "Critically Vulnerable"
+        }
+        mentalResilienceProfile={mrProfile}
+      />
     </div>
   );
 }
