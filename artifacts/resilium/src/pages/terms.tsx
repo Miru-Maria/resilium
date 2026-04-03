@@ -89,7 +89,7 @@ export default function TermsPage() {
             All software, design, branding, and non-user-generated content on Resilium is the intellectual property of Resilium and its operator. You may not copy, distribute, reproduce, or create derivative works from the platform without explicit written permission.
           </p>
           <p>
-            Your assessment data belongs to you. By submitting it, you grant Resilium a limited, non-exclusive licence to process and store that data for the purpose of providing the service, as described in our{" "}
+            Your assessment data belongs to you. By submitting it, you grant Resilium a limited, non-exclusive license to process and store that data for the purpose of providing the service, as described in our{" "}
             <Link href="/privacy" className="text-primary underline underline-offset-4 hover:text-primary/80">
               Privacy Policy
             </Link>

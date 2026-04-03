@@ -56,8 +56,8 @@ type Language = "en" | "ro";
 const T = {
   en: {
     // header
-    stepLabel: (step: number, total: number, mrStep: number, mrTotal: number) =>
-      step === MR_STEP ? `Mental Resilience ${mrStep + 1}/${mrTotal}` : `Step ${step} of ${total}`,
+    stepLabel: (step: number, total: number, _mrStep: number, _mrTotal: number) =>
+      `Step ${step} of ${total}`,
     lastFree: "Last free assessment",
     assessmentN: (n: number, limit: number) => `Assessment ${n} of ${limit}`,
     // progress labels
@@ -202,7 +202,8 @@ const T = {
       { id: "natural_disaster", label: "Natural Disasters" },
       { id: "supply_chain", label: "Supply Chain Failure" },
       { id: "political_instability", label: "Political Unrest" },
-      { id: "cyber_attack", label: "Cyber Grid Outage" },
+      { id: "cyber_attack", label: "Cyber Attack" },
+      { id: "grid_failure", label: "Power Grid Failure" },
       { id: "war_conflict", label: "War / Conflict" },
       { id: "pandemic", label: "Global Pandemic" },
       { id: "illness", label: "Personal Illness" },
@@ -220,18 +221,18 @@ const T = {
       { value: 3, label: "6 or more", desc: "A broad, reliable network" },
     ],
     s12InvolvementTitle: "Community or group involvement",
-    s12InvolvementSub: "Religious groups, mutual aid networks, volunteer organisations, professional associations, etc.",
+    s12InvolvementSub: "Religious groups, community support networks, volunteer organizations, professional associations, etc.",
     involvementOptions: [
       { id: "none", label: "Not involved", desc: "No active group membership" },
       { id: "occasional", label: "Occasionally", desc: "Loose ties with 1–2 groups" },
       { id: "active", label: "Actively involved", desc: "Regular participation in community groups" },
     ],
-    s12MutualAidTitle: "Access to mutual aid or community support",
+    s12MutualAidTitle: "Access to community support",
     s12MutualAidSub: "Could you access food, shelter, tools, or practical help from your community or network if needed?",
     mutualAidYes: "Yes, I could access support",
     mutualAidNo: "Not really / unsure",
     // loading / errors
-    analysing: "Analysing your profile and building your plan…",
+    analysing: "Analyzing your profile and building your plan…",
     analysingDesc: "This usually takes 60–90 seconds — please keep this tab open.",
     planLimitTitle: "Plan Limit Reached",
     planLimitBack: "Go Back",
@@ -248,8 +249,8 @@ const T = {
     backToHome: "Back to Home",
   },
   ro: {
-    stepLabel: (step: number, total: number, mrStep: number, mrTotal: number) =>
-      step === MR_STEP ? `Reziliență Mentală ${mrStep + 1}/${mrTotal}` : `Pasul ${step} din ${total}`,
+    stepLabel: (step: number, total: number, _mrStep: number, _mrTotal: number) =>
+      `Pasul ${step} din ${total}`,
     lastFree: "Ultima evaluare gratuită",
     assessmentN: (n: number, limit: number) => `Evaluarea ${n} din ${limit}`,
     progress: {
@@ -382,6 +383,7 @@ const T = {
       { id: "supply_chain", label: "Lipsă Produse" },
       { id: "political_instability", label: "Instabilitate Politică" },
       { id: "cyber_attack", label: "Atac Cibernetic" },
+      { id: "grid_failure", label: "Căderea Rețelei Electrice" },
       { id: "war_conflict", label: "Război / Conflict" },
       { id: "pandemic", label: "Pandemie Globală" },
       { id: "illness", label: "Boală Personală" },
@@ -398,13 +400,13 @@ const T = {
       { value: 3, label: "6 sau mai multe", desc: "O rețea largă și de încredere" },
     ],
     s12InvolvementTitle: "Implicare în comunitate sau grupuri",
-    s12InvolvementSub: "Grupuri religioase, rețele de ajutor reciproc, organizații de voluntariat, asociații profesionale etc.",
+    s12InvolvementSub: "Grupuri religioase, rețele de sprijin comunitar, organizații de voluntariat, asociații profesionale etc.",
     involvementOptions: [
       { id: "none", label: "Nicio implicare", desc: "Fără apartenența activă la grupuri" },
       { id: "occasional", label: "Ocazional", desc: "Legături slabe cu 1–2 grupuri" },
       { id: "active", label: "Activ implicat/ă", desc: "Participare regulată în grupuri comunitare" },
     ],
-    s12MutualAidTitle: "Acces la ajutor reciproc sau sprijin comunitar",
+    s12MutualAidTitle: "Acces la sprijin comunitar",
     s12MutualAidSub: "Ai putea accesa hrană, adăpost, unelte sau ajutor practic din comunitatea sau rețeaua ta dacă ai nevoie?",
     mutualAidYes: "Da, pot accesa sprijin",
     mutualAidNo: "Nu prea / nesigur/ă",
@@ -1272,15 +1274,6 @@ export default function AssessmentPage() {
               {/* STEP 4: MENTAL RESILIENCE */}
               {step === MR_STEP && currentMrQuestion && (
                 <div className="space-y-8">
-                  {mrStep === 0 && (
-                    <div className="flex items-center gap-3 p-4 bg-primary/5 border border-primary/20 rounded-2xl">
-                      <Brain className="w-8 h-8 text-primary flex-shrink-0" />
-                      <div>
-                        <p className="text-sm font-semibold text-primary">{t.mrTitle}</p>
-                        <p className="text-xs text-muted-foreground">{t.mrSub}</p>
-                      </div>
-                    </div>
-                  )}
                   <div>
                     <span className="text-xs font-bold uppercase tracking-widest text-primary mb-2 block">{currentMrQuestion.dimension}</span>
                     <h2 className="text-2xl md:text-3xl font-display font-bold leading-tight">{currentMrQuestion.question}</h2>
@@ -1312,18 +1305,6 @@ export default function AssessmentPage() {
                       <span>{currentMrQuestion.lowLabel}</span>
                       <span>{currentMrQuestion.highLabel}</span>
                     </div>
-                  </div>
-
-                  <div className="flex justify-center gap-1.5 pt-2" aria-label="Question progress">
-                    {MR_QUESTIONS.map((_, idx) => (
-                      <div
-                        key={idx}
-                        className={cn(
-                          "h-1.5 rounded-full transition-all",
-                          idx < mrStep ? "bg-primary w-4" : idx === mrStep ? "bg-primary w-6" : "bg-muted w-1.5"
-                        )}
-                      />
-                    ))}
                   </div>
                 </div>
               )}

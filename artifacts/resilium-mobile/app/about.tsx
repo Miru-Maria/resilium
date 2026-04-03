@@ -74,7 +74,7 @@ export default function AboutScreen() {
           {[
             { n: "1", title: "Take the assessment", body: "Answer honest questions about your finances, health, skills, and circumstances. Takes 10–15 minutes." },
             { n: "2", title: "Get your score",      body: "Receive a 0–100 resilience score across all six dimensions, powered by your real inputs." },
-            { n: "3", title: "Follow the plan",     body: "AI generates a personalised 90-day action plan with prioritised steps and checklists." },
+            { n: "3", title: "Follow the plan",     body: "AI generates a personalized 90-day action plan with prioritized steps and checklists." },
             { n: "4", title: "Track progress",      body: "Retake periodically to measure growth and see exactly where you've improved." },
           ].map(({ n, title, body }) => (
             <View key={n} style={s.stepRow}>

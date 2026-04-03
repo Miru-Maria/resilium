@@ -808,7 +808,8 @@ export default function AssessmentScreen() {
                   { id: "natural_disaster", label: "Natural Disaster" },
                   { id: "supply_chain", label: "Supply Chain" },
                   { id: "political_instability", label: "Political Unrest" },
-                  { id: "cyber_attack", label: "Cyber Outage" },
+                  { id: "cyber_attack", label: "Cyber Attack" },
+                  { id: "grid_failure", label: "Power Grid Failure" },
                   { id: "war_conflict", label: "War / Conflict" },
                   { id: "pandemic", label: "Pandemic" },
                   { id: "illness", label: "Personal Illness" },
@@ -864,7 +865,7 @@ export default function AssessmentScreen() {
                 </View>
 
                 <Text style={[styles.subSectionTitle, { marginTop: 24 }]}>Community involvement</Text>
-                <Text style={styles.subSectionDesc}>Religious groups, mutual aid networks, volunteer organisations, professional associations, etc.</Text>
+                <Text style={styles.subSectionDesc}>Religious groups, community support networks, volunteer organizations, professional associations, etc.</Text>
                 <View style={styles.segmentRow}>
                   {([
                     { id: "none", label: "None" },
@@ -883,7 +884,7 @@ export default function AssessmentScreen() {
                   ))}
                 </View>
 
-                <Text style={[styles.subSectionTitle, { marginTop: 24 }]}>Mutual aid access</Text>
+                <Text style={[styles.subSectionTitle, { marginTop: 24 }]}>Community support access</Text>
                 <Text style={styles.subSectionDesc}>Could you access food, shelter, tools, or practical help from your community or network if needed?</Text>
                 <View style={styles.yesNoGrid}>
                   {([

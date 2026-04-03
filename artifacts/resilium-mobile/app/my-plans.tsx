@@ -226,7 +226,7 @@ export default function MyPlansScreen() {
                     ? (
                       <View style={{ alignItems: "center", gap: 16, paddingTop: 60 }}>
                         <ActivityIndicator color={colors.primary} size="large" />
-                        <Text style={styles.loadingText}>Analysing your progress…</Text>
+                        <Text style={styles.loadingText}>Analyzing your progress…</Text>
                       </View>
                     )
                     : (

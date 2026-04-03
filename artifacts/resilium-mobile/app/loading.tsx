@@ -112,7 +112,7 @@ export default function LoadingScreen() {
           </Animated.View>
 
           <Text style={styles.title}>Building Your Plan</Text>
-          <Text style={styles.message}>Analysing your profile and building your plan…</Text>
+          <Text style={styles.message}>Analyzing your profile and building your plan…</Text>
           <Text style={styles.timeHint}>This usually takes 60–90 seconds — please keep this screen open</Text>
         </View>
       )}

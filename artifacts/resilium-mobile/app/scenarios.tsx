@@ -221,7 +221,7 @@ export default function ScenariosScreen() {
                 ? <ActivityIndicator size="small" color={colors.background} />
                 : <Feather name="play" size={16} color={colors.background} />
               }
-              <Text style={styles.runBtnText}>{loading ? "Analysing…" : "Run Scenario Analysis"}</Text>
+              <Text style={styles.runBtnText}>{loading ? "Analyzing…" : "Run Scenario Analysis"}</Text>
             </Pressable>
 
             {error && (

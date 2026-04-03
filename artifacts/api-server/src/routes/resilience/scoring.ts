@@ -347,7 +347,7 @@ function calculateSocialCapitalScore(input: AssessmentInput): number {
   const contactScores: Record<number, number> = { 0: 0, 1: 25, 2: 40, 3: 50 };
   score += contactScores[input.trustedLocalContacts ?? 1] ?? 25;
 
-  // Community organisation involvement
+  // Community organization involvement
   const involvementScores: Record<string, number> = {
     active: 30,
     occasional: 15,

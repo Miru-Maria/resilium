@@ -259,7 +259,7 @@ export default function CoachingPage() {
             { icon: <Shield size={20} />, title: "Change management and processing disruption", text: "Working through the emotional weight of major life changes — job loss, relocation, health changes — without it derailing your recovery." },
             { icon: <Heart size={20} />, title: "Confidence after setbacks", text: "Rebuilding your sense of agency after financial stress, health challenges, or mobility limitations. This is where sustainable change actually starts." },
             { icon: <MessageCircle size={20} />, title: "Functional health & mental resilience", text: "Your physical health and psychological capacity are deeply connected. Phoenix Insight Coaching's functional approach looks at the root patterns — sleep, stress load, nervous system regulation — that directly affect how resilient you feel." },
-            { icon: <CheckCircle size={20} />, title: "A personalised plan alongside Resilium", text: "Sessions can be structured around your Resilium report. We work the psychological dimension while you execute the practical action plan on your own." },
+            { icon: <CheckCircle size={20} />, title: "A personalized plan alongside Resilium", text: "Sessions can be structured around your Resilium report. We work the psychological dimension while you execute the practical action plan on your own." },
           ].map(({ icon, title, text }) => (
             <div key={title} style={{
               display: "flex",
@@ -350,7 +350,7 @@ export default function CoachingPage() {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "20px" }}>
           {[
             { step: "01", title: "Free discovery call", text: "50–60 minutes. No pressure. We look at your Resilium report together and see if there's a fit." },
-            { step: "02", title: "Tailored programme", text: "A coaching plan built around your specific score, circumstances, and goals — not a generic template." },
+            { step: "02", title: "Tailored program", text: "A coaching plan built around your specific score, circumstances, and goals — not a generic template." },
             { step: "03", title: "Ongoing support", text: "Bi-weekly or weekly sessions, plus async support between sessions when you need it." },
           ].map(({ step, title, text }) => (
             <div key={step} style={{

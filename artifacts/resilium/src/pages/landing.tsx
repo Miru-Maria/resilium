@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import { SiteFooter } from "@/components/site-footer";
 import { useAuth } from "@workspace/replit-auth-web";
-import { OnboardingModal } from "@/components/onboarding-modal";
+
 import { ResilientIcon } from "@/components/resilient-icon";
 import {
   DropdownMenu,
@@ -137,7 +137,6 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen flex flex-col relative overflow-hidden">
-      <OnboardingModal />
       {/* Animated background — hero section only */}
       <div className="absolute top-0 left-0 right-0 h-screen z-0 pointer-events-none overflow-hidden">
         <AnimatedBackground />

@@ -135,7 +135,7 @@ export default function CoachingScreen() {
                 },
                 {
                   n: "02",
-                  title: "Tailored programme",
+                  title: "Tailored program",
                   body: "A coaching plan built around your specific score, circumstances, and goals.",
                 },
                 {

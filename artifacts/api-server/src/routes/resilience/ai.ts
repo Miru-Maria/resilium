@@ -172,7 +172,7 @@ USER PROFILE:
 - Psychological resilience (self-rated): ${input.psychologicalResilience}/10
 - Primary risk concerns: ${input.riskConcerns.join(", ")}
 - Preferred currency: ${input.currency ?? "USD"} (use this currency symbol and amounts in all financial advice and examples)
-- Social network: trusted contacts ${input.trustedLocalContacts ?? "unspecified"}, community involvement: ${input.communityInvolvement ?? "unspecified"}, mutual aid access: ${input.mutualAidAccess ?? "unspecified"}
+- Social network: trusted contacts ${input.trustedLocalContacts ?? "unspecified"}, community involvement: ${input.communityInvolvement ?? "unspecified"}, community support access: ${input.mutualAidAccess ?? "unspecified"}
 
 RESILIENCE SCORES (0-100):
 - Overall: ${scores.overall}
@@ -269,7 +269,7 @@ Requirements:
 - recommendedResources: 6-8 resources ordered by priority (critical first), personalized as follows:
   * LOCATION-SPECIFIC: Include the national/regional emergency management agency, civil protection authority, and emergency contact number for the user's country/region. E.g., FEMA + ready.gov for USA; Civil Protection / IGSU + 112 for Romania; NHS + GOV.UK emergency prep for UK; AEMET/Protección Civil for Spain; etc.
   * DISASTER-SPECIFIC: For each of the user's top risk concerns (e.g., earthquake, flood, pandemic, economic collapse, cyberattack), include the most authoritative regional resource addressing that specific threat.
-  * GAP-TARGETED: Include 2-3 resources directly addressing the user's lowest-scoring dimensions (financial tools for low financial score, mental health resources for low psychological score, first aid/medical courses for low health score, skills training for low skills score, community organisations for low social capital score).
+  * GAP-TARGETED: Include 2-3 resources directly addressing the user's lowest-scoring dimensions (financial tools for low financial score, mental health resources for low psychological score, first aid/medical courses for low health score, skills training for low skills score, community organizations for low social capital score).
   * CHECKLIST-SUPPORTING: Include at least one resource that helps the user fulfill critical checklist items they likely haven't completed yet (e.g., emergency supply kit builder, 72-hour kit guide, financial resilience workbook).
   * Use real, working URLs. Prefer free government/NGO resources. Include paid courses only if they are uniquely valuable.
   * priority reflects urgency for this specific user (critical = addresses their most critical vulnerability).
@@ -287,9 +287,9 @@ EMPATHY RULES — apply to riskProfileSummary and action plan framing:
 - If the user has dependents: acknowledge the dual weight of protecting both self and family before prescribing action.
 - If income is unstable or savings < 2 months: validate the psychological difficulty of financial uncertainty before recommending financial steps.
 - If health is poor or mobility is low OR the user has a chronic condition: do not recommend self-directed physical tasks. Suggest assisted, digital, or community-based alternatives.
-- If the psychological score is below 45: begin the riskProfileSummary by recognising resilience shown under difficulty — lead with what is working, not what is missing.
-- If the user's location or risk concerns suggest recent immigration or displacement: do not assume full access to government services or stable legal status. Prioritise NGO and community organisation resources.
-- For high-stress profiles (single parents, students with debt, low-income renters): validate stress and time constraints explicitly before listing actions. Frame actions as "one at a time" rather than a comprehensive programme.
+- If the psychological score is below 45: begin the riskProfileSummary by recognizing resilience shown under difficulty — lead with what is working, not what is missing.
+- If the user's location or risk concerns suggest recent immigration or displacement: do not assume full access to government services or stable legal status. Prioritize NGO and community organization resources.
+- For high-stress profiles (single parents, students with debt, low-income renters): validate stress and time constraints explicitly before listing actions. Frame actions as "one at a time" rather than a comprehensive program.
 - If the user has strong specific skills (medical, military, technical, languages): explicitly name these as resilience assets in the summary — they are often undersold by users themselves.
 - If the user lives with family or friends: acknowledge this as a genuine resilience asset — shared housing can mean shared resources, mutual support, and lower individual cost burden. Do not frame it as a vulnerability unless combined with other clear risk factors.
 
@@ -297,10 +297,10 @@ CULTURAL FRAMING — mental resilience and social strength:
 - When discussing mental resilience strengths, frame them in BOTH individual AND community/collective terms. E.g., instead of "you have good personal coping skills", also reference "your ability to lean on and give support to those around you" where relevant.
 - Acknowledge that resilience takes different forms in different cultural contexts — for some people, community bonds, family interdependence, and collective problem-solving are primary resilience strategies, not secondary ones.
 - For users with strong social capital or family/community networks: explicitly name this as a core resilience dimension in the summary, not an afterthought.
-- For users in collectivist-leaning cultural contexts (suggested by location such as sub-Saharan Africa, South/Southeast Asia, Eastern Europe, Latin America, Middle East): apply extra weight to community-based recommendations and mutual aid strategies in the action plan and checklist.
+- For users in collectivist-leaning cultural contexts (suggested by location such as sub-Saharan Africa, South/Southeast Asia, Eastern Europe, Latin America, Middle East): apply extra weight to community-based recommendations and community support strategies in the action plan and checklist.
 
 COMMUNITY RESOURCES — apply when relevant:
-- For users with low mobility, low income, or likely language barriers: include at least 2 resources in recommendedResources that are accessible without physical travel or significant cost (phone hotlines, online portals, community organisations, government benefit finders).
+- For users with low mobility, low income, or likely language barriers: include at least 2 resources in recommendedResources that are accessible without physical travel or significant cost (phone hotlines, online portals, community organizations, government benefit finders).
 - For users in financial hardship (savings < 2 months and unstable income): include at least one resource for emergency financial assistance, food security, or housing support relevant to their location.
 
 Return ONLY the JSON, no additional text.`;

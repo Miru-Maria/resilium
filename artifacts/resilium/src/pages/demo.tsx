@@ -92,7 +92,7 @@ const SAMPLE_ACTION_PLAN = {
     { priority: "high", category: "Financial", title: "Diversify income to at least 2 sources", description: "A side practice of your primary skill, rental income, dividend investing — any second revenue stream reduces catastrophic risk." },
     { priority: "medium", category: "Mobility", title: "Research alternative housing in a lower-risk zone", description: "Not necessarily move — but know where you'd go. Have the conversation. Understand the cost delta." },
     { priority: "medium", category: "Skills", title: "Develop one practical physical skill", description: "Gardening, basic carpentry, electrical — anything that reduces dependence on supply chains under disruption." },
-    { priority: "low", category: "Psychological", title: "Deepen your social network deliberately", description: "Shared preparedness conversations with neighbors, friends, or family create real mutual-aid infrastructure." },
+    { priority: "low", category: "Psychological", title: "Deepen your social network deliberately", description: "Shared preparedness conversations with neighbors, friends, or family create real community support infrastructure." },
   ],
 };
 

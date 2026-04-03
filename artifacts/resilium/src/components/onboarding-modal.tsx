@@ -69,7 +69,7 @@ export function OnboardingModal() {
         <div className="space-y-4 mb-8">
           {[
             { icon: Brain, text: "Take a 5-minute assessment across 6 resilience dimensions — financial, health, skills, mobility, psychological, and resources." },
-            { icon: Zap, text: "Get an AI-generated score out of 100, your top vulnerabilities, and a personalised action plan." },
+            { icon: Zap, text: "Get an AI-generated score out of 100, your top vulnerabilities, and a personalized action plan." },
             { icon: TrendingUp, text: "Track your progress over time and stress-test your readiness against real crisis scenarios." },
           ].map(({ icon: Icon, text }, i) => (
             <div key={i} className="flex items-start gap-3">
