@@ -25,6 +25,7 @@ import AdminConsentLogPage from "@/pages/admin/consent-log";
 import AdminUsersPage from "@/pages/admin/users";
 import AdminAnnouncementsPage from "@/pages/admin/announcements";
 import AdminTestimonialsPage from "@/pages/admin/testimonials";
+import AdminMarketingPage from "@/pages/admin/marketing";
 import ConsentPage from "@/pages/consent";
 import CoachingPage from "@/pages/coaching";
 import DemoPage from "@/pages/demo";
@@ -87,6 +88,7 @@ function Router() {
       <Route path="/admin/users" component={AdminUsersPage} />
       <Route path="/admin/announcements" component={AdminAnnouncementsPage} />
       <Route path="/admin/testimonials" component={AdminTestimonialsPage} />
+      <Route path="/admin/marketing" component={AdminMarketingPage} />
       <Route path="/coaching" component={CoachingPage} />
       <Route path="/demo" component={DemoPage} />
       <Route path="/scenarios/:reportId" component={ScenariosPage} />
