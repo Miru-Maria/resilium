@@ -105,7 +105,7 @@ const T = {
     mrTitle: "Mental Resilience Assessment",
     mrSub: "10 questions · ~2 minutes · shapes your entire plan",
     // step 5
-    s5Title: "What is your financial runway?",
+    s5Title: "How long could you cover your expenses without income?",
     s5Sub: "If you lost your income today, how many months could you sustain yourself and your household without going into debt? This is one of the strongest predictors of crisis resilience.",
     months: (n: number) => n === 36 ? "months +" : "months",
     preferNotSavings: "Skip the slider — we'll use a neutral mid-range value",
@@ -291,7 +291,7 @@ const T = {
     preferNotDesc: "Răspunsurile tale sunt private — nu îți va bloca rezultatele",
     mrTitle: "Evaluarea Rezilienței Mentale",
     mrSub: "10 întrebări · ~2 minute · modelează întregul tău plan",
-    s5Title: "Care este rezerva ta financiară?",
+    s5Title: "Cât timp ți-ai putea acoperi cheltuielile fără venituri?",
     s5Sub: "Dacă ți-ai pierde venitul azi, câte luni ți-ai putea susține gospodăria fără a te îndatora? Acesta este unul dintre cei mai puternici predictori ai rezilienței în criză.",
     months: (n: number) => n === 36 ? "luni +" : "luni",
     preferNotSavings: "Sari peste selector — vom folosi o valoare neutră",
@@ -1275,7 +1275,8 @@ export default function AssessmentPage() {
               {step === MR_STEP && currentMrQuestion && (
                 <div className="space-y-8">
                   <div>
-                    <span className="text-xs font-bold uppercase tracking-widest text-primary mb-2 block">{currentMrQuestion.dimension}</span>
+                    <span className="text-xs font-bold uppercase tracking-widest text-primary mb-1 block">{currentMrQuestion.dimension}</span>
+                    <span className="text-xs text-muted-foreground mb-2 block">Question {mrStep + 1} of {MR_QUESTIONS.length}</span>
                     <h2 className="text-2xl md:text-3xl font-display font-bold leading-tight">{currentMrQuestion.question}</h2>
                   </div>
 
@@ -1301,8 +1302,9 @@ export default function AssessmentPage() {
                         </button>
                       ))}
                     </div>
-                    <div className="flex justify-between text-xs text-muted-foreground font-medium px-1">
+                    <div className="flex justify-between text-xs text-muted-foreground font-medium px-1 relative">
                       <span>{currentMrQuestion.lowLabel}</span>
+                      <span className="absolute left-1/2 -translate-x-1/2">Neutral</span>
                       <span>{currentMrQuestion.highLabel}</span>
                     </div>
                   </div>

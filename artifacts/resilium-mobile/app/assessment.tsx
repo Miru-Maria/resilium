@@ -100,7 +100,7 @@ const STEPS = [
   { title: "What's your age bracket?",     subtitle: "Age affects how we weight your financial and health scores." },
   { title: "Income stability?",            subtitle: "How consistent and secure is your main income source?" },
   { title: "Mental resilience",            subtitle: "Rate how accurately each statement describes you." },
-  { title: "Financial runway?",            subtitle: "If income stopped today, how long could you sustain yourself and your household without debt? This is one of the strongest predictors of crisis resilience." },
+  { title: "How long without income?",      subtitle: "If income stopped today, how long could you sustain yourself and your household without debt? This is one of the strongest predictors of crisis resilience." },
   { title: "How many dependents?",          subtitle: "Children, elderly parents, or others financially or physically reliant on you." },
   { title: "Practical skills?",            subtitle: "Select all skills you actively possess." },
   { title: "Health?",                      subtitle: "Your health status and any conditions that affect daily functioning." },
@@ -381,9 +381,7 @@ export default function AssessmentScreen() {
   const currentMrQ = MR_QUESTIONS[mrSubStep];
   const currentMrAnswer = data.mentalResilienceAnswers[currentMrQ?.key];
 
-  const stepLabel = step === MR_STEP
-    ? `Mental Resilience ${mrSubStep + 1}/${MR_QUESTIONS.length}`
-    : `${step + 1} / ${TOTAL_STEPS}`;
+  const stepLabel = `${step + 1} / ${TOTAL_STEPS}`;
 
   return (
     <View style={[styles.container, { paddingTop: topPad }]}>
@@ -409,27 +407,9 @@ export default function AssessmentScreen() {
         {/* ── STEP 3: MENTAL RESILIENCE DEEP ASSESSMENT ── */}
         {step === MR_STEP ? (
           <View style={styles.mrContainer}>
-            {mrSubStep === 0 && (
-              <View style={styles.mrBanner}>
-                <Feather name="activity" size={22} color={colors.primary} />
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.mrBannerTitle}>Mental Resilience Assessment</Text>
-                  <Text style={styles.mrBannerSub}>10 questions · ~2 minutes · shapes your entire plan</Text>
-                </View>
-              </View>
-            )}
-
             <Text style={styles.mrDimension}>{currentMrQ.dimension}</Text>
+            <Text style={styles.mrSubCounter}>Question {mrSubStep + 1} of {MR_QUESTIONS.length}</Text>
             <Text style={styles.mrQuestion}>{currentMrQ.question}</Text>
-
-            <View style={styles.mrDots}>
-              {MR_QUESTIONS.map((_, i) => (
-                <View
-                  key={i}
-                  style={[styles.mrDot, i === mrSubStep && styles.mrDotActive, i < mrSubStep && styles.mrDotDone]}
-                />
-              ))}
-            </View>
 
             <View style={styles.mrRating}>
               {[1, 2, 3, 4, 5].map((val) => (
@@ -446,6 +426,7 @@ export default function AssessmentScreen() {
             </View>
             <View style={styles.mrScale}>
               <Text style={styles.mrScaleLabel}>Rarely</Text>
+              <Text style={styles.mrScaleLabel}>Neutral</Text>
               <Text style={styles.mrScaleLabel}>Almost always</Text>
             </View>
           </View>
@@ -1132,6 +1113,13 @@ const createStyles = (colors: ColorsType) => StyleSheet.create({
     color: colors.primary,
     letterSpacing: 1.2,
     textTransform: "uppercase",
+  },
+  mrSubCounter: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 12,
+    color: colors.textSecondary,
+    marginTop: 2,
+    marginBottom: 4,
   },
   mrQuestion: {
     fontFamily: "Inter_700Bold",
