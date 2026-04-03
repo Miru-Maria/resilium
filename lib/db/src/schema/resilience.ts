@@ -43,6 +43,7 @@ export const resilienceReportsTable = pgTable("resilience_reports", {
   scoreMobility: real("score_mobility").notNull(),
   scorePsychological: real("score_psychological").notNull(),
   scoreResources: real("score_resources").notNull(),
+  scoreSocialCapital: real("score_social_capital"),
 
   riskProfileSummary: text("risk_profile_summary").notNull(),
   topVulnerabilities: jsonb("top_vulnerabilities").notNull(),

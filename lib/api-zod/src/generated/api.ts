@@ -76,7 +76,15 @@ export const SubmitAssessmentBody = zod.object({
     .describe("Current housing situation"),
   hasEmergencySupplies: zod
     .boolean()
-    .describe("Access to emergency food\/water supplies"),
+    .describe("Access to emergency food\/water supplies (legacy; use emergencySupplyTier for tiered scoring)"),
+  emergencySupplyTier: zod
+    .enum(["none", "under_3days", "3_14days", "2weeks_1month", "over_1month"])
+    .optional()
+    .describe("Tiered emergency supply level: none, under 3 days, 3-14 days, 2 weeks-1 month, or over 1 month"),
+  chronicCondition: zod
+    .enum(["yes", "no", "prefer_not_to_say"])
+    .optional()
+    .describe("Whether the user has a chronic health condition"),
   psychologicalResilience: zod
     .number()
     .min(1)
@@ -118,6 +126,21 @@ export const SubmitAssessmentBody = zod.object({
     .enum(["immediate", "within_month", "within_3months", "difficult"])
     .optional()
     .describe("How quickly the user can relocate"),
+  trustedLocalContacts: zod
+    .number()
+    .int()
+    .min(0)
+    .max(20)
+    .optional()
+    .describe("Number of trusted local contacts the user can rely on in a crisis"),
+  communityInvolvement: zod
+    .enum(["none", "occasional", "active"])
+    .optional()
+    .describe("Level of community involvement and engagement"),
+  mutualAidAccess: zod
+    .boolean()
+    .optional()
+    .describe("Whether the user has access to a mutual aid network"),
   mentalResilienceAnswers: zod
     .object({
       stressTolerance1: zod
@@ -270,6 +293,7 @@ export const SubmitAssessmentResponse = zod.object({
       .number()
       .min(submitAssessmentResponseScoreResourcesMin)
       .max(submitAssessmentResponseScoreResourcesMax),
+    socialCapital: zod.number().min(0).max(100).optional(),
   }),
   mentalResilienceProfile: zod
     .object({

@@ -25,24 +25,396 @@ import type {
   AssessmentInputHousingType,
   AssessmentInputRiskConcernsItem,
   AssessmentInputSkillsItem,
+  AssessmentInputEmergencySupplyTier,
+  AssessmentInputChronicCondition,
+  AssessmentInputCommunityInvolvement,
+  AssessmentInputRelocationReadiness,
   MentalResilienceAnswers
-} from "@workspace/api-client-react/src/generated/api.schemas";
+} from "@workspace/api-client-react";
 
 // Steps:
 // 1 = Location + Currency
 // 2 = Age Bracket
 // 3 = Income Stability
-// 4 = Mental Resilience (10 sub-steps) ← after 3 factual steps
+// 4 = Mental Resilience (10 sub-steps)
 // 5 = Financial Runway (savings)
 // 6 = Dependents
 // 7 = Skills
-// 8 = Health & Mobility
+// 8 = Health & Mobility (now includes chronic condition follow-up)
 // 9 = Housing
-// 10 = Emergency Supplies
-// 11 = Risk Profile (submit triggered at end)
-const TOTAL_STEPS = 11;
+// 10 = Emergency Supplies (tiered)
+// 11 = Risk Profile
+// 12 = Social Capital (new)
+const TOTAL_STEPS = 12;
 const MR_STEP = 4;
 
+type Language = "en" | "ro";
+
+// ─── TRANSLATIONS ──────────────────────────────────────────────────────────────
+const T = {
+  en: {
+    // header
+    stepLabel: (step: number, total: number, mrStep: number, mrTotal: number) =>
+      step === MR_STEP ? `Mental Resilience ${mrStep + 1}/${mrTotal}` : `Step ${step} of ${total}`,
+    lastFree: "Last free assessment",
+    assessmentN: (n: number, limit: number) => `Assessment ${n} of ${limit}`,
+    // progress labels
+    progress: {
+      1: "Location", 2: "Age Bracket", 3: "Income", 4: "Mental Resilience",
+      5: "Financial Runway", 6: "Dependents", 7: "Skills", 8: "Health & Mobility",
+      9: "Housing", 10: "Emergency Supplies", 11: "Risk Profile", 12: "Social Capital"
+    } as Record<number, string>,
+    // nav
+    back: "Back",
+    next: "Next",
+    continue: "Continue",
+    generateReport: "Generate Report",
+    // step 1
+    s1Title: "Where are you based?",
+    s1Sub: "Your geographic location affects climate, political, and economic risk factors.",
+    s1Placeholder: "e.g. California, USA",
+    s1LocationDenied: "Location access was denied — please type your city or region above.",
+    s1LocationHint: "Or click the pin icon to detect your location automatically.",
+    s1Currency: "Preferred currency for financial advice",
+    s1CustomCurrency: "Enter currency code (e.g. CHF, SEK)",
+    // step 2
+    s2Title: "What's your age bracket?",
+    s2Sub: "Age shapes your financial time-horizon and baseline health vulnerability — it affects how we weight your scores.",
+    ageBrackets: [
+      { id: "18-24", label: "18–24", desc: "Early career" },
+      { id: "25-34", label: "25–34", desc: "Building phase" },
+      { id: "35-44", label: "35–44", desc: "Established" },
+      { id: "45-54", label: "45–54", desc: "Peak earning" },
+      { id: "55-64", label: "55–64", desc: "Pre-retirement" },
+      { id: "65+", label: "65+", desc: "Retirement age" },
+    ],
+    // step 3
+    s3Title: "How stable is your income?",
+    incomeOptions: [
+      { id: "fixed", title: "Fixed & Secure", desc: "Salaried employee, guaranteed pension" },
+      { id: "freelance", title: "Variable / Freelance", desc: "Income fluctuates month to month" },
+      { id: "unstable", title: "Unstable / Irregular", desc: "Currently unemployed or highly volatile" },
+      { id: "student", title: "Student / No income", desc: "Full-time student or not currently earning" },
+    ],
+    preferNotToSay: "Prefer not to say",
+    preferNotDesc: "Your answers remain private — this won't block your results",
+    // step 4 (MR)
+    mrTitle: "Mental Resilience Assessment",
+    mrSub: "10 questions · ~2 minutes · shapes your entire plan",
+    // step 5
+    s5Title: "What is your financial runway?",
+    s5Sub: "If you lost your income today, how many months could you survive on savings without going into debt?",
+    months: (n: number) => n === 24 ? "months +" : "months",
+    preferNotSavings: "Skip the slider — we'll use a neutral mid-range value",
+    preferNotSavingsSelected: "✓ Prefer not to say",
+    savingsNeutral: "Your financial runway won't be used in scoring — we'll use a neutral estimate.",
+    // step 6
+    s6Title: "How many dependents do you have?",
+    s6Sub: "Children, elderly parents, or anyone financially or physically reliant on you.",
+    dependentOptions: [
+      { value: 0, label: "None", desc: "No dependents" },
+      { value: 1, label: "One", desc: "One dependent" },
+      { value: 2, label: "Two or three", desc: "2–3 dependents" },
+      { value: 3, label: "Four or more", desc: "4+ dependents" },
+    ],
+    // step 7
+    s7Title: "What practical skills do you possess?",
+    s7Sub: "Select all that apply.",
+    skills: [
+      { id: "digital", label: "Digital/Tech", desc: "Software, IT, programming, online tools" },
+      { id: "physical", label: "Trade/Manual", desc: "Carpentry, plumbing, electrical, mechanics" },
+      { id: "survival", label: "Outdoors/Survival", desc: "Wilderness skills, hunting, navigation" },
+      { id: "medical", label: "First Aid/Medical", desc: "CPR, first aid, nursing or medical training" },
+      { id: "financial", label: "Trading/Finance", desc: "Investing, accounting, financial planning" },
+      { id: "language", label: "Multiple Languages", desc: "Fluent or conversational in 2+ languages" },
+      { id: "caregiving", label: "Caregiving", desc: "Child, elder, or disability care" },
+      { id: "agriculture", label: "Agriculture/Homesteading", desc: "Growing food, animal husbandry, gardening" },
+      { id: "community", label: "Community Organizing", desc: "Coordination, volunteering, leadership" },
+      { id: "teaching", label: "Education/Teaching", desc: "Teaching, tutoring, training others" },
+      { id: "none", label: "None of these", desc: "" },
+    ],
+    // step 8
+    s8Title: "Health & Mobility",
+    s8HealthTitle: "Overall Health Status",
+    healthOptions: [
+      { id: "excellent", label: "Excellent" },
+      { id: "good", label: "Good" },
+      { id: "fair", label: "Fair" },
+      { id: "poor", label: "Poor" },
+    ],
+    s8PhysicalTitle: "Physical Capability",
+    s8PhysicalSub: "How physically capable are you of handling demanding situations?",
+    mobilityOptions: [
+      { id: "high", label: "High" },
+      { id: "medium", label: "Medium" },
+      { id: "low", label: "Low" },
+    ],
+    s8RelocationTitle: "Relocation Readiness",
+    s8RelocationSub: "How quickly could you pack up and relocate if you had to?",
+    relocationOptions: [
+      { id: "immediate", label: "Immediately", desc: "Could leave within days" },
+      { id: "within_month", label: "Within a month", desc: "Need a few weeks" },
+      { id: "within_3months", label: "Within 3 months", desc: "Need time to sort things" },
+      { id: "difficult", label: "Very difficult", desc: "Tied down for the foreseeable future" },
+    ],
+    s8ChronicTitle: "Chronic Condition or Disability",
+    s8ChronicSub: "Do you have a chronic condition or disability that affects your daily functioning? (Optional)",
+    chronicOptions: [
+      { id: "yes", label: "Yes" },
+      { id: "no", label: "No" },
+      { id: "prefer_not_to_say", label: "Prefer not to say" },
+    ],
+    // step 9
+    s9Title: "Current housing situation?",
+    housingOptions: [
+      { id: "own", label: "Own a home (mortgage or outright)" },
+      { id: "rent", label: "Renting long-term" },
+      { id: "family", label: "Living with family or friends" },
+      { id: "temporary", label: "Temporary/Subsidised housing" },
+      { id: "transitional", label: "Transitional housing or shelter" },
+      { id: "nomadic", label: "Nomadic / frequent traveler" },
+      { id: "other", label: "Other arrangement" },
+    ],
+    // step 10
+    s10Title: "Emergency Preparedness",
+    s10Sub: "How much emergency food, water, and essential medicines do you have readily available?",
+    emergencyOptions: [
+      { id: "none", label: "None", desc: "Not prepared yet" },
+      { id: "under_3days", label: "Under 3 days", desc: "Very basic supplies only" },
+      { id: "3_14days", label: "3–14 days", desc: "A couple of weeks covered" },
+      { id: "2weeks_1month", label: "2 weeks – 1 month", desc: "Well stocked for most crises" },
+      { id: "over_1month", label: "1 month +", desc: "Extended preparedness" },
+    ],
+    // step 11
+    s11Title: "Primary Risk Concerns",
+    s11Sub: "Select the risks you feel least prepared for (choose at least one).",
+    riskOptions: [
+      { id: "job_loss", label: "Job Loss / Automation" },
+      { id: "inflation", label: "Hyperinflation" },
+      { id: "financial_crisis", label: "Market Crash" },
+      { id: "natural_disaster", label: "Natural Disasters" },
+      { id: "supply_chain", label: "Supply Chain Failure" },
+      { id: "political_instability", label: "Political Unrest" },
+      { id: "cyber_attack", label: "Cyber Grid Outage" },
+      { id: "war_conflict", label: "War / Conflict" },
+      { id: "pandemic", label: "Global Pandemic" },
+      { id: "illness", label: "Personal Illness" },
+    ],
+    traumaNote: "We understand this may be personal. Your answers shape a plan that takes this seriously.",
+    // step 12
+    s12Title: "Community & Social Network",
+    s12Sub: "Strong community ties are a core resilience asset in any culture. Help us understand yours.",
+    s12ContactsTitle: "Trusted contacts you could call on in a major crisis",
+    s12ContactsSub: "People locally or abroad who would genuinely help you — family, friends, colleagues, or community.",
+    contactOptions: [
+      { value: 0, label: "None", desc: "I have no one I could reliably call on" },
+      { value: 1, label: "1–2 people", desc: "A handful of trusted people" },
+      { value: 2, label: "3–5 people", desc: "A solid support circle" },
+      { value: 3, label: "6 or more", desc: "A broad, reliable network" },
+    ],
+    s12InvolvementTitle: "Community or group involvement",
+    s12InvolvementSub: "Religious groups, mutual aid networks, volunteer organisations, professional associations, etc.",
+    involvementOptions: [
+      { id: "none", label: "Not involved", desc: "No active group membership" },
+      { id: "occasional", label: "Occasionally", desc: "Loose ties with 1–2 groups" },
+      { id: "active", label: "Actively involved", desc: "Regular participation in community groups" },
+    ],
+    s12MutualAidTitle: "Access to mutual aid or community support",
+    s12MutualAidSub: "Could you access food, shelter, tools, or practical help from your community or network if needed?",
+    mutualAidYes: "Yes, I could access support",
+    mutualAidNo: "Not really / unsure",
+    // loading / errors
+    analysing: "Analysing your profile and building your plan…",
+    analysingDesc: "This usually takes 60–90 seconds — please keep this tab open.",
+    planLimitTitle: "Plan Limit Reached",
+    planLimitBack: "Go Back",
+    manageMyPlans: "Manage My Plans",
+    errorTitle: "Analysis Timed Out",
+    errorDesc: "AI analysis can take up to 90 seconds. Your report may have been created in the background.",
+    errorAuthHint: "Check My Plans — your report might already be there.",
+    errorAnonHint: "If you were signed in, your report would be saved to your profile automatically.",
+    checkMyPlans: "Check My Plans",
+    tryAgain: "Try Again",
+    gatedTitle: (limit: number) => `You've used your ${limit} free assessments`,
+    gatedDesc: "Upgrade to Resilium Pro for unlimited assessments, full progress tracking, and plan comparison tools.",
+    viewPricing: "View Pricing",
+    backToHome: "Back to Home",
+  },
+  ro: {
+    stepLabel: (step: number, total: number, mrStep: number, mrTotal: number) =>
+      step === MR_STEP ? `Reziliență Mentală ${mrStep + 1}/${mrTotal}` : `Pasul ${step} din ${total}`,
+    lastFree: "Ultima evaluare gratuită",
+    assessmentN: (n: number, limit: number) => `Evaluarea ${n} din ${limit}`,
+    progress: {
+      1: "Locație", 2: "Vârstă", 3: "Venituri", 4: "Reziliență Mentală",
+      5: "Resurse Financiare", 6: "Dependenți", 7: "Abilități", 8: "Sănătate & Mobilitate",
+      9: "Locuință", 10: "Urgențe", 11: "Profilul de Risc", 12: "Capital Social"
+    } as Record<number, string>,
+    back: "Înapoi",
+    next: "Următor",
+    continue: "Continuă",
+    generateReport: "Generează Raportul",
+    s1Title: "Unde locuiești?",
+    s1Sub: "Locația ta influențează factorii de risc climatici, politici și economici.",
+    s1Placeholder: "ex. Cluj-Napoca, România",
+    s1LocationDenied: "Accesul la locație a fost refuzat — te rugăm să tastezi orașul sau regiunea ta mai sus.",
+    s1LocationHint: "Sau apasă iconița pin pentru a detecta locația automat.",
+    s1Currency: "Moneda preferată pentru sfaturi financiare",
+    s1CustomCurrency: "Introdu codul monedei (ex. RON, CHF)",
+    s2Title: "Ce interval de vârstă ai?",
+    s2Sub: "Vârsta influențează orizontul financiar și vulnerabilitatea de bază la sănătate — afectează modul în care ponderăm scorurile.",
+    ageBrackets: [
+      { id: "18-24", label: "18–24", desc: "Carieră timpurie" },
+      { id: "25-34", label: "25–34", desc: "Fază de construire" },
+      { id: "35-44", label: "35–44", desc: "Stabilizat" },
+      { id: "45-54", label: "45–54", desc: "Câștiguri de vârf" },
+      { id: "55-64", label: "55–64", desc: "Pre-pensionare" },
+      { id: "65+", label: "65+", desc: "Vârsta pensionării" },
+    ],
+    s3Title: "Cât de stabilă este venitul tău?",
+    incomeOptions: [
+      { id: "fixed", title: "Fix & Sigur", desc: "Angajat cu salariu, pensie garantată" },
+      { id: "freelance", title: "Variabil / Freelancer", desc: "Venitul fluctuează de la lună la lună" },
+      { id: "unstable", title: "Instabil / Neregulat", desc: "Șomer sau venituri foarte volatile" },
+      { id: "student", title: "Student / Fără venituri", desc: "Student cu normă întreagă sau fără câștiguri" },
+    ],
+    preferNotToSay: "Prefer să nu spun",
+    preferNotDesc: "Răspunsurile tale sunt private — nu îți va bloca rezultatele",
+    mrTitle: "Evaluarea Rezilienței Mentale",
+    mrSub: "10 întrebări · ~2 minute · modelează întregul tău plan",
+    s5Title: "Care este rezerva ta financiară?",
+    s5Sub: "Dacă ți-ai pierde venitul azi, câte luni ai putea supraviețui din economii fără a te îndatora?",
+    months: (n: number) => n === 24 ? "luni +" : "luni",
+    preferNotSavings: "Sari peste selector — vom folosi o valoare neutră",
+    preferNotSavingsSelected: "✓ Prefer să nu spun",
+    savingsNeutral: "Rezerva ta financiară nu va fi folosită în scorare — vom folosi o estimare neutră.",
+    s6Title: "Câți dependenți ai?",
+    s6Sub: "Copii, părinți în vârstă sau orice persoană dependentă financiar sau fizic de tine.",
+    dependentOptions: [
+      { value: 0, label: "Niciunul", desc: "Fără dependenți" },
+      { value: 1, label: "Unul", desc: "Un dependent" },
+      { value: 2, label: "Doi sau trei", desc: "2–3 dependenți" },
+      { value: 3, label: "Patru sau mai mulți", desc: "4+ dependenți" },
+    ],
+    s7Title: "Ce abilități practice deții?",
+    s7Sub: "Selectează tot ce ți se aplică.",
+    skills: [
+      { id: "digital", label: "Digital/Tech", desc: "Software, IT, programare, instrumente online" },
+      { id: "physical", label: "Meserie/Manual", desc: "Tâmplărie, instalații, electric, mecanică" },
+      { id: "survival", label: "Drumeție/Supraviețuire", desc: "Abilități în natură, vânătoare, navigare" },
+      { id: "medical", label: "Prim Ajutor/Medical", desc: "CPR, prim ajutor, asistență medicală" },
+      { id: "financial", label: "Trading/Finanțe", desc: "Investiții, contabilitate, planificare financiară" },
+      { id: "language", label: "Limbi Străine Multiple", desc: "Fluent sau conversațional în 2+ limbi" },
+      { id: "caregiving", label: "Îngrijire", desc: "Îngrijirea copiilor, persoanelor în vârstă sau cu dizabilități" },
+      { id: "agriculture", label: "Agricultură/Gospodărie", desc: "Cultivarea alimentelor, creșterea animalelor, grădinărit" },
+      { id: "community", label: "Organizare Comunitară", desc: "Coordonare, voluntariat, leadership" },
+      { id: "teaching", label: "Educație/Predare", desc: "Predare, meditații, instruirea altora" },
+      { id: "none", label: "Niciuna din acestea", desc: "" },
+    ],
+    s8Title: "Sănătate & Mobilitate",
+    s8HealthTitle: "Starea Generală de Sănătate",
+    healthOptions: [
+      { id: "excellent", label: "Excelentă" },
+      { id: "good", label: "Bună" },
+      { id: "fair", label: "Acceptabilă" },
+      { id: "poor", label: "Slabă" },
+    ],
+    s8PhysicalTitle: "Capacitate Fizică",
+    s8PhysicalSub: "Cât de capabil/ă ești să gestionezi situații solicitante fizic?",
+    mobilityOptions: [
+      { id: "high", label: "Ridicată" },
+      { id: "medium", label: "Medie" },
+      { id: "low", label: "Scăzută" },
+    ],
+    s8RelocationTitle: "Disponibilitate de Relocare",
+    s8RelocationSub: "Cât de repede te-ai putea muta dacă ar fi necesar?",
+    relocationOptions: [
+      { id: "immediate", label: "Imediat", desc: "M-aș putea muta în câteva zile" },
+      { id: "within_month", label: "Într-o lună", desc: "Am nevoie de câteva săptămâni" },
+      { id: "within_3months", label: "În 3 luni", desc: "Am nevoie de timp să aranjez lucrurile" },
+      { id: "difficult", label: "Foarte dificil", desc: "Legat/ă pe termen previzibil" },
+    ],
+    s8ChronicTitle: "Condiție Cronică sau Dizabilitate",
+    s8ChronicSub: "Ai o condiție cronică sau o dizabilitate care îți afectează funcționarea zilnică? (Opțional)",
+    chronicOptions: [
+      { id: "yes", label: "Da" },
+      { id: "no", label: "Nu" },
+      { id: "prefer_not_to_say", label: "Prefer să nu spun" },
+    ],
+    s9Title: "Situația locativă actuală?",
+    housingOptions: [
+      { id: "own", label: "Proprietar (credit sau integral)" },
+      { id: "rent", label: "Chirie pe termen lung" },
+      { id: "family", label: "Locuiesc cu familia sau prietenii" },
+      { id: "temporary", label: "Locuință temporară/subvenționată" },
+      { id: "transitional", label: "Adăpost sau locuință de tranziție" },
+      { id: "nomadic", label: "Nomad / călător frecvent" },
+      { id: "other", label: "Altă situație" },
+    ],
+    s10Title: "Pregătire pentru Urgențe",
+    s10Sub: "Câtă hrană de urgență, apă și medicamente esențiale ai disponibile imediat?",
+    emergencyOptions: [
+      { id: "none", label: "Nimic", desc: "Încă nepregătit/ă" },
+      { id: "under_3days", label: "Sub 3 zile", desc: "Provizii foarte de bază" },
+      { id: "3_14days", label: "3–14 zile", desc: "Câteva săptămâni acoperite" },
+      { id: "2weeks_1month", label: "2 săptămâni – 1 lună", desc: "Bine aprovizionat/ă" },
+      { id: "over_1month", label: "Peste 1 lună", desc: "Pregătire extinsă" },
+    ],
+    s11Title: "Riscuri Principale",
+    s11Sub: "Selectează riscurile pentru care te simți cel mai puțin pregătit/ă (alege cel puțin unul).",
+    riskOptions: [
+      { id: "job_loss", label: "Pierderea Locului de Muncă" },
+      { id: "inflation", label: "Hiperinflație" },
+      { id: "financial_crisis", label: "Criză Financiară" },
+      { id: "natural_disaster", label: "Dezastre Naturale" },
+      { id: "supply_chain", label: "Lipsă Produse" },
+      { id: "political_instability", label: "Instabilitate Politică" },
+      { id: "cyber_attack", label: "Atac Cibernetic" },
+      { id: "war_conflict", label: "Război / Conflict" },
+      { id: "pandemic", label: "Pandemie Globală" },
+      { id: "illness", label: "Boală Personală" },
+    ],
+    traumaNote: "Înțelegem că aceasta poate fi o temă personală. Răspunsurile tale modelează un plan care ia aceasta în serios.",
+    s12Title: "Comunitate & Rețea Socială",
+    s12Sub: "Legăturile comunitare puternice sunt un bun fundamental al rezilienței în orice cultură. Ajută-ne să le înțelegem pe ale tale.",
+    s12ContactsTitle: "Persoane de încredere pe care le-ai putea apela într-o criză majoră",
+    s12ContactsSub: "Persoane din localitate sau din străinătate care te-ar ajuta cu adevărat — familie, prieteni, colegi sau comunitate.",
+    contactOptions: [
+      { value: 0, label: "Niciuna", desc: "Nu am pe nimeni la care să apelez cu încredere" },
+      { value: 1, label: "1–2 persoane", desc: "Câteva persoane de încredere" },
+      { value: 2, label: "3–5 persoane", desc: "Un cerc solid de suport" },
+      { value: 3, label: "6 sau mai multe", desc: "O rețea largă și de încredere" },
+    ],
+    s12InvolvementTitle: "Implicare în comunitate sau grupuri",
+    s12InvolvementSub: "Grupuri religioase, rețele de ajutor reciproc, organizații de voluntariat, asociații profesionale etc.",
+    involvementOptions: [
+      { id: "none", label: "Nicio implicare", desc: "Fără apartenența activă la grupuri" },
+      { id: "occasional", label: "Ocazional", desc: "Legături slabe cu 1–2 grupuri" },
+      { id: "active", label: "Activ implicat/ă", desc: "Participare regulată în grupuri comunitare" },
+    ],
+    s12MutualAidTitle: "Acces la ajutor reciproc sau sprijin comunitar",
+    s12MutualAidSub: "Ai putea accesa hrană, adăpost, unelte sau ajutor practic din comunitatea sau rețeaua ta dacă ai nevoie?",
+    mutualAidYes: "Da, pot accesa sprijin",
+    mutualAidNo: "Nu prea / nesigur/ă",
+    analysing: "Analizăm profilul tău și construim planul…",
+    analysingDesc: "De obicei durează 60–90 secunde — te rugăm să menții această filă deschisă.",
+    planLimitTitle: "Limita Planului Atinsă",
+    planLimitBack: "Înapoi",
+    manageMyPlans: "Gestionați Planurile Mele",
+    errorTitle: "Analiză Expirată",
+    errorDesc: "Analiza AI poate dura până la 90 de secunde. Raportul tău poate fi creat în fundal.",
+    errorAuthHint: "Verifică Planurile Mele — raportul tău ar putea fi deja acolo.",
+    errorAnonHint: "Dacă erai autentificat/ă, raportul ar fi salvat automat în profilul tău.",
+    checkMyPlans: "Verifică Planurile Mele",
+    tryAgain: "Încearcă din nou",
+    gatedTitle: (limit: number) => `Ai folosit cele ${limit} evaluări gratuite`,
+    gatedDesc: "Actualizează la Resilium Pro pentru evaluări nelimitate, urmărire completă a progresului și instrumente de comparare a planurilor.",
+    viewPricing: "Vezi Prețurile",
+    backToHome: "Înapoi Acasă",
+  },
+} as const;
+
+// Rephrased MR questions for collectivist framing
 type MentalResilienceQuestion = {
   key: keyof MentalResilienceAnswers;
   dimension: string;
@@ -55,14 +427,14 @@ const MR_QUESTIONS: MentalResilienceQuestion[] = [
   {
     key: "stressTolerance1",
     dimension: "Stress Tolerance",
-    question: "When facing an unexpected crisis, I remain calm and think clearly under pressure.",
+    question: "When facing an unexpected crisis, I remain calm and think clearly — whether on my own or alongside others around me.",
     lowLabel: "Rarely",
     highLabel: "Almost always",
   },
   {
     key: "stressTolerance2",
     dimension: "Stress Tolerance",
-    question: "I recover quickly after a stressful event and return to normal functioning.",
+    question: "I recover quickly after a stressful event and return to normal functioning — drawing on my own resilience or the support of those close to me.",
     lowLabel: "Rarely",
     highLabel: "Almost always",
   },
@@ -90,7 +462,7 @@ const MR_QUESTIONS: MentalResilienceQuestion[] = [
   {
     key: "changeManagement1",
     dimension: "Handling Change",
-    question: "I plan ahead for major life changes rather than reacting after the fact.",
+    question: "I plan ahead for major life changes — either independently or by thinking through plans with people I trust.",
     lowLabel: "Strongly disagree",
     highLabel: "Strongly agree",
   },
@@ -104,7 +476,7 @@ const MR_QUESTIONS: MentalResilienceQuestion[] = [
   {
     key: "emotionalRegulation1",
     dimension: "Managing Your Emotions",
-    question: "I manage anxiety and fear productively without being stopped in my tracks by them.",
+    question: "I manage anxiety and fear productively without being stopped in my tracks — whether by grounding myself or reaching out for support from those around me.",
     lowLabel: "Rarely",
     highLabel: "Almost always",
   },
@@ -118,9 +490,82 @@ const MR_QUESTIONS: MentalResilienceQuestion[] = [
   {
     key: "socialSupport1",
     dimension: "Social Support",
-    question: "I have a reliable support network I can call on during a major crisis.",
+    question: "I have a reliable support network — family, friends, or community — I can call on during a major crisis.",
     lowLabel: "Not at all",
     highLabel: "Absolutely",
+  },
+];
+
+const MR_QUESTIONS_RO: MentalResilienceQuestion[] = [
+  {
+    key: "stressTolerance1",
+    dimension: "Toleranță la Stres",
+    question: "Când mă confrunt cu o criză neașteptată, rămân calm/ă și gândesc clar — singur/ă sau alături de cei din jur.",
+    lowLabel: "Rar",
+    highLabel: "Aproape întotdeauna",
+  },
+  {
+    key: "stressTolerance2",
+    dimension: "Toleranță la Stres",
+    question: "Revin rapid după un eveniment stresant la funcționarea normală — bazându-mă pe propriile resurse sau pe sprijinul celor apropiați.",
+    lowLabel: "Rar",
+    highLabel: "Aproape întotdeauna",
+  },
+  {
+    key: "adaptability1",
+    dimension: "Adaptabilitate",
+    question: "Îmi ajustez planurile fără probleme când circumstanțele se schimbă neașteptat.",
+    lowLabel: "Rar",
+    highLabel: "Aproape întotdeauna",
+  },
+  {
+    key: "adaptability2",
+    dimension: "Adaptabilitate",
+    question: "Îmi vine ușor să adopt rutine sau medii noi.",
+    lowLabel: "Dezacord total",
+    highLabel: "Acord total",
+  },
+  {
+    key: "learningAgility1",
+    dimension: "Învățare Continuă",
+    question: "Caut activ abilități sau cunoștințe noi când observ o lipsă în pregătirea mea.",
+    lowLabel: "Rar",
+    highLabel: "Foarte des",
+  },
+  {
+    key: "changeManagement1",
+    dimension: "Gestionarea Schimbărilor",
+    question: "Planific în avans schimbările majore din viață — independent sau gândindu-mă împreună cu persoane de încredere.",
+    lowLabel: "Dezacord total",
+    highLabel: "Acord total",
+  },
+  {
+    key: "changeManagement2",
+    dimension: "Gestionarea Schimbărilor",
+    question: "Mă simt încrezător/oare să fac față situațiilor incerte majore precum crizele economice sau instabilitatea politică.",
+    lowLabel: "Deloc",
+    highLabel: "Foarte încrezător/oare",
+  },
+  {
+    key: "emotionalRegulation1",
+    dimension: "Gestionarea Emoțiilor",
+    question: "Gestionez anxietatea și frica productiv, fără să mă blochez — fie prin propriile resurse, fie căutând sprijin la cei din jur.",
+    lowLabel: "Rar",
+    highLabel: "Aproape întotdeauna",
+  },
+  {
+    key: "emotionalRegulation2",
+    dimension: "Gestionarea Emoțiilor",
+    question: "Pot menține o perspectivă pozitivă în perioadele prelungite de dificultate.",
+    lowLabel: "Dezacord total",
+    highLabel: "Acord total",
+  },
+  {
+    key: "socialSupport1",
+    dimension: "Suport Social",
+    question: "Am o rețea de sprijin de încredere — familie, prieteni sau comunitate — pe care o pot apela în caz de criză majoră.",
+    lowLabel: "Deloc",
+    highLabel: "Absolut",
   },
 ];
 
@@ -151,6 +596,14 @@ const CURRENCIES = [
 
 type CurrencyCode = typeof CURRENCIES[number]["code"];
 
+type ExtendedFormData = AssessmentInput & {
+  emergencySupplyTier?: AssessmentInputEmergencySupplyTier;
+  chronicCondition?: AssessmentInputChronicCondition;
+  trustedLocalContacts?: number;
+  communityInvolvement?: AssessmentInputCommunityInvolvement;
+  mutualAidAccess?: boolean;
+};
+
 export default function AssessmentPage() {
   const [, setLocation] = useLocation();
   const [step, setStep] = useState(1);
@@ -167,8 +620,10 @@ export default function AssessmentPage() {
   const [locationDenied, setLocationDenied] = useState(false);
   const [savingsPreferNotToSay, setSavingsPreferNotToSay] = useState(false);
   const [incomePreferNotToSay, setIncomePreferNotToSay] = useState(false);
+  const [lang, setLang] = useState<Language>("en");
 
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const t = T[lang];
 
   useEffect(() => {
     if (authLoading) return;
@@ -204,21 +659,28 @@ export default function AssessmentPage() {
     checkGate();
   }, [isAuthenticated, user, authLoading]);
 
-  const [formData, setFormData] = useState<AssessmentInput>({
+  const [formData, setFormData] = useState<ExtendedFormData>({
     location: "",
     ageBracket: undefined,
     incomeStability: "fixed",
     savingsMonths: 3,
+    hasDependents: false,
     dependentCount: 0,
-    relocationReadiness: undefined,
-    skills: [],
+    relocationReadiness: "within_month", // sensible default — avoids undefined
+    skills: [] as AssessmentInputSkillsItem[],
     healthStatus: "good",
     mobilityLevel: "medium",
     housingType: "rent",
     hasEmergencySupplies: false,
     psychologicalResilience: 7,
-    riskConcerns: [],
+    riskConcerns: [] as AssessmentInputRiskConcernsItem[],
     mentalResilienceAnswers: { ...DEFAULT_MR_ANSWERS },
+    // extended
+    emergencySupplyTier: undefined,
+    chronicCondition: undefined,
+    trustedLocalContacts: 1,
+    communityInvolvement: "occasional",
+    mutualAidAccess: undefined,
   });
 
   const { mutateAsync } = useSubmitAssessment();
@@ -254,7 +716,17 @@ export default function AssessmentPage() {
       const sessionId = localStorage.getItem(SESSION_KEY) ?? undefined;
       const finalCurrency = currency === "OTHER" ? (customCurrency || "USD") : currency;
       const finalSavingsMonths = savingsPreferNotToSay ? 3 : formData.savingsMonths;
-      const report = await mutateAsync({ data: { ...formData, savingsMonths: finalSavingsMonths, currency: finalCurrency, sessionId } as any });
+      const submitPayload: AssessmentInput & { currency?: string } = {
+        ...formData,
+        savingsMonths: finalSavingsMonths,
+        currency: finalCurrency,
+        sessionId,
+        // Ensure hasEmergencySupplies stays backward-compatible
+        hasEmergencySupplies: formData.emergencySupplyTier 
+          ? formData.emergencySupplyTier !== "none" && formData.emergencySupplyTier !== "under_3days"
+          : formData.hasEmergencySupplies,
+      };
+      const report = await mutateAsync({ data: submitPayload as AssessmentInput });
       if (!isAuthenticated) {
         const prev = parseInt(localStorage.getItem(ANON_COUNT_KEY) ?? "0", 10);
         localStorage.setItem(ANON_COUNT_KEY, String(prev + 1));
@@ -306,15 +778,16 @@ export default function AssessmentPage() {
     switch(step) {
       case 1: return formData.location.trim().length > 1;
       case 2: return !!formData.ageBracket;
-      case 3: return true; // income stability always has a value (or prefer not to say)
-      case MR_STEP: return true; // MR questions all have default values
+      case 3: return true;
+      case MR_STEP: return true;
       case 7: return formData.skills.length > 0;
-      case TOTAL_STEPS: return formData.riskConcerns.length > 0;
+      case 10: return !!formData.emergencySupplyTier;
+      case 11: return formData.riskConcerns.length > 0;
       default: return true;
     }
   };
 
-  const updateField = <K extends keyof AssessmentInput>(field: K, value: AssessmentInput[K]) => {
+  const updateField = <K extends keyof ExtendedFormData>(field: K, value: ExtendedFormData[K]) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -328,17 +801,20 @@ export default function AssessmentPage() {
     }));
   };
 
-  const toggleArrayItem = <K extends 'skills' | 'riskConcerns'>(field: K, value: any) => {
+  const toggleArrayItem = <K extends 'skills' | 'riskConcerns'>(
+    field: K,
+    value: ExtendedFormData[K] extends (infer Item)[] ? Item : never,
+  ) => {
     setFormData(prev => {
-      const current = prev[field] as any[];
+      const current = prev[field] as typeof value[];
       if (field === 'skills') {
         if (value === 'none') {
-          return { ...prev, [field]: current.includes('none') ? [] : ['none'] };
+          return { ...prev, [field]: current.includes('none' as typeof value) ? [] : ['none' as typeof value] };
         }
         if (current.includes(value)) {
           return { ...prev, [field]: current.filter(i => i !== value) };
         } else {
-          return { ...prev, [field]: [...current.filter(i => i !== 'none'), value] };
+          return { ...prev, [field]: [...current.filter(i => i !== ('none' as typeof value)), value] };
         }
       }
       if (current.includes(value)) {
@@ -357,11 +833,10 @@ export default function AssessmentPage() {
       : (MR_STEP - 1) + MR_QUESTIONS.length + (step - MR_STEP - 1);
   const progressPercent = ((currentSubStep + 1) / totalSubSteps) * 100;
 
-  const stepLabel = step === MR_STEP
-    ? `Mental Resilience ${mrStep + 1}/${MR_QUESTIONS.length}`
-    : `Step ${step} of ${TOTAL_STEPS}`;
+  const stepLabel = t.stepLabel(step, TOTAL_STEPS, mrStep, MR_QUESTIONS.length);
 
-  const currentMrQuestion = MR_QUESTIONS[mrStep];
+  const mrQuestions = lang === "ro" ? MR_QUESTIONS_RO : MR_QUESTIONS;
+  const currentMrQuestion = mrQuestions[mrStep];
   const currentMrAnswer = formData.mentalResilienceAnswers?.[currentMrQuestion?.key ?? "stressTolerance1"] ?? 3;
   const stepKey = step === MR_STEP ? `mr-${mrStep}` : `step-${step}`;
 
@@ -380,18 +855,16 @@ export default function AssessmentPage() {
           <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-6">
             <Lock className="w-8 h-8 text-primary" />
           </div>
-          <h2 className="text-2xl font-display font-bold mb-3">You've used your {FREE_LIMIT} free assessments</h2>
-          <p className="text-muted-foreground mb-8">
-            Upgrade to Resilium Pro for unlimited assessments, full progress tracking, and plan comparison tools.
-          </p>
+          <h2 className="text-2xl font-display font-bold mb-3">{t.gatedTitle(FREE_LIMIT)}</h2>
+          <p className="text-muted-foreground mb-8">{t.gatedDesc}</p>
           <div className="flex flex-col gap-3">
             <Link href="/pricing">
               <Button className="w-full rounded-full gap-2 h-12 shadow-lg shadow-primary/20">
-                <Zap className="w-4 h-4" /> View Pricing
+                <Zap className="w-4 h-4" /> {t.viewPricing}
               </Button>
             </Link>
             <Link href="/">
-              <Button variant="outline" className="w-full rounded-full h-12">Back to Home</Button>
+              <Button variant="outline" className="w-full rounded-full h-12">{t.backToHome}</Button>
             </Link>
           </div>
         </div>
@@ -408,10 +881,8 @@ export default function AssessmentPage() {
           </div>
           <Brain className="w-8 h-8 text-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
         </div>
-        <h2 className="text-3xl font-display font-bold mb-3">Analysing your profile and building your plan…</h2>
-        <p className="text-muted-foreground text-base max-w-sm">
-          This usually takes 60–90 seconds — please keep this tab open.
-        </p>
+        <h2 className="text-3xl font-display font-bold mb-3">{t.analysing}</h2>
+        <p className="text-muted-foreground text-base max-w-sm">{t.analysingDesc}</p>
       </div>
     );
   }
@@ -420,14 +891,14 @@ export default function AssessmentPage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
         <AlertCircle className="w-16 h-16 text-amber-500 mb-6" />
-        <h2 className="text-2xl font-display font-bold mb-2">Plan Limit Reached</h2>
+        <h2 className="text-2xl font-display font-bold mb-2">{t.planLimitTitle}</h2>
         <p className="text-muted-foreground max-w-md mb-8">{submitError.message}</p>
         <div className="flex gap-3">
           <Link href="/profile">
-            <Button className="rounded-full">Manage My Plans</Button>
+            <Button className="rounded-full">{t.manageMyPlans}</Button>
           </Link>
           <Button variant="outline" className="rounded-full" onClick={() => setSubmitError(null)}>
-            Go Back
+            {t.planLimitBack}
           </Button>
         </div>
       </div>
@@ -438,27 +909,21 @@ export default function AssessmentPage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
         <AlertCircle className="w-16 h-16 text-destructive mb-6" />
-        <h2 className="text-2xl font-display font-bold mb-2">Analysis Timed Out</h2>
-        <p className="text-muted-foreground max-w-md mb-2">
-          AI analysis can take up to 90 seconds. Your report may have been created in the background.
-        </p>
+        <h2 className="text-2xl font-display font-bold mb-2">{t.errorTitle}</h2>
+        <p className="text-muted-foreground max-w-md mb-2">{t.errorDesc}</p>
         {isAuthenticated ? (
-          <p className="text-muted-foreground max-w-md mb-8">
-            Check <strong>My Plans</strong> — your report might already be there.
-          </p>
+          <p className="text-muted-foreground max-w-md mb-8">{t.errorAuthHint}</p>
         ) : (
-          <p className="text-muted-foreground max-w-md mb-8">
-            If you were signed in, your report would be saved to your profile automatically.
-          </p>
+          <p className="text-muted-foreground max-w-md mb-8">{t.errorAnonHint}</p>
         )}
         <div className="flex flex-wrap justify-center gap-3">
           {isAuthenticated && (
             <Link href="/profile">
-              <Button className="rounded-full">Check My Plans</Button>
+              <Button className="rounded-full">{t.checkMyPlans}</Button>
             </Link>
           )}
           <Button variant="outline" className="rounded-full" onClick={() => setSubmitError(null)}>
-            Try Again
+            {t.tryAgain}
           </Button>
         </div>
       </div>
@@ -480,19 +945,44 @@ export default function AssessmentPage() {
     })
   };
 
+  const progressLabel = (step === MR_STEP ? t.progress[4] : t.progress[step]) ?? "";
+
   return (
     <div className="min-h-screen flex flex-col">
       <header className="w-full p-6 lg:p-8 flex items-center justify-between z-10">
         <div className="font-display font-bold text-xl tracking-tight text-primary">Resilium</div>
         <div className="flex items-center gap-3">
+          {/* Language Toggle */}
+          <div className="flex items-center gap-1 rounded-full border border-border bg-card p-0.5 text-xs font-medium">
+            <button
+              onClick={() => setLang("en")}
+              className={cn(
+                "px-3 py-1 rounded-full transition-all",
+                lang === "en" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+              )}
+              aria-label="Switch to English"
+            >
+              EN
+            </button>
+            <button
+              onClick={() => setLang("ro")}
+              className={cn(
+                "px-3 py-1 rounded-full transition-all",
+                lang === "ro" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+              )}
+              aria-label="Comută la Română"
+            >
+              RO
+            </button>
+          </div>
           {!isSubscribed && freeUsed === FREE_LIMIT - 1 && (
             <span className="text-xs font-medium px-3 py-1 rounded-full bg-amber-500/10 text-amber-700 border border-amber-500/20">
-              Last free assessment
+              {t.lastFree}
             </span>
           )}
           {!isSubscribed && freeUsed === 0 && (
             <span className="text-xs font-medium text-muted-foreground">
-              Assessment 1 of {FREE_LIMIT}
+              {t.assessmentN(1, FREE_LIMIT)}
             </span>
           )}
           <div className="text-sm font-medium text-muted-foreground">{stepLabel}</div>
@@ -502,19 +992,7 @@ export default function AssessmentPage() {
       <div className="w-full max-w-md mx-auto px-6 mb-8">
         <Progress value={progressPercent} className="h-2" />
         <div className="flex items-center justify-between mt-2 px-0.5">
-          <span className="text-xs font-semibold text-primary/70">
-            {step === 1 ? "Location" :
-             step === 2 ? "Age Bracket" :
-             step === 3 ? "Income" :
-             step === MR_STEP ? "Mental Resilience" :
-             step === 5 ? "Financial Runway" :
-             step === 6 ? "Dependents" :
-             step === 7 ? "Skills" :
-             step === 8 ? "Health & Mobility" :
-             step === 9 ? "Housing" :
-             step === 10 ? "Emergency Supplies" :
-             "Risk Profile"}
-          </span>
+          <span className="text-xs font-semibold text-primary/70">{progressLabel}</span>
           <span className="text-xs text-muted-foreground">{Math.round(progressPercent)}%</span>
         </div>
       </div>
@@ -536,12 +1014,12 @@ export default function AssessmentPage() {
               {/* STEP 1: LOCATION + CURRENCY */}
               {step === 1 && (
                 <div className="space-y-6">
-                  <h2 className="text-3xl md:text-4xl font-display font-bold">Where are you based?</h2>
-                  <p className="text-muted-foreground text-lg">Your geographic location affects climate, political, and economic risk factors.</p>
+                  <h2 className="text-3xl md:text-4xl font-display font-bold">{t.s1Title}</h2>
+                  <p className="text-muted-foreground text-lg">{t.s1Sub}</p>
                   <div className="relative">
                     <Input 
                       autoFocus
-                      placeholder="e.g. California, USA" 
+                      placeholder={t.s1Placeholder}
                       className="h-16 text-xl px-6 rounded-2xl bg-card border-2 border-border focus-visible:border-primary shadow-sm pr-14"
                       value={formData.location}
                       onChange={(e) => updateField('location', e.target.value)}
@@ -559,11 +1037,11 @@ export default function AssessmentPage() {
                     </button>
                   </div>
                   {locationDenied
-                    ? <p className="text-xs text-amber-600 -mt-2">Location access was denied — please type your city or region above.</p>
-                    : <p className="text-xs text-muted-foreground -mt-2">Or click the pin icon to detect your location automatically.</p>
+                    ? <p className="text-xs text-amber-600 -mt-2">{t.s1LocationDenied}</p>
+                    : <p className="text-xs text-muted-foreground -mt-2">{t.s1LocationHint}</p>
                   }
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-muted-foreground">Preferred currency for financial advice</p>
+                    <p className="text-sm font-medium text-muted-foreground">{t.s1Currency}</p>
                     <div className="grid grid-cols-3 gap-2">
                       {CURRENCIES.map((c) => (
                         <button
@@ -588,7 +1066,7 @@ export default function AssessmentPage() {
                     </div>
                     {currency === "OTHER" && (
                       <Input
-                        placeholder="Enter currency code (e.g. CHF, SEK)"
+                        placeholder={t.s1CustomCurrency}
                         className="mt-2 h-11 rounded-xl"
                         value={customCurrency}
                         onChange={(e) => setCustomCurrency(e.target.value.toUpperCase())}
@@ -603,17 +1081,10 @@ export default function AssessmentPage() {
               {/* STEP 2: AGE BRACKET */}
               {step === 2 && (
                 <div className="space-y-6">
-                  <h2 className="text-3xl md:text-4xl font-display font-bold">What's your age bracket?</h2>
-                  <p className="text-muted-foreground text-lg">Age shapes your financial time-horizon and baseline health vulnerability — it affects how we weight your scores.</p>
+                  <h2 className="text-3xl md:text-4xl font-display font-bold">{t.s2Title}</h2>
+                  <p className="text-muted-foreground text-lg">{t.s2Sub}</p>
                   <div className="grid grid-cols-2 gap-3" role="radiogroup" aria-label="Age bracket">
-                    {([
-                      { id: "18-24", label: "18–24", desc: "Early career" },
-                      { id: "25-34", label: "25–34", desc: "Building phase" },
-                      { id: "35-44", label: "35–44", desc: "Established" },
-                      { id: "45-54", label: "45–54", desc: "Peak earning" },
-                      { id: "55-64", label: "55–64", desc: "Pre-retirement" },
-                      { id: "65+",   label: "65+",   desc: "Retirement age" },
-                    ] as { id: AssessmentInputAgeBracket; label: string; desc: string }[]).map((opt) => (
+                    {(t.ageBrackets as { id: AssessmentInputAgeBracket; label: string; desc: string }[]).map((opt) => (
                       <Card
                         key={opt.id}
                         role="radio"
@@ -637,14 +1108,9 @@ export default function AssessmentPage() {
               {/* STEP 3: INCOME STABILITY */}
               {step === 3 && (
                 <div className="space-y-6">
-                  <h2 className="text-3xl md:text-4xl font-display font-bold">How stable is your income?</h2>
+                  <h2 className="text-3xl md:text-4xl font-display font-bold">{t.s3Title}</h2>
                   <div className="grid gap-4" role="radiogroup" aria-label="Income stability">
-                    {[
-                      { id: 'fixed', title: 'Fixed & Secure', desc: 'Salaried employee, guaranteed pension' },
-                      { id: 'freelance', title: 'Variable / Freelance', desc: 'Income fluctuates month to month' },
-                      { id: 'unstable', title: 'Unstable / Irregular', desc: 'Currently unemployed or highly volatile' },
-                      { id: 'student', title: 'Student / No income', desc: 'Full-time student or not currently earning' },
-                    ].map((opt) => (
+                    {(t.incomeOptions as { id: string; title: string; desc: string }[]).map((opt) => (
                       <Card 
                         key={opt.id}
                         role="radio"
@@ -679,8 +1145,8 @@ export default function AssessmentPage() {
                           : "border-dashed border-border text-muted-foreground hover:border-primary/30"
                       )}
                     >
-                      <span className="font-medium">Prefer not to say</span>
-                      <span className="text-xs block mt-0.5 opacity-70">Your answers remain private — this won't block your results</span>
+                      <span className="font-medium">{t.preferNotToSay}</span>
+                      <span className="text-xs block mt-0.5 opacity-70">{t.preferNotDesc}</span>
                     </button>
                   </div>
                 </div>
@@ -693,8 +1159,8 @@ export default function AssessmentPage() {
                     <div className="flex items-center gap-3 p-4 bg-primary/5 border border-primary/20 rounded-2xl">
                       <Brain className="w-8 h-8 text-primary flex-shrink-0" />
                       <div>
-                        <p className="text-sm font-semibold text-primary">Mental Resilience Assessment</p>
-                        <p className="text-xs text-muted-foreground">10 questions · ~2 minutes · shapes your entire plan</p>
+                        <p className="text-sm font-semibold text-primary">{t.mrTitle}</p>
+                        <p className="text-xs text-muted-foreground">{t.mrSub}</p>
                       </div>
                     </div>
                   )}
@@ -748,8 +1214,8 @@ export default function AssessmentPage() {
               {/* STEP 5: SAVINGS / FINANCIAL RUNWAY */}
               {step === 5 && (
                 <div className="space-y-8">
-                  <h2 className="text-3xl md:text-4xl font-display font-bold">What is your financial runway?</h2>
-                  <p className="text-muted-foreground text-lg">If you lost your income today, how many months could you survive on savings without going into debt?</p>
+                  <h2 className="text-3xl md:text-4xl font-display font-bold">{t.s5Title}</h2>
+                  <p className="text-muted-foreground text-lg">{t.s5Sub}</p>
                   
                   {!savingsPreferNotToSay ? (
                     <>
@@ -766,12 +1232,12 @@ export default function AssessmentPage() {
                       
                       <div className="flex justify-center items-end gap-2 text-primary">
                         <span className="text-6xl font-bold font-display tracking-tighter">{formData.savingsMonths}</span>
-                        <span className="text-xl font-medium mb-2">{formData.savingsMonths === 24 ? "months +" : "months"}</span>
+                        <span className="text-xl font-medium mb-2">{t.months(formData.savingsMonths)}</span>
                       </div>
                     </>
                   ) : (
                     <div className="flex items-center justify-center py-12">
-                      <p className="text-muted-foreground text-center">Your financial runway won't be used in scoring — we'll use a neutral estimate.</p>
+                      <p className="text-muted-foreground text-center">{t.savingsNeutral}</p>
                     </div>
                   )}
 
@@ -786,8 +1252,8 @@ export default function AssessmentPage() {
                         : "border-dashed border-border text-muted-foreground hover:border-primary/30"
                     )}
                   >
-                    <span className="font-medium">{savingsPreferNotToSay ? "✓ Prefer not to say" : "Prefer not to say"}</span>
-                    <span className="text-xs block mt-0.5 opacity-70">Skip the slider — we'll use a neutral mid-range value</span>
+                    <span className="font-medium">{savingsPreferNotToSay ? t.preferNotSavingsSelected : t.preferNotToSay}</span>
+                    <span className="text-xs block mt-0.5 opacity-70">{t.preferNotSavings}</span>
                   </button>
                 </div>
               )}
@@ -795,15 +1261,10 @@ export default function AssessmentPage() {
               {/* STEP 6: DEPENDENTS */}
               {step === 6 && (
                 <div className="space-y-6">
-                  <h2 className="text-3xl md:text-4xl font-display font-bold">How many dependents do you have?</h2>
-                  <p className="text-muted-foreground text-lg">Children, elderly parents, or anyone financially or physically reliant on you.</p>
+                  <h2 className="text-3xl md:text-4xl font-display font-bold">{t.s6Title}</h2>
+                  <p className="text-muted-foreground text-lg">{t.s6Sub}</p>
                   <div className="grid grid-cols-2 gap-4" role="radiogroup" aria-label="Number of dependents">
-                    {[
-                      { value: 0, label: 'None', desc: 'No dependents' },
-                      { value: 1, label: 'One', desc: 'One dependent' },
-                      { value: 2, label: 'Two or three', desc: '2–3 dependents' },
-                      { value: 3, label: 'Four or more', desc: '4+ dependents' },
-                    ].map((opt) => (
+                    {(t.dependentOptions as { value: number; label: string; desc: string }[]).map((opt) => (
                       <Card
                         key={opt.value}
                         role="radio"
@@ -813,8 +1274,8 @@ export default function AssessmentPage() {
                           "p-6 cursor-pointer flex flex-col items-center justify-center gap-2 transition-all duration-200",
                           formData.dependentCount === opt.value ? "step-card-active" : "hover:border-primary/30"
                         )}
-                        onClick={() => updateField('dependentCount', opt.value as any)}
-                        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); updateField('dependentCount', opt.value as any); } }}
+                        onClick={() => updateField('dependentCount', opt.value)}
+                        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); updateField('dependentCount', opt.value); } }}
                       >
                         <span className="text-xl font-bold">{opt.label}</span>
                         <span className="text-xs text-muted-foreground">{opt.desc}</span>
@@ -827,29 +1288,17 @@ export default function AssessmentPage() {
               {/* STEP 7: SKILLS */}
               {step === 7 && (
                 <div className="space-y-6">
-                  <h2 className="text-3xl md:text-4xl font-display font-bold">What practical skills do you possess?</h2>
-                  <p className="text-muted-foreground">Select all that apply.</p>
+                  <h2 className="text-3xl md:text-4xl font-display font-bold">{t.s7Title}</h2>
+                  <p className="text-muted-foreground">{t.s7Sub}</p>
                   <div className="grid grid-cols-1 gap-3" role="group" aria-label="Practical skills">
-                    {[
-                      { id: 'digital', label: 'Digital/Tech', desc: 'Software, IT, programming, online tools' },
-                      { id: 'physical', label: 'Trade/Manual', desc: 'Carpentry, plumbing, electrical, mechanics' },
-                      { id: 'survival', label: 'Outdoors/Survival', desc: 'Wilderness skills, hunting, navigation' },
-                      { id: 'medical', label: 'First Aid/Medical', desc: 'CPR, first aid, nursing or medical training' },
-                      { id: 'financial', label: 'Trading/Finance', desc: 'Investing, accounting, financial planning' },
-                      { id: 'language', label: 'Multiple Languages', desc: 'Fluent or conversational in 2+ languages' },
-                      { id: 'caregiving', label: 'Caregiving', desc: 'Child, elder, or disability care' },
-                      { id: 'agriculture', label: 'Agriculture/Homesteading', desc: 'Growing food, animal husbandry, gardening' },
-                      { id: 'community', label: 'Community Organizing', desc: 'Coordination, volunteering, leadership' },
-                      { id: 'teaching', label: 'Education/Teaching', desc: 'Teaching, tutoring, training others' },
-                      { id: 'none', label: 'None of these', desc: '' },
-                    ].map((opt) => (
+                    {(t.skills as { id: string; label: string; desc: string }[]).map((opt) => (
                       <div 
                         key={opt.id}
                         role="checkbox"
                         aria-checked={formData.skills.includes(opt.id as AssessmentInputSkillsItem)}
                         tabIndex={0}
-                        onClick={() => toggleArrayItem('skills', opt.id)}
-                        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleArrayItem('skills', opt.id); } }}
+                        onClick={() => toggleArrayItem('skills', opt.id as AssessmentInputSkillsItem)}
+                        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleArrayItem('skills', opt.id as AssessmentInputSkillsItem); } }}
                         className={cn(
                           "px-4 py-3 rounded-xl border-2 cursor-pointer font-medium transition-all",
                           formData.skills.includes(opt.id as AssessmentInputSkillsItem)
@@ -868,33 +1317,29 @@ export default function AssessmentPage() {
               {/* STEP 8: HEALTH & MOBILITY */}
               {step === 8 && (
                 <div className="space-y-8">
-                  <h2 className="text-3xl md:text-4xl font-display font-bold">Health & Mobility</h2>
+                  <h2 className="text-3xl md:text-4xl font-display font-bold">{t.s8Title}</h2>
                   <div>
-                    <h3 className="text-xl font-display font-bold mb-3">Overall Health Status</h3>
+                    <h3 className="text-xl font-display font-bold mb-3">{t.s8HealthTitle}</h3>
                     <div className="flex gap-2" role="radiogroup" aria-label="Health status">
-                      {(['excellent', 'good', 'fair', 'poor'] as AssessmentInputHealthStatus[]).map(opt => (
+                      {(t.healthOptions as { id: AssessmentInputHealthStatus; label: string }[]).map(opt => (
                         <Button 
-                          key={opt}
+                          key={opt.id}
                           role="radio"
-                          aria-checked={formData.healthStatus === opt}
-                          variant={formData.healthStatus === opt ? "default" : "outline"}
-                          className="flex-1 capitalize rounded-xl h-11 text-sm"
-                          onClick={() => updateField('healthStatus', opt)}
+                          aria-checked={formData.healthStatus === opt.id}
+                          variant={formData.healthStatus === opt.id ? "default" : "outline"}
+                          className="flex-1 rounded-xl h-11 text-sm"
+                          onClick={() => updateField('healthStatus', opt.id)}
                         >
-                          {opt}
+                          {opt.label}
                         </Button>
                       ))}
                     </div>
                   </div>
                   <div>
-                    <h3 className="text-xl font-display font-bold mb-1">Physical Capability</h3>
-                    <p className="text-sm text-muted-foreground mb-3">How physically capable are you of handling demanding situations?</p>
+                    <h3 className="text-xl font-display font-bold mb-1">{t.s8PhysicalTitle}</h3>
+                    <p className="text-sm text-muted-foreground mb-3">{t.s8PhysicalSub}</p>
                     <div className="flex gap-2" role="radiogroup" aria-label="Physical capability">
-                      {([
-                        { id: 'high', label: 'High' },
-                        { id: 'medium', label: 'Medium' },
-                        { id: 'low', label: 'Low' },
-                      ] as { id: AssessmentInputMobilityLevel; label: string }[]).map(opt => (
+                      {(t.mobilityOptions as { id: AssessmentInputMobilityLevel; label: string }[]).map(opt => (
                         <Button 
                           key={opt.id}
                           role="radio"
@@ -909,15 +1354,10 @@ export default function AssessmentPage() {
                     </div>
                   </div>
                   <div>
-                    <h3 className="text-xl font-display font-bold mb-1">Relocation Readiness</h3>
-                    <p className="text-sm text-muted-foreground mb-3">How quickly could you pack up and relocate if you had to?</p>
+                    <h3 className="text-xl font-display font-bold mb-1">{t.s8RelocationTitle}</h3>
+                    <p className="text-sm text-muted-foreground mb-3">{t.s8RelocationSub}</p>
                     <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Relocation readiness">
-                      {[
-                        { id: 'immediate', label: 'Immediately', desc: 'Could leave within days' },
-                        { id: 'within_month', label: 'Within a month', desc: 'Need a few weeks' },
-                        { id: 'within_3months', label: 'Within 3 months', desc: 'Need time to sort things' },
-                        { id: 'difficult', label: 'Very difficult', desc: 'Tied down for the foreseeable future' },
-                      ].map(opt => (
+                      {(t.relocationOptions as { id: string; label: string; desc: string }[]).map(opt => (
                         <Card
                           key={opt.id}
                           role="radio"
@@ -927,12 +1367,30 @@ export default function AssessmentPage() {
                             "p-3 cursor-pointer transition-all duration-200",
                             formData.relocationReadiness === opt.id ? "step-card-active" : "hover:border-primary/30"
                           )}
-                          onClick={() => updateField('relocationReadiness', opt.id as any)}
-                          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); updateField('relocationReadiness', opt.id as any); } }}
+                          onClick={() => updateField('relocationReadiness', opt.id as AssessmentInputRelocationReadiness)}
+                          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); updateField('relocationReadiness', opt.id as AssessmentInputRelocationReadiness); } }}
                         >
                           <div className="font-semibold text-sm">{opt.label}</div>
                           <div className="text-xs text-muted-foreground">{opt.desc}</div>
                         </Card>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-display font-bold mb-1">{t.s8ChronicTitle}</h3>
+                    <p className="text-sm text-muted-foreground mb-3">{t.s8ChronicSub}</p>
+                    <div className="flex gap-2" role="radiogroup" aria-label="Chronic condition">
+                      {(t.chronicOptions as { id: string; label: string }[]).map(opt => (
+                        <Button 
+                          key={opt.id}
+                          role="radio"
+                          aria-checked={formData.chronicCondition === opt.id}
+                          variant={formData.chronicCondition === opt.id ? "default" : "outline"}
+                          className="flex-1 rounded-xl h-11 text-sm"
+                          onClick={() => updateField('chronicCondition', opt.id as AssessmentInputChronicCondition)}
+                        >
+                          {opt.label}
+                        </Button>
                       ))}
                     </div>
                   </div>
@@ -942,17 +1400,9 @@ export default function AssessmentPage() {
               {/* STEP 9: HOUSING */}
               {step === 9 && (
                 <div className="space-y-6">
-                  <h2 className="text-3xl md:text-4xl font-display font-bold">Current housing situation?</h2>
+                  <h2 className="text-3xl md:text-4xl font-display font-bold">{t.s9Title}</h2>
                   <div className="grid grid-cols-1 gap-3" role="radiogroup" aria-label="Housing situation">
-                    {[
-                      { id: 'own', label: 'Own a home (mortgage or outright)' },
-                      { id: 'rent', label: 'Renting long-term' },
-                      { id: 'family', label: 'Living with family/friends' },
-                      { id: 'temporary', label: 'Temporary/Subsidised housing' },
-                      { id: 'transitional', label: 'Transitional housing or shelter' },
-                      { id: 'nomadic', label: 'Nomadic / frequent traveler' },
-                      { id: 'other', label: 'Other arrangement' },
-                    ].map((opt) => (
+                    {(t.housingOptions as { id: string; label: string }[]).map((opt) => (
                       <Card 
                         key={opt.id}
                         role="radio"
@@ -972,29 +1422,27 @@ export default function AssessmentPage() {
                 </div>
               )}
 
-              {/* STEP 10: EMERGENCY SUPPLIES */}
+              {/* STEP 10: EMERGENCY SUPPLIES (TIERED) */}
               {step === 10 && (
                 <div className="space-y-6">
-                  <h2 className="text-3xl md:text-4xl font-display font-bold">Emergency Preparedness</h2>
-                  <p className="text-muted-foreground text-lg">Do you have immediate access to at least 14 days of emergency food, water, and essential medicines?</p>
-                  <div className="grid grid-cols-2 gap-4" role="radiogroup" aria-label="Emergency supplies">
-                    {[
-                      { value: true, label: 'Yes' },
-                      { value: false, label: 'No' },
-                    ].map((opt) => (
+                  <h2 className="text-3xl md:text-4xl font-display font-bold">{t.s10Title}</h2>
+                  <p className="text-muted-foreground text-lg">{t.s10Sub}</p>
+                  <div className="grid grid-cols-1 gap-3" role="radiogroup" aria-label="Emergency supplies tier">
+                    {(t.emergencyOptions as { id: string; label: string; desc: string }[]).map((opt) => (
                       <Card 
-                        key={String(opt.value)}
+                        key={opt.id}
                         role="radio"
-                        aria-checked={formData.hasEmergencySupplies === opt.value}
+                        aria-checked={formData.emergencySupplyTier === opt.id}
                         tabIndex={0}
                         className={cn(
-                          "p-8 cursor-pointer flex flex-col items-center justify-center gap-4 transition-all duration-200",
-                          formData.hasEmergencySupplies === opt.value ? "step-card-active" : "hover:border-primary/30"
+                          "p-5 cursor-pointer transition-all duration-200",
+                          formData.emergencySupplyTier === opt.id ? "step-card-active" : "hover:border-primary/30"
                         )}
-                        onClick={() => updateField('hasEmergencySupplies', opt.value)}
-                        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); updateField('hasEmergencySupplies', opt.value); } }}
+                        onClick={() => updateField('emergencySupplyTier', opt.id as AssessmentInputEmergencySupplyTier)}
+                        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); updateField('emergencySupplyTier', opt.id as AssessmentInputEmergencySupplyTier); } }}
                       >
-                        <span className="text-2xl font-bold">{opt.label}</span>
+                        <div className="font-semibold">{opt.label}</div>
+                        <div className="text-xs text-muted-foreground mt-0.5">{opt.desc}</div>
                       </Card>
                     ))}
                   </div>
@@ -1002,23 +1450,12 @@ export default function AssessmentPage() {
               )}
 
               {/* STEP 11: RISK PROFILE */}
-              {step === TOTAL_STEPS && (
+              {step === 11 && (
                 <div className="space-y-6">
-                  <h2 className="text-3xl md:text-4xl font-display font-bold">Primary Risk Concerns</h2>
-                  <p className="text-muted-foreground">Select the risks you feel least prepared for (choose at least one).</p>
+                  <h2 className="text-3xl md:text-4xl font-display font-bold">{t.s11Title}</h2>
+                  <p className="text-muted-foreground">{t.s11Sub}</p>
                   <div className="grid grid-cols-2 gap-3" role="group" aria-label="Risk concerns">
-                    {[
-                      { id: 'job_loss', label: 'Job Loss / Automation' },
-                      { id: 'inflation', label: 'Hyperinflation' },
-                      { id: 'financial_crisis', label: 'Market Crash' },
-                      { id: 'natural_disaster', label: 'Natural Disasters' },
-                      { id: 'supply_chain', label: 'Supply Chain Failure' },
-                      { id: 'political_instability', label: 'Political Unrest' },
-                      { id: 'cyber_attack', label: 'Cyber Grid Outage' },
-                      { id: 'war_conflict', label: 'War / Conflict' },
-                      { id: 'pandemic', label: 'Global Pandemic' },
-                      { id: 'illness', label: 'Personal Illness' },
-                    ].map((opt) => {
+                    {(t.riskOptions as { id: string; label: string }[]).map((opt) => {
                       const isSelected = formData.riskConcerns.includes(opt.id as AssessmentInputRiskConcernsItem);
                       const isTraumaAdjacent = opt.id === 'war_conflict' || opt.id === 'illness';
                       return (
@@ -1027,8 +1464,8 @@ export default function AssessmentPage() {
                             role="checkbox"
                             aria-checked={isSelected}
                             tabIndex={0}
-                            onClick={() => toggleArrayItem('riskConcerns', opt.id)}
-                            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleArrayItem('riskConcerns', opt.id); } }}
+                            onClick={() => toggleArrayItem('riskConcerns', opt.id as AssessmentInputRiskConcernsItem)}
+                            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleArrayItem('riskConcerns', opt.id as AssessmentInputRiskConcernsItem); } }}
                             className={cn(
                               "px-3 py-3 rounded-xl border-2 cursor-pointer font-medium text-sm transition-all text-center flex items-center justify-center min-h-[60px]",
                               isSelected
@@ -1040,12 +1477,96 @@ export default function AssessmentPage() {
                           </div>
                           {isSelected && isTraumaAdjacent && (
                             <p className="text-xs text-muted-foreground px-1 leading-relaxed">
-                              We understand this may be personal. Your answers shape a plan that takes this seriously.
+                              {t.traumaNote}
                             </p>
                           )}
                         </div>
                       );
                     })}
+                  </div>
+                </div>
+              )}
+
+              {/* STEP 12: SOCIAL CAPITAL */}
+              {step === 12 && (
+                <div className="space-y-8">
+                  <div>
+                    <h2 className="text-3xl md:text-4xl font-display font-bold">{t.s12Title}</h2>
+                    <p className="text-muted-foreground text-lg mt-2">{t.s12Sub}</p>
+                  </div>
+
+                  <div>
+                    <h3 className="text-xl font-display font-bold mb-1">{t.s12ContactsTitle}</h3>
+                    <p className="text-sm text-muted-foreground mb-3">{t.s12ContactsSub}</p>
+                    <div className="grid grid-cols-2 gap-3" role="radiogroup" aria-label="Trusted contacts">
+                      {(t.contactOptions as { value: number; label: string; desc: string }[]).map((opt) => (
+                        <Card
+                          key={opt.value}
+                          role="radio"
+                          aria-checked={formData.trustedLocalContacts === opt.value}
+                          tabIndex={0}
+                          className={cn(
+                            "p-4 cursor-pointer flex flex-col gap-1 transition-all duration-200",
+                            formData.trustedLocalContacts === opt.value ? "step-card-active" : "hover:border-primary/30"
+                          )}
+                          onClick={() => updateField('trustedLocalContacts', opt.value)}
+                          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); updateField('trustedLocalContacts', opt.value); } }}
+                        >
+                          <span className="font-bold">{opt.label}</span>
+                          <span className="text-xs text-muted-foreground">{opt.desc}</span>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-xl font-display font-bold mb-1">{t.s12InvolvementTitle}</h3>
+                    <p className="text-sm text-muted-foreground mb-3">{t.s12InvolvementSub}</p>
+                    <div className="grid grid-cols-1 gap-3" role="radiogroup" aria-label="Community involvement">
+                      {(t.involvementOptions as { id: string; label: string; desc: string }[]).map((opt) => (
+                        <Card
+                          key={opt.id}
+                          role="radio"
+                          aria-checked={formData.communityInvolvement === opt.id}
+                          tabIndex={0}
+                          className={cn(
+                            "p-4 cursor-pointer transition-all duration-200",
+                            formData.communityInvolvement === opt.id ? "step-card-active" : "hover:border-primary/30"
+                          )}
+                          onClick={() => updateField('communityInvolvement', opt.id as AssessmentInputCommunityInvolvement)}
+                          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); updateField('communityInvolvement', opt.id as AssessmentInputCommunityInvolvement); } }}
+                        >
+                          <div className="font-semibold">{opt.label}</div>
+                          <div className="text-xs text-muted-foreground mt-0.5">{opt.desc}</div>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-xl font-display font-bold mb-1">{t.s12MutualAidTitle}</h3>
+                    <p className="text-sm text-muted-foreground mb-3">{t.s12MutualAidSub}</p>
+                    <div className="grid grid-cols-2 gap-4" role="radiogroup" aria-label="Mutual aid access">
+                      {[
+                        { value: true, label: t.mutualAidYes },
+                        { value: false, label: t.mutualAidNo },
+                      ].map((opt) => (
+                        <Card
+                          key={String(opt.value)}
+                          role="radio"
+                          aria-checked={formData.mutualAidAccess === opt.value}
+                          tabIndex={0}
+                          className={cn(
+                            "p-6 cursor-pointer flex items-center justify-center text-center transition-all duration-200",
+                            formData.mutualAidAccess === opt.value ? "step-card-active" : "hover:border-primary/30"
+                          )}
+                          onClick={() => updateField('mutualAidAccess', opt.value)}
+                          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); updateField('mutualAidAccess', opt.value); } }}
+                        >
+                          <span className="font-semibold text-sm">{opt.label}</span>
+                        </Card>
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}
@@ -1064,7 +1585,7 @@ export default function AssessmentPage() {
             className="text-muted-foreground hover:text-foreground"
             aria-label="Go back"
           >
-            <ArrowLeft className="w-4 h-4 mr-2" /> Back
+            <ArrowLeft className="w-4 h-4 mr-2" /> {t.back}
           </Button>
           
           <Button 
@@ -1072,9 +1593,9 @@ export default function AssessmentPage() {
             className="px-8 rounded-full shadow-lg shadow-primary/20"
             onClick={handleNext}
             disabled={!isStepValid()}
-            aria-label={step === TOTAL_STEPS ? "Generate Report" : step === MR_STEP && mrStep === MR_QUESTIONS.length - 1 ? "Continue to next section" : "Continue to next step"}
+            aria-label={step === TOTAL_STEPS ? t.generateReport : step === MR_STEP && mrStep === MR_QUESTIONS.length - 1 ? t.continue : t.next}
           >
-            {step === TOTAL_STEPS ? 'Generate Report' : step === MR_STEP && mrStep === MR_QUESTIONS.length - 1 ? 'Continue' : 'Next'}
+            {step === TOTAL_STEPS ? t.generateReport : step === MR_STEP && mrStep === MR_QUESTIONS.length - 1 ? t.continue : t.next}
             {step === TOTAL_STEPS ? <CheckCircle2 className="w-4 h-4 ml-2" /> : <ArrowRight className="w-4 h-4 ml-2" />}
           </Button>
         </div>

@@ -556,11 +556,19 @@ components:
           description: Ability to relocate or travel
         housingType:
           type: string
-          enum: [own, rent, family, nomadic, other]
+          enum: [own, rent, family, nomadic, other, temporary, transitional]
           description: Current housing situation
         hasEmergencySupplies:
           type: boolean
-          description: Access to emergency food/water supplies
+          description: Access to emergency food/water supplies (legacy; use emergencySupplyTier for tiered scoring)
+        emergencySupplyTier:
+          type: string
+          enum: [none, under_3days, 3_14days, 2weeks_1month, over_1month]
+          description: "Tiered emergency supply level: none, under 3 days, 3-14 days, 2 weeks to 1 month, or over 1 month"
+        chronicCondition:
+          type: string
+          enum: [yes, no, prefer_not_to_say]
+          description: Whether the user has a chronic health condition
         psychologicalResilience:
           type: number
           minimum: 1
@@ -581,6 +589,18 @@ components:
           description: Age bracket of the user — affects scoring modifiers for financial runway and health vulnerability
         mentalResilienceAnswers:
           $ref: "#/components/schemas/MentalResilienceAnswers"
+        trustedLocalContacts:
+          type: integer
+          minimum: 0
+          maximum: 20
+          description: Number of trusted local contacts the user can rely on in a crisis
+        communityInvolvement:
+          type: string
+          enum: [none, occasional, active]
+          description: Level of community involvement and engagement
+        mutualAidAccess:
+          type: boolean
+          description: Whether the user has access to a mutual aid network
       required:
         - location
         - incomeStability
@@ -691,6 +711,11 @@ components:
           type: number
           minimum: 0
           maximum: 100
+        socialCapital:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: Social capital resilience score (optional; populated when Social Capital step is completed)
       required:
         - overall
         - financial

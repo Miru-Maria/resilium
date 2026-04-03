@@ -42,10 +42,19 @@ type AssessmentInput = {
   housingType: "own" | "rent" | "family" | "nomadic" | "other" | "temporary" | "transitional";
   // New: explicit relocation readiness
   relocationReadiness?: "immediate" | "within_month" | "within_3months" | "difficult";
-  hasEmergencySupplies: boolean;
+  // Tiered emergency supplies
+  emergencySupplyTier?: "none" | "under_3days" | "3_14days" | "2weeks_1month" | "over_1month";
+  // Legacy boolean
+  hasEmergencySupplies?: boolean;
   psychologicalResilience: number;
   riskConcerns: string[];
   mentalResilienceAnswers?: MentalResilienceAnswers;
+  // Chronic health modifier
+  chronicCondition?: "yes" | "prefer_not_to_say" | "no";
+  // Social capital inputs
+  trustedLocalContacts?: number;   // 0=none, 1=1-2, 2=3-5, 3=6+
+  communityInvolvement?: "none" | "occasional" | "active";
+  mutualAidAccess?: boolean;
 };
 
 // ─── Age modifiers ────────────────────────────────────────────────────────────
@@ -122,6 +131,7 @@ export function calculateScores(input: AssessmentInput) {
   const skills = calculateSkillsScore(input);
   const mobility = calculateMobilityScore(input);
   const resources = calculateResourcesScore(input);
+  const socialCapital = calculateSocialCapitalScore(input);
 
   // Derive psychological score from composite when available; fall back to self-rating
   let mentalResilienceSubScores: MentalResilienceSubScores | null = null;
@@ -144,13 +154,16 @@ export function calculateScores(input: AssessmentInput) {
     modifier = 0.85 + (mentalResilienceSubScores.composite / GROWTH_PATHWAY_THRESHOLD) * 0.15;
   }
 
+  // Weights: financial 25%, health 15%, skills 18%, mobility 13%, psychological 14%, resources 9%, socialCapital 6%
+  // (redistributed ~2% from each of skills, mobility, psychological, resources to add socialCapital at 6%)
   const overall = Math.round(
     (financial * modifier) * 0.25 +
     health * 0.15 +
-    (skills * modifier) * 0.20 +
-    mobility * 0.15 +
-    psychological * 0.15 +
-    resources * 0.10
+    (skills * modifier) * 0.18 +
+    mobility * 0.13 +
+    psychological * 0.14 +
+    resources * 0.09 +
+    socialCapital * 0.06
   );
 
   return {
@@ -161,6 +174,7 @@ export function calculateScores(input: AssessmentInput) {
     mobility,
     psychological,
     resources,
+    socialCapital,
     mentalResilienceSubScores,
   };
 }
@@ -191,8 +205,7 @@ function calculateFinancialScore(input: AssessmentInput): number {
 }
 
 // ─── HEALTH (15%) ─────────────────────────────────────────────────────────────
-// status(15-80) + medical skill(20) = max 100
-// No phantom +20 bonus
+// status(15-80) + medical skill(20) - chronic condition modifier = max 100
 function calculateHealthScore(input: AssessmentInput): number {
   let score = 0;
 
@@ -201,11 +214,16 @@ function calculateHealthScore(input: AssessmentInput): number {
 
   if (input.skills.includes("medical")) score += 20;
 
-  return Math.min(100, score);
+  // Chronic condition or disability affecting daily function: apply negative modifier
+  if (input.chronicCondition === "yes") score -= 15;
+  // "prefer_not_to_say" and "no" add no modifier
+
+  return Math.min(100, Math.max(0, score));
 }
 
 // ─── SKILLS (20%) ─────────────────────────────────────────────────────────────
-// Sum of individual skill values, floored at 10 (basic life competency)
+// Diminishing-returns model: each additional skill beyond the first adds ~70% of the previous.
+// Floor at 10, ceiling at 100.
 function calculateSkillsScore(input: AssessmentInput): number {
   const skillValues: Record<string, number> = {
     digital: 20,
@@ -221,13 +239,20 @@ function calculateSkillsScore(input: AssessmentInput): number {
     none: 0,
   };
 
+  // Sort skills by descending value to maximize diminishing-returns calculation
+  const skillScores = input.skills
+    .map(s => skillValues[s] ?? 0)
+    .filter(v => v > 0)
+    .sort((a, b) => b - a);
+
   let score = 0;
-  for (const skill of input.skills) {
-    score += skillValues[skill] ?? 0;
+  const DR_FACTOR = 0.7; // each additional skill adds 70% of previous
+  for (let i = 0; i < skillScores.length; i++) {
+    score += skillScores[i] * Math.pow(DR_FACTOR, i);
   }
 
   // Floor: everyone has basic life competency
-  return Math.min(100, Math.max(10, score));
+  return Math.min(100, Math.max(10, Math.round(score)));
 }
 
 // ─── MOBILITY (15%) ──────────────────────────────────────────────────────────
@@ -251,12 +276,13 @@ function calculateMobilityScore(input: AssessmentInput): number {
     score += readinessScores[input.relocationReadiness] ?? 20;
   } else {
     // Legacy fallback: derive flexibility from housing type
+    // "family" housing is treated comparably to renting for mobility
     const housingFlexScores: Record<string, number> = {
       nomadic: 35,
       transitional: 30,
       temporary: 28,
       rent: 25,
-      family: 20,
+      family: 22,   // comparable to renting, slightly lower only due to social ties
       other: 15,
       own: 10,
     };
@@ -272,19 +298,33 @@ function calculateMobilityScore(input: AssessmentInput): number {
   return Math.min(100, score);
 }
 
-// ─── RESOURCES (10%) ─────────────────────────────────────────────────────────
+// ─── RESOURCES (9%) ─────────────────────────────────────────────────────────
 // Physical assets: emergency supplies + housing stability (separate from mobility flexibility)
+// Emergency supplies now tiered; housing: family is a positive (shared assets & support)
 // Floored at 10
 function calculateResourcesScore(input: AssessmentInput): number {
   let score = 0;
 
-  // Physical stockpile
-  if (input.hasEmergencySupplies) score += 50;
+  // Emergency supplies — tiered scoring
+  if (input.emergencySupplyTier) {
+    const tierScores: Record<string, number> = {
+      over_1month: 50,
+      "2weeks_1month": 38,
+      "3_14days": 22,
+      under_3days: 10,
+      none: 0,
+    };
+    score += tierScores[input.emergencySupplyTier] ?? 0;
+  } else {
+    // Legacy boolean fallback
+    if (input.hasEmergencySupplies === true) score += 38; // equivalent to 3-14 days tier
+  }
 
-  // Housing as a stability asset (own = major asset; nomadic/transitional = no fixed base)
+  // Housing as a stability asset (own = major asset; family = moderate positive for shared support)
+  // "family" living is NOT penalised — it reflects legitimate mutual support arrangements
   const housingStabilityScores: Record<string, number> = {
     own: 40,
-    family: 30,
+    family: 30,   // comparable to renting — shared assets, mutual support is a genuine strength
     rent: 20,
     other: 10,
     temporary: 8,
@@ -294,5 +334,31 @@ function calculateResourcesScore(input: AssessmentInput): number {
   score += housingStabilityScores[input.housingType] ?? 10;
 
   // Floor: everyone has some minimal resources
+  return Math.min(100, Math.max(10, score));
+}
+
+// ─── SOCIAL CAPITAL (6%) ──────────────────────────────────────────────────────
+// Captures community/network strength: trusted contacts, community involvement, mutual aid
+// Score range: 10 (floor) - 100 (ceiling)
+function calculateSocialCapitalScore(input: AssessmentInput): number {
+  let score = 0;
+
+  // Trusted local/abroad contacts (0=none, 1=1-2, 2=3-5, 3=6+)
+  const contactScores: Record<number, number> = { 0: 0, 1: 25, 2: 40, 3: 50 };
+  score += contactScores[input.trustedLocalContacts ?? 1] ?? 25;
+
+  // Community organisation involvement
+  const involvementScores: Record<string, number> = {
+    active: 30,
+    occasional: 15,
+    none: 0,
+  };
+  score += involvementScores[input.communityInvolvement ?? "occasional"] ?? 15;
+
+  // Access to mutual aid networks
+  if (input.mutualAidAccess === true) score += 20;
+  else if (input.mutualAidAccess === false) score += 0;
+  else score += 5; // undefined/unknown — modest default
+
   return Math.min(100, Math.max(10, score));
 }

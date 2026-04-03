@@ -217,6 +217,57 @@ export const AssessmentInputAgeBracket = {
   "65+": "65+",
 } as const;
 
+/**
+ * How quickly the user can relocate
+ */
+export type AssessmentInputRelocationReadiness =
+  (typeof AssessmentInputRelocationReadiness)[keyof typeof AssessmentInputRelocationReadiness];
+
+export const AssessmentInputRelocationReadiness = {
+  immediate: "immediate",
+  within_month: "within_month",
+  within_3months: "within_3months",
+  difficult: "difficult",
+} as const;
+
+/**
+ * Tiered emergency supply level
+ */
+export type AssessmentInputEmergencySupplyTier =
+  (typeof AssessmentInputEmergencySupplyTier)[keyof typeof AssessmentInputEmergencySupplyTier];
+
+export const AssessmentInputEmergencySupplyTier = {
+  none: "none",
+  under_3days: "under_3days",
+  "3_14days": "3_14days",
+  "2weeks_1month": "2weeks_1month",
+  over_1month: "over_1month",
+} as const;
+
+/**
+ * Whether the user has a chronic health condition
+ */
+export type AssessmentInputChronicCondition =
+  (typeof AssessmentInputChronicCondition)[keyof typeof AssessmentInputChronicCondition];
+
+export const AssessmentInputChronicCondition = {
+  yes: "yes",
+  no: "no",
+  prefer_not_to_say: "prefer_not_to_say",
+} as const;
+
+/**
+ * Level of community involvement and engagement
+ */
+export type AssessmentInputCommunityInvolvement =
+  (typeof AssessmentInputCommunityInvolvement)[keyof typeof AssessmentInputCommunityInvolvement];
+
+export const AssessmentInputCommunityInvolvement = {
+  none: "none",
+  occasional: "occasional",
+  active: "active",
+} as const;
+
 export interface AssessmentInput {
   /** Country or region */
   location: string;
@@ -234,8 +285,12 @@ export interface AssessmentInput {
   mobilityLevel: AssessmentInputMobilityLevel;
   /** Current housing situation */
   housingType: AssessmentInputHousingType;
-  /** Access to emergency food/water supplies */
+  /** Access to emergency food/water supplies (legacy; use emergencySupplyTier for tiered scoring) */
   hasEmergencySupplies: boolean;
+  /** Tiered emergency supply level */
+  emergencySupplyTier?: AssessmentInputEmergencySupplyTier;
+  /** Whether the user has a chronic health condition */
+  chronicCondition?: AssessmentInputChronicCondition;
   /**
    * Self-rated psychological resilience (1-10)
    * @minimum 1
@@ -248,7 +303,24 @@ export interface AssessmentInput {
   sessionId?: string;
   /** Age bracket of the user — affects scoring modifiers for financial runway and health vulnerability */
   ageBracket?: AssessmentInputAgeBracket;
+  /**
+   * Number of dependents (0=none, 1=one, 2=two-three, 3=four+)
+   * @minimum 0
+   */
+  dependentCount?: number;
+  /** How quickly the user can relocate */
+  relocationReadiness?: AssessmentInputRelocationReadiness;
   mentalResilienceAnswers?: MentalResilienceAnswers;
+  /**
+   * Number of trusted local contacts the user can rely on in a crisis
+   * @minimum 0
+   * @maximum 20
+   */
+  trustedLocalContacts?: number;
+  /** Level of community involvement and engagement */
+  communityInvolvement?: AssessmentInputCommunityInvolvement;
+  /** Whether the user has access to a mutual aid network */
+  mutualAidAccess?: boolean;
 }
 
 export type MentalResilienceProfilePathway =
@@ -360,6 +432,11 @@ export interface ResilienceScore {
    * @maximum 100
    */
   resources: number;
+  /**
+   * @minimum 0
+   * @maximum 100
+   */
+  socialCapital?: number;
 }
 
 export type ActionItemPriority =
