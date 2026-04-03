@@ -75,7 +75,7 @@ export default function Slide5Replit() {
               className="text-[1.3vw] font-light leading-relaxed"
               style={{ color: "#8A7A6A", fontFamily: "Inter, sans-serif" }}
             >
-              Full assessment on Android (Google Play), push notifications, GDPR data management, score sharing
+              Full assessment on Android, push notifications, GDPR data management, score sharing
             </div>
           </div>
 

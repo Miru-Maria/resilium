@@ -146,7 +146,7 @@ export async function generateResilienceReport(
     : "";
 
   const chronicHealthNote = input.chronicCondition === "yes"
-    ? "IMPORTANT: The user has a chronic condition or disability affecting daily function. Do NOT recommend self-directed physical tasks such as manual labour, strenuous exercise drills, or physically demanding emergency preparations. Instead prioritise: assisted alternatives, digital preparation tools, professional support networks, and community-based resources. Note this explicitly in health checklist items."
+    ? "IMPORTANT: The user has a chronic condition or disability affecting daily function. Do NOT recommend self-directed physical tasks such as manual labor, strenuous exercise drills, or physically demanding emergency preparations. Instead prioritize: assisted alternatives, digital preparation tools, professional support networks, and community-based resources. Note this explicitly in health checklist items."
     : "";
 
   const socialCapitalLevel = scores.socialCapital >= 70
