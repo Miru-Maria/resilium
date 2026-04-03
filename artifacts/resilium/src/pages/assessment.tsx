@@ -40,13 +40,14 @@ import type {
 // 4 = Mental Resilience (10 sub-steps)
 // 5 = Financial Runway (savings)
 // 6 = Dependents
-// 7 = Skills
-// 8 = Health & Mobility (now includes chronic condition follow-up)
-// 9 = Housing
-// 10 = Emergency Supplies (tiered)
-// 11 = Risk Profile
-// 12 = Social Capital (new)
-const TOTAL_STEPS = 12;
+// 7  = Skills
+// 8  = Health (health status + chronic condition)
+// 9  = Mobility & Relocation (physical capability + relocation readiness)
+// 10 = Housing
+// 11 = Emergency Supplies (tiered)
+// 12 = Risk Profile
+// 13 = Social Capital
+const TOTAL_STEPS = 13;
 const MR_STEP = 4;
 
 type Language = "en" | "ro";
@@ -62,8 +63,9 @@ const T = {
     // progress labels
     progress: {
       1: "Location", 2: "Age Bracket", 3: "Income", 4: "Mental Resilience",
-      5: "Financial Runway", 6: "Dependents", 7: "Skills", 8: "Health & Mobility",
-      9: "Housing", 10: "Emergency Supplies", 11: "Risk Profile", 12: "Social Capital"
+      5: "Financial Runway", 6: "Dependents", 7: "Skills", 8: "Health",
+      9: "Mobility & Relocation", 10: "Housing", 11: "Emergency Supplies",
+      12: "Risk Profile", 13: "Social Capital",
     } as Record<number, string>,
     // nav
     back: "Back",
@@ -104,8 +106,8 @@ const T = {
     mrSub: "10 questions · ~2 minutes · shapes your entire plan",
     // step 5
     s5Title: "What is your financial runway?",
-    s5Sub: "If you lost your income today, how many months could you survive on savings without going into debt?",
-    months: (n: number) => n === 24 ? "months +" : "months",
+    s5Sub: "If you lost your income today, how many months could you sustain yourself and your household without going into debt? This is one of the strongest predictors of crisis resilience.",
+    months: (n: number) => n === 36 ? "months +" : "months",
     preferNotSavings: "Skip the slider — we'll use a neutral mid-range value",
     preferNotSavingsSelected: "✓ Prefer not to say",
     savingsNeutral: "Your financial runway won't be used in scoring — we'll use a neutral estimate.",
@@ -132,10 +134,10 @@ const T = {
       { id: "agriculture", label: "Agriculture/Homesteading", desc: "Growing food, animal husbandry, gardening" },
       { id: "community", label: "Community Organizing", desc: "Coordination, volunteering, leadership" },
       { id: "teaching", label: "Education/Teaching", desc: "Teaching, tutoring, training others" },
-      { id: "none", label: "None of these", desc: "" },
+      { id: "none", label: "None that apply", desc: "" },
     ],
     // step 8
-    s8Title: "Health & Mobility",
+    s8Title: "Health",
     s8HealthTitle: "Overall Health Status",
     healthOptions: [
       { id: "excellent", label: "Excellent" },
@@ -165,8 +167,12 @@ const T = {
       { id: "no", label: "No" },
       { id: "prefer_not_to_say", label: "Prefer not to say" },
     ],
-    // step 9
-    s9Title: "Current housing situation?",
+    // step 9 (Mobility & Relocation)
+    s9Title: "Mobility & Relocation",
+    s9Sub: "Your physical capability and flexibility to relocate are key factors in crisis response.",
+    // step 10 (Housing)
+    housingStepTitle: "Current housing situation?",
+    housingStepSub: "Your housing situation affects both financial stability and your ability to shelter-in-place.",
     housingOptions: [
       { id: "own", label: "Own a home (mortgage or outright)" },
       { id: "rent", label: "Renting long-term" },
@@ -204,7 +210,7 @@ const T = {
     traumaNote: "We understand this may be personal. Your answers shape a plan that takes this seriously.",
     // step 12
     s12Title: "Community & Social Network",
-    s12Sub: "Strong community ties are a core resilience asset in any culture. Help us understand yours.",
+    s12Sub: "Strong networks are often the most reliable resource in a crisis. Help me understand yours.",
     s12ContactsTitle: "Trusted contacts you could call on in a major crisis",
     s12ContactsSub: "People locally or abroad who would genuinely help you — family, friends, colleagues, or community.",
     contactOptions: [
@@ -248,8 +254,9 @@ const T = {
     assessmentN: (n: number, limit: number) => `Evaluarea ${n} din ${limit}`,
     progress: {
       1: "Locație", 2: "Vârstă", 3: "Venituri", 4: "Reziliență Mentală",
-      5: "Resurse Financiare", 6: "Dependenți", 7: "Abilități", 8: "Sănătate & Mobilitate",
-      9: "Locuință", 10: "Urgențe", 11: "Profilul de Risc", 12: "Capital Social"
+      5: "Resurse Financiare", 6: "Dependenți", 7: "Abilități", 8: "Sănătate",
+      9: "Mobilitate & Relocare", 10: "Locuință", 11: "Urgențe",
+      12: "Profilul de Risc", 13: "Capital Social",
     } as Record<number, string>,
     back: "Înapoi",
     next: "Următor",
@@ -284,8 +291,8 @@ const T = {
     mrTitle: "Evaluarea Rezilienței Mentale",
     mrSub: "10 întrebări · ~2 minute · modelează întregul tău plan",
     s5Title: "Care este rezerva ta financiară?",
-    s5Sub: "Dacă ți-ai pierde venitul azi, câte luni ai putea supraviețui din economii fără a te îndatora?",
-    months: (n: number) => n === 24 ? "luni +" : "luni",
+    s5Sub: "Dacă ți-ai pierde venitul azi, câte luni ți-ai putea susține gospodăria fără a te îndatora? Acesta este unul dintre cei mai puternici predictori ai rezilienței în criză.",
+    months: (n: number) => n === 36 ? "luni +" : "luni",
     preferNotSavings: "Sari peste selector — vom folosi o valoare neutră",
     preferNotSavingsSelected: "✓ Prefer să nu spun",
     savingsNeutral: "Rezerva ta financiară nu va fi folosită în scorare — vom folosi o estimare neutră.",
@@ -310,9 +317,9 @@ const T = {
       { id: "agriculture", label: "Agricultură/Gospodărie", desc: "Cultivarea alimentelor, creșterea animalelor, grădinărit" },
       { id: "community", label: "Organizare Comunitară", desc: "Coordonare, voluntariat, leadership" },
       { id: "teaching", label: "Educație/Predare", desc: "Predare, meditații, instruirea altora" },
-      { id: "none", label: "Niciuna din acestea", desc: "" },
+      { id: "none", label: "Niciuna care se aplică", desc: "" },
     ],
-    s8Title: "Sănătate & Mobilitate",
+    s8Title: "Sănătate",
     s8HealthTitle: "Starea Generală de Sănătate",
     healthOptions: [
       { id: "excellent", label: "Excelentă" },
@@ -342,7 +349,11 @@ const T = {
       { id: "no", label: "Nu" },
       { id: "prefer_not_to_say", label: "Prefer să nu spun" },
     ],
-    s9Title: "Situația locativă actuală?",
+    s9Title: "Mobilitate & Relocare",
+    s9Sub: "Capacitatea ta fizică și flexibilitatea de a te reloca sunt factori cheie în răspunsul la criză.",
+    // step 10 (Housing)
+    housingStepTitle: "Situația locativă actuală?",
+    housingStepSub: "Situația locativă îți afectează atât stabilitatea financiară, cât și capacitatea de a te adăposti.",
     housingOptions: [
       { id: "own", label: "Proprietar (credit sau integral)" },
       { id: "rent", label: "Chirie pe termen lung" },
@@ -377,7 +388,7 @@ const T = {
     ],
     traumaNote: "Înțelegem că aceasta poate fi o temă personală. Răspunsurile tale modelează un plan care ia aceasta în serios.",
     s12Title: "Comunitate & Rețea Socială",
-    s12Sub: "Legăturile comunitare puternice sunt un bun fundamental al rezilienței în orice cultură. Ajută-ne să le înțelegem pe ale tale.",
+    s12Sub: "Rețelele puternice sunt adesea cea mai fiabilă resursă în criză. Ajută-mă să le înțeleg pe ale tale.",
     s12ContactsTitle: "Persoane de încredere pe care le-ai putea apela într-o criză majoră",
     s12ContactsSub: "Persoane din localitate sau din străinătate care te-ar ajuta cu adevărat — familie, prieteni, colegi sau comunitate.",
     contactOptions: [
@@ -826,8 +837,8 @@ export default function AssessmentPage() {
       case 3: return true;
       case MR_STEP: return true;
       case 7: return formData.skills.length > 0;
-      case 10: return !!formData.emergencySupplyTier;
-      case 11: return formData.riskConcerns.length > 0;
+      case 11: return !!formData.emergencySupplyTier;
+      case 12: return formData.riskConcerns.length > 0;
       default: return true;
     }
   };
@@ -1328,7 +1339,7 @@ export default function AssessmentPage() {
                       <div className="pt-8 pb-4">
                         <Slider 
                           value={[formData.savingsMonths]} 
-                          max={24} 
+                          max={36} 
                           step={1} 
                           onValueChange={(v) => updateField('savingsMonths', v[0])}
                           className="py-4"
@@ -1420,7 +1431,7 @@ export default function AssessmentPage() {
                 </div>
               )}
 
-              {/* STEP 8: HEALTH & MOBILITY */}
+              {/* STEP 8: HEALTH */}
               {step === 8 && (
                 <div className="space-y-8">
                   <h2 className="text-3xl md:text-4xl font-display font-bold">{t.s8Title}</h2>
@@ -1440,6 +1451,34 @@ export default function AssessmentPage() {
                         </Button>
                       ))}
                     </div>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-display font-bold mb-1">{t.s8ChronicTitle}</h3>
+                    <p className="text-sm text-muted-foreground mb-3">{t.s8ChronicSub}</p>
+                    <div className="flex gap-2" role="radiogroup" aria-label="Chronic condition">
+                      {(t.chronicOptions as { id: string; label: string }[]).map(opt => (
+                        <Button 
+                          key={opt.id}
+                          role="radio"
+                          aria-checked={formData.chronicCondition === opt.id}
+                          variant={formData.chronicCondition === opt.id ? "default" : "outline"}
+                          className="flex-1 rounded-xl h-11 text-sm"
+                          onClick={() => updateField('chronicCondition', opt.id as AssessmentInputChronicCondition)}
+                        >
+                          {opt.label}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* STEP 9: MOBILITY & RELOCATION */}
+              {step === 9 && (
+                <div className="space-y-8">
+                  <div>
+                    <h2 className="text-3xl md:text-4xl font-display font-bold">{t.s9Title}</h2>
+                    <p className="mt-2 text-muted-foreground text-sm">{t.s9Sub}</p>
                   </div>
                   <div>
                     <h3 className="text-xl font-display font-bold mb-1">{t.s8PhysicalTitle}</h3>
@@ -1482,31 +1521,16 @@ export default function AssessmentPage() {
                       ))}
                     </div>
                   </div>
-                  <div>
-                    <h3 className="text-xl font-display font-bold mb-1">{t.s8ChronicTitle}</h3>
-                    <p className="text-sm text-muted-foreground mb-3">{t.s8ChronicSub}</p>
-                    <div className="flex gap-2" role="radiogroup" aria-label="Chronic condition">
-                      {(t.chronicOptions as { id: string; label: string }[]).map(opt => (
-                        <Button 
-                          key={opt.id}
-                          role="radio"
-                          aria-checked={formData.chronicCondition === opt.id}
-                          variant={formData.chronicCondition === opt.id ? "default" : "outline"}
-                          className="flex-1 rounded-xl h-11 text-sm"
-                          onClick={() => updateField('chronicCondition', opt.id as AssessmentInputChronicCondition)}
-                        >
-                          {opt.label}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
                 </div>
               )}
 
-              {/* STEP 9: HOUSING */}
-              {step === 9 && (
+              {/* STEP 10: HOUSING */}
+              {step === 10 && (
                 <div className="space-y-6">
-                  <h2 className="text-3xl md:text-4xl font-display font-bold">{t.s9Title}</h2>
+                  <div>
+                    <h2 className="text-3xl md:text-4xl font-display font-bold">{t.housingStepTitle}</h2>
+                    <p className="mt-2 text-muted-foreground text-sm">{t.housingStepSub}</p>
+                  </div>
                   <div className="grid grid-cols-1 gap-3" role="radiogroup" aria-label="Housing situation">
                     {(t.housingOptions as { id: string; label: string }[]).map((opt) => (
                       <Card 
@@ -1528,8 +1552,8 @@ export default function AssessmentPage() {
                 </div>
               )}
 
-              {/* STEP 10: EMERGENCY SUPPLIES (TIERED) */}
-              {step === 10 && (
+              {/* STEP 11: EMERGENCY SUPPLIES (TIERED) */}
+              {step === 11 && (
                 <div className="space-y-6">
                   <h2 className="text-3xl md:text-4xl font-display font-bold">{t.s10Title}</h2>
                   <p className="text-muted-foreground text-lg">{t.s10Sub}</p>
@@ -1555,8 +1579,8 @@ export default function AssessmentPage() {
                 </div>
               )}
 
-              {/* STEP 11: RISK PROFILE */}
-              {step === 11 && (
+              {/* STEP 12: RISK PROFILE */}
+              {step === 12 && (
                 <div className="space-y-6">
                   <h2 className="text-3xl md:text-4xl font-display font-bold">{t.s11Title}</h2>
                   <p className="text-muted-foreground">{t.s11Sub}</p>
@@ -1593,8 +1617,8 @@ export default function AssessmentPage() {
                 </div>
               )}
 
-              {/* STEP 12: SOCIAL CAPITAL */}
-              {step === 12 && (
+              {/* STEP 13: SOCIAL CAPITAL */}
+              {step === 13 && (
                 <div className="space-y-8">
                   <div>
                     <h2 className="text-3xl md:text-4xl font-display font-bold">{t.s12Title}</h2>

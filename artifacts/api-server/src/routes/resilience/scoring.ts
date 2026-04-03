@@ -154,16 +154,15 @@ export function calculateScores(input: AssessmentInput) {
     modifier = 0.85 + (mentalResilienceSubScores.composite / GROWTH_PATHWAY_THRESHOLD) * 0.15;
   }
 
-  // Weights: financial 25%, health 15%, skills 18%, mobility 13%, psychological 14%, resources 9%, socialCapital 6%
-  // (redistributed ~2% from each of skills, mobility, psychological, resources to add socialCapital at 6%)
+  // Weights: financial 25%, health 15%, skills 18%, mobility 13%, psychological 14%, resources 6%, socialCapital 9%
   const overall = Math.round(
     (financial * modifier) * 0.25 +
     health * 0.15 +
     (skills * modifier) * 0.18 +
     mobility * 0.13 +
     psychological * 0.14 +
-    resources * 0.09 +
-    socialCapital * 0.06
+    resources * 0.06 +
+    socialCapital * 0.09
   );
 
   return {
@@ -189,10 +188,11 @@ function calculateFinancialScore(input: AssessmentInput): number {
   const incomeScores: Record<string, number> = { fixed: 40, freelance: 28, unstable: 12, student: 12 };
   score += incomeScores[input.incomeStability] ?? 28;
 
-  if (input.savingsMonths >= 12) score += 40;
-  else if (input.savingsMonths >= 6) score += 30;
-  else if (input.savingsMonths >= 3) score += 20;
-  else if (input.savingsMonths >= 1) score += 10;
+  if (input.savingsMonths >= 24) score += 40;
+  else if (input.savingsMonths >= 12) score += 34;
+  else if (input.savingsMonths >= 6) score += 25;
+  else if (input.savingsMonths >= 3) score += 15;
+  else if (input.savingsMonths >= 1) score += 7;
 
   // 0=none → +20, 1=one → +12, 2=two-three → +5, 3=four+ → +0
   const dc = resolveDependentCount(input);
@@ -305,13 +305,13 @@ function calculateMobilityScore(input: AssessmentInput): number {
 function calculateResourcesScore(input: AssessmentInput): number {
   let score = 0;
 
-  // Emergency supplies — tiered scoring
+  // Emergency supplies — tiered scoring (steeper differentiation at the bottom)
   if (input.emergencySupplyTier) {
     const tierScores: Record<string, number> = {
       over_1month: 50,
-      "2weeks_1month": 38,
-      "3_14days": 22,
-      under_3days: 10,
+      "2weeks_1month": 40,
+      "3_14days": 26,
+      under_3days: 8,
       none: 0,
     };
     score += tierScores[input.emergencySupplyTier] ?? 0;

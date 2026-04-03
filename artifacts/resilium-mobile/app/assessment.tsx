@@ -37,11 +37,15 @@ type AssessmentData = {
   relocationReadiness?: "immediate" | "within_month" | "within_3months" | "difficult";
   skills: string[];
   healthStatus: "excellent" | "good" | "fair" | "poor";
+  chronicCondition?: "yes" | "no" | "prefer_not_to_say";
   mobilityLevel: "high" | "medium" | "low";
   housingType: "own" | "rent" | "family" | "nomadic" | "other" | "temporary" | "transitional";
-  hasEmergencySupplies: boolean;
+  emergencySupplyTier?: "none" | "under_3days" | "3_14days" | "2weeks_1month" | "over_1month";
   psychologicalResilience: number;
   riskConcerns: string[];
+  trustedLocalContacts?: number;
+  communityInvolvement?: "none" | "occasional" | "active";
+  mutualAidAccess?: boolean;
   mentalResilienceAnswers: MrAnswers;
 };
 
@@ -63,18 +67,20 @@ const DEFAULT_MR_ANSWERS: MrAnswers = Object.fromEntries(
 );
 
 // Steps:
-// 0 = Location + Currency
-// 1 = Age Bracket
-// 2 = Income Stability
-// 3 = Mental Resilience (sub-steps) ← after 3 factual steps
-// 4 = Financial Runway
-// 5 = Dependents
-// 6 = Skills
-// 7 = Health & Mobility
-// 8 = Housing
-// 9 = Emergency Preparedness
-// 10 = Risk Concerns (submit triggered at end)
-const TOTAL_STEPS = 11;
+// 0  = Location + Currency
+// 1  = Age Bracket
+// 2  = Income Stability
+// 3  = Mental Resilience (sub-steps)
+// 4  = Financial Runway
+// 5  = Dependents
+// 6  = Skills
+// 7  = Health (health status + chronic condition)
+// 8  = Mobility & Relocation
+// 9  = Housing
+// 10 = Emergency Preparedness (tiered)
+// 11 = Risk Concerns
+// 12 = Social Capital
+const TOTAL_STEPS = 13;
 const MR_STEP = 3;
 
 const CURRENCIES = [
@@ -94,13 +100,15 @@ const STEPS = [
   { title: "What's your age bracket?",     subtitle: "Age affects how we weight your financial and health scores." },
   { title: "Income stability?",            subtitle: "How consistent and secure is your main income source?" },
   { title: "Mental resilience",            subtitle: "Rate how accurately each statement describes you." },
-  { title: "Financial runway?",            subtitle: "Months of expenses covered by savings if income stopped today." },
+  { title: "Financial runway?",            subtitle: "If income stopped today, how long could you sustain yourself and your household without debt? This is one of the strongest predictors of crisis resilience." },
   { title: "How many dependents?",          subtitle: "Children, elderly parents, or others financially or physically reliant on you." },
   { title: "Practical skills?",            subtitle: "Select all skills you actively possess." },
-  { title: "Health & mobility?",           subtitle: "Your physical readiness to handle crisis situations." },
-  { title: "Housing situation?",           subtitle: "Where you currently live and your flexibility to move." },
-  { title: "Emergency preparedness?",      subtitle: "Do you have 14+ days of food, water, and essential medicines?" },
+  { title: "Health?",                      subtitle: "Your health status and any conditions that affect daily functioning." },
+  { title: "Mobility & relocation?",       subtitle: "Your physical capability and flexibility to relocate are key factors in crisis response." },
+  { title: "Housing situation?",           subtitle: "Your housing affects both financial stability and your ability to shelter-in-place." },
+  { title: "Emergency preparedness?",      subtitle: "How much food, water, and essential medicines do you have readily available?" },
   { title: "Primary risk concerns?",       subtitle: "Select the risks you feel least prepared for." },
+  { title: "Community & social network?",  subtitle: "Strong networks are often the most reliable resource in a crisis. Help me understand yours." },
 ];
 
 function OptionCard({
@@ -198,11 +206,15 @@ export default function AssessmentScreen() {
     relocationReadiness: undefined,
     skills: [],
     healthStatus: "good",
+    chronicCondition: undefined,
     mobilityLevel: "medium",
     housingType: "rent",
-    hasEmergencySupplies: false,
+    emergencySupplyTier: undefined,
     psychologicalResilience: 7,
     riskConcerns: [],
+    trustedLocalContacts: undefined,
+    communityInvolvement: undefined,
+    mutualAidAccess: undefined,
     mentalResilienceAnswers: { ...DEFAULT_MR_ANSWERS },
   });
 
@@ -336,10 +348,11 @@ export default function AssessmentScreen() {
   const isValid = () => {
     if (step === 0) return data.location.trim().length > 1;
     if (step === 1) return !!data.ageBracket;
-    if (step === 2) return true; // income stability always has value
-    if (step === MR_STEP) return true; // MR questions have defaults
+    if (step === 2) return true;
+    if (step === MR_STEP) return true;
     if (step === 6) return data.skills.length > 0;
-    if (step === TOTAL_STEPS - 1) return data.riskConcerns.length > 0;
+    if (step === 10) return !!data.emergencySupplyTier;
+    if (step === 11) return data.riskConcerns.length > 0;
     return true;
   };
 
@@ -570,9 +583,9 @@ export default function AssessmentScreen() {
                     styles={styles}
                     value={data.savingsMonths}
                     min={0}
-                    max={24}
+                    max={36}
                     onChange={(v) => update("savingsMonths", v)}
-                    formatValue={(v) => v === 24 ? "24+ months" : v === 1 ? "1 month" : `${v} months`}
+                    formatValue={(v) => v === 36 ? "36+ months" : v === 1 ? "1 month" : `${v} months`}
                   />
                 ) : (
                   <View style={{ paddingVertical: 24, alignItems: "center" }}>
@@ -632,7 +645,7 @@ export default function AssessmentScreen() {
                   { id: "agriculture", label: "Agriculture / Homesteading" },
                   { id: "community", label: "Community Organizing" },
                   { id: "teaching", label: "Education / Teaching" },
-                  { id: "none", label: "None of these" },
+                  { id: "none", label: "None that apply" },
                 ].map((s) => (
                   <Pressable
                     key={s.id}
@@ -647,10 +660,10 @@ export default function AssessmentScreen() {
               </View>
             )}
 
-            {/* ── STEP 7: HEALTH & MOBILITY ── */}
+            {/* ── STEP 7: HEALTH ── */}
             {step === 7 && (
               <View style={styles.section}>
-                <Text style={styles.subSectionTitle}>Overall Health</Text>
+                <Text style={styles.subSectionTitle}>Overall Health Status</Text>
                 <View style={styles.segmentRow}>
                   {(["excellent", "good", "fair", "poor"] as const).map((opt) => (
                     <Pressable
@@ -665,7 +678,32 @@ export default function AssessmentScreen() {
                   ))}
                 </View>
 
-                <Text style={[styles.subSectionTitle, { marginTop: 24 }]}>Physical Capability</Text>
+                <Text style={[styles.subSectionTitle, { marginTop: 24 }]}>Chronic Condition or Disability</Text>
+                <Text style={styles.subSectionDesc}>Do you have a chronic condition or disability that affects your daily functioning? (Optional)</Text>
+                <View style={styles.segmentRow}>
+                  {([
+                    { id: "no", label: "No" },
+                    { id: "yes", label: "Yes" },
+                    { id: "prefer_not_to_say", label: "Prefer not to say" },
+                  ] as const).map((opt) => (
+                    <Pressable
+                      key={opt.id}
+                      onPress={() => { Haptics.selectionAsync(); update("chronicCondition", opt.id); }}
+                      style={[styles.segment, data.chronicCondition === opt.id && styles.segmentSelected]}
+                    >
+                      <Text style={[styles.segmentText, data.chronicCondition === opt.id && styles.segmentTextSelected]}>
+                        {opt.label}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {/* ── STEP 8: MOBILITY & RELOCATION ── */}
+            {step === 8 && (
+              <View style={styles.section}>
+                <Text style={styles.subSectionTitle}>Physical Capability</Text>
                 <Text style={styles.subSectionDesc}>How physically capable are you of handling demanding situations?</Text>
                 <View style={styles.segmentRow}>
                   {(["high", "medium", "low"] as const).map((opt) => (
@@ -707,8 +745,8 @@ export default function AssessmentScreen() {
               </View>
             )}
 
-            {/* ── STEP 8: HOUSING ── */}
-            {step === 8 && (
+            {/* ── STEP 9: HOUSING ── */}
+            {step === 9 && (
               <View style={styles.optionList}>
                 {[
                   { id: "own", label: "Own a home", desc: "Mortgage or outright ownership" },
@@ -734,18 +772,25 @@ export default function AssessmentScreen() {
               </View>
             )}
 
-            {/* ── STEP 9: EMERGENCY SUPPLIES ── */}
-            {step === 9 && (
-              <View style={styles.yesNoGrid}>
-                {(["true", "false"] as const).map((val) => {
-                  const isYes = val === "true";
-                  const selected = data.hasEmergencySupplies === isYes;
+            {/* ── STEP 10: EMERGENCY SUPPLIES (TIERED) ── */}
+            {step === 10 && (
+              <View style={styles.optionList}>
+                {([
+                  { id: "none", label: "None", desc: "Not prepared yet" },
+                  { id: "under_3days", label: "Under 3 days", desc: "Very basic supplies only" },
+                  { id: "3_14days", label: "3–14 days", desc: "A couple of weeks covered" },
+                  { id: "2weeks_1month", label: "2 weeks – 1 month", desc: "Well stocked for most crises" },
+                  { id: "over_1month", label: "1 month +", desc: "Extended preparedness" },
+                ] as const).map((opt) => {
+                  const selected = data.emergencySupplyTier === opt.id;
                   return (
-                    <OptionCard key={val} styles={styles} selected={selected} onPress={() => { Haptics.selectionAsync(); update("hasEmergencySupplies", isYes); }}>
-                      <View style={styles.yesNoCard}>
-                        <Feather name={isYes ? "package" : "x-circle"} size={28} color={selected ? colors.primary : colors.textMuted} />
-                        <Text style={[styles.yesNoLabel, selected && styles.yesNoLabelSelected]}>{isYes ? "Yes" : "No"}</Text>
-                        <Text style={styles.yesNoDesc}>{isYes ? "14+ days of supplies" : "Not prepared yet"}</Text>
+                    <OptionCard key={opt.id} styles={styles} selected={selected} onPress={() => { Haptics.selectionAsync(); update("emergencySupplyTier", opt.id); }}>
+                      <View style={styles.optionCardInner}>
+                        <View style={styles.optionCardText}>
+                          <Text style={[styles.optionLabel, selected && styles.optionLabelSelected]}>{opt.label}</Text>
+                          <Text style={styles.optionDesc}>{opt.desc}</Text>
+                        </View>
+                        {selected && <Feather name="check-circle" size={20} color={colors.primary} />}
                       </View>
                     </OptionCard>
                   );
@@ -753,8 +798,8 @@ export default function AssessmentScreen() {
               </View>
             )}
 
-            {/* ── STEP 10: RISK CONCERNS ── */}
-            {step === 10 && (
+            {/* ── STEP 11: RISK CONCERNS ── */}
+            {step === 11 && (
               <View style={styles.chipGrid}>
                 {[
                   { id: "job_loss", label: "Job Loss" },
@@ -788,6 +833,75 @@ export default function AssessmentScreen() {
                     </View>
                   );
                 })}
+              </View>
+            )}
+
+            {/* ── STEP 12: SOCIAL CAPITAL ── */}
+            {step === 12 && (
+              <View style={styles.section}>
+                <Text style={styles.subSectionTitle}>Trusted contacts in a crisis</Text>
+                <Text style={styles.subSectionDesc}>People locally or abroad who would genuinely help you — family, friends, colleagues, or community.</Text>
+                <View style={styles.optionList}>
+                  {([
+                    { value: 0, label: "None", desc: "No one I could reliably call on" },
+                    { value: 1, label: "1–2 people", desc: "A handful of trusted people" },
+                    { value: 2, label: "3–5 people", desc: "A solid support circle" },
+                    { value: 3, label: "6 or more", desc: "A broad, reliable network" },
+                  ] as const).map((opt) => {
+                    const selected = data.trustedLocalContacts === opt.value;
+                    return (
+                      <OptionCard key={opt.value} styles={styles} selected={selected} onPress={() => { Haptics.selectionAsync(); update("trustedLocalContacts", opt.value); }}>
+                        <View style={styles.optionCardInner}>
+                          <View style={styles.optionCardText}>
+                            <Text style={[styles.optionLabel, selected && styles.optionLabelSelected]}>{opt.label}</Text>
+                            <Text style={styles.optionDesc}>{opt.desc}</Text>
+                          </View>
+                          {selected && <Feather name="check-circle" size={20} color={colors.primary} />}
+                        </View>
+                      </OptionCard>
+                    );
+                  })}
+                </View>
+
+                <Text style={[styles.subSectionTitle, { marginTop: 24 }]}>Community involvement</Text>
+                <Text style={styles.subSectionDesc}>Religious groups, mutual aid networks, volunteer organisations, professional associations, etc.</Text>
+                <View style={styles.segmentRow}>
+                  {([
+                    { id: "none", label: "None" },
+                    { id: "occasional", label: "Occasionally" },
+                    { id: "active", label: "Actively" },
+                  ] as const).map((opt) => (
+                    <Pressable
+                      key={opt.id}
+                      onPress={() => { Haptics.selectionAsync(); update("communityInvolvement", opt.id); }}
+                      style={[styles.segment, data.communityInvolvement === opt.id && styles.segmentSelected]}
+                    >
+                      <Text style={[styles.segmentText, data.communityInvolvement === opt.id && styles.segmentTextSelected]}>
+                        {opt.label}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
+
+                <Text style={[styles.subSectionTitle, { marginTop: 24 }]}>Mutual aid access</Text>
+                <Text style={styles.subSectionDesc}>Could you access food, shelter, tools, or practical help from your community or network if needed?</Text>
+                <View style={styles.yesNoGrid}>
+                  {([
+                    { val: true, label: "Yes", desc: "I could access support" },
+                    { val: false, label: "Not sure", desc: "No / uncertain" },
+                  ] as const).map((opt) => {
+                    const selected = data.mutualAidAccess === opt.val;
+                    return (
+                      <OptionCard key={String(opt.val)} styles={styles} selected={selected} onPress={() => { Haptics.selectionAsync(); update("mutualAidAccess", opt.val); }}>
+                        <View style={styles.yesNoCard}>
+                          <Feather name={opt.val ? "users" : "user-x"} size={28} color={selected ? colors.primary : colors.textMuted} />
+                          <Text style={[styles.yesNoLabel, selected && styles.yesNoLabelSelected]}>{opt.label}</Text>
+                          <Text style={styles.yesNoDesc}>{opt.desc}</Text>
+                        </View>
+                      </OptionCard>
+                    );
+                  })}
+                </View>
               </View>
             )}
           </>
