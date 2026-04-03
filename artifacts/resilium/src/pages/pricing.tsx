@@ -86,7 +86,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Can I get a refund?",
-    a: "Yes — we offer a 14-day full refund on your initial subscription purchase. See our Refund Policy for full details.",
+    a: "Yes — I offer a 14-day full refund on your initial subscription purchase. See the Refund Policy for full details.",
   },
   {
     q: "What are the scenario stress-tests in Pro?",

@@ -150,18 +150,18 @@ function ProductHuntSection() {
       </CopyBlock>
 
       <CopyBlock label="Short Description (≤ 260 chars)">
-        {`Resilium gives you a scored, AI-powered resilience report across 6 life dimensions — finances, health, skills, mobility, psychology, and emergency resources. Like a credit score, but for how well you'll survive disruption. No email required.`}
+        {`Resilium gives you a scored, AI-powered resilience report across 7 life dimensions — finances, health, skills, mobility, psychology, emergency resources, and social capital. Like a credit score, but for how well you'll survive disruption. No email required.`}
       </CopyBlock>
 
       <CopyBlock label="Long-Form Product Description">
-        {`Most people don't realise how exposed they are until a job loss, health crisis, or geopolitical shock forces their hand. By then, the window to prepare is already closed.
+        {`Most people don't realize how exposed they are until a job loss, health crisis, or geopolitical shock forces their hand. By then, the window to prepare is already closed.
 
 Resilium is a privacy-first platform that gives you an honest, scored picture of where you actually stand — across the financial, physical, psychological, and logistical dimensions that determine how well you weather disruption.
 
 Think of it like a credit score for personal resilience. A single number you can improve over time, built from a deep-dive assessment that takes 10–15 minutes to complete.
 
-→ 6 resilience dimensions, each scored 0–100
-→ AI-personalised action plan with prioritised next steps
+→ 7 resilience dimensions, each scored 0–100
+→ AI-personalized action plan with prioritized next steps
 → Mental resilience profile across 6 psychological dimensions
 → Scenario planning: see how your score shifts under job loss, health emergency, relocation
 → Progress tracking: retake, compare, improve
@@ -176,7 +176,7 @@ This is not a quiz with generic tips. It's a structured, scored assessment that 
 
 I built this because I found myself anxious about "big picture" disruption risks — inflation, geopolitical instability, potential job loss — but couldn't find a tool that gave me an honest picture of where I actually stood. Everything I found was either generic advice, prepper-adjacent content, or surveys with no output.
 
-So I built the credit score for personal resilience. A structured, scored, AI-powered report across 6 life dimensions.
+So I built the credit score for personal resilience. A structured, scored, AI-powered report across 7 life dimensions.
 
 A few things I'd love to hear from you:
 1. Does the "credit score" framing resonate with how you'd describe preparedness risk?
@@ -191,10 +191,10 @@ The assessment is free and anonymous — no email required. Takes about 12 minut
         headers={["#", "Image Concept", "Caption"]}
         rows={[
           ["1", "Overall score screen — circular progress dial", "Your Resilium Score: one number that tells you how ready you actually are."],
-          ["2", "Radar chart — 6-dimension breakdown", "Six dimensions. One honest picture. See exactly where you're strong and where you're exposed."],
-          ["3", "Action checklist for lowest-scoring area", "Not generic tips — a prioritised action plan built around your specific gaps."],
+          ["2", "Radar chart — 7-dimension breakdown", "Seven dimensions. One honest picture. See exactly where you're strong and where you're exposed."],
+          ["3", "Action checklist for lowest-scoring area", "Not generic tips — a prioritized action plan built around your specific gaps."],
           ["4", "Scenario modelling UI", "\"What if I lost my job tomorrow?\" Model disruption scenarios and see how your score shifts."],
-          ["5", "Mental Resilience Profile cards", "Psychological readiness matters as much as logistics. We score both."],
+          ["5", "Mental Resilience Profile cards", "Psychological readiness matters as much as logistics. I score both."],
         ]}
       />
 
@@ -255,7 +255,7 @@ function RedditSection() {
       <Table
         headers={["Priority", "Subreddit", "Subscribers", "Why It Fits", "Entry Angle"]}
         rows={[
-          ["1", "r/preppers", "1.5M+", "Core audience — serious about preparedness, data-literate, anti-hype", "Discuss the '6 dimensions of resilience' framework; offer the tool as a scoring mechanism they can use"],
+          ["1", "r/preppers", "1.5M+", "Core audience — serious about preparedness, data-literate, anti-hype", "Discuss the '7 dimensions of resilience' framework; offer the tool as a scoring mechanism they can use"],
           ["2", "r/personalfinance", "20M+", "Financially anxious, structured thinkers; resonates with the 'credit score' metaphor", "Start threads on financial resilience buffer calculation; Resilium as a supplementary tool"],
           ["3", "r/selfimprovement", "2M+", "Action-oriented, open to tools and frameworks for personal growth", "Frame as a 'structured self-assessment' not a prepper tool"],
           ["4", "r/financialindependence", "2M+", "FIRE community — highly data-driven, already thinking about runway and risk", "Resilience runway (months of buffer) directly maps to FI thinking"],
@@ -292,9 +292,9 @@ Happy to share the scoring framework if useful — I've been refining it.`}
       </CopyBlock>
 
       <CopyBlock label="Template 2 — Soft Demo Share (use when someone asks for tools/resources)">
-        {`I've been working on something that addresses exactly this. It's a free structured assessment — takes about 12 minutes — and gives you scored results across six resilience dimensions (finances, health, skills, mobility, mental resilience, emergency resources).
+        {`I've been working on something that addresses exactly this. It's a free structured assessment — takes about 12 minutes — and gives you scored results across seven resilience dimensions (finances, health, skills, mobility, mental resilience, emergency resources, social capital).
 
-The output isn't generic tips — it's a prioritised action plan based on your specific answers. No email required.
+The output isn't generic tips — it's a prioritized action plan based on your specific answers. No email required.
 
 [resilium.app or your URL]
 
@@ -308,7 +308,7 @@ Background: I found myself anxious about a cluster of overlapping risks — econ
 
 So I built Resilium.
 
-It's a structured, AI-powered assessment that scores you across six dimensions:
+It's a structured, AI-powered assessment that scores you across seven dimensions:
 - Financial resilience (runway, income stability, debt exposure)
 - Skills (practical, transferable, crisis-relevant)
 - Health & mobility
@@ -316,7 +316,7 @@ It's a structured, AI-powered assessment that scores you across six dimensions:
 - Emergency resources
 - Location risk
 
-You get a scored report, a personalised action plan, and scenario modelling (e.g. "what happens to my score if I lose my job?"). No email required.
+You get a scored report, a personalized action plan, and scenario modeling (e.g. "what happens to my score if I lose my job?"). No email required.
 
 What I'd love feedback on:
 1. Does the "credit score for resilience" framing resonate with you?
@@ -383,7 +383,7 @@ function ResearchReportSection() {
           ["5", "How would you rate your ability to stay calm and function under sustained stress?", "1–5 scale", "Psychological"],
           ["6", "If you needed to relocate in the next 30 days, how prepared would you be?", "1–5 scale (Not at all → Very prepared)", "Mobility"],
           ["7", "Which of the following risks concern you most right now? (select up to 3)", "Multi-select: job loss / economic recession / health crisis / geopolitical instability / climate event / other", "General"],
-          ["8", "Have you taken any deliberate steps to improve your personal resilience in the past 12 months?", "Yes / No / Planning to", "Behaviour"],
+          ["8", "Have you taken any deliberate steps to improve your personal resilience in the past 12 months?", "Yes / No / Planning to", "Behavior"],
           ["9", "What has been the biggest barrier to improving your resilience?", "Multi-select: time / money / don't know where to start / don't think it's necessary / overwhelm", "Barrier"],
           ["10", "Age bracket", "18–24 / 25–34 / 35–44 / 45–54 / 55–64 / 65+", "Demographic"],
           ["11", "Country of residence", "Free text + dropdown", "Demographic"],
@@ -405,7 +405,7 @@ function ResearchReportSection() {
           ["Section 4: Emergency Resources", "% with 72-hour supply. % with no emergency plan. Correlation with financial score.", "Simple % stat. Side-by-side chart."],
           ["Section 5: Mobility & Location Risk", "% able to relocate in 30 days. Urban vs rural split. Homeowners vs renters.", "Grouped bar chart."],
           ["Section 6: Top Concerns", "Ranked risk concerns. Year-over-year sentiment (if data available).", "Ranked horizontal bar chart."],
-          ["Section 7: Behaviour & Barriers", "% who've taken action. Top 5 barriers. Correlation: barrier vs score.", "Funnel or waterfall chart. Barrier ranking."],
+          ["Section 7: Behavior & Barriers", "% who've taken action. Top 5 barriers. Correlation: barrier vs score.", "Funnel or waterfall chart. Barrier ranking."],
           ["Recommendations", "5 evidence-based recommendations for individuals. 3 for policy/employers.", "Action checklist format"],
           ["Appendix", "Full methodology, question wording, demographic tables, statistical notes", "Tables"],
         ]}
@@ -425,7 +425,7 @@ I'm sharing early access to an original research report — "State of Personal R
 
 The headline finding: [INSERT TOP STAT, e.g. "41% of UK adults have less than one month's financial runway if they lost their primary income today."]
 
-The report is based on [N] responses from adults in the UK and US, collected in [Month] 2026. It covers six dimensions of personal resilience: financial readiness, practical skills, psychological capacity, emergency preparedness, mobility, and location risk.
+The report is based on [N] responses from adults in the UK and US, collected in [Month] 2026. It covers seven dimensions of personal resilience: financial readiness, practical skills, health, psychological capacity, emergency preparedness, mobility, and social capital.
 
 Other notable findings:
 - [Stat 2 — psychological]

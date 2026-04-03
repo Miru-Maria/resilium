@@ -82,7 +82,7 @@ export default function RefundPage() {
             In particular, EU and UK consumers generally have a right of withdrawal within 14 days of purchasing a digital service. However, this right may be waived if you have explicitly consented to the immediate supply of a digital service and acknowledged that the right of withdrawal is forfeited once the service has been fully delivered.
           </p>
           <p>
-            Regardless of the above, Resilium honours a 14-day full refund window for all customers, consistent with these consumer protection standards.
+            Regardless of the above, Resilium honors a 14-day full refund window for all customers, consistent with these consumer protection standards.
           </p>
         </Section>
 

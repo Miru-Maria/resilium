@@ -205,7 +205,7 @@ export default function CoachingPage() {
               {
                 icon: "🔍",
                 title: "What it often means",
-                text: "You're carrying more than most people see. Stress tolerance and emotional regulation are learnable — they're just skills that haven't been prioritised yet.",
+                text: "You're carrying more than most people see. Stress tolerance and emotional regulation are learnable — they're just skills that haven't been prioritized yet.",
               },
               {
                 icon: "🚫",
