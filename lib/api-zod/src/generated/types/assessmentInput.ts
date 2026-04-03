@@ -21,8 +21,12 @@ export interface AssessmentInput {
   incomeStability: AssessmentInputIncomeStability;
   /** Months of savings runway */
   savingsMonths: number;
-  /** Whether user has dependents */
-  hasDependents: boolean;
+  /** Whether user has dependents (legacy) */
+  hasDependents?: boolean;
+  /** Number of dependents (0=none, 1=one, 2=two-three, 3=four+) */
+  dependentCount?: number;
+  /** How quickly the user can relocate */
+  relocationReadiness?: "immediate" | "within_month" | "within_3months" | "difficult";
   /** Skills the user has */
   skills: AssessmentInputSkillsItem[];
   /** Overall health status */

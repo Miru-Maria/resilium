@@ -44,10 +44,10 @@ export const submitAssessmentBodyMentalResilienceAnswersSocialSupport1Max = 5;
 export const SubmitAssessmentBody = zod.object({
   location: zod.string().describe("Country or region"),
   incomeStability: zod
-    .enum(["fixed", "freelance", "unstable"])
+    .enum(["fixed", "freelance", "unstable", "student"])
     .describe("Income stability type"),
   savingsMonths: zod.number().describe("Months of savings runway"),
-  hasDependents: zod.boolean().describe("Whether user has dependents"),
+  hasDependents: zod.boolean().optional().describe("Whether user has dependents"),
   skills: zod
     .array(
       zod.enum([
@@ -57,6 +57,10 @@ export const SubmitAssessmentBody = zod.object({
         "medical",
         "financial",
         "language",
+        "caregiving",
+        "agriculture",
+        "community",
+        "teaching",
         "none",
       ]),
     )
@@ -68,7 +72,7 @@ export const SubmitAssessmentBody = zod.object({
     .enum(["high", "medium", "low"])
     .describe("Ability to relocate or travel"),
   housingType: zod
-    .enum(["own", "rent", "family", "nomadic", "other"])
+    .enum(["own", "rent", "family", "nomadic", "other", "temporary", "transitional"])
     .describe("Current housing situation"),
   hasEmergencySupplies: zod
     .boolean()
@@ -104,6 +108,16 @@ export const SubmitAssessmentBody = zod.object({
     .describe(
       "Age bracket of the user — affects scoring modifiers for financial runway and health vulnerability",
     ),
+  dependentCount: zod
+    .number()
+    .int()
+    .min(0)
+    .optional()
+    .describe("Number of dependents (0=none, 1=one, 2=two-three, 3=four+)"),
+  relocationReadiness: zod
+    .enum(["immediate", "within_month", "within_3months", "difficult"])
+    .optional()
+    .describe("How quickly the user can relocate"),
   mentalResilienceAnswers: zod
     .object({
       stressTolerance1: zod

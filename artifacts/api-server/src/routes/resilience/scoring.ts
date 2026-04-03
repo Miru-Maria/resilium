@@ -30,7 +30,7 @@ type MentalResilienceSubScores = {
 type AssessmentInput = {
   location: string;
   ageBracket?: string;
-  incomeStability: "fixed" | "freelance" | "unstable";
+  incomeStability: "fixed" | "freelance" | "unstable" | "student";
   savingsMonths: number;
   // New: count 0=none, 1=one, 2=two-three, 3=four+
   // Legacy boolean hasDependents kept for backward compat
@@ -39,7 +39,7 @@ type AssessmentInput = {
   skills: string[];
   healthStatus: "excellent" | "good" | "fair" | "poor";
   mobilityLevel: "high" | "medium" | "low";
-  housingType: "own" | "rent" | "family" | "nomadic" | "other";
+  housingType: "own" | "rent" | "family" | "nomadic" | "other" | "temporary" | "transitional";
   // New: explicit relocation readiness
   relocationReadiness?: "immediate" | "within_month" | "within_3months" | "difficult";
   hasEmergencySupplies: boolean;
@@ -80,12 +80,13 @@ function likertToScore(avg: number): number {
 export function computeMentalResilienceSubScores(
   answers: MentalResilienceAnswers
 ): MentalResilienceSubScores {
-  const stressToleranceAvg = (answers.stressTolerance1 + answers.stressTolerance2) / 2;
-  const adaptabilityAvg = (answers.adaptability1 + answers.adaptability2) / 2;
-  const learningAgilityAvg = answers.learningAgility1;
-  const changeManagementAvg = (answers.changeManagement1 + answers.changeManagement2) / 2;
-  const emotionalRegulationAvg = (answers.emotionalRegulation1 + answers.emotionalRegulation2) / 2;
-  const socialSupportAvg = answers.socialSupport1;
+  const safe = (v: number | undefined) => (typeof v === "number" && !isNaN(v) && v >= 1 && v <= 5 ? v : 3);
+  const stressToleranceAvg = (safe(answers.stressTolerance1) + safe(answers.stressTolerance2)) / 2;
+  const adaptabilityAvg = (safe(answers.adaptability1) + safe(answers.adaptability2)) / 2;
+  const learningAgilityAvg = safe(answers.learningAgility1);
+  const changeManagementAvg = (safe(answers.changeManagement1) + safe(answers.changeManagement2)) / 2;
+  const emotionalRegulationAvg = (safe(answers.emotionalRegulation1) + safe(answers.emotionalRegulation2)) / 2;
+  const socialSupportAvg = safe(answers.socialSupport1);
 
   const stressTolerance = likertToScore(stressToleranceAvg);
   const adaptability = likertToScore(adaptabilityAvg);
@@ -169,8 +170,10 @@ export function calculateScores(input: AssessmentInput) {
 function calculateFinancialScore(input: AssessmentInput): number {
   let score = 0;
 
-  const incomeScores = { fixed: 40, freelance: 28, unstable: 12 };
-  score += incomeScores[input.incomeStability] ?? 0;
+  // "student" is a life stage, not a risk — scored equivalent to "unstable" for
+  // financial purposes. "freelance" also covers "prefer not to say" (neutral mid-range).
+  const incomeScores: Record<string, number> = { fixed: 40, freelance: 28, unstable: 12, student: 12 };
+  score += incomeScores[input.incomeStability] ?? 28;
 
   if (input.savingsMonths >= 12) score += 40;
   else if (input.savingsMonths >= 6) score += 30;
@@ -211,6 +214,10 @@ function calculateSkillsScore(input: AssessmentInput): number {
     medical: 20,
     financial: 15,
     language: 15,
+    caregiving: 15,
+    agriculture: 20,
+    community: 12,
+    teaching: 12,
     none: 0,
   };
 
@@ -246,6 +253,8 @@ function calculateMobilityScore(input: AssessmentInput): number {
     // Legacy fallback: derive flexibility from housing type
     const housingFlexScores: Record<string, number> = {
       nomadic: 35,
+      transitional: 30,
+      temporary: 28,
       rent: 25,
       family: 20,
       other: 15,
@@ -272,12 +281,14 @@ function calculateResourcesScore(input: AssessmentInput): number {
   // Physical stockpile
   if (input.hasEmergencySupplies) score += 50;
 
-  // Housing as a stability asset (own = major asset; nomadic = no fixed base)
+  // Housing as a stability asset (own = major asset; nomadic/transitional = no fixed base)
   const housingStabilityScores: Record<string, number> = {
     own: 40,
     family: 30,
     rent: 20,
     other: 10,
+    temporary: 8,
+    transitional: 5,
     nomadic: 5,
   };
   score += housingStabilityScores[input.housingType] ?? 10;

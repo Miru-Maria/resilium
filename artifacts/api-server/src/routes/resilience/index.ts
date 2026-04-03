@@ -11,13 +11,15 @@ import scenariosRouter from "./scenarios.js";
 
 const router: IRouter = Router();
 
-const VALID_CURRENCIES = ["USD", "EUR", "RON"] as const;
-type SupportedCurrency = typeof VALID_CURRENCIES[number];
+const VALID_CURRENCIES = ["USD", "EUR", "GBP", "AUD", "CAD", "JPY", "INR", "BRL", "RON"] as const;
+type SupportedCurrency = string;
+const CUSTOM_CURRENCY_RE = /^[A-Z]{2,6}$/;
 
 function parseCurrency(value: unknown): SupportedCurrency {
-  if (typeof value === "string" && (VALID_CURRENCIES as readonly string[]).includes(value)) {
-    return value as SupportedCurrency;
-  }
+  if (typeof value !== "string") return "USD";
+  const upper = value.toUpperCase();
+  if ((VALID_CURRENCIES as readonly string[]).includes(upper)) return upper;
+  if (CUSTOM_CURRENCY_RE.test(upper)) return upper;
   return "USD";
 }
 

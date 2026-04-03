@@ -16,4 +16,5 @@ export const AssessmentInputIncomeStability = {
   fixed: "fixed",
   freelance: "freelance",
   unstable: "unstable",
+  student: "student",
 } as const;

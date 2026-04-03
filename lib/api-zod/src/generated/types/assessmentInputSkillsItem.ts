@@ -16,5 +16,9 @@ export const AssessmentInputSkillsItem = {
   medical: "medical",
   financial: "financial",
   language: "language",
+  caregiving: "caregiving",
+  agriculture: "agriculture",
+  community: "community",
+  teaching: "teaching",
   none: "none",
 } as const;

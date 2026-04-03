@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import React, { useEffect, useRef, useMemo } from "react";
 import {
   View,
   Text,
@@ -17,19 +17,10 @@ import { ColorsType } from "@/constants/colors";
 
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get("window");
 
-const MESSAGES = [
-  "Analyzing your risk profile...",
-  "Calculating resilience scores...",
-  "Simulating stress scenarios...",
-  "Building your action plan...",
-  "Finalizing your report...",
-];
-
 export default function LoadingScreen() {
   const insets = useSafeAreaInsets();
   const { assessmentData } = useLocalSearchParams<{ assessmentData: string }>();
-  const [messageIdx, setMessageIdx] = useState(0);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = React.useState<string | null>(null);
   const spinAnim = useRef(new Animated.Value(0)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
@@ -54,12 +45,6 @@ export default function LoadingScreen() {
         Animated.timing(pulseAnim, { toValue: 1, duration: 800, useNativeDriver: true }),
       ])
     ).start();
-
-    const msgInterval = setInterval(() => {
-      setMessageIdx((i) => Math.min(i + 1, MESSAGES.length - 1));
-    }, 3000);
-
-    return () => clearInterval(msgInterval);
   }, []);
 
   useEffect(() => {
@@ -127,13 +112,8 @@ export default function LoadingScreen() {
           </Animated.View>
 
           <Text style={styles.title}>Building Your Plan</Text>
-          <Text style={styles.message}>{MESSAGES[messageIdx]}</Text>
-
-          <View style={styles.dots}>
-            {MESSAGES.map((_, i) => (
-              <View key={i} style={[styles.dot, i <= messageIdx && styles.dotActive]} />
-            ))}
-          </View>
+          <Text style={styles.message}>Analysing your profile and building your plan…</Text>
+          <Text style={styles.timeHint}>This usually takes 60–90 seconds — please keep this screen open</Text>
         </View>
       )}
     </View>
@@ -183,18 +163,13 @@ const createStyles = (colors: ColorsType) => StyleSheet.create({
     textAlign: "center",
     lineHeight: 22,
   },
-  dots: {
-    flexDirection: "row",
-    gap: 8,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: colors.border,
-  },
-  dotActive: {
-    backgroundColor: colors.primary,
+  timeHint: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 13,
+    color: colors.textMuted,
+    textAlign: "center",
+    lineHeight: 18,
+    maxWidth: 280,
   },
   errorContainer: {
     alignItems: "center",

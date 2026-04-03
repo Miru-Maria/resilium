@@ -18,4 +18,6 @@ export const AssessmentInputHousingType = {
   family: "family",
   nomadic: "nomadic",
   other: "other",
+  temporary: "temporary",
+  transitional: "transitional",
 } as const;

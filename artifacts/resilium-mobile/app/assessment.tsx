@@ -14,6 +14,7 @@ import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import * as Location from "expo-location";
 
 import { useSession } from "@/context/session";
 import { useColors } from "@/context/theme";
@@ -25,14 +26,19 @@ type MrAnswers = Record<string, number>;
 
 type AssessmentData = {
   location: string;
-  incomeStability: "fixed" | "freelance" | "unstable";
+  currency: string;
+  customCurrency: string;
+  ageBracket?: string;
+  incomeStability: "fixed" | "freelance" | "unstable" | "student";
   savingsMonths: number;
+  savingsPreferNotToSay: boolean;
+  incomePreferNotToSay: boolean;
   dependentCount: number;
   relocationReadiness?: "immediate" | "within_month" | "within_3months" | "difficult";
   skills: string[];
   healthStatus: "excellent" | "good" | "fair" | "poor";
   mobilityLevel: "high" | "medium" | "low";
-  housingType: "own" | "rent" | "family" | "nomadic" | "other";
+  housingType: "own" | "rent" | "family" | "nomadic" | "other" | "temporary" | "transitional";
   hasEmergencySupplies: boolean;
   psychologicalResilience: number;
   riskConcerns: string[];
@@ -44,27 +50,57 @@ const MR_QUESTIONS = [
   { key: "stressTolerance2",    dimension: "STRESS TOLERANCE",    question: "I recover quickly after a stressful event and return to normal functioning." },
   { key: "adaptability1",       dimension: "ADAPTABILITY",        question: "I adjust my plans smoothly when circumstances change unexpectedly." },
   { key: "adaptability2",       dimension: "ADAPTABILITY",        question: "I find it easy to embrace new routines or environments." },
-  { key: "learningAgility1",    dimension: "LEARNING AGILITY",    question: "I actively seek out new skills or knowledge when I notice a gap in my preparedness." },
-  { key: "changeManagement1",   dimension: "CHANGE MANAGEMENT",   question: "I proactively prepare for major life changes rather than reacting after the fact." },
-  { key: "changeManagement2",   dimension: "CHANGE MANAGEMENT",   question: "I feel confident navigating large-scale uncertainty (economic, political, social)." },
-  { key: "emotionalRegulation1",dimension: "EMOTIONAL REGULATION",question: "I manage anxiety and fear productively without being paralyzed by them." },
-  { key: "emotionalRegulation2",dimension: "EMOTIONAL REGULATION",question: "I can maintain a positive outlook during extended periods of difficulty." },
+  { key: "learningAgility1",    dimension: "LEARNING NEW THINGS", question: "I actively seek out new skills or knowledge when I notice a gap in my preparedness." },
+  { key: "changeManagement1",   dimension: "HANDLING CHANGE",     question: "I plan ahead for major life changes rather than reacting after the fact." },
+  { key: "changeManagement2",   dimension: "HANDLING CHANGE",     question: "I feel confident dealing with big uncertain situations like economic shifts or political instability." },
+  { key: "emotionalRegulation1",dimension: "MANAGING YOUR EMOTIONS", question: "I manage anxiety and fear productively without being stopped in my tracks by them." },
+  { key: "emotionalRegulation2",dimension: "MANAGING YOUR EMOTIONS", question: "I can maintain a positive outlook during extended periods of difficulty." },
   { key: "socialSupport1",      dimension: "SOCIAL SUPPORT",      question: "I have a reliable support network I can call on during a major crisis." },
 ];
 
-const TOTAL_STEPS = 10;
+const DEFAULT_MR_ANSWERS: MrAnswers = Object.fromEntries(
+  MR_QUESTIONS.map((q) => [q.key, 3])
+);
+
+// Steps:
+// 0 = Location + Currency
+// 1 = Age Bracket
+// 2 = Income Stability
+// 3 = Mental Resilience (sub-steps) ← after 3 factual steps
+// 4 = Financial Runway
+// 5 = Dependents
+// 6 = Skills
+// 7 = Health & Mobility
+// 8 = Housing
+// 9 = Emergency Preparedness
+// 10 = Risk Concerns (submit triggered at end)
+const TOTAL_STEPS = 11;
+const MR_STEP = 3;
+
+const CURRENCIES = [
+  { code: "USD", label: "$ USD" },
+  { code: "EUR", label: "€ EUR" },
+  { code: "GBP", label: "£ GBP" },
+  { code: "AUD", label: "A$ AUD" },
+  { code: "CAD", label: "CA$ CAD" },
+  { code: "JPY", label: "¥ JPY" },
+  { code: "INR", label: "₹ INR" },
+  { code: "BRL", label: "R$ BRL" },
+  { code: "OTHER", label: "Other" },
+];
 
 const STEPS = [
-  { title: "Where are you based?",        subtitle: "Your location affects climate, political, and economic risk factors." },
-  { title: "Income stability?",           subtitle: "How consistent and secure is your main income source?" },
-  { title: "Financial runway?",           subtitle: "Months of expenses covered by savings if income stopped today." },
-  { title: "How many dependents?",         subtitle: "Children, elderly parents, or others financially or physically reliant on you." },
-  { title: "Practical skills?",           subtitle: "Select all skills you actively possess." },
-  { title: "Health & mobility?",          subtitle: "Your physical readiness to handle crisis situations." },
-  { title: "Housing situation?",          subtitle: "Where you currently live and your flexibility to move." },
-  { title: "Emergency preparedness?",     subtitle: "Do you have 14+ days of food, water, and essential medicines?" },
-  { title: "Mental resilience",           subtitle: "Rate how accurately each statement describes you." },
-  { title: "Primary risk concerns?",      subtitle: "Select the risks you feel least prepared for." },
+  { title: "Where are you based?",         subtitle: "Your location affects climate, political, and economic risk factors." },
+  { title: "What's your age bracket?",     subtitle: "Age affects how we weight your financial and health scores." },
+  { title: "Income stability?",            subtitle: "How consistent and secure is your main income source?" },
+  { title: "Mental resilience",            subtitle: "Rate how accurately each statement describes you." },
+  { title: "Financial runway?",            subtitle: "Months of expenses covered by savings if income stopped today." },
+  { title: "How many dependents?",          subtitle: "Children, elderly parents, or others financially or physically reliant on you." },
+  { title: "Practical skills?",            subtitle: "Select all skills you actively possess." },
+  { title: "Health & mobility?",           subtitle: "Your physical readiness to handle crisis situations." },
+  { title: "Housing situation?",           subtitle: "Where you currently live and your flexibility to move." },
+  { title: "Emergency preparedness?",      subtitle: "Do you have 14+ days of food, water, and essential medicines?" },
+  { title: "Primary risk concerns?",       subtitle: "Select the risks you feel least prepared for." },
 ];
 
 function OptionCard({
@@ -142,6 +178,8 @@ export default function AssessmentScreen() {
   const { sessionId } = useSession();
   const [step, setStep] = useState(0);
   const [mrSubStep, setMrSubStep] = useState(0);
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [locationDenied, setLocationDenied] = useState(false);
   const progress = useRef(new Animated.Value(1 / TOTAL_STEPS)).current;
 
   const colors = useColors();
@@ -149,8 +187,13 @@ export default function AssessmentScreen() {
 
   const [data, setData] = useState<AssessmentData>({
     location: "",
+    currency: "USD",
+    customCurrency: "",
+    ageBracket: undefined,
     incomeStability: "fixed",
     savingsMonths: 3,
+    savingsPreferNotToSay: false,
+    incomePreferNotToSay: false,
     dependentCount: 0,
     relocationReadiness: undefined,
     skills: [],
@@ -160,17 +203,21 @@ export default function AssessmentScreen() {
     hasEmergencySupplies: false,
     psychologicalResilience: 7,
     riskConcerns: [],
-    mentalResilienceAnswers: {},
+    mentalResilienceAnswers: { ...DEFAULT_MR_ANSWERS },
   });
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
 
+  const FREE_LIMIT = 3;
+
   const animateProgress = (nextStep: number, subOffset = 0) => {
-    const total = TOTAL_STEPS * MR_QUESTIONS.length;
-    const current = step === 8
-      ? (nextStep * MR_QUESTIONS.length + subOffset)
-      : (nextStep * MR_QUESTIONS.length);
+    const total = (TOTAL_STEPS - 1) + MR_QUESTIONS.length;
+    const current = nextStep < MR_STEP
+      ? nextStep
+      : nextStep === MR_STEP
+        ? (MR_STEP) + subOffset
+        : (MR_STEP) + MR_QUESTIONS.length + (nextStep - MR_STEP - 1);
     Animated.spring(progress, {
       toValue: Math.min((current + 1) / total, 1),
       useNativeDriver: false,
@@ -179,47 +226,74 @@ export default function AssessmentScreen() {
     }).start();
   };
 
+  const handleUseMyLocation = async () => {
+    setLocationLoading(true);
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        setLocationLoading(false);
+        setLocationDenied(true);
+        return;
+      }
+      const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+      const geocode = await Location.reverseGeocodeAsync({
+        latitude: loc.coords.latitude,
+        longitude: loc.coords.longitude,
+      });
+      if (geocode.length > 0) {
+        const g = geocode[0];
+        const city = g.city || g.district || g.region || "";
+        const country = g.country || "";
+        const locationStr = city && country ? `${city}, ${country}` : country || city;
+        if (locationStr) update("location", locationStr);
+      }
+    } catch {
+      // silently ignore errors
+    } finally {
+      setLocationLoading(false);
+    }
+  };
+
   const handleNext = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
-    if (step === 8) {
+    if (step === MR_STEP) {
       if (mrSubStep < MR_QUESTIONS.length - 1) {
         const next = mrSubStep + 1;
         setMrSubStep(next);
-        animateProgress(8, next);
+        animateProgress(MR_STEP, next);
       } else {
-        const avg = Object.values(data.mentalResilienceAnswers).reduce((a, b) => a + b, 0) / MR_QUESTIONS.length;
-        setData((prev) => ({ ...prev, psychologicalResilience: Math.round(avg * 2) }));
-        const next = step + 1;
+        const next = MR_STEP + 1;
         setStep(next);
         animateProgress(next);
       }
       return;
     }
 
-    if (step < TOTAL_STEPS - 1) {
-      const next = step + 1;
-      setStep(next);
-      animateProgress(next);
-    } else {
+    if (step === TOTAL_STEPS - 1) {
       handleSubmit();
+      return;
     }
+
+    const next = step + 1;
+    setStep(next);
+    animateProgress(next);
   };
 
   const handleBack = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
-    if (step === 8 && mrSubStep > 0) {
+    if (step === MR_STEP && mrSubStep > 0) {
       const prev = mrSubStep - 1;
       setMrSubStep(prev);
-      animateProgress(8, prev);
+      animateProgress(MR_STEP, prev);
       return;
     }
 
     if (step > 0) {
       const prev = step - 1;
       setStep(prev);
-      if (prev === 8) setMrSubStep(MR_QUESTIONS.length - 1);
+      if (prev === MR_STEP) setMrSubStep(MR_QUESTIONS.length - 1);
       animateProgress(prev);
     } else {
       router.back();
@@ -242,8 +316,10 @@ export default function AssessmentScreen() {
     Haptics.selectionAsync();
     setData((prev) => {
       const cur = prev.skills;
+      if (skill === "none") {
+        return { ...prev, skills: cur.includes("none") ? [] : ["none"] };
+      }
       if (cur.includes(skill)) return { ...prev, skills: cur.filter((s) => s !== skill) };
-      if (skill === "none") return { ...prev, skills: ["none"] };
       return { ...prev, skills: [...cur.filter((s) => s !== "none"), skill] };
     });
   };
@@ -259,17 +335,26 @@ export default function AssessmentScreen() {
 
   const isValid = () => {
     if (step === 0) return data.location.trim().length > 1;
-    if (step === 4) return data.skills.length > 0;
-    if (step === 8) return data.mentalResilienceAnswers[MR_QUESTIONS[mrSubStep].key] !== undefined;
-    if (step === 9) return data.riskConcerns.length > 0;
+    if (step === 1) return !!data.ageBracket;
+    if (step === 2) return true; // income stability always has value
+    if (step === MR_STEP) return true; // MR questions have defaults
+    if (step === 6) return data.skills.length > 0;
+    if (step === TOTAL_STEPS - 1) return data.riskConcerns.length > 0;
     return true;
   };
 
   const handleSubmit = async () => {
+    const finalCurrency = data.currency === "OTHER" ? (data.customCurrency || "USD") : data.currency;
     router.replace({
       pathname: "/loading",
       params: {
-        assessmentData: JSON.stringify({ ...data, sessionId }),
+        assessmentData: JSON.stringify({
+          ...data,
+          currency: finalCurrency,
+          sessionId,
+          savingsMonths: data.savingsPreferNotToSay ? 3 : data.savingsMonths,
+          incomeStability: data.incomePreferNotToSay ? "freelance" : data.incomeStability,
+        }),
       },
     });
   };
@@ -283,7 +368,7 @@ export default function AssessmentScreen() {
   const currentMrQ = MR_QUESTIONS[mrSubStep];
   const currentMrAnswer = data.mentalResilienceAnswers[currentMrQ?.key];
 
-  const stepLabel = step === 8
+  const stepLabel = step === MR_STEP
     ? `Mental Resilience ${mrSubStep + 1}/${MR_QUESTIONS.length}`
     : `${step + 1} / ${TOTAL_STEPS}`;
 
@@ -308,8 +393,8 @@ export default function AssessmentScreen() {
         keyboardShouldPersistTaps="handled"
       >
 
-        {/* ── STEP 8: MENTAL RESILIENCE DEEP ASSESSMENT ── */}
-        {step === 8 ? (
+        {/* ── STEP 3: MENTAL RESILIENCE DEEP ASSESSMENT ── */}
+        {step === MR_STEP ? (
           <View style={styles.mrContainer}>
             {mrSubStep === 0 && (
               <View style={styles.mrBanner}>
@@ -356,56 +441,160 @@ export default function AssessmentScreen() {
             <Text style={styles.stepTitle}>{currentStep.title}</Text>
             <Text style={styles.stepSubtitle}>{currentStep.subtitle}</Text>
 
+            {/* ── STEP 0: LOCATION + CURRENCY ── */}
             {step === 0 && (
-              <TextInput
-                style={styles.textInput}
-                value={data.location}
-                onChangeText={(v) => update("location", v)}
-                placeholder="e.g. California, USA"
-                placeholderTextColor={colors.textMuted}
-                autoFocus
-                returnKeyType="next"
-                onSubmitEditing={isValid() ? handleNext : undefined}
-                testID="location-input"
-              />
+              <>
+                <TextInput
+                  style={styles.textInput}
+                  value={data.location}
+                  onChangeText={(v) => update("location", v)}
+                  placeholder="e.g. California, USA"
+                  placeholderTextColor={colors.textMuted}
+                  autoFocus
+                  returnKeyType="next"
+                  onSubmitEditing={isValid() ? handleNext : undefined}
+                  testID="location-input"
+                />
+                <Pressable
+                  onPress={handleUseMyLocation}
+                  disabled={locationLoading}
+                  style={({ pressed }) => [styles.geoBtn, pressed && { opacity: 0.7 }]}
+                >
+                  <Feather name="map-pin" size={16} color={colors.primary} />
+                  <Text style={styles.geoBtnText}>
+                    {locationLoading ? "Detecting…" : "Use my location"}
+                  </Text>
+                </Pressable>
+                {locationDenied && (
+                  <Text style={[styles.preferNotDesc, { color: colors.warning ?? colors.textMuted }]}>
+                    Location access was denied — please type your city or region above.
+                  </Text>
+                )}
+
+                <Text style={[styles.subSectionTitle, { marginTop: 24 }]}>Preferred currency</Text>
+                <View style={styles.currencyGrid}>
+                  {CURRENCIES.map((c) => (
+                    <Pressable
+                      key={c.code}
+                      onPress={() => { Haptics.selectionAsync(); update("currency", c.code); }}
+                      style={[styles.currencyBtn, data.currency === c.code && styles.currencyBtnSelected]}
+                    >
+                      <Text style={[styles.currencyBtnText, data.currency === c.code && styles.currencyBtnTextSelected]}>
+                        {c.label}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
+                {data.currency === "OTHER" && (
+                  <TextInput
+                    style={[styles.textInput, { marginTop: 8, height: 44 }]}
+                    value={data.customCurrency}
+                    onChangeText={(v) => update("customCurrency", v.toUpperCase())}
+                    placeholder="Currency code (e.g. CHF, SEK)"
+                    placeholderTextColor={colors.textMuted}
+                    maxLength={5}
+                    autoCapitalize="characters"
+                  />
+                )}
+              </>
             )}
 
+            {/* ── STEP 1: AGE BRACKET ── */}
             {step === 1 && (
+              <View style={styles.chipGrid}>
+                {([
+                  { id: "18-24", label: "18–24", desc: "Early career" },
+                  { id: "25-34", label: "25–34", desc: "Building phase" },
+                  { id: "35-44", label: "35–44", desc: "Established" },
+                  { id: "45-54", label: "45–54", desc: "Peak earning" },
+                  { id: "55-64", label: "55–64", desc: "Pre-retirement" },
+                  { id: "65+",   label: "65+",   desc: "Retirement age" },
+                ]).map((opt) => (
+                  <Pressable
+                    key={opt.id}
+                    onPress={() => { Haptics.selectionAsync(); update("ageBracket", opt.id); }}
+                    style={[styles.ageChip, data.ageBracket === opt.id && styles.ageChipSelected]}
+                  >
+                    <Text style={[styles.ageChipLabel, data.ageBracket === opt.id && styles.ageChipLabelSelected]}>
+                      {opt.label}
+                    </Text>
+                    <Text style={styles.ageChipDesc}>{opt.desc}</Text>
+                  </Pressable>
+                ))}
+              </View>
+            )}
+
+            {/* ── STEP 2: INCOME STABILITY ── */}
+            {step === 2 && (
               <View style={styles.optionList}>
                 {([
                   { id: "fixed", label: "Fixed & Secure", desc: "Salaried, guaranteed pension" },
                   { id: "freelance", label: "Variable / Freelance", desc: "Fluctuates month to month" },
                   { id: "unstable", label: "Unstable / Irregular", desc: "Unemployed or highly volatile" },
+                  { id: "student", label: "Student / No income", desc: "Full-time student or not currently earning" },
                 ] as const).map((opt) => (
-                  <OptionCard key={opt.id} styles={styles} selected={data.incomeStability === opt.id} onPress={() => { Haptics.selectionAsync(); update("incomeStability", opt.id); }}>
+                  <OptionCard
+                    key={opt.id}
+                    styles={styles}
+                    selected={data.incomeStability === opt.id && !data.incomePreferNotToSay}
+                    onPress={() => { Haptics.selectionAsync(); update("incomeStability", opt.id); update("incomePreferNotToSay", false); }}
+                  >
                     <View style={styles.optionCardInner}>
                       <View style={styles.optionCardText}>
-                        <Text style={[styles.optionLabel, data.incomeStability === opt.id && styles.optionLabelSelected]}>{opt.label}</Text>
+                        <Text style={[styles.optionLabel, data.incomeStability === opt.id && !data.incomePreferNotToSay && styles.optionLabelSelected]}>{opt.label}</Text>
                         <Text style={styles.optionDesc}>{opt.desc}</Text>
                       </View>
-                      {data.incomeStability === opt.id && (
+                      {data.incomeStability === opt.id && !data.incomePreferNotToSay && (
                         <Feather name="check-circle" size={20} color={colors.primary} />
                       )}
                     </View>
                   </OptionCard>
                 ))}
+                <Pressable
+                  onPress={() => { Haptics.selectionAsync(); update("incomePreferNotToSay", !data.incomePreferNotToSay); update("incomeStability", "freelance"); }}
+                  style={[styles.preferNotCard, data.incomePreferNotToSay && styles.preferNotCardSelected]}
+                >
+                  <Text style={[styles.preferNotLabel, data.incomePreferNotToSay && styles.preferNotLabelSelected]}>
+                    {data.incomePreferNotToSay ? "✓ Prefer not to say" : "Prefer not to say"}
+                  </Text>
+                  <Text style={styles.preferNotDesc}>Your answers remain private — won't block your results</Text>
+                </Pressable>
               </View>
             )}
 
-            {step === 2 && (
+            {/* ── STEP 4: FINANCIAL RUNWAY ── */}
+            {step === 4 && (
               <View style={styles.section}>
-                <SliderControl
-                  styles={styles}
-                  value={data.savingsMonths}
-                  min={0}
-                  max={24}
-                  onChange={(v) => update("savingsMonths", v)}
-                  formatValue={(v) => v === 24 ? "24+ months" : v === 1 ? "1 month" : `${v} months`}
-                />
+                {!data.savingsPreferNotToSay ? (
+                  <SliderControl
+                    styles={styles}
+                    value={data.savingsMonths}
+                    min={0}
+                    max={24}
+                    onChange={(v) => update("savingsMonths", v)}
+                    formatValue={(v) => v === 24 ? "24+ months" : v === 1 ? "1 month" : `${v} months`}
+                  />
+                ) : (
+                  <View style={{ paddingVertical: 24, alignItems: "center" }}>
+                    <Text style={[styles.optionDesc, { textAlign: "center", fontSize: 14 }]}>
+                      We'll use a neutral estimate for your financial runway.
+                    </Text>
+                  </View>
+                )}
+                <Pressable
+                  onPress={() => { Haptics.selectionAsync(); update("savingsPreferNotToSay", !data.savingsPreferNotToSay); }}
+                  style={[styles.preferNotCard, data.savingsPreferNotToSay && styles.preferNotCardSelected]}
+                >
+                  <Text style={[styles.preferNotLabel, data.savingsPreferNotToSay && styles.preferNotLabelSelected]}>
+                    {data.savingsPreferNotToSay ? "✓ Prefer not to say" : "Prefer not to say"}
+                  </Text>
+                  <Text style={styles.preferNotDesc}>Skip the slider — we'll use a neutral mid-range value</Text>
+                </Pressable>
               </View>
             )}
 
-            {step === 3 && (
+            {/* ── STEP 5: DEPENDENTS ── */}
+            {step === 5 && (
               <View style={styles.optionList}>
                 {([
                   { value: 0, label: "None", desc: "No dependents", icon: "user" },
@@ -429,7 +618,8 @@ export default function AssessmentScreen() {
               </View>
             )}
 
-            {step === 4 && (
+            {/* ── STEP 6: SKILLS ── */}
+            {step === 6 && (
               <View style={styles.chipGrid}>
                 {[
                   { id: "digital", label: "Digital / Tech" },
@@ -438,6 +628,10 @@ export default function AssessmentScreen() {
                   { id: "medical", label: "First Aid / Medical" },
                   { id: "financial", label: "Trading / Finance" },
                   { id: "language", label: "Multiple Languages" },
+                  { id: "caregiving", label: "Caregiving" },
+                  { id: "agriculture", label: "Agriculture / Homesteading" },
+                  { id: "community", label: "Community Organizing" },
+                  { id: "teaching", label: "Education / Teaching" },
                   { id: "none", label: "None of these" },
                 ].map((s) => (
                   <Pressable
@@ -453,7 +647,8 @@ export default function AssessmentScreen() {
               </View>
             )}
 
-            {step === 5 && (
+            {/* ── STEP 7: HEALTH & MOBILITY ── */}
+            {step === 7 && (
               <View style={styles.section}>
                 <Text style={styles.subSectionTitle}>Overall Health</Text>
                 <View style={styles.segmentRow}>
@@ -512,14 +707,17 @@ export default function AssessmentScreen() {
               </View>
             )}
 
-            {step === 6 && (
+            {/* ── STEP 8: HOUSING ── */}
+            {step === 8 && (
               <View style={styles.optionList}>
                 {[
                   { id: "own", label: "Own a home", desc: "Mortgage or outright ownership" },
                   { id: "rent", label: "Renting", desc: "Long-term rental agreement" },
                   { id: "family", label: "Living with family", desc: "With parents or relatives" },
+                  { id: "temporary", label: "Temporary/Subsidised housing", desc: "Short-term or government-assisted" },
+                  { id: "transitional", label: "Transitional housing or shelter", desc: "Crisis accommodation or shelter" },
                   { id: "nomadic", label: "Nomadic", desc: "Frequent traveler, no fixed base" },
-                  { id: "other", label: "Other", desc: "Temporary or transitional housing" },
+                  { id: "other", label: "Other", desc: "Any other arrangement" },
                 ].map((opt) => (
                   <OptionCard key={opt.id} styles={styles} selected={data.housingType === opt.id} onPress={() => { Haptics.selectionAsync(); update("housingType", opt.id as any); }}>
                     <View style={styles.optionCardInner}>
@@ -536,7 +734,8 @@ export default function AssessmentScreen() {
               </View>
             )}
 
-            {step === 7 && (
+            {/* ── STEP 9: EMERGENCY SUPPLIES ── */}
+            {step === 9 && (
               <View style={styles.yesNoGrid}>
                 {(["true", "false"] as const).map((val) => {
                   const isYes = val === "true";
@@ -554,7 +753,8 @@ export default function AssessmentScreen() {
               </View>
             )}
 
-            {step === 9 && (
+            {/* ── STEP 10: RISK CONCERNS ── */}
+            {step === 10 && (
               <View style={styles.chipGrid}>
                 {[
                   { id: "job_loss", label: "Job Loss" },
@@ -567,17 +767,27 @@ export default function AssessmentScreen() {
                   { id: "war_conflict", label: "War / Conflict" },
                   { id: "pandemic", label: "Pandemic" },
                   { id: "illness", label: "Personal Illness" },
-                ].map((r) => (
-                  <Pressable
-                    key={r.id}
-                    onPress={() => toggleRisk(r.id)}
-                    style={[styles.chip, styles.riskChip, data.riskConcerns.includes(r.id) && styles.chipSelectedDanger]}
-                  >
-                    <Text style={[styles.chipText, data.riskConcerns.includes(r.id) && styles.chipTextDanger]}>
-                      {r.label}
-                    </Text>
-                  </Pressable>
-                ))}
+                ].map((r) => {
+                  const selected = data.riskConcerns.includes(r.id);
+                  const isTraumaAdjacent = r.id === "war_conflict" || r.id === "illness";
+                  return (
+                    <View key={r.id} style={{ width: "47%" }}>
+                      <Pressable
+                        onPress={() => toggleRisk(r.id)}
+                        style={[styles.chip, styles.riskChip, selected && styles.chipSelectedDanger]}
+                      >
+                        <Text style={[styles.chipText, selected && styles.chipTextDanger]}>
+                          {r.label}
+                        </Text>
+                      </Pressable>
+                      {selected && isTraumaAdjacent && (
+                        <Text style={styles.traumaNote}>
+                          We understand this may be personal. Your answers shape a plan that takes this seriously.
+                        </Text>
+                      )}
+                    </View>
+                  );
+                })}
               </View>
             )}
           </>
@@ -592,10 +802,16 @@ export default function AssessmentScreen() {
           testID="next-btn"
         >
           <Text style={styles.nextBtnText}>
-            {step === 9 ? "Generate Report" : step === 8 && mrSubStep < MR_QUESTIONS.length - 1 ? "Next Question" : "Continue"}
+            {step === TOTAL_STEPS - 1
+              ? "Generate Report"
+              : step === MR_STEP && mrSubStep < MR_QUESTIONS.length - 1
+              ? "Next Question"
+              : step === MR_STEP && mrSubStep === MR_QUESTIONS.length - 1
+              ? "Continue"
+              : "Continue"}
           </Text>
           <Feather
-            name={step === 9 ? "zap" : "arrow-right"}
+            name={step === TOTAL_STEPS - 1 ? "zap" : "arrow-right"}
             size={18}
             color={!isValid() ? colors.textMuted : colors.background}
           />
@@ -661,6 +877,113 @@ const createStyles = (colors: ColorsType) => StyleSheet.create({
     color: colors.textSecondary,
     lineHeight: 22,
     marginTop: -4,
+  },
+  // ── Age bracket chips ──
+  ageChip: {
+    width: "47%",
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    borderRadius: 14,
+    backgroundColor: colors.surface,
+    borderWidth: 2,
+    borderColor: colors.border,
+    alignItems: "center",
+  },
+  ageChipSelected: {
+    borderColor: colors.primary,
+    backgroundColor: colors.primaryMuted,
+  },
+  ageChipLabel: {
+    fontFamily: "Inter_700Bold",
+    fontSize: 18,
+    color: colors.textSecondary,
+  },
+  ageChipLabelSelected: { color: colors.primary },
+  ageChipDesc: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 11,
+    color: colors.textMuted,
+    marginTop: 2,
+  },
+  // ── Currency grid ──
+  currencyGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginTop: 8,
+  },
+  currencyBtn: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: colors.border,
+    backgroundColor: colors.card,
+  },
+  currencyBtnSelected: {
+    borderColor: colors.primary,
+    backgroundColor: colors.primaryMuted,
+  },
+  currencyBtnText: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 13,
+    color: colors.textSecondary,
+  },
+  currencyBtnTextSelected: {
+    color: colors.primary,
+  },
+  // ── Geolocation button ──
+  geoBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    backgroundColor: colors.primaryMuted,
+    borderWidth: 1,
+    borderColor: colors.primaryBorder,
+    alignSelf: "flex-start",
+  },
+  geoBtnText: {
+    fontFamily: "Inter_500Medium",
+    fontSize: 14,
+    color: colors.primary,
+  },
+  // ── Prefer not to say ──
+  preferNotCard: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderStyle: "dashed",
+    borderColor: colors.border,
+  },
+  preferNotCardSelected: {
+    borderColor: colors.primary,
+    backgroundColor: colors.primaryMuted,
+    borderStyle: "solid",
+  },
+  preferNotLabel: {
+    fontFamily: "Inter_600SemiBold",
+    fontSize: 14,
+    color: colors.textSecondary,
+  },
+  preferNotLabelSelected: { color: colors.primary },
+  preferNotDesc: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 12,
+    color: colors.textMuted,
+    marginTop: 2,
+  },
+  // ── Trauma note ──
+  traumaNote: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 11,
+    color: colors.textMuted,
+    marginTop: 4,
+    paddingHorizontal: 4,
+    lineHeight: 16,
   },
   // ── Mental Resilience ──
   mrContainer: {
