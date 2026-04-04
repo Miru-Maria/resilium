@@ -12,7 +12,7 @@ import { ResilientIcon } from "@/components/resilient-icon";
 import { cn } from "@/lib/utils";
 import {
   AlertTriangle, CheckCircle, Activity, Brain, TrendingUp, Award,
-  ExternalLink, ArrowRight, Eye, Zap, Lock,
+  ExternalLink, ArrowRight, Eye, Zap, Lock, Sparkles, ChevronDown, ChevronUp, Target,
 } from "lucide-react";
 
 /* ──────────────────────────────────────────
@@ -46,6 +46,13 @@ const SAMPLE_VULNERABILITIES = [
   "Rented housing in a high-seismic-risk zone with no renter's insurance in place.",
 ];
 
+const SAMPLE_GOAL = {
+  id: "job_security",
+  emoji: "💼",
+  label: "Job & income security",
+  vision: "Six months of savings, a freelance client lined up, and a clear plan if my employer downsizes.",
+};
+
 const SAMPLE_CHECKLIST: Record<string, { id: string; title: string; description: string; priority: string; pathway: string }[]> = {
   financial: [
     { id: "f1", title: "Build a 3-month emergency fund", description: "Open a high-yield savings account and automate monthly transfers until you reach 3 months of living expenses.", priority: "critical", pathway: "foundation" },
@@ -72,6 +79,10 @@ const SAMPLE_CHECKLIST: Record<string, { id: string; title: string; description:
   psychological: [
     { id: "p1", title: "Build a weekly decompression habit", description: "30 minutes of any physical activity, 3× per week, consistently reduces crisis-response cortisol.", priority: "medium", pathway: "growth" },
     { id: "p2", title: "Write a simple 'chaos protocol'", description: "A one-page document: who to call, where to go, what account numbers matter. Done once, invaluable in crisis.", priority: "high", pathway: "foundation" },
+  ],
+  socialCapital: [
+    { id: "sc1", title: "Have one resilience conversation with a trusted contact", description: "Share your plan with one person you trust and ask them to do the same. Mutual awareness multiplies real-world support.", priority: "medium", pathway: "growth" },
+    { id: "sc2", title: "Join or explore one local community group", description: "Neighborhood associations, mutual aid networks, or faith communities — one trusted group is a genuine safety net.", priority: "low", pathway: "growth" },
   ],
 };
 
@@ -138,6 +149,7 @@ const SAMPLE_SCENARIOS = [
 const AREA_LABELS: Record<string, string> = {
   financial: "Financial", health: "Health", skills: "Skills",
   mobility: "Mobility", psychological: "Psychological", resources: "Resources",
+  socialCapital: "Social Network",
 };
 
 const PRIORITY_CONFIG = {
@@ -210,6 +222,7 @@ function ProTeaser({ title, description }: { title: string; description: string 
 ────────────────────────────────────────── */
 export default function DemoPage() {
   const [checkedItems, setCheckedItems] = useState<Set<string>>(new Set());
+  const [expandedItem, setExpandedItem] = useState<string | null>(null);
 
   const toggleItem = (key: string) =>
     setCheckedItems(prev => {
@@ -217,6 +230,11 @@ export default function DemoPage() {
       next.has(key) ? next.delete(key) : next.add(key);
       return next;
     });
+
+  const toggleExpand = (e: React.MouseEvent, key: string) => {
+    e.stopPropagation();
+    setExpandedItem(prev => prev === key ? null : key);
+  };
 
   const sortedAreas = Object.keys(SAMPLE_CHECKLIST).sort((a, b) => {
     const scoreMap: Record<string, number> = SAMPLE_SCORE;
@@ -264,6 +282,21 @@ export default function DemoPage() {
       <DemoBanner />
 
       <main className="max-w-6xl mx-auto px-6 pt-10 space-y-10">
+
+        {/* GOAL BADGE — shows the new step 14 feature */}
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-2">
+            <span className="text-lg">{SAMPLE_GOAL.emoji}</span>
+            <div>
+              <span className="text-xs font-bold uppercase tracking-wider text-primary mr-2">Resilience Goal</span>
+              <span className="text-sm font-semibold text-foreground">{SAMPLE_GOAL.label}</span>
+            </div>
+          </div>
+          <div className="flex items-start gap-2 flex-1 min-w-0">
+            <Target className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5" />
+            <p className="text-sm text-muted-foreground italic">"{SAMPLE_GOAL.vision}"</p>
+          </div>
+        </div>
 
         {/* HERO SCORES */}
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -362,6 +395,42 @@ export default function DemoPage() {
           </div>
         </section>
 
+        {/* NEXT ACTION SPOTLIGHT */}
+        {(() => {
+          const nextItem = Object.entries(SAMPLE_CHECKLIST)
+            .flatMap(([area, items]) => items.map(i => ({ area, ...i })))
+            .filter(i => !checkedItems.has(`${i.area}::${i.id}`))
+            .sort((a, b) => {
+              const order = { critical: 0, high: 1, medium: 2, low: 3 };
+              return (order[a.priority as keyof typeof order] ?? 9) - (order[b.priority as keyof typeof order] ?? 9);
+            })[0];
+          if (!nextItem) return null;
+          const cfg = PRIORITY_CONFIG[nextItem.priority as keyof typeof PRIORITY_CONFIG] ?? PRIORITY_CONFIG.medium;
+          return (
+            <div className="bg-primary/5 border border-primary/20 rounded-2xl p-5 flex items-start gap-4">
+              <div className="w-8 h-8 rounded-xl bg-primary/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <Zap className="w-4 h-4 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-bold uppercase tracking-wider text-primary mb-1">Your Next Action</p>
+                <div className="flex flex-wrap items-center gap-2 mb-1">
+                  <span className={cn("text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full", cfg.className)}>{cfg.label}</span>
+                  <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{AREA_LABELS[nextItem.area] ?? nextItem.area}</span>
+                </div>
+                <h4 className="font-bold text-base">{nextItem.title}</h4>
+                <p className="text-muted-foreground text-sm mt-0.5">{nextItem.description}</p>
+              </div>
+              <button
+                type="button"
+                className="flex items-center gap-1.5 text-xs font-semibold rounded-full px-3 py-1.5 border border-emerald-200 bg-emerald-50 text-emerald-700 flex-shrink-0 dark:bg-emerald-900/20 dark:border-emerald-800"
+                onClick={() => toggleItem(`${nextItem.area}::${nextItem.id}`)}
+              >
+                <CheckCircle className="w-3.5 h-3.5" /> Done
+              </button>
+            </div>
+          );
+        })()}
+
         {/* ACTION CHECKLISTS */}
         <section className="bg-card rounded-3xl p-6 md:p-8 shadow-lg shadow-black/5 border border-border">
           <div className="flex items-center gap-3 mb-2">
@@ -369,7 +438,7 @@ export default function DemoPage() {
             <h2 className="font-display font-bold text-2xl">Action Checklists</h2>
           </div>
           <p className="text-muted-foreground text-sm mb-6">
-            Areas sorted from most critical to least. Try checking items off — your progress tracks in real reports.
+            Areas sorted from most critical to least. Try checking items off — your progress saves in real reports.
           </p>
 
           {/* Overall progress */}
@@ -412,41 +481,82 @@ export default function DemoPage() {
                   {items.map(item => {
                     const key = `${area}::${item.id}`;
                     const completed = checkedItems.has(key);
+                    const isExpanded = expandedItem === key;
                     const priorityConfig = PRIORITY_CONFIG[item.priority as keyof typeof PRIORITY_CONFIG] ?? PRIORITY_CONFIG.medium;
                     return (
                       <div
                         key={item.id}
                         className={cn(
-                          "flex items-start gap-4 p-5 rounded-2xl border transition-all cursor-pointer",
+                          "rounded-2xl border transition-all overflow-hidden",
                           completed
                             ? "border-emerald-200 bg-emerald-50/50 dark:bg-emerald-900/10 dark:border-emerald-900/30"
                             : "border-border/60 hover:border-primary/30 hover:bg-muted/10"
                         )}
-                        onClick={() => toggleItem(key)}
                       >
-                        <div className={cn(
-                          "w-5 h-5 rounded-full border-2 flex-shrink-0 mt-0.5 flex items-center justify-center transition-all",
-                          completed ? "border-emerald-500 bg-emerald-500" : "border-muted-foreground/40"
-                        )}>
-                          {completed && <CheckCircle className="w-3 h-3 text-white" />}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex flex-wrap items-center gap-2 mb-1">
-                            <span className={cn("text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full", priorityConfig.className)}>
-                              {priorityConfig.label}
-                            </span>
-                            <span className={cn(
-                              "text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full",
-                              item.pathway === "growth" ? "bg-emerald-500/10 text-emerald-700" : "bg-amber-500/10 text-amber-700"
-                            )}>
-                              {item.pathway === "growth" ? "Growth" : "Foundation"}
-                            </span>
+                        <div
+                          className="flex items-start gap-4 p-5 cursor-pointer"
+                          onClick={() => toggleItem(key)}
+                        >
+                          <div className={cn(
+                            "w-5 h-5 rounded-full border-2 flex-shrink-0 mt-0.5 flex items-center justify-center transition-all",
+                            completed ? "border-emerald-500 bg-emerald-500" : "border-muted-foreground/40"
+                          )}>
+                            {completed && <CheckCircle className="w-3 h-3 text-white" />}
                           </div>
-                          <h4 className={cn("font-bold text-base", completed && "line-through text-muted-foreground")}>
-                            {item.title}
-                          </h4>
-                          <p className="text-muted-foreground text-sm mt-0.5">{item.description}</p>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex flex-wrap items-center gap-2 mb-1">
+                              <span className={cn("text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full", priorityConfig.className)}>
+                                {priorityConfig.label}
+                              </span>
+                              <span className={cn(
+                                "text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full",
+                                item.pathway === "growth" ? "bg-emerald-500/10 text-emerald-700" : "bg-amber-500/10 text-amber-700"
+                              )}>
+                                {item.pathway === "growth" ? "Growth" : "Foundation"}
+                              </span>
+                            </div>
+                            <h4 className={cn("font-bold text-base", completed && "line-through text-muted-foreground")}>
+                              {item.title}
+                            </h4>
+                            <p className="text-muted-foreground text-sm mt-0.5">{item.description}</p>
+                          </div>
                         </div>
+
+                        {/* Break it down — Pro feature demo */}
+                        <div className="px-5 pb-4 pt-0">
+                          <button
+                            type="button"
+                            onClick={(e) => toggleExpand(e, key)}
+                            className={cn(
+                              "flex items-center gap-1.5 text-xs font-semibold rounded-full px-3 py-1.5 border transition-all",
+                              isExpanded
+                                ? "border-primary/40 bg-primary/5 text-primary"
+                                : "border-border text-muted-foreground hover:border-primary/30 hover:text-primary"
+                            )}
+                          >
+                            <Sparkles className="w-3.5 h-3.5" />
+                            {isExpanded ? "Hide breakdown" : "Break it down"}
+                            {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                          </button>
+                        </div>
+
+                        {/* Pro teaser inline */}
+                        {isExpanded && (
+                          <div className="mx-5 mb-5 rounded-xl border border-primary/20 bg-primary/5 p-4 flex items-start gap-3">
+                            <Lock className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                            <div className="flex-1">
+                              <p className="text-sm font-semibold text-foreground mb-1">AI step-by-step guidance — Pro feature</p>
+                              <p className="text-xs text-muted-foreground mb-3">
+                                In your real report, clicking this generates 4–7 personalized sub-steps tailored to your location, goal, and situation — using the full context of your profile.
+                              </p>
+                              <Link href="/pricing">
+                                <Button size="sm" className="rounded-full gap-1.5 h-7 text-xs">
+                                  Unlock with Pro <ExternalLink className="w-3 h-3" />
+                                </Button>
+                              </Link>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     );
                   })}
@@ -530,14 +640,18 @@ export default function DemoPage() {
         </section>
 
         {/* PRO TEASERS */}
-        <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <ProTeaser
+            title="Step-by-step AI Guidance"
+            description="Click 'Break it down' on any checklist item and get 4–7 concrete, location-specific sub-steps generated from your full profile and goal."
+          />
           <ProTeaser
             title="Interactive Scenario Stress-Tests"
-            description="Adjust parameters — unemployment duration, medical severity, relocation distance — and let AI re-score your profile in real time. Pro-exclusive."
+            description="Adjust parameters — unemployment duration, medical severity, relocation distance — and let AI re-score your profile in real time."
           />
           <ProTeaser
             title="Score History & Plan Comparison"
-            description="Track your resilience over multiple assessments. See exactly which dimensions improved and compare plan versions side-by-side. Pro-exclusive."
+            description="Track your resilience over multiple assessments. See exactly which dimensions improved and compare plan versions side-by-side."
           />
         </section>
 
