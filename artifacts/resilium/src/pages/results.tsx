@@ -338,13 +338,17 @@ export default function ResultsPage() {
   const mrProfile = (report as any).mentalResilienceProfile as MentalResilienceProfile | undefined;
 
   const mrDimensions = mrProfile ? [
-    { label: "Stress Tolerance", value: mrProfile.stressTolerance },
-    { label: "Adaptability", value: mrProfile.adaptability },
-    { label: "Learning Agility", value: mrProfile.learningAgility },
-    { label: "Change Management", value: mrProfile.changeManagement },
-    { label: "Emotional Regulation", value: mrProfile.emotionalRegulation },
-    { label: "Social Support", value: mrProfile.socialSupport },
+    { label: "Stress Tolerance", value: mrProfile.stressTolerance, insight: "absorbing acute pressure without shutting down" },
+    { label: "Adaptability", value: mrProfile.adaptability, insight: "pivoting when circumstances change fast" },
+    { label: "Learning Agility", value: mrProfile.learningAgility, insight: "picking up new skills quickly under pressure" },
+    { label: "Change Management", value: mrProfile.changeManagement, insight: "staying functional while routines break down" },
+    { label: "Emotional Regulation", value: mrProfile.emotionalRegulation, insight: "keeping decisions clear when emotions are running high" },
+    { label: "Social Support", value: mrProfile.socialSupport, insight: "drawing on your network when you need it most" },
   ] : [];
+
+  // Derive the strongest and weakest MR dimensions for narrative framing
+  const mrStrength = mrDimensions.length > 0 ? mrDimensions.reduce((a, b) => a.value > b.value ? a : b) : null;
+  const mrGap = mrDimensions.length > 0 ? mrDimensions.reduce((a, b) => a.value < b.value ? a : b) : null;
 
   return (
     <div className="min-h-screen pb-24">
@@ -502,6 +506,24 @@ export default function ResultsPage() {
                 </div>
               ))}
             </div>
+            {mrStrength && mrGap && mrStrength.label !== mrGap.label && (
+              <div className="bg-muted/30 rounded-2xl p-5 mb-4 space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 mt-2 flex-shrink-0" />
+                  <p className="text-sm leading-relaxed text-foreground">
+                    <span className="font-semibold">You're built for {mrStrength.label.toLowerCase()}.</span>{" "}
+                    <span className="text-muted-foreground">When it comes to {(mrStrength as any).insight ?? "handling pressure"}, you're already ahead of most people — this is a real asset in a crisis.</span>
+                  </p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-2 h-2 rounded-full bg-amber-400 mt-2 flex-shrink-0" />
+                  <p className="text-sm leading-relaxed text-foreground">
+                    <span className="font-semibold">The gap to build: {mrGap.label.toLowerCase()}.</span>{" "}
+                    <span className="text-muted-foreground">In a sustained disruption, {(mrGap as any).insight ?? "this area"} becomes the pressure point — not a weakness, but the next thing to strengthen.</span>
+                  </p>
+                </div>
+              </div>
+            )}
             <div className="bg-muted/30 rounded-2xl p-4 flex items-center gap-4">
               <div className="flex-shrink-0 w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
                 <span className="text-2xl font-display font-bold text-primary">{mrProfile.composite}</span>
@@ -510,8 +532,8 @@ export default function ResultsPage() {
                 <p className="font-bold text-sm">Composite Mental Resilience Score</p>
                 <p className="text-muted-foreground text-xs leading-relaxed">
                   {mrProfile.pathway === "growth"
-                    ? "Your strong mental resilience enables an ambitious, challenge-oriented action plan. Embrace growth-oriented goals."
-                    : "Your plan is scaffolded to build confidence step-by-step. Start small, build momentum, and your resilience will grow."}
+                    ? "Use this as a springboard — your mental resilience supports ambitious action. Push into the growth-oriented items in your plan."
+                    : "Build one habit at a time. Your plan is ordered to create early wins that compound into real resilience over weeks, not years."}
                 </p>
               </div>
             </div>
@@ -716,30 +738,97 @@ export default function ResultsPage() {
           </Tabs>
         </section>
 
-        {/* PRO UPSELL — shown to free users after the action plan */}
+        {/* SCENARIO PAYWALL TEASER — shown to free users after the action plan */}
         {!isPro && (
-          <section className="rounded-3xl border border-primary/20 bg-primary/5 p-6 md:p-8 print:hidden">
-            <div className="flex items-center gap-2 mb-3">
-              <Zap className="w-4 h-4 text-primary" />
-              <span className="text-[10px] font-bold uppercase tracking-widest text-primary">Resilium Pro</span>
+          <section className="rounded-3xl border border-primary/20 bg-card overflow-hidden print:hidden shadow-lg shadow-black/5">
+            {/* Header */}
+            <div className="px-6 md:px-8 pt-6 md:pt-8 pb-5 border-b border-border/50">
+              <div className="flex items-center gap-2 mb-3">
+                <Lock className="w-4 h-4 text-primary" />
+                <span className="text-[10px] font-bold uppercase tracking-widest text-primary">Pro Feature</span>
+              </div>
+              <h3 className="font-display font-bold text-xl md:text-2xl mb-1">
+                What happens to your resilience when life goes sideways?
+              </h3>
+              <p className="text-muted-foreground text-sm leading-relaxed max-w-2xl">
+                Scenario analysis stress-tests your current plan against real disruptions — showing you exactly where you'd break, how fast, and what to fix before it happens.
+              </p>
             </div>
-            <h3 className="font-display font-bold text-xl mb-2">
-              See if you're actually getting stronger over time.
-            </h3>
-            <p className="text-muted-foreground text-sm leading-relaxed mb-5 max-w-2xl">
-              Your plan is solid — but resilience is a moving target. Pro lets you reassess as often as you want, tracks your score across all six dimensions month by month, and shows you exactly what's changed and why so you always act on the right things.
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <Link href="/pricing">
-                <Button className="rounded-full gap-2 shadow-md shadow-primary/20">
-                  <Zap className="w-4 h-4" /> Upgrade to Pro — $9/mo
-                </Button>
-              </Link>
-              <Link href="/pricing">
-                <Button variant="outline" className="rounded-full gap-2">
-                  See what's included
-                </Button>
-              </Link>
+
+            {/* Mock scenario tabs */}
+            <div className="relative">
+              {/* Tab bar */}
+              <div className="flex gap-1 px-6 md:px-8 pt-5 pb-0">
+                {["Job Loss", "Market Downturn", "Health Crisis"].map((label, i) => (
+                  <div key={label} className={cn(
+                    "px-4 py-2 rounded-t-xl text-xs font-bold border border-b-0 cursor-default select-none",
+                    i === 0
+                      ? "bg-card border-border text-foreground"
+                      : "bg-muted/40 border-transparent text-muted-foreground"
+                  )}>{label}</div>
+                ))}
+              </div>
+
+              {/* Scenario preview content — partially blurred */}
+              <div className="relative mx-6 md:mx-8 mb-6 border border-border rounded-b-2xl rounded-tr-2xl overflow-hidden">
+                {/* Fake scenario output */}
+                <div className="p-5 space-y-4 select-none pointer-events-none" style={{ filter: "blur(3.5px)" }}>
+                  {/* Narrative headline */}
+                  <div className="space-y-1">
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-destructive">Critical Impact Detected</div>
+                    <p className="font-semibold text-sm leading-snug">
+                      Losing your primary income today would exhaust your financial runway in approximately 38 days at current burn rate — well below the 90-day safety threshold.
+                    </p>
+                  </div>
+
+                  {/* Score deltas */}
+                  <div className="grid grid-cols-3 sm:grid-cols-7 gap-2">
+                    {[
+                      { label: "Financial", delta: -28 },
+                      { label: "Skills", delta: -4 },
+                      { label: "Mobility", delta: -11 },
+                      { label: "Resources", delta: -19 },
+                      { label: "Health", delta: -3 },
+                      { label: "Psych", delta: -8 },
+                      { label: "Social", delta: -6 },
+                    ].map(({ label, delta }) => (
+                      <div key={label} className="bg-muted/40 rounded-xl p-2 text-center">
+                        <p className="text-[9px] text-muted-foreground mb-0.5">{label}</p>
+                        <p className="text-sm font-bold text-destructive">{delta}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Immediate actions */}
+                  <div className="space-y-2">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Top 3 Actions to Reduce Impact</p>
+                    {["Build a 3-month emergency fund before this scenario becomes real", "Activate your professional network now — 80% of roles are filled before posting", "Identify 2 income streams you could launch within 30 days"].map((action) => (
+                      <div key={action} className="flex items-start gap-2 bg-muted/30 rounded-xl px-3 py-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 flex-shrink-0" />
+                        <p className="text-xs text-foreground">{action}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Lock overlay */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-card/60 backdrop-blur-[1px]">
+                  <div className="text-center px-6">
+                    <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                      <Lock className="w-6 h-6 text-primary" />
+                    </div>
+                    <p className="font-display font-bold text-base mb-1">Unlock Scenario Analysis</p>
+                    <p className="text-muted-foreground text-xs mb-4 max-w-xs">
+                      Test your plan against job loss, market crashes, health crises, and more — with specific actions to close each gap.
+                    </p>
+                    <Link href="/pricing">
+                      <Button size="sm" className="rounded-full gap-2 shadow-md shadow-primary/20">
+                        <Zap className="w-3.5 h-3.5" /> Upgrade to Pro — $9/mo
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </div>
             </div>
           </section>
         )}

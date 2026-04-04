@@ -4,6 +4,7 @@ import { and, eq, gte, sql } from "drizzle-orm";
 import { sendAdminDigest, sendErrorAlert, sendReassessmentReminder } from "./email.js";
 import { sendPushNotificationsToUsers } from "./push.js";
 import { logger } from "./logger.js";
+import { createClerkClient } from "@clerk/express";
 
 // ─── In-memory error rate tracking ───────────────────────────────────────────
 
@@ -64,6 +65,8 @@ export function getCoachingClickCount(): number {
 async function fetchReminders(dayFrom: number, dayTo: number) {
   const windowStart = new Date(Date.now() - dayTo   * 24 * 60 * 60 * 1000);
   const windowEnd   = new Date(Date.now() - dayFrom * 24 * 60 * 60 * 1000);
+
+  // Fetch only the report data — no join on local users table (Clerk is source of truth)
   const rows = await db.execute(sql`
     WITH latest AS (
       SELECT user_id,
@@ -73,15 +76,37 @@ async function fetchReminders(dayFrom: number, dayTo: number) {
       WHERE  user_id IS NOT NULL
       GROUP  BY user_id
     )
-    SELECT l.user_id, l.last_score, l.last_at,
-           u.email, u.first_name
+    SELECT l.user_id, l.last_score, l.last_at
     FROM   latest l
-    JOIN   users u ON u.id = l.user_id
-    WHERE  u.email IS NOT NULL
-      AND  l.last_at >= ${windowStart}
+    WHERE  l.last_at >= ${windowStart}
       AND  l.last_at <= ${windowEnd}
   `);
-  return rows.rows as Array<{ user_id: string; last_score: number; last_at: Date; email: string; first_name: string | null }>;
+
+  const rawRows = rows.rows as Array<{ user_id: string; last_score: number; last_at: Date }>;
+  if (rawRows.length === 0) return [];
+
+  // Resolve email + name from Clerk
+  const clerkClient = createClerkClient({ secretKey: process.env["CLERK_SECRET_KEY"] });
+  const enriched: Array<{ user_id: string; last_score: number; last_at: Date; email: string; first_name: string | null }> = [];
+
+  for (const row of rawRows) {
+    try {
+      const clerkUser = await clerkClient.users.getUser(row.user_id);
+      const email = clerkUser.emailAddresses[0]?.emailAddress;
+      if (!email) continue;
+      enriched.push({
+        user_id: row.user_id,
+        last_score: row.last_score,
+        last_at: row.last_at,
+        email,
+        first_name: clerkUser.firstName ?? null,
+      });
+    } catch {
+      // User may have been deleted from Clerk — skip silently
+    }
+  }
+
+  return enriched;
 }
 
 // ─── 7-day re-engagement reminder ─────────────────────────────────────────────
