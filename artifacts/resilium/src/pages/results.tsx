@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import { useRoute } from "wouter";
 import { useGetReport, useGetChecklists, useUpdateChecklistItem, useGetSnapshots } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -350,6 +350,32 @@ export default function ResultsPage() {
   const mrStrength = mrDimensions.length > 0 ? mrDimensions.reduce((a, b) => a.value > b.value ? a : b) : null;
   const mrGap = mrDimensions.length > 0 ? mrDimensions.reduce((a, b) => a.value < b.value ? a : b) : null;
 
+  // Checklist — next incomplete item (highest priority, worst area first)
+  const PRIORITY_RANK: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 };
+  const nextIncompleteItem = (() => {
+    for (const area of sortedAreas) {
+      const items = checklistsByArea[area] ?? [];
+      const sorted = [...items].sort((a, b) => (PRIORITY_RANK[a.priority] ?? 2) - (PRIORITY_RANK[b.priority] ?? 2));
+      for (const item of sorted) {
+        if (!progressMap[`${area}::${item.id}`]) return { area, item };
+      }
+    }
+    return null;
+  })();
+  const totalRemaining = totalItems - totalDone;
+
+  // Checklist section ref + visibility (for floating pill)
+  const checklistRef = useRef<HTMLElement>(null);
+  const [checklistVisible, setChecklistVisible] = useState(false);
+  useEffect(() => {
+    const el = checklistRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([entry]) => setChecklistVisible(entry.isIntersecting), { threshold: 0.05 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [report]);
+  const scrollToChecklist = () => checklistRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+
   return (
     <div className="min-h-screen pb-24">
       {/* Header */}
@@ -477,6 +503,59 @@ export default function ResultsPage() {
           </Card>
         </section>
 
+        {/* NEXT ACTION SPOTLIGHT */}
+        {nextIncompleteItem && totalRemaining > 0 && (
+          <section className="bg-card rounded-3xl border border-emerald-500/20 shadow-lg shadow-black/5 overflow-hidden">
+            <div className="px-6 md:px-8 pt-5 pb-3 flex flex-col sm:flex-row sm:items-center gap-4">
+              <div className="flex items-start gap-3 flex-1 min-w-0">
+                <div
+                  className="w-6 h-6 rounded-full border-2 border-emerald-500/40 flex-shrink-0 mt-0.5 flex items-center justify-center cursor-pointer hover:border-emerald-500 hover:bg-emerald-500/10 transition-all"
+                  onClick={() => handleChecklistToggle(nextIncompleteItem.area, nextIncompleteItem.item.id, false)}
+                >
+                  <CheckCircle className="w-3.5 h-3.5 text-emerald-500/40" />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Next Action</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                      {AREA_LABELS[nextIncompleteItem.area] ?? nextIncompleteItem.area}
+                    </span>
+                    <span className={cn(
+                      "text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full",
+                      (PRIORITY_CONFIG[nextIncompleteItem.item.priority as keyof typeof PRIORITY_CONFIG] ?? PRIORITY_CONFIG.medium).className
+                    )}>
+                      {(PRIORITY_CONFIG[nextIncompleteItem.item.priority as keyof typeof PRIORITY_CONFIG] ?? PRIORITY_CONFIG.medium).label}
+                    </span>
+                  </div>
+                  <p className="font-bold text-base leading-snug">{nextIncompleteItem.item.title}</p>
+                  <p className="text-muted-foreground text-sm mt-0.5 line-clamp-1">{nextIncompleteItem.item.description}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 flex-shrink-0 pl-9 sm:pl-0">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="rounded-full gap-1.5 text-xs border-emerald-500/30 text-emerald-700 hover:bg-emerald-500/10"
+                  onClick={() => handleChecklistToggle(nextIncompleteItem.area, nextIncompleteItem.item.id, false)}
+                >
+                  <CheckCircle className="w-3.5 h-3.5" /> Mark done
+                </Button>
+                <Button size="sm" variant="ghost" className="rounded-full text-xs text-muted-foreground" onClick={scrollToChecklist}>
+                  See all {totalRemaining} →
+                </Button>
+              </div>
+            </div>
+            {/* Progress bar strip */}
+            <div className="px-6 md:px-8 pb-4">
+              <div className="flex items-center justify-between text-[10px] text-muted-foreground mb-1.5">
+                <span>{totalDone} of {totalItems} completed</span>
+                {milestone && <span>{milestone.icon} {milestone.label}</span>}
+              </div>
+              <Progress value={overallPercent} className="h-1.5" />
+            </div>
+          </section>
+        )}
+
         {/* MENTAL RESILIENCE PROFILE */}
         {mrProfile && (
           <section className="bg-card rounded-3xl p-6 md:p-8 shadow-lg shadow-black/5 border border-border">
@@ -591,13 +670,21 @@ export default function ResultsPage() {
 
         {/* ACTION CHECKLISTS */}
         {sortedAreas.length > 0 && (
-          <section className="bg-card rounded-3xl p-6 md:p-8 shadow-lg shadow-black/5 border border-border">
-            <div className="flex items-center gap-3 mb-2">
-              <CheckCircle className="w-6 h-6 text-emerald-600" />
-              <h2 className="font-display font-bold text-2xl">Action Checklists</h2>
+          <section ref={checklistRef} className="bg-card rounded-3xl p-6 md:p-8 shadow-lg shadow-black/5 border border-border scroll-mt-24">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-3">
+                <CheckCircle className="w-6 h-6 text-emerald-600" />
+                <h2 className="font-display font-bold text-2xl">Action Checklists</h2>
+              </div>
+              {totalRemaining > 0 && (
+                <span className="text-sm font-bold text-muted-foreground">{totalRemaining} remaining</span>
+              )}
+              {totalRemaining === 0 && totalItems > 0 && (
+                <span className="text-sm font-bold text-emerald-600">✓ All done</span>
+              )}
             </div>
             <p className="text-muted-foreground text-sm mb-6">
-              Areas sorted from most critical to least. Check items off as you complete them — your progress is saved.
+              Sorted from most critical to least. Check items off as you complete them — progress is saved automatically.
             </p>
 
             {/* Overall progress */}
@@ -618,7 +705,8 @@ export default function ResultsPage() {
             )}
 
             <Tabs defaultValue={sortedAreas[0]} className="w-full">
-              <TabsList className="flex flex-wrap h-auto gap-1 bg-muted/50 p-1 rounded-2xl mb-6">
+              <div className="sticky top-16 z-30 -mx-6 md:-mx-8 px-6 md:px-8 pb-2 pt-1 bg-card/95 backdrop-blur-sm border-b border-border/40 mb-4">
+              <TabsList className="flex flex-wrap h-auto gap-1 bg-muted/50 p-1 rounded-2xl">
                 {sortedAreas.map(area => {
                   const items = checklistsByArea[area] ?? [];
                   const comp = areaCompletion(area, items);
@@ -637,6 +725,7 @@ export default function ResultsPage() {
                   );
                 })}
               </TabsList>
+              </div>
 
               {sortedAreas.map(area => {
                 const items = checklistsByArea[area] ?? [];
@@ -1135,6 +1224,36 @@ export default function ResultsPage() {
       </main>
 
       <SiteFooter />
+
+      {/* FLOATING CHECKLIST PROGRESS PILL */}
+      {totalItems > 0 && !checklistVisible && totalRemaining > 0 && (
+        <div className="fixed bottom-6 right-6 z-40 print:hidden animate-in slide-in-from-bottom-4 duration-300">
+          <button
+            onClick={scrollToChecklist}
+            className="flex items-center gap-3 bg-card border border-border shadow-2xl shadow-black/30 rounded-2xl px-4 py-3 hover:bg-muted/30 transition-all"
+          >
+            <div className="relative w-10 h-10 flex-shrink-0">
+              <svg viewBox="0 0 36 36" className="w-10 h-10 -rotate-90">
+                <circle cx="18" cy="18" r="14" fill="none" stroke="currentColor" strokeWidth="3" className="text-muted/40" />
+                <circle
+                  cx="18" cy="18" r="14" fill="none"
+                  stroke="currentColor" strokeWidth="3"
+                  strokeDasharray={`${(overallPercent / 100) * 87.96} 87.96`}
+                  strokeLinecap="round"
+                  className="text-primary transition-all duration-500"
+                />
+              </svg>
+              <span className="absolute inset-0 flex items-center justify-center text-[9px] font-bold text-primary">
+                {overallPercent}%
+              </span>
+            </div>
+            <div className="text-left pr-1">
+              <p className="text-xs font-bold text-foreground leading-tight">{totalRemaining} action{totalRemaining !== 1 ? "s" : ""} left</p>
+              <p className="text-[10px] text-muted-foreground">View checklist →</p>
+            </div>
+          </button>
+        </div>
+      )}
 
       <ShareScorecardModal
         isOpen={shareScorecardOpen}
