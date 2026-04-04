@@ -52,6 +52,9 @@ export const resilienceReportsTable = pgTable("resilience_reports", {
   dailyHabits: jsonb("daily_habits").notNull(),
   checklistsByArea: jsonb("checklists_by_area"),
   recommendedResources: jsonb("recommended_resources"),
+  primaryGoal: text("primary_goal"),
+  successVision: text("success_vision"),
+  emergencySupplyTier: text("emergency_supply_tier"),
 });
 
 export const insertResilienceReportSchema = createInsertSchema(resilienceReportsTable).omit({ id: true });

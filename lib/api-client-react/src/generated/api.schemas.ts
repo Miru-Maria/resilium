@@ -321,7 +321,24 @@ export interface AssessmentInput {
   communityInvolvement?: AssessmentInputCommunityInvolvement;
   /** Whether the user has access to a mutual aid network */
   mutualAidAccess?: boolean;
+  /** The user's primary resilience motivation */
+  primaryGoal?: AssessmentInputPrimaryGoal;
+  /** What success looks like for the user in 6 months (open text, max 500 chars) */
+  successVision?: string;
 }
+
+export type AssessmentInputPrimaryGoal =
+  (typeof AssessmentInputPrimaryGoal)[keyof typeof AssessmentInputPrimaryGoal];
+
+export const AssessmentInputPrimaryGoal = {
+  job_security: "job_security",
+  financial_independence: "financial_independence",
+  disaster_preparedness: "disaster_preparedness",
+  health_continuity: "health_continuity",
+  geopolitical_risk: "geopolitical_risk",
+  general_resilience: "general_resilience",
+  life_transition: "life_transition",
+} as const;
 
 export type MentalResilienceProfilePathway =
   (typeof MentalResilienceProfilePathway)[keyof typeof MentalResilienceProfilePathway];

@@ -192,6 +192,23 @@ export const SubmitAssessmentBody = zod.object({
     .describe(
       "Answers to the 10 mental resilience questions (1-5 Likert scale each)",
     ),
+  primaryGoal: zod
+    .enum([
+      "job_security",
+      "financial_independence",
+      "disaster_preparedness",
+      "health_continuity",
+      "geopolitical_risk",
+      "general_resilience",
+      "life_transition",
+    ])
+    .optional()
+    .describe("The user's primary resilience motivation"),
+  successVision: zod
+    .string()
+    .max(500)
+    .optional()
+    .describe("What success looks like for the user in 6 months (open text)"),
 });
 
 export const submitAssessmentResponseScoreOverallMin = 0;

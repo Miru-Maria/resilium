@@ -47,7 +47,7 @@ import type {
 // 11 = Emergency Supplies (tiered)
 // 12 = Risk Profile
 // 13 = Social Capital
-const TOTAL_STEPS = 13;
+const TOTAL_STEPS = 14;
 const MR_STEP = 4;
 
 type Language = "en" | "ro";
@@ -65,7 +65,7 @@ const T = {
       1: "Location", 2: "Age Bracket", 3: "Income", 4: "Mental Resilience",
       5: "Financial Runway", 6: "Dependents", 7: "Skills", 8: "Health",
       9: "Mobility & Relocation", 10: "Housing", 11: "Emergency Supplies",
-      12: "Risk Profile", 13: "Social Capital",
+      12: "Risk Profile", 13: "Social Capital", 14: "Your Goal",
     } as Record<number, string>,
     // nav
     back: "Back",
@@ -231,6 +231,23 @@ const T = {
     s12MutualAidSub: "Could you access food, shelter, tools, or practical help from your community or network if needed?",
     mutualAidYes: "Yes, I could access support",
     mutualAidNo: "Not really / unsure",
+    // step 13 (social — kept s12 keys for backward compat, shown on step 13)
+    // step 14: resilience goal
+    s14Title: "What's your resilience goal?",
+    s14Sub: "This shapes how your plan is framed — the AI uses it to tailor every recommendation to what actually matters to you.",
+    s14GoalLabel: "What's driving you to build resilience right now?",
+    goalOptions: [
+      { id: "job_security", emoji: "💼", label: "Job & income security", desc: "Worried about layoffs, career disruption, or income instability" },
+      { id: "financial_independence", emoji: "🏦", label: "Financial independence", desc: "Building a cushion that lets me make choices without panic" },
+      { id: "disaster_preparedness", emoji: "🌪️", label: "Disaster & emergency prep", desc: "Natural disasters, power outages, supply chain failures" },
+      { id: "health_continuity", emoji: "❤️‍🩹", label: "Health continuity", desc: "Concerned about illness, injury, or a health crisis for me or my family" },
+      { id: "geopolitical_risk", emoji: "🌍", label: "Geopolitical & conflict risk", desc: "Political instability, civil unrest, or potential conflict" },
+      { id: "life_transition", emoji: "🔄", label: "Life transition", desc: "Divorce, relocation, career change, or other major shift" },
+      { id: "general_resilience", emoji: "🛡️", label: "General preparedness", desc: "I want to be ready for whatever comes — no specific threat in mind" },
+    ] as { id: string; emoji: string; label: string; desc: string }[],
+    s14VisionLabel: "What does success look like for you in 6 months?",
+    s14VisionPlaceholder: "e.g. 'Six months of savings saved, a clear plan if I lose my job, and less daily anxiety about money.'",
+    s14VisionSub: "Optional — but the more specific you are, the more targeted your plan becomes.",
     // loading / errors
     analysing: "Analyzing your profile and building your plan…",
     analysingDesc: "This usually takes 60–90 seconds — please keep this tab open.",
@@ -410,6 +427,21 @@ const T = {
     s12MutualAidSub: "Ai putea accesa hrană, adăpost, unelte sau ajutor practic din comunitatea sau rețeaua ta dacă ai nevoie?",
     mutualAidYes: "Da, pot accesa sprijin",
     mutualAidNo: "Nu prea / nesigur/ă",
+    s14Title: "Care este obiectivul tău de reziliență?",
+    s14Sub: "Aceasta modelează modul în care este formulat planul tău — AI-ul folosește acest răspuns pentru a personaliza fiecare recomandare.",
+    s14GoalLabel: "Ce te motivează să construiești reziliență în acest moment?",
+    goalOptions: [
+      { id: "job_security", emoji: "💼", label: "Securitate la locul de muncă", desc: "Îngrijorat/ă de concedieri sau instabilitate financiară" },
+      { id: "financial_independence", emoji: "🏦", label: "Independență financiară", desc: "Construirea unui tampon care să îmi permită alegeri fără panică" },
+      { id: "disaster_preparedness", emoji: "🌪️", label: "Pregătire pentru dezastre", desc: "Dezastre naturale, pene de curent sau crize de aprovizionare" },
+      { id: "health_continuity", emoji: "❤️‍🩹", label: "Continuitate în sănătate", desc: "Îngrijorat/ă de boli sau crize de sănătate" },
+      { id: "geopolitical_risk", emoji: "🌍", label: "Risc geopolitic și conflict", desc: "Instabilitate politică sau tulburări civile" },
+      { id: "life_transition", emoji: "🔄", label: "Tranziție de viață", desc: "Divorț, relocare, schimbare de carieră sau altă schimbare majoră" },
+      { id: "general_resilience", emoji: "🛡️", label: "Pregătire generală", desc: "Vreau să fiu pregătit/ă pentru orice apare" },
+    ] as { id: string; emoji: string; label: string; desc: string }[],
+    s14VisionLabel: "Cum arată succesul pentru tine în 6 luni?",
+    s14VisionPlaceholder: "ex. 'Șase luni de economii, un plan clar dacă îmi pierd locul de muncă și mai puțin stres zilnic.'",
+    s14VisionSub: "Opțional — cu cât ești mai specific/ă, cu atât planul tău devine mai bine orientat.",
     analysing: "Analizăm profilul tău și construim planul…",
     analysingDesc: "De obicei durează 60–90 secunde — te rugăm să menții această filă deschisă.",
     planLimitTitle: "Limita Planului Atinsă",
@@ -616,6 +648,8 @@ type ExtendedFormData = AssessmentInput & {
   trustedLocalContacts?: number;
   communityInvolvement?: AssessmentInputCommunityInvolvement;
   mutualAidAccess?: boolean;
+  primaryGoal?: string;
+  successVision?: string;
 };
 
 export default function AssessmentPage() {
@@ -844,6 +878,7 @@ export default function AssessmentPage() {
       case 7: return formData.skills.length > 0;
       case 11: return !!formData.emergencySupplyTier;
       case 12: return formData.riskConcerns.length > 0;
+      case 14: return !!formData.primaryGoal;
       default: return true;
     }
   };
@@ -1683,6 +1718,58 @@ export default function AssessmentPage() {
                         </Card>
                       ))}
                     </div>
+                  </div>
+                </div>
+              )}
+
+              {/* STEP 14: RESILIENCE GOAL */}
+              {step === 14 && (
+                <div className="space-y-8">
+                  <div>
+                    <h2 className="text-3xl md:text-4xl font-display font-bold">{t.s14Title}</h2>
+                    <p className="text-muted-foreground text-lg mt-2">{t.s14Sub}</p>
+                  </div>
+
+                  <div>
+                    <h3 className="text-xl font-display font-bold mb-1">{t.s14GoalLabel}</h3>
+                    <div className="grid grid-cols-1 gap-3" role="radiogroup" aria-label="Resilience goal">
+                      {(t.goalOptions as { id: string; emoji: string; label: string; desc: string }[]).map((opt) => (
+                        <Card
+                          key={opt.id}
+                          role="radio"
+                          aria-checked={formData.primaryGoal === opt.id}
+                          tabIndex={0}
+                          className={cn(
+                            "p-4 cursor-pointer flex items-start gap-4 transition-all duration-200",
+                            formData.primaryGoal === opt.id ? "step-card-active" : "hover:border-primary/30"
+                          )}
+                          onClick={() => updateField('primaryGoal', opt.id)}
+                          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); updateField('primaryGoal', opt.id); } }}
+                        >
+                          <span className="text-2xl mt-0.5 shrink-0">{opt.emoji}</span>
+                          <div>
+                            <div className="font-semibold">{opt.label}</div>
+                            <div className="text-xs text-muted-foreground mt-0.5">{opt.desc}</div>
+                          </div>
+                          {formData.primaryGoal === opt.id && (
+                            <CheckCircle2 className="w-5 h-5 text-primary ml-auto shrink-0 mt-0.5" />
+                          )}
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-xl font-display font-bold mb-1">{t.s14VisionLabel}</h3>
+                    <p className="text-sm text-muted-foreground mb-3">{t.s14VisionSub}</p>
+                    <textarea
+                      className="w-full min-h-[120px] rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 resize-none"
+                      placeholder={t.s14VisionPlaceholder}
+                      value={formData.successVision ?? ""}
+                      maxLength={500}
+                      onChange={(e) => updateField('successVision', e.target.value)}
+                    />
+                    <p className="text-xs text-muted-foreground mt-1 text-right">{(formData.successVision ?? "").length}/500</p>
                   </div>
                 </div>
               )}

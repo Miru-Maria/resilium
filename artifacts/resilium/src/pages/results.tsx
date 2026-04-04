@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { Progress } from "@/components/ui/progress";
-import { Loader2, Download, Printer, Share2, AlertTriangle, CheckCircle, RefreshCcw, Activity, User, LogIn, Brain, TrendingUp, Award, Star, ExternalLink, Heart, BookOpen, ShieldCheck, Zap, Package, Globe, MapPin, Lock, Mail, ImageDown } from "lucide-react";
+import { Loader2, Download, Printer, Share2, AlertTriangle, CheckCircle, RefreshCcw, Activity, User, LogIn, Brain, TrendingUp, Award, Star, ExternalLink, Heart, BookOpen, ShieldCheck, Zap, Package, Globe, MapPin, Lock, Mail, ImageDown, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
 import { ResilientIcon } from "@/components/resilient-icon";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
@@ -226,6 +226,42 @@ export default function ResultsPage() {
       .then(d => d && setIsPro(!!d.isActive))
       .catch(() => {});
   }, [isAuthenticated]);
+
+  const [expandedSteps, setExpandedSteps] = useState<Record<string, string[]>>({});
+  const [loadingSteps, setLoadingSteps] = useState<Record<string, boolean>>({});
+  const [showExpandPanel, setShowExpandPanel] = useState<Record<string, boolean>>({});
+
+  const fetchGuidedSteps = useCallback(async (
+    reportId: string,
+    area: string,
+    item: { id: string; title: string; description: string }
+  ) => {
+    const key = `${area}::${item.id}`;
+    if (expandedSteps[key] || loadingSteps[key]) {
+      setShowExpandPanel(prev => ({ ...prev, [key]: !prev[key] }));
+      return;
+    }
+    setLoadingSteps(prev => ({ ...prev, [key]: true }));
+    setShowExpandPanel(prev => ({ ...prev, [key]: true }));
+    try {
+      const res = await fetch(
+        `${BASE}/api/resilience/reports/${reportId}/checklist/${encodeURIComponent(area)}/items/${item.id}/expand`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ itemTitle: item.title, itemDescription: item.description }),
+        }
+      );
+      if (!res.ok) throw new Error("Failed");
+      const data = await res.json() as { steps: string[] };
+      setExpandedSteps(prev => ({ ...prev, [key]: data.steps }));
+    } catch {
+      setExpandedSteps(prev => ({ ...prev, [key]: [] }));
+    } finally {
+      setLoadingSteps(prev => ({ ...prev, [key]: false }));
+    }
+  }, [expandedSteps, loadingSteps]);
 
   if (isLoading) {
     return (
@@ -742,40 +778,106 @@ export default function ResultsPage() {
                       const key = `${area}::${item.id}`;
                       const completed = progressMap[key] ?? false;
                       const priorityConfig = PRIORITY_CONFIG[item.priority as keyof typeof PRIORITY_CONFIG] ?? PRIORITY_CONFIG.medium;
+                      const isExpanded = showExpandPanel[key] ?? false;
+                      const isLoadingExpand = loadingSteps[key] ?? false;
+                      const subSteps = expandedSteps[key];
                       return (
                         <div
                           key={item.id}
                           className={cn(
-                            "flex items-start gap-4 p-5 rounded-2xl border transition-all cursor-pointer",
+                            "rounded-2xl border transition-all overflow-hidden",
                             completed
                               ? "border-emerald-200 bg-emerald-50/50 dark:bg-emerald-900/10 dark:border-emerald-900/30"
                               : "border-border/60 hover:border-primary/30 hover:bg-muted/10"
                           )}
-                          onClick={() => handleChecklistToggle(area, item.id, completed)}
                         >
-                          <div className={cn(
-                            "w-5 h-5 rounded-full border-2 flex-shrink-0 mt-0.5 flex items-center justify-center transition-all",
-                            completed ? "border-emerald-500 bg-emerald-500" : "border-muted-foreground/40"
-                          )}>
-                            {completed && <CheckCircle className="w-3 h-3 text-white" />}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex flex-wrap items-center gap-2 mb-1">
-                              <span className={cn("text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full", priorityConfig.className)}>
-                                {priorityConfig.label}
-                              </span>
-                              <span className={cn(
-                                "text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full",
-                                item.pathway === "growth" ? "bg-emerald-500/10 text-emerald-700" : "bg-amber-500/10 text-amber-700"
-                              )}>
-                                {item.pathway === "growth" ? "Growth" : "Foundation"}
-                              </span>
+                          <div
+                            className="flex items-start gap-4 p-5 cursor-pointer"
+                            onClick={() => handleChecklistToggle(area, item.id, completed)}
+                          >
+                            <div className={cn(
+                              "w-5 h-5 rounded-full border-2 flex-shrink-0 mt-0.5 flex items-center justify-center transition-all",
+                              completed ? "border-emerald-500 bg-emerald-500" : "border-muted-foreground/40"
+                            )}>
+                              {completed && <CheckCircle className="w-3 h-3 text-white" />}
                             </div>
-                            <h4 className={cn("font-bold text-base", completed && "line-through text-muted-foreground")}>
-                              {item.title}
-                            </h4>
-                            <p className="text-muted-foreground text-sm mt-0.5">{item.description}</p>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex flex-wrap items-center gap-2 mb-1">
+                                <span className={cn("text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full", priorityConfig.className)}>
+                                  {priorityConfig.label}
+                                </span>
+                                <span className={cn(
+                                  "text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full",
+                                  item.pathway === "growth" ? "bg-emerald-500/10 text-emerald-700" : "bg-amber-500/10 text-amber-700"
+                                )}>
+                                  {item.pathway === "growth" ? "Growth" : "Foundation"}
+                                </span>
+                              </div>
+                              <h4 className={cn("font-bold text-base", completed && "line-through text-muted-foreground")}>
+                                {item.title}
+                              </h4>
+                              <p className="text-muted-foreground text-sm mt-0.5">{item.description}</p>
+                            </div>
                           </div>
+
+                          {/* Expand button */}
+                          <div className="px-5 pb-4 pt-0 flex items-center justify-between">
+                            {isPro ? (
+                              <button
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); fetchGuidedSteps(reportId, area, item); }}
+                                className={cn(
+                                  "flex items-center gap-1.5 text-xs font-semibold rounded-full px-3 py-1.5 border transition-all",
+                                  isExpanded
+                                    ? "border-primary/40 bg-primary/5 text-primary"
+                                    : "border-border text-muted-foreground hover:border-primary/30 hover:text-primary"
+                                )}
+                              >
+                                {isLoadingExpand ? (
+                                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                ) : (
+                                  <Sparkles className="w-3.5 h-3.5" />
+                                )}
+                                {isLoadingExpand ? "Getting your steps…" : isExpanded ? "Hide steps" : "Break it down"}
+                                {!isLoadingExpand && (isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />)}
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); }}
+                                title="Upgrade to Pro to unlock guided sub-steps"
+                                className="flex items-center gap-1.5 text-xs text-muted-foreground/60 cursor-default"
+                              >
+                                <Lock className="w-3 h-3" />
+                                <span>Step-by-step guide — Pro</span>
+                              </button>
+                            )}
+                          </div>
+
+                          {/* Guided sub-steps panel */}
+                          {isExpanded && (
+                            <div className="px-5 pb-5 border-t border-border/50 pt-4">
+                              {isLoadingExpand ? (
+                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                  <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                                  <span>Generating personalized steps for your profile…</span>
+                                </div>
+                              ) : subSteps && subSteps.length > 0 ? (
+                                <ol className="space-y-2.5">
+                                  {subSteps.map((step, i) => (
+                                    <li key={i} className="flex items-start gap-3 text-sm">
+                                      <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center mt-0.5">
+                                        {i + 1}
+                                      </span>
+                                      <span className="text-foreground leading-snug">{step}</span>
+                                    </li>
+                                  ))}
+                                </ol>
+                              ) : subSteps && subSteps.length === 0 ? (
+                                <p className="text-sm text-muted-foreground">Could not generate steps — please try again.</p>
+                              ) : null}
+                            </div>
+                          )}
                         </div>
                       );
                     })}

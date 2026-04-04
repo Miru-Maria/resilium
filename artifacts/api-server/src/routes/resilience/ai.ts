@@ -32,6 +32,8 @@ type AssessmentInput = {
   trustedLocalContacts?: number;
   communityInvolvement?: string;
   mutualAidAccess?: boolean;
+  primaryGoal?: string;
+  successVision?: string;
 };
 
 type Scores = {
@@ -155,6 +157,22 @@ export async function generateResilienceReport(
     ? "moderate"
     : "limited";
 
+  const goalLabels: Record<string, string> = {
+    job_security: "Worried about job loss or income instability",
+    financial_independence: "Building financial independence",
+    disaster_preparedness: "Preparing for natural disasters or emergencies",
+    health_continuity: "Concerned about health crises for self or family",
+    geopolitical_risk: "Preparing for political instability or conflict",
+    general_resilience: "Want to be prepared for anything",
+    life_transition: "Going through a major life transition",
+  };
+  const goalContext = input.primaryGoal
+    ? `\nRESILIENCE GOAL: ${goalLabels[input.primaryGoal] ?? input.primaryGoal}. Tailor the plan, priorities, and framing to this specific goal.`
+    : "";
+  const successVisionContext = input.successVision
+    ? `SUCCESS VISION (user's own words): "${input.successVision}". Reference this explicitly in the risk profile summary and ensure the plan is oriented toward achieving it.`
+    : "";
+
   const prompt = `You are a resilience planning expert. Based on the following assessment, generate a structured resilience report.
 
 USER PROFILE:
@@ -173,6 +191,8 @@ USER PROFILE:
 - Primary risk concerns: ${input.riskConcerns.join(", ")}
 - Preferred currency: ${input.currency ?? "USD"} (use this currency symbol and amounts in all financial advice and examples)
 - Social network: trusted contacts ${input.trustedLocalContacts ?? "unspecified"}, community involvement: ${input.communityInvolvement ?? "unspecified"}, community support access: ${input.mutualAidAccess ?? "unspecified"}
+${goalContext}
+${successVisionContext}
 
 RESILIENCE SCORES (0-100):
 - Overall: ${scores.overall}
@@ -332,4 +352,73 @@ Return ONLY the JSON, no additional text.`;
     await new Promise(r => setTimeout(r, 1500));
     return await callAI();
   }
+}
+
+export async function generateGuidedSteps(opts: {
+  itemTitle: string;
+  itemDescription: string;
+  area: string;
+  location: string;
+  primaryGoal?: string | null;
+  successVision?: string | null;
+  incomeStability: string;
+  savingsMonths: number;
+  healthStatus?: string | null;
+  currency?: string | null;
+}): Promise<string[]> {
+  const goalLabels: Record<string, string> = {
+    job_security: "Job & income security",
+    financial_independence: "Financial independence",
+    disaster_preparedness: "Disaster & emergency preparedness",
+    health_continuity: "Health continuity",
+    geopolitical_risk: "Geopolitical & conflict risk",
+    general_resilience: "General preparedness",
+    life_transition: "Major life transition",
+  };
+
+  const prompt = `You are a resilience planning expert helping someone take concrete action on their resilience plan.
+
+USER CONTEXT:
+- Location: ${opts.location}
+- Income stability: ${opts.incomeStability}
+- Savings runway: ${opts.savingsMonths} months
+- Health: ${opts.healthStatus ?? "not specified"}
+- Goal: ${opts.primaryGoal ? (goalLabels[opts.primaryGoal] ?? opts.primaryGoal) : "general resilience"}
+${opts.successVision ? `- Success vision: "${opts.successVision}"` : ""}
+- Currency: ${opts.currency ?? "USD"}
+
+CHECKLIST ITEM TO EXPAND:
+Area: ${opts.area}
+Title: ${opts.itemTitle}
+Description: ${opts.itemDescription}
+
+Generate 4 to 7 specific, actionable sub-steps to complete this checklist item. Requirements:
+- Each sub-step must be concrete and immediately actionable (not vague guidance)
+- Adapt to the user's location (${opts.location}) — name real services, portals, organizations, or tools where possible
+- Steps must be ordered logically (each builds on the previous)
+- Keep each step to 1–2 sentences maximum
+- Write in second-person ("Go to...", "Open...", "Set up...", "Contact...")
+- Tailor the urgency and framing to their goal: ${opts.primaryGoal ? (goalLabels[opts.primaryGoal] ?? opts.primaryGoal) : "general preparedness"}
+- Do not start every step with "Step N:" — write naturally
+
+Return ONLY a JSON object with this exact shape: {"steps": ["step text here", "step text here"]}`;
+
+  const response = await openai.chat.completions.create({
+    model: "gpt-4.1-mini",
+    max_completion_tokens: 1024,
+    messages: [
+      { role: "system", content: "You are a resilience planning expert. Respond with valid JSON only." },
+      { role: "user", content: prompt }
+    ],
+    response_format: { type: "json_object" }
+  });
+
+  const content = response.choices[0]?.message?.content;
+  if (!content) throw new Error("No content from AI");
+
+  const parsed = JSON.parse(content) as { steps?: string[] };
+  if (!Array.isArray(parsed.steps) || parsed.steps.length === 0) {
+    throw new Error("AI returned invalid steps format");
+  }
+  return parsed.steps.slice(0, 7);
 }

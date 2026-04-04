@@ -10,6 +10,7 @@ import { generateResilienceReport } from "./ai.js";
 import { PLAN_LIMIT } from "../users.js";
 import rateLimit from "express-rate-limit";
 import scenariosRouter from "./scenarios.js";
+import guidedStepsRouter from "./guided-steps.js";
 import { sendWelcomeEmail } from "../../lib/email.js";
 
 function getUserId(req: Request): string | null {
@@ -140,6 +141,8 @@ router.post("/assess", assessRateLimit, async (req, res) => {
         trustedLocalContacts: input.trustedLocalContacts ?? undefined,
         communityInvolvement: input.communityInvolvement ?? undefined,
         mutualAidAccess: input.mutualAidAccess ?? undefined,
+        primaryGoal: input.primaryGoal ?? undefined,
+        successVision: input.successVision ?? undefined,
       },
       scores,
       mentalResilienceSubScores
@@ -207,6 +210,9 @@ router.post("/assess", assessRateLimit, async (req, res) => {
       dailyHabits: reportContent.dailyHabits,
       checklistsByArea: reportContent.checklistsByArea ?? null,
       recommendedResources: reportContent.recommendedResources ?? null,
+      primaryGoal: input.primaryGoal ?? null,
+      successVision: input.successVision ?? null,
+      emergencySupplyTier: input.emergencySupplyTier ?? null,
       createdAt: now,
     });
 
@@ -576,5 +582,6 @@ router.get("/percentile", async (req, res) => {
 });
 
 router.use(scenariosRouter);
+router.use(guidedStepsRouter);
 
 export default router;
