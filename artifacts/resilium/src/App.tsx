@@ -30,6 +30,7 @@ import AdminMarketingPage from "@/pages/admin/marketing";
 import ConsentPage from "@/pages/consent";
 import CoachingPage from "@/pages/coaching";
 import DemoPage from "@/pages/demo";
+import CompetitiveAnalysisPage from "@/pages/competitive-analysis";
 import ScenariosPage from "@/pages/scenarios";
 import PlanPage from "@/pages/plan";
 import { AnnouncementBanner } from "@/components/announcement-banner";
@@ -136,6 +137,7 @@ function Router() {
       <Route path="/admin/marketing" component={AdminMarketingPage} />
       <Route path="/coaching" component={CoachingPage} />
       <Route path="/demo" component={DemoPage} />
+      <Route path="/competitive-analysis" component={CompetitiveAnalysisPage} />
       <Route path="/scenarios/:reportId" component={ScenariosPage} />
       <Route path="/plan/:reportId" component={PlanPage} />
       <Route path="/sign-in/*?" component={SignInPage} />
