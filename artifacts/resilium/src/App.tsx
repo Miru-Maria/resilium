@@ -31,6 +31,7 @@ import ConsentPage from "@/pages/consent";
 import CoachingPage from "@/pages/coaching";
 import DemoPage from "@/pages/demo";
 import ScenariosPage from "@/pages/scenarios";
+import PlanPage from "@/pages/plan";
 import { AnnouncementBanner } from "@/components/announcement-banner";
 
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY as string | undefined;
@@ -136,6 +137,7 @@ function Router() {
       <Route path="/coaching" component={CoachingPage} />
       <Route path="/demo" component={DemoPage} />
       <Route path="/scenarios/:reportId" component={ScenariosPage} />
+      <Route path="/plan/:reportId" component={PlanPage} />
       <Route path="/sign-in/*?" component={SignInPage} />
       <Route path="/sign-up/*?" component={SignUpPage} />
       <Route component={NotFound} />

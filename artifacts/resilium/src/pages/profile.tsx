@@ -1275,10 +1275,15 @@ function PlansTab({ plans, onDelete }: { plans: PlanSummary[]; onDelete: (id: st
                     </div>
 
                     {/* Actions */}
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Link href={`/plan/${plan.reportId}`}>
+                        <Button size="sm" className="rounded-full gap-1.5">
+                          <Target className="w-3.5 h-3.5" /> Action Plan
+                        </Button>
+                      </Link>
                       <Link href={`/results/${plan.reportId}`}>
                         <Button variant="outline" size="sm" className="rounded-full gap-1.5">
-                          <Eye className="w-3.5 h-3.5" /> View Report
+                          <Eye className="w-3.5 h-3.5" /> Report
                         </Button>
                       </Link>
                       <Button

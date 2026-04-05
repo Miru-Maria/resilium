@@ -32,12 +32,15 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 ### Core User Flow
 1. Landing page → hero CTA
 2. Consent screen (GDPR Article 6(1)(a), version 1.0)
-3. 10-step assessment:
+3. 14-step assessment:
    - Location, Income stability, Savings runway, Dependents, Skills, Health & Mobility, Housing, Emergency supplies
-   - **Mental Resilience deep-dive** (10 sub-questions rated 1–5: stressTolerance, adaptability, socialSupport, purposeClarity, emotionalRecovery, resourcefulness, proactivePreparation, boundarySetting, crisisLeadership, longTermThinking)
+   - **Mental Resilience deep-dive** (10 sub-questions rated 1–5)
    - Risk concerns
-4. AI-generated Resilience Report with score 0-100, vulnerabilities, action plan
-5. Dashboard with score visualization, scenario simulations, daily habits, checklists, snapshots
+   - Goal selection (7 options: job_security, financial_independence, disaster_preparedness, health_continuity, geopolitical_risk, life_transition, general_resilience) + optional success vision
+4. AI-generated Resilience Report: score 0-100, vulnerabilities, action plan, scenario simulations, daily habits, checklists
+5. **Results page** (`/results/:reportId`): Descriptive — score, radar chart, MR profile, vulnerabilities, stress tests. Primary CTA to Strategic Action Plan.
+6. **Strategic Action Plan** (`/plan/:reportId`): The interactive working document. Goal-headlined, three time horizons (0-30d / 3-6mo / long-term), checklist items by priority mapped to timeframe, AI sub-steps on demand (Pro), curated resources per dimension, coaching CTA (health/psych items only), stress test scenarios sub-section.
+7. **Profile** (`/profile`): Report history with "Action Plan" as primary CTA per report, "Report" as secondary. Score comparison and tracking.
 
 ### Scoring Logic
 Six dimensions, each 0-100:

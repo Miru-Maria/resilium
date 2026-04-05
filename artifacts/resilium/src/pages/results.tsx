@@ -593,6 +593,34 @@ export default function ResultsPage() {
           </section>
         )}
 
+        {/* STRATEGIC ACTION PLAN CTA */}
+        <section className="bg-gradient-to-br from-card to-muted/10 rounded-3xl border border-primary/20 p-6 md:p-8 shadow-lg shadow-black/5">
+          <div className="flex flex-col md:flex-row md:items-center gap-6">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-2">
+                <TrendingUp className="w-5 h-5 text-primary" />
+                <span className="text-xs font-bold uppercase tracking-widest text-primary">Your Plan is Ready</span>
+              </div>
+              <h2 className="font-display font-bold text-2xl md:text-3xl mb-2">
+                Strategic Action Plan
+              </h2>
+              <p className="text-muted-foreground text-sm leading-relaxed max-w-xl">
+                Your actions are organized by timeframe — 0–30 days, 3–6 months, and long-term — with AI-guided sub-steps for each, curated resources, and optional coaching for the resilience and health sections. This is where the real work happens.
+              </p>
+            </div>
+            <div className="flex flex-col gap-3 flex-shrink-0">
+              <Link href={`/plan/${reportId}`}>
+                <Button size="lg" className="rounded-full gap-2 shadow-md shadow-primary/20 w-full md:w-auto">
+                  <TrendingUp className="w-4 h-4" /> Open My Action Plan
+                </Button>
+              </Link>
+              <p className="text-xs text-muted-foreground text-center">
+                {totalRemaining > 0 ? `${totalRemaining} action${totalRemaining !== 1 ? "s" : ""} across ${sortedAreas.length} dimensions` : totalItems > 0 ? "All actions complete — plan ready to review" : "Plan ready"}
+              </p>
+            </div>
+          </div>
+        </section>
+
         {/* MENTAL RESILIENCE PROFILE */}
         {mrProfile && (
           <section className="bg-card rounded-3xl p-6 md:p-8 shadow-lg shadow-black/5 border border-border">
@@ -720,8 +748,19 @@ export default function ResultsPage() {
                 <span className="text-sm font-bold text-emerald-600">✓ All done</span>
               )}
             </div>
+            <div className="flex items-center gap-3 mb-5 p-4 rounded-2xl bg-primary/5 border border-primary/20">
+              <TrendingUp className="w-4 h-4 text-primary flex-shrink-0" />
+              <p className="text-sm text-muted-foreground flex-1">
+                These tasks are fully integrated into your <span className="font-semibold text-foreground">Strategic Action Plan</span> — organized by timeframe with AI sub-steps and curated resources for each.
+              </p>
+              <Link href={`/plan/${reportId}`}>
+                <Button size="sm" className="rounded-full gap-1.5 flex-shrink-0">
+                  Open Plan <TrendingUp className="w-3.5 h-3.5" />
+                </Button>
+              </Link>
+            </div>
             <p className="text-muted-foreground text-sm mb-6">
-              Your trackable to-do list, sorted by urgency. Check items off as you complete them — progress saves automatically. For the bigger-picture sequencing, see the Strategic Action Plan below.
+              Reference view below. Check items off as you complete them — progress is shared with your action plan.
             </p>
 
             {/* Overall progress */}
@@ -891,48 +930,24 @@ export default function ResultsPage() {
           </section>
         )}
 
-        {/* ACTION PLAN TABS */}
-        <section className="bg-card rounded-3xl p-6 md:p-8 shadow-lg shadow-black/5 border border-border">
-          <div className="flex items-center gap-3 mb-1">
-            <TrendingUp className="w-6 h-6 text-emerald-600" />
-            <h2 className="font-display font-bold text-2xl">Strategic Action Plan</h2>
+        {/* ACTION PLAN — redirect to plan page */}
+        <section className="bg-card rounded-3xl p-6 md:p-8 shadow-lg shadow-black/5 border border-primary/20">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-5">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-3 mb-2">
+                <TrendingUp className="w-6 h-6 text-primary" />
+                <h2 className="font-display font-bold text-2xl">Strategic Action Plan</h2>
+              </div>
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                Your 0–30 day, 3–6 month, and long-term priorities — each with expandable AI sub-steps tailored to your goal, location, and situation. Includes curated resources and optional coaching for health and resilience items.
+              </p>
+            </div>
+            <Link href={`/plan/${reportId}`} className="flex-shrink-0">
+              <Button size="lg" className="rounded-full gap-2 w-full sm:w-auto shadow-md shadow-primary/20">
+                <TrendingUp className="w-4 h-4" /> Open Full Plan
+              </Button>
+            </Link>
           </div>
-          <p className="text-muted-foreground text-sm mb-6">
-            A sequenced narrative roadmap — use it to decide <em>when</em> to tackle each area. The checklist above tracks individual tasks; this plan shows the broader arc.
-          </p>
-          
-          <Tabs defaultValue="shortTerm" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 mb-8 bg-muted/50 p-1 rounded-full">
-              <TabsTrigger value="shortTerm" className="rounded-full data-[state=active]:shadow-sm">0-30 Days</TabsTrigger>
-              <TabsTrigger value="midTerm" className="rounded-full data-[state=active]:shadow-sm">3-6 Months</TabsTrigger>
-              <TabsTrigger value="longTerm" className="rounded-full data-[state=active]:shadow-sm">Long Term</TabsTrigger>
-            </TabsList>
-            
-            {(['shortTerm', 'midTerm', 'longTerm'] as const).map((period) => (
-              <TabsContent key={period} value={period} className="space-y-4 focus-visible:outline-none focus-visible:ring-0">
-                {(report.actionPlan?.[period] ?? []).map((item, i) => (
-                  <div key={i} className="flex flex-col sm:flex-row sm:items-center gap-4 p-5 rounded-2xl border border-border/60 hover:border-primary/30 hover:bg-muted/10 transition-colors">
-                    <div className="flex-1 space-y-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full ${
-                          item.priority === 'critical' ? 'bg-destructive/10 text-destructive' :
-                          item.priority === 'high' ? 'bg-amber-500/10 text-amber-700' :
-                          'bg-primary/10 text-primary'
-                        }`}>
-                          {item.priority} priority
-                        </span>
-                        <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-secondary/30 text-secondary-foreground">
-                          {item.category}
-                        </span>
-                      </div>
-                      <h4 className="font-bold text-lg text-foreground">{item.title}</h4>
-                      <p className="text-muted-foreground text-sm">{item.description}</p>
-                    </div>
-                  </div>
-                ))}
-              </TabsContent>
-            ))}
-          </Tabs>
         </section>
 
         {/* SCENARIO PAYWALL TEASER — shown to free users after the action plan */}
