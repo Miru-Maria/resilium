@@ -473,12 +473,13 @@ export default function ResultsPage() {
 
         {/* SAVE PROMPT for anonymous users */}
         {!isAuthenticated && (
-          <div className="flex items-center gap-4 px-5 py-4 rounded-2xl bg-primary/5 border border-primary/20">
+          <div className="flex items-center gap-4 px-5 py-4 rounded-2xl bg-amber-500/5 border border-amber-500/30">
+            <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0" />
             <div className="flex-1 min-w-0">
-              <p className="font-semibold text-sm text-foreground">Your report is temporary</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Sign in to save this plan, track your progress over time, and compare against future assessments.</p>
+              <p className="font-semibold text-sm text-foreground">This report disappears when you close the tab</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Sign in free to save your plan, track checklist progress over time, and pick up exactly where you left off.</p>
             </div>
-            <Button size="sm" className="rounded-full flex-shrink-0" onClick={login}>
+            <Button size="sm" className="rounded-full flex-shrink-0 bg-amber-600 hover:bg-amber-700 text-white border-0" onClick={login}>
               <LogIn className="w-4 h-4 mr-2" /> Save My Plan
             </Button>
           </div>
@@ -720,7 +721,7 @@ export default function ResultsPage() {
               )}
             </div>
             <p className="text-muted-foreground text-sm mb-6">
-              Sorted from most critical to least. Check items off as you complete them — progress is saved automatically.
+              Your trackable to-do list, sorted by urgency. Check items off as you complete them — progress saves automatically. For the bigger-picture sequencing, see the Strategic Action Plan below.
             </p>
 
             {/* Overall progress */}
@@ -842,15 +843,17 @@ export default function ResultsPage() {
                                 {!isLoadingExpand && (isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />)}
                               </button>
                             ) : (
-                              <button
-                                type="button"
-                                onClick={(e) => { e.stopPropagation(); }}
-                                title="Upgrade to Pro to unlock guided sub-steps"
-                                className="flex items-center gap-1.5 text-xs text-muted-foreground/60 cursor-default"
-                              >
-                                <Lock className="w-3 h-3" />
-                                <span>Step-by-step guide — Pro</span>
-                              </button>
+                              <Link href="/pricing">
+                                <button
+                                  type="button"
+                                  onClick={(e) => { e.stopPropagation(); }}
+                                  title="Upgrade to Pro to unlock guided sub-steps"
+                                  className="flex items-center gap-1.5 text-xs rounded-full px-3 py-1.5 border border-border text-muted-foreground hover:border-primary/30 hover:text-primary transition-all"
+                                >
+                                  <Lock className="w-3 h-3" />
+                                  <span>Break it down — unlock with Pro</span>
+                                </button>
+                              </Link>
                             )}
                           </div>
 
@@ -890,10 +893,13 @@ export default function ResultsPage() {
 
         {/* ACTION PLAN TABS */}
         <section className="bg-card rounded-3xl p-6 md:p-8 shadow-lg shadow-black/5 border border-border">
-          <div className="flex items-center gap-3 mb-6">
+          <div className="flex items-center gap-3 mb-1">
             <TrendingUp className="w-6 h-6 text-emerald-600" />
             <h2 className="font-display font-bold text-2xl">Strategic Action Plan</h2>
           </div>
+          <p className="text-muted-foreground text-sm mb-6">
+            A sequenced narrative roadmap — use it to decide <em>when</em> to tackle each area. The checklist above tracks individual tasks; this plan shows the broader arc.
+          </p>
           
           <Tabs defaultValue="shortTerm" className="w-full">
             <TabsList className="grid w-full grid-cols-3 mb-8 bg-muted/50 p-1 rounded-full">
