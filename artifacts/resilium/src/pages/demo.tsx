@@ -182,13 +182,13 @@ function DemoBanner() {
       <div className="flex items-center gap-2 flex-1 min-w-0">
         <Eye className="w-4 h-4 text-primary flex-shrink-0" />
         <p className="text-sm font-medium text-foreground">
-          <span className="font-bold text-primary">Sample Report</span>
-          {" "}— This is a fictional demo profile (Alex M., 34). Your actual report reflects your specific situation.
+          <span className="font-bold text-primary">Sample Plan</span>
+          {" "}— This is a fictional demo profile (Alex M., 34). Your actual plan reflects your specific situation.
         </p>
       </div>
-      <Link href="/assess">
+      <Link href="/consent">
         <Button size="sm" className="rounded-full flex-shrink-0 gap-1.5">
-          Get My Real Report <ArrowRight className="w-3.5 h-3.5" />
+          Build My Real Plan <ArrowRight className="w-3.5 h-3.5" />
         </Button>
       </Link>
     </div>
@@ -271,9 +271,9 @@ export default function DemoPage() {
               <ResilientIcon className="w-5 h-5" /> Resilium
             </div>
           </Link>
-          <Link href="/assess">
+          <Link href="/consent">
             <Button size="sm" className="rounded-full gap-1.5">
-              Take Real Assessment <ArrowRight className="w-3.5 h-3.5" />
+              Build My Plan <ArrowRight className="w-3.5 h-3.5" />
             </Button>
           </Link>
         </div>
@@ -438,7 +438,7 @@ export default function DemoPage() {
             <h2 className="font-display font-bold text-2xl">Action Checklists</h2>
           </div>
           <p className="text-muted-foreground text-sm mb-6">
-            Areas sorted from most critical to least. Try checking items off — your progress saves in real reports.
+            Areas sorted from most critical to least. Try checking items off — your progress is saved in your real plan.
           </p>
 
           {/* Overall progress */}
@@ -448,7 +448,7 @@ export default function DemoPage() {
               <span className="text-sm font-bold text-primary">{totalDone}/{totalItems} completed</span>
             </div>
             <Progress value={overallPercent} className="h-3 mb-2" />
-            <p className="text-xs text-muted-foreground">In your real report, checklist progress is saved permanently.</p>
+            <p className="text-xs text-muted-foreground">In your real plan, checklist progress is saved permanently.</p>
           </div>
 
           <Tabs defaultValue={sortedAreas[0]} className="w-full">
@@ -547,7 +547,7 @@ export default function DemoPage() {
                             <div className="flex-1">
                               <p className="text-sm font-semibold text-foreground mb-1">AI step-by-step guidance — Pro feature</p>
                               <p className="text-xs text-muted-foreground mb-3">
-                                In your real report, clicking this generates 4–7 personalized sub-steps tailored to your location, goal, and situation — using the full context of your profile.
+                                In your real plan, clicking this generates 4–7 personalized sub-steps tailored to your location, goal, and situation — using the full context of your profile.
                               </p>
                               <Link href="/pricing">
                                 <Button size="sm" className="rounded-full gap-1.5 h-7 text-xs">
@@ -688,15 +688,15 @@ export default function DemoPage() {
           <div className="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center mx-auto">
             <Zap className="w-6 h-6 text-primary" />
           </div>
-          <h2 className="font-display font-bold text-3xl">Ready to see your real score?</h2>
+          <h2 className="font-display font-bold text-3xl">Ready to build your real plan?</h2>
           <p className="text-muted-foreground max-w-xl mx-auto">
-            Alex's report is fictional. Your report reflects your actual situation — your finances, your location,
+            Alex's plan is fictional. Yours reflects your actual situation — your finances, your location,
             your health, your skills. It takes 10–15 minutes and requires no personal information.
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
-            <Link href="/assess">
+            <Link href="/consent">
               <Button size="lg" className="rounded-full px-8 gap-2 h-12">
-                Take the Real Assessment <ArrowRight className="w-4 h-4" />
+                Build My Resilience Plan <ArrowRight className="w-4 h-4" />
               </Button>
             </Link>
             <Link href="/pricing">
