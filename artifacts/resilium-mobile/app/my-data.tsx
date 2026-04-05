@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -7,7 +7,10 @@ import {
   Pressable,
   Platform,
   Alert,
+  Switch,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Notifications from "expo-notifications";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
@@ -26,6 +29,28 @@ type ExportedData = {
   dataRequests: object[];
 };
 
+const NOTIF_PREFS_KEY = "resilium_notif_prefs_v1";
+
+type NotifPrefs = {
+  dailyHabit: boolean;
+  weeklyCheckin: boolean;
+  reassessmentNudge: boolean;
+};
+
+const DEFAULT_PREFS: NotifPrefs = {
+  dailyHabit: false,
+  weeklyCheckin: false,
+  reassessmentNudge: false,
+};
+
+async function requestNotifPermission(): Promise<boolean> {
+  if (Platform.OS === "web") return false;
+  const { status: existing } = await Notifications.getPermissionsAsync();
+  if (existing === "granted") return true;
+  const { status } = await Notifications.requestPermissionsAsync();
+  return status === "granted";
+}
+
 export default function MyDataScreen() {
   const insets = useSafeAreaInsets();
   const { sessionId, consentDate, revokeConsent, hasConsented } = useSession();
@@ -36,6 +61,8 @@ export default function MyDataScreen() {
   const [exportDone, setExportDone] = useState(false);
   const [deleteDone, setDeleteDone] = useState(false);
   const [subscription, setSubscription] = useState<{ status: string; isActive: boolean; planName?: string; currentPeriodEnd?: string } | null>(null);
+  const [notifPrefs, setNotifPrefs] = useState<NotifPrefs>(DEFAULT_PREFS);
+  const [notifPermission, setNotifPermission] = useState<boolean | null>(null);
 
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -53,6 +80,34 @@ export default function MyDataScreen() {
       } catch {}
     })();
   }, [isSignedIn]);
+
+  useEffect(() => {
+    AsyncStorage.getItem(NOTIF_PREFS_KEY).then(val => {
+      if (val) {
+        try { setNotifPrefs({ ...DEFAULT_PREFS, ...JSON.parse(val) }); } catch {}
+      }
+    });
+    if (Platform.OS !== "web") {
+      Notifications.getPermissionsAsync().then(({ status }) => setNotifPermission(status === "granted"));
+    } else {
+      setNotifPermission(false);
+    }
+  }, []);
+
+  const toggleNotif = useCallback(async (key: keyof NotifPrefs, value: boolean) => {
+    Haptics.selectionAsync();
+    if (value && !notifPermission) {
+      const granted = await requestNotifPermission();
+      setNotifPermission(granted);
+      if (!granted) {
+        Alert.alert("Notifications Blocked", "Please enable notifications in your device settings to use this feature.");
+        return;
+      }
+    }
+    const next = { ...notifPrefs, [key]: value };
+    setNotifPrefs(next);
+    await AsyncStorage.setItem(NOTIF_PREFS_KEY, JSON.stringify(next));
+  }, [notifPrefs, notifPermission]);
 
   const handleExport = async () => {
     if (!sessionId) return;
@@ -215,6 +270,62 @@ export default function MyDataScreen() {
                 <Feather name="zap" size={14} color={colors.background} />
                 <Text style={styles.upgradeSubBtnText}>Upgrade to Pro</Text>
               </Pressable>
+            )}
+          </View>
+        )}
+
+        {isSignedIn && Platform.OS !== "web" && (
+          <View style={styles.notifCard}>
+            <View style={styles.notifHeader}>
+              <Feather name="bell" size={16} color={colors.primary} />
+              <Text style={styles.notifTitle}>Notification Preferences</Text>
+            </View>
+            <Text style={styles.notifSubtitle}>Choose which reminders you'd like to receive</Text>
+
+            {[
+              {
+                key: "dailyHabit" as keyof NotifPrefs,
+                label: "Daily Habit Reminder",
+                desc: "A gentle nudge each morning to work on a resilience task",
+                icon: "sunrise",
+              },
+              {
+                key: "weeklyCheckin" as keyof NotifPrefs,
+                label: "Weekly Progress Check-In",
+                desc: "A Sunday recap of your plan progress this week",
+                icon: "calendar",
+              },
+              {
+                key: "reassessmentNudge" as keyof NotifPrefs,
+                label: "Reassessment Nudge",
+                desc: "Reminder to retake the assessment every 90 days",
+                icon: "refresh-cw",
+              },
+            ].map(item => (
+              <View key={item.key} style={styles.notifRow}>
+                <View style={styles.notifRowIcon}>
+                  <Feather name={item.icon as any} size={14} color={colors.primary} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.notifRowLabel}>{item.label}</Text>
+                  <Text style={styles.notifRowDesc}>{item.desc}</Text>
+                </View>
+                <Switch
+                  value={notifPrefs[item.key]}
+                  onValueChange={(v) => toggleNotif(item.key, v)}
+                  trackColor={{ false: colors.border, true: colors.primary + "80" }}
+                  thumbColor={notifPrefs[item.key] ? colors.primary : colors.textMuted}
+                />
+              </View>
+            ))}
+
+            {!notifPermission && (
+              <View style={styles.notifWarning}>
+                <Feather name="alert-triangle" size={13} color="#F59E0B" />
+                <Text style={styles.notifWarningText}>
+                  Notifications are currently disabled. Enable them in your device settings.
+                </Text>
+              </View>
             )}
           </View>
         )}
@@ -502,4 +613,30 @@ const createStyles = (colors: ColorsType) => StyleSheet.create({
     backgroundColor: colors.primary, borderRadius: 10, paddingVertical: 11,
   },
   upgradeSubBtnText: { fontFamily: "Inter_600SemiBold", fontSize: 14, color: colors.background },
+  notifCard: {
+    backgroundColor: colors.surface, borderRadius: 18, padding: 18,
+    borderWidth: 1, borderColor: colors.border, gap: 14,
+  },
+  notifHeader: { flexDirection: "row", alignItems: "center", gap: 8 },
+  notifTitle: { fontFamily: "Inter_700Bold", fontSize: 15, color: colors.text },
+  notifSubtitle: { fontFamily: "Inter_400Regular", fontSize: 13, color: colors.textMuted, marginTop: -6 },
+  notifRow: {
+    flexDirection: "row", alignItems: "center", gap: 12,
+    paddingVertical: 6, borderTopWidth: 1, borderTopColor: colors.border,
+  },
+  notifRowIcon: {
+    width: 32, height: 32, borderRadius: 8,
+    backgroundColor: colors.primaryMuted, alignItems: "center", justifyContent: "center",
+    flexShrink: 0,
+  },
+  notifRowLabel: { fontFamily: "Inter_600SemiBold", fontSize: 13, color: colors.text },
+  notifRowDesc: { fontFamily: "Inter_400Regular", fontSize: 11, color: colors.textMuted, marginTop: 2, lineHeight: 16 },
+  notifWarning: {
+    flexDirection: "row", alignItems: "flex-start", gap: 8,
+    backgroundColor: "rgba(245,158,11,0.1)", borderRadius: 10, padding: 12,
+    borderWidth: 1, borderColor: "rgba(245,158,11,0.2)",
+  },
+  notifWarningText: {
+    fontFamily: "Inter_400Regular", fontSize: 12, color: "#B45309", flex: 1, lineHeight: 17,
+  },
 });

@@ -96,6 +96,9 @@ interface PlanSummary {
   scoreResources: number;
   location: string;
   currency: string;
+  primaryGoal?: string | null;
+  totalItems?: number;
+  completedItems?: number;
 }
 
 interface ScoreMap {
@@ -1273,6 +1276,24 @@ function PlansTab({ plans, onDelete }: { plans: PlanSummary[]; onDelete: (id: st
                         );
                       })}
                     </div>
+
+                    {/* Plan completion progress */}
+                    {(plan.totalItems ?? 0) > 0 && (
+                      <div className="mb-4">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <span className="text-xs text-muted-foreground">
+                            Plan progress: {plan.completedItems ?? 0} of {plan.totalItems} done
+                          </span>
+                          <span className="text-xs font-semibold text-primary">
+                            {Math.round(((plan.completedItems ?? 0) / (plan.totalItems ?? 1)) * 100)}%
+                          </span>
+                        </div>
+                        <Progress
+                          value={Math.round(((plan.completedItems ?? 0) / (plan.totalItems ?? 1)) * 100)}
+                          className="h-1.5"
+                        />
+                      </div>
+                    )}
 
                     {/* Actions */}
                     <div className="flex items-center gap-2 flex-wrap">

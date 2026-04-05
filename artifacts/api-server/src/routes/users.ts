@@ -1,6 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { getAuth, createClerkClient } from "@clerk/express";
-import { db, resilienceReportsTable, usersTable, subscriptionsTable } from "@workspace/db";
+import { db, resilienceReportsTable, usersTable, subscriptionsTable, checklistProgressTable } from "@workspace/db";
 import { and, eq, inArray, desc } from "drizzle-orm";
 import { openai } from "@workspace/integrations-openai-ai-server";
 
@@ -34,25 +34,47 @@ router.get("/me/plans", async (req: Request, res: Response) => {
         scoreResources: resilienceReportsTable.scoreResources,
         location: resilienceReportsTable.location,
         currency: resilienceReportsTable.currency,
+        primaryGoal: resilienceReportsTable.primaryGoal,
+        checklistsByArea: resilienceReportsTable.checklistsByArea,
       })
       .from(resilienceReportsTable)
       .where(eq(resilienceReportsTable.userId, userId))
       .orderBy(resilienceReportsTable.createdAt);
 
+    const reportIds = plans.map(p => p.reportId);
+    const progressRows = reportIds.length > 0
+      ? await db
+          .select({ reportId: checklistProgressTable.reportId, completed: checklistProgressTable.completed })
+          .from(checklistProgressTable)
+          .where(inArray(checklistProgressTable.reportId, reportIds))
+      : [];
+
+    const completedByReport: Record<string, number> = {};
+    for (const p of progressRows) {
+      if (p.completed) completedByReport[p.reportId] = (completedByReport[p.reportId] ?? 0) + 1;
+    }
+
     res.json({
-      plans: plans.map((p) => ({
-        reportId: p.reportId,
-        createdAt: p.createdAt.toISOString(),
-        scoreOverall: p.scoreOverall,
-        scoreFinancial: p.scoreFinancial,
-        scoreHealth: p.scoreHealth,
-        scoreSkills: p.scoreSkills,
-        scoreMobility: p.scoreMobility,
-        scorePsychological: p.scorePsychological,
-        scoreResources: p.scoreResources,
-        location: p.location,
-        currency: p.currency ?? "USD",
-      })),
+      plans: plans.map((p) => {
+        const checklists = (p.checklistsByArea ?? {}) as Record<string, unknown[]>;
+        const totalItems = Object.values(checklists).reduce((s, items) => s + items.length, 0);
+        return {
+          reportId: p.reportId,
+          createdAt: p.createdAt.toISOString(),
+          scoreOverall: p.scoreOverall,
+          scoreFinancial: p.scoreFinancial,
+          scoreHealth: p.scoreHealth,
+          scoreSkills: p.scoreSkills,
+          scoreMobility: p.scoreMobility,
+          scorePsychological: p.scorePsychological,
+          scoreResources: p.scoreResources,
+          location: p.location,
+          currency: p.currency ?? "USD",
+          primaryGoal: p.primaryGoal ?? null,
+          totalItems,
+          completedItems: completedByReport[p.reportId] ?? 0,
+        };
+      }),
     });
   } catch (err) {
     req.log.error({ err }, "Error fetching user plans");

@@ -142,6 +142,28 @@ router.get("/analytics", requireAdminSession, async (req, res) => {
       .sort((a, b) => b[1] - a[1])
       .map(([concern, count]) => ({ concern, count }));
 
+    // Primary goal distribution
+    const GOAL_LABELS: Record<string, string> = {
+      job_security: "Job & Income Security",
+      financial_independence: "Financial Independence",
+      disaster_preparedness: "Disaster Preparedness",
+      health_continuity: "Health Continuity",
+      geopolitical_risk: "Geopolitical Risk",
+      life_transition: "Life Transition",
+      general_resilience: "General Resilience",
+    };
+    const goalCounts: Record<string, number> = {};
+    for (const r of reports) {
+      const g = r.primaryGoal;
+      if (g) {
+        const label = GOAL_LABELS[g] ?? g;
+        goalCounts[label] = (goalCounts[label] ?? 0) + 1;
+      }
+    }
+    const primaryGoalDistribution = Object.entries(goalCounts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([goal, count]) => ({ goal, count }));
+
     // Recent reports table
     const recentReportsList = reports.slice(0, 50).map(r => ({
       reportId: r.reportId,
@@ -184,6 +206,7 @@ router.get("/analytics", requireAdminSession, async (req, res) => {
         scoreHistogram,
       },
       riskConcerns,
+      primaryGoalDistribution,
       recentReports: recentReportsList,
       feedback: {
         totalFeedback,

@@ -9,6 +9,13 @@
 - **Scenario stress-tests** (`/scenarios/:reportId`): Pro-gated. User picks a crisis scenario (job loss, health crisis, natural disaster, relocation), AI re-analyzes with adjusted parameters, returns delta scores + tailored action steps. "Run Stress Test" CTA on results page links here.
 - **Subscription status** (`GET /api/subscription/status`): Returns `{isPro, status, currentPeriodEnd}`. Pro badge shown on profile AccountTab. Verifies live Paddle subscription.
 - **Mobile push notifications**: `expo-notifications@~0.32.16` installed. After consent, requests permission, schedules a 30-day local check-in notification, and registers push token to `POST /api/push-tokens` for future server-sent pushes.
+- **Coaching CTA Pro-gated**: In `plan.tsx`, `isCoachingArea && isPro` gates the coaching CTA; non-Pro users see an "unlock Pro" pill.
+- **Anonymous save prompt**: Amber banner on `plan.tsx` for unauthenticated users with "Save My Plan Free" CTA.
+- **Profile plan completion progress**: `GET /api/users/me/plans` now returns `primaryGoal`, `totalItems`, `completedItems` per report. Profile report cards show a progress bar ("X of Y done").
+- **Admin Goals tab**: `GET /api/admin/analytics` returns `primaryGoalDistribution`. Admin dashboard has a "Goals" tab showing a horizontal bar chart of user primary goal distribution.
+- **Landing page overhaul**: Badge updated to "Personal Resilience Platform"; hero copy rewritten to reflect the living plan platform; dual CTA (primary "Build My Resilience Plan" + secondary "See a Sample Plan"); crisis path secondary copy ("Already dealing with a disruption?"); How-it-Works step 3 updated; "Navigating a Life Transition" persona replaces "Quietly Cautious"; "What You Get" section features Strategic Action Plan as primary deliverable card; trust indicators updated.
+- **Mobile Action Plan link**: `my-plans.tsx` — each plan card now has an "Open Action Plan" button that opens `https://${domain}/plan/${reportId}` in the browser via `Linking.openURL`.
+- **Mobile notification preferences**: `my-data.tsx` — notification preferences UI with three toggleable options (Daily Habit Reminder, Weekly Progress Check-In, Reassessment Nudge). Persisted via AsyncStorage. Requests permission on first enable. Warning shown if notifications are system-blocked.
 
 pnpm workspace monorepo using TypeScript. Each package manages its own dependencies.
 

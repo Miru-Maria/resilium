@@ -321,6 +321,20 @@ export default function PlanPage() {
 
       <main className="max-w-5xl mx-auto px-6 pt-10 space-y-10">
 
+        {/* SAVE PROMPT — anonymous users */}
+        {!isAuthenticated && (
+          <div className="flex items-center gap-4 px-5 py-4 rounded-2xl bg-amber-500/5 border border-amber-500/30">
+            <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-sm text-foreground">Your plan disappears when you close this tab</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Create a free account to save your progress, pick up where you left off, and track improvements over time.</p>
+            </div>
+            <Button size="sm" className="rounded-full flex-shrink-0 bg-amber-600 hover:bg-amber-700 text-white border-0" onClick={() => openSignIn({})}>
+              Save My Plan Free
+            </Button>
+          </div>
+        )}
+
         {/* GOAL + PROGRESS HERO */}
         <section>
           <div className="flex flex-wrap items-start gap-4 mb-6">
@@ -552,8 +566,8 @@ export default function PlanPage() {
                                           </Link>
                                         )}
 
-                                        {/* Coaching CTA — only for mental/health areas */}
-                                        {isCoachingArea && (
+                                        {/* Coaching CTA — Pro only, mental/health areas only */}
+                                        {isCoachingArea && isPro && (
                                           <a
                                             href="https://healing-through-understanding.replit.app/contact"
                                             target="_blank"
@@ -563,6 +577,17 @@ export default function PlanPage() {
                                             <Heart className="w-3 h-3" />
                                             Talk to a coach
                                           </a>
+                                        )}
+                                        {isCoachingArea && !isPro && (
+                                          <Link href="/pricing">
+                                            <button
+                                              type="button"
+                                              className="flex items-center gap-1.5 text-xs rounded-full px-3 py-1.5 border border-rose-300/20 text-rose-400/60 hover:border-rose-400/40 hover:text-rose-500 transition-all"
+                                            >
+                                              <Heart className="w-3 h-3" />
+                                              Coaching — unlock Pro
+                                            </button>
+                                          </Link>
                                         )}
                                       </div>
 

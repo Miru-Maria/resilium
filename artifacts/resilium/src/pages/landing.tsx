@@ -220,27 +220,41 @@ export default function LandingPage() {
             transition={{ duration: 0.7, ease: "easeOut" }}
           >
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/30 text-primary mb-8 border border-secondary/50 backdrop-blur-sm">
-              <Brain className="w-4 h-4" />
-              <span className="text-sm font-semibold uppercase tracking-wider">Personal Risk Assessment</span>
+              <Shield className="w-4 h-4" />
+              <span className="text-sm font-semibold uppercase tracking-wider">Personal Resilience Platform</span>
             </div>
 
             <h1 className="text-5xl md:text-7xl font-display font-bold tracking-tight text-foreground leading-[1.1] mb-6">
               You're one disruption away from{" "}
               <span className="text-destructive italic">chaos</span>.<br />
-              Check your{" "}
-              <span className="text-primary whitespace-nowrap font-extrabold">readiness.</span>
+              Build your{" "}
+              <span className="text-primary whitespace-nowrap font-extrabold">resilience plan.</span>
             </h1>
 
-            <p className="text-lg md:text-xl text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed">
-              Resilium analyzes your financial stability, skills, health, and location to build a personalized action plan for life's unpredictable moments.
+            <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
+              Resilium assesses your real vulnerability across 7 dimensions — finances, health, skills, location, and more — then gives you a living action plan you actually work through. Not a one-time report. A companion that grows with you.
             </p>
 
-            <Link href="/consent">
-              <Button size="lg" className="rounded-full h-16 px-10 text-lg font-semibold shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/30 hover:-translate-y-1 transition-all duration-300">
-                Get My Resilience Plan
-                <ArrowRight className="ml-2 w-5 h-5" />
-              </Button>
-            </Link>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
+              <Link href="/consent">
+                <Button size="lg" className="rounded-full h-16 px-10 text-lg font-semibold shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/30 hover:-translate-y-1 transition-all duration-300">
+                  Build My Resilience Plan
+                  <ArrowRight className="ml-2 w-5 h-5" />
+                </Button>
+              </Link>
+              <Link href="/demo">
+                <Button size="lg" variant="outline" className="rounded-full h-16 px-10 text-lg font-semibold border-border/60 hover:border-primary/40 hover:-translate-y-0.5 transition-all duration-300">
+                  See a Sample Plan
+                </Button>
+              </Link>
+            </div>
+
+            <p className="text-sm text-muted-foreground/70">
+              Already dealing with a disruption?{" "}
+              <Link href="/consent" className="text-primary underline underline-offset-2 hover:text-primary/80 transition-colors">
+                Start here — your situation is solvable.
+              </Link>
+            </p>
           </motion.div>
 
           {/* Trust indicators */}
@@ -250,9 +264,9 @@ export default function LandingPage() {
             transition={{ delay: 0.8, duration: 1 }}
             className="mt-16 flex flex-wrap items-center justify-center gap-8 text-sm text-muted-foreground"
           >
-            <span className="flex items-center gap-2"><TrendingUp className="w-4 h-4 text-primary" /> Sign in to save &amp; track progress</span>
+            <span className="flex items-center gap-2"><TrendingUp className="w-4 h-4 text-primary" /> Track your progress over time</span>
             <span className="flex items-center gap-2"><Shield className="w-4 h-4 text-primary" /> Your data is never sold</span>
-            <span className="flex items-center gap-2"><Zap className="w-4 h-4 text-primary" /> Takes about 10 minutes</span>
+            <span className="flex items-center gap-2"><Zap className="w-4 h-4 text-primary" /> Assessment takes 10–15 minutes</span>
           </motion.div>
         </div>
 
@@ -278,8 +292,8 @@ export default function LandingPage() {
                 {
                   step: "03",
                   icon: <CheckCircle2 className="w-7 h-7 text-primary" />,
-                  title: "Get your action plan",
-                  desc: "A full resilience report lands immediately: your score, your gaps, and a prioritized action plan broken into 30-day, 6-month, and long-term phases.",
+                  title: "Work your living action plan",
+                  desc: "Your Strategic Action Plan is a real working document — not a PDF you forget. Check off tasks, track your progress across 30-day, 6-month, and long-term phases, and reassess as your situation evolves.",
                 },
               ].map(({ step, icon, title, desc }) => (
                 <div key={step} className="relative flex flex-col gap-4 p-6 rounded-2xl bg-background border border-border/60">
@@ -297,9 +311,9 @@ export default function LandingPage() {
         <section className="w-full py-20 px-6">
           <div className="max-w-5xl mx-auto">
             <p className="text-xs font-semibold uppercase tracking-widest text-primary text-center mb-3">Who Uses Resilium</p>
-            <h2 className="text-3xl md:text-4xl font-display font-bold text-center mb-4">Built for people who prepare, not people who panic</h2>
+            <h2 className="text-3xl md:text-4xl font-display font-bold text-center mb-4">Built for people at every stage of preparedness</h2>
             <p className="text-center text-muted-foreground max-w-2xl mx-auto mb-14">
-              Resilium is used by people who take personal security seriously — wherever they are in the world.
+              Whether you're quietly cautious or already in the middle of a disruption — Resilium meets you where you are.
             </p>
             <div className="grid sm:grid-cols-2 gap-6">
               {[
@@ -320,8 +334,8 @@ export default function LandingPage() {
                 },
                 {
                   icon: <AlertTriangle className="w-6 h-6 text-primary" />,
-                  title: "The Quietly Cautious",
-                  desc: "You don't call yourself a prepper. But the news has you thinking. Resilium gives you a structured, honest starting point — no judgment, no extreme ideology.",
+                  title: "Navigating a Life Transition",
+                  desc: "Retirement, job loss, divorce, or relocating — disruption comes in many forms. Resilium gives you a clear-eyed picture of your current situation and a concrete path forward, at any age.",
                 },
               ].map(({ icon, title, desc }) => (
                 <div key={title} className="flex gap-4 p-6 rounded-2xl border border-border/60 bg-card/40 hover:border-primary/30 transition-colors">
@@ -339,19 +353,29 @@ export default function LandingPage() {
         {/* What you'll get */}
         <section className="w-full bg-card/40 border-y border-border/60 py-20 px-6">
           <div className="max-w-5xl mx-auto">
-            <p className="text-xs font-semibold uppercase tracking-widest text-primary text-center mb-3">Your Report</p>
-            <h2 className="text-3xl md:text-4xl font-display font-bold text-center mb-14">What you'll walk away with</h2>
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary text-center mb-3">What You Get</p>
+            <h2 className="text-3xl md:text-4xl font-display font-bold text-center mb-14">Everything in one place — forever</h2>
+
+            {/* Strategic Action Plan — featured card */}
+            <div className="mb-6 p-6 rounded-2xl border-2 border-primary/40 bg-primary/5 flex flex-col sm:flex-row items-start sm:items-center gap-5">
+              <div className="flex-shrink-0 w-14 h-14 rounded-2xl bg-primary/15 flex items-center justify-center">
+                <CheckCircle2 className="w-7 h-7 text-primary" />
+              </div>
+              <div>
+                <div className="inline-block text-xs font-bold uppercase tracking-widest text-primary bg-primary/10 px-2.5 py-0.5 rounded-full mb-2">Primary Deliverable</div>
+                <h3 className="font-display font-bold text-lg mb-1">Strategic Action Plan</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  A living document you actually work through — not a PDF you forget. Check off 30-day, 6-month, and long-term tasks, track your completion, and return anytime. Your plan updates as you progress.
+                </p>
+              </div>
+            </div>
+
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {[
                 {
                   icon: <TrendingUp className="w-5 h-5 text-primary" />,
-                  title: "Your Resilience Score",
-                  desc: "A 0–100 composite score across six dimensions: Financial, Health, Skills, Mobility, Psychological, and Resources.",
-                },
-                {
-                  icon: <CheckCircle2 className="w-5 h-5 text-primary" />,
-                  title: "Prioritized Action Plan",
-                  desc: "30-day, 6-month, and long-term tasks — ordered by criticality for your specific situation, not a generic checklist.",
+                  title: "Resilience Score",
+                  desc: "A 0–100 composite score across seven dimensions: Financial, Health, Skills, Mobility, Psychological, Resources, and Social Capital.",
                 },
                 {
                   icon: <Brain className="w-5 h-5 text-primary" />,
@@ -361,7 +385,7 @@ export default function LandingPage() {
                 {
                   icon: <AlertTriangle className="w-5 h-5 text-primary" />,
                   title: "Scenario Stress Tests",
-                  desc: "AI-generated simulations of your top risks — job loss, supply chain failure, natural disaster — with your personal impact and recovery timeline.",
+                  desc: "AI-generated simulations of your top risks — job loss, supply disruption, natural disaster — with your personal impact and recovery timeline.",
                 },
                 {
                   icon: <MapPin className="w-5 h-5 text-primary" />,
@@ -372,6 +396,11 @@ export default function LandingPage() {
                   icon: <Shield className="w-5 h-5 text-primary" />,
                   title: "Daily Resilience Habits",
                   desc: "Recurring actions tailored to your profile that, compounded over time, move you from vulnerable to prepared.",
+                },
+                {
+                  icon: <TrendingUp className="w-5 h-5 text-primary" />,
+                  title: "Progress Tracking",
+                  desc: "Every plan you complete is saved. Reassess over time and see how your resilience score improves as you do the work.",
                 },
               ].map(({ icon, title, desc }) => (
                 <div key={title} className="p-5 rounded-2xl border border-border/60 bg-background hover:border-primary/30 transition-colors">

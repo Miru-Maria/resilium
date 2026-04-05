@@ -39,6 +39,7 @@ interface AnalyticsData {
     scoreHistogram: { range: string; count: number }[];
   };
   riskConcerns: { concern: string; count: number }[];
+  primaryGoalDistribution: { goal: string; count: number }[];
   recentReports: {
     reportId: string;
     createdAt: string;
@@ -206,6 +207,7 @@ export default function AdminDashboard() {
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="demographics">Demographics</TabsTrigger>
             <TabsTrigger value="scores">Score Analytics</TabsTrigger>
+            <TabsTrigger value="goals">Goals</TabsTrigger>
             <TabsTrigger value="risks">Risk Concerns</TabsTrigger>
             <TabsTrigger value="reports">Reports</TabsTrigger>
             <TabsTrigger value="feedback">Feedback</TabsTrigger>
@@ -392,6 +394,34 @@ export default function AdminDashboard() {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="goals" className="space-y-6">
+            <Card className="border-none shadow-md">
+              <CardHeader>
+                <CardTitle className="text-base font-display">Primary Goal Distribution</CardTitle>
+                <CardDescription>What users most want to achieve — selected during assessment</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {!data.primaryGoalDistribution || data.primaryGoalDistribution.length === 0 ? (
+                  <p className="text-muted-foreground text-sm text-center py-8">No goal data yet — users with older reports may not have selected a primary goal</p>
+                ) : (
+                  <ResponsiveContainer width="100%" height={Math.max(260, data.primaryGoalDistribution.length * 44)}>
+                    <BarChart data={data.primaryGoalDistribution} layout="vertical">
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis type="number" tick={{ fontSize: 11 }} allowDecimals={false} />
+                      <YAxis type="category" dataKey="goal" tick={{ fontSize: 11 }} width={170} />
+                      <Tooltip />
+                      <Bar dataKey="count" radius={4} name="Users">
+                        {data.primaryGoalDistribution.map((_, i) => (
+                          <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="risks">

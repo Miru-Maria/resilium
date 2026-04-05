@@ -3,7 +3,7 @@ import { getAuth, createClerkClient } from "@clerk/express";
 import { randomUUID } from "crypto";
 import { SubmitAssessmentBody, GetReportParams } from "@workspace/api-zod";
 import { db, resilienceReportsTable, checklistProgressTable, progressSnapshotsTable, subscriptionsTable } from "@workspace/db";
-import { eq, and, count } from "drizzle-orm";
+import { eq, and, count, inArray } from "drizzle-orm";
 
 import { calculateScores } from "./scoring.js";
 import { generateResilienceReport } from "./ai.js";
@@ -314,26 +314,54 @@ router.get("/my-reports", async (req, res) => {
         scoreResources: resilienceReportsTable.scoreResources,
         location: resilienceReportsTable.location,
         riskProfileSummary: resilienceReportsTable.riskProfileSummary,
+        primaryGoal: resilienceReportsTable.primaryGoal,
+        checklistsByArea: resilienceReportsTable.checklistsByArea,
       })
       .from(resilienceReportsTable)
       .where(eq(resilienceReportsTable.userId, myReportsUserId))
       .orderBy(resilienceReportsTable.createdAt);
 
-    res.json({ reports: rows.map(r => ({
-      reportId: r.reportId,
-      createdAt: r.createdAt.toISOString(),
-      location: r.location,
-      riskProfileSummary: r.riskProfileSummary,
-      score: {
-        overall: r.scoreOverall,
-        financial: r.scoreFinancial,
-        health: r.scoreHealth,
-        skills: r.scoreSkills,
-        mobility: r.scoreMobility,
-        psychological: r.scorePsychological,
-        resources: r.scoreResources,
-      },
-    })) });
+    const reportIds = rows.map(r => r.reportId);
+    const progressRows = reportIds.length > 0
+      ? await db
+          .select({
+            reportId: checklistProgressTable.reportId,
+            completed: checklistProgressTable.completed,
+          })
+          .from(checklistProgressTable)
+          .where(inArray(checklistProgressTable.reportId, reportIds))
+      : [];
+
+    const completedByReport: Record<string, number> = {};
+    for (const p of progressRows) {
+      if (p.completed) {
+        completedByReport[p.reportId] = (completedByReport[p.reportId] ?? 0) + 1;
+      }
+    }
+
+    res.json({ reports: rows.map(r => {
+      const checklists = (r.checklistsByArea ?? {}) as Record<string, Array<unknown>>;
+      const totalItems = Object.values(checklists).reduce((sum, items) => sum + items.length, 0);
+      const completedItems = completedByReport[r.reportId] ?? 0;
+      return {
+        reportId: r.reportId,
+        createdAt: r.createdAt.toISOString(),
+        location: r.location,
+        riskProfileSummary: r.riskProfileSummary,
+        primaryGoal: r.primaryGoal,
+        totalItems,
+        completedItems,
+        score: {
+          overall: r.scoreOverall,
+          financial: r.scoreFinancial,
+          health: r.scoreHealth,
+          skills: r.scoreSkills,
+          mobility: r.scoreMobility,
+          psychological: r.scorePsychological,
+          resources: r.scoreResources,
+        },
+      };
+    }) });
   } catch (err) {
     req.log.error({ err }, "Error fetching user reports");
     res.status(500).json({ error: "INTERNAL_ERROR", message: "Failed to fetch reports." });

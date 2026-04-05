@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import {
   View, Text, StyleSheet, ScrollView, Pressable, Platform, ActivityIndicator,
-  Modal,
+  Modal, Linking,
 } from "react-native";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -291,8 +291,22 @@ export default function MyPlansScreen() {
                 </View>
 
                 <View style={styles.planFooter}>
-                  <Text style={styles.viewText}>View full plan</Text>
-                  <Feather name="arrow-right" size={14} color={colors.primary} />
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                    <Text style={styles.viewText}>View report</Text>
+                    <Feather name="arrow-right" size={14} color={colors.primary} />
+                  </View>
+                  <Pressable
+                    style={({ pressed }) => [styles.actionPlanBtn, pressed && { opacity: 0.75 }]}
+                    onPress={(e) => {
+                      e.stopPropagation?.();
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      const domain = process.env.EXPO_PUBLIC_DOMAIN;
+                      Linking.openURL(`https://${domain}/plan/${plan.reportId}`);
+                    }}
+                  >
+                    <Feather name="check-square" size={13} color={colors.background} />
+                    <Text style={styles.actionPlanBtnText}>Open Action Plan</Text>
+                  </Pressable>
                 </View>
               </Pressable>
             ))}
@@ -366,8 +380,14 @@ const createStyles = (colors: ColorsType) => StyleSheet.create({
   },
   subScoreFill: { height: "100%", borderRadius: 2 },
   subScoreLabel: { fontFamily: "Inter_400Regular", fontSize: 10, color: colors.textMuted, width: 56 },
-  planFooter: { flexDirection: "row", alignItems: "center", justifyContent: "flex-end", gap: 4, marginTop: 2 },
+  planFooter: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 2 },
   viewText: { fontFamily: "Inter_600SemiBold", fontSize: 13, color: colors.primary },
+  actionPlanBtn: {
+    flexDirection: "row", alignItems: "center", gap: 6,
+    backgroundColor: colors.primary, borderRadius: 8,
+    paddingVertical: 7, paddingHorizontal: 11,
+  },
+  actionPlanBtnText: { fontFamily: "Inter_600SemiBold", fontSize: 12, color: colors.background },
   trendCard: {
     backgroundColor: colors.surface, borderRadius: 16, padding: 16,
     borderWidth: 1, borderColor: colors.border, gap: 12,
