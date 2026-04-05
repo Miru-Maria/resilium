@@ -249,12 +249,6 @@ export default function LandingPage() {
               </Link>
             </div>
 
-            <p className="text-sm text-muted-foreground/70">
-              Already dealing with a disruption?{" "}
-              <Link href="/consent" className="text-primary underline underline-offset-2 hover:text-primary/80 transition-colors">
-                Start here — your situation is solvable.
-              </Link>
-            </p>
           </motion.div>
 
           {/* Trust indicators */}
