@@ -248,13 +248,6 @@ export default function LandingPage() {
                 </Button>
               </Link>
             </div>
-            <div className="flex items-center justify-center">
-              <Link href="/about#resources" className="flex items-center gap-1.5 text-sm text-destructive/70 hover:text-destructive transition-colors font-medium">
-                <AlertTriangle className="w-3.5 h-3.5" />
-                Already in a crisis? Get immediate resources →
-              </Link>
-            </div>
-
           </motion.div>
 
           {/* Trust indicators */}
