@@ -152,6 +152,24 @@ export default function PlanPage() {
       .catch(() => {});
   }, [isAuthenticated]);
 
+  // Track plan page open (fire-and-forget)
+  useEffect(() => {
+    if (!reportId) return;
+    fetch(`${BASE}/api/resilience/reports/${reportId}/view`, { method: "POST", credentials: "include" }).catch(() => {});
+  }, [reportId]);
+
+  // Time-delayed save prompt for anonymous users
+  useEffect(() => {
+    if (isAuthenticated) return;
+    const timer = setTimeout(() => {
+      toast({
+        title: "Don't lose your plan",
+        description: "Sign up free to save your action plan and track your progress over time.",
+      });
+    }, 35000);
+    return () => clearTimeout(timer);
+  }, [isAuthenticated, toast]);
+
   const handleChecklistToggle = useCallback(async (area: string, itemId: string, currentlyCompleted: boolean) => {
     if (!isAuthenticated) { openSignIn({}); return; }
     try {

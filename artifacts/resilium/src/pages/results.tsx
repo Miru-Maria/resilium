@@ -209,6 +209,18 @@ export default function ResultsPage() {
     document.head.appendChild(script);
   }, []);
 
+  // Time-delayed save prompt for anonymous users
+  useEffect(() => {
+    if (isAuthenticated) return;
+    const timer = setTimeout(() => {
+      toast({
+        title: "Save your resilience report",
+        description: "Sign up free to keep this report, track your score over time, and build a persistent action plan.",
+      });
+    }, 35000);
+    return () => clearTimeout(timer);
+  }, [isAuthenticated, toast]);
+
   const [percentileData, setPercentileData] = useState<{ percentile: number | null; total: number } | null>(null);
   useEffect(() => {
     if (!report?.score?.overall) return;

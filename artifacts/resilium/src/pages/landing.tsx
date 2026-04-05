@@ -235,7 +235,7 @@ export default function LandingPage() {
               Resilium assesses your real vulnerability across 7 dimensions — finances, health, skills, location, and more — then gives you a living action plan you actually work through. Not a one-time report. A companion that grows with you.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
               <Link href="/consent">
                 <Button size="lg" className="rounded-full h-16 px-10 text-lg font-semibold shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/30 hover:-translate-y-1 transition-all duration-300">
                   Build My Resilience Plan
@@ -246,6 +246,12 @@ export default function LandingPage() {
                 <Button size="lg" variant="outline" className="rounded-full h-16 px-10 text-lg font-semibold border-border/60 hover:border-primary/40 hover:-translate-y-0.5 transition-all duration-300">
                   See a Sample Plan
                 </Button>
+              </Link>
+            </div>
+            <div className="flex items-center justify-center">
+              <Link href="/about#resources" className="flex items-center gap-1.5 text-sm text-destructive/70 hover:text-destructive transition-colors font-medium">
+                <AlertTriangle className="w-3.5 h-3.5" />
+                Already in a crisis? Get immediate resources →
               </Link>
             </div>
 

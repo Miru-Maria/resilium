@@ -2,7 +2,7 @@ import { Router, type IRouter, type Request } from "express";
 import { getAuth, createClerkClient } from "@clerk/express";
 import { randomUUID } from "crypto";
 import { SubmitAssessmentBody, GetReportParams } from "@workspace/api-zod";
-import { db, resilienceReportsTable, checklistProgressTable, progressSnapshotsTable, subscriptionsTable } from "@workspace/db";
+import { db, resilienceReportsTable, checklistProgressTable, progressSnapshotsTable, subscriptionsTable, planViewsTable } from "@workspace/db";
 import { eq, and, count, inArray } from "drizzle-orm";
 
 import { calculateScores } from "./scoring.js";
@@ -606,6 +606,20 @@ router.get("/percentile", async (req, res) => {
   } catch (err) {
     req.log.error({ err }, "Error calculating percentile");
     res.status(500).json({ error: "INTERNAL_ERROR", message: "Failed to calculate percentile." });
+  }
+});
+
+// POST /resilience/reports/:reportId/view — lightweight plan engagement tracking
+router.post("/reports/:reportId/view", async (req, res) => {
+  try {
+    const reportId = req.params.reportId;
+    if (!reportId) { res.status(400).json({ error: "Missing reportId" }); return; }
+    const userId = getUserId(req as Request);
+    const sessionId = (req.body as { sessionId?: string })?.sessionId ?? null;
+    await db.insert(planViewsTable).values({ reportId, userId, sessionId });
+    res.json({ ok: true });
+  } catch {
+    res.json({ ok: false });
   }
 });
 

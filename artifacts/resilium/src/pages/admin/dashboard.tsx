@@ -7,7 +7,7 @@ import {
 } from "recharts";
 import {
   ShieldAlert, LogOut, Loader2, AlertTriangle, FileText,
-  Star, Activity, MessageSquare, Smartphone, Shield, LayoutDashboard, FlaskConical, ExternalLink
+  Star, Activity, MessageSquare, Smartphone, Shield, LayoutDashboard, FlaskConical, ExternalLink, Eye
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,7 @@ interface AnalyticsData {
     totalReports: number;
     avgOverall: number;
     reportsPerDay: { date: string; count: number }[];
+    planViewsThisWeek?: number;
   };
   demographics: {
     location: { name: string; count: number }[];
@@ -217,6 +218,7 @@ export default function AdminDashboard() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <StatCard title="Total Reports" value={data.overview.totalReports} icon={FileText} description="All time submissions" />
               <StatCard title="Avg Overall Score" value={`${data.overview.avgOverall}/100`} icon={Activity} description="Across all users" />
+              <StatCard title="Plan Opens (7d)" value={data.overview.planViewsThisWeek ?? 0} icon={Eye} description="Action plan page views" />
               <StatCard title="Feedback Received" value={data.feedback.totalFeedback} icon={MessageSquare} description={data.feedback.totalFeedback > 0 ? `Avg rating: ${data.feedback.avgRating}/5` : "No feedback yet"} />
               <StatCard title="Coaching Clicks" value={coachingClicks ?? "—"} icon={ExternalLink} description="Since last server restart" />
             </div>

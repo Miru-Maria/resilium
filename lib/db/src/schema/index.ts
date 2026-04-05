@@ -23,3 +23,4 @@ export * from "./gdpr";
 export * from "./feedback";
 export * from "./announcements";
 export * from "./subscriptions";
+export * from "./monitoring";

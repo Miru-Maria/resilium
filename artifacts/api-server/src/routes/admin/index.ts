@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
-import { db, resilienceReportsTable, reportFeedbackTable, usersTable } from "@workspace/db";
-import { desc, eq, count, max, and, isNotNull } from "drizzle-orm";
+import { db, resilienceReportsTable, reportFeedbackTable, usersTable, planViewsTable } from "@workspace/db";
+import { desc, eq, count, max, and, isNotNull, gte } from "drizzle-orm";
 import { requireAdminSession, generateAdminToken, verifyAdminToken } from "../../middlewares/adminAuth.js";
 import uxTestRouter from "./ux-test/index.js";
 import adminGdprRouter from "./gdpr.js";
@@ -194,11 +194,19 @@ router.get("/analytics", requireAdminSession, async (req, res) => {
         createdAt: f.createdAt.toISOString(),
       }));
 
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const planViewRows = await db
+      .select({ cnt: count() })
+      .from(planViewsTable)
+      .where(gte(planViewsTable.viewedAt, sevenDaysAgo));
+    const planViewsThisWeek = planViewRows[0]?.cnt ?? 0;
+
     res.json({
       overview: {
         totalReports,
         avgOverall: Math.round(avgOverall * 10) / 10,
         reportsPerDay,
+        planViewsThisWeek,
       },
       demographics,
       scoreAnalytics: {

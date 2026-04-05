@@ -1,225 +1,54 @@
-# Workspace
+# Overview
 
-## Overview
+Resilium is a personal resilience planning platform designed to help users assess their preparedness for life's challenges. It provides a 10-step assessment, including a detailed Mental Resilience deep-dive, to generate an AI-powered Resilience Report. This report includes a personalized score (0–100), identifies vulnerabilities, proposes an action plan, simulates crisis scenarios, and suggests daily habits. The platform supports GDPR-compliant data management and offers a full admin dashboard for analytics, AI UX testing, consent management, and user administration. It operates on a freemium model, offering two free assessments, with Pro subscriptions available via Paddle for advanced features like scenario stress-tests and AI sub-steps.
 
-**Resilium** — A personal resilience planning platform. Users complete a 10-step assessment (including a 10-question Mental Resilience deep-dive), receive an AI-generated Resilience Report (score 0–100, vulnerabilities, action plan, scenario simulations, daily habits), and can manage their data under GDPR. Includes a full admin dashboard for analytics, AI UX testing, consent management, user management, and site announcement banners. Results page includes resource recommendations, shareable score card (Web Share API), email report (mailto), and Paddle donation button. Freemium: 2 free assessments for anon/free users; paywall counter visible in assessment header; Pro subscriptions via Paddle.
+# User Preferences
 
-### Post-Roadmap Features (completed)
-- **Demo page** (`/demo`): Static fictional sample report for "Alex M." — full results UI, Pro teasers, scenario section. Linked from landing nav.
-- **Scenario stress-tests** (`/scenarios/:reportId`): Pro-gated. User picks a crisis scenario (job loss, health crisis, natural disaster, relocation), AI re-analyzes with adjusted parameters, returns delta scores + tailored action steps. "Run Stress Test" CTA on results page links here.
-- **Subscription status** (`GET /api/subscription/status`): Returns `{isPro, status, currentPeriodEnd}`. Pro badge shown on profile AccountTab. Verifies live Paddle subscription.
-- **Mobile push notifications**: `expo-notifications@~0.32.16` installed. After consent, requests permission, schedules a 30-day local check-in notification, and registers push token to `POST /api/push-tokens` for future server-sent pushes.
-- **Coaching CTA Pro-gated**: In `plan.tsx`, `isCoachingArea && isPro` gates the coaching CTA; non-Pro users see an "unlock Pro" pill.
-- **Anonymous save prompt**: Amber banner on `plan.tsx` for unauthenticated users with "Save My Plan Free" CTA.
-- **Profile plan completion progress**: `GET /api/users/me/plans` now returns `primaryGoal`, `totalItems`, `completedItems` per report. Profile report cards show a progress bar ("X of Y done").
-- **Admin Goals tab**: `GET /api/admin/analytics` returns `primaryGoalDistribution`. Admin dashboard has a "Goals" tab showing a horizontal bar chart of user primary goal distribution.
-- **Landing page overhaul**: Badge updated to "Personal Resilience Platform"; hero copy rewritten to reflect the living plan platform; dual CTA (primary "Build My Resilience Plan" + secondary "See a Sample Plan"); crisis path secondary copy ("Already dealing with a disruption?"); How-it-Works step 3 updated; "Navigating a Life Transition" persona replaces "Quietly Cautious"; "What You Get" section features Strategic Action Plan as primary deliverable card; trust indicators updated.
-- **Mobile Action Plan link**: `my-plans.tsx` — each plan card now has an "Open Action Plan" button that opens `https://${domain}/plan/${reportId}` in the browser via `Linking.openURL`.
-- **Mobile notification preferences**: `my-data.tsx` — notification preferences UI with three toggleable options (Daily Habit Reminder, Weekly Progress Check-In, Reassessment Nudge). Persisted via AsyncStorage. Requests permission on first enable. Warning shown if notifications are system-blocked.
+I prefer detailed explanations.
+I want iterative development.
+Ask before making major changes.
+Do not make changes to the folder `lib/replit-auth-web/`.
+Do not make changes to the file `artifacts/resilium-mobile/app/my-data.tsx`.
+All copy should use "I/me" framing or impersonal language, not "we/our".
+The project must use American English only (e.g., "paralyzed", "personalized", "organized", "color", "behavior").
+The platform's narrative should avoid an HR/corporate angle, focusing instead on preppers, financially anxious individuals, expats/digital nomads, and the quietly cautious.
 
-pnpm workspace monorepo using TypeScript. Each package manages its own dependencies.
+# System Architecture
 
-## Stack
+## Application Structure
 
-- **Monorepo tool**: pnpm workspaces
-- **Node.js version**: 24
-- **Package manager**: pnpm
-- **TypeScript version**: 5.9
-- **API framework**: Express 5
-- **Database**: PostgreSQL + Drizzle ORM
-- **Validation**: Zod (`zod/v4`), `drizzle-zod`
-- **Build**: esbuild (CJS bundle)
-- **Frontend**: React + Vite, Tailwind CSS, framer-motion, recharts
-- **Mobile**: Expo + React Native (Expo Router, `@expo/vector-icons`, expo-haptics)
-- **AI**: OpenAI via Replit AI Integrations (gpt-5.2)
-- **Auth**: Clerk (web: `@clerk/react`, API: `@clerk/express`, mobile: `@clerk/expo`) — replaced Replit Auth in April 2026
+The project is a pnpm workspace monorepo using TypeScript, consisting of three main artifacts: `api-server` (Express API), `resilium` (React + Vite web frontend), and `resilium-mobile` (Expo React Native mobile app). Core libraries include `db` (Drizzle ORM), `replit-auth-web`, and `integrations-openai-ai-server`.
 
-## Application Architecture
+## Core User Flow
 
-### Core User Flow
-1. Landing page → hero CTA
-2. Consent screen (GDPR Article 6(1)(a), version 1.0)
-3. 14-step assessment:
-   - Location, Income stability, Savings runway, Dependents, Skills, Health & Mobility, Housing, Emergency supplies
-   - **Mental Resilience deep-dive** (10 sub-questions rated 1–5)
-   - Risk concerns
-   - Goal selection (7 options: job_security, financial_independence, disaster_preparedness, health_continuity, geopolitical_risk, life_transition, general_resilience) + optional success vision
-4. AI-generated Resilience Report: score 0-100, vulnerabilities, action plan, scenario simulations, daily habits, checklists
-5. **Results page** (`/results/:reportId`): Descriptive — score, radar chart, MR profile, vulnerabilities, stress tests. Primary CTA to Strategic Action Plan.
-6. **Strategic Action Plan** (`/plan/:reportId`): The interactive working document. Goal-headlined, three time horizons (0-30d / 3-6mo / long-term), checklist items by priority mapped to timeframe, AI sub-steps on demand (Pro), curated resources per dimension, coaching CTA (health/psych items only), stress test scenarios sub-section.
-7. **Profile** (`/profile`): Report history with "Action Plan" as primary CTA per report, "Report" as secondary. Score comparison and tracking.
+The user journey begins on the landing page, leading to a GDPR consent screen. Following consent, users complete a 14-step assessment, including a 10-question Mental Resilience deep-dive, covering areas like income stability, skills, health, and risk concerns. This culminates in an AI-generated Resilience Report displayed on the results page, which then guides users to a Strategic Action Plan—an interactive document with goal-headlined tasks, time horizons, AI sub-steps (Pro-gated), and curated resources. Authenticated users can access their report history and progress tracking via a profile page.
 
-### Scoring Logic
-Six dimensions, each 0-100:
-- **Financial** (25% weight): Income stability + savings runway + dependents
-- **Skills** (20% weight): Digital, physical, survival, medical, financial, language skills
-- **Health** (15% weight): Health status + medical skills
-- **Mobility** (15% weight): Mobility level + housing type + dependents
-- **Psychological** (15% weight): Average of 10 MR sub-question scores × 2 (maps 1–5 scale to 2–10)
-- **Resources** (10% weight): Emergency supplies + survival/financial skills
+## Scoring Logic
 
-### Design
-- **Theme**: Permanently dark-only (no light mode, no toggle). Background `#0D1225`, primary `#E08040` (amber), text `#EAD9BE`.
-- **Logo**: Custom PNG (`/logo.png` on web, `../assets/logo.png` on mobile). `ResilientIcon` renders `<img src="/logo.png">`.
-- **CSS vars** in `:root` (no `.dark` class on `<html>`).
+The overall resilience score is derived from six weighted dimensions, each scored 0-100: Financial (25%), Skills (20%), Health (15%), Mobility (15%), Psychological (15%), and Resources (10%). The Psychological score is an average of 10 mental resilience sub-questions.
 
-## Structure
+## Design
 
-```text
-artifacts-monorepo/
-├── artifacts/
-│   ├── api-server/         # Express API server
-│   ├── resilium/           # React + Vite frontend (previewPath: /)
-│   └── resilium-mobile/    # Expo React Native mobile app
-├── lib/
-│   ├── db/                 # Drizzle ORM schema + DB connection
-│   ├── replit-auth-web/    # useAuth hook for Replit OIDC browser auth
-│   └── integrations-openai-ai-server/  # OpenAI via Replit integrations
-├── scripts/
-├── pnpm-workspace.yaml
-├── tsconfig.base.json
-└── tsconfig.json
-```
+The platform features a permanent dark-only theme with a background color `#0D1225`, primary accent color `#E08040` (amber), and text color `#EAD9BE`. Custom CSS variables are defined in `:root`. A custom logo (`/logo.png` for web, `../assets/logo.png` for mobile) is used across the platform.
 
-## Database Schema
+## Technical Implementations
 
-### `users` table
-Replit Auth users — id (varchar PK = OIDC sub), email, firstName, lastName, profileImageUrl, createdAt, updatedAt
+- **Monorepo**: pnpm workspaces
+- **Backend**: Node.js 24, Express 5, PostgreSQL with Drizzle ORM, Zod for validation.
+- **Frontend**: React, Vite, Tailwind CSS, framer-motion, recharts.
+- **Mobile**: Expo, React Native, Expo Router, `@expo/vector-icons`, expo-haptics.
+- **AI**: OpenAI (gpt-5.2) via Replit AI Integrations. The AI generates structured JSON reports including risk summaries, vulnerabilities, action plans, scenario simulations, and daily habits, maintaining an intelligent, grounded, and empowering tone.
+- **Authentication**: Clerk (`@clerk/react`, `@clerk/express`, `@clerk/expo`) handles user authentication across web and mobile.
+- **GDPR**: Implemented with explicit consent mechanisms, data export, and deletion request functionalities. Anonymous reports are auto-deleted after 30 days.
+- **Admin Dashboard**: Provides comprehensive analytics, GDPR management, consent logging, and AI UX testing capabilities. Access is protected by `ADMIN_USERNAME`/`ADMIN_PASSWORD` secrets.
+- **Mobile Notifications**: Uses `expo-notifications` for local check-in notifications and registration for server-sent pushes.
+- **Rate Limiting**: `/api/resilience/assess` is rate-limited to 6 requests/min per IP for unauthenticated users.
 
-### `sessions` table
-Replit Auth sessions — sid (varchar PK), sess (jsonb), expire (timestamp)
+# External Dependencies
 
-### `resilience_reports` table
-Stores assessment inputs + generated report:
-- Input: location, incomeStability, savingsMonths, hasDependents, skills (jsonb), healthStatus, mobilityLevel, housingType, hasEmergencySupplies, psychologicalResilience, riskConcerns (jsonb), **mentalResilienceAnswers (jsonb)**
-- `currency` (varchar, default 'USD') — preferred currency (USD/EUR/RON) for AI financial advice
-- Scores: scoreOverall, scoreFinancial, scoreHealth, scoreSkills, scoreMobility, scorePsychological, scoreResources
-- MR sub-scores: mrStressTolerance, mrAdaptability, mrLearningAgility, mrChangeManagement, mrEmotionalRegulation, mrSocialSupport, mrComposite, mrPathway
-- Report: riskProfileSummary, topVulnerabilities (jsonb), actionPlan (jsonb), scenarioSimulations (jsonb), dailyHabits (jsonb), checklistsByArea (jsonb)
-- `sessionId` (varchar) — anonymous user tracking
-
-### `gdpr_consents` table
-sessionId, platform, consentVersion, consentGivenAt, ipHash
-
-### `gdpr_data_requests` table
-sessionId, type ('export' | 'deletion'), status ('pending' | 'completed'), createdAt, completedAt
-
-### `report_checklists` table
-reportId (FK), items (jsonb), createdAt, updatedAt
-
-### `report_snapshots` table
-reportId (FK), scores (jsonb), takenAt
-
-### `report_feedback` table
-reportId (FK), rating (int), comment (text), createdAt
-
-### `admin_sessions` table
-Token-based admin auth — token (varchar PK), createdAt, expiresAt
-
-### `ux_test_runs` table
-AI UX simulation runs — runId, status, personas (jsonb), results (jsonb), createdAt
-
-## API Routes
-
-### Public
-- `GET /api/healthz` — Health check
-- `POST /api/resilience/assess` — Submit assessment + sessionId → AI report
-- `GET /api/resilience/reports/:reportId` — Retrieve report
-- `GET /api/resilience/reports/:reportId/checklists` — Report checklists
-- `GET /api/resilience/reports/:reportId/snapshots` — Score snapshots
-- `POST /api/resilience/reports/:reportId/feedback` — Submit star rating + comment
-- `GET /api/auth/user` — Current Replit Auth state
-- `GET /api/login` — Replit OIDC login redirect
-- `GET /api/callback` — OIDC callback
-- `GET /api/logout` — Clear session + OIDC end-session
-
-### GDPR
-- `POST /api/gdpr/consent` — Record consent (sessionId, platform, consentVersion)
-- `GET /api/gdpr/export/:sessionId` — Export all user data
-- `POST /api/gdpr/data-request` — Submit deletion request
-- `GET /api/gdpr/status/:sessionId` — Check deletion request status
-
-### Authenticated User
-- `GET /api/users/me/plans` — User's saved plan summaries
-- `DELETE /api/users/me/plans/:reportId` — Delete a plan
-
-### Admin (token auth, 24h TTL)
-- `POST /api/admin/login` — Admin login → session token
-- `POST /api/admin/logout` — Revoke admin session
-- `GET /api/admin/analytics` — Full dashboard analytics (overview, demographics, scores, risk, recent reports, feedback)
-- `GET /api/admin/analytics/mobile` — Mobile-specific analytics (platform breakdown, daily trend, score distribution, top locations)
-- `GET /api/admin/gdpr/requests` — GDPR data requests list
-- `PATCH /api/admin/gdpr/requests/:id` — Update request status
-- `GET /api/admin/gdpr/consents` — Consent log
-- `POST /api/admin/ux-test/run` — Trigger AI UX simulation
-- `GET /api/admin/ux-test/runs` — List simulation runs
-- `GET /api/admin/ux-test/runs/:runId` — Get run results
-- `GET /api/admin/ux-test/personas` — List AI test personas
-
-## Admin Dashboard Pages
-
-Access at `/admin` (requires `ADMIN_USERNAME` / `ADMIN_PASSWORD` secrets):
-- `/admin/dashboard` — Main analytics: total reports, avg score, daily chart, demographics, risk concerns, score histogram, feedback
-- `/admin/mobile` — Mobile analytics: platform breakdown, daily mobile trend, score distribution, top locations
-- `/admin/gdpr` — GDPR data request management (pending/completed deletion requests)
-- `/admin/consent-log` — Consent record viewer
-- `/admin/ux-test` — AI UX testing: run simulations with AI personas
-- `/admin/ux-test/report/:runId` — Detailed simulation results per persona
-
-## Web Frontend Pages
-
-- `/` — Landing page (hero, How it works, Who it's for [preppers/financially anxious/expats/cautious], What you'll get, Privacy, CTA)
-- `/consent` — GDPR consent screen (pre-assessment)
-- `/assessment` — 10-step assessment with Mental Resilience deep-dive
-- `/loading` — AI generation loading screen
-- `/results/:reportId` — Full report dashboard (score, radar chart, vulnerabilities, action plan tabs, scenarios, habits, checklists, snapshots, feedback)
-- `/profile` — "My Plans" (Replit Auth users)
-- `/my-data` — GDPR data management (export, deletion request)
-- `/admin` — Admin entry (redirects to `/admin/login`)
-
-## Mobile App Screens (Expo)
-
-- `app/index.tsx` — Home screen (logo, Start CTA, My Data link)
-- `app/consent.tsx` — GDPR consent (calls `POST /api/gdpr/consent`)
-- `app/assessment.tsx` — 10-step assessment with Mental Resilience 10-question deep-dive
-- `app/loading.tsx` — AI generation loading with progress animation
-- `app/results.tsx` — Full report view (score, category bars, vulnerabilities, action plan tabs, scenarios, habits, share)
-- `app/my-data.tsx` — GDPR: export data, delete data request
-
-## AI Integration
-
-Uses Replit AI Integrations (OpenAI gpt-5.2). The AI:
-1. Receives user profile + calculated scores + mentalResilienceAnswers
-2. Generates structured JSON: riskProfileSummary, topVulnerabilities, actionPlan (short/mid/long term), scenarioSimulations (5 scenarios), dailyHabits (5 habits)
-3. Voice: intelligent, grounded, strategic, empowering — not alarmist
-
-## GitHub Repository
-
-Mirrored to: https://github.com/Miru-Maria/resilium (branch: `main`)
-GitHub integration: Replit connector `conn_github_01KJXCFKRVXXA64K4SRJX9NF1V`
-Push method: GitHub Contents API via `@replit/connectors-sdk` token
-
-## Environment Variables
-
-- `DATABASE_URL`, `PGHOST`, etc. — Auto-provisioned by Replit PostgreSQL
-- `AI_INTEGRATIONS_OPENAI_BASE_URL` — Auto-provisioned by Replit AI Integrations
-- `AI_INTEGRATIONS_OPENAI_API_KEY` — Auto-provisioned by Replit AI Integrations
-- `PORT` — Auto-assigned per artifact by Replit
-- `ADMIN_USERNAME` / `ADMIN_PASSWORD` — Admin dashboard credentials (secrets)
-- `EXPO_PUBLIC_DOMAIN` — Mobile app API domain (set in `.env` for mobile)
-
-## Key Conventions
-
-- **American English only** — No UK spellings. `paralyzed`, `personalized`, `organized`, `color`, `behavior`, etc.
-- **No HR/corporate angle** — Audience: preppers, financially anxious Americans, expats/digital nomads, the quietly cautious.
-- **Currency** — USD, EUR, RON supported. Picker at location step (step 2) in assessment. Stored in DB and passed to AI.
-- **Rate limiting** — `/api/resilience/assess` limited to 6 req/min per IP (skips for authenticated users).
-- **Anonymous TTL** — Anonymous reports (userId IS NULL) auto-deleted after 30 days. Cleanup runs on server startup + daily.
-- **UX Testing** — Admin-only route. NOT linked from the public nav dropdown.
-- **Profile plan cards** — Show location, currency badge, mini dimension score bars (Fin/Hlt/Skl/Mob/Psy/Res).
-- **Save prompt** — Results page shows a "Sign in to save" banner for unauthenticated users.
-- **Always dark** — No `.dark` class. Background `#0D1225`, primary `#E08040`, text `#EAD9BE`.
-
-## GDPR Contact
-
-Sole individual operator. Contact: `contact_resilium@pm.me`. No DPA or "we/our" language — all copy uses "I/me" framing or impersonal.
+- **Database**: PostgreSQL (auto-provisioned by Replit)
+- **AI Service**: OpenAI (gpt-5.2) via Replit AI Integrations
+- **Authentication**: Clerk (for user authentication)
+- **Payments/Subscriptions**: Paddle (for Pro subscriptions and donations)
+- **Push Notifications**: Expo Notifications
+- **Version Control**: GitHub (mirrored via Replit connector)
