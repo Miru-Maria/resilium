@@ -815,6 +815,7 @@ function AccountTab({ user, plans, onAllPlansDeleted }: {
 }) {
   const { toast } = useToast();
   const { openUserProfile } = useClerk();
+  const { user: clerkUser } = useUser();
 
   const { data: subStatus } = useQuery({
     queryKey: ["subscription-status"],
@@ -912,23 +913,25 @@ function AccountTab({ user, plans, onAllPlansDeleted }: {
           </CardTitle>
         </CardHeader>
         <CardContent className="flex items-center gap-4">
-          {user.profileImageUrl ? (
-            <img src={user.profileImageUrl} alt="avatar" className="w-14 h-14 rounded-full object-cover ring-2 ring-border" />
+          {clerkUser?.imageUrl ? (
+            <img src={clerkUser.imageUrl} alt="avatar" className="w-14 h-14 rounded-full object-cover ring-2 ring-border" />
           ) : (
             <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center">
               <span className="text-xl font-bold text-primary leading-none">
-                {[user.firstName?.[0], user.lastName?.[0]].filter(Boolean).join("").toUpperCase() || "?"}
+                {[clerkUser?.firstName?.[0], clerkUser?.lastName?.[0]].filter(Boolean).join("").toUpperCase() || "?"}
               </span>
             </div>
           )}
           <div className="flex-1 min-w-0">
             <p className="font-semibold text-foreground text-base leading-tight">
-              {[user.firstName, user.lastName].filter(Boolean).join(" ") || user.username || user.email?.split("@")[0] || "—"}
+              {[clerkUser?.firstName, clerkUser?.lastName].filter(Boolean).join(" ") || clerkUser?.username || clerkUser?.primaryEmailAddress?.emailAddress?.split("@")[0] || "—"}
             </p>
-            {user.username && (
-              <p className="text-xs text-primary/80 mt-0.5">@{user.username}</p>
+            {clerkUser?.username && (
+              <p className="text-xs text-primary/80 mt-0.5">@{clerkUser.username}</p>
             )}
-            {user.email && <p className="text-sm text-muted-foreground mt-0.5 truncate">{user.email}</p>}
+            {clerkUser?.primaryEmailAddress?.emailAddress && (
+              <p className="text-sm text-muted-foreground mt-0.5 truncate">{clerkUser.primaryEmailAddress.emailAddress}</p>
+            )}
           </div>
           <Button
             variant="outline"
@@ -1447,8 +1450,8 @@ export default function ProfilePage() {
                 </span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem className="font-medium text-muted-foreground text-xs truncate">{user?.primaryEmailAddress?.emailAddress}</DropdownMenuItem>
+            <DropdownMenuContent align="end" className="w-64">
+              <DropdownMenuItem className="font-medium text-muted-foreground text-xs break-all whitespace-normal">{user?.primaryEmailAddress?.emailAddress}</DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={logout} className="cursor-pointer">Sign Out</DropdownMenuItem>
             </DropdownMenuContent>
