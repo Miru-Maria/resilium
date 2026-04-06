@@ -809,11 +809,12 @@ const REMINDER_OPTIONS = [
 ];
 
 function AccountTab({ user, plans, onAllPlansDeleted }: {
-  user: { id: string; firstName?: string | null; lastName?: string | null; email?: string | null; profileImageUrl?: string | null };
+  user: { id: string; firstName?: string | null; lastName?: string | null; email?: string | null; profileImageUrl?: string | null; username?: string | null };
   plans: PlanSummary[];
   onAllPlansDeleted: () => void;
 }) {
   const { toast } = useToast();
+  const { openUserProfile } = useClerk();
 
   const { data: subStatus } = useQuery({
     queryKey: ["subscription-status"],
@@ -922,9 +923,19 @@ function AccountTab({ user, plans, onAllPlansDeleted }: {
             <p className="font-semibold text-foreground text-base leading-tight">
               {[user.firstName, user.lastName].filter(Boolean).join(" ") || "Resilium User"}
             </p>
+            {user.username && (
+              <p className="text-xs text-primary/80 mt-0.5">@{user.username}</p>
+            )}
             {user.email && <p className="text-sm text-muted-foreground mt-0.5 truncate">{user.email}</p>}
-            <p className="text-xs text-muted-foreground/60 mt-1">Managed by Replit Auth · read-only</p>
           </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="rounded-full shrink-0"
+            onClick={() => openUserProfile()}
+          >
+            Edit Profile
+          </Button>
         </CardContent>
       </Card>
 
@@ -1059,7 +1070,7 @@ function AccountTab({ user, plans, onAllPlansDeleted }: {
           <div className="flex items-center justify-between gap-4 p-3 rounded-xl bg-destructive/5 border border-destructive/20">
             <div>
               <p className="text-sm font-medium text-foreground">Delete account</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Remove all your Resilium data. Your Replit account is unaffected.</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Remove all your Resilium data. Your sign-in account is unaffected.</p>
             </div>
             <Button variant="destructive" size="sm" className="rounded-full flex-shrink-0" onClick={() => setDeleteAccountOpen(true)}>
               Delete Account
@@ -1092,7 +1103,7 @@ function AccountTab({ user, plans, onAllPlansDeleted }: {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete your account?</AlertDialogTitle>
             <AlertDialogDescription>
-              All your Resilium data — including {plans.length} report{plans.length !== 1 ? "s" : ""}, scores, and checklist progress — will be permanently deleted. Your Replit account remains active.
+              All your Resilium data — including {plans.length} report{plans.length !== 1 ? "s" : ""}, scores, and checklist progress — will be permanently deleted. Your sign-in account remains active.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
