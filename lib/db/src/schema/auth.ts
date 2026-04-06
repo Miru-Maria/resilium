@@ -31,3 +31,9 @@ export const usersTable = pgTable("users", {
 
 export type UpsertUser = typeof usersTable.$inferInsert;
 export type User = typeof usersTable.$inferSelect;
+
+export const adminConfigTable = pgTable("admin_config", {
+  key: varchar("key").primaryKey(),
+  value: varchar("value", { length: 1024 }).notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
+});

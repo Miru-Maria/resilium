@@ -1,12 +1,18 @@
 import { Router, type IRouter } from "express";
-import { db, resilienceReportsTable, reportFeedbackTable, usersTable, planViewsTable } from "@workspace/db";
+import { db, resilienceReportsTable, reportFeedbackTable, usersTable, planViewsTable, adminConfigTable } from "@workspace/db";
 import { desc, eq, count, max, and, isNotNull, gte } from "drizzle-orm";
-import { requireAdminSession, generateAdminToken, verifyAdminToken } from "../../middlewares/adminAuth.js";
+import {
+  requireAdminSession, generateAdminToken, verifyAdminToken,
+  hashPassword, verifyPassword, generateRecoveryCode, consumeRecoveryCode,
+} from "../../middlewares/adminAuth.js";
 import uxTestRouter from "./ux-test/index.js";
 import adminGdprRouter from "./gdpr.js";
 import adminAnalyticsRouter from "./analytics.js";
 import adminAnnouncementsRouter from "./announcements.js";
 import { getCoachingClickCount } from "../../lib/cron.js";
+import { logger } from "../../lib/logger.js";
+
+const ADMIN_PASSWORD_KEY = "admin_password_hash";
 
 const router: IRouter = Router();
 
@@ -21,7 +27,30 @@ router.post("/login", async (req, res) => {
     return;
   }
 
-  if (username === adminUsername && password === adminPassword) {
+  if (!username || !password) {
+    res.status(401).json({ error: "INVALID_CREDENTIALS", message: "Invalid username or password." });
+    return;
+  }
+
+  if (username !== adminUsername) {
+    res.status(401).json({ error: "INVALID_CREDENTIALS", message: "Invalid username or password." });
+    return;
+  }
+
+  // Check DB-stored password hash first (set via change-password), then fall back to env var
+  let passwordOk = false;
+  try {
+    const rows = await db.select().from(adminConfigTable).where(eq(adminConfigTable.key, ADMIN_PASSWORD_KEY)).limit(1);
+    if (rows[0]?.value) {
+      passwordOk = await verifyPassword(password, rows[0].value);
+    }
+  } catch { /* DB not ready yet, fall through */ }
+
+  if (!passwordOk) {
+    passwordOk = password === adminPassword;
+  }
+
+  if (passwordOk) {
     const token = generateAdminToken();
     res.json({ success: true, token });
   } else {
@@ -37,6 +66,44 @@ router.get("/session", (req, res) => {
   const authHeader = req.headers["authorization"];
   const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
   res.json({ authenticated: token ? verifyAdminToken(token) : false });
+});
+
+// Request a recovery code — generates an 8-char code logged to the server console (valid 15 min)
+router.post("/request-recovery", (_req, res) => {
+  const code = generateRecoveryCode();
+  logger.warn({ code }, "⚠️  ADMIN RECOVERY CODE (valid 15 minutes): " + code);
+  console.warn(`\n\n========================================\n  ADMIN RECOVERY CODE: ${code}\n  (valid for 15 minutes — use on the login page)\n========================================\n`);
+  res.json({ success: true, message: "Recovery code generated. Check your server logs (Replit console) for the code." });
+});
+
+// Exchange a valid recovery code for an admin session token
+router.post("/verify-recovery", (req, res) => {
+  const { code } = req.body as { code?: string };
+  if (!code || !consumeRecoveryCode(code)) {
+    res.status(401).json({ error: "INVALID_CODE", message: "Invalid or expired recovery code." });
+    return;
+  }
+  const token = generateAdminToken();
+  res.json({ success: true, token });
+});
+
+// Change admin password (requires active session) — stores bcrypt hash in DB
+router.post("/change-password", requireAdminSession, async (req, res) => {
+  const { newPassword } = req.body as { newPassword?: string };
+  if (!newPassword || newPassword.length < 8) {
+    res.status(400).json({ error: "INVALID_PASSWORD", message: "New password must be at least 8 characters." });
+    return;
+  }
+  try {
+    const hash = await hashPassword(newPassword);
+    await db.insert(adminConfigTable)
+      .values({ key: ADMIN_PASSWORD_KEY, value: hash })
+      .onConflictDoUpdate({ target: adminConfigTable.key, set: { value: hash } });
+    res.json({ success: true, message: "Password updated successfully." });
+  } catch (err) {
+    logger.error({ err }, "Failed to update admin password");
+    res.status(500).json({ error: "DB_ERROR", message: "Failed to save new password." });
+  }
 });
 
 router.get("/analytics", requireAdminSession, async (req, res) => {
