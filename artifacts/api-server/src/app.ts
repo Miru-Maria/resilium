@@ -5,10 +5,6 @@ import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
 import { recordServerError, startCron } from "./lib/cron.js";
-import { initSentry, sentryErrorHandler } from "./lib/sentry.js";
-
-// Initialize Sentry before anything else
-initSentry();
 
 const REPLIT_DOMAIN = "resilium-ai.replit.app";
 const CANONICAL_DOMAIN = "resilium-platform.com";
@@ -67,9 +63,6 @@ app.use((_req: Request, res: Response, next: NextFunction) => {
 });
 
 app.use("/api", router);
-
-// Sentry error handler — must be AFTER routes and BEFORE other error handlers
-if (sentryErrorHandler) app.use(sentryErrorHandler);
 
 // Start background cron jobs
 startCron();

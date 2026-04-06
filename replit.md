@@ -44,7 +44,7 @@ The platform features a permanent dark-only theme with a background color `#0D12
 - **Mobile Notifications**: Uses `expo-notifications` for local check-in notifications and registration for server-sent pushes. Push tokens are registered via authenticated `POST /api/push-tokens` (Clerk auth, fixed from legacy bug). Tokens are stored in `usersTable.pushToken`. Server-side cron sends pushes via Expo push API.
 - **Rate Limiting**: `/api/resilience/assess` is rate-limited to 6 requests/min per IP for unauthenticated users.
 - **Email Unsubscribe**: HMAC-SHA256 tokens (signed with `CLERK_SECRET_KEY`) power one-click unsubscribe. `GET /api/email/unsubscribe?uid=<userId>&sig=<token>` sets `users.emailOptOut=true`. All bulk emails include `List-Unsubscribe` headers and footer links. Cron jobs skip opted-out users.
-- **Error Monitoring**: `@sentry/node@7` integrated in `api-server/src/lib/sentry.ts`. Disabled until `SENTRY_DSN` secret is added. In-memory error rate tracking + admin email alerts still active as fallback.
+- **Error Monitoring**: In-memory error rate tracking + admin email digest alerts (cron-based). No external error monitoring service is configured.
 - **Welcome Email Trigger**: Fires on user's first `GET /api/users/me/subscription` request (first page load). Tracks with `usersTable.emailWelcomeSent`. Idempotent — existing users who missed it will receive it on next login.
 - **Domain Redirect**: 301 redirect from `resilium-ai.replit.app` → `resilium-platform.com` in Express middleware. Also client-side redirect in `index.html` for web requests.
 
