@@ -5,10 +5,28 @@ import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
 import { recordServerError, startCron } from "./lib/cron.js";
+import { initSentry, sentryErrorHandler } from "./lib/sentry.js";
+
+// Initialize Sentry before anything else
+initSentry();
+
+const REPLIT_DOMAIN = "resilium-ai.replit.app";
+const CANONICAL_DOMAIN = "resilium-platform.com";
 
 const app: Express = express();
 
 app.set("trust proxy", 1);
+
+// 301-redirect legacy Replit domain to canonical domain
+app.use((req: Request, res: Response, next: NextFunction) => {
+  const host = (req.headers["x-forwarded-host"] as string | undefined) ?? req.headers.host ?? "";
+  if (host.includes(REPLIT_DOMAIN)) {
+    const target = `https://${CANONICAL_DOMAIN}${req.url}`;
+    res.redirect(301, target);
+    return;
+  }
+  next();
+});
 
 app.use(
   pinoHttp({
@@ -49,6 +67,9 @@ app.use((_req: Request, res: Response, next: NextFunction) => {
 });
 
 app.use("/api", router);
+
+// Sentry error handler — must be AFTER routes and BEFORE other error handlers
+if (sentryErrorHandler) app.use(sentryErrorHandler);
 
 // Start background cron jobs
 startCron();

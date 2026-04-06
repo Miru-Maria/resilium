@@ -331,6 +331,19 @@ export default function PlanPage() {
 
   return (
     <div className="min-h-screen pb-24">
+      <style dangerouslySetInnerHTML={{ __html: `
+        @media print {
+          header, .print\\:hidden { display: none !important; }
+          body { background: white !important; color: black !important; }
+          .bg-card, .bg-background, .bg-muted { background: white !important; }
+          .border { border-color: #ddd !important; }
+          .text-muted-foreground { color: #555 !important; }
+          .text-primary { color: #c05c18 !important; }
+          .sticky { position: static !important; }
+          main { padding-top: 0 !important; }
+          @page { margin: 1.5cm; size: A4; }
+        }
+      `}} />
       {/* Header */}
       <header className="w-full bg-card border-b border-border sticky top-0 z-50">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
@@ -340,13 +353,23 @@ export default function PlanPage() {
             </div>
           </Link>
           <div className="flex items-center gap-2 text-sm">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="rounded-full text-muted-foreground hover:text-foreground gap-1.5 print:hidden"
+              onClick={() => window.print()}
+              title="Save as PDF"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+              Save PDF
+            </Button>
             <Link href={`/results/${reportId}`}>
-              <Button variant="ghost" size="sm" className="rounded-full text-muted-foreground hover:text-foreground gap-1.5">
+              <Button variant="ghost" size="sm" className="rounded-full text-muted-foreground hover:text-foreground gap-1.5 print:hidden">
                 View Report
               </Button>
             </Link>
             <Link href="/profile">
-              <Button variant="outline" size="sm" className="rounded-full gap-1.5">
+              <Button variant="outline" size="sm" className="rounded-full gap-1.5 print:hidden">
                 My Plans
               </Button>
             </Link>

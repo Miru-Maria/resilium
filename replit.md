@@ -41,8 +41,12 @@ The platform features a permanent dark-only theme with a background color `#0D12
 - **Authentication**: Clerk (`@clerk/react`, `@clerk/express`, `@clerk/expo`) handles user authentication across web and mobile. Production instance is live on `resilium-platform.com` with DNS CNAME records (`clerk.resilium-platform.com → frontend-api.clerk.services`). The Clerk publishable key is hardcoded in `artifacts/resilium/vite.config.ts` via a `define` block to prevent Replit's build process from overriding it with its own managed key.
 - **GDPR**: Implemented with explicit consent mechanisms, data export, and deletion request functionalities. Anonymous reports are auto-deleted after 30 days.
 - **Admin Dashboard**: Provides comprehensive analytics, GDPR management, consent logging, and AI UX testing capabilities. Access is protected by `ADMIN_USERNAME`/`ADMIN_PASSWORD` secrets.
-- **Mobile Notifications**: Uses `expo-notifications` for local check-in notifications and registration for server-sent pushes.
+- **Mobile Notifications**: Uses `expo-notifications` for local check-in notifications and registration for server-sent pushes. Push tokens are registered via authenticated `POST /api/push-tokens` (Clerk auth, fixed from legacy bug). Tokens are stored in `usersTable.pushToken`. Server-side cron sends pushes via Expo push API.
 - **Rate Limiting**: `/api/resilience/assess` is rate-limited to 6 requests/min per IP for unauthenticated users.
+- **Email Unsubscribe**: HMAC-SHA256 tokens (signed with `CLERK_SECRET_KEY`) power one-click unsubscribe. `GET /api/email/unsubscribe?uid=<userId>&sig=<token>` sets `users.emailOptOut=true`. All bulk emails include `List-Unsubscribe` headers and footer links. Cron jobs skip opted-out users.
+- **Error Monitoring**: `@sentry/node@7` integrated in `api-server/src/lib/sentry.ts`. Disabled until `SENTRY_DSN` secret is added. In-memory error rate tracking + admin email alerts still active as fallback.
+- **Welcome Email Trigger**: Fires on user's first `GET /api/users/me/subscription` request (first page load). Tracks with `usersTable.emailWelcomeSent`. Idempotent — existing users who missed it will receive it on next login.
+- **Domain Redirect**: 301 redirect from `resilium-ai.replit.app` → `resilium-platform.com` in Express middleware. Also client-side redirect in `index.html` for web requests.
 
 # External Dependencies
 

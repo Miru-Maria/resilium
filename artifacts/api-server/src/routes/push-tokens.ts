@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { getAuth } from "@clerk/express";
 import { db, usersTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
@@ -12,7 +13,7 @@ const bodySchema = z.object({
 });
 
 router.post("/push-tokens", async (req, res) => {
-  const userId = (req as any).user?.id;
+  const { userId } = getAuth(req);
 
   const parsed = bodySchema.safeParse(req.body);
   if (!parsed.success) {
@@ -44,7 +45,7 @@ router.post("/push-tokens", async (req, res) => {
 });
 
 router.delete("/push-tokens", async (req, res) => {
-  const userId = (req as any).user?.id;
+  const { userId } = getAuth(req);
   if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
   try {

@@ -1,8 +1,9 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { getAuth, createClerkClient } from "@clerk/express";
-import { db, resilienceReportsTable, usersTable, subscriptionsTable, checklistProgressTable } from "@workspace/db";
+import { db, resilienceReportsTable, usersTable, subscriptionsTable, checklistProgressTable, progressSnapshotsTable, reportFeedbackTable } from "@workspace/db";
 import { and, eq, inArray, desc } from "drizzle-orm";
 import { openai } from "@workspace/integrations-openai-ai-server";
+import { sendWelcomeEmail } from "../lib/email.js";
 
 const router: IRouter = Router();
 
@@ -149,12 +150,23 @@ router.delete("/me", async (req: Request, res: Response) => {
     return;
   }
   try {
-    await db
-      .delete(resilienceReportsTable)
+    // Fetch all report IDs for this user first (for child-table cascades)
+    const userReports = await db
+      .select({ reportId: resilienceReportsTable.reportId })
+      .from(resilienceReportsTable)
       .where(eq(resilienceReportsTable.userId, userId));
-    await db
-      .delete(usersTable)
-      .where(eq(usersTable.id, userId));
+    const reportIds = userReports.map(r => r.reportId);
+
+    // Delete child records first (FK-safe order), scoped by reportId
+    if (reportIds.length > 0) {
+      await db.delete(checklistProgressTable).where(inArray(checklistProgressTable.reportId, reportIds));
+      await db.delete(reportFeedbackTable).where(inArray(reportFeedbackTable.reportId, reportIds));
+      await db.delete(progressSnapshotsTable).where(inArray(progressSnapshotsTable.reportId, reportIds));
+    }
+    await db.delete(subscriptionsTable).where(eq(subscriptionsTable.userId, userId));
+    await db.delete(resilienceReportsTable).where(eq(resilienceReportsTable.userId, userId));
+    await db.delete(usersTable).where(eq(usersTable.id, userId));
+
     res.json({ success: true });
   } catch (err) {
     req.log.error({ err }, "Error deleting account");
@@ -375,12 +387,52 @@ Return only valid JSON.`;
   }
 });
 
+// Upsert the user record and fire a one-time welcome email on first seen
+async function upsertUserAndMaybeWelcome(userId: string): Promise<void> {
+  try {
+    const clerkClient = createClerkClient({ secretKey: process.env["CLERK_SECRET_KEY"] });
+    const clerkUser = await clerkClient.users.getUser(userId);
+    const email = clerkUser.emailAddresses[0]?.emailAddress;
+    if (!email) return;
+
+    // Check if user already exists
+    const existing = await db
+      .select({ id: usersTable.id, emailWelcomeSent: usersTable.emailWelcomeSent })
+      .from(usersTable)
+      .where(eq(usersTable.id, userId))
+      .limit(1);
+
+    if (existing.length === 0) {
+      // New user — insert and send welcome email
+      await db.insert(usersTable).values({
+        id: userId,
+        email,
+        firstName: clerkUser.firstName ?? null,
+        lastName: clerkUser.lastName ?? null,
+        profileImageUrl: clerkUser.imageUrl ?? null,
+        emailWelcomeSent: true,
+      }).onConflictDoNothing();
+
+      await sendWelcomeEmail({ email, firstName: clerkUser.firstName ?? null, userId });
+    } else if (!existing[0]?.emailWelcomeSent) {
+      // Existing user who never got the welcome email — send it now
+      await db.update(usersTable).set({ emailWelcomeSent: true }).where(eq(usersTable.id, userId));
+      await sendWelcomeEmail({ email, firstName: clerkUser.firstName ?? null, userId });
+    }
+  } catch {
+    // Non-critical — don't surface errors to caller
+  }
+}
+
 router.get("/me/subscription", async (req: Request, res: Response) => {
   const userId = getUserId(req);
   if (!userId) {
     return res.json({ status: "anonymous", isActive: false });
   }
   try {
+    // Fire welcome email on first visit (non-blocking)
+    upsertUserAndMaybeWelcome(userId).catch(() => {});
+
     const subs = await db
       .select()
       .from(subscriptionsTable)

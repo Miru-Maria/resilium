@@ -16,6 +16,7 @@ import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { NeuralNetSVG } from "@/components/NeuralNetSVG";
 import { useSession } from "@/context/session";
+import { useAuth } from "@/context/auth";
 import { useColors } from "@/context/theme";
 import { ColorsType } from "@/constants/colors";
 
@@ -35,6 +36,7 @@ const DATA_POINTS = [
 export default function ConsentScreen() {
   const insets = useSafeAreaInsets();
   const { giveConsent } = useSession();
+  const { getAuthHeaders } = useAuth();
   const [isAccepting, setIsAccepting] = useState(false);
   
   const colors = useColors();
@@ -62,8 +64,10 @@ export default function ConsentScreen() {
       } catch {
       }
 
-      // Request notification permission and schedule monthly check-in (non-blocking)
-      setupNotifications(process.env.EXPO_PUBLIC_DOMAIN ?? "").catch(() => {});
+      // Request notification permission, register push token with server (non-blocking)
+      getAuthHeaders().then(headers =>
+        setupNotifications(process.env.EXPO_PUBLIC_DOMAIN ?? "", headers)
+      ).catch(() => {});
 
       router.replace("/assessment");
     } catch (e) {

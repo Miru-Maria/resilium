@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Notifications from "expo-notifications";
+import { getExpoPushToken, registerPushTokenWithBackend } from "@/utils/notifications";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
@@ -107,7 +108,15 @@ export default function MyDataScreen() {
     const next = { ...notifPrefs, [key]: value };
     setNotifPrefs(next);
     await AsyncStorage.setItem(NOTIF_PREFS_KEY, JSON.stringify(next));
-  }, [notifPrefs, notifPermission]);
+    // Register push token with server when user enables any notification
+    if (value && isSignedIn) {
+      getExpoPushToken().then(async token => {
+        if (!token) return;
+        const headers = await getAuthHeaders();
+        await registerPushTokenWithBackend(token, process.env.EXPO_PUBLIC_DOMAIN ?? "", headers);
+      }).catch(() => {});
+    }
+  }, [notifPrefs, notifPermission, isSignedIn, getAuthHeaders]);
 
   const handleExport = async () => {
     if (!sessionId) return;

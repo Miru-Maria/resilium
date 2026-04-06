@@ -1,6 +1,6 @@
 import cron from "node-cron";
-import { db, subscriptionsTable, reportFeedbackTable, resilienceReportsTable } from "@workspace/db";
-import { and, eq, gte, sql } from "drizzle-orm";
+import { db, subscriptionsTable, reportFeedbackTable, resilienceReportsTable, usersTable } from "@workspace/db";
+import { and, eq, gte, inArray, sql } from "drizzle-orm";
 import { sendAdminDigest, sendErrorAlert, sendReassessmentReminder, sendUserWeeklyDigest } from "./email.js";
 import { sendPushNotificationsToUsers } from "./push.js";
 import { logger } from "./logger.js";
@@ -60,6 +60,20 @@ export function getCoachingClickCount(): number {
   return coachingClickCount;
 }
 
+// ─── Opt-out helpers ──────────────────────────────────────────────────────────
+
+async function getOptedOutUserIds(): Promise<Set<string>> {
+  try {
+    const rows = await db
+      .select({ id: usersTable.id })
+      .from(usersTable)
+      .where(eq(usersTable.emailOptOut, true));
+    return new Set(rows.map(r => r.id));
+  } catch {
+    return new Set();
+  }
+}
+
 // ─── Re-assessment reminder helper ───────────────────────────────────────────
 
 async function fetchReminders(dayFrom: number, dayTo: number) {
@@ -114,18 +128,23 @@ async function fetchReminders(dayFrom: number, dayTo: number) {
 async function runEarlyReminders() {
   try {
     logger.info("Running 7-day re-engagement reminder job");
-    const users = await fetchReminders(5, 9); // 5–9 days since last report
-    logger.info({ count: users.length }, "7-day reminder candidates");
+    const [users, optedOut] = await Promise.all([
+      fetchReminders(5, 9),
+      getOptedOutUserIds(),
+    ]);
+    const eligible = users.filter(u => !optedOut.has(u.user_id));
+    logger.info({ candidates: users.length, eligible: eligible.length }, "7-day reminder candidates");
 
-    const userIds: string[] = users.map(u => u.user_id);
+    const userIds: string[] = eligible.map(u => u.user_id);
 
-    for (const u of users) {
+    for (const u of eligible) {
       const daysSince = Math.round((Date.now() - new Date(u.last_at).getTime()) / (1000 * 60 * 60 * 24));
       await sendReassessmentReminder({
         email: u.email,
         firstName: u.first_name,
         lastScore: Math.round(u.last_score),
         daysSince,
+        userId: u.user_id,
       }).catch(() => {});
     }
 
@@ -147,18 +166,23 @@ async function runEarlyReminders() {
 async function runReassessmentReminders() {
   try {
     logger.info("Running 30-day re-assessment reminder job");
-    const users = await fetchReminders(28, 35); // 28–35 days since last report
-    logger.info({ count: users.length }, "30-day re-assessment reminder candidates");
+    const [users, optedOut] = await Promise.all([
+      fetchReminders(28, 35),
+      getOptedOutUserIds(),
+    ]);
+    const eligible = users.filter(u => !optedOut.has(u.user_id));
+    logger.info({ candidates: users.length, eligible: eligible.length }, "30-day re-assessment reminder candidates");
 
-    const userIds: string[] = users.map(u => u.user_id);
+    const userIds: string[] = eligible.map(u => u.user_id);
 
-    for (const u of users) {
+    for (const u of eligible) {
       const daysSince = Math.round((Date.now() - new Date(u.last_at).getTime()) / (1000 * 60 * 60 * 24));
       await sendReassessmentReminder({
         email: u.email,
         firstName: u.first_name,
         lastScore: Math.round(u.last_score),
         daysSince,
+        userId: u.user_id,
       }).catch(() => {});
     }
 
@@ -203,9 +227,13 @@ async function runUserWeeklyDigest() {
     logger.info({ count: rawRows.length }, "User weekly digest candidates");
     if (rawRows.length === 0) return;
 
-    const clerkClient = createClerkClient({ secretKey: process.env["CLERK_SECRET_KEY"] });
+    const [clerkClient, optedOut] = [
+      createClerkClient({ secretKey: process.env["CLERK_SECRET_KEY"] }),
+      await getOptedOutUserIds(),
+    ];
+    const eligibleRows = rawRows.filter(r => !optedOut.has(r.user_id));
 
-    for (const row of rawRows) {
+    for (const row of eligibleRows) {
       try {
         const clerkUser = await clerkClient.users.getUser(row.user_id);
         const email = clerkUser.emailAddresses[0]?.emailAddress;
@@ -215,6 +243,7 @@ async function runUserWeeklyDigest() {
           firstName: clerkUser.firstName ?? null,
           lastScore: Math.round(row.score_overall),
           reportId: row.report_id,
+          userId: row.user_id,
         }).catch(() => {});
       } catch {
         // User may have been deleted from Clerk — skip
