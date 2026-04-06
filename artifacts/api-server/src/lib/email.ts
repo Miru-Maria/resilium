@@ -7,7 +7,7 @@ const resend = process.env["RESEND_API_KEY"]
 // TODO: update to "Resilium <hello@resilium.app>" once domain is verified in Resend
 const FROM = process.env["RESEND_FROM"] ?? "Resilium <onboarding@resend.dev>";
 const ADMIN_TO = process.env["ADMIN_EMAIL"] ?? "contact_resilium@pm.me";
-const APP_URL = process.env["APP_URL"] ?? "https://resilium.app";
+const APP_URL = process.env["APP_URL"] ?? "https://resilium-platform.com";
 
 async function send(opts: { to: string; subject: string; html: string; text: string }): Promise<void> {
   if (!resend) {
@@ -97,6 +97,35 @@ export async function sendReassessmentReminder(opts: { email: string; firstName?
     text: `Hi ${name},\n\nIt's been about ${opts.daysSince} days since your last Resilium assessment. A lot can change in a month — your financial runway, health habits, skills, and circumstances.\n\nYour last overall score was ${opts.lastScore}/100 (${scoreLabel}). A new assessment takes under 5 minutes and will reflect where you actually stand today.\n\nRetake your assessment: ${APP_URL}/assess\n\n— Cristiana at Resilium\n\nIf you'd prefer not to receive these reminders, just reply and I'll remove you.`,
     html: `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0D1225;font-family:'Helvetica Neue',Arial,sans-serif;color:#EAD9BE;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:40px 20px;"><table width="560" cellpadding="0" cellspacing="0" style="background:#131929;border-radius:16px;overflow:hidden;"><tr><td style="background:#E08040;padding:24px 32px;"><h1 style="margin:0;color:#0D1225;font-size:22px;font-weight:800;">Resilium</h1></td></tr><tr><td style="padding:32px;"><h2 style="margin:0 0 16px;color:#EAD9BE;font-size:20px;font-weight:700;">Time to check in, ${name}</h2><p style="margin:0 0 16px;color:#b8a99a;line-height:1.6;">It's been about <strong style="color:#EAD9BE;">${opts.daysSince} days</strong> since your last assessment. A lot can change in a month — your finances, circumstances, and readiness evolve constantly.</p><div style="background:#1a2235;border-radius:10px;padding:16px 20px;margin:0 0 24px;display:inline-block;"><span style="color:#8A7A6A;font-size:12px;display:block;margin-bottom:4px;">Your last overall score</span><span style="color:#E08040;font-size:32px;font-weight:800;">${opts.lastScore}/100</span><span style="color:#8A7A6A;font-size:13px;margin-left:8px;">${scoreLabel}</span></div><p style="margin:0 0 24px;color:#b8a99a;line-height:1.6;">A new assessment takes under 5 minutes and will show exactly where you stand today.</p><a href="${APP_URL}/assess" style="display:inline-block;background:#E08040;color:#0D1225;font-weight:700;font-size:15px;padding:14px 28px;border-radius:10px;text-decoration:none;">Retake Your Assessment →</a><p style="margin:32px 0 0;color:#7a6a5a;font-size:12px;line-height:1.6;">If you'd prefer not to receive these reminders, just reply and I'll remove you.<br>— Cristiana at Resilium</p></td></tr></table></td></tr></table></body></html>`,
   });
+}
+
+// ─── Weekly User Digest ───────────────────────────────────────────────────────
+
+export async function sendUserWeeklyDigest(opts: {
+  email: string;
+  firstName?: string | null;
+  lastScore: number;
+  reportId: string;
+}) {
+  if (!opts.email) return;
+  const name = opts.firstName ?? "there";
+  const scoreLabel = opts.lastScore >= 70 ? "strong" : opts.lastScore >= 40 ? "fair" : "developing";
+  const scoreColor = opts.lastScore >= 70 ? "#22d3ee" : opts.lastScore >= 40 ? "#f59e0b" : "#ef4444";
+  const planUrl = `${APP_URL}/plan/${opts.reportId}`;
+  const encouragements = [
+    "Resilience is built one action at a time. Even one small win this week moves the needle.",
+    "The best time to prepare was yesterday. The next best time is right now.",
+    "Every task you complete is a gap you've closed — permanently.",
+    "Your future self is counting on the decisions you make this week.",
+    "Preparedness isn't paranoia — it's wisdom. Keep building.",
+  ];
+  const encouragement = encouragements[Math.floor(Math.random() * encouragements.length)];
+
+  const text = `Hi ${name},\n\nHere's your weekly Resilium check-in.\n\nCurrent resilience score: ${opts.lastScore}/100 (${scoreLabel})\n\n"${encouragement}"\n\nOpen your action plan and complete one task this week — small actions compound:\n${planUrl}\n\n— Cristiana at Resilium\n\nTo unsubscribe from weekly check-ins, just reply to this email.`;
+
+  const html = `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0D1225;font-family:'Helvetica Neue',Arial,sans-serif;color:#EAD9BE;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:40px 20px;"><table width="560" cellpadding="0" cellspacing="0" style="background:#131929;border-radius:16px;overflow:hidden;"><tr><td style="background:#E08040;padding:20px 32px;display:flex;align-items:center;justify-content:space-between;"><h1 style="margin:0;color:#0D1225;font-size:20px;font-weight:800;display:inline;">Resilium</h1><span style="color:rgba(13,18,37,0.65);font-size:12px;margin-left:12px;">Weekly Check-In · ${new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span></td></tr><tr><td style="padding:32px;"><h2 style="margin:0 0 6px;color:#EAD9BE;font-size:18px;font-weight:700;">Hey ${name} 👋</h2><p style="margin:0 0 24px;color:#b8a99a;font-size:14px;line-height:1.6;">Your weekly resilience update is here.</p><div style="background:#1a2235;border-radius:12px;padding:20px;margin:0 0 24px;text-align:center;border:1px solid #2a3245;"><span style="color:#8A7A6A;font-size:11px;display:block;margin-bottom:8px;text-transform:uppercase;letter-spacing:1.5px;">Resilience Score</span><span style="color:${scoreColor};font-size:48px;font-weight:800;line-height:1;">${opts.lastScore}</span><span style="color:#8A7A6A;font-size:22px;font-weight:400;">/100</span><span style="display:block;color:#8A7A6A;font-size:13px;margin-top:6px;font-weight:500;">${scoreLabel}</span></div><p style="margin:0 0 20px;color:#8A7A6A;font-size:13px;font-style:italic;line-height:1.7;padding:0 4px;">"${encouragement}"</p><p style="margin:0 0 24px;color:#b8a99a;font-size:14px;line-height:1.6;">Open your action plan and tick off one task this week. Every completed action is a gap permanently closed.</p><a href="${planUrl}" style="display:block;background:#E08040;color:#0D1225;font-weight:700;font-size:15px;padding:15px 28px;border-radius:10px;text-decoration:none;text-align:center;letter-spacing:-0.2px;">Open My Action Plan →</a><p style="margin:28px 0 0;color:#4a3a2a;font-size:12px;line-height:1.6;text-align:center;">To unsubscribe, reply to this email.<br>— Cristiana at Resilium</p></td></tr></table></td></tr></table></body></html>`;
+
+  await send({ to: opts.email, subject: `Your weekly resilience check-in, ${name}`, html, text });
 }
 
 // ─── Error Alert ──────────────────────────────────────────────────────────────

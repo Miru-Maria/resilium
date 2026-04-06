@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { NeuralNetSVG } from "@/components/NeuralNetSVG";
 
@@ -58,10 +59,186 @@ function AnimatedOrb({
   );
 }
 
+const MOTIVATIONS = [
+  "One action today. One gap closed permanently.",
+  "Preparedness isn't paranoia — it's wisdom.",
+  "The best time to prepare was yesterday. The next best time is now.",
+  "Your future self is counting on the decisions you make today.",
+  "Small consistent actions build durable resilience.",
+  "Every task you complete is a vulnerability you've eliminated.",
+  "Resilience isn't a destination — it's a daily practice.",
+];
+
+function CompanionScrollContent({
+  user,
+  colors,
+  getAuthHeaders,
+  bottomPad,
+}: {
+  user: any;
+  colors: ColorsType;
+  getAuthHeaders: () => Promise<Record<string, string>>;
+  bottomPad: number;
+}) {
+  const [score, setScore] = useState<number | null>(null);
+  const [latestReportId, setLatestReportId] = useState<string | null>(null);
+  const [streak, setStreak] = useState(0);
+  const [greeting, setGreeting] = useState("Good morning");
+
+  const motivation = MOTIVATIONS[new Date().getDay() % MOTIVATIONS.length];
+
+  useEffect(() => {
+    const h = new Date().getHours();
+    setGreeting(h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening");
+  }, []);
+
+  useEffect(() => {
+    const today = new Date().toISOString().split("T")[0];
+    AsyncStorage.getItem("resilium_streak_v1").then(raw => {
+      const data: { lastDate: string; count: number } = raw ? JSON.parse(raw) : { lastDate: "", count: 0 };
+      if (data.lastDate === today) {
+        setStreak(data.count);
+      } else {
+        const yesterday = new Date(Date.now() - 86_400_000).toISOString().split("T")[0];
+        const newCount = data.lastDate === yesterday ? data.count + 1 : 1;
+        AsyncStorage.setItem("resilium_streak_v1", JSON.stringify({ lastDate: today, count: newCount }));
+        setStreak(newCount);
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    const domain = process.env.EXPO_PUBLIC_DOMAIN;
+    (async () => {
+      try {
+        const headers = await getAuthHeaders();
+        const res = await fetch(`https://${domain}/api/resilience/my-reports`, { headers });
+        if (!res.ok) return;
+        const data = await res.json();
+        const reports: any[] = data.reports ?? [];
+        if (reports.length > 0) {
+          const latest = reports[0];
+          setScore(Math.round(latest.score?.overall ?? 0));
+          setLatestReportId(latest.reportId);
+        }
+      } catch {}
+    })();
+  }, []);
+
+  const dotColor = score === null ? colors.textMuted : score >= 70 ? colors.success : score >= 40 ? "#F59E0B" : colors.danger;
+  const dotLabel = score === null ? "—" : String(score);
+  const ratingLabel = score === null ? "Loading..." : score >= 70 ? "Highly Resilient" : score >= 40 ? "Moderately Prepared" : "Critically Vulnerable";
+
+  return (
+    <View style={{ paddingBottom: bottomPad + 40, gap: 18, paddingTop: 28 }}>
+
+      {/* Greeting */}
+      <View style={{ gap: 4 }}>
+        <Text style={{ fontFamily: "Inter_400Regular", fontSize: 14, color: colors.textMuted }}>{greeting},</Text>
+        <Text style={{ fontFamily: "Inter_700Bold", fontSize: 28, color: colors.text, letterSpacing: -0.8 }}>
+          {user?.firstName ?? "there"} 👋
+        </Text>
+        {streak >= 1 && (
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginTop: 6, backgroundColor: "rgba(224,128,64,0.12)", borderRadius: 20, paddingHorizontal: 12, paddingVertical: 6, alignSelf: "flex-start", borderWidth: 1, borderColor: "rgba(224,128,64,0.25)" }}>
+            <Text style={{ fontSize: 14 }}>🔥</Text>
+            <Text style={{ fontFamily: "Inter_700Bold", fontSize: 12, color: colors.primary }}>
+              {streak === 1 ? "Day 1 — you're building a habit!" : `${streak}-day streak — keep going!`}
+            </Text>
+          </View>
+        )}
+      </View>
+
+      {/* Score card */}
+      <View style={{ backgroundColor: colors.surface, borderRadius: 20, padding: 20, borderWidth: 1, borderColor: colors.border, flexDirection: "row", alignItems: "center", gap: 16 }}>
+        <View style={{ width: 72, height: 72, borderRadius: 36, borderWidth: 3, borderColor: dotColor, alignItems: "center", justifyContent: "center", backgroundColor: colors.background }}>
+          <Text style={{ fontFamily: "Inter_700Bold", fontSize: score !== null ? 22 : 16, color: dotColor }}>{dotLabel}</Text>
+        </View>
+        <View style={{ flex: 1, gap: 4 }}>
+          <Text style={{ fontFamily: "Inter_700Bold", fontSize: 10, color: colors.primary, letterSpacing: 2, textTransform: "uppercase" }}>Resilience Score</Text>
+          <Text style={{ fontFamily: "Inter_700Bold", fontSize: 15, color: colors.text }}>{ratingLabel}</Text>
+          {latestReportId ? (
+            <Pressable
+              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push("/my-plans"); }}
+              style={{ flexDirection: "row", alignItems: "center", gap: 4, marginTop: 2 }}
+            >
+              <Text style={{ fontFamily: "Inter_600SemiBold", fontSize: 12, color: colors.primary }}>Open my plan</Text>
+              <Feather name="arrow-right" size={12} color={colors.primary} />
+            </Pressable>
+          ) : (
+            <Text style={{ fontFamily: "Inter_400Regular", fontSize: 12, color: colors.textMuted }}>No plan yet — take your first assessment</Text>
+          )}
+        </View>
+      </View>
+
+      {/* Daily Check-In — primary CTA */}
+      <Pressable
+        onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); router.push("/checkin"); }}
+        style={({ pressed }) => [{ borderRadius: 18, overflow: "hidden", opacity: pressed ? 0.88 : 1 }]}
+      >
+        <LinearGradient
+          colors={[colors.primary, colors.primaryDark]}
+          style={{ padding: 22, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        >
+          <View>
+            <Text style={{ fontFamily: "Inter_700Bold", fontSize: 17, color: colors.background, letterSpacing: -0.3 }}>Daily Check-In</Text>
+            <Text style={{ fontFamily: "Inter_400Regular", fontSize: 13, color: "rgba(13,18,37,0.65)", marginTop: 4 }}>60-second resilience pulse</Text>
+          </View>
+          <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: "rgba(13,18,37,0.15)", alignItems: "center", justifyContent: "center" }}>
+            <Feather name="activity" size={22} color={colors.background} />
+          </View>
+        </LinearGradient>
+      </Pressable>
+
+      {/* Quick action grid */}
+      <View style={{ flexDirection: "row", gap: 12 }}>
+        {[
+          { icon: "bookmark", label: "My Plans", route: "/my-plans" },
+          { icon: "refresh-cw", label: "Reassess", route: "/assessment" },
+          { icon: "tag", label: "Go Pro", route: "/pricing" },
+        ].map(({ icon, label, route }) => (
+          <Pressable
+            key={label}
+            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push(route as any); }}
+            style={({ pressed }) => [{ flex: 1, backgroundColor: colors.surface, borderRadius: 16, padding: 16, borderWidth: 1, borderColor: colors.border, alignItems: "center", gap: 8, opacity: pressed ? 0.8 : 1 }]}
+          >
+            <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primaryMuted, alignItems: "center", justifyContent: "center" }}>
+              <Feather name={icon as any} size={17} color={colors.primary} />
+            </View>
+            <Text style={{ fontFamily: "Inter_600SemiBold", fontSize: 12, color: colors.text }}>{label}</Text>
+          </Pressable>
+        ))}
+      </View>
+
+      {/* Motivational quote */}
+      <View style={{ backgroundColor: colors.primaryMuted, borderRadius: 16, padding: 18, borderWidth: 1, borderColor: colors.primaryBorder }}>
+        <Text style={{ fontFamily: "Inter_400Regular", fontSize: 13, color: colors.primary, fontStyle: "italic", lineHeight: 20 }}>"{motivation}"</Text>
+      </View>
+
+      {/* Footer links */}
+      <View style={{ flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 8, marginTop: 8 }}>
+        {[
+          { label: "About", route: "/about" },
+          { label: "Coaching", route: "/coaching" },
+          { label: "Account", route: "/my-data" },
+        ].map(({ label, route }, i, arr) => (
+          <React.Fragment key={label}>
+            <Pressable onPress={() => router.push(route as any)} style={{ padding: 8 }}>
+              <Text style={{ fontFamily: "Inter_500Medium", fontSize: 13, color: colors.primary }}>{label}</Text>
+            </Pressable>
+            {i < arr.length - 1 && <Text style={{ fontFamily: "Inter_400Regular", fontSize: 13, color: colors.textMuted }}>·</Text>}
+          </React.Fragment>
+        ))}
+      </View>
+    </View>
+  );
+}
+
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const { hasConsented, isLoaded } = useSession();
-  const { isSignedIn, user } = useAuth();
+  const { isSignedIn, user, getAuthHeaders } = useAuth();
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
@@ -174,6 +351,15 @@ export default function HomeScreen() {
         contentContainerStyle={[styles.scrollContent, { paddingBottom: bottomPad + 40 }]}
         showsVerticalScrollIndicator={false}
       >
+        {isSignedIn ? (
+          <CompanionScrollContent
+            user={user}
+            colors={colors}
+            getAuthHeaders={getAuthHeaders}
+            bottomPad={bottomPad}
+          />
+        ) : (<>
+
         {/* ── Hero ── */}
         <View
           style={styles.hero}
@@ -371,6 +557,7 @@ export default function HomeScreen() {
             <Text style={styles.footerLinkText}>Get Coaching</Text>
           </Pressable>
         </View>
+        </>)}
       </ScrollView>
     </View>
   );

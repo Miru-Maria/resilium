@@ -152,6 +152,23 @@ export default function PlanPage() {
       .catch(() => {});
   }, [isAuthenticated]);
 
+  // ── Streak tracking ──────────────────────────────────────────────────────────
+  const [streak, setStreak] = useState(0);
+  useEffect(() => {
+    if (!reportId) return;
+    const today = new Date().toISOString().split("T")[0];
+    const raw = localStorage.getItem("resilium_streak_v1");
+    const data: { lastDate: string; count: number } = raw ? JSON.parse(raw) : { lastDate: "", count: 0 };
+    if (data.lastDate === today) {
+      setStreak(data.count);
+    } else {
+      const yesterday = new Date(Date.now() - 86_400_000).toISOString().split("T")[0];
+      const newCount = data.lastDate === yesterday ? data.count + 1 : 1;
+      localStorage.setItem("resilium_streak_v1", JSON.stringify({ lastDate: today, count: newCount }));
+      setStreak(newCount);
+    }
+  }, [reportId]);
+
   // Track plan page open (fire-and-forget)
   useEffect(() => {
     if (!reportId) return;
@@ -386,7 +403,14 @@ export default function PlanPage() {
             <div className="bg-card rounded-3xl border border-border p-6 shadow-lg shadow-black/5">
               <div className="flex items-center justify-between mb-3">
                 <div>
-                  <p className="font-semibold text-base">Progress</p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-semibold text-base">Progress</p>
+                    {streak >= 2 && (
+                      <span className="inline-flex items-center gap-1 text-xs font-bold text-orange-500 bg-orange-500/10 px-2 py-0.5 rounded-full border border-orange-500/20">
+                        🔥 {streak}-day streak
+                      </span>
+                    )}
+                  </div>
                   {milestone && (
                     <p className="text-xs text-muted-foreground mt-0.5">{milestone.icon} {milestone.label}</p>
                   )}

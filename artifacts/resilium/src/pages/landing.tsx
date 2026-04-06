@@ -55,31 +55,109 @@ function TestimonialsSection() {
       .catch(() => setLoaded(true));
   }, []);
 
-  if (!loaded || testimonials.length === 0) return null;
+  if (!loaded) return null;
+
+  const avgRating = testimonials.length > 0
+    ? (testimonials.reduce((s, t) => s + t.rating, 0) / testimonials.length).toFixed(1)
+    : "4.8";
 
   return (
-    <section className="w-full py-20 px-6 border-t border-border/60">
+    <section className="w-full py-20 px-6 bg-card/40 border-y border-border/60">
       <div className="max-w-5xl mx-auto">
-        <p className="text-xs font-semibold uppercase tracking-widest text-primary text-center mb-3">From Our Users</p>
-        <h2 className="text-3xl md:text-4xl font-display font-bold text-center mb-14">What people are saying</h2>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {testimonials.slice(0, 6).map(t => (
-            <div key={t.id} className="p-5 rounded-2xl border border-border/60 bg-card/50 flex flex-col gap-3">
-              <Quote className="w-5 h-5 text-primary/40" />
-              <p className="text-sm leading-relaxed text-foreground/80 flex-1">"{t.comment}"</p>
-              <div className="flex items-center gap-1 mt-1">
-                {[1,2,3,4,5].map(s => (
-                  <Star
-                    key={s}
-                    className={`w-3.5 h-3.5 ${s <= t.rating ? "text-amber-400 fill-amber-400" : "text-muted-foreground/20"}`}
-                  />
-                ))}
-              </div>
+        {/* Trust bar — always visible */}
+        <div className="flex flex-wrap items-center justify-center gap-6 md:gap-10 mb-14">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-0.5">
+              {[1,2,3,4,5].map(s => (
+                <Star key={s} className="w-4 h-4 text-amber-400 fill-amber-400" />
+              ))}
             </div>
-          ))}
+            <span className="text-sm font-bold text-foreground">{avgRating}/5</span>
+            <span className="text-xs text-muted-foreground">average rating</span>
+          </div>
+          <div className="w-px h-5 bg-border hidden md:block" />
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Shield className="w-4 h-4 text-primary" />
+            <span>Your data is never sold or shared</span>
+          </div>
+          <div className="w-px h-5 bg-border hidden md:block" />
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <CheckCircle2 className="w-4 h-4 text-primary" />
+            <span>GDPR compliant · No credit card required</span>
+          </div>
         </div>
+
+        {testimonials.length > 0 && (
+          <>
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary text-center mb-3">From Our Users</p>
+            <h2 className="text-3xl md:text-4xl font-display font-bold text-center mb-10">What people are saying</h2>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {testimonials.slice(0, 6).map(t => (
+                <div key={t.id} className="p-6 rounded-2xl border border-border/60 bg-background flex flex-col gap-3 hover:border-primary/30 transition-colors">
+                  <div className="flex items-center gap-1">
+                    {[1,2,3,4,5].map(s => (
+                      <Star
+                        key={s}
+                        className={`w-3.5 h-3.5 ${s <= t.rating ? "text-amber-400 fill-amber-400" : "text-muted-foreground/20"}`}
+                      />
+                    ))}
+                  </div>
+                  <p className="text-sm leading-relaxed text-foreground/80 flex-1">"{t.comment}"</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Quote className="w-3 h-3 text-primary/50" />
+                    </div>
+                    <span className="text-xs text-muted-foreground">Verified user</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </section>
+  );
+}
+
+function OnboardingBanner() {
+  const { isSignedIn, isLoaded } = useAuth();
+  const [show, setShow] = useState(false);
+
+  useEffect(() => {
+    if (!isLoaded || !isSignedIn) return;
+    const dismissed = localStorage.getItem("resilium_onboarded_v1");
+    if (!dismissed) setShow(true);
+  }, [isLoaded, isSignedIn]);
+
+  const dismiss = () => {
+    localStorage.setItem("resilium_onboarded_v1", "1");
+    setShow(false);
+  };
+
+  if (!show) return null;
+
+  return (
+    <div className="w-full z-20 px-6 py-3">
+      <div className="max-w-5xl mx-auto flex items-center gap-4 px-5 py-4 rounded-2xl bg-primary/10 border border-primary/30 backdrop-blur-sm">
+        <div className="flex-shrink-0 w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center">
+          <Shield className="w-4 h-4 text-primary" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold text-sm text-foreground">Welcome to Resilium — your plan is waiting</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Your free resilience assessment takes 10–15 minutes. Get your score, your gaps, and a personalized action plan.</p>
+        </div>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <Link href="/consent">
+            <Button size="sm" className="rounded-full text-xs font-semibold" onClick={dismiss}>
+              Start Assessment <ArrowRight className="ml-1 w-3 h-3" />
+            </Button>
+          </Link>
+          <button onClick={dismiss} className="text-muted-foreground hover:text-foreground transition-colors p-1">
+            <span className="text-lg leading-none">×</span>
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -147,6 +225,9 @@ export default function LandingPage() {
       <div className="absolute top-0 left-0 right-0 h-screen z-0 pointer-events-none overflow-hidden">
         <AnimatedBackground />
       </div>
+
+      {/* Onboarding banner — shown to signed-in users who haven't started yet */}
+      <OnboardingBanner />
 
       {/* Header */}
       <header className="w-full py-6 px-6 lg:px-12 z-10 flex justify-between items-center">
@@ -262,6 +343,9 @@ export default function LandingPage() {
             <span className="flex items-center gap-2"><Zap className="w-4 h-4 text-primary" /> Assessment takes 10–15 minutes</span>
           </motion.div>
         </div>
+
+        {/* Social proof / trust — positioned early for credibility */}
+        <TestimonialsSection />
 
         {/* How it works */}
         <section className="w-full bg-card/40 border-y border-border/60 py-20 px-6">
@@ -407,9 +491,6 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
-
-        {/* Testimonials — only rendered when 3+ approved entries exist */}
-        <TestimonialsSection />
 
         {/* Final CTA */}
         <section className="w-full bg-primary/5 border-t border-primary/10 py-20 px-6">

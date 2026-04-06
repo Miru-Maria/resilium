@@ -1,7 +1,7 @@
 import cron from "node-cron";
 import { db, subscriptionsTable, reportFeedbackTable, resilienceReportsTable } from "@workspace/db";
 import { and, eq, gte, sql } from "drizzle-orm";
-import { sendAdminDigest, sendErrorAlert, sendReassessmentReminder } from "./email.js";
+import { sendAdminDigest, sendErrorAlert, sendReassessmentReminder, sendUserWeeklyDigest } from "./email.js";
 import { sendPushNotificationsToUsers } from "./push.js";
 import { logger } from "./logger.js";
 import { createClerkClient } from "@clerk/express";
@@ -175,6 +175,58 @@ async function runReassessmentReminders() {
   }
 }
 
+// ─── User weekly digest ───────────────────────────────────────────────────────
+
+async function runUserWeeklyDigest() {
+  try {
+    logger.info("Running user weekly digest job");
+
+    // Fetch users with a report in the last 60 days (active users only)
+    const sinceDate = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000);
+    const rows = await db.execute(sql`
+      WITH latest AS (
+        SELECT DISTINCT ON (user_id)
+               user_id,
+               id          AS report_id,
+               score_overall,
+               created_at
+        FROM   resilience_reports
+        WHERE  user_id IS NOT NULL
+          AND  created_at >= ${sinceDate}
+        ORDER  BY user_id, created_at DESC
+      )
+      SELECT user_id, report_id, score_overall
+      FROM   latest
+    `);
+
+    const rawRows = rows.rows as Array<{ user_id: string; report_id: string; score_overall: number }>;
+    logger.info({ count: rawRows.length }, "User weekly digest candidates");
+    if (rawRows.length === 0) return;
+
+    const clerkClient = createClerkClient({ secretKey: process.env["CLERK_SECRET_KEY"] });
+
+    for (const row of rawRows) {
+      try {
+        const clerkUser = await clerkClient.users.getUser(row.user_id);
+        const email = clerkUser.emailAddresses[0]?.emailAddress;
+        if (!email) continue;
+        await sendUserWeeklyDigest({
+          email,
+          firstName: clerkUser.firstName ?? null,
+          lastScore: Math.round(row.score_overall),
+          reportId: row.report_id,
+        }).catch(() => {});
+      } catch {
+        // User may have been deleted from Clerk — skip
+      }
+    }
+
+    logger.info({ sent: rawRows.length }, "User weekly digest complete");
+  } catch (err) {
+    logger.error({ err }, "Failed to run user weekly digest");
+  }
+}
+
 // ─── Weekly stats ─────────────────────────────────────────────────────────────
 
 async function buildWeeklyStats() {
@@ -234,5 +286,10 @@ export function startCron(): void {
     runReassessmentReminders().catch(() => {});
   }, { timezone: "UTC" });
 
-  logger.info("Cron jobs scheduled (digest: Mon 07:00, 7d reminders: daily 09:00, 30d reminders: Mon 08:00 UTC)");
+  // Every Sunday at 18:00 UTC — user weekly digest
+  cron.schedule("0 18 * * 0", () => {
+    runUserWeeklyDigest().catch(() => {});
+  }, { timezone: "UTC" });
+
+  logger.info("Cron jobs scheduled (admin digest: Mon 07:00, user digest: Sun 18:00, 7d reminders: daily 09:00, 30d reminders: Mon 08:00 UTC)");
 }
