@@ -273,6 +273,9 @@ export default function LandingPage() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuItem asChild>
+                  <Link href="/profile?tab=account" className="cursor-pointer">Account</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
                   <Link href="/profile" className="cursor-pointer">My Plans</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />

@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { Link, useLocation } from "wouter";
+import { Link, useLocation, useSearch } from "wouter";
 import { SiteFooter } from "@/components/site-footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -1376,6 +1376,10 @@ export default function ProfilePage() {
   const isAuthenticated = !!isSignedIn;
   const login = () => openSignIn({});
   const logout = () => signOut({ redirectUrl: "/" });
+  const search = useSearch();
+  const urlTab = new URLSearchParams(search).get("tab");
+  const validTabs = ["overview", "plans", "checklist", "account"];
+  const defaultTab = urlTab && validTabs.includes(urlTab) ? urlTab : "overview";
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -1458,7 +1462,7 @@ export default function ProfilePage() {
             <Loader2 className="w-8 h-8 text-primary animate-spin" />
           </div>
         ) : (
-          <Tabs defaultValue="overview" className="space-y-6">
+          <Tabs defaultValue={defaultTab} className="space-y-6">
             <TabsList className="rounded-xl h-10 p-1 w-full sm:w-auto">
               <TabsTrigger value="overview" className="rounded-lg gap-1.5 text-sm">
                 <BarChart2 className="w-3.5 h-3.5" /> Overview
