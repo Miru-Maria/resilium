@@ -19,7 +19,7 @@ const router: IRouter = Router();
 router.post("/login", async (req, res) => {
   const { username, password } = req.body as { username?: string; password?: string };
 
-  const adminUsername = process.env["ADMIN_USERNAME"];
+  const adminUsername = process.env["RESILIUM_ADMIN_USERNAME"] ?? process.env["ADMIN_USERNAME"];
   const adminPassword = process.env["ADMIN_PASSWORD"];
 
   if (!adminUsername || !adminPassword) {
