@@ -266,9 +266,13 @@ export default function LandingPage() {
                       className="w-5 h-5 rounded-full object-cover"
                     />
                   ) : (
-                    <User className="w-4 h-4" />
+                    <span className="w-5 h-5 rounded-full bg-primary/20 text-primary flex items-center justify-center text-[10px] font-bold leading-none shrink-0">
+                      {[user?.firstName?.[0], user?.lastName?.[0]].filter(Boolean).join("").toUpperCase() || "?"}
+                    </span>
                   )}
-                  <span className="max-w-[100px] truncate">{user?.firstName || "Account"}</span>
+                  <span className="max-w-[100px] truncate">
+                    {user?.firstName || user?.username || user?.primaryEmailAddress?.emailAddress?.split("@")[0] || "Account"}
+                  </span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
