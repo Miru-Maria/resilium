@@ -908,20 +908,22 @@ function AccountTab({ user, plans, onAllPlansDeleted }: {
       <Card className="border-none shadow-md">
         <CardHeader className="pb-2">
           <CardTitle className="text-base font-display flex items-center gap-2">
-            <User className="w-4 h-4 text-primary" /> Profile
+            <User className="w-4 h-4 text-primary" /> User Details
           </CardTitle>
         </CardHeader>
         <CardContent className="flex items-center gap-4">
           {user.profileImageUrl ? (
             <img src={user.profileImageUrl} alt="avatar" className="w-14 h-14 rounded-full object-cover ring-2 ring-border" />
           ) : (
-            <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
-              <User className="w-6 h-6 text-primary" />
+            <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center">
+              <span className="text-xl font-bold text-primary leading-none">
+                {[user.firstName?.[0], user.lastName?.[0]].filter(Boolean).join("").toUpperCase() || "?"}
+              </span>
             </div>
           )}
           <div className="flex-1 min-w-0">
             <p className="font-semibold text-foreground text-base leading-tight">
-              {[user.firstName, user.lastName].filter(Boolean).join(" ") || "Resilium User"}
+              {[user.firstName, user.lastName].filter(Boolean).join(" ") || user.username || user.email?.split("@")[0] || "—"}
             </p>
             {user.username && (
               <p className="text-xs text-primary/80 mt-0.5">@{user.username}</p>
@@ -1436,9 +1438,13 @@ export default function ProfilePage() {
                 {user?.imageUrl ? (
                   <img src={user.imageUrl} alt={user.firstName || "User"} className="w-5 h-5 rounded-full object-cover" />
                 ) : (
-                  <User className="w-4 h-4" />
+                  <span className="w-5 h-5 rounded-full bg-primary/20 text-primary flex items-center justify-center text-[10px] font-bold leading-none shrink-0">
+                    {[user?.firstName?.[0], user?.lastName?.[0]].filter(Boolean).join("").toUpperCase() || "?"}
+                  </span>
                 )}
-                <span className="max-w-[100px] truncate text-sm">{user?.firstName || "Account"}</span>
+                <span className="max-w-[100px] truncate text-sm">
+                  {user?.firstName || user?.username || user?.primaryEmailAddress?.emailAddress?.split("@")[0] || "Account"}
+                </span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
