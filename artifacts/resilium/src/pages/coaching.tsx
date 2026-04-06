@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import { ArrowLeft, CheckCircle, MessageCircle, TrendingUp, Heart, Brain, Shield } from "lucide-react";
 import { NeuralCanvas } from "../components/neural-canvas";
 
-const COACHING_URL = "https://healing-through-understanding.replit.app/contact";
+const COACHING_URL = "https://resilium-platform.com/coaching";
 const BASE = typeof window !== "undefined" ? (import.meta as any).env?.BASE_URL?.replace(/\/$/, "") ?? "" : "";
 
 function trackCoachingClick() {
@@ -159,7 +159,7 @@ export default function CoachingPage() {
 
         <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" as const }}>
           <a
-            href="https://healing-through-understanding.replit.app/services"
+            href="https://resilium-platform.com/coaching"
             target="_blank"
             rel="noopener noreferrer"
             style={{

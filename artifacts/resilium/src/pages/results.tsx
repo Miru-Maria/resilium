@@ -718,7 +718,7 @@ export default function ResultsPage() {
                   <Heart className="w-4 h-4" /> Explore Coaching
                 </Button>
               </Link>
-              <a href="https://healing-through-understanding.replit.app/contact" target="_blank" rel="noopener noreferrer">
+              <a href="https://resilium-platform.com/coaching" target="_blank" rel="noopener noreferrer">
                 <Button variant="outline" className="rounded-full gap-2 border-amber-500/30 text-amber-700 dark:text-amber-400 hover:bg-amber-500/5">
                   <ExternalLink className="w-4 h-4" /> Book a Free Call
                 </Button>

@@ -634,7 +634,7 @@ export default function PlanPage() {
                                         {/* Coaching CTA — Pro only, mental/health areas only */}
                                         {isCoachingArea && isPro && (
                                           <a
-                                            href="https://healing-through-understanding.replit.app/contact"
+                                            href="https://resilium-platform.com/coaching"
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="flex items-center gap-1.5 text-xs rounded-full px-3 py-1.5 border border-rose-300/40 text-rose-600 hover:bg-rose-500/5 transition-all"
@@ -816,7 +816,7 @@ export default function PlanPage() {
                     <Heart className="w-4 h-4" /> Learn About Coaching
                   </Button>
                 </Link>
-                <a href="https://healing-through-understanding.replit.app/contact" target="_blank" rel="noopener noreferrer">
+                <a href="https://resilium-platform.com/coaching" target="_blank" rel="noopener noreferrer">
                   <Button variant="outline" className="rounded-full gap-2 border-amber-500/30 text-amber-700 hover:bg-amber-500/5">
                     <ExternalLink className="w-4 h-4" /> Book a Free Call
                   </Button>
