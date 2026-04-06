@@ -35,6 +35,7 @@ import ScenariosPage from "@/pages/scenarios";
 import PlanPage from "@/pages/plan";
 import { AnnouncementBanner } from "@/components/announcement-banner";
 
+// Clerk publishable key — injected at build time from VITE_CLERK_PUBLISHABLE_KEY / CLERK_PUBLISHABLE_KEY
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY as string | undefined;
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
 

@@ -55,10 +55,10 @@ export default defineConfig({
   },
   root: path.resolve(import.meta.dirname),
   define: {
+    // Publishable key is a public value — safe to commit. Hardcoded here so
+    // Replit's build process cannot override it with the old replit.app key.
     "import.meta.env.VITE_CLERK_PUBLISHABLE_KEY": JSON.stringify(
-      process.env.VITE_CLERK_PUBLISHABLE_KEY ||
-      process.env.CLERK_PUBLISHABLE_KEY ||
-      ""
+      "pk_live_Y2xlcmsucmVzaWxpdW0tcGxhdGZvcm0uY29tJA"
     ),
   },
   build: {
