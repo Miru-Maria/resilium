@@ -1,0 +1,49 @@
+Authentication & Accounts
+- [ ] Clerk sign-up and sign-in work end-to-end on resilium-platform.com(not just in dev)
+- [ ] Google OAuth login flow completes without errors
+- [ ] Password reset email delivers reliably
+- [ ] Session persists correctly on mobile across app restarts
+- [ ] Account deletion removes all associated data (GDPR requirement)
+Core Product Flow
+- [ ] Full assessment (all question steps) completes without errors on web
+- [ ] Full assessment completes on mobile (Expo Go and web browser)
+- [ ] Plan generates correctly after assessment — all 6 dimensions scored
+- [ ] Plan PDF downloads cleanly (no broken layout, correct branding)
+- [ ] My Plans screen loads historical reports correctly
+- [ ] Plan comparison works when ≥ 2 plans exist
+- [ ] Streak counter increments correctly day-over-day
+- [ ] Mobile daily check-in saves and shows the score summary
+Email Delivery
+- [ ] Welcome email sends on first sign-up (test with real address)
+- [ ] Weekly user digest delivers on Sunday (test with seeded user)
+- [ ] Reassessment reminder (7-day and 30-day) delivers correctly
+- [ ] All emails render cleanly on Gmail, Apple Mail, Outlook mobile
+- [ ] Unsubscribe link works and is honoured
+Payments
+- [ ] Paddle checkout opens and completes for Pro plan
+- [ ] Pro features unlock immediately after successful payment
+- [ ] Webhook processes correctly (test with Paddle sandbox)
+- [ ] Cancellation flow handled gracefully (Pro downgrades at period end)
+Mobile
+- [ ] App published to Expo (or App Store / Play Store if native build planned)
+- [ ] QR code on landing page / marketing links to working Expo URL
+- [ ] Push notifications configured if used
+- [ ] App icon and splash screen are final (not Expo defaults)
+Infrastructure
+- [ ] API server health check endpoint responds under load
+- [ ] Database has production backups enabled
+- [ ] Error monitoring (e.g. Sentry) capturing uncaught exceptions
+- [ ] All critical API routes have rate limiting
+- [ ] resilium-ai.replit.appredirects cleanly to resilium-platform.com
+Content & Legal
+- [ ] Privacy policy live and linked in footer
+- [ ] Terms of service live and linked in footer
+- [ ] Cookie banner / consent (required for EU traffic)
+- [ ] All coaching referral CTAs link to a real booking or contact form
+- [ ] Testimonials are genuine (not placeholder names)
+- [ ] "Resilium" branding is consistent — no stray "Replit" or template text
+SEO Basics
+- [ ] <title>and <meta description>set on all pages
+- [ ] og:image(social card) set for link previews on Twitter/LinkedIn
+- [ ] sitemap.xmland robots.txtaccessible
+- [ ] Google Search Console verified on resilium-platform.com

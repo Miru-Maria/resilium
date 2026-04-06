@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin/
 Disallow: /api/
 
-Sitemap: https://resilium-ai.replit.app/sitemap.xml
+Sitemap: https://resilium-platform.com/sitemap.xml
