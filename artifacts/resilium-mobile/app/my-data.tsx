@@ -10,8 +10,7 @@ import {
   Switch,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as Notifications from "expo-notifications";
-import { getExpoPushToken, registerPushTokenWithBackend } from "@/utils/notifications";
+import { getExpoPushToken, registerPushTokenWithBackend, requestNotificationPermission } from "@/utils/notifications";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
@@ -44,13 +43,6 @@ const DEFAULT_PREFS: NotifPrefs = {
   reassessmentNudge: false,
 };
 
-async function requestNotifPermission(): Promise<boolean> {
-  if (Platform.OS === "web") return false;
-  const { status: existing } = await Notifications.getPermissionsAsync();
-  if (existing === "granted") return true;
-  const { status } = await Notifications.requestPermissionsAsync();
-  return status === "granted";
-}
 
 export default function MyDataScreen() {
   const insets = useSafeAreaInsets();
@@ -89,7 +81,10 @@ export default function MyDataScreen() {
       }
     });
     if (Platform.OS !== "web") {
-      Notifications.getPermissionsAsync().then(({ status }) => setNotifPermission(status === "granted"));
+      import("expo-notifications")
+        .then(mod => mod.getPermissionsAsync())
+        .then(({ status }) => setNotifPermission(status === "granted"))
+        .catch(() => setNotifPermission(false));
     } else {
       setNotifPermission(false);
     }
@@ -98,7 +93,7 @@ export default function MyDataScreen() {
   const toggleNotif = useCallback(async (key: keyof NotifPrefs, value: boolean) => {
     Haptics.selectionAsync();
     if (value && !notifPermission) {
-      const granted = await requestNotifPermission();
+      const granted = await requestNotificationPermission();
       setNotifPermission(granted);
       if (!granted) {
         Alert.alert("Notifications Blocked", "Please enable notifications in your device settings to use this feature.");

@@ -1,35 +1,52 @@
-import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 
 const MONTHLY_NOTIFICATION_ID = "resilium_monthly_checkin";
-const SCHEDULED_KEY = "resilium_notification_scheduled";
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: false,
-    shouldSetBadge: false,
-  }),
-});
+// Lazily import and initialize expo-notifications to avoid crashing in Expo Go SDK 53+
+// (remote push notifications were removed from Expo Go in SDK 53)
+let _Notifications: typeof import("expo-notifications") | null = null;
+
+async function getNotifications(): Promise<typeof import("expo-notifications") | null> {
+  if (Platform.OS === "web") return null;
+  if (_Notifications) return _Notifications;
+  try {
+    const mod = await import("expo-notifications");
+    mod.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: false,
+        shouldSetBadge: false,
+      }),
+    });
+    _Notifications = mod;
+    return mod;
+  } catch {
+    return null;
+  }
+}
 
 export async function requestNotificationPermission(): Promise<boolean> {
   if (Platform.OS === "web") return false;
-
-  const { status: existing } = await Notifications.getPermissionsAsync();
-  if (existing === "granted") return true;
-  if (existing === "denied") return false;
-
-  const { status } = await Notifications.requestPermissionsAsync();
-  return status === "granted";
+  try {
+    const Notifications = await getNotifications();
+    if (!Notifications) return false;
+    const { status: existing } = await Notifications.getPermissionsAsync();
+    if (existing === "granted") return true;
+    if (existing === "denied") return false;
+    const { status } = await Notifications.requestPermissionsAsync();
+    return status === "granted";
+  } catch {
+    return false;
+  }
 }
 
 export async function getExpoPushToken(): Promise<string | null> {
   if (Platform.OS === "web") return null;
-
   try {
+    const Notifications = await getNotifications();
+    if (!Notifications) return null;
     const { status } = await Notifications.getPermissionsAsync();
     if (status !== "granted") return null;
-
     const tokenData = await Notifications.getExpoPushTokenAsync({
       projectId: process.env.EXPO_PUBLIC_PROJECT_ID,
     });
@@ -41,12 +58,12 @@ export async function getExpoPushToken(): Promise<string | null> {
 
 export async function scheduleMonthlyCheckin(): Promise<void> {
   if (Platform.OS === "web") return;
-
   try {
+    const Notifications = await getNotifications();
+    if (!Notifications) return;
     const { status } = await Notifications.getPermissionsAsync();
     if (status !== "granted") return;
 
-    // Cancel any existing monthly notification first
     const scheduled = await Notifications.getAllScheduledNotificationsAsync();
     for (const notif of scheduled) {
       if (notif.identifier === MONTHLY_NOTIFICATION_ID) {
@@ -54,7 +71,6 @@ export async function scheduleMonthlyCheckin(): Promise<void> {
       }
     }
 
-    // Schedule a notification 30 days from now
     const triggerDate = new Date();
     triggerDate.setDate(triggerDate.getDate() + 30);
 
