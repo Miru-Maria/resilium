@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import { SiteFooter } from "@/components/site-footer";
 import { ResilientIcon } from "@/components/resilient-icon";
 
-const LAST_UPDATED = "March 27, 2026";
+const LAST_UPDATED = "April 7, 2026";
 const CONTACT_EMAIL = "contact_resilium@pm.me";
 
 export default function TermsPage() {
@@ -137,9 +137,21 @@ export default function TermsPage() {
           </p>
         </Section>
 
-        <Section title="13. Governing Law">
+        <Section title="13. Third-Party Resources &amp; Recommendations">
           <p>
-            These Terms are governed by and construed in accordance with the laws of England and Wales. Any disputes arising from these Terms shall be subject to the exclusive jurisdiction of the courts of England and Wales.
+            Resilium may suggest or link to third-party websites, products, services, tools, or organisations as possible resources to support your resilience planning. These recommendations are provided for informational purposes only as a convenience to you.
+          </p>
+          <p>
+            Resilium has no affiliation, association, sponsorship, or endorsement relationship with any third party unless explicitly stated. We derive no financial gain, commission, or other benefit from any such reference unless it is clearly disclosed at the point of recommendation.
+          </p>
+          <p>
+            Your use of any third-party resource is entirely at your own discretion and risk. Resilium accepts no responsibility or liability for the content, accuracy, availability, or practices of any external site or service.
+          </p>
+        </Section>
+
+        <Section title="14. Governing Law">
+          <p>
+            These Terms are governed by and construed in accordance with the laws of Romania. Any disputes arising from these Terms shall be subject to the exclusive jurisdiction of the competent courts of Romania.
           </p>
         </Section>
 

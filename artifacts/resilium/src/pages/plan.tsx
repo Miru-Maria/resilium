@@ -704,6 +704,9 @@ export default function PlanPage() {
                                               </a>
                                             ))}
                                           </div>
+                                          <p className="text-[9px] text-muted-foreground/50 mt-2 leading-relaxed">
+                                            Resources are provided for informational purposes only. Resilium has no affiliation with or financial interest in any of these sites unless explicitly stated. Use at your own discretion.
+                                          </p>
                                         </div>
                                       )}
                                     </div>
