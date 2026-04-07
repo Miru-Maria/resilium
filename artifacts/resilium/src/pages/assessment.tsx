@@ -747,7 +747,8 @@ export default function AssessmentPage() {
       if (raw) {
         const saved = JSON.parse(raw);
         const savedAt = saved?.savedAt ? new Date(saved.savedAt).getTime() : 0;
-        if (Date.now() - savedAt < 7 * 24 * 60 * 60 * 1000) {
+        const hasProgress = (saved?.step ?? 1) > 1 || !!(saved?.formData?.location);
+        if (hasProgress && Date.now() - savedAt < 7 * 24 * 60 * 60 * 1000) {
           setResumeDraft(saved);
           setShowResumeBanner(true);
         } else {

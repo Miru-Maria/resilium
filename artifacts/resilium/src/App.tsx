@@ -1,10 +1,11 @@
 import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { useEffect, useRef } from "react";
 import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
-import { ClerkProvider, SignIn, SignUp, useClerk } from "@clerk/react";
+import { ClerkProvider, SignIn, SignUp, useClerk, useAuth } from "@clerk/react";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { NeuralCanvas } from "@/components/neural-canvas";
+import { setAuthTokenGetter } from "@workspace/api-client-react";
 
 import LandingPage from "@/pages/landing";
 import AssessmentPage from "@/pages/assessment";
@@ -69,6 +70,15 @@ function ClerkQueryClientCacheInvalidator() {
     });
     return unsub;
   }, [addListener, qc]);
+  return null;
+}
+
+function ClerkAuthBridge() {
+  const { getToken } = useAuth();
+  useEffect(() => {
+    setAuthTokenGetter(() => getToken());
+    return () => setAuthTokenGetter(null);
+  }, [getToken]);
   return null;
 }
 
@@ -159,6 +169,7 @@ function ClerkProviderWithRoutes() {
       routerPush={(to) => setLocation(stripBase(to))}
       routerReplace={(to) => setLocation(stripBase(to), { replace: true })}
     >
+      <ClerkAuthBridge />
       <QueryClientProvider client={queryClient}>
         <ClerkQueryClientCacheInvalidator />
         <TooltipProvider>
