@@ -11,6 +11,7 @@ import adminAnalyticsRouter from "./analytics.js";
 import adminAnnouncementsRouter from "./announcements.js";
 import { getCoachingClickCount } from "../../lib/cron.js";
 import { logger } from "../../lib/logger.js";
+import { sendWelcomeEmail, sendProUpgradeEmail } from "../../lib/email.js";
 
 const ADMIN_PASSWORD_KEY = "admin_password_hash";
 
@@ -389,6 +390,25 @@ router.patch("/testimonials/:id", requireAdminSession, async (req, res) => {
 
 router.get("/coaching-stats", requireAdminSession, (req, res) => {
   res.json({ coachingClicksTotal: getCoachingClickCount() });
+});
+
+router.post("/send-test-email", requireAdminSession, async (req, res) => {
+  const { to, type } = req.body as { to?: string; type?: string };
+  if (!to) {
+    res.status(400).json({ error: "Missing 'to' email address" });
+    return;
+  }
+  try {
+    if (type === "pro") {
+      await sendProUpgradeEmail({ email: to, firstName: "there", periodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) });
+    } else {
+      await sendWelcomeEmail({ email: to, firstName: "there" });
+    }
+    res.json({ success: true, type: type ?? "welcome", to });
+  } catch (err) {
+    logger.error({ err }, "Failed to send test email");
+    res.status(500).json({ error: "Failed to send test email" });
+  }
 });
 
 router.use("/ux-test", uxTestRouter);
