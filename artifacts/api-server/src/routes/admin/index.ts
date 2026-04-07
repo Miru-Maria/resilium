@@ -11,7 +11,7 @@ import adminAnalyticsRouter from "./analytics.js";
 import adminAnnouncementsRouter from "./announcements.js";
 import { getCoachingClickCount } from "../../lib/cron.js";
 import { logger } from "../../lib/logger.js";
-import { sendWelcomeEmail, sendProUpgradeEmail } from "../../lib/email.js";
+import { sendWelcomeEmail, sendProUpgradeEmail, sendReassessmentReminder, sendUserWeeklyDigest } from "../../lib/email.js";
 
 const ADMIN_PASSWORD_KEY = "admin_password_hash";
 
@@ -401,6 +401,10 @@ router.post("/send-test-email", requireAdminSession, async (req, res) => {
   try {
     if (type === "pro") {
       await sendProUpgradeEmail({ email: to, firstName: "there", periodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) });
+    } else if (type === "reassessment") {
+      await sendReassessmentReminder({ email: to, firstName: "there", lastScore: 62, daysSince: 30 });
+    } else if (type === "weekly") {
+      await sendUserWeeklyDigest({ email: to, firstName: "there", lastScore: 62, reportId: "test-report-id" });
     } else {
       await sendWelcomeEmail({ email: to, firstName: "there" });
     }
