@@ -15,7 +15,7 @@ import { useUser, useAuth } from "@clerk/react";
 const FREE_LIMIT = 3;
 const ANON_COUNT_KEY = "resilium_free_count";
 const SESSION_KEY = "resilium_session_id";
-const DRAFT_KEY = "resilium_assessment_draft_v2";
+const DRAFT_KEY_BASE = "resilium_assessment_draft_v2";
 
 import type { 
   AssessmentInput,
@@ -677,6 +677,8 @@ export default function AssessmentPage() {
   const { isSignedIn } = useAuth();
   const authLoading = !isLoaded;
   const isAuthenticated = !!isSignedIn;
+  // Per-user draft key — null until Clerk has resolved identity
+  const draftKey = isLoaded ? `${DRAFT_KEY_BASE}_${user?.id ?? "anon"}` : null;
   const t = T[lang];
 
   useEffect(() => {
@@ -740,10 +742,11 @@ export default function AssessmentPage() {
   const { mutateAsync } = useSubmitAssessment();
 
   // ── Draft persistence ─────────────────────────────────────────────────────
-  // Load saved draft once on mount (before user starts interacting)
+  // Load saved draft once Clerk identity is resolved
   useEffect(() => {
+    if (!draftKey) return; // wait until Clerk resolves the user
     try {
-      const raw = localStorage.getItem(DRAFT_KEY);
+      const raw = localStorage.getItem(draftKey);
       if (raw) {
         const saved = JSON.parse(raw);
         const savedAt = saved?.savedAt ? new Date(saved.savedAt).getTime() : 0;
@@ -752,19 +755,19 @@ export default function AssessmentPage() {
           setResumeDraft(saved);
           setShowResumeBanner(true);
         } else {
-          localStorage.removeItem(DRAFT_KEY);
+          localStorage.removeItem(draftKey);
         }
       }
     } catch {}
     setDraftLoaded(true);
-  }, []);
+  }, [draftKey]);
 
   // Auto-save every 1.5s whenever form state changes (debounced)
   useEffect(() => {
-    if (!draftLoaded) return;
+    if (!draftLoaded || !draftKey) return;
     const timer = setTimeout(() => {
       try {
-        localStorage.setItem(DRAFT_KEY, JSON.stringify({
+        localStorage.setItem(draftKey, JSON.stringify({
           formData,
           step,
           mrStep,
@@ -778,7 +781,7 @@ export default function AssessmentPage() {
       } catch {}
     }, 1500);
     return () => clearTimeout(timer);
-  }, [formData, step, mrStep, lang, currency, customCurrency, savingsPreferNotToSay, incomePreferNotToSay, draftLoaded]);
+  }, [formData, step, mrStep, lang, currency, customCurrency, savingsPreferNotToSay, incomePreferNotToSay, draftLoaded, draftKey]);
 
   const handleNext = () => {
     if (step === MR_STEP) {
@@ -827,7 +830,7 @@ export default function AssessmentPage() {
         localStorage.setItem(ANON_COUNT_KEY, String(prev + 1));
       }
       localStorage.setItem("resilium_last_report_id", report.reportId);
-      localStorage.removeItem(DRAFT_KEY);
+      if (draftKey) localStorage.removeItem(draftKey);
       setLocation(`/results/${report.reportId}`);
     } catch (error: any) {
       console.error("Assessment submission failed", error);
@@ -945,7 +948,7 @@ export default function AssessmentPage() {
   };
 
   const dismissDraft = () => {
-    localStorage.removeItem(DRAFT_KEY);
+    if (draftKey) localStorage.removeItem(draftKey);
     setShowResumeBanner(false);
     setResumeDraft(null);
   };
