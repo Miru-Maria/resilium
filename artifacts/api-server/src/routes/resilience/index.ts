@@ -60,9 +60,11 @@ router.post("/assess", assessRateLimit, async (req, res) => {
   try {
     const parseResult = SubmitAssessmentBody.safeParse(req.body);
     if (!parseResult.success) {
+      req.log.error({ zodIssues: parseResult.error.issues, body: req.body }, "Assessment validation failed");
       res.status(400).json({
         error: "VALIDATION_ERROR",
         message: "Invalid assessment input: " + parseResult.error.message,
+        issues: parseResult.error.issues,
       });
       return;
     }
@@ -86,7 +88,9 @@ router.post("/assess", assessRateLimit, async (req, res) => {
 
       const isSubscriber = subs.length > 0 && (subs[0].status === "active" || subs[0].status === "cancel_scheduled");
 
+      req.log.info({ userId, planCount, isSubscriber }, "Plan gate check");
       if (!isSubscriber && planCount >= PLAN_LIMIT) {
+        req.log.warn({ userId, planCount }, "Plan limit exceeded");
         res.status(400).json({
           error: "PLAN_LIMIT_EXCEEDED",
           message: `You have reached the maximum of ${PLAN_LIMIT} saved plans. Upgrade to Pro for unlimited access.`,

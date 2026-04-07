@@ -834,11 +834,15 @@ export default function AssessmentPage() {
       setLocation(`/results/${report.reportId}`);
     } catch (error: any) {
       console.error("Assessment submission failed", error);
-      const body = error?.response?.data || error?.data;
-      if (body?.error === "PLAN_LIMIT_EXCEEDED") {
+      const body = error?.data ?? error?.response?.data ?? null;
+      const errCode = body?.error ?? "UNKNOWN";
+      console.error("Error body:", JSON.stringify(body), "| HTTP status:", error?.status);
+      if (errCode === "PLAN_LIMIT_EXCEEDED") {
         setSubmitError({ code: "PLAN_LIMIT_EXCEEDED", message: body.message });
+      } else if (errCode === "VALIDATION_ERROR") {
+        setSubmitError({ code: "VALIDATION_ERROR", message: "Your answers couldn't be validated. Please try again." });
       } else {
-        setSubmitError({ code: "UNKNOWN", message: "Something went wrong. Please try again." });
+        setSubmitError({ code: "UNKNOWN", message: error?.message ?? "Something went wrong. Please try again." });
       }
       setIsSubmitting(false);
     }
@@ -1033,17 +1037,25 @@ export default function AssessmentPage() {
     );
   }
 
-  if (submitError?.code === "UNKNOWN") {
+  if (submitError?.code === "VALIDATION_ERROR" || submitError?.code === "UNKNOWN") {
+    const isTimeout = submitError.code === "UNKNOWN";
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
         <AlertCircle className="w-16 h-16 text-destructive mb-6" />
         <h2 className="text-2xl font-display font-bold mb-2">{t.errorTitle}</h2>
-        <p className="text-muted-foreground max-w-md mb-2">{t.errorDesc}</p>
-        {isAuthenticated ? (
-          <p className="text-muted-foreground max-w-md mb-8">{t.errorAuthHint}</p>
+        {isTimeout ? (
+          <>
+            <p className="text-muted-foreground max-w-md mb-2">{t.errorDesc}</p>
+            {isAuthenticated ? (
+              <p className="text-muted-foreground max-w-md mb-8">{t.errorAuthHint}</p>
+            ) : (
+              <p className="text-muted-foreground max-w-md mb-8">{t.errorAnonHint}</p>
+            )}
+          </>
         ) : (
-          <p className="text-muted-foreground max-w-md mb-8">{t.errorAnonHint}</p>
+          <p className="text-muted-foreground max-w-md mb-8">{submitError.message}</p>
         )}
+        <p className="text-xs text-muted-foreground/50 mb-4 font-mono">{submitError.code}</p>
         <div className="flex flex-wrap justify-center gap-3">
           {isAuthenticated && (
             <Link href="/profile">
