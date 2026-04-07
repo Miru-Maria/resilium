@@ -433,7 +433,7 @@ function OverviewTab({ plans }: { plans: PlanSummary[] }) {
           <h3 className="text-lg font-display font-semibold mb-1">No data yet</h3>
           <p className="text-muted-foreground text-sm max-w-xs">Complete your first resilience assessment to see your overview here.</p>
         </div>
-        <Link href="/assessment">
+        <Link href="/assess">
           <Button className="rounded-full gap-2 mt-2">Get Started <ChevronRight className="w-4 h-4" /></Button>
         </Link>
       </div>
