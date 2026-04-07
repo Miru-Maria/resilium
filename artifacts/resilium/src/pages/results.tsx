@@ -710,7 +710,7 @@ export default function ResultsPage() {
             <p className="text-muted-foreground text-sm leading-relaxed mb-5 max-w-2xl">
               Psychological resilience is the foundation everything else rests on. A low score here usually reflects accumulated stress, unprocessed disruption, or simply not having had the space to build those muscles yet — not a character flaw.
               <br /><br />
-              Cristiana Paun at <strong className="text-foreground">Phoenix Insight Coaching</strong> specialises in 1:1 sessions built directly around your Resilium profile. The first call is free, with no commitment.
+              Cristiana Paun at <strong className="text-foreground">Phoenix Insight Coaching</strong> specializes in 1:1 sessions built directly around your Resilium profile. The first call is free, with no commitment.
             </p>
             <div className="flex flex-wrap gap-3">
               <Link href="/coaching">

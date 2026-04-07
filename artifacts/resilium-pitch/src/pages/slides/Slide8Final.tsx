@@ -68,7 +68,7 @@ export default function Slide8Final() {
         style={{ background: "linear-gradient(90deg, transparent, #E08040, transparent)" }}
       />
 
-      {/* Centred brand moment */}
+      {/* Centered brand moment */}
       <div className="relative flex flex-col items-center justify-center" style={{ gap: "0.8vh" }}>
 
         <div style={a("0.1s", "scaleIn")}>

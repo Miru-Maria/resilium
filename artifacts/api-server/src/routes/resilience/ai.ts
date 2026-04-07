@@ -136,7 +136,7 @@ export async function generateResilienceReport(
 
   const emergencyTierDesc = describeEmergencyTier(input.emergencySupplyTier, input.hasEmergencySupplies);
   const emergencyAdvice = input.emergencySupplyTier === "over_1month"
-    ? "This user has excellent emergency supply depth — focus on optimisation, rotation, and diversification rather than urgent stocking."
+    ? "This user has excellent emergency supply depth — focus on optimization, rotation, and diversification rather than urgent stocking."
     : input.emergencySupplyTier === "2weeks_1month"
     ? "This user has a good emergency supply base — focus on filling gaps and extending to a full month where possible."
     : input.emergencySupplyTier === "3_14days"

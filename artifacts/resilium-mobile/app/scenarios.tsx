@@ -15,7 +15,7 @@ import { ColorsType } from "@/constants/colors";
 type Scenario = "job_loss" | "health_crisis" | "natural_disaster" | "relocation";
 
 const SCENARIOS: { key: Scenario; label: string; icon: string; desc: string }[] = [
-  { key: "job_loss",         label: "Sudden Job Loss",         icon: "briefcase",   desc: "Analyse your runway if your income disappeared tomorrow." },
+  { key: "job_loss",         label: "Sudden Job Loss",         icon: "briefcase",   desc: "Analyze your runway if your income disappeared tomorrow." },
   { key: "health_crisis",    label: "Major Health Crisis",     icon: "heart",       desc: "Model the financial and logistical impact of a serious illness." },
   { key: "natural_disaster", label: "Natural Disaster",        icon: "cloud-rain",  desc: "Assess your preparedness for an acute environmental emergency." },
   { key: "relocation",       label: "Emergency Relocation",    icon: "map-pin",     desc: "Evaluate your capacity to relocate quickly under pressure." },

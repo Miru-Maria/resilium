@@ -20,7 +20,7 @@ const FREE_FEATURES = [
   "Full resilience assessment (all 10 dimensions)",
   "Overall score & category breakdown",
   "Mental Resilience Profile with pathway",
-  "Personalised action plan (short, mid & long term)",
+  "Personalized action plan (short, mid & long term)",
   "Stress test scenarios",
   "Daily habit recommendations",
   "Up to 2 saved plans",

@@ -139,7 +139,7 @@ export default function TermsPage() {
 
         <Section title="13. Third-Party Resources &amp; Recommendations">
           <p>
-            Resilium may suggest or link to third-party websites, products, services, tools, or organisations as possible resources to support your resilience planning. These recommendations are provided for informational purposes only as a convenience to you.
+            Resilium may suggest or link to third-party websites, products, services, tools, or organizations as possible resources to support your resilience planning. These recommendations are provided for informational purposes only as a convenience to you.
           </p>
           <p>
             Resilium has no affiliation, association, sponsorship, or endorsement relationship with any third party unless explicitly stated. We derive no financial gain, commission, or other benefit from any such reference unless it is clearly disclosed at the point of recommendation.
