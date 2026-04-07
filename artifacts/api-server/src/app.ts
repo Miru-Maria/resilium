@@ -50,7 +50,10 @@ app.use("/api/paddle/webhook", express.raw({ type: "*/*" }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(clerkMiddleware());
+app.use(clerkMiddleware({
+  publishableKey: "pk_live_Y2xlcmsucmVzaWxpdW0tcGxhdGZvcm0uY29tJA",
+  secretKey: process.env["CLERK_SECRET_KEY"],
+}));
 
 // Error-rate tracking middleware — must be BEFORE routes so finish listener is attached
 app.use((_req: Request, res: Response, next: NextFunction) => {
