@@ -1,0 +1,155 @@
+Authentication & Accounts
+Item
+Status
+Notes
+Clerk sign-up / sign-in on resilium-platform.com
+Verify
+Production Clerk instance is wired up. Test with a real email on the live domain.
+Google OAuth login flow
+Verify
+Depends on whether Google is enabled in your Clerk dashboard. No code changes needed — it's Clerk-managed.
+Password reset email
+Verify
+Clerk handles this automatically. Needs a real end-to-end test.
+Session persists on mobile across restarts
+Likely ✅
+SecureStore is used for token caching — this is the correct approach.
+Account deletion removes all data
+✅ Done
+Cascade implemented last session.
+Core Product Flow
+Item
+Status
+Notes
+Full assessment completes (web)
+Verify
+Pre-existing; no changes made.
+Full assessment completes (mobile)
+Verify
+Pre-existing; Expo Go crash fixed this session.
+Plan generates, all 6 dimensions scored
+Verify
+Pre-existing.
+Plan PDF downloads cleanly
+✅ Done
+Print CSS added last session.
+My Plans loads historical reports
+Verify
+Pre-existing.
+Plan comparison (≥2 plans)
+Verify
+Pre-existing.
+Streak counter works day-over-day
+✅ Implemented
+Both web (localStorage) and mobile (AsyncStorage) — already in the code.
+Mobile daily check-in saves + shows score
+Verify
+Pre-existing.
+Email Delivery
+Item
+Status
+Notes
+Welcome email on first sign-up
+✅ Done
+Implemented last session.
+Weekly user digest (Sunday)
+✅ Done
+Cron job already existed.
+7-day and 30-day reassessment reminders
+✅ Done
+Cron jobs already existed.
+All emails render on Gmail / Apple Mail / Outlook
+Verify manually
+Need to send test emails to each client.
+Unsubscribe link works and is honoured
+✅ Done
+Full HMAC-signed unsubscribe implemented.
+Payments
+Item
+Status
+Notes
+Paddle checkout opens and completes
+Verify
+Code exists; test in Paddle sandbox.
+Pro features unlock after payment
+Verify
+Webhook updates subscription table — verify with a sandbox transaction.
+Webhook processes correctly
+✅ Implemented
+Signature verification with PADDLE_WEBHOOK_SECRETis in place.
+Cancellation flow (downgrades at period end)
+Verify
+Logic exists; needs sandbox test.
+Mobile
+Item
+Status
+Notes
+App published to Expo / App Store / Play Store
+❌ Not done
+No EAS build or store submission done.
+QR code on landing page
+❌ Not done
+No QR code exists anywhere on the site.
+Push notifications configured
+✅ Done
+Server-side + mobile wired up; remote pushes require a development build, not Expo Go.
+App icon and splash screen are final
+✅ Done
+Custom 1024×1024 PNGs confirmed (not Expo defaults).
+Infrastructure
+Item
+Status
+Notes
+API server health check endpoint
+✅ Done
+/healthroute exists.
+Database production backups
+✅ Handled
+Replit manages PostgreSQL backups automatically.
+Error monitoring (Sentry)
+❌ Not done
+Removed at your request — no external monitoring in place. In-memory alerting only.
+All critical API routes rate-limited
+⚠️ Partial
+Rate limiting confirmed on /api/resilience/assess. Other sensitive routes (auth, payments) should be checked.
+Domain redirect (replit.app → platform.com)
+✅ Done
+301 redirect implemented.
+Content & Legal
+Item
+Status
+Notes
+Privacy policy live and linked
+✅ Done
+/privacypage exists and is linked in footer.
+Terms of service live and linked
+✅ Done
+/termspage exists and is linked in footer.
+Cookie banner / consent (EU traffic)
+❌ Not done
+There is no cookie/analytics consent banner. The assessment consent flow is separate. If you don't use analytics or tracking cookies, this may not be required.
+Coaching referral CTAs link to real booking
+✅ Done
+All coaching links point to healing-through-understanding.replit.app. Now points to the correct domain
+Testimonials are genuine
+✅ Implemented
+Pulled dynamically from real user feedback via /api/feedback/testimonials.
+No stray "Replit" branding
+⚠️ Needs review
+Admin marketing page has old references (internal only, not user-facing). Coaching CTAs use a .replit.appdomain — see above.
+SEO Basics
+Item
+Status
+Notes
+<title>and <meta description>on all pages
+✅ Done
+Set in index.html.
+og:imageset for link previews
+✅ Done
+opengraph.jpgat resilium-platform.com/opengraph.jpg.
+sitemap.xmland robots.txtaccessible
+✅ Done
+Fixed robots.txtsitemap URL (was still pointing to old domain) just now.
+Google Search Console verified
+User action
+Requires you to add a verification meta tag or DNS TXT record.
