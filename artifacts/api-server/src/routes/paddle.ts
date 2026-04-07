@@ -4,8 +4,17 @@ import { eq } from "drizzle-orm";
 import { createHmac } from "crypto";
 import { logger } from "../lib/logger";
 import { sendProUpgradeEmail } from "../lib/email.js";
+import rateLimit from "express-rate-limit";
 
 const router = Router();
+
+const paddleWebhookRateLimit = rateLimit({
+  windowMs: 60 * 1000,
+  max: 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "RATE_LIMITED", message: "Too many webhook requests." },
+});
 
 function verifyPaddleSignature(rawBody: string, signatureHeader: string | undefined, secret: string): boolean {
   if (!signatureHeader) return false;
@@ -24,6 +33,7 @@ function verifyPaddleSignature(rawBody: string, signatureHeader: string | undefi
 
 router.post(
   "/paddle/webhook",
+  paddleWebhookRateLimit,
   async (req, res) => {
     const webhookSecret = process.env["PADDLE_RESILIUM_WEBHOOK_SECRET_KEY"] ?? process.env["PADDLE_WEBHOOK_SECRET"];
     // express.raw() (registered in app.ts before express.json()) captures the body as a Buffer

@@ -296,7 +296,7 @@ Happy to share the scoring framework if useful — I've been refining it.`}
 
 The output isn't generic tips — it's a prioritized action plan based on your specific answers. No email required.
 
-resilium-ai.replit.app
+resilium-platform.com
 
 Happy to answer any questions about the methodology — I built it to solve this exact problem for myself first.`}
       </CopyBlock>
@@ -442,7 +442,7 @@ Would this be relevant for an upcoming piece? I can arrange a brief call or send
 
 Best,
 [Name]
-Resilium | resilium-ai.replit.app`}
+Resilium | resilium-platform.com`}
       </CopyBlock>
 
       <SubHeading><Globe className="w-4 h-4" /> Target Publications & Newsletters</SubHeading>

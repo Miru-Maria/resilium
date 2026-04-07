@@ -43,7 +43,7 @@ export default function AdminUsersPage() {
           </div>
           <div>
             <h1 className="text-xl font-bold">User Management</h1>
-            <p className="text-sm text-muted-foreground">Registered accounts via Replit Auth</p>
+            <p className="text-sm text-muted-foreground">Registered accounts via Clerk</p>
           </div>
         </div>
 

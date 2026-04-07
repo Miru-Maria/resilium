@@ -3,7 +3,7 @@ import { desc } from "drizzle-orm";
 import { logger } from "./logger.js";
 import { sendHealthCheckSummary } from "./email.js";
 
-const APP_URL = process.env["APP_URL"] ?? "https://resilium-ai.replit.app";
+const APP_URL = process.env["APP_URL"] ?? "https://resilium-platform.com";
 const API_URL = process.env["API_URL"] ?? APP_URL;
 
 interface CheckResult {

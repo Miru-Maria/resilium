@@ -5,6 +5,7 @@ import {
   requireAdminSession, generateAdminToken, verifyAdminToken,
   hashPassword, verifyPassword, generateRecoveryCode, consumeRecoveryCode,
 } from "../../middlewares/adminAuth.js";
+import rateLimit from "express-rate-limit";
 import uxTestRouter from "./ux-test/index.js";
 import adminGdprRouter from "./gdpr.js";
 import adminAnalyticsRouter from "./analytics.js";
@@ -15,9 +16,17 @@ import { sendWelcomeEmail, sendProUpgradeEmail, sendReassessmentReminder, sendUs
 
 const ADMIN_PASSWORD_KEY = "admin_password_hash";
 
+const adminLoginRateLimit = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "RATE_LIMITED", message: "Too many login attempts. Please wait 15 minutes before trying again." },
+});
+
 const router: IRouter = Router();
 
-router.post("/login", async (req, res) => {
+router.post("/login", adminLoginRateLimit, async (req, res) => {
   const { username, password } = req.body as { username?: string; password?: string };
 
   const adminUsername = process.env["RESILIUM_ADMIN_USERNAME"] ?? process.env["ADMIN_USERNAME"];
