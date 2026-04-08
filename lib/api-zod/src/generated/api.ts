@@ -103,6 +103,7 @@ export const SubmitAssessmentBody = zod.object({
         "cyber_attack",
         "pandemic",
         "financial_crisis",
+        "grid_failure",
       ]),
     )
     .describe("Primary risk concerns"),

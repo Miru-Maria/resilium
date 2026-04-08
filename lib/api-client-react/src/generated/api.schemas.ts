@@ -200,6 +200,7 @@ export const AssessmentInputRiskConcernsItem = {
   cyber_attack: "cyber_attack",
   pandemic: "pandemic",
   financial_crisis: "financial_crisis",
+  grid_failure: "grid_failure",
 } as const;
 
 /**

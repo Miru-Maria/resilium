@@ -172,13 +172,13 @@ function GlobalNav() {
                     </span>
                   )}
                   <span className="max-w-[100px] truncate text-sm hidden sm:block">
-                    {user.firstName || user.username || "Account"}
+                    {user.firstName || user.fullName || user.username || user.primaryEmailAddress?.emailAddress?.split("@")[0] || "Account"}
                   </span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuItem asChild>
-                  <Link href="/profile" className="cursor-pointer">My Plans</Link>
+                  <Link href="/profile?tab=plans" className="cursor-pointer">My Plans</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link href="/profile?tab=account" className="cursor-pointer">Account</Link>
