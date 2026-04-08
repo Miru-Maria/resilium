@@ -51,14 +51,12 @@ function RootLayoutNav() {
             animation: "slide_from_right",
           }}
         >
-          <Stack.Screen name="index" />
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="consent" />
           <Stack.Screen name="assessment" />
           <Stack.Screen name="loading" />
           <Stack.Screen name="results" />
-          <Stack.Screen name="my-data" />
           <Stack.Screen name="sign-in" />
-          <Stack.Screen name="my-plans" />
           <Stack.Screen name="pricing" />
           <Stack.Screen name="scenarios" />
           <Stack.Screen name="about" />

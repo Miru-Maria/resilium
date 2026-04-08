@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { Link, useLocation, useSearch } from "wouter";
 import { SiteFooter } from "@/components/site-footer";
 import { Button } from "@/components/ui/button";
@@ -1377,7 +1377,13 @@ export default function ProfilePage() {
   const { user, isLoaded } = useUser();
   const { isSignedIn } = useAuth();
   const { openSignIn, signOut } = useClerk();
-  const authLoading = !isLoaded;
+  const [authTimedOut, setAuthTimedOut] = useState(false);
+  useEffect(() => {
+    if (isLoaded) return;
+    const t = setTimeout(() => setAuthTimedOut(true), 3000);
+    return () => clearTimeout(t);
+  }, [isLoaded]);
+  const authLoading = !isLoaded && !authTimedOut;
   const isAuthenticated = !!isSignedIn;
   const login = () => openSignIn({});
   const logout = () => signOut({ redirectUrl: "/" });

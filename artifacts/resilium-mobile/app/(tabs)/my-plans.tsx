@@ -3,7 +3,7 @@ import {
   View, Text, StyleSheet, ScrollView, Pressable, Platform, ActivityIndicator,
   Modal, Linking,
 } from "react-native";
-import { router } from "expo-router";
+import { router, useSegments } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -42,6 +42,8 @@ function scoreLabel(score: number) {
 
 export default function MyPlansScreen() {
   const insets = useSafeAreaInsets();
+  const segments = useSegments();
+  const isTabRoot = segments[0] === "(tabs)";
   const { getAuthHeaders, isSignedIn, user } = useAuth();
   const [plans, setPlans] = useState<PlanSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -106,9 +108,7 @@ export default function MyPlansScreen() {
   return (
     <View style={[styles.container, { paddingTop: topPad }]}>
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()} style={styles.backBtn} hitSlop={12}>
-          <Feather name="arrow-left" size={20} color={colors.textSecondary} />
-        </Pressable>
+        <View style={{ width: 38 }} />
         <View>
           <Text style={styles.headerTitle}>My Plans</Text>
           {user?.firstName ? (

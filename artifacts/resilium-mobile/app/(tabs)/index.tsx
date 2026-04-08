@@ -308,7 +308,7 @@ export default function HomeScreen() {
       <View style={styles.header}>
         <View style={styles.logo}>
           <Image
-            source={require("../assets/logo.png")}
+            source={require("../../assets/logo.png")}
             style={styles.logoIcon}
             tintColor={colors.primary}
           />

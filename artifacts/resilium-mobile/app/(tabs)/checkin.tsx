@@ -7,7 +7,7 @@ import {
   ScrollView,
   Platform,
 } from "react-native";
-import { router } from "expo-router";
+import { router, useSegments } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -94,6 +94,8 @@ function RatingRow({
 
 export default function CheckinScreen() {
   const insets = useSafeAreaInsets();
+  const segments = useSegments();
+  const isTabRoot = segments[0] === "(tabs)";
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
@@ -147,9 +149,7 @@ export default function CheckinScreen() {
     <View style={[styles.root, { paddingTop: topPad }]}>
       {/* Header */}
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()} style={styles.backBtn} hitSlop={12}>
-          <Feather name="arrow-left" size={20} color={colors.text} />
-        </Pressable>
+        <View style={{ width: 40 }} />
         <Text style={styles.headerTitle}>Daily Check-In</Text>
         <View style={{ width: 40 }} />
       </View>

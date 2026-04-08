@@ -42,7 +42,7 @@ export function RadarChartView({ score, previousScore }: RadarChartViewProps) {
     { subject: "Health", current: score.health, previous: previousScore?.health, fullMark: 100 },
     { subject: "Skills", current: score.skills, previous: previousScore?.skills, fullMark: 100 },
     { subject: "Mobility", current: score.mobility, previous: previousScore?.mobility, fullMark: 100 },
-    { subject: "Psychological", current: score.psychological, previous: previousScore?.psychological, fullMark: 100 },
+    { subject: "Psych.", current: score.psychological, previous: previousScore?.psychological, fullMark: 100 },
     { subject: "Resources", current: score.resources, previous: previousScore?.resources, fullMark: 100 },
   ];
 

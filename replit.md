@@ -36,7 +36,7 @@ The platform features a permanent dark-only theme with a background color `#0D12
 - **Monorepo**: pnpm workspaces
 - **Backend**: Node.js 24, Express 5, PostgreSQL with Drizzle ORM, Zod for validation.
 - **Frontend**: React, Vite, Tailwind CSS, framer-motion, recharts.
-- **Mobile**: Expo, React Native, Expo Router, `@expo/vector-icons`, expo-haptics.
+- **Mobile**: Expo, React Native, Expo Router (tab + stack navigation), `@expo/vector-icons`, expo-haptics. Main screens (Home, Plans, Check-in, Account) live in `app/(tabs)/` with a persistent bottom tab bar. Flow screens (assessment, consent, results, sign-in, pricing, scenarios, about, coaching) remain as root stack screens.
 - **AI**: OpenAI (gpt-5.2) via Replit AI Integrations. The AI generates structured JSON reports including risk summaries, vulnerabilities, action plans, scenario simulations, and daily habits, maintaining an intelligent, grounded, and empowering tone.
 - **Authentication**: Clerk (`@clerk/react`, `@clerk/express`, `@clerk/expo`) handles user authentication across web and mobile. Production instance is live on `resilium-platform.com` with DNS CNAME records (`clerk.resilium-platform.com → frontend-api.clerk.services`). The Clerk publishable key is hardcoded in `artifacts/resilium/vite.config.ts` via a `define` block to prevent Replit's build process from overriding it with its own managed key.
 - **GDPR**: Implemented with explicit consent mechanisms, data export, and deletion request functionalities. Anonymous reports are auto-deleted after 30 days.
