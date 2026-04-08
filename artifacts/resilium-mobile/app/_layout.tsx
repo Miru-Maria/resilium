@@ -9,6 +9,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect, useState } from "react";
+import { Platform } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -20,7 +21,19 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { SessionProvider } from "@/context/session";
 import { ThemeProvider, useColors } from "@/context/theme";
 
-const tokenCache = {
+const webTokenCache = {
+  async getToken(key: string) {
+    try { return typeof localStorage !== "undefined" ? localStorage.getItem(key) : null; } catch { return null; }
+  },
+  async saveToken(key: string, value: string) {
+    try { if (typeof localStorage !== "undefined") localStorage.setItem(key, value); } catch {}
+  },
+  async clearToken(key: string) {
+    try { if (typeof localStorage !== "undefined") localStorage.removeItem(key); } catch {}
+  },
+};
+
+const nativeTokenCache = {
   async getToken(key: string) {
     try { return await SecureStore.getItemAsync(key); } catch { return null; }
   },
@@ -31,6 +44,8 @@ const tokenCache = {
     try { await SecureStore.deleteItemAsync(key); } catch {}
   },
 };
+
+const tokenCache = Platform.OS === "web" ? webTokenCache : nativeTokenCache;
 
 setBaseUrl(`https://${process.env.EXPO_PUBLIC_DOMAIN}`);
 
