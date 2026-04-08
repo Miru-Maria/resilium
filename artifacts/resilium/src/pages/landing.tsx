@@ -363,26 +363,130 @@ export default function LandingPage() {
               {[
                 {
                   step: "01",
-                  icon: <Brain className="w-7 h-7 text-primary" />,
+                  illustration: (
+                    <svg viewBox="0 0 160 110" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                      {/* Six dimension nodes flowing in */}
+                      {[
+                        { cx: 18, cy: 20, label: "Financial" },
+                        { cx: 18, cy: 42, label: "Health" },
+                        { cx: 18, cy: 64, label: "Skills" },
+                        { cx: 18, cy: 86, label: "Mobility" },
+                        { cx: 142, cy: 31, label: "Psych" },
+                        { cx: 142, cy: 75, label: "Resources" },
+                      ].map(({ cx, cy, label }, i) => (
+                        <g key={i}>
+                          <line x1={cx + (cx < 80 ? 10 : -10)} y1={cy} x2={80} y2={55} stroke="rgba(224,128,64,0.18)" strokeWidth="1" strokeDasharray="3 3" />
+                          <circle cx={cx} cy={cy} r="7" fill="rgba(224,128,64,0.08)" stroke="rgba(224,128,64,0.4)" strokeWidth="1" />
+                          <circle cx={cx} cy={cy} r="3" fill="rgba(224,128,64,0.7)" />
+                        </g>
+                      ))}
+                      {/* Center hub — the assessment form */}
+                      <circle cx="80" cy="55" r="22" fill="rgba(224,128,64,0.06)" stroke="rgba(224,128,64,0.35)" strokeWidth="1.5" />
+                      <circle cx="80" cy="55" r="14" fill="rgba(224,128,64,0.1)" stroke="rgba(224,128,64,0.5)" strokeWidth="1" />
+                      {/* Form lines inside hub */}
+                      <rect x="70" y="49" width="20" height="2" rx="1" fill="rgba(234,217,190,0.5)" />
+                      <rect x="70" y="54" width="14" height="2" rx="1" fill="rgba(234,217,190,0.3)" />
+                      <rect x="70" y="59" width="17" height="2" rx="1" fill="rgba(234,217,190,0.2)" />
+                    </svg>
+                  ),
                   title: "Answer the assessment",
                   desc: "10–15 minutes of honest questions covering your finances, location, health, practical skills, housing situation, and psychological resilience under pressure.",
                 },
                 {
                   step: "02",
-                  icon: <Zap className="w-7 h-7 text-primary" />,
+                  illustration: (
+                    <svg viewBox="0 0 160 110" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                      {/* Hexagonal radar chart */}
+                      {[0, 1, 2].map((ring) => {
+                        const r = 16 + ring * 14;
+                        const pts = Array.from({ length: 6 }, (_, i) => {
+                          const a = (i * Math.PI) / 3 - Math.PI / 2;
+                          return `${80 + r * Math.cos(a)},${55 + r * Math.sin(a)}`;
+                        }).join(" ");
+                        return <polygon key={ring} points={pts} fill="none" stroke="rgba(234,217,190,0.12)" strokeWidth="1" />;
+                      })}
+                      {/* Spoke lines */}
+                      {Array.from({ length: 6 }, (_, i) => {
+                        const a = (i * Math.PI) / 3 - Math.PI / 2;
+                        return <line key={i} x1="80" y1="55" x2={80 + 44 * Math.cos(a)} y2={55 + 44 * Math.sin(a)} stroke="rgba(234,217,190,0.1)" strokeWidth="1" />;
+                      })}
+                      {/* Filled amber shape (score polygon) */}
+                      <polygon
+                        points={Array.from({ length: 6 }, (_, i) => {
+                          const scores = [0.72, 0.58, 0.84, 0.45, 0.67, 0.78];
+                          const a = (i * Math.PI) / 3 - Math.PI / 2;
+                          const r = 44 * scores[i];
+                          return `${80 + r * Math.cos(a)},${55 + r * Math.sin(a)}`;
+                        }).join(" ")}
+                        fill="rgba(224,128,64,0.18)"
+                        stroke="#E08040"
+                        strokeWidth="1.8"
+                      />
+                      {/* Vertex dots */}
+                      {Array.from({ length: 6 }, (_, i) => {
+                        const scores = [0.72, 0.58, 0.84, 0.45, 0.67, 0.78];
+                        const a = (i * Math.PI) / 3 - Math.PI / 2;
+                        const r = 44 * scores[i];
+                        return <circle key={i} cx={80 + r * Math.cos(a)} cy={55 + r * Math.sin(a)} r="3" fill="#E08040" />;
+                      })}
+                      {/* Dimension labels */}
+                      {[
+                        { label: "Financial", a: -Math.PI / 2 },
+                        { label: "Health", a: -Math.PI / 6 },
+                        { label: "Skills", a: Math.PI / 6 },
+                        { label: "Mobility", a: Math.PI / 2 },
+                        { label: "Psych", a: (5 * Math.PI) / 6 },
+                        { label: "Resources", a: (7 * Math.PI) / 6 },
+                      ].map(({ label, a }, i) => (
+                        <text key={i} x={80 + 52 * Math.cos(a)} y={55 + 52 * Math.sin(a)} fontSize="7" fill="rgba(155,142,126,0.8)" textAnchor="middle" dominantBaseline="central" fontFamily="sans-serif">{label}</text>
+                      ))}
+                    </svg>
+                  ),
                   title: "AI builds your profile",
                   desc: "Your answers are scored across six risk dimensions and fed to an AI that reasons about your specific vulnerabilities — not generic advice lifted from a checklist.",
                 },
                 {
                   step: "03",
-                  icon: <CheckCircle2 className="w-7 h-7 text-primary" />,
+                  illustration: (
+                    <svg viewBox="0 0 160 110" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                      {/* Document card */}
+                      <rect x="28" y="10" width="104" height="90" rx="8" fill="rgba(224,128,64,0.04)" stroke="rgba(224,128,64,0.2)" strokeWidth="1" />
+                      {/* Phase labels */}
+                      {[
+                        { label: "30 Days", y: 26, pct: 78, done: true },
+                        { label: "6 Months", y: 52, pct: 42, done: false },
+                        { label: "Long-term", y: 78, pct: 15, done: false },
+                      ].map(({ label, y, pct, done }) => (
+                        <g key={label}>
+                          <text x="40" y={y} fontSize="7.5" fill={done ? "#E08040" : "rgba(155,142,126,0.7)"} fontFamily="sans-serif" fontWeight="600">{label}</text>
+                          {/* Progress track */}
+                          <rect x="40" y={y + 6} width="80" height="5" rx="2.5" fill="rgba(234,217,190,0.08)" />
+                          <rect x="40" y={y + 6} width={0.8 * pct} height="5" rx="2.5" fill={done ? "rgba(224,128,64,0.7)" : "rgba(224,128,64,0.3)"} />
+                          {/* Checklist items */}
+                          {[0, 1].map((j) => (
+                            <g key={j}>
+                              {done ? (
+                                <>
+                                  <circle cx={40 + j * 38} cy={y + 18} r="4" fill="rgba(224,128,64,0.2)" stroke="#E08040" strokeWidth="1" />
+                                  <polyline points={`${36 + j * 38},${y + 18} ${39 + j * 38},${y + 21} ${44 + j * 38},${y + 15}`} stroke="#E08040" strokeWidth="1.2" fill="none" strokeLinecap="round" />
+                                </>
+                              ) : (
+                                <circle cx={40 + j * 38} cy={y + 18} r="4" fill="none" stroke="rgba(234,217,190,0.2)" strokeWidth="1" />
+                              )}
+                              <rect x={47 + j * 38} y={y + 15} width={done ? 22 : 28} height="2.5" rx="1.25" fill={done ? "rgba(234,217,190,0.35)" : "rgba(234,217,190,0.12)"} />
+                            </g>
+                          ))}
+                        </g>
+                      ))}
+                    </svg>
+                  ),
                   title: "Work your living action plan",
                   desc: "Your Strategic Action Plan is a real working document — not a PDF you forget. Check off tasks, track your progress across 30-day, 6-month, and long-term phases, and reassess as your situation evolves.",
                 },
-              ].map(({ step, icon, title, desc }) => (
+              ].map(({ step, illustration, title, desc }) => (
                 <div key={step} className="relative flex flex-col gap-4 p-6 rounded-2xl bg-background border border-border/60">
                   <span className="text-xs font-bold text-primary/40 tracking-widest">{step}</span>
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">{icon}</div>
+                  <div className="w-full h-[110px]">{illustration}</div>
                   <h3 className="font-display font-bold text-lg">{title}</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
                 </div>

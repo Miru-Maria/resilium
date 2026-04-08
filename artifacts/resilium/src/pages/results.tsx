@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { Progress } from "@/components/ui/progress";
-import { Loader2, Download, Printer, Share2, AlertTriangle, CheckCircle, RefreshCcw, Activity, User, LogIn, Brain, TrendingUp, Award, Star, ExternalLink, Heart, BookOpen, ShieldCheck, Zap, Package, Globe, MapPin, Lock, Mail, ImageDown, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
+import { Loader2, Download, Printer, Share2, AlertTriangle, CheckCircle, RefreshCcw, Activity, User, LogIn, Brain, TrendingUp, Award, Star, ExternalLink, Heart, BookOpen, ShieldCheck, Zap, Package, Globe, MapPin, Lock, Mail, ImageDown, Sparkles, ChevronDown, ChevronUp, DollarSign, Wrench, Navigation, Home, Users, Target } from "lucide-react";
 import { ResilientIcon } from "@/components/resilient-icon";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
@@ -137,6 +137,15 @@ const AREA_LABELS: Record<string, string> = {
   mobility: "Mobility",
   psychological: "Psychological",
   resources: "Resources",
+};
+
+const AREA_ICONS: Record<string, React.ReactNode> = {
+  financial: <DollarSign className="w-4 h-4 text-amber-500" />,
+  health: <Activity className="w-4 h-4 text-emerald-500" />,
+  skills: <Wrench className="w-4 h-4 text-blue-400" />,
+  mobility: <Navigation className="w-4 h-4 text-violet-400" />,
+  psychological: <Brain className="w-4 h-4 text-rose-400" />,
+  resources: <Package className="w-4 h-4 text-orange-400" />,
 };
 
 const PRIORITY_CONFIG = {
@@ -800,6 +809,7 @@ export default function ResultsPage() {
                   const comp = areaCompletion(area, items);
                   return (
                     <TabsTrigger key={area} value={area} className="rounded-xl text-xs sm:text-sm data-[state=active]:shadow-sm flex items-center gap-1.5">
+                      {AREA_ICONS[area]}
                       {AREA_LABELS[area] ?? area}
                       {comp.total > 0 && (
                         <span className={cn(
@@ -1096,8 +1106,11 @@ export default function ResultsPage() {
                   {Object.entries(checklistsByArea).map(([area, items]) => {
                     const comp = areaCompletion(area, items);
                     return (
-                      <div key={area} className="flex items-center gap-4">
-                        <span className="text-sm font-medium w-24 flex-shrink-0">{AREA_LABELS[area] ?? area}</span>
+                      <div key={area} className="flex items-center gap-3">
+                        <span className="w-28 flex-shrink-0 flex items-center gap-2">
+                          {AREA_ICONS[area]}
+                          <span className="text-sm font-medium">{AREA_LABELS[area] ?? area}</span>
+                        </span>
                         <Progress value={comp.percent} className="h-2 flex-1" />
                         <span className="text-xs font-bold text-muted-foreground w-12 text-right">{comp.done}/{comp.total}</span>
                       </div>

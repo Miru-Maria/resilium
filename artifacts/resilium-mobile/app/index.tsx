@@ -407,6 +407,35 @@ export default function HomeScreen() {
             </LinearGradient>
           </Pressable>
 
+          {/* Dimension preview teaser */}
+          <View style={{ marginTop: 4, borderRadius: 16, borderWidth: 1, borderColor: "rgba(224,128,64,0.2)", backgroundColor: "rgba(224,128,64,0.04)", padding: 16, gap: 10 }}>
+            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 2 }}>
+              <Text style={{ fontFamily: "Inter_700Bold", fontSize: 11, color: colors.primary, letterSpacing: 1.5, textTransform: "uppercase" }}>Your Resilience Profile</Text>
+              <View style={{ backgroundColor: "rgba(224,128,64,0.15)", paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, borderWidth: 1, borderColor: "rgba(224,128,64,0.25)" }}>
+                <Text style={{ fontFamily: "Inter_700Bold", fontSize: 9, color: colors.primary, letterSpacing: 1 }}>LOCKED</Text>
+              </View>
+            </View>
+            {[
+              { label: "Financial", pct: 0.62, color: "#E08040" },
+              { label: "Health", pct: 0.78, color: "#E08040" },
+              { label: "Skills", pct: 0.45, color: "#E08040" },
+              { label: "Mobility", pct: 0.55, color: "#E08040" },
+              { label: "Psychological", pct: 0.70, color: "#E08040" },
+              { label: "Resources", pct: 0.38, color: "#E08040" },
+            ].map(({ label, pct }) => (
+              <View key={label} style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                <Text style={{ fontFamily: "Inter_600SemiBold", fontSize: 11, color: colors.textMuted, width: 90 }}>{label}</Text>
+                <View style={{ flex: 1, height: 5, borderRadius: 3, backgroundColor: "rgba(234,217,190,0.08)", overflow: "hidden" }}>
+                  <View style={{ width: `${pct * 100}%`, height: "100%", borderRadius: 3, backgroundColor: "rgba(224,128,64,0.3)" }} />
+                </View>
+                <View style={{ width: 24, height: 14, borderRadius: 4, backgroundColor: "rgba(234,217,190,0.06)", alignItems: "center", justifyContent: "center" }}>
+                  <Text style={{ fontFamily: "Inter_700Bold", fontSize: 9, color: colors.textMuted }}>??</Text>
+                </View>
+              </View>
+            ))}
+            <Text style={{ fontFamily: "Inter_400Regular", fontSize: 11, color: colors.textMuted, marginTop: 2, textAlign: "center" }}>Complete the assessment to reveal your scores</Text>
+          </View>
+
           {/* Trust indicators */}
           <View style={styles.trustRow}>
             {[

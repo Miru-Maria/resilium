@@ -7,7 +7,7 @@ import { Slider } from "@/components/ui/slider";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { useSubmitAssessment } from "@workspace/api-client-react";
-import { Loader2, ArrowRight, ArrowLeft, CheckCircle2, AlertCircle, Brain, Zap, Lock, MapPin } from "lucide-react";
+import { Loader2, ArrowRight, ArrowLeft, CheckCircle2, AlertCircle, Brain, Zap, Lock, MapPin, User, DollarSign, Wallet, Users, Wrench, Activity, Navigation, Home, ShieldCheck, TriangleAlert, Share2, Target } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SiteFooter } from "@/components/site-footer";
 import { useUser, useAuth } from "@clerk/react";
@@ -49,6 +49,23 @@ import type {
 // 13 = Social Capital
 const TOTAL_STEPS = 14;
 const MR_STEP = 4;
+
+const STEP_ICONS: Record<number | string, React.ReactNode> = {
+  1: <MapPin className="w-3.5 h-3.5" />,
+  2: <User className="w-3.5 h-3.5" />,
+  3: <DollarSign className="w-3.5 h-3.5" />,
+  mr: <Brain className="w-3.5 h-3.5" />,
+  5: <Wallet className="w-3.5 h-3.5" />,
+  6: <Users className="w-3.5 h-3.5" />,
+  7: <Wrench className="w-3.5 h-3.5" />,
+  8: <Activity className="w-3.5 h-3.5" />,
+  9: <Navigation className="w-3.5 h-3.5" />,
+  10: <Home className="w-3.5 h-3.5" />,
+  11: <ShieldCheck className="w-3.5 h-3.5" />,
+  12: <TriangleAlert className="w-3.5 h-3.5" />,
+  13: <Share2 className="w-3.5 h-3.5" />,
+  14: <Target className="w-3.5 h-3.5" />,
+};
 
 type Language = "en" | "ro";
 
@@ -1093,6 +1110,7 @@ export default function AssessmentPage() {
   };
 
   const progressLabel = (step === MR_STEP ? t.progress[4] : t.progress[step]) ?? "";
+  const progressIcon = STEP_ICONS[step === MR_STEP ? "mr" : step];
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -1172,7 +1190,10 @@ export default function AssessmentPage() {
       <div className="w-full max-w-md mx-auto px-6 mb-8">
         <Progress value={progressPercent} className="h-2" />
         <div className="flex items-center justify-between mt-2 px-0.5">
-          <span className="text-xs font-semibold text-primary/70">{progressLabel}</span>
+          <span className="flex items-center gap-1.5 text-xs font-semibold text-primary/70">
+            {progressIcon && <span className="opacity-70">{progressIcon}</span>}
+            {progressLabel}
+          </span>
           <span className="text-xs text-muted-foreground">{Math.round(progressPercent)}%</span>
         </div>
       </div>
