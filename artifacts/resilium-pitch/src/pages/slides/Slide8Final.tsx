@@ -1,5 +1,3 @@
-import { useEffect, useRef } from "react";
-
 const base = import.meta.env.BASE_URL;
 const allSlides =
   typeof window !== "undefined" &&
@@ -9,60 +7,56 @@ const a = (delay: string, kf = "fadeUp") =>
 
 const AMBER = "#E08040";
 
-function NeuralCanvas() {
-  const ref = useRef<HTMLCanvasElement>(null);
-  useEffect(() => {
-    const canvas = ref.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
-    resize();
-    window.addEventListener("resize", resize);
-    const COUNT = 60;
-    const nodes = Array.from({ length: COUNT }, () => ({
-      x: Math.random() * window.innerWidth,
-      y: Math.random() * window.innerHeight,
-      vx: (Math.random() - 0.5) * 0.28,
-      vy: (Math.random() - 0.5) * 0.28,
-      r: Math.random() * 1.8 + 0.8,
-    }));
-    const MAX_DIST = 170;
-    let raf: number;
-    const draw = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      for (const n of nodes) {
-        n.x += n.vx; n.y += n.vy;
-        if (n.x < 0 || n.x > canvas.width) n.vx *= -1;
-        if (n.y < 0 || n.y > canvas.height) n.vy *= -1;
-      }
-      for (let i = 0; i < nodes.length; i++) {
-        for (let j = i + 1; j < nodes.length; j++) {
-          const dx = nodes[i].x - nodes[j].x, dy = nodes[i].y - nodes[j].y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < MAX_DIST) {
-            ctx.strokeStyle = `rgba(224,128,64,${(1 - dist / MAX_DIST) * 0.22})`;
-            ctx.lineWidth = 0.7;
-            ctx.beginPath(); ctx.moveTo(nodes[i].x, nodes[i].y); ctx.lineTo(nodes[j].x, nodes[j].y); ctx.stroke();
-          }
-        }
-      }
-      for (const n of nodes) {
-        ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(224,128,64,0.45)"; ctx.fill();
-      }
-      raf = requestAnimationFrame(draw);
-    };
-    draw();
-    return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", resize); };
-  }, []);
-  return <canvas ref={ref} className="absolute inset-0 w-full h-full" style={{ pointerEvents: "none" }} />;
+const NODES: { cx: string; cy: string; r: number }[] = [
+  { cx: "12%",  cy: "18%", r: 1.6 }, { cx: "28%",  cy: "9%",  r: 1.1 },
+  { cx: "44%",  cy: "22%", r: 1.4 }, { cx: "61%",  cy: "12%", r: 1.8 },
+  { cx: "77%",  cy: "28%", r: 1.2 }, { cx: "88%",  cy: "14%", r: 1.5 },
+  { cx: "6%",   cy: "42%", r: 1.3 }, { cx: "19%",  cy: "55%", r: 1.7 },
+  { cx: "34%",  cy: "47%", r: 1.0 }, { cx: "50%",  cy: "38%", r: 1.9 },
+  { cx: "65%",  cy: "52%", r: 1.3 }, { cx: "82%",  cy: "44%", r: 1.1 },
+  { cx: "93%",  cy: "58%", r: 1.6 }, { cx: "10%",  cy: "70%", r: 1.4 },
+  { cx: "25%",  cy: "78%", r: 1.2 }, { cx: "41%",  cy: "66%", r: 1.8 },
+  { cx: "57%",  cy: "74%", r: 1.0 }, { cx: "73%",  cy: "68%", r: 1.5 },
+  { cx: "87%",  cy: "80%", r: 1.3 }, { cx: "96%",  cy: "72%", r: 1.1 },
+  { cx: "15%",  cy: "88%", r: 1.7 }, { cx: "33%",  cy: "92%", r: 1.2 },
+  { cx: "52%",  cy: "85%", r: 1.4 }, { cx: "70%",  cy: "90%", r: 1.6 },
+  { cx: "85%",  cy: "94%", r: 1.0 },
+];
+
+const EDGES: [number, number][] = [
+  [0,1],[1,2],[2,3],[3,4],[4,5],[0,6],[6,7],[7,8],[8,9],[9,10],[10,11],[11,12],
+  [7,13],[13,14],[14,15],[15,16],[16,17],[17,18],[18,19],[13,20],[20,21],[21,22],
+  [22,23],[23,24],[2,9],[9,16],[4,11],[1,8],[15,22],[10,17],[6,13],
+];
+
+function StaticNetwork() {
+  return (
+    <svg
+      className="absolute inset-0 w-full h-full"
+      viewBox="0 0 100 100"
+      preserveAspectRatio="xMidYMid slice"
+      style={{ pointerEvents: "none" }}
+    >
+      {EDGES.map(([i, j], k) => (
+        <line
+          key={k}
+          x1={NODES[i].cx} y1={NODES[i].cy}
+          x2={NODES[j].cx} y2={NODES[j].cy}
+          stroke="rgba(224,128,64,0.13)"
+          strokeWidth="0.3"
+        />
+      ))}
+      {NODES.map((n, i) => (
+        <circle key={i} cx={n.cx} cy={n.cy} r={n.r * 0.35} fill="rgba(224,128,64,0.38)" />
+      ))}
+    </svg>
+  );
 }
 
 export default function Slide8Final() {
   return (
     <div className="relative w-screen h-screen overflow-hidden flex items-center justify-center" style={{ background: "#0D1225" }}>
-      {!allSlides && <NeuralCanvas />}
+      <StaticNetwork />
 
       <div className="absolute top-0 left-0 right-0 h-[2px]"
         style={{ background: "linear-gradient(90deg, transparent, #E08040, transparent)" }}
