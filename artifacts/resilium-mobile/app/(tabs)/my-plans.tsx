@@ -108,7 +108,20 @@ export default function MyPlansScreen() {
   return (
     <View style={[styles.container, { paddingTop: topPad }]}>
       <View style={styles.header}>
-        <View style={{ width: 38 }} />
+        <Pressable
+          style={({ pressed }) => [styles.backBtn, pressed && { opacity: 0.6 }]}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            if (router.canGoBack()) {
+              router.back();
+            } else {
+              router.replace("/(tabs)");
+            }
+          }}
+          hitSlop={12}
+        >
+          <Feather name="arrow-left" size={18} color={colors.text} />
+        </Pressable>
         <View>
           <Text style={styles.headerTitle}>My Plans</Text>
           {user?.firstName ? (
