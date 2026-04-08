@@ -409,31 +409,70 @@ export default function HomeScreen() {
 
           {/* Dimension preview teaser */}
           <View style={{ marginTop: 4, borderRadius: 16, borderWidth: 1, borderColor: "rgba(224,128,64,0.2)", backgroundColor: "rgba(224,128,64,0.04)", padding: 16, gap: 10 }}>
-            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 2 }}>
+            {/* Header row */}
+            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
               <Text style={{ fontFamily: "Inter_700Bold", fontSize: 11, color: colors.primary, letterSpacing: 1.5, textTransform: "uppercase" }}>Your Resilience Profile</Text>
               <View style={{ backgroundColor: "rgba(224,128,64,0.15)", paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, borderWidth: 1, borderColor: "rgba(224,128,64,0.25)" }}>
                 <Text style={{ fontFamily: "Inter_700Bold", fontSize: 9, color: colors.primary, letterSpacing: 1 }}>LOCKED</Text>
               </View>
             </View>
-            {[
-              { label: "Financial", pct: 0.62, color: "#E08040" },
-              { label: "Health", pct: 0.78, color: "#E08040" },
-              { label: "Skills", pct: 0.45, color: "#E08040" },
-              { label: "Mobility", pct: 0.55, color: "#E08040" },
-              { label: "Psychological", pct: 0.70, color: "#E08040" },
-              { label: "Resources", pct: 0.38, color: "#E08040" },
-            ].map(({ label, pct }) => (
-              <View key={label} style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                <Text style={{ fontFamily: "Inter_600SemiBold", fontSize: 11, color: colors.textMuted, width: 90 }}>{label}</Text>
-                <View style={{ flex: 1, height: 5, borderRadius: 3, backgroundColor: "rgba(234,217,190,0.08)", overflow: "hidden" }}>
-                  <View style={{ width: `${pct * 100}%`, height: "100%", borderRadius: 3, backgroundColor: "rgba(224,128,64,0.3)" }} />
-                </View>
-                <View style={{ width: 24, height: 14, borderRadius: 4, backgroundColor: "rgba(234,217,190,0.06)", alignItems: "center", justifyContent: "center" }}>
-                  <Text style={{ fontFamily: "Inter_700Bold", fontSize: 9, color: colors.textMuted }}>??</Text>
-                </View>
+
+            {/* Score ring + label */}
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 14, marginBottom: 6 }}>
+              <View style={{ width: 62, height: 62, borderRadius: 31, borderWidth: 3, borderColor: "rgba(224,128,64,0.35)", backgroundColor: "rgba(224,128,64,0.06)", alignItems: "center", justifyContent: "center" }}>
+                <Text style={{ fontFamily: "Inter_700Bold", fontSize: 18, color: "rgba(224,128,64,0.4)" }}>??</Text>
+                <Text style={{ fontFamily: "Inter_500Medium", fontSize: 8, color: "rgba(224,128,64,0.3)", letterSpacing: 0.5 }}>/ 100</Text>
               </View>
-            ))}
-            <Text style={{ fontFamily: "Inter_400Regular", fontSize: 11, color: colors.textMuted, marginTop: 2, textAlign: "center" }}>Complete the assessment to reveal your scores</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontFamily: "Inter_700Bold", fontSize: 13, color: colors.text, marginBottom: 3 }}>Overall Score</Text>
+                <Text style={{ fontFamily: "Inter_400Regular", fontSize: 11, color: colors.textMuted, lineHeight: 16 }}>Complete the assessment to see where you stand across all 7 dimensions</Text>
+              </View>
+            </View>
+
+            {/* Color-coded dimension bars */}
+            {[
+              { label: "Financial",     pct: 0.62, risk: "moderate" },
+              { label: "Health",        pct: 0.78, risk: "good"     },
+              { label: "Skills",        pct: 0.45, risk: "critical" },
+              { label: "Mobility",      pct: 0.55, risk: "moderate" },
+              { label: "Psychological", pct: 0.70, risk: "good"     },
+              { label: "Resources",     pct: 0.38, risk: "critical" },
+            ].map(({ label, pct, risk }) => {
+              const barColor =
+                risk === "critical" ? "rgba(248,113,113,0.55)"
+                : risk === "moderate" ? "rgba(224,128,64,0.55)"
+                : "rgba(74,222,128,0.45)";
+              const dotColor =
+                risk === "critical" ? "#F87171"
+                : risk === "moderate" ? "#E08040"
+                : "#4ADE80";
+              return (
+                <View key={label} style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                  <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: dotColor, opacity: 0.7 }} />
+                  <Text style={{ fontFamily: "Inter_600SemiBold", fontSize: 11, color: colors.textMuted, width: 84 }}>{label}</Text>
+                  <View style={{ flex: 1, height: 5, borderRadius: 3, backgroundColor: "rgba(234,217,190,0.08)", overflow: "hidden" }}>
+                    <View style={{ width: `${pct * 100}%`, height: "100%", borderRadius: 3, backgroundColor: barColor }} />
+                  </View>
+                  <View style={{ width: 22, height: 14, borderRadius: 4, backgroundColor: "rgba(234,217,190,0.05)", alignItems: "center", justifyContent: "center" }}>
+                    <Text style={{ fontFamily: "Inter_700Bold", fontSize: 9, color: colors.textMuted }}>??</Text>
+                  </View>
+                </View>
+              );
+            })}
+
+            {/* Legend */}
+            <View style={{ flexDirection: "row", justifyContent: "center", gap: 14, marginTop: 4 }}>
+              {[
+                { color: "#F87171", label: "Critical" },
+                { color: "#E08040", label: "Moderate" },
+                { color: "#4ADE80", label: "Strong" },
+              ].map(({ color, label }) => (
+                <View key={label} style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                  <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: color, opacity: 0.7 }} />
+                  <Text style={{ fontFamily: "Inter_400Regular", fontSize: 9, color: colors.textMuted }}>{label}</Text>
+                </View>
+              ))}
+            </View>
           </View>
 
           {/* Trust indicators */}
