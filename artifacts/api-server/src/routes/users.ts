@@ -7,7 +7,7 @@ import { sendWelcomeEmail } from "../lib/email.js";
 
 const router: IRouter = Router();
 
-export const PLAN_LIMIT = 2;
+export const PLAN_LIMIT = 3;
 
 function getUserId(req: Request): string | null {
   const auth = getAuth(req);

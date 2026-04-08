@@ -40,7 +40,7 @@ function usePaddle() {
 }
 
 const FREE_FEATURES = [
-  "2 lifetime assessments",
+  "3 lifetime assessments",
   "Full resilience score — all 7 dimensions",
   "AI-generated action plan",
   "Mental resilience profile",
@@ -73,7 +73,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "What happens to free (Starter) plans?",
-    a: "Starter accounts are never deleted automatically. Your 2 assessments and reports remain accessible indefinitely. You can request full data deletion at any time via the GDPR tools in your profile.",
+    a: "Starter accounts are never deleted automatically. Your 3 assessments and reports remain accessible indefinitely. You can request full data deletion at any time via the GDPR tools in your profile.",
   },
   {
     q: "Is my assessment data private?",
@@ -194,7 +194,7 @@ export default function PricingPage() {
                 Know if you're getting stronger
               </h1>
               <p className="text-muted-foreground text-lg max-w-xl mx-auto mb-8">
-                Two full assessments for free. Upgrade to track your progress over time, compare plans, and model crisis scenarios before they hit.
+                Three full assessments for free. Upgrade to track your progress over time, compare plans, and model crisis scenarios before they hit.
               </p>
 
               {/* Billing toggle */}
