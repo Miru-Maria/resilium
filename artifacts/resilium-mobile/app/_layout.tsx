@@ -8,12 +8,12 @@ import {
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { setBaseUrl } from "@workspace/api-client-react";
-import { ClerkProvider, ClerkLoaded } from "@clerk/expo";
+import { ClerkProvider } from "@clerk/expo";
 import * as SecureStore from "expo-secure-store";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -77,13 +77,24 @@ export default function RootLayout() {
     Inter_700Bold,
   });
 
+  // Timeout fallback: if fonts haven't loaded or errored after 5 s (e.g. slow CDN),
+  // render with system fonts so the app isn't permanently stuck on a white screen.
+  const [fontTimedOut, setFontTimedOut] = useState(false);
   useEffect(() => {
-    if (fontsLoaded || fontError) {
-      SplashScreen.hideAsync();
-    }
+    if (fontsLoaded || fontError) return;
+    const timer = setTimeout(() => setFontTimedOut(true), 5000);
+    return () => clearTimeout(timer);
   }, [fontsLoaded, fontError]);
 
-  if (!fontsLoaded && !fontError) return null;
+  const fontReady = fontsLoaded || fontError || fontTimedOut;
+
+  useEffect(() => {
+    if (fontReady) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontReady]);
+
+  if (!fontReady) return null;
 
   return (
     <SafeAreaProvider>
@@ -92,15 +103,13 @@ export default function RootLayout() {
           publishableKey={process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY ?? ""}
           tokenCache={tokenCache}
         >
-          <ClerkLoaded>
-            <QueryClientProvider client={queryClient}>
-              <SessionProvider>
-                <ThemeProvider>
-                  <RootLayoutNav />
-                </ThemeProvider>
-              </SessionProvider>
-            </QueryClientProvider>
-          </ClerkLoaded>
+          <QueryClientProvider client={queryClient}>
+            <SessionProvider>
+              <ThemeProvider>
+                <RootLayoutNav />
+              </ThemeProvider>
+            </SessionProvider>
+          </QueryClientProvider>
         </ClerkProvider>
       </ErrorBoundary>
     </SafeAreaProvider>

@@ -675,10 +675,17 @@ export default function AssessmentPage() {
 
   const { user, isLoaded } = useUser();
   const { isSignedIn } = useAuth();
-  const authLoading = !isLoaded;
+  // Timeout fallback: if Clerk hasn't loaded within 3 s, treat as anonymous
+  const [authTimedOut, setAuthTimedOut] = useState(false);
+  useEffect(() => {
+    if (isLoaded) return;
+    const timer = setTimeout(() => setAuthTimedOut(true), 3000);
+    return () => clearTimeout(timer);
+  }, [isLoaded]);
+  const authLoading = !isLoaded && !authTimedOut;
   const isAuthenticated = !!isSignedIn;
   // Per-user draft key — null until Clerk has resolved identity
-  const draftKey = isLoaded ? `${DRAFT_KEY_BASE}_${user?.id ?? "anon"}` : null;
+  const draftKey = (isLoaded || authTimedOut) ? `${DRAFT_KEY_BASE}_${user?.id ?? "anon"}` : null;
   const t = T[lang];
 
   useEffect(() => {
