@@ -23,7 +23,7 @@ const FREE_FEATURES = [
   "Personalized action plan (short, mid & long term)",
   "Stress test scenarios",
   "Daily habit recommendations",
-  "Up to 2 saved plans",
+  "Up to 3 saved plans",
   "GDPR data export & deletion",
 ];
 
