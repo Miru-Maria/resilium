@@ -55,6 +55,7 @@ import {
   Clock,
   Flame,
   Award,
+  Smartphone,
 } from "lucide-react";
 import {
   AlertDialog,
@@ -993,6 +994,39 @@ function AccountTab({ user, plans, onAllPlansDeleted }: {
           )}
         </CardContent>
       </Card>
+
+      {/* Mobile app — Pro only */}
+      {subStatus?.isPro && (
+        <Card className="border border-primary/20 shadow-md bg-primary/[0.03]">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base font-display flex items-center gap-2">
+              <Smartphone className="w-4 h-4 text-primary" /> Mobile App
+              <Badge className="ml-1 bg-primary/15 text-primary border-primary/20 rounded-full text-xs font-bold">Pro</Badge>
+            </CardTitle>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Your Pro plan includes access to the Resilium mobile experience.
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-foreground/80 leading-relaxed">
+              Track your daily check-in, review your Resilience Profile, and access your action plans on the go — optimised for mobile and available exclusively for Pro members.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <a
+                href="https://resilium-platform.com/resilium-mobile/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity"
+              >
+                <Smartphone className="w-4 h-4" /> Open Mobile App
+              </a>
+              <p className="self-center text-xs text-muted-foreground">
+                Works in any mobile browser — no app store required.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Reminder preference */}
       <Card className="border-none shadow-md">
