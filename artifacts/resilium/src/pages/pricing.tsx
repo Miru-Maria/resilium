@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { CheckCircle2, Zap, ShieldCheck, BarChart2, RefreshCw, Lock, ArrowRight, Sparkles, XCircle, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SiteFooter } from "@/components/site-footer";
-import { ResilientIcon } from "@/components/resilient-icon";
+import { PageNav } from "@/components/page-nav";
 import { useUser, useAuth, useClerk } from "@clerk/react";
 
 const PADDLE_CLIENT_TOKEN = import.meta.env.VITE_PADDLE_CLIENT_TOKEN as string | undefined;
@@ -156,21 +156,7 @@ export default function PricingPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="w-full px-6 py-5 flex items-center justify-between border-b border-border/40">
-        <Link href="/">
-          <span className="flex items-center gap-2 cursor-pointer">
-            <ResilientIcon className="w-7 h-7" />
-            <span className="font-display font-bold text-xl text-primary">Resilium</span>
-          </span>
-        </Link>
-        {isAuthenticated ? (
-          <Link href="/profile">
-            <Button variant="ghost" size="sm" className="rounded-full">My Profile</Button>
-          </Link>
-        ) : (
-          <Button variant="ghost" size="sm" className="rounded-full" onClick={login}>Sign In</Button>
-        )}
-      </header>
+      <PageNav />
 
       <main className="flex-1 max-w-5xl mx-auto w-full px-6 py-16">
         {isSuccess ? (

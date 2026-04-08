@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "wouter";
 import { SiteFooter } from "@/components/site-footer";
-import { ResilientIcon } from "@/components/resilient-icon";
+import { PageNav } from "@/components/page-nav";
 import { Button } from "@/components/ui/button";
 import {
   Brain,
@@ -30,17 +30,15 @@ const fadeUp = {
 export default function AboutPage() {
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="w-full py-6 px-6 lg:px-12 border-b border-border/60 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 w-fit">
-          <ResilientIcon className="w-7 h-7" />
-          <span className="font-display font-bold text-xl tracking-tight text-primary">Resilium</span>
-        </Link>
-        <Link href="/consent">
-          <Button size="sm" className="rounded-full px-5 gap-2">
-            Build My Plan <ArrowRight className="w-3.5 h-3.5" />
-          </Button>
-        </Link>
-      </header>
+      <PageNav
+        cta={
+          <Link href="/consent">
+            <Button size="sm" className="rounded-full px-5 gap-2">
+              Build My Plan <ArrowRight className="w-3.5 h-3.5" />
+            </Button>
+          </Link>
+        }
+      />
 
       {/* Page header */}
       <section className="border-b border-border/60 bg-card/20">
