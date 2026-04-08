@@ -188,15 +188,15 @@ function getScoreLabel(score: number) {
 ────────────────────────────────────────── */
 function DemoBanner() {
   return (
-    <div className="w-full bg-primary/10 border-b border-primary/20 px-6 py-3 flex items-center gap-4 print:hidden">
+    <div className="w-full bg-primary/10 border-b border-primary/20 px-6 py-3 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 print:hidden">
       <div className="flex items-center gap-2 flex-1 min-w-0">
         <Eye className="w-4 h-4 text-primary flex-shrink-0" />
         <p className="text-sm font-medium text-foreground">
           <span className="font-bold text-primary">Sample Plan</span>
-          {" "}— This is a fictional demo profile (Alex M., 34). Your actual plan reflects your specific situation.
+          {" "}— Fictional demo profile (Alex M., 34). Your real plan reflects your situation.
         </p>
       </div>
-      <Link href="/consent" className="flex-shrink-0">
+      <Link href="/consent" className="flex-shrink-0 self-start sm:self-auto">
         <Button size="sm" className="rounded-full gap-1.5">
           Build My Plan <ArrowRight className="w-3.5 h-3.5" />
         </Button>
