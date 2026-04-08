@@ -76,7 +76,7 @@ export default function Slide7Close() {
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: "2.2vw" }}>
-            <span style={NUM}>Free</span>
+            <span style={{ ...NUM, fontSize: "3.8vw" }}>Free</span>
             <div style={RULE} />
             <div>
               <div style={LABEL}>To start — always</div>
