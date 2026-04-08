@@ -81,8 +81,7 @@ export function NeuralNetSVG({ width, height, opacity = 0.7, particleCount = 22 
     <Svg
       width={width}
       height={height}
-      style={{ position: "absolute", top: 0, left: 0, opacity }}
-      pointerEvents="none"
+      style={{ position: "absolute", top: 0, left: 0, opacity, pointerEvents: "none" }}
     >
       {lines}
       {particles.map((p, i) => {

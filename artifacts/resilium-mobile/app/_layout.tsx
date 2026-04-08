@@ -17,6 +17,7 @@ import { setBaseUrl } from "@workspace/api-client-react";
 import { ClerkProvider } from "@clerk/expo";
 import * as SecureStore from "expo-secure-store";
 
+import { AppLoadingScreen } from "@/components/AppLoadingScreen";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { SessionProvider } from "@/context/session";
 import { ThemeProvider, useColors } from "@/context/theme";
@@ -53,7 +54,7 @@ SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();
 
-function RootLayoutNav() {
+function RootLayoutNav({ showIntro, onIntroDone }: { showIntro: boolean; onIntroDone: () => void }) {
   const colors = useColors();
 
   return (
@@ -78,6 +79,7 @@ function RootLayoutNav() {
           <Stack.Screen name="coaching" />
         </Stack>
       </KeyboardProvider>
+      {showIntro && <AppLoadingScreen onDone={onIntroDone} />}
     </GestureHandlerRootView>
   );
 }
@@ -89,6 +91,7 @@ export default function RootLayout() {
     Inter_600SemiBold,
     Inter_700Bold,
   });
+  const [showIntro, setShowIntro] = useState(true);
 
   // Timeout fallback: if fonts haven't loaded or errored after 5 s (e.g. slow CDN),
   // render with system fonts so the app isn't permanently stuck on a white screen.
@@ -119,7 +122,7 @@ export default function RootLayout() {
           <QueryClientProvider client={queryClient}>
             <SessionProvider>
               <ThemeProvider>
-                <RootLayoutNav />
+                <RootLayoutNav showIntro={showIntro} onIntroDone={() => setShowIntro(false)} />
               </ThemeProvider>
             </SessionProvider>
           </QueryClientProvider>
