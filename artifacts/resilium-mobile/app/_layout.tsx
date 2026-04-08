@@ -17,6 +17,7 @@ import { setBaseUrl } from "@workspace/api-client-react";
 import { ClerkProvider } from "@clerk/expo";
 import * as SecureStore from "expo-secure-store";
 import { Feather } from "@expo/vector-icons";
+import * as Font from "expo-font";
 
 import { AppLoadingScreen } from "@/components/AppLoadingScreen";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -91,9 +92,21 @@ export default function RootLayout() {
     Inter_500Medium,
     Inter_600SemiBold,
     Inter_700Bold,
-    ...Feather.font,
   });
   const [showIntro, setShowIntro] = useState(true);
+
+  // Load Feather separately — on web it's handled by the @font-face in +html.tsx,
+  // on native we call Font.loadAsync. Errors are swallowed so a missing font never
+  // blocks startup.
+  const [featherReady, setFeatherReady] = useState<boolean>(
+    () => Platform.OS === "web" || Font.isLoaded("Feather")
+  );
+  useEffect(() => {
+    if (featherReady) return;
+    Font.loadAsync(Feather.font)
+      .then(() => setFeatherReady(true))
+      .catch(() => setFeatherReady(true));
+  }, [featherReady]);
 
   // Timeout fallback: if fonts haven't loaded or errored after 7 s (e.g. slow CDN /
   // Android emulator latency), render with system fonts so the app isn't stuck.
@@ -104,7 +117,7 @@ export default function RootLayout() {
     return () => clearTimeout(timer);
   }, [fontsLoaded, fontError]);
 
-  const fontReady = fontsLoaded || !!fontError || fontTimedOut;
+  const fontReady = (fontsLoaded || !!fontError || fontTimedOut) && featherReady;
 
   useEffect(() => {
     if (fontReady) {

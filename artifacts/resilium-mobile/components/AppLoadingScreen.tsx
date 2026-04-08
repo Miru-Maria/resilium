@@ -136,10 +136,9 @@ export function AppLoadingScreen({ onDone }: Props) {
 
       {/* Ambient glow */}
       <Animated.View
-        style={[s.glowOuter, { transform: [{ scale: glowScale }], opacity: glowOpacity }]}
-        pointerEvents="none"
+        style={[s.glowOuter, { transform: [{ scale: glowScale }], opacity: glowOpacity, pointerEvents: "none" }]}
       />
-      <View style={s.glowInner} pointerEvents="none" />
+      <View style={[s.glowInner, { pointerEvents: "none" }]} />
 
       <View style={s.center}>
         {/* Icon area: logo centered inside the two dashed rings */}
