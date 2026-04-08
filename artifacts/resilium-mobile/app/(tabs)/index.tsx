@@ -449,107 +449,18 @@ export default function HomeScreen() {
               </View>
             ))}
           </View>
-        </View>
 
-        {/* ── How it works ── */}
-        <View style={styles.section}>
-          <Text style={styles.sectionEyebrow}>The Process</Text>
-          <Text style={styles.sectionTitle}>How it works</Text>
-          <View style={styles.stepsCol}>
-            {[
-              {
-                step: "01",
-                icon: "cpu",
-                title: "Answer the assessment",
-                desc: "10–15 minutes of honest questions covering finances, location, health, practical skills, housing, and psychological resilience.",
-              },
-              {
-                step: "02",
-                icon: "zap",
-                title: "AI builds your profile",
-                desc: "Your answers are scored across six risk dimensions and fed to an AI that reasons about your specific vulnerabilities — not generic advice.",
-              },
-              {
-                step: "03",
-                icon: "check-circle",
-                title: "Get your action plan",
-                desc: "Your score, your gaps, and a prioritized plan broken into 30-day, 6-month, and long-term phases.",
-              },
-            ].map((s) => (
-              <View key={s.step} style={styles.stepCard}>
-                <Text style={styles.stepNum}>{s.step}</Text>
-                <View style={styles.stepIconWrap}>
-                  <Feather name={s.icon as any} size={18} color={colors.primary} />
-                </View>
-                <Text style={styles.stepTitle}>{s.title}</Text>
-                <Text style={styles.stepDesc}>{s.desc}</Text>
-              </View>
-            ))}
-          </View>
-        </View>
-
-        {/* ── Who it's for ── */}
-        <View style={[styles.section, styles.sectionAlt]}>
-          <Text style={styles.sectionEyebrow}>Who Uses Resilium</Text>
-          <Text style={styles.sectionTitle}>Built for people who prepare, not people who panic</Text>
-          <View style={styles.audienceGrid}>
-            {[
-              {
-                icon: "package",
-                title: "Preppers & Self-Reliance",
-                desc: "You already stockpile and plan. Resilium gives you an honest, scored picture of where your gaps still are — and what to fix first.",
-              },
-              {
-                icon: "dollar-sign",
-                title: "The Financially Anxious",
-                desc: "Find out how many months of runway you have and what would happen if you lost your income tomorrow.",
-              },
-              {
-                icon: "globe",
-                title: "Expats & Digital Nomads",
-                desc: "Assess how your country, mobility, and support network hold up when things go sideways.",
-              },
-              {
-                icon: "alert-triangle",
-                title: "The Quietly Cautious",
-                desc: "You don't call yourself a prepper. Resilium gives you a structured, honest starting point — no judgment.",
-              },
-            ].map((a) => (
-              <View key={a.title} style={styles.audienceCard}>
-                <View style={styles.audienceIconWrap}>
-                  <Feather name={a.icon as any} size={18} color={colors.primary} />
-                </View>
-                <Text style={styles.audienceTitle}>{a.title}</Text>
-                <Text style={styles.audienceDesc}>{a.desc}</Text>
-              </View>
-            ))}
-          </View>
-        </View>
-
-        {/* ── What you'll get ── */}
-        <View style={styles.section}>
-          <Text style={styles.sectionEyebrow}>Your Report</Text>
-          <Text style={styles.sectionTitle}>What you'll walk away with</Text>
-          <View style={styles.reportGrid}>
-            {[
-              { icon: "trending-up",   title: "Resilience Score",       desc: "0–100 composite across six dimensions: Financial, Health, Skills, Mobility, Psychological, Resources." },
-              { icon: "check-square",  title: "Action Plan",            desc: "30-day, 6-month, and long-term tasks ordered by criticality for your specific situation." },
-              { icon: "cpu",           title: "Mental Resilience",      desc: "Deep psychological assessment identifying your Growth or Compensation pathway." },
-              { icon: "alert-triangle",title: "Scenario Stress Tests",  desc: "AI simulations of job loss, supply chain failure, natural disaster — with your personal recovery timeline." },
-              { icon: "map-pin",       title: "Location Risk Analysis", desc: "How your geography affects vulnerability — climate, political stability, infrastructure." },
-              { icon: "shield",        title: "Daily Habits",           desc: "Recurring actions tailored to your profile that move you from vulnerable to prepared." },
-            ].map((r) => (
-              <View key={r.title} style={styles.reportCard}>
-                <View style={styles.reportIconRow}>
-                  <View style={styles.reportIconWrap}>
-                    <Feather name={r.icon as any} size={14} color={colors.primary} />
-                  </View>
-                  <Text style={styles.reportTitle}>{r.title}</Text>
-                </View>
-                <Text style={styles.reportDesc}>{r.desc}</Text>
-              </View>
-            ))}
-          </View>
+          {/* Explore Nudge */}
+          <Pressable
+            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push("/explore"); }}
+            style={{ marginTop: 32, flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 8 }}
+          >
+            <Text style={{ fontFamily: "Inter_500Medium", fontSize: 14, color: colors.primary }}>How it works</Text>
+            <Text style={{ fontFamily: "Inter_400Regular", fontSize: 14, color: colors.textMuted }}>·</Text>
+            <Text style={{ fontFamily: "Inter_500Medium", fontSize: 14, color: colors.primary }}>Who it's for</Text>
+            <Text style={{ fontFamily: "Inter_400Regular", fontSize: 14, color: colors.textMuted }}>·</Text>
+            <Text style={{ fontFamily: "Inter_500Medium", fontSize: 14, color: colors.primary }}>What you get</Text>
+          </Pressable>
         </View>
 
         {/* ── Final CTA ── */}
