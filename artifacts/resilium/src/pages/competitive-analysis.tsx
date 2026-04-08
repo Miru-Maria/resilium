@@ -478,7 +478,7 @@ function generatePDF() {
   doc.text("Wgt", M + capW + 4, y + 12);
   COLS.forEach((col, ci) => {
     const cx = M + capW + wgtW + ci * cellW;
-    doc.setTextColor(ci === 0 ? [224, 128, 64] as [number, number, number] : [255, 255, 255] as [number, number, number]);
+    doc.setTextColor(...(ci === 0 ? [224, 128, 64] as [number, number, number] : [255, 255, 255] as [number, number, number]));
     doc.text(col, cx + cellW / 2, y + 12, { align: "center" });
   });
   y += 18;
