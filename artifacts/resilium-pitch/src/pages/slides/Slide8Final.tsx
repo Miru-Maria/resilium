@@ -7,56 +7,21 @@ const a = (delay: string, kf = "fadeUp") =>
 
 const AMBER = "#E08040";
 
-const NODES: { cx: string; cy: string; r: number }[] = [
-  { cx: "12%",  cy: "18%", r: 1.6 }, { cx: "28%",  cy: "9%",  r: 1.1 },
-  { cx: "44%",  cy: "22%", r: 1.4 }, { cx: "61%",  cy: "12%", r: 1.8 },
-  { cx: "77%",  cy: "28%", r: 1.2 }, { cx: "88%",  cy: "14%", r: 1.5 },
-  { cx: "6%",   cy: "42%", r: 1.3 }, { cx: "19%",  cy: "55%", r: 1.7 },
-  { cx: "34%",  cy: "47%", r: 1.0 }, { cx: "50%",  cy: "38%", r: 1.9 },
-  { cx: "65%",  cy: "52%", r: 1.3 }, { cx: "82%",  cy: "44%", r: 1.1 },
-  { cx: "93%",  cy: "58%", r: 1.6 }, { cx: "10%",  cy: "70%", r: 1.4 },
-  { cx: "25%",  cy: "78%", r: 1.2 }, { cx: "41%",  cy: "66%", r: 1.8 },
-  { cx: "57%",  cy: "74%", r: 1.0 }, { cx: "73%",  cy: "68%", r: 1.5 },
-  { cx: "87%",  cy: "80%", r: 1.3 }, { cx: "96%",  cy: "72%", r: 1.1 },
-  { cx: "15%",  cy: "88%", r: 1.7 }, { cx: "33%",  cy: "92%", r: 1.2 },
-  { cx: "52%",  cy: "85%", r: 1.4 }, { cx: "70%",  cy: "90%", r: 1.6 },
-  { cx: "85%",  cy: "94%", r: 1.0 },
-];
-
-const EDGES: [number, number][] = [
-  [0,1],[1,2],[2,3],[3,4],[4,5],[0,6],[6,7],[7,8],[8,9],[9,10],[10,11],[11,12],
-  [7,13],[13,14],[14,15],[15,16],[16,17],[17,18],[18,19],[13,20],[20,21],[21,22],
-  [22,23],[23,24],[2,9],[9,16],[4,11],[1,8],[15,22],[10,17],[6,13],
-];
-
-function StaticNetwork() {
-  return (
-    <svg
-      className="absolute inset-0 w-full h-full"
-      viewBox="0 0 100 100"
-      preserveAspectRatio="xMidYMid slice"
-      style={{ pointerEvents: "none" }}
-    >
-      {EDGES.map(([i, j], k) => (
-        <line
-          key={k}
-          x1={NODES[i].cx} y1={NODES[i].cy}
-          x2={NODES[j].cx} y2={NODES[j].cy}
-          stroke="rgba(224,128,64,0.13)"
-          strokeWidth="0.3"
-        />
-      ))}
-      {NODES.map((n, i) => (
-        <circle key={i} cx={n.cx} cy={n.cy} r={n.r * 0.35} fill="rgba(224,128,64,0.38)" />
-      ))}
-    </svg>
-  );
-}
-
 export default function Slide8Final() {
   return (
     <div className="relative w-screen h-screen overflow-hidden flex items-center justify-center" style={{ background: "#0D1225" }}>
-      <StaticNetwork />
+      {/* Soft echo of the opening slide — same hero image, heavily veiled */}
+      <img
+        src={`${base}hero-title.png`}
+        alt=""
+        className="absolute inset-0 w-full h-full object-cover"
+        style={{ opacity: 0.10 }}
+      />
+      {/* Deep veil so text stays fully legible */}
+      <div
+        className="absolute inset-0"
+        style={{ background: "linear-gradient(135deg, rgba(13,18,37,0.88) 0%, rgba(13,18,37,0.72) 50%, rgba(224,128,64,0.06) 100%)" }}
+      />
 
       <div className="absolute top-0 left-0 right-0 h-[2px]"
         style={{ background: "linear-gradient(90deg, transparent, #E08040, transparent)" }}
