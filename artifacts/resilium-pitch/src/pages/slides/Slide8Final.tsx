@@ -15,7 +15,7 @@ export default function Slide8Final() {
         src={`${base}hero-title.png`}
         alt=""
         className="absolute inset-0 w-full h-full object-cover"
-        style={{ opacity: 0.10 }}
+        style={{ opacity: 0.20 }}
       />
       {/* Deep veil so text stays fully legible */}
       <div
