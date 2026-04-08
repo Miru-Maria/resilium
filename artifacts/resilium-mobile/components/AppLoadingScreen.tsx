@@ -122,7 +122,7 @@ export function AppLoadingScreen({ onDone }: Props) {
         dotAnim.stop();
         onDone();
       });
-    }, 2800);
+    }, 5000);
 
     return () => {
       clearTimeout(dismiss);
@@ -196,7 +196,7 @@ export function AppLoadingScreen({ onDone }: Props) {
             <Image
               source={require("../assets/images/brain-logo.png")}
               style={styles.logoImage}
-              resizeMode="cover"
+              resizeMode="contain"
             />
           </Animated.View>
         </View>
@@ -282,19 +282,16 @@ const styles = StyleSheet.create({
     left: -13,
   },
   logoCircle: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
+    borderRadius: 14,
     borderWidth: 1.5,
     borderColor: "rgba(224,128,64,0.40)",
-    overflow: "hidden",
     alignItems: "center",
     justifyContent: "center",
+    padding: 6,
   },
   logoImage: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
+    width: 120,
+    height: 96,
   },
   wordmark: {
     fontSize: 26,
