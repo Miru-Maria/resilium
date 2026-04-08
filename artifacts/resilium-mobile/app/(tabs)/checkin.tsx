@@ -13,6 +13,7 @@ import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+import { useAuth } from "@/context/auth";
 import { useColors } from "@/context/theme";
 import { ColorsType } from "@/constants/colors";
 
@@ -96,6 +97,7 @@ export default function CheckinScreen() {
   const insets = useSafeAreaInsets();
   const segments = useSegments();
   const isTabRoot = segments[0] === "(tabs)";
+  const { isSignedIn } = useAuth();
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
@@ -199,11 +201,74 @@ export default function CheckinScreen() {
               })}
             </View>
 
+            {/* Focus area bridge → Action Plan */}
+            {(() => {
+              const weakest = [...DIMENSIONS].sort((a, b) => values[a.key] - values[b.key])[0];
+              const weakestScore = values[weakest.key];
+              const dimMessages: Record<string, string> = {
+                financial: "Financial security is built in small, consistent steps. Your action plan has tasks to strengthen your emergency fund and reduce exposure.",
+                health:    "Your health is the foundation of every other dimension. Your plan includes wellness checkpoints to help you stay on track.",
+                skills:    "Practical skills make you adaptable when things go wrong. Your plan has targeted tasks to close the most important skill gaps.",
+                social:    "Your support network is an underrated resilience asset. Your plan can help you strengthen the key relationships that matter most.",
+                resources: "Preparedness gaps can be closed faster than you think. Your plan has a resource checklist to work through at your own pace.",
+              };
+              const urgency =
+                weakestScore <= 2 ? "Needs immediate attention"
+                : weakestScore === 3 ? "Room to improve"
+                : "Doing well — keep it up";
+              const barColor =
+                weakestScore >= 4 ? colors.success
+                : weakestScore >= 3 ? "#F59E0B"
+                : colors.danger;
+
+              return (
+                <View style={{ backgroundColor: colors.surface, borderRadius: 18, padding: 18, borderWidth: 1, borderColor: colors.primaryBorder, gap: 14 }}>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 7 }}>
+                    <Feather name="target" size={13} color={colors.primary} />
+                    <Text style={{ fontFamily: "Inter_700Bold", fontSize: 11, color: colors.primary, letterSpacing: 1.2, textTransform: "uppercase" }}>Today's Focus Area</Text>
+                  </View>
+
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+                    <View style={{ width: 46, height: 46, borderRadius: 13, backgroundColor: colors.primaryMuted, alignItems: "center", justifyContent: "center" }}>
+                      <Feather name={weakest.icon as any} size={20} color={colors.primary} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ fontFamily: "Inter_700Bold", fontSize: 17, color: colors.text, letterSpacing: -0.3 }}>{weakest.label}</Text>
+                      <Text style={{ fontFamily: "Inter_400Regular", fontSize: 12, color: barColor, marginTop: 2 }}>{urgency}</Text>
+                    </View>
+                    <Text style={{ fontFamily: "Inter_700Bold", fontSize: 22, color: barColor }}>{weakestScore}<Text style={{ fontFamily: "Inter_400Regular", fontSize: 13, color: colors.textMuted }}>/5</Text></Text>
+                  </View>
+
+                  <Text style={{ fontFamily: "Inter_400Regular", fontSize: 13, color: colors.textSecondary, lineHeight: 20 }}>
+                    {dimMessages[weakest.key]}
+                  </Text>
+
+                  {isSignedIn ? (
+                    <Pressable
+                      onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); router.push("/(tabs)/my-plans"); }}
+                      style={({ pressed }) => [{ backgroundColor: colors.primary, borderRadius: 12, padding: 15, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, opacity: pressed ? 0.85 : 1 }]}
+                    >
+                      <Feather name="check-square" size={15} color={colors.background} />
+                      <Text style={{ fontFamily: "Inter_700Bold", fontSize: 15, color: colors.background }}>Open My Action Plan</Text>
+                    </Pressable>
+                  ) : (
+                    <Pressable
+                      onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push("/sign-in"); }}
+                      style={({ pressed }) => [{ borderRadius: 12, padding: 15, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, borderWidth: 1.5, borderColor: colors.primaryBorder, opacity: pressed ? 0.85 : 1 }]}
+                    >
+                      <Feather name="log-in" size={15} color={colors.primary} />
+                      <Text style={{ fontFamily: "Inter_700Bold", fontSize: 15, color: colors.primary }}>Sign In to Access Your Plan</Text>
+                    </Pressable>
+                  )}
+                </View>
+              );
+            })()}
+
             <Pressable
               onPress={() => router.push("/")}
-              style={({ pressed }) => [{ backgroundColor: colors.primary, borderRadius: 14, padding: 16, alignItems: "center", opacity: pressed ? 0.88 : 1 }]}
+              style={({ pressed }) => [{ borderRadius: 14, padding: 14, alignItems: "center", opacity: pressed ? 0.88 : 1, borderWidth: 1, borderColor: colors.border }]}
             >
-              <Text style={{ fontFamily: "Inter_700Bold", fontSize: 15, color: colors.background }}>Back to Dashboard</Text>
+              <Text style={{ fontFamily: "Inter_600SemiBold", fontSize: 14, color: colors.textMuted }}>Back to Dashboard</Text>
             </Pressable>
           </View>
         )}
