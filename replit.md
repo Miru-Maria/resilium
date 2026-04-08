@@ -31,6 +31,16 @@ The overall resilience score is derived from six weighted dimensions, each score
 
 The platform features a permanent dark-only theme with a background color `#0D1225`, primary accent color `#E08040` (amber), and text color `#EAD9BE`. Custom CSS variables are defined in `:root`. A custom logo (`/logo.png` for web, `../assets/logo.png` for mobile) is used across the platform.
 
+## Navigation Architecture
+
+A single `GlobalNav` component in `App.tsx` renders as a `fixed top-0 z-[100]` bar on every non-admin, non-coaching page. It shows:
+- Resilium logo linking to `/` (always at top-left)
+- About / Demo / Pricing links (center, hidden on mobile)
+- Auth state: animated user avatar + dropdown (My Plans, Account, Sign Out) when signed in, or a Sign In button when not — with a 3-second `authTimedOut` fallback for dev environments where Clerk won't load
+- A `GlobalNavSpacer` sibling pushes page content 56px down to avoid overlap
+
+Individual page headers contain only page-specific CTAs (e.g., "Build My Plan", print/share buttons). The `PageNav` component (`src/components/page-nav.tsx`) still exists but is no longer used — the GlobalNav is the single source of truth for navigation.
+
 ## Technical Implementations
 
 - **Monorepo**: pnpm workspaces

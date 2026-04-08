@@ -1433,38 +1433,6 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <header className="w-full bg-card border-b border-border sticky top-0 z-50">
-        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/">
-            <div className="font-display font-bold text-xl text-primary flex items-center gap-2 cursor-pointer">
-              <ResilientIcon className="w-5 h-5" /> Resilium
-            </div>
-          </Link>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="rounded-full flex items-center gap-2">
-                {user?.imageUrl ? (
-                  <img src={user.imageUrl} alt={user.firstName || "User"} className="w-5 h-5 rounded-full object-cover" />
-                ) : (
-                  <span className="w-5 h-5 rounded-full bg-primary/20 text-primary flex items-center justify-center text-[10px] font-bold leading-none shrink-0">
-                    {[user?.firstName?.[0], user?.lastName?.[0]].filter(Boolean).join("").toUpperCase() || "?"}
-                  </span>
-                )}
-                <span className="max-w-[100px] truncate text-sm">
-                  {user?.firstName || user?.username || user?.primaryEmailAddress?.emailAddress?.split("@")[0] || "Account"}
-                </span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-64">
-              <DropdownMenuItem className="font-medium text-muted-foreground text-xs break-all whitespace-normal">{user?.primaryEmailAddress?.emailAddress}</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={logout} className="cursor-pointer">Sign Out</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </header>
-
       <main className="max-w-5xl mx-auto px-6 pt-8 pb-24">
         {/* Page title */}
         <div className="mb-6">

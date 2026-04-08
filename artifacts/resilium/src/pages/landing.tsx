@@ -211,19 +211,6 @@ function AnimatedBackground() {
 }
 
 export default function LandingPage() {
-  const { user, isLoaded } = useUser();
-  const { isSignedIn } = useAuth();
-  const { openSignIn, signOut } = useClerk();
-  const [authTimedOut, setAuthTimedOut] = useState(false);
-  useEffect(() => {
-    const t = setTimeout(() => setAuthTimedOut(true), 3000);
-    return () => clearTimeout(t);
-  }, []);
-  const isLoading = !isLoaded && !authTimedOut;
-  const isAuthenticated = !!isSignedIn;
-  const login = () => openSignIn({});
-  const logout = () => signOut({ redirectUrl: "/" });
-
   return (
     <div className="min-h-screen flex flex-col relative overflow-hidden">
       {/* Animated background — hero section only */}
@@ -233,76 +220,6 @@ export default function LandingPage() {
 
       {/* Onboarding banner — shown to signed-in users who haven't started yet */}
       <OnboardingBanner />
-
-      {/* Header */}
-      <header className="w-full py-6 px-6 lg:px-12 z-10 flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <ResilientIcon className="w-7 h-7" />
-          <span className="font-display font-bold text-xl tracking-tight text-primary">Resilium</span>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <Link href="/about" className="text-sm text-muted-foreground hover:text-primary transition-colors hidden sm:block">
-            About
-          </Link>
-          <Link href="/demo" className="text-sm text-muted-foreground hover:text-primary transition-colors hidden sm:block">
-            Demo
-          </Link>
-          <Link href="/pricing" className="text-sm text-muted-foreground hover:text-primary transition-colors hidden sm:block">
-            Pricing
-          </Link>
-
-          {!isLoading && isAuthenticated && (
-            <Link href="/profile" className="text-sm text-foreground/80 hover:text-primary transition-colors font-medium hidden sm:block">
-              My Plans
-            </Link>
-          )}
-
-          {isLoading ? (
-            <div className="w-24 h-9 rounded-full bg-muted animate-pulse" />
-          ) : isAuthenticated ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="rounded-full px-4 border-primary/20 hover:bg-primary/5 font-medium flex items-center gap-2">
-                  {user?.imageUrl ? (
-                    <img
-                      src={user.imageUrl}
-                      alt={user.firstName || "User"}
-                      className="w-5 h-5 rounded-full object-cover"
-                    />
-                  ) : (
-                    <span className="w-5 h-5 rounded-full bg-primary/20 text-primary flex items-center justify-center text-[10px] font-bold leading-none shrink-0">
-                      {[user?.firstName?.[0], user?.lastName?.[0]].filter(Boolean).join("").toUpperCase() || "?"}
-                    </span>
-                  )}
-                  <span className="max-w-[100px] truncate">
-                    {user?.firstName || user?.username || user?.primaryEmailAddress?.emailAddress?.split("@")[0] || "Account"}
-                  </span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem asChild>
-                  <Link href="/profile?tab=account" className="cursor-pointer">Account</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/profile" className="cursor-pointer">My Plans</Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={logout} className="cursor-pointer">Sign Out</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <Button
-              variant="outline"
-              className="rounded-full px-6 border-primary/20 hover:bg-primary/5 font-medium flex items-center gap-2"
-              onClick={login}
-            >
-              <LogIn className="w-4 h-4" />
-              Sign In
-            </Button>
-          )}
-        </div>
-      </header>
 
       {/* Hero */}
       <main className="flex-1 flex flex-col items-center z-10">

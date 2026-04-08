@@ -274,20 +274,15 @@ export default function DemoPage() {
   return (
     <div className="min-h-screen pb-24">
       {/* Header */}
-      <header className="w-full bg-card border-b border-border sticky top-0 z-50 print:hidden">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/">
-            <div className="font-display font-bold text-xl text-primary flex items-center gap-2 cursor-pointer">
-              <ResilientIcon className="w-5 h-5" /> Resilium
-            </div>
-          </Link>
+      <div className="w-full bg-card border-b border-border sticky top-14 z-50 print:hidden">
+        <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-end">
           <Link href="/consent">
             <Button size="sm" className="rounded-full gap-1.5">
               Build My Plan <ArrowRight className="w-3.5 h-3.5" />
             </Button>
           </Link>
         </div>
-      </header>
+      </div>
 
       <DemoBanner />
 

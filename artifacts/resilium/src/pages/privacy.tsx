@@ -1,6 +1,5 @@
 import React from "react";
 import { SiteFooter } from "@/components/site-footer";
-import { PageNav } from "@/components/page-nav";
 
 const LAST_UPDATED = "March 24, 2026";
 const CONTACT_EMAIL = "contact_resilium@pm.me";
@@ -8,8 +7,6 @@ const CONTACT_EMAIL = "contact_resilium@pm.me";
 export default function PrivacyPage() {
   return (
     <div className="min-h-screen flex flex-col">
-      <PageNav />
-
       <main className="flex-1 w-full max-w-3xl mx-auto px-6 py-12 space-y-10">
         <div>
           <h1 className="text-4xl font-display font-bold tracking-tight mb-3">Privacy Policy</h1>

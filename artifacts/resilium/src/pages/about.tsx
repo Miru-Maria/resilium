@@ -1,7 +1,6 @@
 import React from "react";
 import { Link } from "wouter";
 import { SiteFooter } from "@/components/site-footer";
-import { PageNav } from "@/components/page-nav";
 import { Button } from "@/components/ui/button";
 import {
   Brain,
@@ -30,16 +29,6 @@ const fadeUp = {
 export default function AboutPage() {
   return (
     <div className="min-h-screen flex flex-col">
-      <PageNav
-        cta={
-          <Link href="/consent">
-            <Button size="sm" className="rounded-full px-5 gap-2">
-              Build My Plan <ArrowRight className="w-3.5 h-3.5" />
-            </Button>
-          </Link>
-        }
-      />
-
       {/* Page header */}
       <section className="border-b border-border/60 bg-card/20">
         <div className="max-w-3xl mx-auto px-6 py-16 text-center">

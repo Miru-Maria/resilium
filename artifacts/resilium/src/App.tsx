@@ -1,11 +1,21 @@
-import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
-import { useEffect, useRef } from "react";
+import { Switch, Route, Router as WouterRouter, useLocation, Link } from "wouter";
+import { useEffect, useRef, useState } from "react";
 import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
-import { ClerkProvider, SignIn, SignUp, useClerk, useAuth } from "@clerk/react";
+import { ClerkProvider, SignIn, SignUp, useClerk, useAuth, useUser } from "@clerk/react";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { NeuralCanvas } from "@/components/neural-canvas";
 import { setAuthTokenGetter } from "@workspace/api-client-react";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ResilientIcon } from "@/components/resilient-icon";
+import { LogIn } from "lucide-react";
 
 import LandingPage from "@/pages/landing";
 import AssessmentPage from "@/pages/assessment";
@@ -112,6 +122,83 @@ function ScrollToTop() {
   return null;
 }
 
+function GlobalNav() {
+  const [location] = useLocation();
+  const { isLoaded, isSignedIn } = useAuth();
+  const { user } = useUser();
+  const { openSignIn, signOut } = useClerk();
+  const [authTimedOut, setAuthTimedOut] = useState(false);
+
+  useEffect(() => {
+    if (isLoaded) return;
+    const t = setTimeout(() => setAuthTimedOut(true), 3000);
+    return () => clearTimeout(t);
+  }, [isLoaded]);
+
+  if (location.startsWith("/admin") || location === "/coaching") return null;
+
+  const showAuth = isLoaded || authTimedOut;
+  const logout = () => signOut({ redirectUrl: "/" });
+  const initials = [user?.firstName?.[0], user?.lastName?.[0]].filter(Boolean).join("").toUpperCase() || "?";
+
+  return (
+    <header className="fixed top-0 left-0 right-0 h-14 z-[100] bg-background/95 backdrop-blur-sm border-b border-border/40 flex items-center">
+      <div className="w-full px-6 flex items-center justify-between">
+        <Link href="/">
+          <span className="flex items-center gap-2 cursor-pointer">
+            <ResilientIcon className="w-6 h-6" />
+            <span className="font-display font-bold text-lg tracking-tight text-primary">Resilium</span>
+          </span>
+        </Link>
+
+        <div className="hidden md:flex items-center gap-5">
+          <Link href="/about" className="text-sm text-muted-foreground hover:text-primary transition-colors">About</Link>
+          <Link href="/demo" className="text-sm text-muted-foreground hover:text-primary transition-colors">Demo</Link>
+          <Link href="/pricing" className="text-sm text-muted-foreground hover:text-primary transition-colors">Pricing</Link>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {!showAuth ? (
+            <div className="w-24 h-8 rounded-full bg-muted/50 animate-pulse" />
+          ) : isSignedIn && user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="rounded-full flex items-center gap-2 px-3">
+                  {user.imageUrl ? (
+                    <img src={user.imageUrl} alt={user.firstName || "User"} className="w-6 h-6 rounded-full object-cover" />
+                  ) : (
+                    <span className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-[10px] font-bold leading-none shrink-0">
+                      {initials}
+                    </span>
+                  )}
+                  <span className="max-w-[100px] truncate text-sm hidden sm:block">
+                    {user.firstName || user.username || "Account"}
+                  </span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem asChild>
+                  <Link href="/profile" className="cursor-pointer">My Plans</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/profile?tab=account" className="cursor-pointer">Account</Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={logout} className="cursor-pointer text-destructive focus:text-destructive">Sign Out</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button variant="ghost" size="sm" className="rounded-full gap-1.5" onClick={() => openSignIn({})}>
+              <LogIn className="w-4 h-4" />
+              <span className="hidden sm:inline">Sign In</span>
+            </Button>
+          )}
+        </div>
+      </div>
+    </header>
+  );
+}
+
 function GlobalBackground() {
   const [location] = useLocation();
   if (location.startsWith("/admin") || location === "/coaching") return null;
@@ -122,11 +209,19 @@ function GlobalBackground() {
   );
 }
 
+function GlobalNavSpacer() {
+  const [location] = useLocation();
+  if (location.startsWith("/admin") || location === "/coaching") return null;
+  return <div style={{ height: "3.5rem" }} />;
+}
+
 function Router() {
   return (
     <>
       <GlobalBackground />
+      <GlobalNav />
       <div style={{ position: "relative", zIndex: 1 }}>
+      <GlobalNavSpacer />
       <AnnouncementBanner />
       <ScrollToTop />
       <Switch>

@@ -1147,8 +1147,7 @@ export default function AssessmentPage() {
         </div>
       )}
 
-      <header className="w-full p-6 lg:p-8 flex items-center justify-between z-10">
-        <div className="font-display font-bold text-xl tracking-tight text-primary">Resilium</div>
+      <header className="w-full p-6 lg:p-8 flex items-center justify-end z-10">
         <div className="flex items-center gap-3">
           {/* Language Toggle */}
           <div className="flex items-center gap-1 rounded-full border border-border bg-card p-0.5 text-xs font-medium">

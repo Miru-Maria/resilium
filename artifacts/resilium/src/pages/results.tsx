@@ -436,57 +436,20 @@ export default function ResultsPage() {
   return (
     <div className="min-h-screen pb-24">
       {/* Header */}
-      <header className="w-full bg-card border-b border-border sticky top-0 z-50 print:hidden">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/">
-            <div className="font-display font-bold text-xl text-primary flex items-center gap-2 cursor-pointer">
-              <ResilientIcon className="w-5 h-5" /> Resilium
-            </div>
-          </Link>
-          <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm" onClick={handleEmailReport} className="rounded-full">
-              <Mail className="w-4 h-4 mr-2" /> Email
-            </Button>
-            <Button variant="outline" size="sm" onClick={handleShare} className="rounded-full">
-              <Share2 className="w-4 h-4 mr-2" /> Share
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => setShareScorecardOpen(true)} className="rounded-full bg-primary/5 border-primary/30 text-primary hover:bg-primary/10">
-              <ImageDown className="w-4 h-4 mr-2" /> Share Score
-            </Button>
-            <Button variant="default" size="sm" onClick={handlePrint} className="rounded-full">
-              <Printer className="w-4 h-4 mr-2" /> Print / Save PDF
-            </Button>
-
-            {isAuthenticated ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="rounded-full flex items-center gap-2">
-                    {user?.imageUrl ? (
-                      <img
-                        src={user.imageUrl}
-                        alt={user.firstName || "User"}
-                        className="w-5 h-5 rounded-full object-cover"
-                      />
-                    ) : (
-                      <User className="w-4 h-4" />
-                    )}
-                    <span className="max-w-[80px] truncate text-sm">{user?.firstName || "Account"}</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem asChild>
-                    <Link href="/profile" className="cursor-pointer">My Plans</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={logout} className="cursor-pointer">Sign Out</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <Button variant="ghost" size="sm" className="rounded-full" onClick={login}>
-                <LogIn className="w-4 h-4 mr-1" /> Sign In
-              </Button>
-            )}
-          </div>
+      <header className="w-full bg-card border-b border-border sticky top-14 z-50 print:hidden">
+        <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-end gap-2">
+          <Button variant="outline" size="sm" onClick={handleEmailReport} className="rounded-full">
+            <Mail className="w-4 h-4 mr-2" /> Email
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleShare} className="rounded-full">
+            <Share2 className="w-4 h-4 mr-2" /> Share
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setShareScorecardOpen(true)} className="rounded-full bg-primary/5 border-primary/30 text-primary hover:bg-primary/10">
+            <ImageDown className="w-4 h-4 mr-2" /> Share Score
+          </Button>
+          <Button variant="default" size="sm" onClick={handlePrint} className="rounded-full">
+            <Printer className="w-4 h-4 mr-2" /> Print / Save PDF
+          </Button>
         </div>
       </header>
 
@@ -802,7 +765,7 @@ export default function ResultsPage() {
             )}
 
             <Tabs defaultValue={sortedAreas[0]} className="w-full">
-              <div className="sticky top-16 z-30 -mx-6 md:-mx-8 px-6 md:px-8 pb-2 pt-1 bg-card/95 backdrop-blur-sm border-b border-border/40 mb-4">
+              <div className="sticky top-28 z-30 -mx-6 md:-mx-8 px-6 md:px-8 pb-2 pt-1 bg-card/95 backdrop-blur-sm border-b border-border/40 mb-4">
               <TabsList className="flex flex-wrap h-auto gap-1 bg-muted/50 p-1 rounded-2xl">
                 {sortedAreas.map(area => {
                   const items = checklistsByArea[area] ?? [];
