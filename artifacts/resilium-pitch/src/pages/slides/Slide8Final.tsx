@@ -87,7 +87,7 @@ export default function Slide8Final() {
       <div className="absolute bottom-[4vh] left-0 right-0 text-center"
         style={{ fontSize: "1.15vw", fontWeight: 500, color: "#E08040", letterSpacing: "0.06em", fontFamily: "Inter, sans-serif", ...a("0.65s", "fadeIn") }}
       >
-        Start free today &mdash; no account required &bull; resilium-platform.com
+        Start free today &mdash; no account required
       </div>
 
       <div className="absolute bottom-0 left-0 right-0 h-[2px]"
