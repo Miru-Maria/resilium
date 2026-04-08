@@ -3,7 +3,7 @@ const allSlides = typeof window !== "undefined" && window.location.pathname.toLo
 const a = (delay: string, kf = "fadeUp") =>
   allSlides ? {} : { animation: `${kf} 0.75s cubic-bezier(0.22,1,0.36,1) both`, animationDelay: delay };
 
-const NUM = { fontSize: "4.8vw", fontWeight: 900, lineHeight: 1, fontFamily: "Plus Jakarta Sans, sans-serif", color: "#E08040", textShadow: "0 0 24px rgba(224,128,64,0.5), 0 0 50px rgba(224,128,64,0.18)", minWidth: "6.5vw", textAlign: "right" as const };
+const NUM = { fontSize: "4.8vw", fontWeight: 900, lineHeight: 1, fontFamily: "Plus Jakarta Sans, sans-serif", color: "#E08040", textShadow: "0 0 24px rgba(224,128,64,0.5), 0 0 50px rgba(224,128,64,0.18)", width: "9vw", flexShrink: 0, textAlign: "right" as const };
 const RULE = { width: "1px", height: "4.5vh", background: "rgba(224,128,64,0.3)", flexShrink: 0 };
 const LABEL = { fontSize: "1.6vw", fontWeight: 500, color: "#EAD9BE", fontFamily: "Inter, sans-serif" };
 const SUB   = { fontSize: "1.2vw", fontWeight: 300, color: "#8A7A6A", fontFamily: "Inter, sans-serif" };
@@ -67,7 +67,7 @@ export default function Slide7Close() {
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: "2.2vw" }}>
-            <span style={{ ...NUM, fontSize: "3.2vw" }}>0–100</span>
+            <span style={NUM}>0–100</span>
             <div style={RULE} />
             <div>
               <div style={LABEL}>Your score — clear and actionable</div>
@@ -76,7 +76,7 @@ export default function Slide7Close() {
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: "2.2vw" }}>
-            <span style={{ ...NUM, fontSize: "3.2vw" }}>Free</span>
+            <span style={NUM}>Free</span>
             <div style={RULE} />
             <div>
               <div style={LABEL}>To start — always</div>
