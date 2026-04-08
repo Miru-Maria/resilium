@@ -196,11 +196,6 @@ function DemoBanner() {
           {" "}— This is a fictional demo profile (Alex M., 34). Your actual plan reflects your specific situation.
         </p>
       </div>
-      <Link href="/consent">
-        <Button size="sm" className="rounded-full flex-shrink-0 gap-1.5">
-          Build My Real Plan <ArrowRight className="w-3.5 h-3.5" />
-        </Button>
-      </Link>
     </div>
   );
 }
