@@ -14,18 +14,24 @@ import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 
 const COACHING_URL = "https://healing-through-understanding.replit.app/contact";
+const TRACK_URL = "https://resilium-platform.com/api/coaching/track";
 
 const WARM = {
   bg: "#F5EDE0",
   bgDeep: "#EAD9BE",
   ember: "#E08040",
   emberDark: "#C05F20",
+  gold: "#E8A830",
   dark: "#1C1008",
   text: "#2C1A0A",
   muted: "#7A5C3A",
   border: "#D4B896",
   surface: "#FDF6EE",
   cardBg: "#FBF0E4",
+  badgeBg: "#F5E8D5",
+  badgeBorder: "#DFC49A",
+  badgeText: "#8A5C2A",
+  headingDark: "#1E0F05",
 };
 
 const { width: SCREEN_W } = Dimensions.get("window");
@@ -34,13 +40,13 @@ export default function CoachingScreen() {
   const insets = useSafeAreaInsets();
 
   const handleBook = () => {
-    fetch("https://resilium-ai.replit.app/api/coaching/track", { method: "POST" }).catch(() => {});
+    fetch(TRACK_URL, { method: "POST" }).catch(() => {});
     Linking.openURL(COACHING_URL);
   };
 
   return (
     <View style={[s.root, { paddingTop: insets.top }]}>
-      {/* ── Nav bar — sits on top of the hero gradient ── */}
+      {/* ── Nav bar ── */}
       <View style={s.nav}>
         <Pressable onPress={() => router.back()} hitSlop={12} style={s.backBtn}>
           <Feather name="arrow-left" size={20} color={WARM.text} />
@@ -70,7 +76,6 @@ export default function CoachingScreen() {
             <Text style={s.pillText}>Phoenix Insight Coaching</Text>
           </View>
 
-          {/* Headline */}
           <Text style={s.headline}>
             Build the resilience{"\n"}
             <Text style={s.headlineAccent}>numbers can't measure.</Text>
@@ -82,7 +87,6 @@ export default function CoachingScreen() {
             decisions under pressure, and find ground again after disruption.
           </Text>
 
-          {/* Primary CTA — above the fold */}
           <Pressable
             style={({ pressed }) => [s.cta, pressed && { opacity: 0.82 }]}
             onPress={handleBook}
@@ -94,13 +98,54 @@ export default function CoachingScreen() {
           <Text style={s.ctaSub}>50–60 min · No pressure · No commitment</Text>
         </LinearGradient>
 
-        {/* ── Body — white/warm surface ── */}
+        {/* ── Body — warm surface ── */}
         <View style={s.body}>
 
-          {/* What it addresses */}
+          {/* ── What your score is telling you ── */}
           <View style={s.section}>
-            <Text style={s.eyebrow}>WHAT COACHING ADDRESSES</Text>
-            <Text style={s.sectionTitle}>The gap scores can't close</Text>
+            <Text style={s.eyebrow}>WHAT YOUR SCORE IS TELLING YOU</Text>
+            <Text style={s.sectionTitle}>A low score isn't a character flaw.</Text>
+            <Text style={s.sectionDesc}>
+              It usually reflects accumulated stress, past disruption, or simply not having had the
+              space or tools to build those muscles yet.
+            </Text>
+            <View style={s.scoreCardGrid}>
+              {[
+                {
+                  emoji: "🔍",
+                  title: "What it often means",
+                  text: "You're carrying more than most people see. Stress tolerance and emotional regulation are learnable — they're just skills that haven't been prioritized yet.",
+                },
+                {
+                  emoji: "🚫",
+                  title: "What it doesn't mean",
+                  text: "It doesn't mean you're fragile or unready. Many people with lower scores show remarkable grit — they just don't have a structured approach yet.",
+                },
+                {
+                  emoji: "✨",
+                  title: "What we can change",
+                  text: "With the right support, psychological resilience is one of the fastest dimensions to improve — and it raises performance across all the others.",
+                },
+              ].map(({ emoji, title, text }) => (
+                <View key={title} style={s.scoreCard}>
+                  <Text style={s.scoreCardEmoji}>{emoji}</Text>
+                  <Text style={s.scoreCardTitle}>{title}</Text>
+                  <Text style={s.scoreCardText}>{text}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+
+          <View style={s.divider} />
+
+          {/* ── What coaching addresses ── */}
+          <View style={s.section}>
+            <Text style={s.eyebrow}>WHAT WE WORK ON TOGETHER</Text>
+            <Text style={s.sectionTitle}>Practical resilience. Real life.</Text>
+            <Text style={s.sectionDesc}>
+              Sessions are grounded in your actual situation — your score, your stressors, your
+              timeline. Not generic wellness advice.
+            </Text>
             <View style={s.bulletList}>
               {[
                 { icon: "activity",    text: "Stress tolerance and crisis response patterns" },
@@ -108,6 +153,7 @@ export default function CoachingScreen() {
                 { icon: "users",       text: "Social support and preventing isolation" },
                 { icon: "zap",         text: "Emotional regulation under pressure" },
                 { icon: "trending-up", text: "Building sustainable psychological resilience" },
+                { icon: "check-circle",text: "A personalized plan running alongside your Resilium report" },
               ].map(({ icon, text }) => (
                 <View key={text} style={s.bullet}>
                   <View style={s.bulletIconWrap}>
@@ -119,10 +165,9 @@ export default function CoachingScreen() {
             </View>
           </View>
 
-          {/* Divider */}
           <View style={s.divider} />
 
-          {/* How it works */}
+          {/* ── How it works ── */}
           <View style={s.section}>
             <Text style={s.eyebrow}>HOW IT WORKS</Text>
             <Text style={s.sectionTitle}>Three steps. No commitment.</Text>
@@ -155,23 +200,62 @@ export default function CoachingScreen() {
             </View>
           </View>
 
-          {/* Divider */}
           <View style={s.divider} />
 
-          {/* Secondary CTA */}
-          <View style={s.secondaryCtaBlock}>
-            <Text style={s.secondaryCtaTitle}>Ready to start?</Text>
-            <Text style={s.secondaryCtaSub}>
-              Sessions available online · Flexible across time zones
+          {/* ── About Cristiana ── */}
+          <View style={[s.section, { alignItems: "center" }]}>
+            <Text style={[s.eyebrow, { textAlign: "center" }]}>YOUR COACH</Text>
+
+            {/* Gradient avatar orb */}
+            <LinearGradient
+              colors={[WARM.ember, WARM.gold]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={s.coachOrb}
+            >
+              <Text style={{ fontSize: 32 }}>🌿</Text>
+            </LinearGradient>
+
+            <Text style={s.coachName}>Cristiana Paun</Text>
+            <Text style={s.coachSubtitle}>Phoenix Insight Coaching</Text>
+            <Text style={s.coachRole}>Integrative Health Coach</Text>
+
+            <Text style={s.coachBio}>
+              Cristiana takes a functional approach to health coaching — working with the whole
+              person to understand the root patterns behind stress, burnout, and low resilience.
+              Her focus is mental resilience: building the internal capacity that makes every other
+              area of your life more stable.
+            </Text>
+
+            <Text style={s.coachBio2}>
+              She works specifically with Resilium users whose assessments surface a gap between
+              their practical preparation and their inner capacity to carry it out — the gap no
+              checklist can close.
+            </Text>
+          </View>
+
+          <View style={s.divider} />
+
+          {/* ── Dark CTA block ── */}
+          <LinearGradient
+            colors={["#3D1F08", "#5C3015"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={s.darkCta}
+          >
+            <Text style={s.darkCtaTitle}>Ready to work on the part that matters most?</Text>
+            <Text style={s.darkCtaSub}>
+              The free discovery call is 50–60 minutes with no obligation. Bring your Resilium
+              report and we'll take it from there.
             </Text>
             <Pressable
-              style={({ pressed }) => [s.cta, { marginTop: 16 }, pressed && { opacity: 0.82 }]}
+              style={({ pressed }) => [s.darkCtaBtn, pressed && { opacity: 0.82 }]}
               onPress={handleBook}
             >
-              <Text style={s.ctaText}>Book Your Free Discovery Call</Text>
-              <Feather name="external-link" size={15} color="#fff" />
+              <Text style={s.darkCtaBtnText}>Book Your Free Discovery Call →</Text>
             </Pressable>
-          </View>
+            <Text style={s.darkCtaNote}>Sessions available online · Flexible across time zones</Text>
+          </LinearGradient>
 
           {/* Disclaimer */}
           <View style={s.disclaimer}>
@@ -235,7 +319,7 @@ const s = StyleSheet.create({
     lineHeight: 38,
     letterSpacing: -0.8,
   },
-  headlineAccent: { color: WARM.ember },
+  headlineAccent: { color: WARM.gold },
   sub: {
     fontSize: 15,
     fontFamily: "Inter_400Regular",
@@ -285,7 +369,36 @@ const s = StyleSheet.create({
     color: WARM.text,
     letterSpacing: -0.4,
   },
+  sectionDesc: {
+    fontSize: 14,
+    fontFamily: "Inter_400Regular",
+    color: WARM.muted,
+    lineHeight: 21,
+  },
   divider: { height: 1, backgroundColor: WARM.border, marginBottom: 28 },
+
+  /* Score cards — "What your score is telling you" */
+  scoreCardGrid: { gap: 10, marginTop: 4 },
+  scoreCard: {
+    backgroundColor: WARM.cardBg,
+    borderRadius: 14,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: WARM.border,
+    gap: 6,
+  },
+  scoreCardEmoji: { fontSize: 22 },
+  scoreCardTitle: {
+    fontSize: 14,
+    fontFamily: "Inter_700Bold",
+    color: WARM.headingDark,
+  },
+  scoreCardText: {
+    fontSize: 13,
+    fontFamily: "Inter_400Regular",
+    color: WARM.muted,
+    lineHeight: 19,
+  },
 
   /* Bullets */
   bulletList: { gap: 10, marginTop: 4 },
@@ -330,23 +443,97 @@ const s = StyleSheet.create({
   stepTitle: { fontSize: 14, fontFamily: "Inter_600SemiBold", color: WARM.text },
   stepBody: { fontSize: 13, fontFamily: "Inter_400Regular", color: WARM.muted, lineHeight: 19 },
 
-  /* Secondary CTA block */
-  secondaryCtaBlock: {
+  /* About Cristiana */
+  coachOrb: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     alignItems: "center",
-    marginBottom: 28,
+    justifyContent: "center",
+    marginTop: 12,
+    marginBottom: 16,
   },
-  secondaryCtaTitle: {
-    fontSize: 20,
+  coachName: {
+    fontSize: 22,
     fontFamily: "Inter_700Bold",
-    color: WARM.text,
-    letterSpacing: -0.4,
+    color: WARM.headingDark,
+    textAlign: "center",
   },
-  secondaryCtaSub: {
-    fontSize: 13,
+  coachSubtitle: {
+    fontSize: 12,
     fontFamily: "Inter_400Regular",
     color: WARM.muted,
-    marginTop: 4,
     textAlign: "center",
+    marginTop: 2,
+  },
+  coachRole: {
+    fontSize: 12,
+    fontFamily: "Inter_700Bold",
+    color: WARM.ember,
+    textAlign: "center",
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
+    marginBottom: 8,
+  },
+  coachBio: {
+    fontSize: 15,
+    fontFamily: "Inter_400Regular",
+    color: WARM.text,
+    lineHeight: 24,
+    textAlign: "center",
+    marginBottom: 12,
+  },
+  coachBio2: {
+    fontSize: 14,
+    fontFamily: "Inter_400Regular",
+    color: WARM.muted,
+    lineHeight: 22,
+    textAlign: "center",
+  },
+
+  /* Dark CTA */
+  darkCta: {
+    borderRadius: 20,
+    padding: 32,
+    alignItems: "center",
+    gap: 16,
+    marginBottom: 28,
+    overflow: "hidden",
+  },
+  darkCtaTitle: {
+    fontSize: 22,
+    fontFamily: "Inter_700Bold",
+    color: "#F9F6F2",
+    textAlign: "center",
+    letterSpacing: -0.5,
+    lineHeight: 30,
+  },
+  darkCtaSub: {
+    fontSize: 14,
+    fontFamily: "Inter_400Regular",
+    color: "#D4B08A",
+    textAlign: "center",
+    lineHeight: 21,
+  },
+  darkCtaBtn: {
+    backgroundColor: WARM.ember,
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 28,
+    alignSelf: "stretch",
+    alignItems: "center",
+  },
+  darkCtaBtnText: {
+    fontSize: 15,
+    fontFamily: "Inter_700Bold",
+    color: "#fff",
+  },
+  darkCtaNote: {
+    fontSize: 12,
+    fontFamily: "Inter_400Regular",
+    color: "#9B7050",
+    textAlign: "center",
+    marginTop: -4,
   },
 
   /* Disclaimer */

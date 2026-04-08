@@ -35,7 +35,8 @@ export default function ExploreScreen() {
   return (
     <View style={[styles.root, { paddingTop: topPad }]}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Explore</Text>
+        <Text style={styles.headerTitle}>About Resilium</Text>
+        <Text style={styles.headerSub}>What it is, how it works, and what you'll get</Text>
       </View>
 
       <ScrollView
@@ -241,6 +242,13 @@ const createStyles = (colors: ColorsType) =>
       fontSize: 24,
       color: colors.text,
       letterSpacing: -0.5,
+    },
+    headerSub: {
+      fontFamily: "Inter_400Regular",
+      fontSize: 13,
+      color: colors.textMuted,
+      marginTop: 3,
+      lineHeight: 18,
     },
     scroll: { flex: 1 },
     scrollContent: { paddingHorizontal: 24, paddingTop: 24, gap: 48 },
