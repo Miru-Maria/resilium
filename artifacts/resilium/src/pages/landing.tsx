@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
@@ -214,7 +214,12 @@ export default function LandingPage() {
   const { user, isLoaded } = useUser();
   const { isSignedIn } = useAuth();
   const { openSignIn, signOut } = useClerk();
-  const isLoading = !isLoaded;
+  const [authTimedOut, setAuthTimedOut] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setAuthTimedOut(true), 3000);
+    return () => clearTimeout(t);
+  }, []);
+  const isLoading = !isLoaded && !authTimedOut;
   const isAuthenticated = !!isSignedIn;
   const login = () => openSignIn({});
   const logout = () => signOut({ redirectUrl: "/" });

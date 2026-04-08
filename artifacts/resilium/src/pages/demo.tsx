@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import {
   AlertTriangle, CheckCircle, Activity, Brain, TrendingUp, Award,
   ExternalLink, ArrowRight, Eye, Zap, Lock, Sparkles, ChevronDown, ChevronUp, Target,
+  DollarSign, Wrench, Navigation, Package,
 } from "lucide-react";
 
 /* ──────────────────────────────────────────
@@ -150,6 +151,15 @@ const AREA_LABELS: Record<string, string> = {
   financial: "Financial", health: "Health", skills: "Skills",
   mobility: "Mobility", psychological: "Psychological", resources: "Resources",
   socialCapital: "Social Network",
+};
+
+const AREA_ICONS: Record<string, React.ReactNode> = {
+  financial: <DollarSign className="w-4 h-4 text-amber-500" />,
+  health: <Activity className="w-4 h-4 text-emerald-500" />,
+  skills: <Wrench className="w-4 h-4 text-blue-400" />,
+  mobility: <Navigation className="w-4 h-4 text-violet-400" />,
+  psychological: <Brain className="w-4 h-4 text-rose-400" />,
+  resources: <Package className="w-4 h-4 text-orange-400" />,
 };
 
 const PRIORITY_CONFIG = {
@@ -457,6 +467,7 @@ export default function DemoPage() {
                 const comp = areaCompletion(area);
                 return (
                   <TabsTrigger key={area} value={area} className="rounded-xl text-xs sm:text-sm data-[state=active]:shadow-sm flex items-center gap-1.5">
+                    {AREA_ICONS[area]}
                     {AREA_LABELS[area] ?? area}
                     <span className={cn(
                       "text-[10px] font-bold px-1.5 py-0.5 rounded-full",
