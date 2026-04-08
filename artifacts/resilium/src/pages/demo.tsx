@@ -196,6 +196,11 @@ function DemoBanner() {
           {" "}— This is a fictional demo profile (Alex M., 34). Your actual plan reflects your specific situation.
         </p>
       </div>
+      <Link href="/consent" className="flex-shrink-0">
+        <Button size="sm" className="rounded-full gap-1.5">
+          Build My Plan <ArrowRight className="w-3.5 h-3.5" />
+        </Button>
+      </Link>
     </div>
   );
 }
@@ -269,16 +274,6 @@ export default function DemoPage() {
   return (
     <div className="min-h-screen pb-24">
       {/* Header */}
-      <div className="w-full bg-card border-b border-border sticky top-14 z-50 print:hidden">
-        <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-end">
-          <Link href="/consent">
-            <Button size="sm" className="rounded-full gap-1.5">
-              Build My Plan <ArrowRight className="w-3.5 h-3.5" />
-            </Button>
-          </Link>
-        </div>
-      </div>
-
       <DemoBanner />
 
       <main className="max-w-6xl mx-auto px-6 pt-10 space-y-10">
