@@ -17,7 +17,6 @@ import { setBaseUrl } from "@workspace/api-client-react";
 import { ClerkProvider } from "@clerk/expo";
 import * as SecureStore from "expo-secure-store";
 import { Feather } from "@expo/vector-icons";
-import * as Font from "expo-font";
 
 import { AppLoadingScreen } from "@/components/AppLoadingScreen";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -92,20 +91,9 @@ export default function RootLayout() {
     Inter_500Medium,
     Inter_600SemiBold,
     Inter_700Bold,
+    ...Feather.font,
   });
   const [showIntro, setShowIntro] = useState(true);
-
-  // Load Feather icons font separately so a double-registration error in Expo Go
-  // (where the font is pre-bundled) doesn't pollute fontError and block startup.
-  const [featherReady, setFeatherReady] = useState<boolean>(
-    () => Font.isLoaded("Feather")
-  );
-  useEffect(() => {
-    if (featherReady) return;
-    Font.loadAsync(Feather.font)
-      .then(() => setFeatherReady(true))
-      .catch(() => setFeatherReady(true)); // Non-fatal: render without icons rather than hang
-  }, [featherReady]);
 
   // Timeout fallback: if fonts haven't loaded or errored after 7 s (e.g. slow CDN /
   // Android emulator latency), render with system fonts so the app isn't stuck.
@@ -116,7 +104,7 @@ export default function RootLayout() {
     return () => clearTimeout(timer);
   }, [fontsLoaded, fontError]);
 
-  const fontReady = (fontsLoaded || fontError || fontTimedOut) && featherReady;
+  const fontReady = fontsLoaded || !!fontError || fontTimedOut;
 
   useEffect(() => {
     if (fontReady) {

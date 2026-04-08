@@ -200,6 +200,49 @@ export default function MyDataScreen() {
         contentContainerStyle={[styles.scrollContent, { paddingBottom: bottomPad + 40 }]}
         showsVerticalScrollIndicator={false}
       >
+        {/* ── Resilience Profile card ── */}
+        <View style={styles.profileResilCard}>
+          <View style={styles.profileResilHeader}>
+            <View style={styles.profileResilIconWrap}>
+              <Feather name="activity" size={16} color={colors.primary} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.profileResilTitle}>Your Resilience Profile</Text>
+              <Text style={styles.profileResilSub}>
+                {hasConsented
+                  ? "View your saved plans and scores in the Plans tab."
+                  : "Complete the assessment to unlock your profile."}
+              </Text>
+            </View>
+          </View>
+
+          {hasConsented ? (
+            <Pressable
+              style={({ pressed }) => [styles.plansRedirectBtn, pressed && styles.btnPressed]}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                router.replace("/(tabs)/my-plans");
+              }}
+            >
+              <Text style={styles.plansRedirectBtnText}>View My Plans</Text>
+              <Feather name="arrow-right" size={15} color={colors.background} />
+            </Pressable>
+          ) : (
+            <Pressable
+              style={({ pressed }) => [styles.plansRedirectBtn, styles.plansRedirectBtnAlt, pressed && styles.btnPressed]}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                router.push("/consent");
+              }}
+            >
+              <Text style={[styles.plansRedirectBtnText, { color: colors.primary }]}>
+                Start My Assessment
+              </Text>
+              <Feather name="arrow-right" size={15} color={colors.primary} />
+            </Pressable>
+          )}
+        </View>
+
         {isSignedIn && user && (
           <View style={styles.profileCard}>
             <View style={styles.profileRow}>
@@ -564,6 +607,34 @@ const createStyles = (colors: ColorsType) => StyleSheet.create({
   legalNoteText: {
     fontFamily: "Inter_400Regular", fontSize: 12, color: colors.textMuted,
     lineHeight: 18, flex: 1,
+  },
+  profileResilCard: {
+    backgroundColor: colors.surface, borderRadius: 16, padding: 18,
+    gap: 14, borderWidth: 1, borderColor: colors.primaryBorder,
+  },
+  profileResilHeader: {
+    flexDirection: "row", alignItems: "flex-start", gap: 12,
+  },
+  profileResilIconWrap: {
+    width: 36, height: 36, borderRadius: 10,
+    backgroundColor: colors.primaryMuted, alignItems: "center", justifyContent: "center",
+    flexShrink: 0,
+  },
+  profileResilTitle: {
+    fontFamily: "Inter_700Bold", fontSize: 15, color: colors.text, marginBottom: 3,
+  },
+  profileResilSub: {
+    fontFamily: "Inter_400Regular", fontSize: 13, color: colors.textMuted, lineHeight: 18,
+  },
+  plansRedirectBtn: {
+    flexDirection: "row", alignItems: "center", justifyContent: "center",
+    gap: 8, backgroundColor: colors.primary, borderRadius: 12, paddingVertical: 13,
+  },
+  plansRedirectBtnAlt: {
+    backgroundColor: colors.primaryMuted, borderWidth: 1, borderColor: colors.primaryBorder,
+  },
+  plansRedirectBtnText: {
+    fontFamily: "Inter_700Bold", fontSize: 14, color: colors.background,
   },
   profileCard: {
     backgroundColor: colors.surface, borderRadius: 16, padding: 18,

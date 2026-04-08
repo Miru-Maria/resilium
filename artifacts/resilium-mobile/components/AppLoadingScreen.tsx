@@ -7,7 +7,6 @@ import {
   Dimensions,
   Platform,
 } from "react-native";
-import Svg, { Circle } from "react-native-svg";
 import { NeuralNetSVG } from "./NeuralNetSVG";
 
 const ND = Platform.OS !== "web";
@@ -15,217 +14,151 @@ const ND = Platform.OS !== "web";
 const { width: W, height: H } = Dimensions.get("window");
 
 const BRAND = "#E08040";
-const BRAND_MID = "rgba(224,128,64,0.22)";
-const BRAND_SOFT = "rgba(224,128,64,0.08)";
+const BRAND_GLOW = "rgba(224,128,64,0.18)";
+const BRAND_GLOW_INNER = "rgba(224,128,64,0.30)";
 const BG = "#0D1225";
-const BLUE_SOFT = "rgba(120,144,224,0.10)";
-
-const RING_R = 62;
-const RING_SIZE = RING_R * 2 + 8;
 
 interface Props {
   onDone: () => void;
 }
 
 export function AppLoadingScreen({ onDone }: Props) {
-  const screenFade = useRef(new Animated.Value(0)).current;
-  const orbScale = useRef(new Animated.Value(0.82)).current;
-  const orbOpacity = useRef(new Animated.Value(0.55)).current;
-  const innerOrbScale = useRef(new Animated.Value(0.9)).current;
-  const innerOrbOpacity = useRef(new Animated.Value(0.7)).current;
-  const ringRot = useRef(new Animated.Value(0)).current;
-  const ringRot2 = useRef(new Animated.Value(0)).current;
-  const iconOpacity = useRef(new Animated.Value(0)).current;
-  const iconScale = useRef(new Animated.Value(0.7)).current;
-  const wordOpacity = useRef(new Animated.Value(0)).current;
-  const wordY = useRef(new Animated.Value(12)).current;
-  const tagOpacity = useRef(new Animated.Value(0)).current;
-  const dot1 = useRef(new Animated.Value(0.25)).current;
-  const dot2 = useRef(new Animated.Value(0.25)).current;
-  const dot3 = useRef(new Animated.Value(0.25)).current;
+  const screenFade   = useRef(new Animated.Value(0)).current;
+  const logoOpacity  = useRef(new Animated.Value(0)).current;
+  const logoScale    = useRef(new Animated.Value(0.78)).current;
+  const glowScale    = useRef(new Animated.Value(0.88)).current;
+  const glowOpacity  = useRef(new Animated.Value(0.5)).current;
+  const wordOpacity  = useRef(new Animated.Value(0)).current;
+  const wordY        = useRef(new Animated.Value(14)).current;
+  const tagOpacity   = useRef(new Animated.Value(0)).current;
+  const dot1         = useRef(new Animated.Value(0.25)).current;
+  const dot2         = useRef(new Animated.Value(0.25)).current;
+  const dot3         = useRef(new Animated.Value(0.25)).current;
+  const netOpacity   = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    Animated.timing(screenFade, {
-      toValue: 1, duration: 450, useNativeDriver: ND,
-    }).start();
+    // Fade in whole screen
+    Animated.timing(screenFade, { toValue: 1, duration: 380, useNativeDriver: ND }).start();
 
+    // Neural net fades in quickly
+    Animated.timing(netOpacity, { toValue: 1, duration: 700, useNativeDriver: ND }).start();
+
+    // Logo pops in
     Animated.parallel([
-      Animated.timing(iconOpacity, { toValue: 1, duration: 600, delay: 200, useNativeDriver: ND }),
-      Animated.spring(iconScale, { toValue: 1, delay: 200, useNativeDriver: ND, tension: 60, friction: 8 }),
+      Animated.timing(logoOpacity, { toValue: 1, duration: 620, delay: 160, useNativeDriver: ND }),
+      Animated.spring(logoScale,   { toValue: 1, delay: 160, tension: 55, friction: 9, useNativeDriver: ND }),
     ]).start();
 
+    // Wordmark slides up
     Animated.parallel([
-      Animated.timing(wordOpacity, { toValue: 1, duration: 550, delay: 560, useNativeDriver: ND }),
-      Animated.timing(wordY, { toValue: 0, duration: 550, delay: 560, useNativeDriver: ND }),
+      Animated.timing(wordOpacity, { toValue: 1, duration: 520, delay: 540, useNativeDriver: ND }),
+      Animated.timing(wordY,       { toValue: 0, duration: 520, delay: 540, useNativeDriver: ND }),
     ]).start();
 
-    Animated.timing(tagOpacity, { toValue: 1, duration: 500, delay: 960, useNativeDriver: ND }).start();
+    // Tagline
+    Animated.timing(tagOpacity, { toValue: 1, duration: 480, delay: 900, useNativeDriver: ND }).start();
 
-    const orbAnim = Animated.loop(
+    // Ambient glow pulse
+    const glowAnim = Animated.loop(
       Animated.sequence([
         Animated.parallel([
-          Animated.timing(orbScale, { toValue: 1.08, duration: 2400, useNativeDriver: ND }),
-          Animated.timing(orbOpacity, { toValue: 0.85, duration: 2400, useNativeDriver: ND }),
+          Animated.timing(glowScale,   { toValue: 1.14, duration: 2600, useNativeDriver: ND }),
+          Animated.timing(glowOpacity, { toValue: 0.9,  duration: 2600, useNativeDriver: ND }),
         ]),
         Animated.parallel([
-          Animated.timing(orbScale, { toValue: 0.82, duration: 2400, useNativeDriver: ND }),
-          Animated.timing(orbOpacity, { toValue: 0.55, duration: 2400, useNativeDriver: ND }),
+          Animated.timing(glowScale,   { toValue: 0.88, duration: 2600, useNativeDriver: ND }),
+          Animated.timing(glowOpacity, { toValue: 0.5,  duration: 2600, useNativeDriver: ND }),
         ]),
       ])
     );
-    orbAnim.start();
+    glowAnim.start();
 
-    const innerOrbAnim = Animated.loop(
-      Animated.sequence([
-        Animated.parallel([
-          Animated.timing(innerOrbScale, { toValue: 1.12, duration: 1800, useNativeDriver: ND }),
-          Animated.timing(innerOrbOpacity, { toValue: 1, duration: 1800, useNativeDriver: ND }),
-        ]),
-        Animated.parallel([
-          Animated.timing(innerOrbScale, { toValue: 0.9, duration: 1800, useNativeDriver: ND }),
-          Animated.timing(innerOrbOpacity, { toValue: 0.7, duration: 1800, useNativeDriver: ND }),
-        ]),
-      ])
-    );
-    innerOrbAnim.start();
-
-    const ring1Anim = Animated.loop(
-      Animated.timing(ringRot, { toValue: 1, duration: 7000, useNativeDriver: ND })
-    );
-    ring1Anim.start();
-
-    const ring2Anim = Animated.loop(
-      Animated.timing(ringRot2, { toValue: -1, duration: 11000, useNativeDriver: ND })
-    );
-    ring2Anim.start();
-
+    // Loading dots
     const dotAnim = Animated.loop(
       Animated.sequence([
-        Animated.delay(900),
-        Animated.timing(dot1, { toValue: 1, duration: 280, useNativeDriver: ND }),
-        Animated.timing(dot1, { toValue: 0.25, duration: 280, useNativeDriver: ND }),
-        Animated.timing(dot2, { toValue: 1, duration: 280, useNativeDriver: ND }),
-        Animated.timing(dot2, { toValue: 0.25, duration: 280, useNativeDriver: ND }),
-        Animated.timing(dot3, { toValue: 1, duration: 280, useNativeDriver: ND }),
-        Animated.timing(dot3, { toValue: 0.25, duration: 280, useNativeDriver: ND }),
-        Animated.delay(300),
+        Animated.delay(800),
+        Animated.timing(dot1, { toValue: 1, duration: 260, useNativeDriver: ND }),
+        Animated.timing(dot1, { toValue: 0.25, duration: 260, useNativeDriver: ND }),
+        Animated.timing(dot2, { toValue: 1, duration: 260, useNativeDriver: ND }),
+        Animated.timing(dot2, { toValue: 0.25, duration: 260, useNativeDriver: ND }),
+        Animated.timing(dot3, { toValue: 1, duration: 260, useNativeDriver: ND }),
+        Animated.timing(dot3, { toValue: 0.25, duration: 260, useNativeDriver: ND }),
+        Animated.delay(400),
       ])
     );
     dotAnim.start();
 
+    // Dismiss after 4.8s
     const dismiss = setTimeout(() => {
-      Animated.timing(screenFade, { toValue: 0, duration: 480, useNativeDriver: ND }).start(() => {
-        orbAnim.stop();
-        innerOrbAnim.stop();
-        ring1Anim.stop();
-        ring2Anim.stop();
+      Animated.timing(screenFade, { toValue: 0, duration: 460, useNativeDriver: ND }).start(() => {
+        glowAnim.stop();
         dotAnim.stop();
         onDone();
       });
-    }, 5000);
+    }, 4800);
 
     return () => {
       clearTimeout(dismiss);
-      orbAnim.stop();
-      innerOrbAnim.stop();
-      ring1Anim.stop();
-      ring2Anim.stop();
+      glowAnim.stop();
       dotAnim.stop();
     };
   }, []);
 
-  const ring1Deg = ringRot.interpolate({ inputRange: [0, 1], outputRange: ["0deg", "360deg"] });
-  const ring2Deg = ringRot2.interpolate({ inputRange: [-1, 0], outputRange: ["-360deg", "0deg"] });
-
   return (
-    <Animated.View style={[styles.root, { opacity: screenFade }]}>
-      <NeuralNetSVG width={W} height={H} opacity={0.28} particleCount={30} />
+    <Animated.View style={[s.root, { opacity: screenFade }]}>
+      {/* Neural network — more prominent, fades in with the rest */}
+      <Animated.View style={{ ...StyleSheet.absoluteFillObject, opacity: netOpacity }}>
+        <NeuralNetSVG width={W} height={H} opacity={0.52} particleCount={38} />
+      </Animated.View>
 
+      {/* Ambient glow behind logo */}
       <Animated.View
-        style={[
-          styles.glowOuter,
-          { transform: [{ scale: orbScale }], opacity: orbOpacity, pointerEvents: "none" },
-        ]}
+        style={[s.glowOuter, { transform: [{ scale: glowScale }], opacity: glowOpacity }]}
+        pointerEvents="none"
       />
-      <Animated.View
-        style={[
-          styles.glowInner,
-          { transform: [{ scale: innerOrbScale }], opacity: innerOrbOpacity, pointerEvents: "none" },
-        ]}
-      />
-      <View style={[styles.glowBlue, { pointerEvents: "none" }]} />
+      <View style={s.glowInner} pointerEvents="none" />
 
-      <View style={styles.center}>
-        <View style={styles.iconArea}>
-          <Animated.View
-            style={[styles.ringWrap, { transform: [{ rotate: ring1Deg }] }]}
-          >
-            <Svg width={RING_SIZE} height={RING_SIZE}>
-              <Circle
-                cx={RING_SIZE / 2}
-                cy={RING_SIZE / 2}
-                r={RING_R}
-                stroke={BRAND}
-                strokeWidth={1.2}
-                strokeDasharray="14 6"
-                fill="none"
-                opacity={0.55}
-              />
-            </Svg>
-          </Animated.View>
-          <Animated.View
-            style={[styles.ringWrap, styles.ringWrap2, { transform: [{ rotate: ring2Deg }] }]}
-          >
-            <Svg width={RING_SIZE + 26} height={RING_SIZE + 26}>
-              <Circle
-                cx={(RING_SIZE + 26) / 2}
-                cy={(RING_SIZE + 26) / 2}
-                r={RING_R + 13}
-                stroke={BRAND}
-                strokeWidth={0.7}
-                strokeDasharray="6 10"
-                fill="none"
-                opacity={0.28}
-              />
-            </Svg>
-          </Animated.View>
+      <View style={s.center}>
+        {/* Brain logo — clean rounded square, no spinning rings */}
+        <Animated.View
+          style={[s.logoWrap, { opacity: logoOpacity, transform: [{ scale: logoScale }] }]}
+        >
+          <Image
+            source={require("../assets/images/brain-logo.png")}
+            style={s.logoImage}
+            resizeMode="contain"
+          />
+        </Animated.View>
 
-          <Animated.View
-            style={[styles.logoCircle, { opacity: iconOpacity, transform: [{ scale: iconScale }] }]}
-          >
-            <Image
-              source={require("../assets/images/brain-logo.png")}
-              style={styles.logoImage}
-              resizeMode="contain"
-            />
-          </Animated.View>
-        </View>
-
+        {/* Wordmark */}
         <Animated.Text
-          style={[styles.wordmark, { opacity: wordOpacity, transform: [{ translateY: wordY }] }]}
+          style={[s.wordmark, { opacity: wordOpacity, transform: [{ translateY: wordY }] }]}
         >
           RESILIUM
         </Animated.Text>
 
-        <Animated.Text style={[styles.tagline, { opacity: tagOpacity }]}>
+        {/* Tagline */}
+        <Animated.Text style={[s.tagline, { opacity: tagOpacity }]}>
           Your Personal Resilience Platform
         </Animated.Text>
 
-        <View style={styles.dotsRow}>
-          <Animated.View style={[styles.dot, { opacity: dot1 }]} />
-          <Animated.View style={[styles.dot, { opacity: dot2 }]} />
-          <Animated.View style={[styles.dot, { opacity: dot3 }]} />
+        {/* Loading indicator dots */}
+        <View style={s.dotsRow}>
+          <Animated.View style={[s.dot, { opacity: dot1 }]} />
+          <Animated.View style={[s.dot, { opacity: dot2 }]} />
+          <Animated.View style={[s.dot, { opacity: dot3 }]} />
         </View>
       </View>
 
-      <Animated.Text style={[styles.footer, { opacity: tagOpacity }]}>
+      {/* Footer */}
+      <Animated.Text style={[s.footer, { opacity: tagOpacity }]}>
         Built for what matters most
       </Animated.Text>
     </Animated.View>
   );
 }
 
-const styles = StyleSheet.create({
+const s = StyleSheet.create({
   root: {
     position: "absolute",
     top: 0, left: 0, right: 0, bottom: 0,
@@ -236,62 +169,45 @@ const styles = StyleSheet.create({
   },
   glowOuter: {
     position: "absolute",
-    width: 420,
-    height: 420,
-    borderRadius: 210,
-    backgroundColor: BRAND_SOFT,
+    width: 360,
+    height: 360,
+    borderRadius: 180,
+    backgroundColor: BRAND_GLOW,
     alignSelf: "center",
-    top: H / 2 - 210,
+    top: H / 2 - 180,
+    pointerEvents: "none",
   },
   glowInner: {
     position: "absolute",
-    width: 240,
-    height: 240,
-    borderRadius: 120,
-    backgroundColor: BRAND_MID,
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+    backgroundColor: BRAND_GLOW_INNER,
     alignSelf: "center",
-    top: H / 2 - 120,
-  },
-  glowBlue: {
-    position: "absolute",
-    width: 340,
-    height: 340,
-    borderRadius: 170,
-    backgroundColor: BLUE_SOFT,
-    alignSelf: "center",
-    top: H / 2 + 60,
+    top: H / 2 - 90,
+    pointerEvents: "none",
   },
   center: {
     alignItems: "center",
     justifyContent: "center",
   },
-  iconArea: {
-    width: RING_SIZE + 26,
-    height: RING_SIZE + 26,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 32,
-  },
-  ringWrap: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-  },
-  ringWrap2: {
-    top: -13,
-    left: -13,
-  },
-  logoCircle: {
-    borderRadius: 14,
+  logoWrap: {
+    borderRadius: 22,
     borderWidth: 1.5,
-    borderColor: "rgba(224,128,64,0.40)",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 6,
+    borderColor: "rgba(224,128,64,0.38)",
+    backgroundColor: "rgba(13,18,37,0.6)",
+    padding: 10,
+    marginBottom: 36,
+    // Subtle shadow for depth
+    shadowColor: BRAND,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.35,
+    shadowRadius: 24,
+    elevation: 10,
   },
   logoImage: {
-    width: 120,
-    height: 96,
+    width: 112,
+    height: 90,
   },
   wordmark: {
     fontSize: 26,
@@ -301,8 +217,8 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   tagline: {
-    fontSize: 13.5,
-    color: "rgba(176,168,144,0.8)",
+    fontSize: 13,
+    color: "rgba(176,168,144,0.75)",
     letterSpacing: 0.3,
     marginBottom: 36,
   },
@@ -320,8 +236,8 @@ const styles = StyleSheet.create({
   footer: {
     position: "absolute",
     bottom: 52,
-    fontSize: 11.5,
-    color: "rgba(106,96,112,0.9)",
+    fontSize: 11,
+    color: "rgba(106,96,112,0.85)",
     letterSpacing: 0.8,
     textTransform: "uppercase",
   },
