@@ -16,6 +16,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { setBaseUrl } from "@workspace/api-client-react";
 import { ClerkProvider } from "@clerk/expo";
 import * as SecureStore from "expo-secure-store";
+import { Feather } from "@expo/vector-icons";
 
 import { AppLoadingScreen } from "@/components/AppLoadingScreen";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -90,6 +91,7 @@ export default function RootLayout() {
     Inter_500Medium,
     Inter_600SemiBold,
     Inter_700Bold,
+    ...Feather.font,
   });
   const [showIntro, setShowIntro] = useState(true);
 
