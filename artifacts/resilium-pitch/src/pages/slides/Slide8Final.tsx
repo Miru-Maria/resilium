@@ -85,9 +85,9 @@ export default function Slide8Final() {
       </div>
 
       <div className="absolute bottom-[4vh] left-0 right-0 text-center"
-        style={{ fontSize: "1.05vw", fontWeight: 300, color: "#8A7A6A", fontFamily: "Inter, sans-serif", ...a("0.65s", "fadeIn") }}
+        style={{ fontSize: "1.15vw", fontWeight: 500, color: "#E08040", letterSpacing: "0.06em", fontFamily: "Inter, sans-serif", ...a("0.65s", "fadeIn") }}
       >
-        Built with Replit Agent 4 &bull; April 2026
+        Start free today &mdash; no account required &bull; resilium-platform.com
       </div>
 
       <div className="absolute bottom-0 left-0 right-0 h-[2px]"

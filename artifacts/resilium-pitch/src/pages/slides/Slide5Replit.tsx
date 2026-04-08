@@ -21,13 +21,13 @@ export default function Slide5Replit() {
           className="text-[1.2vw] font-semibold tracking-[0.18em] uppercase mb-[1vh]"
           style={{ color: "#E08040", fontFamily: "Inter, sans-serif", ...a("0.1s", "fadeIn") }}
         >
-          Built on Replit
+          The Product
         </div>
         <h2
           className="text-[4vw] font-black tracking-tight mb-[4vh]"
           style={{ fontFamily: "Plus Jakarta Sans, sans-serif", color: "#EAD9BE", ...a("0.2s", "slideInLeft") }}
         >
-          Four artifacts. One cohesive platform.
+          From uncertain to prepared — in four steps.
         </h2>
 
         <div className="grid gap-[2vh]" style={{ gridTemplateColumns: "1fr 1fr", flex: 1 }}>
@@ -39,19 +39,19 @@ export default function Slide5Replit() {
               className="text-[1.2vw] font-bold tracking-widest uppercase"
               style={{ color: "#E08040", fontFamily: "Inter, sans-serif" }}
             >
-              Web App
+              Step 01
             </div>
             <div
               className="text-[1.7vw] font-bold"
               style={{ color: "#EAD9BE", fontFamily: "Plus Jakarta Sans, sans-serif" }}
             >
-              React + Vite
+              Take the Assessment
             </div>
             <div
               className="text-[1.3vw] font-light leading-relaxed"
               style={{ color: "#8A7A6A", fontFamily: "Inter, sans-serif" }}
             >
-              Full assessment flow, dashboard, admin panel, GDPR tools, scenario simulations, coaching page
+              14 honest questions across 7 life dimensions. Under 10 minutes. Available in English &amp; Romanian.
             </div>
           </div>
 
@@ -63,19 +63,19 @@ export default function Slide5Replit() {
               className="text-[1.2vw] font-bold tracking-widest uppercase"
               style={{ color: "#E08040", fontFamily: "Inter, sans-serif" }}
             >
-              Mobile App
+              Step 02
             </div>
             <div
               className="text-[1.7vw] font-bold"
               style={{ color: "#EAD9BE", fontFamily: "Plus Jakarta Sans, sans-serif" }}
             >
-              Expo + React Native
+              Get Your Score
             </div>
             <div
               className="text-[1.3vw] font-light leading-relaxed"
               style={{ color: "#8A7A6A", fontFamily: "Inter, sans-serif" }}
             >
-              Full assessment on Android, push notifications, GDPR data management, score sharing
+              A 0–100 resilience score, your top vulnerabilities, and 5 crisis scenario stress-tests — all AI-generated, specific to you.
             </div>
           </div>
 
@@ -87,19 +87,19 @@ export default function Slide5Replit() {
               className="text-[1.2vw] font-bold tracking-widest uppercase"
               style={{ color: "#E08040", fontFamily: "Inter, sans-serif" }}
             >
-              API Server
+              Step 03
             </div>
             <div
               className="text-[1.7vw] font-bold"
               style={{ color: "#EAD9BE", fontFamily: "Plus Jakarta Sans, sans-serif" }}
             >
-              Express + PostgreSQL
+              Build Your Plan
             </div>
             <div
               className="text-[1.3vw] font-light leading-relaxed"
               style={{ color: "#8A7A6A", fontFamily: "Inter, sans-serif" }}
             >
-              Clerk Auth, Drizzle ORM, Paddle webhooks, Resend emails, rate limiting, cron digest
+              A personalized action plan, prioritized by impact. Daily habits and a resilience checklist to move from knowing to doing.
             </div>
           </div>
 
@@ -111,19 +111,19 @@ export default function Slide5Replit() {
               className="text-[1.2vw] font-bold tracking-widest uppercase"
               style={{ color: "#E08040", fontFamily: "Inter, sans-serif" }}
             >
-              AI Integration
+              Step 04
             </div>
             <div
               className="text-[1.7vw] font-bold"
               style={{ color: "#EAD9BE", fontFamily: "Plus Jakarta Sans, sans-serif" }}
             >
-              GPT-5.2 via Replit
+              Grow Over Time
             </div>
             <div
               className="text-[1.3vw] font-light leading-relaxed"
               style={{ color: "#8A7A6A", fontFamily: "Inter, sans-serif" }}
             >
-              AI Integrations proxy — zero API key management. Structured JSON output for reports and scenario analysis.
+              Reassess as life changes. Track progress month over month. Connect with a coach if your psychological score calls for it.
             </div>
           </div>
         </div>

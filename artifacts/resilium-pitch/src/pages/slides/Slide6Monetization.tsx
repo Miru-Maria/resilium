@@ -20,19 +20,19 @@ export default function Slide6Monetization() {
             className="text-[1.2vw] font-semibold tracking-[0.18em] uppercase mb-[1.5vh]"
             style={{ color: "#E08040", fontFamily: "Inter, sans-serif", ...a("0.1s", "fadeIn") }}
           >
-            Monetization
+            Plans &amp; Pricing
           </div>
           <h2
             className="text-[4vw] font-black leading-[1.05] tracking-tight mb-[2.5vh]"
             style={{ fontFamily: "Plus Jakarta Sans, sans-serif", color: "#EAD9BE", ...a("0.2s", "slideInLeft") }}
           >
-            Revenue built in from day one.
+            Start free. Upgrade when it matters.
           </h2>
           <p
             className="text-[1.5vw] font-light leading-relaxed mb-[3vh]"
             style={{ color: "#8A7A6A", fontFamily: "Inter, sans-serif", ...a("0.38s", "fadeUp") }}
           >
-            Three compounding revenue streams designed to grow with the user — not extract from them.
+            Three plans designed around how seriously you want to take your readiness — not how much we can extract from you.
           </p>
           <div
             className="h-[2px]"
@@ -50,20 +50,20 @@ export default function Slide6Monetization() {
                 className="text-[1.6vw] font-bold"
                 style={{ color: "#EAD9BE", fontFamily: "Plus Jakarta Sans, sans-serif" }}
               >
-                Freemium Model
+                Free
               </div>
               <div
                 className="text-[1.1vw] font-semibold px-[0.8vw] py-[0.4vh] rounded-full"
                 style={{ background: "rgba(224,128,64,0.15)", color: "#E08040", fontFamily: "Inter, sans-serif" }}
               >
-                3 free assessments
+                3 full assessments
               </div>
             </div>
             <div
               className="text-[1.3vw] font-light"
               style={{ color: "#8A7A6A", fontFamily: "Inter, sans-serif" }}
             >
-              Unlimited assessments for Pro — full 7-dimension scoring, progress history, scenario simulations, draft resume, and coaching referral access.
+              Complete the assessment, get your full AI report and action plan — no account required for your first run.
             </div>
           </div>
 
@@ -76,20 +76,20 @@ export default function Slide6Monetization() {
                 className="text-[1.6vw] font-bold"
                 style={{ color: "#EAD9BE", fontFamily: "Plus Jakarta Sans, sans-serif" }}
               >
-                Pro Subscriptions
+                Pro
               </div>
               <div
                 className="text-[1.1vw] font-semibold px-[0.8vw] py-[0.4vh] rounded-full"
                 style={{ background: "rgba(224,128,64,0.15)", color: "#E08040", fontFamily: "Inter, sans-serif" }}
               >
-                via Paddle
+                Unlimited assessments
               </div>
             </div>
             <div
               className="text-[1.3vw] font-light"
               style={{ color: "#8A7A6A", fontFamily: "Inter, sans-serif" }}
             >
-              Paddle integration with live webhook processing, subscription lifecycle management, and Pro badge on profile.
+              Unlimited reassessments, full progress history, crisis scenario simulations, and draft resilience resume — as your life evolves.
             </div>
           </div>
 
@@ -102,20 +102,20 @@ export default function Slide6Monetization() {
                 className="text-[1.6vw] font-bold"
                 style={{ color: "#EAD9BE", fontFamily: "Plus Jakarta Sans, sans-serif" }}
               >
-                Coaching Referral
+                Coaching
               </div>
               <div
                 className="text-[1.1vw] font-semibold px-[0.8vw] py-[0.4vh] rounded-full"
                 style={{ background: "rgba(232,168,48,0.12)", color: "#E8A830", fontFamily: "Inter, sans-serif" }}
               >
-                Phoenix Insight Coaching
+                When you need it
               </div>
             </div>
             <div
               className="text-[1.3vw] font-light"
               style={{ color: "#8A7A6A", fontFamily: "Inter, sans-serif" }}
             >
-              AI surfaces coaching when psychological scores are low — passive referral funnel to a real coaching service.
+              If your psychological resilience score signals you could use support, Resilium surfaces a direct path to a human coach.
             </div>
           </div>
         </div>

@@ -27,7 +27,7 @@ export default function Slide1Title() {
             className="text-[1.3vw] font-medium tracking-[0.22em] uppercase"
             style={{ color: "#E08040", fontFamily: "Inter, sans-serif" }}
           >
-            Replit Agent 4 Buildathon
+            Free to start &bull; Web &bull; Mobile &bull; Android
           </span>
         </div>
 
