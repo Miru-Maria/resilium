@@ -120,7 +120,7 @@ export default function Slide8Final() {
           marginTop: "0.6vh",
           ...a("0.54s", "fadeUp"),
         }}>
-          resilium-ai.replit.app
+          resilium-platform.com
         </div>
 
       </div>
@@ -128,7 +128,7 @@ export default function Slide8Final() {
       <div className="absolute bottom-[4vh] left-0 right-0 text-center"
         style={{ fontSize: "1.05vw", fontWeight: 300, color: "#8A7A6A", fontFamily: "Inter, sans-serif", ...a("0.65s", "fadeIn") }}
       >
-        Built with Replit Agent 4 &bull; March 2026
+        Built with Replit Agent 4 &bull; April 2026
       </div>
 
       <div className="absolute bottom-0 left-0 right-0 h-[2px]"

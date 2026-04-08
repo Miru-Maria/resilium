@@ -61,7 +61,7 @@ export default function Slide7Close() {
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: "2.2vw" }}>
-            <span style={NUM}>6</span>
+            <span style={NUM}>7</span>
             <div style={RULE} />
             <div>
               <div style={LABEL}>Resilience dimensions</div>

@@ -41,7 +41,7 @@ export default function Slide3Solution() {
               className="text-[1.8vw] font-bold mb-[1vh]"
               style={{ color: "#EAD9BE", fontFamily: "Plus Jakarta Sans, sans-serif" }}
             >
-              13-Step Assessment
+              14-Step Assessment
             </div>
             <div
               className="text-[1.4vw] font-light leading-relaxed"

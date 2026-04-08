@@ -99,7 +99,7 @@ export default function Slide5Replit() {
               className="text-[1.3vw] font-light leading-relaxed"
               style={{ color: "#8A7A6A", fontFamily: "Inter, sans-serif" }}
             >
-              Replit Auth (OIDC), Drizzle ORM, Paddle webhooks, Resend emails, rate limiting, cron digest
+              Clerk Auth, Drizzle ORM, Paddle webhooks, Resend emails, rate limiting, cron digest
             </div>
           </div>
 

@@ -63,7 +63,7 @@ export default function Slide1Title() {
             className="text-[1.2vw] font-medium tracking-wide"
             style={{ color: "#E08040", fontFamily: "Inter, sans-serif" }}
           >
-            resilium-ai.replit.app
+            resilium-platform.com
           </div>
         </div>
       </div>
