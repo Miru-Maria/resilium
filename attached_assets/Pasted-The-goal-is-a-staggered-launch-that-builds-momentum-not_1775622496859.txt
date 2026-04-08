@@ -1,0 +1,76 @@
+The goal is a staggered launch that builds momentum, not a single spike that fades.
+
+
+Phase 1 — Soft Launch (Week 1–2)
+
+
+Goal: Catch product bugs with real users before public exposure.
+- Invite 20–50 people directly: friends, colleagues, anyone in adjacent fields (finance, health, emergency management)
+- Ask them to complete the full assessment and report anything broken
+- Offer them free Pro access in return for a 5-minute feedback call
+- Fix everything that surfaces — especially email delivery, plan generation, and payment
+
+
+Phase 2 — Community Seeding (Week 2–3)
+
+
+Goal: Build organic credibility in the communities who need this most.
+
+These communities have high overlap with Resilium's value proposition:
+
+- Reddit: r/preppers, r/financialindependence, r/homesteading, r/personalfinance, r/digitalnomad
+- Facebook Groups: prepper groups, off-grid living, financial independence communities
+- Don't advertise — post a genuine "I built this because..." story and link. These communities respond much better to authenticity than promotion.
+- Seed 3–5 upvoted comments before posting your own content (earn credibility first)
+
+
+Phase 3 — ProductHunt Launch (Week 3–4)
+
+
+Goal: Tech-audience spike and media visibility.
+
+- Submit to ProductHunt on a Tuesday or Wednesday (highest traffic days)
+- Line up 30+ supporters to upvote and comment in the first hour — this is the single biggest factor in ranking
+- Write a genuine maker story in the comments
+- Respond to every comment on launch day
+- Simultaneously post on X/Twitter, LinkedIn, and HackerNews "Show HN"
+
+
+Phase 4 — Coaching & B2B Referral Activation (Week 3 onwards)
+
+
+Goal: Turn the passive coaching referral funnel into an active partnership channel.
+
+- Identify 10–20 independent resilience, life, or financial coaches on LinkedIn
+- Offer them a white-label or affiliate arrangement: they send clients to complete the Resilium assessment, they get a referral fee or co-branded report
+- Coaches benefit because it gives their clients structured data before the first session
+- This is a compounding channel — each coach brings recurring clients
+
+
+Phase 5 — Content & SEO (Ongoing from Week 2)
+
+
+Goal: Capture search intent from people who are already worried about resilience.
+
+High-intent search terms to target with blog posts or landing pages:
+
+- "personal resilience score"
+- "emergency preparedness checklist"
+- "financial resilience plan"
+- "how prepared am I for a crisis"
+- "personal resilience assessment"
+Each post should link back to the free assessment as the CTA.
+
+
+Phase 6 — Press Outreach (Week 4+)
+
+
+Goal: Earned media in publications your target audience reads.
+
+Pitch angles that are newsworthy right now:
+
+- "How financially resilient is the average person?" (data story using anonymised assessment results)
+- "The overlooked dimension of emergency preparedness: psychological resilience"
+- Target: personal finance newsletters, prepper media, HR/wellbeing trade press, local news if you have a regional angle
+---
+The single most important thing: the product must work perfectly before Phase 3. A broken experience at ProductHunt scale will generate negative reviews that are very hard to recover from. Phases 1 and 2 exist precisely to prevent that.
