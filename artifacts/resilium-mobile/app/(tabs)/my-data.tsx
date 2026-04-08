@@ -190,9 +190,7 @@ export default function MyDataScreen() {
   return (
     <View style={[styles.container, { paddingTop: topPad }]}>
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()} style={styles.backBtn} hitSlop={12} testID="back-btn">
-          <Feather name="arrow-left" size={20} color={colors.textSecondary} />
-        </Pressable>
+        <View style={{ width: 38 }} />
         <Text style={styles.headerTitle}>My Data & Privacy</Text>
         <View style={{ width: 38 }} />
       </View>
