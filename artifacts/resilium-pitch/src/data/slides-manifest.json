@@ -32,32 +32,40 @@
     "speakerNotes": ""
   },
   {
-    "id": "e5f6a7b8-c9d0-1234-efab-345678901234",
+    "id": "a9f1e2d3-b4c5-6789-0abc-def123456789",
     "position": 5,
+    "filepath": "src/pages/slides/Slide5Testimonial.tsx",
+    "title": "First Validation",
+    "description": "Pull quote from Pauline, holistic & executive performance coach.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "e5f6a7b8-c9d0-1234-efab-345678901234",
+    "position": 6,
     "filepath": "src/pages/slides/Slide5Replit.tsx",
-    "title": "Built on Replit",
-    "description": "Four-artifact grid — web, mobile, API, AI integration.",
+    "title": "The Product",
+    "description": "Four-step user journey: assess, score, plan, grow.",
     "speakerNotes": ""
   },
   {
     "id": "f6a7b8c9-d0e1-2345-fabc-456789012345",
-    "position": 6,
+    "position": 7,
     "filepath": "src/pages/slides/Slide6Monetization.tsx",
-    "title": "Monetization",
-    "description": "Three revenue streams: freemium, Pro subscriptions, coaching referral.",
+    "title": "Plans & Pricing",
+    "description": "Three plans: Free, Pro, Coaching — customer-benefit framing.",
     "speakerNotes": ""
   },
   {
     "id": "a7b8c9d0-e1f2-3456-abcd-567890123456",
-    "position": 7,
+    "position": 8,
     "filepath": "src/pages/slides/Slide7Close.tsx",
-    "title": "What's Next",
-    "description": "Full-center layout — four giant stats in a horizontal row with vertical dividers, roadmap text below.",
+    "title": "Why Resilium",
+    "description": "Proof points — 10 min, 7 dimensions, 0–100 score, Free to start.",
     "speakerNotes": ""
   },
   {
     "id": "b8c9d0e1-f2a3-4567-bcde-678901234567",
-    "position": 8,
+    "position": 9,
     "filepath": "src/pages/slides/Slide8Final.tsx",
     "title": "Final",
     "description": "Closing slide — neon Resilium logo, closing line, URL.",
