@@ -28,7 +28,7 @@ export default function LoadingScreen() {
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
-  const topPad = Platform.OS === "web" ? 67 : insets.top;
+  const topPad = insets.top;
 
   useEffect(() => {
     Animated.loop(

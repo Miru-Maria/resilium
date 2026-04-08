@@ -218,8 +218,8 @@ export default function AssessmentScreen() {
     mentalResilienceAnswers: { ...DEFAULT_MR_ANSWERS },
   });
 
-  const topPad = Platform.OS === "web" ? 67 : insets.top;
-  const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
+  const topPad = insets.top;
+  const bottomPad = insets.bottom;
 
   const FREE_LIMIT = 3;
 

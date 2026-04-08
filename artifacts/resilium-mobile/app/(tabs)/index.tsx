@@ -242,8 +242,8 @@ export default function HomeScreen() {
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
-  const topPad = Platform.OS === "web" ? 67 : insets.top;
-  const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
+  const topPad = insets.top;
+  const bottomPad = insets.bottom;
   const [heroSize, setHeroSize] = useState({ width: SCREEN_W, height: 340 });
 
   const handleStart = () => {
