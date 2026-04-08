@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import {
   View,
-  Text,
+  Image,
   StyleSheet,
   Animated,
   Dimensions,
@@ -193,7 +193,11 @@ export function AppLoadingScreen({ onDone }: Props) {
           <Animated.View
             style={[styles.logoCircle, { opacity: iconOpacity, transform: [{ scale: iconScale }] }]}
           >
-            <Text style={styles.logoLetter}>R</Text>
+            <Image
+              source={require("../assets/images/brain-logo.png")}
+              style={styles.logoImage}
+              resizeMode="cover"
+            />
           </Animated.View>
         </View>
 
@@ -278,21 +282,19 @@ const styles = StyleSheet.create({
     left: -13,
   },
   logoCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: "rgba(224,128,64,0.14)",
+    width: 88,
+    height: 88,
+    borderRadius: 44,
     borderWidth: 1.5,
-    borderColor: "rgba(224,128,64,0.35)",
+    borderColor: "rgba(224,128,64,0.40)",
+    overflow: "hidden",
     alignItems: "center",
     justifyContent: "center",
   },
-  logoLetter: {
-    fontSize: 34,
-    fontWeight: "700",
-    color: BRAND,
-    letterSpacing: 1,
-    lineHeight: 38,
+  logoImage: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
   },
   wordmark: {
     fontSize: 26,
