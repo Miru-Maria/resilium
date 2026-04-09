@@ -147,7 +147,7 @@ function GlobalNav() {
 
   useEffect(() => {
     if (isLoaded) return;
-    const t = setTimeout(() => setAuthTimedOut(true), 3000);
+    const t = setTimeout(() => setAuthTimedOut(true), 500);
     return () => clearTimeout(t);
   }, [isLoaded]);
 

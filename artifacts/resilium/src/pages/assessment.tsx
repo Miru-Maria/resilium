@@ -696,9 +696,17 @@ export default function AssessmentPage() {
   const [authTimedOut, setAuthTimedOut] = useState(false);
   useEffect(() => {
     if (isLoaded) return;
-    const timer = setTimeout(() => setAuthTimedOut(true), 3000);
+    const timer = setTimeout(() => setAuthTimedOut(true), 500);
     return () => clearTimeout(timer);
   }, [isLoaded]);
+
+  // GDPR gate: redirect to /consent if user arrived without going through the consent page
+  useEffect(() => {
+    const consented = sessionStorage.getItem("resilium_consent_given");
+    if (!consented) {
+      setLocation("/consent");
+    }
+  }, []);
   const authLoading = !isLoaded && !authTimedOut;
   const isAuthenticated = !!isSignedIn;
   // Per-user draft key — null until Clerk has resolved identity

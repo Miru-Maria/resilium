@@ -85,6 +85,7 @@ export default function ConsentPage() {
         // Non-blocking — consent is stored locally even if the API call fails
       }
 
+      sessionStorage.setItem("resilium_consent_given", "1");
       setLocation("/assess");
     } finally {
       setIsAccepting(false);

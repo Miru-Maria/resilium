@@ -116,6 +116,17 @@ export default function CoachingPage() {
           <ArrowLeft size={14} />
           Back to Resilium
         </Link>
+        <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+          <Link href="/about" style={{ color: C.muted, textDecoration: "none", fontSize: "13px", fontWeight: 500 }}>About</Link>
+          <Link href="/demo" style={{ color: C.muted, textDecoration: "none", fontSize: "13px", fontWeight: 500 }}>Demo</Link>
+          <Link href="/pricing" style={{ color: C.muted, textDecoration: "none", fontSize: "13px", fontWeight: 500 }}>Pricing</Link>
+          <Link href="/sign-in" style={{
+            display: "inline-flex", alignItems: "center", gap: "5px",
+            color: C.primary, textDecoration: "none", fontSize: "13px", fontWeight: 600,
+            background: "rgba(232,73,15,0.08)", border: "1px solid rgba(232,73,15,0.22)",
+            borderRadius: "20px", padding: "5px 14px",
+          }}>Sign In</Link>
+        </div>
       </div>
 
       {/* Hero */}

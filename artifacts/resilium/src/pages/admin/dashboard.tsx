@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useLocation, useSearch, Link } from "wouter";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -7,12 +7,14 @@ import {
 } from "recharts";
 import {
   ShieldAlert, LogOut, Loader2, AlertTriangle, FileText,
-  Star, Activity, MessageSquare, Smartphone, Shield, LayoutDashboard, FlaskConical, ExternalLink, Eye
+  Star, Activity, MessageSquare, Smartphone, Shield, LayoutDashboard, FlaskConical, ExternalLink, Eye,
+  Search, ChevronLeft, ChevronRight, X
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
 import { adminAuthHeaders } from "./layout";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -121,6 +123,16 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  interface ReportsPageData {
+    reports: { reportId: string; createdAt: string; location: string; overallScore: number; incomeStability: string; ageBracket: string | null; primaryGoal: string | null }[];
+    total: number; page: number; limit: number; totalPages: number;
+  }
+  const [reportsData, setReportsData] = useState<ReportsPageData | null>(null);
+  const [reportsPage, setReportsPage] = useState(1);
+  const [reportsSearch, setReportsSearch] = useState("");
+  const [reportsLoading, setReportsLoading] = useState(false);
+  const reportsDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   useEffect(() => {
     const load = async () => {
       try {
@@ -152,6 +164,25 @@ export default function AdminDashboard() {
     };
     load();
   }, [setLocation]);
+
+  const fetchReports = useCallback(async (page: number, search: string) => {
+    setReportsLoading(true);
+    try {
+      const params = new URLSearchParams({ page: String(page), limit: "25" });
+      if (search) params.set("search", search);
+      const res = await fetch(`${BASE}/api/admin/reports?${params}`, { headers: adminAuthHeaders() });
+      if (res.ok) setReportsData(await res.json());
+    } finally {
+      setReportsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (activeTab !== "reports") return;
+    if (reportsDebounce.current) clearTimeout(reportsDebounce.current);
+    reportsDebounce.current = setTimeout(() => fetchReports(reportsPage, reportsSearch), 300);
+    return () => { if (reportsDebounce.current) clearTimeout(reportsDebounce.current); };
+  }, [activeTab, reportsPage, reportsSearch, fetchReports]);
 
   const handleLogout = async () => {
     localStorage.removeItem("admin_token");
@@ -470,47 +501,99 @@ export default function AdminDashboard() {
           <TabsContent value="reports">
             <Card className="border-none shadow-md">
               <CardHeader>
-                <CardTitle className="text-base font-display">Recent Submissions</CardTitle>
-                <CardDescription>Latest {data.recentReports.length} resilience reports</CardDescription>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
+                  <div>
+                    <CardTitle className="text-base font-display">All Submissions</CardTitle>
+                    <CardDescription className="mt-0.5">
+                      {reportsData ? `${reportsData.total} total report${reportsData.total !== 1 ? "s" : ""}` : "Loading…"}
+                    </CardDescription>
+                  </div>
+                  <div className="relative w-full sm:w-64">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                    <Input
+                      placeholder="Search location or report ID…"
+                      value={reportsSearch}
+                      onChange={e => { setReportsSearch(e.target.value); setReportsPage(1); }}
+                      className="pl-9 pr-8 h-8 text-sm"
+                    />
+                    {reportsSearch && (
+                      <button onClick={() => { setReportsSearch(""); setReportsPage(1); }} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                        <X className="w-3 h-3" />
+                      </button>
+                    )}
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
-                {data.recentReports.length === 0 ? (
-                  <p className="text-muted-foreground text-sm text-center py-8">No reports yet</p>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="border-b border-border">
-                          <th className="text-left py-2 px-3 text-muted-foreground font-medium">Date</th>
-                          <th className="text-left py-2 px-3 text-muted-foreground font-medium">Location</th>
-                          <th className="text-left py-2 px-3 text-muted-foreground font-medium">Overall Score</th>
-                          <th className="text-left py-2 px-3 text-muted-foreground font-medium">Income</th>
-                          <th className="text-left py-2 px-3 text-muted-foreground font-medium">View</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {data.recentReports.map(r => (
-                          <tr key={r.reportId} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
-                            <td className="py-2.5 px-3 text-muted-foreground">{formatDate(r.createdAt)}</td>
-                            <td className="py-2.5 px-3 font-medium">{r.location}</td>
-                            <td className="py-2.5 px-3">
-                              <span className={`font-semibold ${formatScore(r.overallScore) >= 70 ? "text-emerald-500" : formatScore(r.overallScore) >= 40 ? "text-amber-500" : "text-destructive"}`}>
-                                {formatScore(r.overallScore)}
-                              </span>
-                            </td>
-                            <td className="py-2.5 px-3">
-                              <Badge variant="outline" className="text-xs capitalize">{r.incomeStability}</Badge>
-                            </td>
-                            <td className="py-2.5 px-3">
-                              <Link href={`/results/${r.reportId}`} className="text-primary hover:underline text-xs font-medium">
-                                View →
-                              </Link>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                {reportsLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
                   </div>
+                ) : !reportsData || reportsData.reports.length === 0 ? (
+                  <p className="text-muted-foreground text-sm text-center py-8">
+                    {reportsSearch ? "No reports match your search" : "No reports yet"}
+                  </p>
+                ) : (
+                  <>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b border-border">
+                            <th className="text-left py-2 px-3 text-muted-foreground font-medium">Date</th>
+                            <th className="text-left py-2 px-3 text-muted-foreground font-medium">Location</th>
+                            <th className="text-left py-2 px-3 text-muted-foreground font-medium">Score</th>
+                            <th className="text-left py-2 px-3 text-muted-foreground font-medium">Age</th>
+                            <th className="text-left py-2 px-3 text-muted-foreground font-medium">Goal</th>
+                            <th className="text-left py-2 px-3 text-muted-foreground font-medium">View</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {reportsData.reports.map(r => (
+                            <tr key={r.reportId} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
+                              <td className="py-2.5 px-3 text-muted-foreground whitespace-nowrap">{formatDate(r.createdAt)}</td>
+                              <td className="py-2.5 px-3 font-medium max-w-[140px] truncate">{r.location || "—"}</td>
+                              <td className="py-2.5 px-3">
+                                <span className={`font-semibold ${r.overallScore >= 70 ? "text-emerald-500" : r.overallScore >= 40 ? "text-amber-500" : "text-destructive"}`}>
+                                  {Math.round(r.overallScore)}
+                                </span>
+                              </td>
+                              <td className="py-2.5 px-3 text-muted-foreground">{r.ageBracket || "—"}</td>
+                              <td className="py-2.5 px-3 max-w-[120px] truncate text-muted-foreground text-xs">{r.primaryGoal?.replace(/_/g, " ") || "—"}</td>
+                              <td className="py-2.5 px-3">
+                                <Link href={`/results/${r.reportId}`} className="text-primary hover:underline text-xs font-medium">
+                                  View →
+                                </Link>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                    {reportsData.totalPages > 1 && (
+                      <div className="flex items-center justify-between pt-4 border-t border-border mt-3">
+                        <span className="text-xs text-muted-foreground">
+                          Page {reportsData.page} of {reportsData.totalPages} · {reportsData.total} reports
+                        </span>
+                        <div className="flex items-center gap-1">
+                          <Button variant="ghost" size="sm" className="h-7 w-7 p-0" disabled={reportsPage <= 1} onClick={() => setReportsPage(p => p - 1)}>
+                            <ChevronLeft className="w-4 h-4" />
+                          </Button>
+                          {Array.from({ length: Math.min(5, reportsData.totalPages) }, (_, i) => {
+                            const start = Math.max(1, Math.min(reportsData.page - 2, reportsData.totalPages - 4));
+                            const pg = start + i;
+                            return (
+                              <Button key={pg} variant={pg === reportsData.page ? "default" : "ghost"} size="sm" className="h-7 w-7 p-0 text-xs" onClick={() => setReportsPage(pg)}>
+                                {pg}
+                              </Button>
+                            );
+                          })}
+                          <Button variant="ghost" size="sm" className="h-7 w-7 p-0" disabled={reportsPage >= reportsData.totalPages} onClick={() => setReportsPage(p => p + 1)}>
+                            <ChevronRight className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
               </CardContent>
             </Card>

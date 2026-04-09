@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db, resilienceReportsTable, reportFeedbackTable, usersTable, planViewsTable, adminConfigTable } from "@workspace/db";
-import { desc, eq, count, max, and, isNotNull, gte } from "drizzle-orm";
+import { desc, eq, count, max, and, isNotNull, gte, lte, ilike, or } from "drizzle-orm";
 import {
   requireAdminSession, generateAdminToken, verifyAdminToken,
   hashPassword, verifyPassword, generateRecoveryCode, consumeRecoveryCode,
@@ -170,15 +170,31 @@ router.get("/analytics", requireAdminSession, async (req, res) => {
       "18-24": "18–24", "25-34": "25–34", "35-44": "35–44",
       "45-54": "45–54", "55-64": "55–64", "65+": "65+"
     };
+    // Normalize location to country (last segment after comma)
+    const normalizeCountry = (loc: string | null): string => {
+      if (!loc || !loc.trim()) return "Unknown";
+      const parts = loc.split(",").map(p => p.trim()).filter(Boolean);
+      return parts[parts.length - 1] || loc.trim();
+    };
+    const locationNormalized = Object.entries(
+      reports.reduce<Record<string, number>>((acc, r) => {
+        const country = normalizeCountry(r.location);
+        acc[country] = (acc[country] ?? 0) + 1;
+        return acc;
+      }, {})
+    )
+      .sort((a, b) => b[1] - a[1])
+      .map(([name, count]) => ({ name, count }));
+
     const demographics = {
-      location: countBy(reports, "location"),
+      location: locationNormalized,
       incomeStability: countBy(reports, "incomeStability"),
       healthStatus: countBy(reports, "healthStatus"),
       housingType: countBy(reports, "housingType"),
       mobilityLevel: countBy(reports, "mobilityLevel"),
       dependentCount: countByLabel(reports, "dependentCount", DEPENDENT_LABELS),
       relocationReadiness: countByLabel(reports, "relocationReadiness", RELOCATION_LABELS),
-      ageBracket: countByLabel(reports.filter(r => r.ageBracket), "ageBracket", AGE_BRACKET_LABELS),
+      ageBracket: countByLabel(reports, "ageBracket", AGE_BRACKET_LABELS),
     };
 
     // Score analytics
@@ -421,6 +437,81 @@ router.post("/send-test-email", requireAdminSession, async (req, res) => {
   } catch (err) {
     logger.error({ err }, "Failed to send test email");
     res.status(500).json({ error: "Failed to send test email" });
+  }
+});
+
+// Paginated reports endpoint
+router.get("/reports", requireAdminSession, async (req, res) => {
+  try {
+    const page = Math.max(1, parseInt(String(req.query["page"] ?? "1"), 10));
+    const limit = Math.min(100, Math.max(1, parseInt(String(req.query["limit"] ?? "25"), 10)));
+    const search = String(req.query["search"] ?? "").trim();
+    const minScore = req.query["minScore"] !== undefined ? parseFloat(String(req.query["minScore"])) : undefined;
+    const maxScore = req.query["maxScore"] !== undefined ? parseFloat(String(req.query["maxScore"])) : undefined;
+    const startDate = req.query["startDate"] ? new Date(String(req.query["startDate"])) : undefined;
+    const endDate = req.query["endDate"] ? new Date(String(req.query["endDate"])) : undefined;
+
+    const conditions = [];
+    if (search) {
+      conditions.push(
+        or(
+          ilike(resilienceReportsTable.location, `%${search}%`),
+          ilike(resilienceReportsTable.reportId, `%${search}%`)
+        )
+      );
+    }
+    if (minScore !== undefined && !isNaN(minScore)) {
+      conditions.push(gte(resilienceReportsTable.scoreOverall, minScore));
+    }
+    if (maxScore !== undefined && !isNaN(maxScore)) {
+      conditions.push(lte(resilienceReportsTable.scoreOverall, maxScore));
+    }
+    if (startDate && !isNaN(startDate.getTime())) {
+      conditions.push(gte(resilienceReportsTable.createdAt, startDate));
+    }
+    if (endDate && !isNaN(endDate.getTime())) {
+      conditions.push(lte(resilienceReportsTable.createdAt, endDate));
+    }
+
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+    const [countResult, rows] = await Promise.all([
+      db.select({ total: count() }).from(resilienceReportsTable).where(whereClause),
+      db.select({
+        reportId: resilienceReportsTable.reportId,
+        createdAt: resilienceReportsTable.createdAt,
+        location: resilienceReportsTable.location,
+        scoreOverall: resilienceReportsTable.scoreOverall,
+        incomeStability: resilienceReportsTable.incomeStability,
+        ageBracket: resilienceReportsTable.ageBracket,
+        primaryGoal: resilienceReportsTable.primaryGoal,
+      })
+        .from(resilienceReportsTable)
+        .where(whereClause)
+        .orderBy(desc(resilienceReportsTable.createdAt))
+        .limit(limit)
+        .offset((page - 1) * limit),
+    ]);
+
+    const total = Number(countResult[0]?.total ?? 0);
+    res.json({
+      reports: rows.map(r => ({
+        reportId: r.reportId,
+        createdAt: r.createdAt.toISOString(),
+        location: r.location,
+        overallScore: r.scoreOverall,
+        incomeStability: r.incomeStability,
+        ageBracket: r.ageBracket,
+        primaryGoal: r.primaryGoal,
+      })),
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    });
+  } catch (err) {
+    req.log.error({ err }, "Error fetching admin reports");
+    res.status(500).json({ error: "INTERNAL_ERROR", message: "Failed to fetch reports." });
   }
 });
 

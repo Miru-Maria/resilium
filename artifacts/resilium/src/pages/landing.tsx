@@ -254,7 +254,7 @@ export default function LandingPage() {
               </Link>
               <Link href="/demo">
                 <Button size="lg" variant="outline" className="rounded-full h-16 px-10 text-lg font-semibold border-border/60 hover:border-primary/40 hover:-translate-y-0.5 transition-all duration-300">
-                  See a Sample Plan
+                  See a Demo
                 </Button>
               </Link>
             </div>
