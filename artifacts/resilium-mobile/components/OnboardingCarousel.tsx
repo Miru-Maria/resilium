@@ -341,7 +341,7 @@ const s = StyleSheet.create({
     flexWrap: "wrap",
   },
   bullet: {
-    width: BULLET_W,
+    width: "100%",
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "rgba(255,255,255,0.04)",
@@ -350,7 +350,6 @@ const s = StyleSheet.create({
     paddingVertical: 7,
     borderWidth: 1,
     borderColor: C.border,
-    marginRight: 8,
     marginBottom: 8,
   },
   bulletIcon: {
