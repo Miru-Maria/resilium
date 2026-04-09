@@ -7,6 +7,7 @@ import {
   Dimensions,
   Animated,
   ScrollView,
+  Modal,
 } from "react-native";
 import { router } from "expo-router";
 import { Feather } from "@expo/vector-icons";
@@ -134,75 +135,77 @@ export function OnboardingCarousel({ onDismiss }: Props) {
   const slide = SLIDES[currentIndex];
 
   return (
-    <View style={s.overlay}>
-      <View style={s.modal}>
-        {/* Skip */}
-        <Pressable style={s.skipBtn} onPress={dismiss} hitSlop={12}>
-          <Text style={s.skipText}>Skip</Text>
-        </Pressable>
+    <Modal visible transparent statusBarTranslucent animationType="fade">
+      <View style={s.overlay}>
+        <View style={s.modal}>
+          {/* Skip */}
+          <Pressable style={s.skipBtn} onPress={dismiss} hitSlop={12}>
+            <Text style={s.skipText}>Skip</Text>
+          </Pressable>
 
-        {/* Animated slide content */}
-        <Animated.View
-          style={[
-            s.slideWrapper,
-            { opacity: fadeAnim, transform: [{ translateX: slideAnim }] },
-          ]}
-        >
-          <SlideView slide={slide} />
-        </Animated.View>
+          {/* Animated slide content */}
+          <Animated.View
+            style={[
+              s.slideWrapper,
+              { opacity: fadeAnim, transform: [{ translateX: slideAnim }] },
+            ]}
+          >
+            <SlideView slide={slide} />
+          </Animated.View>
 
-        {/* Dots + CTA */}
-        <View style={s.bottom}>
-          {/* Progress dots */}
-          <View style={s.dotsRow}>
-            {SLIDES.map((_, i) => (
+          {/* Dots + CTA */}
+          <View style={s.bottom}>
+            {/* Progress dots */}
+            <View style={s.dotsRow}>
+              {SLIDES.map((_, i) => (
+                <Pressable
+                  key={i}
+                  onPress={() => i !== currentIndex && animateTo(i)}
+                  hitSlop={8}
+                >
+                  <View
+                    style={[
+                      s.dot,
+                      {
+                        width: i === currentIndex ? 22 : 8,
+                        backgroundColor:
+                          i === currentIndex ? slide.accent : C.border,
+                        opacity: i === currentIndex ? 1 : 0.5,
+                      },
+                    ]}
+                  />
+                </Pressable>
+              ))}
+            </View>
+
+            {isLast ? (
               <Pressable
-                key={i}
-                onPress={() => i !== currentIndex && animateTo(i)}
-                hitSlop={8}
+                style={({ pressed }) => [s.ctaBtn, pressed && { opacity: 0.85 }]}
+                onPress={handleStart}
               >
-                <View
-                  style={[
-                    s.dot,
-                    {
-                      width: i === currentIndex ? 22 : 8,
-                      backgroundColor:
-                        i === currentIndex ? slide.accent : C.border,
-                      opacity: i === currentIndex ? 1 : 0.5,
-                    },
-                  ]}
-                />
+                <LinearGradient
+                  colors={["#E08040", "#C05820"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={s.ctaGradient}
+                >
+                  <Text style={s.ctaText}>Start My Assessment</Text>
+                  <Feather name="arrow-right" size={18} color="#fff" />
+                </LinearGradient>
               </Pressable>
-            ))}
-          </View>
-
-          {isLast ? (
-            <Pressable
-              style={({ pressed }) => [s.ctaBtn, pressed && { opacity: 0.85 }]}
-              onPress={handleStart}
-            >
-              <LinearGradient
-                colors={["#E08040", "#C05820"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={s.ctaGradient}
+            ) : (
+              <Pressable
+                style={({ pressed }) => [s.nextBtn, pressed && { opacity: 0.75 }]}
+                onPress={handleNext}
               >
-                <Text style={s.ctaText}>Start My Assessment</Text>
-                <Feather name="arrow-right" size={18} color="#fff" />
-              </LinearGradient>
-            </Pressable>
-          ) : (
-            <Pressable
-              style={({ pressed }) => [s.nextBtn, pressed && { opacity: 0.75 }]}
-              onPress={handleNext}
-            >
-              <Text style={s.nextText}>Next</Text>
-              <Feather name="chevron-right" size={18} color={C.text2} />
-            </Pressable>
-          )}
+                <Text style={s.nextText}>Next</Text>
+                <Feather name="chevron-right" size={18} color={C.text2} />
+              </Pressable>
+            )}
+          </View>
         </View>
       </View>
-    </View>
+    </Modal>
   );
 }
 
