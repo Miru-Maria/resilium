@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   Pressable,
   Dimensions,
   Animated,
+  ScrollView,
 } from "react-native";
 import { router } from "expo-router";
 import { Feather } from "@expo/vector-icons";
@@ -16,6 +17,9 @@ const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get("window");
 
 const ONBOARDING_KEY = "resilium_onboarded_mobile_v1";
 
+const MODAL_H = Math.min(Math.round(SCREEN_H * 0.84), 680);
+const MODAL_W = SCREEN_W - 32;
+
 const C = {
   bg: "#0D1225",
   surface: "#141B30",
@@ -23,18 +27,18 @@ const C = {
   primary: "#E08040",
   text: "#F0EBE3",
   text2: "#A09880",
-  text3: "#6A6070",
   success: "#34D399",
 };
 
+type BulletItem = { icon: string; label: string };
 type Slide = {
   key: string;
-  icon: keyof typeof Feather.glyphMap;
+  icon: string;
   accent: string;
   eyebrow: string;
   title: string;
   subtitle: string;
-  bullets: { icon: keyof typeof Feather.glyphMap; label: string }[];
+  bullets: BulletItem[];
 };
 
 const SLIDES: Slide[] = [
@@ -44,7 +48,8 @@ const SLIDES: Slide[] = [
     accent: C.primary,
     eyebrow: "WHAT IS RESILIUM?",
     title: "Know your real\nvulnerabilities",
-    subtitle: "Most people don't know how resilient they actually are — until a crisis hits. Resilium measures it across 6 life dimensions.",
+    subtitle:
+      "Most people don't know how resilient they actually are — until a crisis hits. Resilium measures it across 6 life dimensions.",
     bullets: [
       { icon: "dollar-sign", label: "Financial stability" },
       { icon: "heart", label: "Health continuity" },
@@ -60,7 +65,8 @@ const SLIDES: Slide[] = [
     accent: "#60A5FA",
     eyebrow: "TAKE YOUR ASSESSMENT",
     title: "14 steps.\nYour AI report.",
-    subtitle: "Answer honestly — the assessment takes 10–15 minutes. At the end, AI scores you across all 6 dimensions and generates a personalised resilience report.",
+    subtitle:
+      "Answer honestly — the assessment takes 10–15 minutes. AI scores you across all 6 dimensions and generates a personalised resilience report.",
     bullets: [
       { icon: "clock", label: "~10 min to complete" },
       { icon: "bar-chart-2", label: "Scored across 6 dimensions" },
@@ -74,10 +80,11 @@ const SLIDES: Slide[] = [
     accent: C.success,
     eyebrow: "BUILD YOUR RESILIENCE",
     title: "A living plan\nthat grows with you.",
-    subtitle: "Your report becomes a trackable action plan. Daily check-ins build your streak. Book coaching when you need more than a checklist.",
+    subtitle:
+      "Your report becomes a trackable action plan. Daily check-ins build your streak. Book coaching when you need more than a checklist.",
     bullets: [
       { icon: "check-circle", label: "Trackable action checklist" },
-      { icon: "refresh-cw", label: "Daily check-ins & streak tracking" },
+      { icon: "refresh-cw", label: "Daily check-ins & streaks" },
       { icon: "alert-triangle", label: "Stress-test life scenarios" },
       { icon: "user", label: "1-on-1 coaching available" },
     ],
@@ -100,19 +107,17 @@ export function OnboardingCarousel({ onDismiss }: Props) {
 
   const animateTo = (nextIndex: number) => {
     Animated.parallel([
-      Animated.timing(fadeAnim, { toValue: 0, duration: 160, useNativeDriver: true }),
-      Animated.timing(slideAnim, { toValue: -20, duration: 160, useNativeDriver: true }),
+      Animated.timing(fadeAnim, { toValue: 0, duration: 150, useNativeDriver: true }),
+      Animated.timing(slideAnim, { toValue: -16, duration: 150, useNativeDriver: true }),
     ]).start(() => {
       setCurrentIndex(nextIndex);
-      slideAnim.setValue(20);
+      slideAnim.setValue(16);
       Animated.parallel([
-        Animated.timing(fadeAnim, { toValue: 1, duration: 200, useNativeDriver: true }),
-        Animated.timing(slideAnim, { toValue: 0, duration: 200, useNativeDriver: true }),
+        Animated.timing(fadeAnim, { toValue: 1, duration: 180, useNativeDriver: true }),
+        Animated.timing(slideAnim, { toValue: 0, duration: 180, useNativeDriver: true }),
       ]).start();
     });
   };
-
-  const handleSkip = () => dismiss();
 
   const handleNext = () => {
     if (currentIndex < SLIDES.length - 1) {
@@ -129,17 +134,17 @@ export function OnboardingCarousel({ onDismiss }: Props) {
   const slide = SLIDES[currentIndex];
 
   return (
-    <View style={styles.overlay}>
-      <View style={styles.modal}>
+    <View style={s.overlay}>
+      <View style={s.modal}>
         {/* Skip */}
-        <Pressable style={styles.skipBtn} onPress={handleSkip} hitSlop={12}>
-          <Text style={styles.skipText}>Skip</Text>
+        <Pressable style={s.skipBtn} onPress={dismiss} hitSlop={12}>
+          <Text style={s.skipText}>Skip</Text>
         </Pressable>
 
         {/* Animated slide content */}
         <Animated.View
           style={[
-            styles.slideWrapper,
+            s.slideWrapper,
             { opacity: fadeAnim, transform: [{ translateX: slideAnim }] },
           ]}
         >
@@ -147,16 +152,22 @@ export function OnboardingCarousel({ onDismiss }: Props) {
         </Animated.View>
 
         {/* Dots + CTA */}
-        <View style={styles.bottom}>
-          <View style={styles.dots}>
+        <View style={s.bottom}>
+          {/* Progress dots */}
+          <View style={s.dotsRow}>
             {SLIDES.map((_, i) => (
-              <Pressable key={i} onPress={() => i !== currentIndex && animateTo(i)}>
+              <Pressable
+                key={i}
+                onPress={() => i !== currentIndex && animateTo(i)}
+                hitSlop={8}
+              >
                 <View
                   style={[
-                    styles.dot,
+                    s.dot,
                     {
                       width: i === currentIndex ? 22 : 8,
-                      backgroundColor: i === currentIndex ? (slide?.accent ?? C.primary) : C.border,
+                      backgroundColor:
+                        i === currentIndex ? slide.accent : C.border,
                       opacity: i === currentIndex ? 1 : 0.5,
                     },
                   ]}
@@ -167,25 +178,25 @@ export function OnboardingCarousel({ onDismiss }: Props) {
 
           {isLast ? (
             <Pressable
-              style={({ pressed }) => [styles.ctaBtn, pressed && { opacity: 0.85 }]}
+              style={({ pressed }) => [s.ctaBtn, pressed && { opacity: 0.85 }]}
               onPress={handleStart}
             >
               <LinearGradient
                 colors={["#E08040", "#C05820"]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
-                style={styles.ctaGradient}
+                style={s.ctaGradient}
               >
-                <Text style={styles.ctaText}>Start My Assessment</Text>
+                <Text style={s.ctaText}>Start My Assessment</Text>
                 <Feather name="arrow-right" size={18} color="#fff" />
               </LinearGradient>
             </Pressable>
           ) : (
             <Pressable
-              style={({ pressed }) => [styles.nextBtn, pressed && { opacity: 0.75 }]}
+              style={({ pressed }) => [s.nextBtn, pressed && { opacity: 0.75 }]}
               onPress={handleNext}
             >
-              <Text style={styles.nextText}>Next</Text>
+              <Text style={s.nextText}>Next</Text>
               <Feather name="chevron-right" size={18} color={C.text2} />
             </Pressable>
           )}
@@ -197,33 +208,54 @@ export function OnboardingCarousel({ onDismiss }: Props) {
 
 function SlideView({ slide }: { slide: Slide }) {
   return (
-    <View style={styles.slide}>
+    <ScrollView
+      style={s.slideScroll}
+      contentContainerStyle={s.slideContent}
+      showsVerticalScrollIndicator={false}
+    >
       {/* Icon orb */}
-      <View style={[styles.iconOrb, { backgroundColor: slide.accent + "22", borderColor: slide.accent + "44" }]}>
-        <Feather name={slide.icon} size={32} color={slide.accent} />
+      <View
+        style={[
+          s.iconOrb,
+          {
+            backgroundColor: slide.accent + "22",
+            borderColor: slide.accent + "44",
+          },
+        ]}
+      >
+        <Feather name={slide.icon as any} size={32} color={slide.accent} />
       </View>
 
       {/* Eyebrow */}
-      <Text style={[styles.eyebrow, { color: slide.accent }]}>{slide.eyebrow}</Text>
+      <Text style={[s.eyebrow, { color: slide.accent }]}>
+        {slide.eyebrow}
+      </Text>
 
       {/* Title */}
-      <Text style={styles.title}>{slide.title}</Text>
+      <Text style={s.title}>{slide.title}</Text>
 
       {/* Subtitle */}
-      <Text style={styles.subtitle}>{slide.subtitle}</Text>
+      <Text style={s.subtitle}>{slide.subtitle}</Text>
 
-      {/* Bullets */}
-      <View style={styles.bullets}>
+      {/* Bullets — 2-per-row grid using explicit widths */}
+      <View style={s.bulletsGrid}>
         {slide.bullets.map((b, i) => (
-          <View key={i} style={styles.bullet}>
-            <View style={[styles.bulletIcon, { backgroundColor: slide.accent + "18" }]}>
-              <Feather name={b.icon} size={13} color={slide.accent} />
+          <View key={i} style={s.bullet}>
+            <View
+              style={[
+                s.bulletIcon,
+                { backgroundColor: slide.accent + "18" },
+              ]}
+            >
+              <Feather name={b.icon as any} size={13} color={slide.accent} />
             </View>
-            <Text style={styles.bulletText}>{b.label}</Text>
+            <Text style={s.bulletText} numberOfLines={1}>
+              {b.label}
+            </Text>
           </View>
         ))}
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -232,29 +264,34 @@ export async function shouldShowOnboarding(): Promise<boolean> {
   return val === null;
 }
 
-const styles = StyleSheet.create({
+const BULLET_W = (MODAL_W - 48 - 8) / 2;
+
+const s = StyleSheet.create({
   overlay: {
     position: "absolute",
-    top: 0, left: 0, right: 0, bottom: 0,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     backgroundColor: "rgba(0,0,0,0.72)",
     zIndex: 999,
-    justifyContent: "center",
     alignItems: "center",
+    justifyContent: "center",
   },
   modal: {
-    width: SCREEN_W - 32,
-    maxHeight: SCREEN_H * 0.88,
+    width: MODAL_W,
+    height: MODAL_H,
     backgroundColor: C.surface,
     borderRadius: 24,
     borderWidth: 1,
     borderColor: C.border,
     overflow: "hidden",
-    paddingBottom: 28,
+    flexDirection: "column",
   },
   skipBtn: {
     position: "absolute",
-    top: 16,
-    right: 20,
+    top: 14,
+    right: 18,
     zIndex: 10,
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -269,55 +306,59 @@ const styles = StyleSheet.create({
   slideWrapper: {
     flex: 1,
   },
-  slide: {
-    paddingTop: 52,
+  slideScroll: {
+    flex: 1,
+  },
+  slideContent: {
+    paddingTop: 50,
     paddingHorizontal: 24,
-    paddingBottom: 12,
+    paddingBottom: 16,
   },
   iconOrb: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
+    width: 68,
+    height: 68,
+    borderRadius: 34,
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 20,
+    marginBottom: 18,
   },
   eyebrow: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: "700",
     letterSpacing: 1.2,
     textTransform: "uppercase",
-    marginBottom: 10,
+    marginBottom: 9,
   },
   title: {
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: "700",
     color: C.text,
-    lineHeight: 33,
-    marginBottom: 12,
+    lineHeight: 31,
+    marginBottom: 10,
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: 13,
     color: C.text2,
-    lineHeight: 21,
-    marginBottom: 20,
+    lineHeight: 20,
+    marginBottom: 18,
   },
-  bullets: {
+  bulletsGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8,
   },
   bullet: {
+    width: BULLET_W,
     flexDirection: "row",
     alignItems: "center",
-    gap: 7,
     backgroundColor: "rgba(255,255,255,0.04)",
     borderRadius: 10,
-    paddingHorizontal: 10,
+    paddingHorizontal: 9,
     paddingVertical: 7,
     borderWidth: 1,
     borderColor: C.border,
+    marginRight: 8,
+    marginBottom: 8,
   },
   bulletIcon: {
     width: 22,
@@ -325,26 +366,29 @@ const styles = StyleSheet.create({
     borderRadius: 11,
     alignItems: "center",
     justifyContent: "center",
+    marginRight: 6,
   },
   bulletText: {
-    fontSize: 12.5,
+    flex: 1,
+    fontSize: 12,
     color: C.text2,
     fontWeight: "500",
   },
   bottom: {
     paddingHorizontal: 24,
     paddingTop: 8,
-    gap: 16,
+    paddingBottom: 24,
   },
-  dots: {
+  dotsRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 6,
+    marginBottom: 14,
   },
   dot: {
     height: 8,
     borderRadius: 4,
+    marginHorizontal: 3,
   },
   ctaBtn: {
     borderRadius: 14,
@@ -354,7 +398,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 8,
     paddingVertical: 15,
     paddingHorizontal: 24,
   },
@@ -362,12 +405,12 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "700",
+    marginRight: 8,
   },
   nextBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 4,
     paddingVertical: 14,
     borderRadius: 14,
     backgroundColor: "rgba(255,255,255,0.05)",
@@ -378,5 +421,6 @@ const styles = StyleSheet.create({
     color: C.text2,
     fontSize: 15,
     fontWeight: "600",
+    marginRight: 4,
   },
 });
