@@ -4,8 +4,22 @@ import { db, resilienceReportsTable, usersTable, subscriptionsTable, checklistPr
 import { and, eq, inArray, desc } from "drizzle-orm";
 import { openai } from "@workspace/integrations-openai-ai-server";
 import { sendWelcomeEmail } from "../lib/email.js";
+import rateLimit from "express-rate-limit";
 
 const router: IRouter = Router();
+
+const planCompareRateLimit = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  validate: { xForwardedForHeader: false },
+  keyGenerator: (req) => {
+    const auth = getAuth(req as Request);
+    return (auth?.sessionClaims?.userId as string | undefined) || auth?.userId || "unauthenticated";
+  },
+  message: { error: "RATE_LIMITED", message: "Too many comparison requests. Please wait an hour before trying again." },
+});
 
 export const PLAN_LIMIT = 3;
 
@@ -260,7 +274,7 @@ router.get("/me/export", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/me/plans/compare", async (req: Request, res: Response) => {
+router.post("/me/plans/compare", planCompareRateLimit, async (req: Request, res: Response) => {
   const userId = getUserId(req);
   if (!userId) {
     res.status(401).json({ error: "Unauthorized" });

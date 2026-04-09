@@ -459,10 +459,11 @@
       <h1 class="hero-title">Platform Assessment<br />& Strategic Review</h1>
       <p class="hero-sub">An honest, unvarnished evaluation of what's been built, how the market might receive it, and a precise checklist of what's done versus what remains.</p>
       <div class="hero-meta">
-        <div class="hero-stat"><strong>~25,000</strong> Lines of Source Code</div>
+        <div class="hero-stat"><strong>~27,000</strong> Lines of Source Code</div>
         <div class="hero-stat"><strong>3</strong> Platforms (Web · Mobile · Admin)</div>
         <div class="hero-stat"><strong>April 2026</strong> Assessment Date</div>
         <div class="hero-stat"><strong>Production</strong> <span style="color:var(--success)">●</span> Live</div>
+        <div class="hero-stat"><strong>Security</strong> Hardened</div>
       </div>
     </div>
 
@@ -583,7 +584,7 @@
           <tr><td>Results</td><td><span class="badge badge-good">✓ Detailed</span></td><td>Score breakdown, action plan, dimension interpretation</td></tr>
           <tr><td>Coaching page</td><td><span class="badge badge-good">✓ Upgraded</span></td><td>Now matches web structure — score context cards, About Cristiana, full CTA sections</td></tr>
           <tr><td>Pricing</td><td><span class="badge badge-good">✓ Present</span></td><td>Links out to web for Paddle checkout — correct for mobile payment flow</td></tr>
-          <tr><td>Android icon rendering</td><td><span class="badge badge-open">⚠ Open</span></td><td>Multiple fixes applied; still under investigation — font face CSS added for web path</td></tr>
+          <tr><td>Icon rendering (nav bar, pricing, all screens)</td><td><span class="badge badge-good">✓ Fixed</span></td><td>Feather icons loaded via Font.loadAsync on all platforms — removes CDN dependency, icons render reliably on web and native</td></tr>
           <tr><td>App Store / Play Store</td><td><span class="badge badge-warn">Pending</span></td><td>Intentionally deferred — owner working on submission</td></tr>
         </tbody>
       </table>
@@ -653,6 +654,8 @@
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">User weekly digest email — Sunday cron at 18:00 UTC</span></li>
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">Admin weekly digest with stats — Monday cron at 07:00 UTC</span></li>
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">Error rate alerts — email if 5+ server errors within any 10-minute window</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Wednesday 06:00 UTC — automated e2e assessment smoke test with email report (cron)</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Sunday 07:00 UTC — site-wide functionality audit across all endpoints + DB with email report (cron)</span></li>
       </ul>
 
       <div class="sub-heading">Push Notifications (Mobile)</div>
@@ -660,6 +663,18 @@
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">Expo push token storage in database (users table)</span></li>
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">Push broadcast endpoint for targeted user notifications</span></li>
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">Push infrastructure wired to Expo push API with ticket handling</span></li>
+      </ul>
+
+      <div class="sub-heading">Security & Reliability</div>
+      <ul class="checklist">
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">GDPR export endpoint: rate limiting (5/15 min) + session ownership check for authenticated users</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">GDPR data-request: rate limiting + UUID format validation on sessionId</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Checklist PATCH: requires authentication + report ownership verification</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Plan comparison AI endpoint: per-user rate limiting (10/hour)</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">React Query: targeted cache invalidation on sign-in (no full cache wipe)</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">ClerkAuthBridge: 5-second token fetch timeout prevents permanent API hangs</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Report queries: staleTime Infinity (immutable data, no unnecessary re-fetches)</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Welcome email failures: now logged as warnings (previously silently swallowed)</span></li>
       </ul>
 
       <div class="sub-heading">Admin & Analytics</div>
@@ -724,6 +739,18 @@
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">Resilience Profile card moved to Account tab (mobile) — shows score, assessment date, "View My Plans" CTA</span></li>
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">Sentry error monitoring wired — <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">@sentry/react</code> (web), <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">@sentry/react-native</code> (mobile), <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">@sentry/node</code> (API)</span></li>
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">Admin Sentry monitoring page — project cards with deep-links to Issues, Performance, Replays, and Alerts for all three platforms</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Automated e2e assessment smoke test — Wednesday 06:00 UTC cron, real API call, DB cleanup, email report</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Automated site-wide audit — Sunday 07:00 UTC cron, all endpoints + DB connectivity, email report</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">GDPR endpoints: rate limiting + session ownership check (authenticated users)</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Checklist progress PATCH: authentication required + report ownership verification</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Plan comparison (AI): per-user rate limiting (10 requests/hour)</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Mobile icon rendering — Feather font loaded via Font.loadAsync on all platforms, CDN dependency removed</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">ClerkAuthBridge: 5-second token fetch timeout prevents silent API hangs on slow connections</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">React Query cache invalidation: scoped to affected keys only on auth changes (no full cache wipe)</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Report query staleTime: Infinity — immutable reports are never unnecessarily re-fetched</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Welcome email failures now logged as server warnings (previously silently ignored)</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Blank page root cause fixed — two independent bugs in App.tsx (cache wipe + token fetch hang) resolved</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Percentile benchmarking — live on results page with DB-backed user comparison percentile display</span></li>
       </ul>
 
       <!-- OUTSTANDING -->
@@ -734,11 +761,6 @@
         </thead>
         <tbody>
           <tr>
-            <td>Android icon rendering</td>
-            <td><span class="badge badge-open">High</span></td>
-            <td>Multiple font-loading fixes applied; still under active investigation. Feather @font-face CSS added for web path. Native Android path needs further debugging.</td>
-          </tr>
-          <tr>
             <td>App Store / Play Store submission</td>
             <td><span class="badge badge-warn">In Progress</span></td>
             <td>Intentionally deferred by owner — app builds, assets, and metadata preparation in progress.</td>
@@ -746,22 +768,17 @@
           <tr>
             <td>Push notification permission prompt</td>
             <td><span class="badge badge-warn">Medium</span></td>
-            <td>Infrastructure fully built (token storage, broadcast API). The in-app permission request screen on mobile hasn't been surfaced to users yet.</td>
-          </tr>
-          <tr>
-            <td>Percentile benchmarking (Pro)</td>
-            <td><span class="badge badge-warn">Medium</span></td>
-            <td>Listed as Pro feature on pricing page. DB schema supports it. Display layer (results page chart) not yet built.</td>
+            <td>Infrastructure fully built (token storage, broadcast API, push send). The in-app permission request screen hasn't been surfaced to users yet — needs a well-timed prompt (e.g. after first assessment).</td>
           </tr>
           <tr>
             <td>Score trend history chart (Pro)</td>
             <td><span class="badge badge-warn">Medium</span></td>
-            <td><code>progressSnapshotsTable</code> exists in DB. No UI to visualize score change over multiple assessments yet.</td>
+            <td><code>progressSnapshotsTable</code> captures score snapshots on each assessment. No UI chart to visualize score progress over multiple assessments yet — the data is there, the display layer isn't.</td>
           </tr>
           <tr>
             <td>Mobile onboarding flow</td>
-            <td><span class="badge badge-warn">Medium</span></td>
-            <td>No first-launch walkthrough for new mobile users — they land cold on the Home tab with no guidance on what to do first.</td>
+            <td><span class="badge badge-warn">Low–Medium</span></td>
+            <td>No first-launch walkthrough for new mobile users — they land cold on the Home tab with no contextual guidance on what to do first.</td>
           </tr>
         </tbody>
       </table>

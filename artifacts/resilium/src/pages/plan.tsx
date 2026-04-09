@@ -410,7 +410,7 @@ export default function PlanPage() {
             <div className="ml-auto flex items-center gap-2 flex-shrink-0">
               <Link href={`/results/${reportId}`}>
                 <Button variant="outline" size="sm" className="rounded-full gap-1.5 text-muted-foreground">
-                  Score: {Math.round(report.score.overall)}/100
+                  Score: {report.score?.overall != null ? Math.round(report.score.overall) : "--"}/100
                 </Button>
               </Link>
             </div>

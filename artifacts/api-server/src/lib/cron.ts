@@ -344,7 +344,7 @@ async function runE2eAssessmentTest() {
           socialSupport1: 3,
         },
       };
-      const res = await fetch(`${APP_URL}/api/resilience/submit`, {
+      const res = await fetch(`${APP_URL}/api/resilience/assess`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

@@ -230,7 +230,9 @@ router.post("/assess", assessRateLimit, async (req, res) => {
           if (email) {
             await sendWelcomeEmail({ email, firstName: clerkUser.firstName });
           }
-        } catch { /* non-critical */ }
+        } catch (err) {
+          req.log.warn({ err }, "sendWelcomeEmail failed (non-critical)");
+        }
       })();
     }
 
@@ -486,10 +488,27 @@ router.get("/reports/:reportId/checklists", async (req, res) => {
 // PATCH /resilience/reports/:reportId/checklists/:area/:itemId
 router.patch("/reports/:reportId/checklists/:area/:itemId", async (req, res) => {
   try {
+    const userId = getUserId(req);
+    if (!userId) {
+      res.status(401).json({ error: "UNAUTHORIZED", message: "Sign in to track your checklist progress." });
+      return;
+    }
+
     const { reportId, area, itemId } = req.params;
     const body = req.body as { completed?: unknown };
     if (typeof body.completed !== "boolean") {
       res.status(400).json({ error: "VALIDATION_ERROR", message: "Invalid body: 'completed' must be a boolean" });
+      return;
+    }
+
+    // Verify report belongs to this user
+    const reportRows = await db
+      .select({ userId: resilienceReportsTable.userId })
+      .from(resilienceReportsTable)
+      .where(eq(resilienceReportsTable.reportId, reportId))
+      .limit(1);
+    if (!reportRows[0] || reportRows[0].userId !== userId) {
+      res.status(403).json({ error: "FORBIDDEN", message: "You do not have access to this report." });
       return;
     }
     const completed = body.completed;

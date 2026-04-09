@@ -15,14 +15,8 @@ export default function Root({ children }: PropsWithChildren) {
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <ScrollViewStyleReset />
-        {/* Feather icon font — explicitly loaded for web rendering path */}
-        <style>{`
-          @font-face {
-            font-family: "Feather";
-            src: url("https://cdn.jsdelivr.net/npm/react-native-vector-icons@10.2.0/Fonts/Feather.ttf") format("truetype");
-            font-display: block;
-          }
-        `}</style>
+        {/* Feather icon font is loaded via Font.loadAsync in _layout.tsx using the Metro-bundled file.
+            No CDN dependency needed — this is more reliable and avoids external network requests. */}
       </head>
       <body>{children}</body>
     </html>

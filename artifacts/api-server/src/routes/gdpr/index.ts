@@ -1,9 +1,21 @@
 import { Router, type IRouter } from "express";
+import { getAuth } from "@clerk/express";
 import { db, consentRecordsTable, gdprDataRequestsTable, resilienceReportsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { sendGdprRequestNotification } from "../../lib/email.js";
+import rateLimit from "express-rate-limit";
 
 const router: IRouter = Router();
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+const gdprRateLimit = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "RATE_LIMITED", message: "Too many GDPR requests. Please wait 15 minutes before trying again." },
+});
 
 router.post("/consent", async (req, res) => {
   try {
@@ -23,12 +35,32 @@ router.post("/consent", async (req, res) => {
   }
 });
 
-router.get("/export/:sessionId", async (req, res) => {
+router.get("/export/:sessionId", gdprRateLimit, async (req, res) => {
   try {
     const { sessionId } = req.params;
-    if (!sessionId) {
-      res.status(400).json({ error: "VALIDATION_ERROR", message: "Session ID is required." });
+    if (!sessionId || !UUID_RE.test(sessionId)) {
+      res.status(400).json({ error: "VALIDATION_ERROR", message: "Valid session ID (UUID) is required." });
       return;
+    }
+
+    // If authenticated, verify the sessionId belongs to that user
+    const auth = getAuth(req);
+    const userId = (auth?.sessionClaims?.userId as string | undefined) || auth?.userId || null;
+    if (userId) {
+      const ownerCheck = await db
+        .select({ reportId: resilienceReportsTable.reportId })
+        .from(resilienceReportsTable)
+        .where(eq(resilienceReportsTable.userId, userId))
+        .limit(1);
+      const ownedSessionIds = await db
+        .select({ sessionId: resilienceReportsTable.sessionId })
+        .from(resilienceReportsTable)
+        .where(eq(resilienceReportsTable.userId, userId));
+      const sessionBelongsToUser = ownedSessionIds.some(r => r.sessionId === sessionId);
+      if (ownerCheck.length > 0 && !sessionBelongsToUser) {
+        res.status(403).json({ error: "FORBIDDEN", message: "You do not have access to this session data." });
+        return;
+      }
     }
 
     const consentRows = await db
@@ -66,10 +98,10 @@ router.get("/export/:sessionId", async (req, res) => {
   }
 });
 
-router.post("/data-request", async (req, res) => {
+router.post("/data-request", gdprRateLimit, async (req, res) => {
   try {
     const { sessionId, type } = req.body ?? {};
-    if (!sessionId || !["deletion", "export"].includes(type)) {
+    if (!sessionId || !UUID_RE.test(String(sessionId)) || !["deletion", "export"].includes(type)) {
       res.status(400).json({ error: "VALIDATION_ERROR", message: "sessionId and valid type (deletion|export) are required." });
       return;
     }

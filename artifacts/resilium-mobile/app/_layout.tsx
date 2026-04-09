@@ -104,17 +104,20 @@ export default function RootLayout() {
   });
   const [showIntro, setShowIntro] = useState(true);
 
-  // Load Feather separately — on web it's handled by the @font-face in +html.tsx,
-  // on native we call Font.loadAsync. Errors are swallowed so a missing font never
-  // blocks startup.
+  // Load Feather via Font.loadAsync on all platforms (web + native).
+  // On web this creates a @font-face rule from the Metro-bundled file, which is
+  // more reliable than relying on an external CDN. A 5-second timeout ensures
+  // startup is never blocked if the font fails to load.
   const [featherReady, setFeatherReady] = useState<boolean>(
-    () => Platform.OS === "web" || Font.isLoaded("Feather")
+    () => Font.isLoaded("Feather")
   );
   useEffect(() => {
     if (featherReady) return;
+    const timer = setTimeout(() => setFeatherReady(true), 5000);
     Font.loadAsync(Feather.font)
-      .then(() => setFeatherReady(true))
-      .catch(() => setFeatherReady(true));
+      .then(() => { clearTimeout(timer); setFeatherReady(true); })
+      .catch(() => { clearTimeout(timer); setFeatherReady(true); });
+    return () => clearTimeout(timer);
   }, [featherReady]);
 
   // Timeout fallback: if fonts haven't loaded or errored after 7 s (e.g. slow CDN /
