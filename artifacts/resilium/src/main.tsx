@@ -4,7 +4,7 @@ import App from "./App";
 import "./index.css";
 
 Sentry.init({
-  dsn: "https://eccc29b8d2b666d5c9f3ed959fb15072@o4511187075923968.ingest.de.sentry.io/4511187286818896",
+  dsn: "https://c77fc9e84488cf6d595edec251386e5d@o4511187075923968.ingest.de.sentry.io/4511187672957008",
   environment: import.meta.env.MODE,
   integrations: [
     Sentry.browserTracingIntegration(),

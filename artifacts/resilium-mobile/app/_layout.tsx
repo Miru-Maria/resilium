@@ -26,7 +26,7 @@ import { SessionProvider } from "@/context/session";
 import { ThemeProvider, useColors } from "@/context/theme";
 
 Sentry.init({
-  dsn: "https://22647b28be4af8c71cc72713292f6c0d@o4511187075923968.ingest.de.sentry.io/4511187296256080",
+  dsn: "https://18da13e057fbeb42d6a6d1346a664d62@o4511187075923968.ingest.de.sentry.io/4511187688816720",
   environment: __DEV__ ? "development" : "production",
   enableNative: Platform.OS !== "web",
   tracesSampleRate: 0.1,
