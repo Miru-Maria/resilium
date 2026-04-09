@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useLocation, Link } from "wouter";
+import { useEffect, useState, useCallback } from "react";
+import { useLocation, useSearch, Link } from "wouter";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, LineChart, Line, CartesianGrid,
@@ -100,8 +100,21 @@ const renderPieLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, n
   );
 };
 
+const VALID_TABS = ["overview", "demographics", "scores", "goals", "risks", "reports", "feedback"];
+
 export default function AdminDashboard() {
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
+  const search = useSearch();
+  const searchParams = new URLSearchParams(search);
+  const tabFromUrl = searchParams.get("tab") ?? "overview";
+  const activeTab = VALID_TABS.includes(tabFromUrl) ? tabFromUrl : "overview";
+
+  const setTab = useCallback((tab: string) => {
+    const params = new URLSearchParams(search);
+    params.set("tab", tab);
+    setLocation(`${location.split("?")[0]}?${params.toString()}`, { replace: true });
+  }, [location, search, setLocation]);
+
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [platformSplit, setPlatformSplit] = useState<PlatformSplit | null>(null);
   const [coachingClicks, setCoachingClicks] = useState<number | null>(null);
@@ -203,7 +216,7 @@ export default function AdminDashboard() {
           <p className="text-muted-foreground text-sm mt-1">Overview of all resilience assessments and user feedback.</p>
         </div>
 
-        <Tabs defaultValue="overview">
+        <Tabs value={activeTab} onValueChange={setTab}>
           <TabsList className="mb-6 flex-wrap h-auto gap-1">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="demographics">Demographics</TabsTrigger>

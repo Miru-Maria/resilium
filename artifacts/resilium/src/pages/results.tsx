@@ -438,7 +438,15 @@ export default function ResultsPage() {
     <div className="min-h-screen pb-24">
       {/* Header */}
       <header className="w-full bg-card border-b border-border sticky top-14 z-50 print:hidden">
-        <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-end gap-2">
+        <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between gap-2">
+          {typeof window !== "undefined" && !!window.localStorage.getItem("admin_token") ? (
+            <Link href="/admin/dashboard?tab=reports">
+              <Button variant="ghost" size="sm" className="rounded-full text-muted-foreground hover:text-foreground gap-1.5">
+                ← Reports
+              </Button>
+            </Link>
+          ) : <div />}
+          <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={handleEmailReport} className="rounded-full">
             <Mail className="w-4 h-4 mr-2" /> Email
           </Button>
@@ -451,6 +459,7 @@ export default function ResultsPage() {
           <Button variant="default" size="sm" onClick={handlePrint} className="rounded-full">
             <Printer className="w-4 h-4 mr-2" /> Print / Save PDF
           </Button>
+          </div>
         </div>
       </header>
 
