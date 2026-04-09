@@ -182,6 +182,7 @@ export default function ResultsPage() {
   const { data: report, isLoading, error } = useGetReport(reportId, {
     query: {
       enabled: !!reportId,
+      staleTime: Infinity,
       retry: (failureCount, error: any) => {
         const status = error?.response?.status ?? error?.status;
         if (status === 404) return false;

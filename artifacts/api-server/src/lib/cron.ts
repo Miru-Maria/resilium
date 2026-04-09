@@ -1,10 +1,12 @@
 import cron from "node-cron";
 import { db, subscriptionsTable, reportFeedbackTable, resilienceReportsTable, usersTable } from "@workspace/db";
-import { and, eq, gte, inArray, sql } from "drizzle-orm";
-import { sendAdminDigest, sendErrorAlert, sendReassessmentReminder, sendUserWeeklyDigest } from "./email.js";
+import { and, desc, eq, gte, inArray, sql } from "drizzle-orm";
+import { sendAdminDigest, sendErrorAlert, sendReassessmentReminder, sendUserWeeklyDigest, sendE2eAssessmentReport, sendSiteAuditReport, type E2eCheckResult } from "./email.js";
 import { sendPushNotificationsToUsers } from "./push.js";
 import { logger } from "./logger.js";
 import { createClerkClient } from "@clerk/express";
+
+const APP_URL = process.env["APP_URL"] ?? "https://resilium-platform.com";
 
 // ─── In-memory error rate tracking ───────────────────────────────────────────
 
@@ -297,6 +299,207 @@ async function runWeeklyDigest() {
   }
 }
 
+// ─── Wednesday e2e assessment test ───────────────────────────────────────────
+
+async function runE2eAssessmentTest() {
+  const startMs = Date.now();
+  const checks: E2eCheckResult[] = [];
+  let testReportId: string | undefined;
+
+  logger.info("Running Wednesday e2e assessment test");
+
+  // Check 1: API health check
+  {
+    const t = Date.now();
+    try {
+      const res = await fetch(`${APP_URL}/api/health`, { signal: AbortSignal.timeout(10_000) });
+      checks.push({ name: "API health check (/api/health)", passed: res.ok, durationMs: Date.now() - t, detail: res.ok ? undefined : `HTTP ${res.status}` });
+    } catch (err: any) {
+      checks.push({ name: "API health check (/api/health)", passed: false, durationMs: Date.now() - t, detail: err?.message });
+    }
+  }
+
+  // Check 2: Submit a realistic test assessment (anonymously)
+  {
+    const t = Date.now();
+    try {
+      const payload = {
+        location: "Romania",
+        incomeStability: "freelance",
+        savingsMonths: 6,
+        hasDependents: false,
+        skills: ["digital", "language"],
+        healthStatus: "good",
+        mobilityLevel: "medium",
+        housingType: "own",
+        hasEmergencySupplies: true,
+        psychologicalResilience: 7,
+        riskConcerns: ["job_loss", "inflation"],
+        mentalResilienceAnswers: {
+          stressTolerance1: 3, stressTolerance2: 4,
+          adaptability1: 4, adaptability2: 3,
+          learningAgility1: 4,
+          changeManagement1: 3, changeManagement2: 3,
+          emotionalRegulation1: 4, emotionalRegulation2: 3,
+          socialSupport1: 3,
+        },
+      };
+      const res = await fetch(`${APP_URL}/api/resilience/submit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(120_000),
+      });
+      const durationMs = Date.now() - t;
+      if (!res.ok) {
+        const body = await res.text().catch(() => "");
+        checks.push({ name: "Submit assessment (POST /api/resilience/submit)", passed: false, durationMs, detail: `HTTP ${res.status}: ${body.slice(0, 200)}` });
+      } else {
+        const data = await res.json() as any;
+        testReportId = data?.reportId;
+        const hasRequiredFields = !!(data?.reportId && data?.score?.overall != null && data?.checklistsByArea);
+        checks.push({
+          name: "Submit assessment (POST /api/resilience/submit)",
+          passed: hasRequiredFields,
+          durationMs,
+          detail: hasRequiredFields ? `Report ${testReportId} — score ${Math.round(data.score.overall)}/100` : `Missing fields in response: ${JSON.stringify(Object.keys(data ?? {}))}`,
+        });
+      }
+    } catch (err: any) {
+      checks.push({ name: "Submit assessment (POST /api/resilience/submit)", passed: false, durationMs: Date.now() - t, detail: err?.message });
+    }
+  }
+
+  // Check 3: Retrieve the test report
+  if (testReportId) {
+    const t = Date.now();
+    try {
+      const res = await fetch(`${APP_URL}/api/resilience/reports/${testReportId}`, { signal: AbortSignal.timeout(10_000) });
+      const durationMs = Date.now() - t;
+      checks.push({ name: `Retrieve test report (GET /api/resilience/reports/:id)`, passed: res.ok, durationMs, detail: res.ok ? undefined : `HTTP ${res.status}` });
+    } catch (err: any) {
+      checks.push({ name: `Retrieve test report (GET /api/resilience/reports/:id)`, passed: false, durationMs: Date.now() - t, detail: err?.message });
+    }
+  }
+
+  // Check 4: Retrieve checklists for the test report
+  if (testReportId) {
+    const t = Date.now();
+    try {
+      const res = await fetch(`${APP_URL}/api/resilience/reports/${testReportId}/checklists`, { signal: AbortSignal.timeout(10_000) });
+      const durationMs = Date.now() - t;
+      checks.push({ name: `Retrieve checklists (GET /api/resilience/reports/:id/checklists)`, passed: res.ok, durationMs, detail: res.ok ? undefined : `HTTP ${res.status}` });
+    } catch (err: any) {
+      checks.push({ name: `Retrieve checklists (GET /api/resilience/reports/:id/checklists)`, passed: false, durationMs: Date.now() - t, detail: err?.message });
+    }
+  }
+
+  // Check 5: Web app homepage responds
+  {
+    const t = Date.now();
+    try {
+      const res = await fetch(APP_URL, { signal: AbortSignal.timeout(10_000) });
+      const durationMs = Date.now() - t;
+      checks.push({ name: "Web app homepage (GET /)", passed: res.ok, durationMs, detail: res.ok ? undefined : `HTTP ${res.status}` });
+    } catch (err: any) {
+      checks.push({ name: "Web app homepage (GET /)", passed: false, durationMs: Date.now() - t, detail: err?.message });
+    }
+  }
+
+  // Clean up the test report from the DB so it doesn't pollute user data
+  if (testReportId) {
+    try {
+      await db.delete(resilienceReportsTable).where(eq(resilienceReportsTable.reportId, testReportId));
+      logger.info({ testReportId }, "E2e test report cleaned up from DB");
+    } catch (err) {
+      logger.warn({ err, testReportId }, "Failed to clean up e2e test report");
+    }
+  }
+
+  const passed = checks.every(c => c.passed);
+  const totalMs = Date.now() - startMs;
+  logger.info({ passed, checks: checks.map(c => ({ name: c.name, passed: c.passed })), totalMs }, "Wednesday e2e assessment test complete");
+
+  await sendE2eAssessmentReport({ passed, checks, totalMs, reportId: testReportId }).catch(err =>
+    logger.error({ err }, "Failed to send e2e assessment report email")
+  );
+}
+
+// ─── Sunday site-wide functionality audit ────────────────────────────────────
+
+async function runSiteAudit() {
+  const startMs = Date.now();
+  const checks: E2eCheckResult[] = [];
+
+  logger.info("Running Sunday site-wide functionality audit");
+
+  const endpoints: Array<{ name: string; url: string; expectedStatus?: number }> = [
+    { name: "API health (/api/health)", url: `${APP_URL}/api/health` },
+    { name: "Announcements (/api/announcements)", url: `${APP_URL}/api/announcements` },
+    { name: "Testimonials (/api/feedback/testimonials)", url: `${APP_URL}/api/feedback/testimonials` },
+    { name: "Web app homepage (/)", url: APP_URL },
+    { name: "Assessment page (/assess)", url: `${APP_URL}/assess` },
+    { name: "Pricing page (/pricing)", url: `${APP_URL}/pricing` },
+    { name: "Consent page (/consent)", url: `${APP_URL}/consent` },
+  ];
+
+  for (const endpoint of endpoints) {
+    const t = Date.now();
+    try {
+      const res = await fetch(endpoint.url, { signal: AbortSignal.timeout(15_000) });
+      const expected = endpoint.expectedStatus ?? 200;
+      const passed = res.status === expected || (endpoint.expectedStatus == null && res.ok);
+      checks.push({ name: endpoint.name, passed, durationMs: Date.now() - t, detail: passed ? undefined : `HTTP ${res.status} (expected ${expected})` });
+    } catch (err: any) {
+      checks.push({ name: endpoint.name, passed: false, durationMs: Date.now() - t, detail: err?.message });
+    }
+  }
+
+  // Check the most recent real user report is retrievable
+  {
+    const t = Date.now();
+    try {
+      const [latestReport] = await db
+        .select({ reportId: resilienceReportsTable.reportId })
+        .from(resilienceReportsTable)
+        .orderBy(desc(resilienceReportsTable.createdAt))
+        .limit(1);
+      if (latestReport) {
+        const res = await fetch(`${APP_URL}/api/resilience/reports/${latestReport.reportId}`, { signal: AbortSignal.timeout(15_000) });
+        checks.push({
+          name: "Most recent user report retrievable",
+          passed: res.ok,
+          durationMs: Date.now() - t,
+          detail: res.ok ? `Report ${latestReport.reportId.slice(0, 8)}…` : `HTTP ${res.status}`,
+        });
+      } else {
+        checks.push({ name: "Most recent user report retrievable", passed: false, durationMs: Date.now() - t, detail: "No reports in database" });
+      }
+    } catch (err: any) {
+      checks.push({ name: "Most recent user report retrievable", passed: false, durationMs: Date.now() - t, detail: err?.message });
+    }
+  }
+
+  // Check DB connectivity directly
+  {
+    const t = Date.now();
+    try {
+      const [row] = await db.select({ count: sql<number>`count(*)::int` }).from(resilienceReportsTable);
+      checks.push({ name: "Database connectivity (report count)", passed: true, durationMs: Date.now() - t, detail: `${row?.count ?? 0} total reports` });
+    } catch (err: any) {
+      checks.push({ name: "Database connectivity (report count)", passed: false, durationMs: Date.now() - t, detail: err?.message });
+    }
+  }
+
+  const passed = checks.every(c => c.passed);
+  const totalMs = Date.now() - startMs;
+  logger.info({ passed, checks: checks.map(c => ({ name: c.name, passed: c.passed })), totalMs }, "Sunday site audit complete");
+
+  await sendSiteAuditReport({ passed, checks, totalMs }).catch(err =>
+    logger.error({ err }, "Failed to send site audit email")
+  );
+}
+
 // ─── Start cron ───────────────────────────────────────────────────────────────
 
 export function startCron(): void {
@@ -320,5 +523,15 @@ export function startCron(): void {
     runUserWeeklyDigest().catch(() => {});
   }, { timezone: "UTC" });
 
-  logger.info("Cron jobs scheduled (admin digest: Mon 07:00, user digest: Sun 18:00, 7d reminders: daily 09:00, 30d reminders: Mon 08:00 UTC)");
+  // Every Wednesday at 06:00 UTC — e2e assessment smoke test
+  cron.schedule("0 6 * * 3", () => {
+    runE2eAssessmentTest().catch(() => {});
+  }, { timezone: "UTC" });
+
+  // Every Sunday at 07:00 UTC — site-wide functionality audit
+  cron.schedule("0 7 * * 0", () => {
+    runSiteAudit().catch(() => {});
+  }, { timezone: "UTC" });
+
+  logger.info("Cron jobs scheduled (admin digest: Mon 07:00, user digest: Sun 18:00, 7d reminders: daily 09:00, 30d reminders: Mon 08:00, e2e test: Wed 06:00, site audit: Sun 07:00 UTC)");
 }

@@ -171,3 +171,81 @@ export async function sendErrorAlert(opts: { errorCount: number; recentErrors: s
   const text = `Error rate alert triggered.\n\nErrors in last 10 min: ${opts.errorCount}\n\nRecent errors:\n${opts.recentErrors.slice(0, 5).join("\n")}\n\nInvestigate: ${APP_URL}/admin`;
   await send({ to: ADMIN_TO, subject, text, html: `<pre style="font-family:monospace;font-size:13px;padding:24px;">${text}</pre>` });
 }
+
+// ─── Wednesday E2E Assessment Test Report ─────────────────────────────────────
+
+export interface E2eCheckResult {
+  name: string;
+  passed: boolean;
+  detail?: string;
+  durationMs?: number;
+}
+
+export async function sendE2eAssessmentReport(opts: {
+  passed: boolean;
+  checks: E2eCheckResult[];
+  totalMs: number;
+  reportId?: string;
+}) {
+  const icon = opts.passed ? "✅" : "❌";
+  const subject = `${icon} Resilium E2E Assessment — ${opts.passed ? "All checks passed" : "Failures detected"}`;
+  const lines = opts.checks.map(c =>
+    `${c.passed ? "✅" : "❌"} ${c.name}${c.durationMs != null ? ` (${c.durationMs}ms)` : ""}${c.detail ? `\n   ${c.detail}` : ""}`
+  );
+  const text = [
+    `Resilium Wednesday E2E Assessment Test`,
+    `Generated: ${new Date().toUTCString()}`,
+    `Overall: ${opts.passed ? "PASSED" : "FAILED"} in ${opts.totalMs}ms`,
+    opts.reportId ? `Test report ID: ${opts.reportId}` : "",
+    ``,
+    `Results:`,
+    ...lines,
+    ``,
+    `Admin: ${APP_URL}/admin`,
+  ].filter(l => l !== undefined).join("\n");
+  const rowsHtml = opts.checks.map(c => `
+    <tr>
+      <td style="padding:10px 12px;color:${c.passed ? "#22c55e" : "#ef4444"};font-size:18px;width:28px;">${c.passed ? "✅" : "❌"}</td>
+      <td style="padding:10px 12px;color:#EAD9BE;font-size:14px;">${c.name}</td>
+      <td style="padding:10px 12px;color:#7a6a5a;font-size:13px;text-align:right;">${c.durationMs != null ? `${c.durationMs}ms` : "—"}</td>
+    </tr>
+    ${c.detail ? `<tr><td></td><td colspan="2" style="padding:0 12px 10px;color:#b8a99a;font-size:12px;">${c.detail}</td></tr>` : ""}
+  `).join("");
+  const html = `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0D1225;font-family:'Helvetica Neue',Arial,sans-serif;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:40px 20px;"><table width="560" cellpadding="0" cellspacing="0" style="background:#131929;border-radius:16px;overflow:hidden;"><tr><td style="background:${opts.passed ? "#166534" : "#7f1d1d"};padding:20px 32px;"><h1 style="margin:0;color:#fff;font-size:18px;font-weight:800;">${icon} E2E Assessment Test · ${opts.passed ? "Passed" : "Failed"}</h1><p style="margin:6px 0 0;color:rgba(255,255,255,0.7);font-size:12px;">${new Date().toUTCString()} · ${opts.totalMs}ms total</p></td></tr><tr><td style="padding:24px 32px;"><table width="100%" cellpadding="0" cellspacing="0" style="background:#1a2235;border-radius:10px;">${rowsHtml}</table>${opts.reportId ? `<p style="margin:16px 0 0;color:#7a6a5a;font-size:12px;">Test report: ${APP_URL}/results/${opts.reportId}</p>` : ""}<p style="margin:20px 0 0;"><a href="${APP_URL}/admin" style="color:#E08040;font-size:13px;">Open Admin Panel →</a></p></td></tr></table></td></tr></table></body></html>`;
+  await send({ to: ADMIN_TO, subject, text, html });
+}
+
+// ─── Sunday Site Audit Report ─────────────────────────────────────────────────
+
+export async function sendSiteAuditReport(opts: {
+  passed: boolean;
+  checks: E2eCheckResult[];
+  totalMs: number;
+}) {
+  const passing = opts.checks.filter(c => c.passed).length;
+  const icon = opts.passed ? "✅" : "⚠️";
+  const subject = `${icon} Resilium Site Audit — ${passing}/${opts.checks.length} checks passing`;
+  const lines = opts.checks.map(c =>
+    `${c.passed ? "✅" : "❌"} ${c.name}${c.durationMs != null ? ` (${c.durationMs}ms)` : ""}${c.detail ? `\n   ${c.detail}` : ""}`
+  );
+  const text = [
+    `Resilium Sunday Site-Wide Functionality Audit`,
+    `Generated: ${new Date().toUTCString()}`,
+    `Overall: ${passing}/${opts.checks.length} checks passing in ${opts.totalMs}ms`,
+    ``,
+    `Results:`,
+    ...lines,
+    ``,
+    `Admin: ${APP_URL}/admin`,
+  ].join("\n");
+  const rowsHtml = opts.checks.map(c => `
+    <tr>
+      <td style="padding:10px 12px;color:${c.passed ? "#22c55e" : "#ef4444"};font-size:18px;width:28px;">${c.passed ? "✅" : "❌"}</td>
+      <td style="padding:10px 12px;color:#EAD9BE;font-size:14px;">${c.name}</td>
+      <td style="padding:10px 12px;color:#7a6a5a;font-size:13px;text-align:right;">${c.durationMs != null ? `${c.durationMs}ms` : "—"}</td>
+    </tr>
+    ${c.detail ? `<tr><td></td><td colspan="2" style="padding:0 12px 10px;color:#b8a99a;font-size:12px;">${c.detail}</td></tr>` : ""}
+  `).join("");
+  const html = `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0D1225;font-family:'Helvetica Neue',Arial,sans-serif;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:40px 20px;"><table width="560" cellpadding="0" cellspacing="0" style="background:#131929;border-radius:16px;overflow:hidden;"><tr><td style="background:${opts.passed ? "#166534" : "#7f1d1d"};padding:20px 32px;"><h1 style="margin:0;color:#fff;font-size:18px;font-weight:800;">${icon} Site Audit · ${passing}/${opts.checks.length} Passing</h1><p style="margin:6px 0 0;color:rgba(255,255,255,0.7);font-size:12px;">${new Date().toUTCString()} · ${opts.totalMs}ms total</p></td></tr><tr><td style="padding:24px 32px;"><table width="100%" cellpadding="0" cellspacing="0" style="background:#1a2235;border-radius:10px;">${rowsHtml}</table><p style="margin:20px 0 0;"><a href="${APP_URL}/admin" style="color:#E08040;font-size:13px;">Open Admin Panel →</a></p></td></tr></table></td></tr></table></body></html>`;
+  await send({ to: ADMIN_TO, subject, text, html });
+}

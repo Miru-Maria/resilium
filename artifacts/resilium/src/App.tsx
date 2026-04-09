@@ -75,7 +75,12 @@ function ClerkQueryClientCacheInvalidator() {
     const unsub = addListener(({ user }) => {
       const uid = user?.id ?? null;
       if (prevUserIdRef.current !== undefined && prevUserIdRef.current !== uid) {
-        qc.clear();
+        qc.invalidateQueries({
+          predicate: (query) => {
+            const key = String(query.queryKey[0] ?? "");
+            return key.includes("/api/users") || key.includes("/api/admin");
+          },
+        });
       }
       prevUserIdRef.current = uid;
     });
@@ -87,7 +92,17 @@ function ClerkQueryClientCacheInvalidator() {
 function ClerkAuthBridge() {
   const { getToken } = useAuth();
   useEffect(() => {
-    setAuthTokenGetter(() => getToken());
+    setAuthTokenGetter(async () => {
+      try {
+        const token = await Promise.race([
+          getToken(),
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), 5000)),
+        ]);
+        return token;
+      } catch {
+        return null;
+      }
+    });
     return () => setAuthTokenGetter(null);
   }, [getToken]);
   return null;
