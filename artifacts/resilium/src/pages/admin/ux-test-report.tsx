@@ -1,5 +1,5 @@
-import { useParams, Link } from "wouter";
-import { getAdminToken } from "./layout";
+import { useParams, Link, useLocation } from "wouter";
+import { AdminLayout, getAdminToken } from "./layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -137,11 +137,12 @@ function generateMarkdown(report: RunReport): string {
 
 export default function UxTestReportPage() {
   const { runId } = useParams<{ runId: string }>();
+  const [, navigate] = useLocation();
   const adminToken = getAdminToken();
 
   const { data: report, isLoading, error } = useQuery({
     queryKey: ["ux-run-report", runId],
-    queryFn: () => fetchRunReport(runId),
+    queryFn: () => fetchRunReport(runId!),
     enabled: !!adminToken && !!runId,
     refetchInterval: (query) => {
       const data = query.state.data;
@@ -156,32 +157,55 @@ export default function UxTestReportPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `ux-test-report-${runId.slice(0, 8)}.md`;
+    a.download = `ux-test-report-${runId!.slice(0, 8)}.md`;
     a.click();
     URL.revokeObjectURL(url);
   }
 
+  if (!runId) {
+    return (
+      <AdminLayout activeSection="ux-testing">
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Card className="max-w-sm w-full">
+            <CardContent className="pt-6 text-center">
+              <AlertCircle className="w-8 h-8 text-destructive mx-auto mb-3" />
+              <p className="text-muted-foreground">No report ID provided.</p>
+              <Button variant="outline" className="mt-4" onClick={() => navigate("/admin/ux-testing")}>
+                Back to UX Testing
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </AdminLayout>
+    );
+  }
+
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-      </div>
+      <AdminLayout activeSection="ux-testing">
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+        </div>
+      </AdminLayout>
     );
   }
 
   if (error || !report) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Card className="max-w-sm w-full">
-          <CardContent className="pt-6 text-center">
-            <AlertCircle className="w-8 h-8 text-destructive mx-auto mb-3" />
-            <p className="text-muted-foreground">Failed to load report</p>
-            <Link href="/admin/ux-testing">
-              <Button variant="outline" className="mt-4">Back to UX Testing</Button>
-            </Link>
-          </CardContent>
-        </Card>
-      </div>
+      <AdminLayout activeSection="ux-testing">
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Card className="max-w-sm w-full">
+            <CardContent className="pt-6 text-center">
+              <AlertCircle className="w-8 h-8 text-destructive mx-auto mb-3" />
+              <p className="text-muted-foreground">Failed to load report.</p>
+              <p className="text-xs text-muted-foreground mt-1">The run may not exist or the session expired.</p>
+              <Button variant="outline" className="mt-4" onClick={() => navigate("/admin/ux-testing")}>
+                Back to UX Testing
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </AdminLayout>
     );
   }
 
@@ -195,14 +219,15 @@ export default function UxTestReportPage() {
     : null;
 
   return (
-    <div className="min-h-screen bg-background print:bg-white">
+    <AdminLayout activeSection="ux-testing">
+    <div className="bg-background print:bg-white">
       <div className="border-b border-border/60 bg-background/80 backdrop-blur sticky top-0 z-10 print:hidden">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <Link href="/admin/ux-testing">
               <Button variant="ghost" size="sm" className="gap-2">
                 <ArrowLeft className="w-4 h-4" />
-                Back
+                Back to UX Testing
               </Button>
             </Link>
             <div>
@@ -424,5 +449,6 @@ export default function UxTestReportPage() {
         }
       `}</style>
     </div>
+    </AdminLayout>
   );
 }

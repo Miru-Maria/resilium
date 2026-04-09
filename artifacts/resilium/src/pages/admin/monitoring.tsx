@@ -3,7 +3,71 @@ import { AdminLayout } from "./layout";
 import { AlertTriangle, Activity, Globe, Smartphone, Server, ExternalLink, Settings, BarChart2, RefreshCw, Zap, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const SENTRY_BASE = "https://de.sentry.io";
+type SentryUrlStyle = "subdomain" | "path" | "unknown";
+
+interface ParsedSentry {
+  slug: string;
+  base: string;
+  style: SentryUrlStyle;
+}
+
+function parseSentryInput(raw: string): ParsedSentry | null {
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+
+  // Case 1: full URL containing .sentry.io
+  // e.g. https://resilium.sentry.io  OR  https://resilium.de.sentry.io
+  // e.g. https://de.sentry.io/organizations/resilium
+  if (trimmed.includes("sentry.io")) {
+    try {
+      // Ensure it has a protocol for URL parsing
+      const withProto = trimmed.startsWith("http") ? trimmed : `https://${trimmed}`;
+      const url = new URL(withProto);
+      const hostname = url.hostname; // e.g. resilium.sentry.io or de.sentry.io
+
+      // subdomain format: slug.sentry.io or slug.de.sentry.io
+      const subdomainMatch = hostname.match(/^([^.]+)\.(?:de\.)?sentry\.io$/);
+      if (subdomainMatch && subdomainMatch[1] !== "de" && subdomainMatch[1] !== "us") {
+        const slug = subdomainMatch[1];
+        const base = `https://${hostname}`;
+        return { slug, base, style: "subdomain" };
+      }
+
+      // path format: sentry.io/organizations/slug or de.sentry.io/organizations/slug
+      const pathMatch = url.pathname.match(/^\/organizations\/([^/]+)/);
+      if (pathMatch) {
+        const slug = pathMatch[1];
+        const base = `${url.protocol}//${url.hostname}`;
+        return { slug, base, style: "path" };
+      }
+    } catch {
+      // fall through to slug-only
+    }
+  }
+
+  // Case 2: plain slug (no dots, no protocol)
+  const slugOnly = trimmed.replace(/^https?:\/\//, "").replace(/\/$/, "");
+  if (!slugOnly.includes("/") && !slugOnly.includes(".")) {
+    return { slug: slugOnly, base: "https://de.sentry.io", style: "path" };
+  }
+
+  return null;
+}
+
+function buildLink(parsed: ParsedSentry, projectId: string, feature: string): string {
+  const featurePaths: Record<string, string> = {
+    Issues: `/issues/?project=${projectId}`,
+    Performance: `/performance/?project=${projectId}`,
+    Replays: `/replays/?project=${projectId}`,
+    Alerts: `/alerts/?project=${projectId}`,
+  };
+  const tail = featurePaths[feature] ?? "/";
+
+  if (parsed.style === "subdomain") {
+    return `${parsed.base}/organizations/${parsed.slug}${tail}`;
+  }
+  return `${parsed.base}/organizations/${parsed.slug}${tail}`;
+}
 
 const PROJECTS = [
   {
@@ -38,28 +102,31 @@ const PROJECTS = [
   },
 ];
 
-const FEATURE_LINKS: Record<string, (org: string, proj: { slug: string; id: string }) => string> = {
-  Issues: (org, p) => `${SENTRY_BASE}/organizations/${org}/issues/?project=${p.id}`,
-  Performance: (org, p) => `${SENTRY_BASE}/organizations/${org}/performance/?project=${p.id}`,
-  Replays: (org, p) => `${SENTRY_BASE}/organizations/${org}/replays/?project=${p.id}`,
-  Alerts: (org, p) => `${SENTRY_BASE}/organizations/${org}/alerts/?project=${p.id}`,
-};
 
 export default function MonitoringPage() {
-  const [orgSlug, setOrgSlug] = useState("");
+  const [orgInput, setOrgInput] = useState("");
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
+  const [parseError, setParseError] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem("sentry_org_slug") ?? "";
-    setOrgSlug(saved);
+    const saved = localStorage.getItem("sentry_org_input") ?? "";
+    setOrgInput(saved);
     setDraft(saved);
   }, []);
 
+  const parsed = parseSentryInput(orgInput);
+
   function saveSlug() {
     const trimmed = draft.trim();
-    localStorage.setItem("sentry_org_slug", trimmed);
-    setOrgSlug(trimmed);
+    const result = parseSentryInput(trimmed);
+    if (!result && trimmed.length > 0) {
+      setParseError(true);
+      return;
+    }
+    setParseError(false);
+    localStorage.setItem("sentry_org_input", trimmed);
+    setOrgInput(trimmed);
     setEditing(false);
   }
 
@@ -80,41 +147,56 @@ export default function MonitoringPage() {
           </div>
         </div>
 
-        {/* Org slug setup */}
+        {/* Sentry URL setup */}
         <div className="mb-8 rounded-xl border bg-card p-5">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Settings className="w-4 h-4 text-muted-foreground" />
-              <span className="text-sm font-semibold">Sentry Organization Slug</span>
+              <span className="text-sm font-semibold">Sentry Organization URL</span>
             </div>
             {!editing && (
-              <Button variant="ghost" size="sm" onClick={() => { setDraft(orgSlug); setEditing(true); }}>
+              <Button variant="ghost" size="sm" onClick={() => { setDraft(orgInput); setEditing(true); setParseError(false); }}>
                 Edit
               </Button>
             )}
           </div>
 
           {editing ? (
-            <div className="flex gap-2">
-              <input
-                className="flex-1 px-3 py-2 rounded-md border bg-background text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary"
-                placeholder="e.g. my-org"
-                value={draft}
-                onChange={(e) => setDraft(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && saveSlug()}
-                autoFocus
-              />
-              <Button size="sm" onClick={saveSlug}>Save</Button>
-              <Button size="sm" variant="ghost" onClick={() => setEditing(false)}>Cancel</Button>
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <input
+                  className={`flex-1 px-3 py-2 rounded-md border bg-background text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary ${parseError ? "border-destructive" : ""}`}
+                  placeholder="https://your-org.sentry.io  or  your-org-slug"
+                  value={draft}
+                  onChange={(e) => { setDraft(e.target.value); setParseError(false); }}
+                  onKeyDown={(e) => e.key === "Enter" && saveSlug()}
+                  autoFocus
+                />
+                <Button size="sm" onClick={saveSlug}>Save</Button>
+                <Button size="sm" variant="ghost" onClick={() => { setEditing(false); setParseError(false); }}>Cancel</Button>
+              </div>
+              {parseError && (
+                <p className="text-xs text-destructive">Couldn't parse this as a Sentry URL. Try pasting the full URL from your browser address bar when on Sentry.</p>
+              )}
+              <p className="text-xs text-muted-foreground">
+                Paste your Sentry URL directly from the browser — for example <code className="bg-muted px-1 rounded">https://your-org.sentry.io</code> — or just type your org slug.
+              </p>
             </div>
-          ) : orgSlug ? (
-            <div className="flex items-center gap-2">
-              <code className="text-sm bg-muted px-2 py-1 rounded font-mono text-primary">{orgSlug}</code>
+          ) : parsed ? (
+            <div className="flex items-center gap-3 flex-wrap">
+              <div>
+                <span className="text-xs text-muted-foreground block mb-0.5">Org slug</span>
+                <code className="text-sm bg-muted px-2 py-1 rounded font-mono text-primary">{parsed.slug}</code>
+              </div>
+              <div>
+                <span className="text-xs text-muted-foreground block mb-0.5">Base URL</span>
+                <code className="text-xs bg-muted px-2 py-1 rounded font-mono text-muted-foreground">{parsed.base}</code>
+              </div>
               <a
-                href={`${SENTRY_BASE}/organizations/${orgSlug}/`}
+                href={`${parsed.base}/organizations/${parsed.slug}/`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+                className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors mt-4"
               >
                 Open Sentry <ExternalLink className="w-3 h-3" />
               </a>
@@ -122,7 +204,7 @@ export default function MonitoringPage() {
           ) : (
             <div className="flex items-start gap-2 text-sm text-amber-400">
               <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-              <span>Enter your Sentry organization slug to generate direct project links. Find it in your Sentry URL: <code className="bg-muted px-1 rounded">sentry.io/organizations/<strong>your-slug</strong>/</code></span>
+              <span>Paste your Sentry dashboard URL to generate direct project links. Copy it straight from the browser address bar when you're logged in to Sentry.</span>
             </div>
           )}
         </div>
@@ -131,6 +213,12 @@ export default function MonitoringPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
           {PROJECTS.map((proj) => {
             const Icon = proj.icon;
+            const featureIcons: Record<string, React.ReactNode> = {
+              Issues: <AlertTriangle className="w-3.5 h-3.5" />,
+              Performance: <Zap className="w-3.5 h-3.5" />,
+              Replays: <Eye className="w-3.5 h-3.5" />,
+              Alerts: <RefreshCw className="w-3.5 h-3.5" />,
+            };
             return (
               <div key={proj.key} className="rounded-xl border bg-card overflow-hidden">
                 <div className="p-5 border-b">
@@ -154,13 +242,7 @@ export default function MonitoringPage() {
                 </div>
                 <div className="p-3 flex flex-col gap-1">
                   {proj.features.map((feature) => {
-                    const url = orgSlug ? FEATURE_LINKS[feature]?.(orgSlug, proj) : null;
-                    const icons: Record<string, React.ReactNode> = {
-                      Issues: <AlertTriangle className="w-3.5 h-3.5" />,
-                      Performance: <Zap className="w-3.5 h-3.5" />,
-                      Replays: <Eye className="w-3.5 h-3.5" />,
-                      Alerts: <RefreshCw className="w-3.5 h-3.5" />,
-                    };
+                    const url = parsed ? buildLink(parsed, proj.id, feature) : null;
                     return url ? (
                       <a
                         key={feature}
@@ -170,7 +252,7 @@ export default function MonitoringPage() {
                         className="flex items-center justify-between gap-2 px-3 py-2 rounded-md text-sm hover:bg-muted transition-colors group"
                       >
                         <span className="flex items-center gap-2 text-muted-foreground group-hover:text-foreground">
-                          {icons[feature]}
+                          {featureIcons[feature]}
                           {feature}
                         </span>
                         <ExternalLink className="w-3 h-3 text-muted-foreground/40 group-hover:text-muted-foreground" />
@@ -180,7 +262,7 @@ export default function MonitoringPage() {
                         key={feature}
                         className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-muted-foreground/40 cursor-default"
                       >
-                        {icons[feature]}
+                        {featureIcons[feature]}
                         {feature}
                       </div>
                     );
