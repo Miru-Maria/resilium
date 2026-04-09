@@ -19,6 +19,8 @@ The platform's narrative should avoid an HR/corporate angle, focusing instead on
 
 The project is a pnpm workspace monorepo using TypeScript, consisting of three main artifacts: `api-server` (Express API), `resilium` (React + Vite web frontend), and `resilium-mobile` (Expo React Native mobile app). Core libraries include `db` (Drizzle ORM), `replit-auth-web`, and `integrations-openai-ai-server`.
 
+**Supported platforms:** Web (React + Vite), iOS (Expo), and mobile web (Expo web). Android is explicitly excluded — the `android` block has been removed from `app.json` and `platforms` is set to `["ios", "web"]` only.
+
 ## Core User Flow
 
 The user journey begins on the landing page, leading to a GDPR consent screen. Following consent, users complete a 14-step assessment, including a 10-question Mental Resilience deep-dive, covering areas like income stability, skills, health, and risk concerns. This culminates in an AI-generated Resilience Report displayed on the results page, which then guides users to a Strategic Action Plan—an interactive document with goal-headlined tasks, time horizons, AI sub-steps (Pro-gated), and curated resources. Authenticated users can access their report history and progress tracking via a profile page.
