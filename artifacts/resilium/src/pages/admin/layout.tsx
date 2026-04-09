@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Loader2, LayoutDashboard, Smartphone, Shield, LogOut, FlaskConical, Users, Megaphone, Rocket, KeyRound } from "lucide-react";
+import { Loader2, LayoutDashboard, Smartphone, Shield, LogOut, FlaskConical, Users, Megaphone, Rocket, KeyRound, Activity } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ResilientIcon } from "@/components/resilient-icon";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
-  activeSection?: "dashboard" | "mobile" | "gdpr" | "consent" | "ux-testing" | "users" | "announcements" | "marketing" | "security";
+  activeSection?: "dashboard" | "mobile" | "gdpr" | "consent" | "ux-testing" | "users" | "announcements" | "marketing" | "security" | "monitoring";
 }
 
 export function getAdminToken(): string | null {
@@ -71,6 +71,7 @@ export function AdminLayout({ children, activeSection }: AdminLayoutProps) {
     { href: "/admin/consent-log", label: "Consent Log", icon: Shield, key: "consent" },
     { href: "/admin/ux-testing", label: "AI UX Tester", icon: FlaskConical, key: "ux-testing" },
     { href: "/admin/security", label: "Security", icon: KeyRound, key: "security" },
+    { href: "/admin/monitoring", label: "Sentry", icon: Activity, key: "monitoring" },
   ];
 
   return (

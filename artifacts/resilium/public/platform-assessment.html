@@ -459,7 +459,7 @@
       <h1 class="hero-title">Platform Assessment<br />& Strategic Review</h1>
       <p class="hero-sub">An honest, unvarnished evaluation of what's been built, how the market might receive it, and a precise checklist of what's done versus what remains.</p>
       <div class="hero-meta">
-        <div class="hero-stat"><strong>~22,000</strong> Lines of Source Code</div>
+        <div class="hero-stat"><strong>~25,000</strong> Lines of Source Code</div>
         <div class="hero-stat"><strong>3</strong> Platforms (Web · Mobile · Admin)</div>
         <div class="hero-stat"><strong>April 2026</strong> Assessment Date</div>
         <div class="hero-stat"><strong>Production</strong> <span style="color:var(--success)">●</span> Live</div>
@@ -608,6 +608,7 @@
           <tr><td>Marketing analytics</td><td><span class="badge badge-good">✓ Present</span></td><td>Marketing performance tracking integrated</td></tr>
           <tr><td>Mobile analytics</td><td><span class="badge badge-good">✓ Built</span></td><td>Web vs. mobile session split, daily breakdown chart, score distribution</td></tr>
           <tr><td>Security monitoring</td><td><span class="badge badge-good">✓ Present</span></td><td>Error rate tracking with in-memory window, alert emails on threshold</td></tr>
+          <tr><td>Sentry monitoring page</td><td><span class="badge badge-good">✓ Added</span></td><td>Dedicated /admin/monitoring page with project cards and deep-links to Issues, Performance, Replays, Alerts for all three Sentry projects</td></tr>
           <tr><td>UX testing (AI personas)</td><td><span class="badge badge-good">✓ Novel</span></td><td>AI-simulated user sessions for UX analysis — genuinely clever differentiator</td></tr>
         </tbody>
       </table>
@@ -667,6 +668,7 @@
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">Testimonials: collect on results → moderate in admin → display on landing</span></li>
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">Announcements: create in admin → display to all users instantly</span></li>
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">Progress snapshots table in DB (foundation for score trend history)</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Sentry error monitoring — wired across all 3 platforms; admin Sentry page with project deep-links</span></li>
       </ul>
     </section>
 
@@ -717,6 +719,11 @@
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">Draft saving for in-progress assessments</span></li>
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">App icon + splash — custom branded brain logo (updated)</span></li>
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">About tab — scope and purpose clarified</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Mobile coaching page upgraded — warm amber palette, score context cards, About Cristiana section, dark gradient CTA</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Mobile splash screen finalized — neural net animation (38 particles, 0.52 opacity), brain logo with counter-rotating SVG rings, amber glow pulse</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Resilience Profile card moved to Account tab (mobile) — shows score, assessment date, "View My Plans" CTA</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Sentry error monitoring wired — <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">@sentry/react</code> (web), <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">@sentry/react-native</code> (mobile), <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">@sentry/node</code> (API)</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Admin Sentry monitoring page — project cards with deep-links to Issues, Performance, Replays, and Alerts for all three platforms</span></li>
       </ul>
 
       <!-- OUTSTANDING -->
@@ -750,11 +757,6 @@
             <td>Score trend history chart (Pro)</td>
             <td><span class="badge badge-warn">Medium</span></td>
             <td><code>progressSnapshotsTable</code> exists in DB. No UI to visualize score change over multiple assessments yet.</td>
-          </tr>
-          <tr>
-            <td>Client-side error tracking</td>
-            <td><span class="badge badge-warn">Medium</span></td>
-            <td>Server-side monitoring is built. Browser/mobile JS errors are untracked. Sentry has a free Developer plan (5,000 events/month). A self-hosted alternative is also viable.</td>
           </tr>
           <tr>
             <td>Mobile onboarding flow</td>
