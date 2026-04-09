@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/node";
 import express, { type Express, type Request, type Response, type NextFunction } from "express";
 import cors from "cors";
 import { clerkMiddleware } from "@clerk/express";
@@ -77,6 +78,9 @@ app.use((_req: Request, res: Response, next: NextFunction) => {
 });
 
 app.use("/api", router);
+
+// Sentry error handler — must come after all routes
+Sentry.setupExpressErrorHandler(app);
 
 // Start background cron jobs
 startCron();
