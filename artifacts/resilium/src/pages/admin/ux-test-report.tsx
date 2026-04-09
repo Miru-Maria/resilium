@@ -37,7 +37,9 @@ function authH() { const t = localStorage.getItem("admin_token"); return t ? { A
 
 async function fetchRunReport(runId: string): Promise<RunReport> {
   const res = await fetch(`/api/admin/ux-test/runs/${runId}`, { headers: authH() });
-  if (!res.ok) throw new Error("Failed to fetch run report");
+  if (res.status === 404) throw new Error("NOT_FOUND");
+  if (res.status === 401) throw new Error("UNAUTHORIZED");
+  if (!res.ok) throw new Error("FETCH_ERROR");
   return res.json();
 }
 
@@ -191,19 +193,59 @@ export default function UxTestReportPage() {
   }
 
   if (error || !report) {
+    const errMsg = error instanceof Error ? error.message : "";
+    const isNotFound = errMsg === "NOT_FOUND";
+    const isUnauthorized = errMsg === "UNAUTHORIZED";
+
     return (
       <AdminLayout activeSection="ux-testing">
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <Card className="max-w-sm w-full">
-            <CardContent className="pt-6 text-center">
-              <AlertCircle className="w-8 h-8 text-destructive mx-auto mb-3" />
-              <p className="text-muted-foreground">Failed to load report.</p>
-              <p className="text-xs text-muted-foreground mt-1">The run may not exist or the session expired.</p>
-              <Button variant="outline" className="mt-4" onClick={() => navigate("/admin/ux-testing")}>
-                Back to UX Testing
+        <div className="flex flex-col items-center justify-center min-h-[70vh] px-6">
+          <div className="max-w-md w-full text-center space-y-4">
+            <div className="w-14 h-14 rounded-full bg-destructive/10 flex items-center justify-center mx-auto">
+              <AlertCircle className="w-7 h-7 text-destructive" />
+            </div>
+
+            {isNotFound ? (
+              <>
+                <h2 className="text-lg font-semibold text-foreground">Report not found</h2>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  This test run doesn't exist in the database. It may have been deleted, or the test may have failed before saving.
+                  Run a new UX test to generate a fresh report.
+                </p>
+              </>
+            ) : isUnauthorized ? (
+              <>
+                <h2 className="text-lg font-semibold text-foreground">Session expired</h2>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Your admin session has expired. Please log in again.
+                </p>
+              </>
+            ) : (
+              <>
+                <h2 className="text-lg font-semibold text-foreground">Couldn't load report</h2>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Something went wrong loading this report. Check that the API server is running and try again.
+                </p>
+              </>
+            )}
+
+            {runId && (
+              <p className="text-xs text-muted-foreground font-mono bg-muted inline-block px-3 py-1 rounded-full">
+                Run: {runId.slice(0, 16)}…
+              </p>
+            )}
+
+            <div className="flex gap-3 justify-center pt-2">
+              <Button onClick={() => navigate("/admin/ux-testing")}>
+                {isNotFound ? "Run a New Test" : "Back to UX Testing"}
               </Button>
-            </CardContent>
-          </Card>
+              {!isNotFound && (
+                <Button variant="outline" onClick={() => window.location.reload()}>
+                  Retry
+                </Button>
+              )}
+            </div>
+          </div>
         </div>
       </AdminLayout>
     );
