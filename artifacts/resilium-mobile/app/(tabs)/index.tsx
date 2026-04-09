@@ -18,6 +18,7 @@ import * as Haptics from "expo-haptics";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { NeuralNetSVG } from "@/components/NeuralNetSVG";
+import { OnboardingCarousel, shouldShowOnboarding } from "@/components/OnboardingCarousel";
 
 import { useSession } from "@/context/session";
 import { useAuth } from "@/context/auth";
@@ -245,6 +246,13 @@ export default function HomeScreen() {
   const topPad = insets.top;
   const bottomPad = insets.bottom;
   const [heroSize, setHeroSize] = useState({ width: SCREEN_W, height: 340 });
+
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  useEffect(() => {
+    shouldShowOnboarding().then(show => {
+      if (show) setShowOnboarding(true);
+    });
+  }, []);
 
   const handleStart = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -538,6 +546,11 @@ export default function HomeScreen() {
         </View>
         </>)}
       </ScrollView>
+
+      {/* Onboarding carousel — shown on first launch */}
+      {showOnboarding && (
+        <OnboardingCarousel onDismiss={() => setShowOnboarding(false)} />
+      )}
     </View>
   );
 }

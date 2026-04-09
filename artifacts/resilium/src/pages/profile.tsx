@@ -19,7 +19,9 @@ import {
   Tooltip,
   ResponsiveContainer,
   ReferenceLine,
+  Legend,
 } from "recharts";
+
 import {
   Trash2,
   Eye,
@@ -1157,6 +1159,118 @@ function AccountTab({ user, plans, onAllPlansDeleted }: {
   );
 }
 
+// ─── Score History Chart ─────────────────────────────────────────────────────
+type ScoreSnapshot = {
+  date: string;
+  overall: number | null;
+  financial?: number | null;
+  health?: number | null;
+  skills?: number | null;
+  mobility?: number | null;
+  psychological?: number | null;
+  resources?: number | null;
+};
+
+const DIM_COLORS: Record<string, string> = {
+  overall:       "hsl(var(--primary))",
+  financial:     "#60A5FA",
+  health:        "#34D399",
+  skills:        "#A78BFA",
+  mobility:      "#FBBF24",
+  psychological: "#F472B6",
+  resources:     "#38BDF8",
+};
+
+function ScoreHistorySection() {
+  const { data, isLoading } = useQuery<{ snapshots: ScoreSnapshot[]; isPro: boolean }>({
+    queryKey: ["scoreHistory"],
+    queryFn: () => fetch("/api/users/me/score-history", { credentials: "include" }).then(r => r.json()),
+    staleTime: 60_000,
+  });
+
+  if (isLoading) return (
+    <div className="flex items-center justify-center py-10">
+      <Loader2 className="w-5 h-5 text-primary animate-spin" />
+    </div>
+  );
+
+  const snapshots = data?.snapshots ?? [];
+  const isPro = data?.isPro ?? false;
+
+  const fmtDate = (iso: string) => {
+    const d = new Date(iso);
+    return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  };
+
+  const chartData = snapshots.map(s => ({ ...s, date: fmtDate(s.date) }));
+
+  if (snapshots.length === 0) {
+    return (
+      <div className="rounded-2xl border bg-card/60 px-6 py-8 text-center text-sm text-muted-foreground space-y-2">
+        <Activity className="w-8 h-8 mx-auto text-muted-foreground/40" />
+        <p className="font-medium text-foreground/70">No score history yet</p>
+        <p className="text-xs max-w-xs mx-auto">Complete your first assessment to start tracking your resilience score over time.</p>
+      </div>
+    );
+  }
+
+  return (
+    <Card className="border-none shadow-md">
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-base font-display flex items-center gap-2">
+            <Activity className="w-4 h-4 text-primary" /> Score History
+          </CardTitle>
+          {isPro && (
+            <span className="text-xs font-bold bg-primary/15 text-primary border border-primary/30 rounded-full px-2 py-0.5">PRO</span>
+          )}
+        </div>
+      </CardHeader>
+      <CardContent className="relative">
+        <ResponsiveContainer width="100%" height={220}>
+          <LineChart data={chartData} margin={{ top: 5, right: 16, left: 0, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+            <XAxis dataKey="date" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+            <YAxis domain={[0, 100]} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} width={28} />
+            <Tooltip
+              contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 10, fontSize: 12 }}
+              labelStyle={{ color: "hsl(var(--foreground))", fontWeight: 700 }}
+            />
+            <ReferenceLine y={70} stroke="rgba(16,185,129,0.2)" strokeDasharray="4 4" />
+            <ReferenceLine y={40} stroke="rgba(245,158,11,0.2)" strokeDasharray="4 4" />
+            <Line type="monotone" dataKey="overall" name="Overall" stroke={DIM_COLORS.overall} strokeWidth={2.5} dot={{ r: 3 }} activeDot={{ r: 5 }} />
+            {isPro && (
+              <>
+                <Line type="monotone" dataKey="financial" name="Financial" stroke={DIM_COLORS.financial} strokeWidth={1.5} dot={false} opacity={0.8} />
+                <Line type="monotone" dataKey="health" name="Health" stroke={DIM_COLORS.health} strokeWidth={1.5} dot={false} opacity={0.8} />
+                <Line type="monotone" dataKey="skills" name="Skills" stroke={DIM_COLORS.skills} strokeWidth={1.5} dot={false} opacity={0.8} />
+                <Line type="monotone" dataKey="mobility" name="Mobility" stroke={DIM_COLORS.mobility} strokeWidth={1.5} dot={false} opacity={0.8} />
+                <Line type="monotone" dataKey="psychological" name="Psychological" stroke={DIM_COLORS.psychological} strokeWidth={1.5} dot={false} opacity={0.8} />
+                <Line type="monotone" dataKey="resources" name="Resources" stroke={DIM_COLORS.resources} strokeWidth={1.5} dot={false} opacity={0.8} />
+                <Legend
+                  wrapperStyle={{ fontSize: 11, paddingTop: 8 }}
+                  formatter={(value: string) => <span style={{ color: "hsl(var(--muted-foreground))" }}>{value}</span>}
+                />
+              </>
+            )}
+          </LineChart>
+        </ResponsiveContainer>
+
+        {!isPro && (
+          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-card to-transparent flex flex-col items-center justify-end pb-4 gap-2">
+            <p className="text-xs text-muted-foreground font-medium">Dimension breakdown available on Pro</p>
+            <Link href="/pricing">
+              <Button size="sm" variant="outline" className="rounded-full gap-1.5 text-xs h-7 border-primary/40 text-primary hover:bg-primary/10">
+                <Bell className="w-3 h-3" /> Unlock Dimension Lines
+              </Button>
+            </Link>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 // ─── Plans Tab ───────────────────────────────────────────────────────────────
 function PlansTab({ plans, onDelete }: { plans: PlanSummary[]; onDelete: (id: string) => void }) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -1214,6 +1328,9 @@ function PlansTab({ plans, onDelete }: { plans: PlanSummary[]; onDelete: (id: st
 
   return (
     <div className="space-y-4">
+      {/* Score History Chart */}
+      <ScoreHistorySection />
+
       {/* Header bar */}
       <div className="flex items-center justify-between gap-4">
         <p className="text-sm text-muted-foreground">{plans.length} of {PLAN_LIMIT} plans used</p>

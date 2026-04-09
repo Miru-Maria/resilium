@@ -685,6 +685,9 @@
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">Announcements: create in admin → display to all users instantly</span></li>
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">Progress snapshots table in DB (foundation for score trend history)</span></li>
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">Sentry error monitoring — wired across all 3 platforms; admin Sentry page with project deep-links</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Push notification permission prompt — bottom sheet modal fires after first assessment, AsyncStorage gate <code>resilium_push_prompted_v1</code>, requests <code>Expo.Notifications</code> permission, registers token via <code>registerPushTokenWithBackend</code></span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Score trend history chart (web + mobile, Pro gate) — <code>GET /api/users/me/score-history</code> endpoint; Recharts LineChart in Profile → Plans tab (web); react-native-svg line chart in My Plans tab (mobile); dimension lines gated behind Pro with upsell overlay for free users</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Mobile onboarding carousel — 3-slide FlatList pagingEnabled carousel (What is Resilium / Take Assessment / Build Your Plan), progress dots, Skip button, "Start My Assessment" CTA; AsyncStorage gate <code>resilium_onboarded_mobile_v1</code>; modal overlay on Home tab first launch</span></li>
       </ul>
     </section>
 
@@ -778,22 +781,6 @@
             <td>App Store / Play Store submission</td>
             <td><span class="badge badge-warn">In Progress</span></td>
             <td>Intentionally deferred by owner — app builds, assets, and metadata preparation in progress.</td>
-          </tr>
-
-          <tr>
-            <td>Push notification permission prompt (mobile)</td>
-            <td><span class="badge badge-warn">Medium</span></td>
-            <td>In <code>artifacts/resilium-mobile</code>, add a push notification permission prompt that fires after a user completes their first assessment. Use <code>Expo.Notifications.requestPermissionsAsync()</code> to request permission. If granted, call <code>Expo.Notifications.getExpoPushTokenAsync()</code> and <code>POST /api/push/register</code> with the token and userId. Gate the prompt behind an AsyncStorage flag (<code>resilium_push_prompted_v1</code>) so it only shows once. Display it as a full-screen bottom sheet modal with a brief value proposition ("Get weekly resilience check-in reminders") and two buttons: "Allow Notifications" and "Not Now". The backend infrastructure (token storage, broadcast API, push send) is already fully built.</td>
-          </tr>
-          <tr>
-            <td>Score trend history chart (Pro, web + mobile)</td>
-            <td><span class="badge badge-warn">Medium</span></td>
-            <td>Add a "Score History" section to the web Profile page (under the Plans tab) and to the mobile Plans tab. On the API, create <code>GET /api/users/me/score-history</code> — it should query <code>progressSnapshotsTable</code>, return an array of <code>{ date, scoreOverall, scoreFinancial, scoreHealth, scoreSkills, scoreMobility, scorePsychological, scoreResources }</code> ordered by date ascending, limited to the last 12 snapshots. On the web, render a Recharts <code>LineChart</code> with one line per dimension plus the overall score, with a legend and date X-axis. Gate the multi-dimension view behind Pro status — free users see only the overall score line with a Pro upsell overlay on the dimension lines. On mobile, render the same chart using <code>react-native-svg</code>-based charting (use the existing chart patterns in the app). Fallback: if fewer than 2 snapshots exist, show "Complete your next assessment to see your progress trend."</td>
-          </tr>
-          <tr>
-            <td>Mobile onboarding flow</td>
-            <td><span class="badge badge-warn">Low–Medium</span></td>
-            <td>In <code>artifacts/resilium-mobile</code>, add a first-launch onboarding flow that runs once for new users. Gate it behind an AsyncStorage flag (<code>resilium_onboarded_mobile_v1</code>). Build a 3-slide horizontal swipe carousel using <code>FlatList</code> with <code>pagingEnabled</code>: Slide 1 — "What is Resilium?" (6-dimension overview with icons); Slide 2 — "Take your assessment" (14-step flow, ~10 minutes, AI report at the end); Slide 3 — "Build your plan" (daily check-ins, progress tracking, coaching access). Each slide has a full-screen illustration using the existing amber/dark brand palette, a large heading, a 2-line subtitle, and a bottom progress indicator (3 dots). The final slide has a prominent "Start My Assessment" CTA that navigates to the assessment flow and sets the onboarding flag. Include a "Skip" button in the top-right corner on all slides. Surface this carousel as a modal over the Home tab on first launch.</td>
           </tr>
         </tbody>
       </table>

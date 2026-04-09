@@ -140,6 +140,69 @@ router.delete("/me/plans/:reportId", async (req: Request, res: Response) => {
   }
 });
 
+router.get("/me/score-history", async (req: Request, res: Response) => {
+  const userId = getUserId(req);
+  if (!userId) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+  try {
+    const userReports = await db
+      .select({ reportId: resilienceReportsTable.reportId })
+      .from(resilienceReportsTable)
+      .where(eq(resilienceReportsTable.userId, userId));
+
+    const reportIds = userReports.map(r => r.reportId);
+    if (reportIds.length === 0) {
+      return res.json({ snapshots: [], isPro: false });
+    }
+
+    const [snapshots, subRows] = await Promise.all([
+      db
+        .select({
+          reportId: progressSnapshotsTable.reportId,
+          snapshotAt: progressSnapshotsTable.snapshotAt,
+          scoreOverall: progressSnapshotsTable.scoreOverall,
+          scoreFinancial: progressSnapshotsTable.scoreFinancial,
+          scoreHealth: progressSnapshotsTable.scoreHealth,
+          scoreSkills: progressSnapshotsTable.scoreSkills,
+          scoreMobility: progressSnapshotsTable.scoreMobility,
+          scorePsychological: progressSnapshotsTable.scorePsychological,
+          scoreResources: progressSnapshotsTable.scoreResources,
+        })
+        .from(progressSnapshotsTable)
+        .where(inArray(progressSnapshotsTable.reportId, reportIds))
+        .orderBy(progressSnapshotsTable.snapshotAt)
+        .limit(24),
+      db
+        .select({ status: subscriptionsTable.status })
+        .from(subscriptionsTable)
+        .where(eq(subscriptionsTable.userId, userId))
+        .limit(1),
+    ]);
+
+    const sub = subRows[0];
+    const isPro = !!(sub && (sub.status === "active" || sub.status === "cancel_scheduled"));
+
+    res.json({
+      snapshots: snapshots.map(s => ({
+        date: s.snapshotAt.toISOString(),
+        overall: s.scoreOverall,
+        financial: s.scoreFinancial,
+        health: s.scoreHealth,
+        skills: s.scoreSkills,
+        mobility: s.scoreMobility,
+        psychological: s.scorePsychological,
+        resources: s.scoreResources,
+      })),
+      isPro,
+    });
+  } catch (err) {
+    req.log.error({ err }, "Error fetching score history");
+    res.status(500).json({ error: "Failed to fetch score history" });
+  }
+});
+
 router.delete("/me/plans", async (req: Request, res: Response) => {
   const userId = getUserId(req);
   if (!userId) {

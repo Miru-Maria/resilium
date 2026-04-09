@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useMemo } from "react";
 import {
   View, Text, StyleSheet, ScrollView, Pressable, Platform, ActivityIndicator,
-  Modal, Linking,
+  Modal, Linking, Dimensions,
 } from "react-native";
 import { router, useSegments } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import { ScoreHistoryChart, type ScoreSnapshot } from "@/components/ScoreHistoryChart";
 
 import { useAuth } from "@/context/auth";
 import { useColors } from "@/context/theme";
@@ -51,11 +52,14 @@ export default function MyPlansScreen() {
   const [compareResult, setCompareResult] = useState<string | null>(null);
   const [comparing, setComparing] = useState(false);
   const [showCompare, setShowCompare] = useState(false);
+  const [scoreHistory, setScoreHistory] = useState<ScoreSnapshot[]>([]);
+  const [scoreHistoryIsPro, setScoreHistoryIsPro] = useState(false);
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   const topPad = insets.top;
   const bottomPad = insets.bottom;
+  const { width: SCREEN_W } = Dimensions.get("window");
 
   useEffect(() => {
     if (!isSignedIn) {
@@ -66,10 +70,18 @@ export default function MyPlansScreen() {
     (async () => {
       try {
         const headers = await getAuthHeaders();
-        const res = await fetch(`https://${domain}/api/resilience/my-reports`, { headers });
-        if (!res.ok) throw new Error("Failed to load plans");
-        const data = await res.json();
-        setPlans(data.reports);
+        const [plansRes, historyRes] = await Promise.all([
+          fetch(`https://${domain}/api/resilience/my-reports`, { headers }),
+          fetch(`https://${domain}/api/users/me/score-history`, { headers }),
+        ]);
+        if (!plansRes.ok) throw new Error("Failed to load plans");
+        const plansData = await plansRes.json();
+        setPlans(plansData.reports);
+        if (historyRes.ok) {
+          const historyData = await historyRes.json();
+          setScoreHistory(historyData.snapshots ?? []);
+          setScoreHistoryIsPro(historyData.isPro ?? false);
+        }
       } catch (e: any) {
         setError(e.message);
       } finally {
@@ -253,6 +265,24 @@ export default function MyPlansScreen() {
               </View>
             </Modal>
 
+            {/* ── Score History Chart ── */}
+            <View style={styles.scoreHistoryCard}>
+              <View style={styles.scoreHistoryHeader}>
+                <Feather name="activity" size={14} color={colors.primary} />
+                <Text style={styles.scoreHistoryTitle}>Score History</Text>
+                {scoreHistoryIsPro && (
+                  <View style={styles.proBadge}>
+                    <Text style={styles.proBadgeText}>PRO</Text>
+                  </View>
+                )}
+              </View>
+              <ScoreHistoryChart
+                snapshots={scoreHistory}
+                isPro={scoreHistoryIsPro}
+                width={SCREEN_W - 80}
+              />
+            </View>
+
             {[...plans].reverse().map((plan, i) => (
               <Pressable
                 key={plan.reportId}
@@ -401,6 +431,18 @@ const createStyles = (colors: ColorsType) => StyleSheet.create({
     paddingVertical: 7, paddingHorizontal: 11,
   },
   actionPlanBtnText: { fontFamily: "Inter_600SemiBold", fontSize: 12, color: colors.background },
+  scoreHistoryCard: {
+    backgroundColor: colors.surface, borderRadius: 16, padding: 16,
+    borderWidth: 1, borderColor: colors.border, gap: 12,
+  },
+  scoreHistoryHeader: { flexDirection: "row", alignItems: "center", gap: 6 },
+  scoreHistoryTitle: { fontFamily: "Inter_600SemiBold", fontSize: 14, color: colors.text, flex: 1 },
+  proBadge: {
+    backgroundColor: "rgba(224,128,64,0.15)", borderRadius: 6,
+    paddingHorizontal: 7, paddingVertical: 2,
+    borderWidth: 1, borderColor: "rgba(224,128,64,0.3)",
+  },
+  proBadgeText: { fontFamily: "Inter_700Bold", fontSize: 9, color: colors.primary, letterSpacing: 0.8 },
   trendCard: {
     backgroundColor: colors.surface, borderRadius: 16, padding: 16,
     borderWidth: 1, borderColor: colors.border, gap: 12,

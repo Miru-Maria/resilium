@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo } from "react";
+import React, { useState, useRef, useMemo, useEffect } from "react";
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
   Dimensions,
   Linking,
   TextInput,
+  Modal,
   type DimensionValue,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
@@ -21,9 +22,14 @@ import * as Clipboard from "expo-clipboard";
 import { useQuery } from "@tanstack/react-query";
 import ViewShot from "react-native-view-shot";
 import * as Sharing from "expo-sharing";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { useColors } from "@/context/theme";
 import { ColorsType } from "@/constants/colors";
+import { useAuth } from "@/context/auth";
+import { requestNotificationPermission, getExpoPushToken, registerPushTokenWithBackend } from "@/utils/notifications";
+
+const PUSH_PROMPTED_KEY = "resilium_push_prompted_v1";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -181,10 +187,12 @@ export default function ResultsScreen() {
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
   const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
   const [sharingScorecard, setSharingScorecard] = useState(false);
+  const [showPushPrompt, setShowPushPrompt] = useState(false);
   const scorecardRef = useRef<ViewShot | null>(null);
 
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
+  const { getAuthHeaders, isSignedIn } = useAuth();
 
   const topPad = insets.top;
   const bottomPad = insets.bottom;
@@ -222,6 +230,37 @@ export default function ResultsScreen() {
       })
       .catch(() => {});
   }, [reportId]);
+
+  useEffect(() => {
+    if (!report?.score?.overall) return;
+    const timer = setTimeout(async () => {
+      try {
+        const val = await AsyncStorage.getItem(PUSH_PROMPTED_KEY);
+        if (val === null) setShowPushPrompt(true);
+      } catch {}
+    }, 2500);
+    return () => clearTimeout(timer);
+  }, [report?.score?.overall]);
+
+  const handleAllowPush = async () => {
+    setShowPushPrompt(false);
+    await AsyncStorage.setItem(PUSH_PROMPTED_KEY, "1");
+    try {
+      const granted = await requestNotificationPermission();
+      if (granted) {
+        const token = await getExpoPushToken();
+        if (token && isSignedIn) {
+          const headers = await getAuthHeaders();
+          await registerPushTokenWithBackend(token, process.env.EXPO_PUBLIC_DOMAIN ?? "", headers);
+        }
+      }
+    } catch {}
+  };
+
+  const handleDismissPush = async () => {
+    setShowPushPrompt(false);
+    await AsyncStorage.setItem(PUSH_PROMPTED_KEY, "1");
+  };
 
   const handleChecklistToggle = async (area: string, itemId: string) => {
     Haptics.selectionAsync();
@@ -706,6 +745,57 @@ export default function ResultsScreen() {
       >
         <MobileScorecardImage score={report.score} scoreLabel={scoreLabel} scoreColor={scoreColor} mentalResilienceProfile={report.mentalResilienceProfile} />
       </ViewShot>
+
+      {/* Push notification permission bottom sheet */}
+      <Modal
+        visible={showPushPrompt}
+        transparent
+        animationType="slide"
+        onRequestClose={handleDismissPush}
+      >
+        <View style={styles.pushOverlay}>
+          <Pressable style={StyleSheet.absoluteFill} onPress={handleDismissPush} />
+          <View style={styles.pushSheet}>
+            <View style={styles.pushHandle} />
+            <View style={styles.pushIconRow}>
+              <View style={styles.pushIconOrb}>
+                <Feather name="bell" size={26} color={colors.primary} />
+              </View>
+            </View>
+            <Text style={styles.pushTitle}>Stay ahead of your blind spots</Text>
+            <Text style={styles.pushBody}>
+              Get notified when it's time to reassess your resilience, when new scenarios match your profile, or when real-world events could affect your score.
+            </Text>
+            <View style={styles.pushBullets}>
+              {[
+                { icon: "clock" as const, text: "Timely reassessment reminders" },
+                { icon: "alert-triangle" as const, text: "Scenario alerts relevant to you" },
+                { icon: "trending-up" as const, text: "Progress milestone celebrations" },
+              ].map(b => (
+                <View key={b.text} style={styles.pushBulletRow}>
+                  <View style={styles.pushBulletIcon}>
+                    <Feather name={b.icon} size={12} color={colors.primary} />
+                  </View>
+                  <Text style={styles.pushBulletText}>{b.text}</Text>
+                </View>
+              ))}
+            </View>
+            <Pressable
+              style={({ pressed }) => [styles.pushAllowBtn, pressed && { opacity: 0.85 }]}
+              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); handleAllowPush(); }}
+            >
+              <Feather name="bell" size={16} color="#fff" />
+              <Text style={styles.pushAllowText}>Allow Notifications</Text>
+            </Pressable>
+            <Pressable
+              style={styles.pushDismissBtn}
+              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); handleDismissPush(); }}
+            >
+              <Text style={styles.pushDismissText}>Not Now</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -1477,5 +1567,84 @@ const createStyles = (colors: ColorsType) => StyleSheet.create({
     width: 1080,
     height: 1080,
     pointerEvents: "none",
+  },
+  pushOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.55)",
+    justifyContent: "flex-end",
+  },
+  pushSheet: {
+    backgroundColor: colors.surface,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingHorizontal: 24,
+    paddingTop: 12,
+    paddingBottom: 36,
+    borderTopWidth: 1,
+    borderColor: colors.border,
+    gap: 14,
+  },
+  pushHandle: {
+    width: 36, height: 4, borderRadius: 2,
+    backgroundColor: colors.border,
+    alignSelf: "center",
+    marginBottom: 4,
+  },
+  pushIconRow: {
+    alignItems: "center",
+  },
+  pushIconOrb: {
+    width: 64, height: 64, borderRadius: 32,
+    backgroundColor: "rgba(224,128,64,0.15)",
+    borderWidth: 1, borderColor: "rgba(224,128,64,0.3)",
+    alignItems: "center", justifyContent: "center",
+  },
+  pushTitle: {
+    fontFamily: "Inter_700Bold",
+    fontSize: 20,
+    color: colors.text,
+    textAlign: "center",
+    letterSpacing: -0.4,
+  },
+  pushBody: {
+    fontFamily: "Inter_400Regular",
+    fontSize: 14,
+    color: colors.textSecondary,
+    textAlign: "center",
+    lineHeight: 21,
+  },
+  pushBullets: { gap: 8 },
+  pushBulletRow: {
+    flexDirection: "row", alignItems: "center", gap: 10,
+    backgroundColor: "rgba(255,255,255,0.04)",
+    borderRadius: 10, paddingHorizontal: 12, paddingVertical: 9,
+    borderWidth: 1, borderColor: colors.border,
+  },
+  pushBulletIcon: {
+    width: 24, height: 24, borderRadius: 12,
+    backgroundColor: "rgba(224,128,64,0.12)",
+    alignItems: "center", justifyContent: "center",
+  },
+  pushBulletText: {
+    fontFamily: "Inter_500Medium",
+    fontSize: 13, color: colors.text,
+  },
+  pushAllowBtn: {
+    flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8,
+    backgroundColor: colors.primary, borderRadius: 14,
+    paddingVertical: 15,
+    marginTop: 4,
+  },
+  pushAllowText: {
+    fontFamily: "Inter_700Bold",
+    fontSize: 16, color: "#fff",
+  },
+  pushDismissBtn: {
+    alignItems: "center",
+    paddingVertical: 8,
+  },
+  pushDismissText: {
+    fontFamily: "Inter_500Medium",
+    fontSize: 14, color: colors.textMuted,
   },
 });
