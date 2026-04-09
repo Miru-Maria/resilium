@@ -41,7 +41,7 @@ function usePaddle() {
 
 const FREE_FEATURES = [
   "3 lifetime assessments",
-  "Full resilience score — all 7 dimensions",
+  "Full resilience score — all 6 dimensions",
   "AI-generated action plan",
   "Mental resilience profile",
   "Print / Save PDF",
@@ -93,7 +93,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "How is Resilium different from generic advice online?",
-    a: "Generic resilience advice is one-size-fits-all. Resilium scores your specific situation across seven dimensions — financial runway, skills, health, mobility, housing, mental resilience, and social capital — and generates recommendations specific to your profile, not a generic checklist.",
+    a: "Generic resilience advice is one-size-fits-all. Resilium scores your specific situation across six dimensions — financial runway, skills, health, mobility, psychological capacity, and emergency resources — and generates recommendations specific to your profile, not a generic checklist.",
   },
 ];
 

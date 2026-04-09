@@ -242,7 +242,7 @@ export default function LandingPage() {
             </h1>
 
             <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
-              Resilium assesses your real vulnerability across 7 dimensions — finances, health, skills, location, and more — then gives you a living action plan you actually work through. Not a one-time report. A companion that grows with you.
+              Resilium assesses your real vulnerability across 6 dimensions — finances, health, skills, mobility, psychology, and resources — then gives you a living action plan you actually work through. Not a one-time report. A companion that grows with you.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
@@ -485,7 +485,7 @@ export default function LandingPage() {
                 {
                   icon: <TrendingUp className="w-5 h-5 text-primary" />,
                   title: "Resilience Score",
-                  desc: "A 0–100 composite score across seven dimensions: Financial, Health, Skills, Mobility, Psychological, Resources, and Social Capital.",
+                  desc: "A 0–100 composite score across six dimensions: Financial, Health, Skills, Mobility, Psychological, and Resources.",
                 },
                 {
                   icon: <Brain className="w-5 h-5 text-primary" />,

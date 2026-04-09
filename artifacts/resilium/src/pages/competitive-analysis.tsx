@@ -12,11 +12,11 @@ const POSITIONING = {
   product: "Resilium",
   category: "personal resilience planning platform",
   keyBenefit:
-    "turns a 15-minute assessment into an ongoing, goal-driven action plan across 7 life dimensions",
+    "turns a 15-minute assessment into an ongoing, goal-driven action plan across 6 life dimensions",
   primaryAlternative:
     "one-dimensional psychological tests (score only) or reactive emergency apps (alerts only)",
   keyDifferentiator:
-    "addresses all 7 dimensions of readiness — financial, health, skills, mobility, resources, psychological, and social — and stays with you as a living document you actually work",
+    "addresses all 6 dimensions of readiness — financial, health, skills, mobility, resources, and psychological — and stays with you as a living document you actually work",
 };
 
 const AUDIENCE_STATS = [
