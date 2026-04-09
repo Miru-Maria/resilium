@@ -6,7 +6,6 @@ import {
   Pressable,
   Dimensions,
   Animated,
-  ScrollView,
   Modal,
 } from "react-native";
 import { router } from "expo-router";
@@ -49,8 +48,7 @@ const SLIDES: Slide[] = [
     accent: C.primary,
     eyebrow: "WHAT IS RESILIUM?",
     title: "Know your real\nvulnerabilities",
-    subtitle:
-      "Most people don't know how resilient they actually are — until a crisis hits. Resilium measures it across 6 life dimensions.",
+    subtitle: "Most people don't know how resilient they are — until a crisis hits.",
     bullets: [
       { icon: "dollar-sign", label: "Financial stability" },
       { icon: "heart", label: "Health continuity" },
@@ -66,8 +64,7 @@ const SLIDES: Slide[] = [
     accent: "#60A5FA",
     eyebrow: "TAKE YOUR ASSESSMENT",
     title: "14 steps.\nYour AI report.",
-    subtitle:
-      "Answer honestly — the assessment takes 10–15 minutes. AI scores you across all 6 dimensions and generates a personalised resilience report.",
+    subtitle: "Answer honestly. AI scores you across 6 dimensions and writes your personalised resilience report.",
     bullets: [
       { icon: "clock", label: "~10 min to complete" },
       { icon: "bar-chart-2", label: "Scored across 6 dimensions" },
@@ -81,8 +78,7 @@ const SLIDES: Slide[] = [
     accent: C.success,
     eyebrow: "BUILD YOUR RESILIENCE",
     title: "A living plan\nthat grows with you.",
-    subtitle:
-      "Your report becomes a trackable action plan. Daily check-ins build your streak. Book coaching when you need more than a checklist.",
+    subtitle: "Your report becomes a trackable action plan with daily check-ins and coaching access.",
     bullets: [
       { icon: "check-circle", label: "Trackable action checklist" },
       { icon: "refresh-cw", label: "Daily check-ins & streaks" },
@@ -211,11 +207,7 @@ export function OnboardingCarousel({ onDismiss }: Props) {
 
 function SlideView({ slide }: { slide: Slide }) {
   return (
-    <ScrollView
-      style={s.slideScroll}
-      contentContainerStyle={s.slideContent}
-      showsVerticalScrollIndicator={false}
-    >
+    <View style={s.slideContent}>
       {/* Icon orb */}
       <View
         style={[
@@ -226,7 +218,7 @@ function SlideView({ slide }: { slide: Slide }) {
           },
         ]}
       >
-        <Feather name={slide.icon as any} size={32} color={slide.accent} />
+        <Feather name={slide.icon as any} size={28} color={slide.accent} />
       </View>
 
       {/* Eyebrow */}
@@ -238,9 +230,9 @@ function SlideView({ slide }: { slide: Slide }) {
       <Text style={s.title}>{slide.title}</Text>
 
       {/* Subtitle */}
-      <Text style={s.subtitle}>{slide.subtitle}</Text>
+      <Text style={s.subtitle} numberOfLines={2}>{slide.subtitle}</Text>
 
-      {/* Bullets — 2-per-row grid using explicit widths */}
+      {/* Bullets — 2-per-row grid */}
       <View style={s.bulletsGrid}>
         {slide.bullets.map((b, i) => (
           <View key={i} style={s.bullet}>
@@ -250,7 +242,7 @@ function SlideView({ slide }: { slide: Slide }) {
                 { backgroundColor: slide.accent + "18" },
               ]}
             >
-              <Feather name={b.icon as any} size={13} color={slide.accent} />
+              <Feather name={b.icon as any} size={12} color={slide.accent} />
             </View>
             <Text style={s.bulletText} numberOfLines={1}>
               {b.label}
@@ -258,7 +250,7 @@ function SlideView({ slide }: { slide: Slide }) {
           </View>
         ))}
       </View>
-    </ScrollView>
+    </View>
   );
 }
 
@@ -309,42 +301,40 @@ const s = StyleSheet.create({
   slideWrapper: {
     flex: 1,
   },
-  slideScroll: {
-    flex: 1,
-  },
   slideContent: {
-    paddingTop: 50,
-    paddingHorizontal: 24,
-    paddingBottom: 16,
+    flex: 1,
+    paddingTop: 44,
+    paddingHorizontal: 22,
+    paddingBottom: 10,
   },
   iconOrb: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
+    width: 58,
+    height: 58,
+    borderRadius: 29,
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 18,
+    marginBottom: 12,
   },
   eyebrow: {
     fontSize: 10,
     fontWeight: "700",
     letterSpacing: 1.2,
     textTransform: "uppercase",
-    marginBottom: 9,
+    marginBottom: 6,
   },
   title: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: "700",
     color: C.text,
-    lineHeight: 31,
-    marginBottom: 10,
+    lineHeight: 29,
+    marginBottom: 8,
   },
   subtitle: {
-    fontSize: 13,
+    fontSize: 12,
     color: C.text2,
-    lineHeight: 20,
-    marginBottom: 18,
+    lineHeight: 18,
+    marginBottom: 14,
   },
   bulletsGrid: {
     flexDirection: "row",
@@ -355,25 +345,25 @@ const s = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "rgba(255,255,255,0.04)",
-    borderRadius: 10,
-    paddingHorizontal: 9,
-    paddingVertical: 7,
+    borderRadius: 9,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
     borderWidth: 1,
     borderColor: C.border,
     marginRight: 8,
-    marginBottom: 8,
+    marginBottom: 7,
   },
   bulletIcon: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
-    marginRight: 6,
+    marginRight: 5,
   },
   bulletText: {
     flex: 1,
-    fontSize: 12,
+    fontSize: 11.5,
     color: C.text2,
     fontWeight: "500",
   },
