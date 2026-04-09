@@ -64,7 +64,7 @@ export default function AboutPage() {
         <div className="max-w-5xl mx-auto px-6 py-16">
           <div className="text-center mb-12">
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">The Methodology</p>
-            <h2 className="text-3xl font-display font-bold">Two pillars. Seven dimensions.</h2>
+            <h2 className="text-3xl font-display font-bold">Two pillars. Six dimensions.</h2>
             <p className="text-muted-foreground mt-3 max-w-2xl mx-auto">
               Strong logistics with fragile psychology leads to rigidity, not resilience. Strong psychology with precarious logistics leads to courage without capacity. Both matter — and both are scored.
             </p>
