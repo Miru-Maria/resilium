@@ -8,6 +8,7 @@ import {
   Platform,
 } from "react-native";
 import Svg, { Circle } from "react-native-svg";
+import { LinearGradient } from "expo-linear-gradient";
 import { NeuralNetSVG } from "./NeuralNetSVG";
 
 const ND = Platform.OS !== "web";
@@ -173,7 +174,7 @@ export function AppLoadingScreen({ onDone }: Props) {
             </Svg>
           </Animated.View>
 
-          {/* Logo — no border, just the image */}
+          {/* Logo — with soft vignette at all four edges */}
           <Animated.View
             style={[s.logoWrap, { opacity: logoOpacity, transform: [{ scale: logoScale }] }]}
           >
@@ -182,6 +183,11 @@ export function AppLoadingScreen({ onDone }: Props) {
               style={s.logoImage}
               resizeMode="contain"
             />
+            {/* Vignette overlays — fade the rectangular edges into the dark background */}
+            <LinearGradient colors={[BG, "transparent"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={s.vigLeft}   pointerEvents="none" />
+            <LinearGradient colors={["transparent", BG]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={s.vigRight}  pointerEvents="none" />
+            <LinearGradient colors={[BG, "transparent"]} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} style={s.vigTop}    pointerEvents="none" />
+            <LinearGradient colors={["transparent", BG]} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} style={s.vigBottom} pointerEvents="none" />
           </Animated.View>
         </View>
 
@@ -260,7 +266,6 @@ const s = StyleSheet.create({
     top: 0,
     left: 0,
   },
-  // Logo — no border, no background card
   logoWrap: {
     alignItems: "center",
     justifyContent: "center",
@@ -268,6 +273,26 @@ const s = StyleSheet.create({
   logoImage: {
     width: 108,
     height: 86,
+  },
+  vigLeft: {
+    position: "absolute",
+    top: 0, bottom: 0, left: 0,
+    width: 28,
+  },
+  vigRight: {
+    position: "absolute",
+    top: 0, bottom: 0, right: 0,
+    width: 28,
+  },
+  vigTop: {
+    position: "absolute",
+    top: 0, left: 0, right: 0,
+    height: 22,
+  },
+  vigBottom: {
+    position: "absolute",
+    bottom: 0, left: 0, right: 0,
+    height: 22,
   },
   wordmark: {
     fontSize: 26,
