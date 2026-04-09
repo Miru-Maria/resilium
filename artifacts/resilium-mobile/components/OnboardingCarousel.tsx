@@ -1,13 +1,11 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
   View,
   Text,
   StyleSheet,
-  FlatList,
   Pressable,
   Dimensions,
   Animated,
-  Platform,
 } from "react-native";
 import { router } from "expo-router";
 import { Feather } from "@expo/vector-icons";
@@ -23,8 +21,6 @@ const C = {
   surface: "#141B30",
   border: "#252E4A",
   primary: "#E08040",
-  primaryDim: "rgba(224,128,64,0.15)",
-  primaryBorder: "rgba(224,128,64,0.3)",
   text: "#F0EBE3",
   text2: "#A09880",
   text3: "#6A6070",
@@ -93,20 +89,34 @@ interface Props {
 }
 
 export function OnboardingCarousel({ onDismiss }: Props) {
-  const flatRef = useRef<FlatList>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const scrollX = useRef(new Animated.Value(0)).current;
+  const fadeAnim = useRef(new Animated.Value(1)).current;
+  const slideAnim = useRef(new Animated.Value(0)).current;
 
   const dismiss = async () => {
     await AsyncStorage.setItem(ONBOARDING_KEY, "1");
     onDismiss();
   };
 
+  const animateTo = (nextIndex: number) => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, { toValue: 0, duration: 160, useNativeDriver: true }),
+      Animated.timing(slideAnim, { toValue: -20, duration: 160, useNativeDriver: true }),
+    ]).start(() => {
+      setCurrentIndex(nextIndex);
+      slideAnim.setValue(20);
+      Animated.parallel([
+        Animated.timing(fadeAnim, { toValue: 1, duration: 200, useNativeDriver: true }),
+        Animated.timing(slideAnim, { toValue: 0, duration: 200, useNativeDriver: true }),
+      ]).start();
+    });
+  };
+
   const handleSkip = () => dismiss();
 
   const handleNext = () => {
     if (currentIndex < SLIDES.length - 1) {
-      flatRef.current?.scrollToIndex({ index: currentIndex + 1, animated: true });
+      animateTo(currentIndex + 1);
     }
   };
 
@@ -116,6 +126,7 @@ export function OnboardingCarousel({ onDismiss }: Props) {
   };
 
   const isLast = currentIndex === SLIDES.length - 1;
+  const slide = SLIDES[currentIndex];
 
   return (
     <View style={styles.overlay}>
@@ -125,44 +136,55 @@ export function OnboardingCarousel({ onDismiss }: Props) {
           <Text style={styles.skipText}>Skip</Text>
         </Pressable>
 
-        {/* Slides */}
-        <Animated.FlatList
-          ref={flatRef as any}
-          data={SLIDES}
-          keyExtractor={s => s.key}
-          horizontal
-          pagingEnabled
-          showsHorizontalScrollIndicator={false}
-          onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], { useNativeDriver: false })}
-          onMomentumScrollEnd={e => {
-            const idx = Math.round(e.nativeEvent.contentOffset.x / SCREEN_W);
-            setCurrentIndex(idx);
-          }}
-          renderItem={({ item }) => <SlideView slide={item} />}
-        />
+        {/* Animated slide content */}
+        <Animated.View
+          style={[
+            styles.slideWrapper,
+            { opacity: fadeAnim, transform: [{ translateX: slideAnim }] },
+          ]}
+        >
+          <SlideView slide={slide} />
+        </Animated.View>
 
         {/* Dots + CTA */}
         <View style={styles.bottom}>
           <View style={styles.dots}>
-            {SLIDES.map((_, i) => {
-              const inputRange = [(i - 1) * SCREEN_W, i * SCREEN_W, (i + 1) * SCREEN_W];
-              const dotWidth = scrollX.interpolate({ inputRange, outputRange: [8, 22, 8], extrapolate: "clamp" });
-              const dotOpacity = scrollX.interpolate({ inputRange, outputRange: [0.35, 1, 0.35], extrapolate: "clamp" });
-              return (
-                <Animated.View key={i} style={[styles.dot, { width: dotWidth, opacity: dotOpacity, backgroundColor: SLIDES[currentIndex]?.accent ?? C.primary }]} />
-              );
-            })}
+            {SLIDES.map((_, i) => (
+              <Pressable key={i} onPress={() => i !== currentIndex && animateTo(i)}>
+                <View
+                  style={[
+                    styles.dot,
+                    {
+                      width: i === currentIndex ? 22 : 8,
+                      backgroundColor: i === currentIndex ? (slide?.accent ?? C.primary) : C.border,
+                      opacity: i === currentIndex ? 1 : 0.5,
+                    },
+                  ]}
+                />
+              </Pressable>
+            ))}
           </View>
 
           {isLast ? (
-            <Pressable style={({ pressed }) => [styles.ctaBtn, pressed && { opacity: 0.85 }]} onPress={handleStart}>
-              <LinearGradient colors={["#E08040", "#C05820"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.ctaGradient}>
+            <Pressable
+              style={({ pressed }) => [styles.ctaBtn, pressed && { opacity: 0.85 }]}
+              onPress={handleStart}
+            >
+              <LinearGradient
+                colors={["#E08040", "#C05820"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.ctaGradient}
+              >
                 <Text style={styles.ctaText}>Start My Assessment</Text>
                 <Feather name="arrow-right" size={18} color="#fff" />
               </LinearGradient>
             </Pressable>
           ) : (
-            <Pressable style={({ pressed }) => [styles.nextBtn, pressed && { opacity: 0.75 }]} onPress={handleNext}>
+            <Pressable
+              style={({ pressed }) => [styles.nextBtn, pressed && { opacity: 0.75 }]}
+              onPress={handleNext}
+            >
               <Text style={styles.nextText}>Next</Text>
               <Feather name="chevron-right" size={18} color={C.text2} />
             </Pressable>
@@ -175,7 +197,7 @@ export function OnboardingCarousel({ onDismiss }: Props) {
 
 function SlideView({ slide }: { slide: Slide }) {
   return (
-    <View style={[styles.slide, { width: SCREEN_W - 48 }]}>
+    <View style={styles.slide}>
       {/* Icon orb */}
       <View style={[styles.iconOrb, { backgroundColor: slide.accent + "22", borderColor: slide.accent + "44" }]}>
         <Feather name={slide.icon} size={32} color={slide.accent} />
@@ -213,7 +235,6 @@ export async function shouldShowOnboarding(): Promise<boolean> {
 const styles = StyleSheet.create({
   overlay: {
     position: "absolute",
-    inset: 0,
     top: 0, left: 0, right: 0, bottom: 0,
     backgroundColor: "rgba(0,0,0,0.72)",
     zIndex: 999,
@@ -244,6 +265,9 @@ const styles = StyleSheet.create({
     color: C.text2,
     fontSize: 13,
     fontWeight: "500",
+  },
+  slideWrapper: {
+    flex: 1,
   },
   slide: {
     paddingTop: 52,
