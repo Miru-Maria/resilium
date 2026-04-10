@@ -886,6 +886,9 @@ export default function AssessmentPage() {
 
       const { jobId } = await submitRes.json();
 
+      // Persist the jobId so the results page can recover if old code navigates early
+      if (jobId) sessionStorage.setItem("resilium_pending_job_v1", jobId);
+
       // ── Poll until the report is ready ────────────────────────────────────
       const POLL_INTERVAL_MS = 3000;
       const POLL_TIMEOUT_MS  = 5 * 60 * 1000; // 5 minutes absolute ceiling
@@ -904,6 +907,7 @@ export default function AssessmentPage() {
         const job = await pollRes.json();
 
         if (job.status === "complete") {
+          sessionStorage.removeItem("resilium_pending_job_v1");
           if (!isAuthenticated) {
             const prev = parseInt(localStorage.getItem(ANON_COUNT_KEY) ?? "0", 10);
             localStorage.setItem(ANON_COUNT_KEY, String(prev + 1));
@@ -915,6 +919,7 @@ export default function AssessmentPage() {
         }
 
         if (job.status === "failed") {
+          sessionStorage.removeItem("resilium_pending_job_v1");
           throw new Error(job.error ?? "Report generation failed. Please try again.");
         }
 

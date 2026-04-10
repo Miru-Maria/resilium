@@ -168,7 +168,9 @@ function getMilestone(percent: number) {
 
 export default function ResultsPage() {
   const [, params] = useRoute("/results/:reportId");
-  const reportId = params?.reportId || "";
+  const rawReportId = params?.reportId || "";
+  // If the old code navigated to /results/undefined, treat as missing
+  const reportId = rawReportId === "undefined" ? "" : rawReportId;
   const { toast } = useToast();
   const { user } = useUser();
   const { isSignedIn } = useAuth();
@@ -179,6 +181,14 @@ export default function ResultsPage() {
   const queryClient = useQueryClient();
   const [shareScorecardOpen, setShareScorecardOpen] = useState(false);
 
+  // ── Job recovery polling ──────────────────────────────────────────────────
+  // If we land here with an invalid/missing reportId (e.g. old JS bundle got a
+  // 202 and navigated to /results/undefined), check sessionStorage for a
+  // pending job and redirect when it completes.
+  const [pendingJobId, setPendingJobId] = useState<string | null>(null);
+  const [pendingJobError, setPendingJobError] = useState<string | null>(null);
+
+  // Queries — declared before the effects that depend on them
   const { data: report, isLoading, error } = useGetReport(reportId, {
     query: {
       enabled: !!reportId,
@@ -198,6 +208,54 @@ export default function ResultsPage() {
   const { data: snapshotsData } = useGetSnapshots(reportId, {
     query: { enabled: !!reportId }
   });
+
+  useEffect(() => {
+    // Enter recovery mode when the URL has no valid reportId
+    const jobId = sessionStorage.getItem("resilium_pending_job_v1");
+    if (!jobId) return;
+    if (reportId && rawReportId !== "undefined") return;
+    setPendingJobId(jobId);
+  }, [reportId, rawReportId]);
+
+  useEffect(() => {
+    // Also enter recovery mode when there's a fetch error and we have a pending job
+    // (handles timing edge case: valid UUID in URL but report not in DB yet)
+    if (!error) return;
+    const jobId = sessionStorage.getItem("resilium_pending_job_v1");
+    if (!jobId) return;
+    setPendingJobId(jobId);
+  }, [error]);
+
+  // Polling effect for recovery
+  useEffect(() => {
+    if (!pendingJobId) return;
+    let cancelled = false;
+
+    const poll = async () => {
+      while (!cancelled) {
+        await new Promise(r => setTimeout(r, 3000));
+        if (cancelled) break;
+        try {
+          const res = await fetch(`${BASE}/api/resilience/jobs/${pendingJobId}`, { credentials: "include" });
+          if (!res.ok) continue;
+          const job = await res.json();
+          if (job.status === "complete" && job.reportId) {
+            sessionStorage.removeItem("resilium_pending_job_v1");
+            window.location.replace(`${import.meta.env.BASE_URL}results/${job.reportId}`);
+            return;
+          }
+          if (job.status === "failed") {
+            sessionStorage.removeItem("resilium_pending_job_v1");
+            setPendingJobError(job.error ?? "Report generation failed. Please try again.");
+            return;
+          }
+        } catch { /* keep polling */ }
+      }
+    };
+
+    poll();
+    return () => { cancelled = true; };
+  }, [pendingJobId]);
 
   const { mutateAsync: updateItem } = useUpdateChecklistItem();
 
@@ -295,6 +353,31 @@ export default function ResultsPage() {
   }
 
   if (error || !report) {
+    // Recovery mode: a pending job was found — the AI is still generating the report.
+    if (pendingJobId && !pendingJobError) {
+      return (
+        <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
+          <Loader2 className="w-14 h-14 text-primary animate-spin mb-6" />
+          <h2 className="text-2xl font-display font-bold mb-2">Your Report Is Being Generated</h2>
+          <p className="text-muted-foreground max-w-sm mb-2">
+            The AI is still analyzing your responses. This page will automatically redirect you when it's ready.
+          </p>
+          <p className="text-xs text-muted-foreground/50">Usually 1–2 minutes from when you submitted.</p>
+        </div>
+      );
+    }
+    if (pendingJobError) {
+      return (
+        <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
+          <AlertTriangle className="w-16 h-16 text-destructive mb-6" />
+          <h2 className="text-2xl font-display font-bold mb-2">Generation Failed</h2>
+          <p className="text-muted-foreground max-w-md mb-8">{pendingJobError}</p>
+          <Link href="/assess">
+            <Button size="lg" className="rounded-full">Try Again</Button>
+          </Link>
+        </div>
+      );
+    }
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
         <AlertTriangle className="w-16 h-16 text-destructive mb-6" />
