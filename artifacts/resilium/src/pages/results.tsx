@@ -183,6 +183,20 @@ import {
 import { cn } from "@/lib/utils";
 import type { ResilienceScore, MentalResilienceProfile, ChecklistItem } from "@workspace/api-client-react/src/generated/api.schemas";
 
+/** Safely converts any AI-returned value to a string before rendering as a React child. */
+function toStr(val: unknown): string {
+  if (typeof val === "string") return val;
+  if (typeof val === "number" || typeof val === "boolean") return String(val);
+  if (val === null || val === undefined) return "";
+  if (typeof val === "object") {
+    const o = val as Record<string, unknown>;
+    const probe = o["text"] ?? o["value"] ?? o["summary"] ?? o["description"] ?? o["content"] ?? o["label"] ?? o["name"];
+    if (probe !== undefined) return toStr(probe);
+    try { return JSON.stringify(val); } catch { return "[object]"; }
+  }
+  return String(val);
+}
+
 const AREA_LABELS: Record<string, string> = {
   financial: "Financial",
   health: "Health",
@@ -661,7 +675,7 @@ function ResultsPageInner() {
             <div className="w-full sm:w-1/2 space-y-4">
               <h3 className="font-display font-bold text-2xl">Risk Profile</h3>
               <p className="text-muted-foreground leading-relaxed">
-                {report.riskProfileSummary}
+                {toStr(report.riskProfileSummary)}
               </p>
               {previousScore && (
                 <div className="text-xs text-muted-foreground border-t pt-3 mt-3">
@@ -696,8 +710,8 @@ function ResultsPageInner() {
                       {(PRIORITY_CONFIG[nextIncompleteItem.item.priority as keyof typeof PRIORITY_CONFIG] ?? PRIORITY_CONFIG.medium).label}
                     </span>
                   </div>
-                  <p className="font-bold text-base leading-snug">{nextIncompleteItem.item.title}</p>
-                  <p className="text-muted-foreground text-sm mt-0.5 line-clamp-1">{nextIncompleteItem.item.description}</p>
+                  <p className="font-bold text-base leading-snug">{toStr(nextIncompleteItem.item.title)}</p>
+                  <p className="text-muted-foreground text-sm mt-0.5 line-clamp-1">{toStr(nextIncompleteItem.item.description)}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2 flex-shrink-0 pl-9 sm:pl-0">
@@ -788,14 +802,14 @@ function ResultsPageInner() {
                   <div className="w-2 h-2 rounded-full bg-emerald-500 mt-2 flex-shrink-0" />
                   <p className="text-sm leading-relaxed text-foreground">
                     <span className="font-semibold">You're built for {mrStrength.label.toLowerCase()}.</span>{" "}
-                    <span className="text-muted-foreground">When it comes to {(mrStrength as any).insight ?? "handling pressure"}, you're already ahead of most people — this is a real asset in a crisis.</span>
+                    <span className="text-muted-foreground">When it comes to {toStr((mrStrength as any).insight ?? "handling pressure")}, you're already ahead of most people — this is a real asset in a crisis.</span>
                   </p>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-2 h-2 rounded-full bg-amber-400 mt-2 flex-shrink-0" />
                   <p className="text-sm leading-relaxed text-foreground">
                     <span className="font-semibold">The gap to build: {mrGap.label.toLowerCase()}.</span>{" "}
-                    <span className="text-muted-foreground">In a sustained disruption, {(mrGap as any).insight ?? "this area"} becomes the pressure point — not a weakness, but the next thing to strengthen.</span>
+                    <span className="text-muted-foreground">In a sustained disruption, {toStr((mrGap as any).insight ?? "this area")} becomes the pressure point — not a weakness, but the next thing to strengthen.</span>
                   </p>
                 </div>
               </div>
@@ -859,7 +873,7 @@ function ResultsPageInner() {
                 <div className="w-6 h-6 rounded-full bg-destructive/20 flex items-center justify-center flex-shrink-0 mt-0.5">
                   <span className="text-xs font-bold text-destructive">{idx + 1}</span>
                 </div>
-                <p className="text-sm font-medium text-foreground leading-snug">{typeof vuln === "string" ? vuln : typeof (vuln as any)?.text === "string" ? (vuln as any).text : JSON.stringify(vuln)}</p>
+                <p className="text-sm font-medium text-foreground leading-snug">{toStr(vuln)}</p>
               </div>
             ))}
           </div>
@@ -987,9 +1001,9 @@ function ResultsPageInner() {
                                 </span>
                               </div>
                               <h4 className={cn("font-bold text-base", completed && "line-through text-muted-foreground")}>
-                                {item.title}
+                                {toStr(item.title)}
                               </h4>
-                              <p className="text-muted-foreground text-sm mt-0.5">{item.description}</p>
+                              <p className="text-muted-foreground text-sm mt-0.5">{toStr(item.description)}</p>
                             </div>
                           </div>
 
@@ -1269,32 +1283,32 @@ function ResultsPageInner() {
                 <AccordionItem key={idx} value={`item-${idx}`} className="bg-card border border-border rounded-2xl overflow-hidden px-2 shadow-sm">
                   <AccordionTrigger className="hover:no-underline px-4 py-5">
                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-left w-full pr-4">
-                      <span className="font-bold text-lg">{scenario.scenario}</span>
+                      <span className="font-bold text-lg">{toStr(scenario.scenario)}</span>
                       <span className={`text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full w-max ${
-                        scenario.impact === 'severe' ? 'bg-destructive/10 text-destructive' :
-                        scenario.impact === 'high' ? 'bg-amber-500/10 text-amber-700' :
+                        toStr(scenario.impact) === 'severe' ? 'bg-destructive/10 text-destructive' :
+                        toStr(scenario.impact) === 'high' ? 'bg-amber-500/10 text-amber-700' :
                         'bg-emerald-500/10 text-emerald-700'
                       }`}>
-                        {scenario.impact} Impact
+                        {toStr(scenario.impact)} Impact
                       </span>
                     </div>
                   </AccordionTrigger>
                   <AccordionContent className="px-4 pb-5 pt-0">
                     <div className="pt-4 border-t border-border space-y-4">
-                      <p className="text-muted-foreground leading-relaxed">{scenario.description}</p>
+                      <p className="text-muted-foreground leading-relaxed">{toStr(scenario.description)}</p>
                       
                       <div className="bg-muted/30 p-4 rounded-xl">
                         <h5 className="font-bold text-sm mb-2 uppercase tracking-wide">Immediate Survival Steps</h5>
                         <ul className="list-disc pl-5 space-y-1 text-sm text-foreground">
                           {(scenario.immediateSteps ?? []).map((step, i) => (
-                            <li key={i}>{typeof step === "string" ? step : typeof (step as any)?.text === "string" ? (step as any).text : JSON.stringify(step)}</li>
+                            <li key={i}>{toStr(step)}</li>
                           ))}
                         </ul>
                       </div>
                       
                       <div className="flex items-center gap-2 text-sm font-medium">
                         <span className="text-muted-foreground">Estimated recovery time:</span>
-                        <span className="text-foreground">{scenario.timeToRecover}</span>
+                        <span className="text-foreground">{toStr(scenario.timeToRecover)}</span>
                       </div>
                     </div>
                   </AccordionContent>
@@ -1332,8 +1346,8 @@ function ResultsPageInner() {
                       <CheckCircle className="w-5 h-5 text-secondary" />
                     </div>
                     <div>
-                      <p className="font-semibold text-sm leading-snug mb-1">{habit.habit}</p>
-                      <span className="text-[10px] uppercase tracking-widest text-primary-foreground/60">{habit.frequency}</span>
+                      <p className="font-semibold text-sm leading-snug mb-1">{toStr(habit.habit)}</p>
+                      <span className="text-[10px] uppercase tracking-widest text-primary-foreground/60">{toStr(habit.frequency)}</span>
                     </div>
                   </div>
                 ))}
@@ -1396,18 +1410,18 @@ function ResultsPageInner() {
                           <Icon className="w-5 h-5 text-primary" />
                         </div>
                         <div className="flex flex-col items-end gap-1">
-                          <span className={`text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full border ${priorityConfig[r.priority] ?? priorityConfig.low}`}>
-                            {r.priority}
+                          <span className={`text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full border ${priorityConfig[toStr(r.priority)] ?? priorityConfig.low}`}>
+                            {toStr(r.priority)}
                           </span>
                           <span className="text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border">
-                            {r.badge}
+                            {toStr(r.badge)}
                           </span>
                         </div>
                       </div>
                       <div className="flex-1">
-                        <p className="text-[10px] uppercase tracking-wider text-primary font-semibold mb-1">{r.category}</p>
-                        <h3 className="font-bold text-sm mb-1.5 group-hover:text-primary transition-colors">{r.title}</h3>
-                        <p className="text-xs text-muted-foreground leading-relaxed">{r.description}</p>
+                        <p className="text-[10px] uppercase tracking-wider text-primary font-semibold mb-1">{toStr(r.category)}</p>
+                        <h3 className="font-bold text-sm mb-1.5 group-hover:text-primary transition-colors">{toStr(r.title)}</h3>
+                        <p className="text-xs text-muted-foreground leading-relaxed">{toStr(r.description)}</p>
                       </div>
                       <div className="mt-3 flex items-center gap-1 text-xs text-primary font-medium">
                         Visit <ExternalLink className="w-3 h-3 ml-1" />
