@@ -56,7 +56,7 @@ export const ScorecardImage = forwardRef<HTMLDivElement, ScorecardImageProps>(
         style={{
           width: 1080,
           height: 1080,
-          background: "linear-gradient(135deg, #0f1c14 0%, #131f18 60%, #1a2920 100%)",
+          background: "linear-gradient(135deg, #0c1220 0%, #111827 60%, #1a2035 100%)",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -136,7 +136,7 @@ export const ScorecardImage = forwardRef<HTMLDivElement, ScorecardImageProps>(
               fontWeight: 500,
             }}
           >
-            resilium.app
+            resilium-platform.com
           </span>
         </div>
 
@@ -370,7 +370,7 @@ export const ScorecardImage = forwardRef<HTMLDivElement, ScorecardImageProps>(
               fontWeight: 500,
             }}
           >
-            Discover your resilience score at
+            Know your readiness at
           </span>
           <span
             style={{
@@ -379,7 +379,7 @@ export const ScorecardImage = forwardRef<HTMLDivElement, ScorecardImageProps>(
               fontWeight: 700,
             }}
           >
-            resilium.app
+            resilium-platform.com
           </span>
         </div>
       </div>

@@ -389,6 +389,48 @@ export default function PlanPage() {
     }
   }, [reportId, expandedSteps, loadingSteps]);
 
+  const handleMarkdownExport = useCallback(() => {
+    if (!report) return;
+    const lines: string[] = [];
+    lines.push("# Resilium — Your Strategic Action Plan");
+    lines.push(`> Generated at resilium-platform.com`);
+    lines.push("");
+    if ((report as any).primaryGoal) {
+      lines.push(`**Goal:** ${GOAL_LABELS[(report as any).primaryGoal as string] ?? (report as any).primaryGoal}`);
+      lines.push("");
+    }
+    const actionPlanData = (report as any).actionPlan as {
+      shortTerm?: Array<{ title: string; description: string; priority: string; category: string }>;
+      midTerm?: Array<{ title: string; description: string; priority: string; category: string }>;
+      longTerm?: Array<{ title: string; description: string; priority: string; category: string }>;
+    } | undefined;
+    const horizonSections: Array<{ label: string; items: Array<{ title: string; description: string; priority: string; category: string }> | undefined }> = [
+      { label: "## 0–30 Days: Immediate Actions", items: actionPlanData?.shortTerm },
+      { label: "## 3–6 Months: High-Priority Habits", items: actionPlanData?.midTerm },
+      { label: "## Long-term: Durable Foundation", items: actionPlanData?.longTerm },
+    ];
+    horizonSections.forEach(({ label, items }) => {
+      if (!items?.length) return;
+      lines.push(label);
+      lines.push("");
+      items.forEach((item, i) => {
+        lines.push(`### ${i + 1}. ${item.title}`);
+        lines.push(`**Category:** ${item.category} | **Priority:** ${item.priority}`);
+        lines.push("");
+        lines.push(item.description);
+        lines.push("");
+      });
+    });
+    const blob = new Blob([lines.join("\n")], { type: "text/markdown;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `resilium-action-plan.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: "Plan exported", description: "Your action plan has been saved as a Markdown file." });
+  }, [report, toast]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center">
@@ -465,7 +507,7 @@ export default function PlanPage() {
       sublabel: "Immediate actions — critical gaps to close now",
       icon: Clock,
       color: "text-destructive",
-      bgColor: "bg-destructive/5 border-destructive/20",
+      bgColor: "bg-destructive/10 border-destructive/30",
       narrativeItems: actionPlan?.shortTerm ?? [],
       items: itemsByHorizon.short,
     },
@@ -475,7 +517,7 @@ export default function PlanPage() {
       sublabel: "High-priority habits and infrastructure to build",
       icon: TrendingUp,
       color: "text-amber-600",
-      bgColor: "bg-amber-500/5 border-amber-500/20",
+      bgColor: "bg-amber-500/10 border-amber-500/30",
       narrativeItems: actionPlan?.midTerm ?? [],
       items: itemsByHorizon.mid,
     },
@@ -485,7 +527,7 @@ export default function PlanPage() {
       sublabel: "Sustained resilience — your durable foundation",
       icon: Star,
       color: "text-primary",
-      bgColor: "bg-primary/5 border-primary/20",
+      bgColor: "bg-primary/10 border-primary/30",
       narrativeItems: actionPlan?.longTerm ?? [],
       items: itemsByHorizon.long,
     },
@@ -518,6 +560,12 @@ export default function PlanPage() {
       <header className="w-full bg-card border-b border-border sticky top-14 z-50">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-end gap-4">
           <div className="flex items-center gap-2 text-sm">
+            <Link href="/profile?tab=overview">
+              <Button variant="ghost" size="sm" className="rounded-full text-muted-foreground hover:text-foreground gap-1.5 print:hidden">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+                Overview
+              </Button>
+            </Link>
             <Button
               variant="ghost"
               size="sm"
@@ -532,11 +580,11 @@ export default function PlanPage() {
               variant="ghost"
               size="sm"
               className="rounded-full text-muted-foreground hover:text-foreground gap-1.5 print:hidden"
-              onClick={() => window.print()}
-              title="Save as PDF"
+              onClick={handleMarkdownExport}
+              title="Export as Markdown"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-              Save PDF
+              Markdown
             </Button>
             <Link href={`/results/${reportId}`}>
               <Button variant="ghost" size="sm" className="rounded-full text-muted-foreground hover:text-foreground gap-1.5 print:hidden">
@@ -572,14 +620,13 @@ export default function PlanPage() {
         <section>
           <div className="flex flex-wrap items-start gap-4 mb-6">
             <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2">Strategic Action Plan</p>
               <h1 className="font-display font-bold text-3xl md:text-4xl text-foreground">
                 {goalLabel ? (
                   <span className="flex items-center gap-2">
                     <span className="text-2xl">{goalIcon}</span>
                     {goalLabel}
                   </span>
-                ) : "Your Resilience Plan"}
+                ) : "Your Strategic Action Plan"}
               </h1>
               {successVision && (
                 <p className="text-muted-foreground mt-2 text-sm max-w-xl italic">
@@ -622,7 +669,7 @@ export default function PlanPage() {
                   return (
                     <div key={m.percent} className={cn(
                       "rounded-2xl p-3 text-center border transition-all",
-                      achieved ? "border-emerald-200 bg-emerald-50/50 dark:bg-emerald-900/10 dark:border-emerald-900/30" : "border-border bg-muted/20 opacity-40"
+                      achieved ? "border-emerald-200 bg-emerald-50/50 dark:bg-emerald-900/10 dark:border-emerald-900/30" : "border-border bg-muted/20"
                     )}>
                       <div className="text-xl mb-1">{m.icon}</div>
                       <p className="text-[10px] font-bold">{m.percent}%</p>
@@ -975,7 +1022,7 @@ export default function PlanPage() {
         )}
 
         {/* COACHING CALLOUT — bottom of page, not in every item */}
-        <section className="rounded-3xl border border-amber-500/20 bg-gradient-to-br from-amber-500/5 to-orange-500/5 p-6 md:p-8">
+        <section className="rounded-3xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 to-orange-500/10 p-6 md:p-8">
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center flex-shrink-0">
               <Heart className="w-6 h-6 text-amber-600" />
@@ -994,11 +1041,6 @@ export default function PlanPage() {
                     <Heart className="w-4 h-4" /> Learn About Coaching
                   </Button>
                 </Link>
-                <a href="https://resilium-platform.com/coaching" target="_blank" rel="noopener noreferrer">
-                  <Button variant="outline" className="rounded-full gap-2 border-amber-500/30 text-amber-700 hover:bg-amber-500/5">
-                    <ExternalLink className="w-4 h-4" /> Book a Free Call
-                  </Button>
-                </a>
               </div>
             </div>
           </div>
