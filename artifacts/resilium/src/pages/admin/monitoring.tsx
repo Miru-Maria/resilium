@@ -87,7 +87,7 @@ const PROJECTS = [
     id: "4511187296256080",
     icon: Smartphone,
     color: "#60A5FA",
-    description: "Expo React Native · iOS & Android",
+    description: "Expo React Native · iOS",
     features: ["Issues", "Performance", "Alerts"],
   },
   {
@@ -298,7 +298,7 @@ export default function MonitoringPage() {
                 items: [
                   "Unhandled JS exceptions",
                   "JS performance traces (10% sample)",
-                  "Platform: iOS / Android / Web",
+                  "Platform: iOS / Web",
                   "Production-only (dev suppressed)",
                 ],
               },

@@ -9,7 +9,7 @@ const router = Router();
 
 const bodySchema = z.object({
   token: z.string().min(1).max(1000),
-  platform: z.enum(["ios", "android", "web"]).default("ios"),
+  platform: z.enum(["ios", "web"]).default("ios"),
 });
 
 router.post("/push-tokens", async (req, res) => {
