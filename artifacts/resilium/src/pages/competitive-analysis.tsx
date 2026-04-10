@@ -16,7 +16,7 @@ const POSITIONING = {
   primaryAlternative:
     "one-dimensional psychological tests (score only) or reactive emergency apps (alerts only)",
   keyDifferentiator:
-    "addresses all 6 dimensions of readiness — financial, health, skills, mobility, resources, and psychological — and stays with you as a living document you actually work",
+    "addresses all 6 dimensions of readiness — financial, health, skills, mobility, resources, and psychological — stays with you as a living document you actually work, and ships a dedicated iOS companion app for daily plan fulfillment (exclusive to Pro) that no competitor offers",
 };
 
 const AUDIENCE_STATS = [
@@ -137,7 +137,7 @@ const WHITE_SPACE = [
 const KANO = [
   { category: "Basic (table stakes — must have)", items: "Free tier, some scoring mechanism, psychological dimension" },
   { category: "Performance (more = better)", items: "More assessed dimensions, better AI recommendations, more scenario types, deeper action steps" },
-  { category: "Delighter (unexpected, differentiating)", items: "Goal personalization, 'living document' plan, coaching referral, mobile tracking, financial dimension, privacy-first (no personal data)" },
+  { category: "Delighter (unexpected, differentiating)", items: "Goal personalization, 'living document' plan, coaching referral, iOS companion app for daily plan fulfillment (Pro-only), financial dimension, privacy-first (no personal data)" },
 ];
 
 const ACTION_PLAN = [

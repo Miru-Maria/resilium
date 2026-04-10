@@ -89,7 +89,7 @@ export default function Slide6Monetization() {
               className="text-[1.3vw] font-light"
               style={{ color: "#8A7A6A", fontFamily: "Inter, sans-serif" }}
             >
-              Unlimited reassessments, full progress history, crisis scenario simulations, and draft resilience resume — as your life evolves.
+              Unlimited reassessments, full progress history, crisis scenario simulations, and draft resilience resume. Includes the iOS companion app for daily plan fulfillment — as your life evolves.
             </div>
           </div>
 
