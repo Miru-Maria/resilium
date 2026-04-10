@@ -16,7 +16,7 @@ const POSITIONING = {
   primaryAlternative:
     "one-dimensional psychological tests (score only) or reactive emergency apps (alerts only)",
   keyDifferentiator:
-    "addresses all 6 dimensions of readiness — financial, health, skills, mobility, resources, and psychological — stays with you as a living document you actually work, and ships a dedicated iOS companion app for daily plan fulfillment (exclusive to Pro) that no competitor offers",
+    "addresses all 6 dimensions of readiness — financial, health, skills, mobility, resources, and psychological — stays with you as a living document you actually work; its scoring model is grounded in peer-reviewed science (CD-RISC, Antonovsky Salutogenesis, FEMA preparedness framework); and it ships a dedicated iOS companion app for daily plan fulfillment (exclusive to Pro) that no competitor offers",
 };
 
 const AUDIENCE_STATS = [
@@ -128,6 +128,11 @@ const WHITE_SPACE = [
       'ReadyScore owns the prepper/survivalist audience (\"barter goods, metals, 15-minute evacuation\"). The much larger mainstream audience — anxious professionals who want financial stability and smart contingency plans — is entirely unaddressed. Resilium\'s language (\"Strategic Action Plan,\" \"financial runway,\" \"living document\") occupies this space by default.',
   },
   {
+    gap: "Academically-anchored methodology — publicly documented",
+    detail:
+      "Every competitor in this space presents their assessment methodology as a black box or doesn't address it at all. Resilium is the only consumer tool that publicly documents its scientific foundations on the About page: Connor-Davidson Resilience Scale (2003), Antonovsky's Salutogenesis theory (1987), Ungar's Social Ecology of Resilience (2011), and the FEMA individual preparedness framework. This creates institutional-grade credibility that generic wellness apps can't replicate, and positions Resilium as the authoritative consumer answer to what has previously been a clinician-only research area.",
+  },
+  {
     gap: "Assessment-to-coaching referral pipeline",
     detail:
       "No competitor builds a direct consumer pathway from a resilience assessment to human coaching. BetterUp does this, but only through employers. Resilium's Pro tier bridges assessment → personalized plan → Phoenix Insight Coaching — a monetizable funnel no one else in this space has built.",
@@ -137,7 +142,7 @@ const WHITE_SPACE = [
 const KANO = [
   { category: "Basic (table stakes — must have)", items: "Free tier, some scoring mechanism, psychological dimension" },
   { category: "Performance (more = better)", items: "More assessed dimensions, better AI recommendations, more scenario types, deeper action steps" },
-  { category: "Delighter (unexpected, differentiating)", items: "Goal personalization, 'living document' plan, coaching referral, iOS companion app for daily plan fulfillment (Pro-only), financial dimension, privacy-first (no personal data)" },
+  { category: "Delighter (unexpected, differentiating)", items: "Goal personalization, 'living document' plan, coaching referral, iOS companion app for daily plan fulfillment (Pro-only), financial dimension, privacy-first (no personal data), peer-reviewed scientific basis publicly documented (CD-RISC, Antonovsky, FEMA framework), chronic condition-aware AI recommendations" },
 ];
 
 const ACTION_PLAN = [
@@ -171,6 +176,11 @@ const SOURCES = [
   { n: 7, text: "Northwestern Mutual 2024 Planning & Progress Study — financial anxiety statistics" },
   { n: 8, text: "FEMA and American Red Cross app features — ready.gov, redcross.org (web search, April 2026)" },
   { n: 9, text: "Funded preparedness/emergency startups (Prepared, Batten, RapidSOS) — web search, April 2026" },
+  { n: 10, text: "Connor, K. M., & Davidson, J. R. T. (2003). Development of a new resilience scale: The Connor–Davidson Resilience Scale (CD-RISC). Depression and Anxiety, 18(2), 76–82. — academic basis for psychological dimension" },
+  { n: 11, text: "Antonovsky, A. (1987). Unraveling the Mystery of Health. Jossey-Bass. — Salutogenesis / Sense of Coherence theory; basis for Resilium psychological scoring" },
+  { n: 12, text: "Ungar, M. (2011). The Social Ecology of Resilience. Springer. — basis for Resilium's Social Capital dimension" },
+  { n: 13, text: "Smith, B. W., et al. (2008). The Brief Resilience Scale. International Journal of Behavioral Medicine, 15(3), 194–200." },
+  { n: 14, text: "World Economic Forum (2023). Future of Jobs Report. WEF, Geneva. — basis for Skills dimension weighting" },
 ];
 
 /* ─────────────────────────────────────────────────────────────
