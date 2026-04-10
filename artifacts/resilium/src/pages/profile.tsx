@@ -58,6 +58,7 @@ import {
   Flame,
   Award,
   Smartphone,
+  FileText,
 } from "lucide-react";
 import {
   AlertDialog,
@@ -1271,6 +1272,101 @@ function ScoreHistorySection() {
   );
 }
 
+// ─── Reports Tab ─────────────────────────────────────────────────────────────
+function ReportsTab({ plans }: { plans: PlanSummary[] }) {
+  if (plans.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 gap-4 text-center">
+        <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
+          <FileText className="w-8 h-8 text-primary/60" />
+        </div>
+        <div>
+          <h3 className="text-lg font-display font-semibold mb-1">No reports yet</h3>
+          <p className="text-muted-foreground text-sm max-w-xs">Complete your first resilience assessment to see your full report here.</p>
+        </div>
+        <Link href="/assessment">
+          <Button className="rounded-full gap-2 mt-2">Start Assessment <ChevronRight className="w-4 h-4" /></Button>
+        </Link>
+      </div>
+    );
+  }
+
+  const fmtDate = (iso: string) =>
+    new Date(iso).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+
+  return (
+    <div className="space-y-4">
+      <p className="text-sm text-muted-foreground">{plans.length} assessment report{plans.length !== 1 ? "s" : ""}</p>
+      {[...plans].reverse().map((plan) => {
+        const { label, variant } = getScoreLabel(plan.scoreOverall);
+        return (
+          <Card key={plan.reportId} className="border shadow-md">
+            <CardContent className="p-5">
+              <div className="flex items-start gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <CalendarDays className="w-3.5 h-3.5" />
+                      <span>{fmtDate(plan.createdAt)}</span>
+                      {plan.location && (
+                        <>
+                          <span className="text-border">·</span>
+                          <MapPin className="w-3.5 h-3.5" />
+                          <span className="truncate max-w-[160px]">{plan.location}</span>
+                        </>
+                      )}
+                    </div>
+                    <Badge variant={variant} className="rounded-full text-xs">{label}</Badge>
+                  </div>
+
+                  <div className="flex items-end gap-2 mb-4">
+                    <span className={`text-4xl font-display font-bold ${getScoreColorClass(plan.scoreOverall)}`}>
+                      {Math.round(plan.scoreOverall)}
+                    </span>
+                    <span className="text-muted-foreground mb-1">/ 100</span>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2 mb-4">
+                    {[
+                      { key: "scoreFinancial", label: "Financial" },
+                      { key: "scoreHealth", label: "Health" },
+                      { key: "scoreSkills", label: "Skills" },
+                      { key: "scoreMobility", label: "Mobility" },
+                      { key: "scorePsychological", label: "Psych." },
+                      { key: "scoreResources", label: "Resources" },
+                    ].map(({ key, label }) => {
+                      const val = plan[key as keyof PlanSummary] as number;
+                      return (
+                        <div key={key} className="text-center bg-muted/40 rounded-lg py-2 px-1">
+                          <div className={`text-lg font-display font-bold ${getScoreColorClass(val)}`}>{Math.round(val)}</div>
+                          <div className="text-[10px] text-muted-foreground mt-0.5">{label}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Link href={`/results/${plan.reportId}`}>
+                      <Button size="sm" className="rounded-full gap-1.5">
+                        <FileText className="w-3.5 h-3.5" /> View Report
+                      </Button>
+                    </Link>
+                    <Link href={`/plan/${plan.reportId}`}>
+                      <Button variant="outline" size="sm" className="rounded-full gap-1.5">
+                        <Target className="w-3.5 h-3.5" /> Action Plan
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })}
+    </div>
+  );
+}
+
 // ─── Plans Tab ───────────────────────────────────────────────────────────────
 function PlansTab({ plans, onDelete }: { plans: PlanSummary[]; onDelete: (id: string) => void }) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -1540,7 +1636,7 @@ export default function ProfilePage() {
   const logout = () => signOut({ redirectUrl: "/" });
   const search = useSearch();
   const urlTab = new URLSearchParams(search).get("tab");
-  const validTabs = ["overview", "plans", "checklist", "account"];
+  const validTabs = ["overview", "reports", "plans", "checklist", "account"];
   const defaultTab = urlTab && validTabs.includes(urlTab) ? urlTab : "overview";
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -1601,6 +1697,9 @@ export default function ProfilePage() {
               <TabsTrigger value="overview" className="rounded-lg gap-1.5 text-sm">
                 <BarChart2 className="w-3.5 h-3.5" /> Overview
               </TabsTrigger>
+              <TabsTrigger value="reports" className="rounded-lg gap-1.5 text-sm">
+                <FileText className="w-3.5 h-3.5" /> Reports
+              </TabsTrigger>
               <TabsTrigger value="plans" className="rounded-lg gap-1.5 text-sm">
                 <Activity className="w-3.5 h-3.5" /> Plans {plans.length > 0 && <span className="ml-0.5 text-xs opacity-60">({plans.length})</span>}
               </TabsTrigger>
@@ -1614,6 +1713,10 @@ export default function ProfilePage() {
 
             <TabsContent value="overview">
               <OverviewTab plans={plans} />
+            </TabsContent>
+
+            <TabsContent value="reports">
+              <ReportsTab plans={plans} />
             </TabsContent>
 
             <TabsContent value="plans">

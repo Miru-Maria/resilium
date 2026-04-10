@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import {
-  Loader2, AlertTriangle, CheckCircle, ChevronDown, ChevronUp,
+  Loader2, AlertTriangle, Check, ChevronDown, ChevronUp,
   Sparkles, Lock, Heart, ExternalLink, Target, ArrowRight,
   TrendingUp, Clock, Star, Activity, Brain, Shield, BookOpen,
   Globe, Zap, DollarSign, Stethoscope, MapPin, Award, ChevronRight,
@@ -748,14 +748,14 @@ export default function PlanPage() {
                                     >
                                       {/* Main item row */}
                                       <div
-                                        className="flex items-start gap-3 p-4 cursor-pointer hover:bg-muted/20 transition-colors"
+                                        className="flex items-start gap-3 p-4 cursor-pointer transition-colors"
                                         onClick={() => handleChecklistToggle(area, item.id, completed)}
                                       >
                                         <div className={cn(
                                           "w-5 h-5 rounded-full border-2 flex-shrink-0 mt-0.5 flex items-center justify-center transition-all",
                                           completed ? "border-emerald-500 bg-emerald-500" : "border-muted-foreground/40"
                                         )}>
-                                          {completed && <CheckCircle className="w-3 h-3 text-white" />}
+                                          {completed && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
                                         </div>
                                         <div className="flex-1 min-w-0">
                                           <div className="flex flex-wrap items-center gap-1.5 mb-1">
