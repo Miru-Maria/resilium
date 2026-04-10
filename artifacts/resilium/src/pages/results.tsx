@@ -412,6 +412,19 @@ function ResultsPageInner() {
     }
   }, [expandedSteps, loadingSteps]);
 
+  // Checklist section ref + visibility (for floating pill)
+  // MUST be declared before early returns to satisfy Rules of Hooks
+  const checklistRef = useRef<HTMLElement>(null);
+  const [checklistVisible, setChecklistVisible] = useState(false);
+  useEffect(() => {
+    const el = checklistRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([entry]) => setChecklistVisible(entry.isIntersecting), { threshold: 0.05 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [report]);
+  const scrollToChecklist = () => checklistRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center">
@@ -573,18 +586,6 @@ function ResultsPageInner() {
     return null;
   })();
   const totalRemaining = totalItems - totalDone;
-
-  // Checklist section ref + visibility (for floating pill)
-  const checklistRef = useRef<HTMLElement>(null);
-  const [checklistVisible, setChecklistVisible] = useState(false);
-  useEffect(() => {
-    const el = checklistRef.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(([entry]) => setChecklistVisible(entry.isIntersecting), { threshold: 0.05 });
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, [report]);
-  const scrollToChecklist = () => checklistRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
 
   return (
     <div className="min-h-screen pb-24">
