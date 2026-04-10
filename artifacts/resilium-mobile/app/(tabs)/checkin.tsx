@@ -16,6 +16,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAuth } from "@/context/auth";
 import { useColors } from "@/context/theme";
 import { ColorsType } from "@/constants/colors";
+import { ProGate } from "@/components/ProGate";
 
 const CHECKIN_KEY = "resilium_checkin_history_v1";
 
@@ -148,6 +149,7 @@ export default function CheckinScreen() {
   };
 
   return (
+    <ProGate>
     <View style={[styles.root, { paddingTop: topPad }]}>
       {/* Header */}
       <View style={styles.header}>
@@ -308,6 +310,7 @@ export default function CheckinScreen() {
         )}
       </ScrollView>
     </View>
+    </ProGate>
   );
 }
 

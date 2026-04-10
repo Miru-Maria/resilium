@@ -46,9 +46,9 @@ export default function TabLayout() {
       <Tabs.Screen
         name="explore"
         options={{
-          title: "About",
+          title: "Progress",
           tabBarIcon: ({ color, size }) => (
-            <TabBarIcon name="info" color={color} size={size - 2} />
+            <TabBarIcon name="trending-up" color={color} size={size - 2} />
           ),
         }}
       />

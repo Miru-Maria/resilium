@@ -19,6 +19,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { NeuralNetSVG } from "@/components/NeuralNetSVG";
 import { OnboardingCarousel, shouldShowOnboarding } from "@/components/OnboardingCarousel";
+import { ProGate } from "@/components/ProGate";
 
 import { useSession } from "@/context/session";
 import { useAuth } from "@/context/auth";
@@ -281,6 +282,7 @@ export default function HomeScreen() {
   };
 
   return (
+    <ProGate>
     <View style={[styles.root, { paddingTop: topPad }]}>
       {/* Animated background orbs */}
       <View style={StyleSheet.absoluteFill} pointerEvents="none">
@@ -359,21 +361,17 @@ export default function HomeScreen() {
         contentContainerStyle={[styles.scrollContent, { paddingBottom: bottomPad + 40 }]}
         showsVerticalScrollIndicator={false}
       >
-        {isSignedIn ? (
-          <CompanionScrollContent
-            user={user}
-            colors={colors}
-            getAuthHeaders={getAuthHeaders}
-            bottomPad={bottomPad}
-          />
-        ) : (<>
-
-        {/* ── Hero ── */}
+        <CompanionScrollContent
+          user={user}
+          colors={colors}
+          getAuthHeaders={getAuthHeaders}
+          bottomPad={bottomPad}
+        />
+        {false && (<>
         <View
           style={styles.hero}
-          onLayout={(e) => setHeroSize({ width: e.nativeEvent.layout.width, height: e.nativeEvent.layout.height })}
         >
-          <NeuralNetSVG width={heroSize.width} height={heroSize.height} opacity={0.55} />
+          <NeuralNetSVG width={0} height={0} opacity={0} />
           <Text style={styles.heroTitle}>
             {"You're one disruption\naway from "}
             <Text style={styles.heroTitleChaos}>chaos</Text>
@@ -552,6 +550,7 @@ export default function HomeScreen() {
         <OnboardingCarousel onDismiss={() => setShowOnboarding(false)} />
       )}
     </View>
+    </ProGate>
   );
 }
 

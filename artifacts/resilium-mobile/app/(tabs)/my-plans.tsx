@@ -12,6 +12,7 @@ import { ScoreHistoryChart, type ScoreSnapshot } from "@/components/ScoreHistory
 import { useAuth } from "@/context/auth";
 import { useColors } from "@/context/theme";
 import { ColorsType } from "@/constants/colors";
+import { ProGate } from "@/components/ProGate";
 
 type PlanSummary = {
   reportId: string;
@@ -118,6 +119,7 @@ export default function MyPlansScreen() {
     new Date(iso).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
 
   return (
+    <ProGate>
     <View style={[styles.container, { paddingTop: topPad }]}>
       <View style={styles.header}>
         <Pressable
@@ -353,6 +355,7 @@ export default function MyPlansScreen() {
         )}
       </ScrollView>
     </View>
+    </ProGate>
   );
 }
 

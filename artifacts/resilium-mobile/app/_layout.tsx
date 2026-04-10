@@ -24,6 +24,7 @@ import { AppLoadingScreen } from "@/components/AppLoadingScreen";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { SessionProvider } from "@/context/session";
 import { ThemeProvider, useColors } from "@/context/theme";
+import { ProStatusProvider } from "@/context/proStatus";
 
 Sentry.init({
   dsn: "https://18da13e057fbeb42d6a6d1346a664d62@o4511187075923968.ingest.de.sentry.io/4511187688816720",
@@ -149,7 +150,9 @@ export default function RootLayout() {
           <QueryClientProvider client={queryClient}>
             <SessionProvider>
               <ThemeProvider>
-                <RootLayoutNav showIntro={showIntro} onIntroDone={() => setShowIntro(false)} />
+                <ProStatusProvider>
+                  <RootLayoutNav showIntro={showIntro} onIntroDone={() => setShowIntro(false)} />
+                </ProStatusProvider>
               </ThemeProvider>
             </SessionProvider>
           </QueryClientProvider>
