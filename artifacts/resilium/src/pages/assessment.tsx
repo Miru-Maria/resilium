@@ -1145,7 +1145,9 @@ export default function AssessmentPage() {
         ) : (
           <p className="text-muted-foreground max-w-md mb-8">{submitError.message}</p>
         )}
-        <p className="text-xs text-muted-foreground/50 mb-4 font-mono">{submitError.code}</p>
+        {submitError.code !== "UNKNOWN" && (
+          <p className="text-xs text-muted-foreground/50 mb-4 font-mono">{submitError.code}</p>
+        )}
         <div className="flex flex-wrap justify-center gap-3">
           {isAuthenticated && (
             <Link href="/profile">

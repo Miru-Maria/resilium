@@ -2,7 +2,7 @@ import { Router, type IRouter, type Request } from "express";
 import { getAuth, createClerkClient } from "@clerk/express";
 import { randomUUID } from "crypto";
 import { SubmitAssessmentBody, GetReportParams } from "@workspace/api-zod";
-import { db, resilienceReportsTable, checklistProgressTable, progressSnapshotsTable, subscriptionsTable, planViewsTable } from "@workspace/db";
+import { db, resilienceReportsTable, checklistProgressTable, progressSnapshotsTable, subscriptionsTable, planViewsTable, usersTable } from "@workspace/db";
 import { eq, and, count, inArray } from "drizzle-orm";
 
 import { calculateScores } from "./scoring.js";
@@ -206,6 +206,13 @@ router.post("/assess", assessRateLimit, async (req, res) => {
         const reportId = randomUUID();
         const now = new Date();
 
+        // Ensure the authenticated user exists in the local users table before
+        // inserting the report (foreign key constraint). A Clerk user may be
+        // authenticated but not yet synced to our DB if the webhook was missed.
+        if (userId) {
+          await db.insert(usersTable).values({ id: userId }).onConflictDoNothing();
+        }
+
         await db.insert(resilienceReportsTable).values({
           reportId,
           sessionId: input.sessionId ?? null,
@@ -289,8 +296,14 @@ router.post("/assess", assessRateLimit, async (req, res) => {
 
         reportJobs.set(jobId, { status: "complete", createdAt: Date.now(), reportId });
         req.log.info({ jobId, reportId }, "Background report generation complete");
-      } catch (err) {
-        req.log.error({ err, jobId }, "Background report generation failed");
+      } catch (err: any) {
+        // Log the underlying cause (actual PostgreSQL error) separately so it is
+        // never truncated by the outer JSON stringification of `err`.
+        const cause = err?.cause;
+        req.log.error(
+          { jobId, errMsg: err?.message, causeMsg: cause?.message, causeCode: cause?.code, causeDetail: cause?.detail },
+          "Background report generation failed"
+        );
         reportJobs.set(jobId, { status: "failed", createdAt: Date.now(), error: "Failed to generate report. Please try again." });
       }
     });
