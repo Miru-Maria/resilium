@@ -456,6 +456,7 @@ router.get("/reports", requireAdminSession, async (req, res) => {
       conditions.push(
         or(
           ilike(resilienceReportsTable.location, `%${search}%`),
+          ilike(resilienceReportsTable.locationCountry, `%${search}%`),
           ilike(resilienceReportsTable.reportId, `%${search}%`)
         )
       );

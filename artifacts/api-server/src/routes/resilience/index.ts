@@ -13,6 +13,12 @@ import scenariosRouter from "./scenarios.js";
 import guidedStepsRouter from "./guided-steps.js";
 import { sendWelcomeEmail } from "../../lib/email.js";
 
+function normalizeCountry(location: string): string | null {
+  if (!location || !location.trim()) return null;
+  const parts = location.split(",").map(p => p.trim()).filter(Boolean);
+  return parts[parts.length - 1] || null;
+}
+
 function getUserId(req: Request): string | null {
   const auth = getAuth(req);
   return (auth?.sessionClaims?.userId as string | undefined) || auth?.userId || null;
@@ -180,6 +186,7 @@ router.post("/assess", assessRateLimit, async (req, res) => {
       currency: currency,
       ageBracket: input.ageBracket ?? null,
       location: input.location,
+      locationCountry: normalizeCountry(input.location),
       incomeStability: input.incomeStability,
       savingsMonths: input.savingsMonths,
       dependentCount: input.dependentCount,

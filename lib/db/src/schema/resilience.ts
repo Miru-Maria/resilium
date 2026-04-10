@@ -13,6 +13,7 @@ export const resilienceReportsTable = pgTable("resilience_reports", {
   currency: varchar("currency", { length: 3 }).default("USD"),
   ageBracket: text("age_bracket"),
   location: text("location").notNull(),
+  locationCountry: text("location_country"),
   incomeStability: text("income_stability").notNull(),
   savingsMonths: real("savings_months").notNull(),
   dependentCount: integer("dependent_count").notNull().default(0),
