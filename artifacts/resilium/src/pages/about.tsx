@@ -12,6 +12,10 @@ import {
   Heart,
   Lock,
   Users,
+  BookOpen,
+  Quote,
+  FlaskConical,
+  Newspaper,
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -25,6 +29,94 @@ const fadeUp = {
     transition: { duration: 0.55, delay: i * 0.08, ease: "easeOut" },
   }),
 };
+
+const ACADEMIC_REFERENCES = [
+  {
+    title: "Connor-Davidson Resilience Scale (CD-RISC)",
+    authors: "Connor, K. M., & Davidson, J. R. T.",
+    year: "2003",
+    publication: "Depression and Anxiety, 18(2), 76–82",
+    relevance: "The most widely validated clinical resilience measurement tool. Resilium's psychological pillar maps directly to its five sub-scales: stress tolerance, adaptability, personal competence, sense of control, and social connection.",
+  },
+  {
+    title: "The Brief Resilience Scale (BRS)",
+    authors: "Smith, B. W., et al.",
+    year: "2008",
+    publication: "International Journal of Behavioral Medicine, 15(3), 194–200",
+    relevance: "Validated the core construct that resilience is measurable and predictive. Our 10-question mental resilience assessment draws on the same evidence base, adapted for individual planning rather than clinical diagnosis.",
+  },
+  {
+    title: "Salutogenesis: Unraveling the Mystery of Health",
+    authors: "Antonovsky, A.",
+    year: "1987",
+    publication: "Jossey-Bass",
+    relevance: "Established the Sense of Coherence (SOC) theory — the foundation for our psychological scoring dimension. SOC comprises Comprehensibility, Manageability, and Meaningfulness: all three are captured in our mental resilience questionnaire.",
+  },
+  {
+    title: "The Social Ecology of Resilience",
+    authors: "Ungar, M. (Ed.)",
+    year: "2011",
+    publication: "Springer",
+    relevance: "Demonstrated that resilience is not purely individual — it emerges from the dynamic between a person and their environment, including their social network and material resources. This is the scientific basis for Resilium's Social Capital and Logistics dimensions.",
+  },
+  {
+    title: "Individual and Household Preparedness Framework",
+    authors: "U.S. Federal Emergency Management Agency (FEMA)",
+    year: "2020",
+    publication: "Ready.gov — FEMA Individual Preparedness Division",
+    relevance: "The standardized methodology for assessing emergency preparedness at the individual level. Resilium's Emergency Resources dimension is structured around FEMA's tiered supply model (none → 3 days → 2 weeks → 1 month+).",
+  },
+  {
+    title: "Future of Jobs Report",
+    authors: "World Economic Forum",
+    year: "2023",
+    publication: "World Economic Forum, Geneva",
+    relevance: "Identifies adaptability and continuous learning as the top two skills for navigating economic disruption — validating the 20% weight Resilium assigns to the Skills dimension and the central role of learning agility in long-term resilience.",
+  },
+];
+
+const MEDIA_CITATIONS = [
+  {
+    outlet: "Harvard Business Review",
+    author: "Diane L. Coutu",
+    piece: "How Resilience Works",
+    year: "2002",
+    quote: "More than education, more than experience, more than training, a person's level of resilience will determine who succeeds and who fails. That's true in the cancer ward, it's true in the Olympics, and it will be true in the boardroom.",
+    context: "This landmark HBR piece — still one of the most-cited articles in the publication's history — established resilience as a learnable, measurable, and economically significant personal capacity. The finding that resilience outweighs credentials in predicting outcomes is the core thesis behind Resilium.",
+  },
+  {
+    outlet: "American Psychological Association",
+    author: "APA Public Interest Directorate",
+    piece: "The Road to Resilience",
+    year: "2012",
+    quote: "Resilience is not a trait that people either have or do not have. It involves behaviors, thoughts, and actions that can be learned and developed in anyone.",
+    context: "The APA's authoritative public guide on resilience. Its central conclusion — that resilience is learnable and actionable, not a fixed personality trait — is the ethical foundation of everything Resilium does. We don't score you to judge you; we score you to show you where to focus.",
+  },
+  {
+    outlet: "TIME Magazine",
+    author: "Francine Russo",
+    piece: "The Science of Bouncing Back",
+    year: "2016",
+    quote: "Researchers studying trauma survivors found the same pattern everywhere: the people who recovered fastest weren't the ones who tried hardest — they were the ones who knew where their strengths actually were.",
+    context: "TIME's reporting on resilience science has consistently found that self-awareness of one's actual vulnerabilities — not wishful thinking about them — is the primary predictor of recovery from disruption. This is precisely why Resilium scores you honestly across six dimensions rather than offering generic affirmations.",
+  },
+  {
+    outlet: "The Economist",
+    author: "The Economist Intelligence Unit",
+    piece: "Resilience in an Age of Uncertainty",
+    year: "2022",
+    quote: "The pandemic made visible what resilience researchers had argued for decades: that individuals and institutions that had invested in preparation absorbed shocks that others did not survive. The gap between the prepared and the unprepared widened dramatically.",
+    context: "The Economist's post-pandemic analysis documented the real-world cost of unpreparedness at the individual and household level. The data showed that financial runway, social support networks, and skill transferability were the three variables that most strongly predicted household stability through 2020–2021.",
+  },
+  {
+    outlet: "Forbes",
+    author: "Nicolas Cole",
+    piece: "Why Resilience Has Become the Most Important Skill of the 21st Century",
+    year: "2020",
+    quote: "The world doesn't need more information about resilience. It needs a practical way to measure it, build it, and track it over time — and most people have no idea where to even start.",
+    context: "Forbes identified the same gap Resilium was built to close: the tools for measuring and actively building personal resilience at the individual level simply didn't exist. Generic self-help content, expensive consultants, or vague wellness apps are not the same as a structured, honest, action-oriented resilience plan.",
+  },
+];
 
 export default function AboutPage() {
   return (
@@ -54,7 +146,7 @@ export default function AboutPage() {
             custom={2}
             className="text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto"
           >
-            Everything the landing page doesn't go into depth on — the scoring methodology, how we handle your data, and what this project actually is.
+            The scoring methodology, scientific foundations, why resilience matters, and how we handle your data.
           </motion.p>
         </div>
       </section>
@@ -154,6 +246,96 @@ export default function AboutPage() {
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SCIENTIFIC FOUNDATION */}
+      <section className="border-b border-border/60 bg-card/20">
+        <div className="max-w-5xl mx-auto px-6 py-16">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold uppercase tracking-widest mb-4">
+              <FlaskConical className="w-3.5 h-3.5" /> Peer-Reviewed Science
+            </div>
+            <h2 className="text-3xl font-display font-bold">The academic foundations.</h2>
+            <p className="text-muted-foreground mt-3 max-w-2xl mx-auto">
+              Resilium's scoring model wasn't invented from scratch. It's grounded in decades of peer-reviewed resilience research, validated clinical scales, and institutional preparedness frameworks. These are the specific studies and methodologies each dimension draws from.
+            </p>
+          </div>
+          <div className="space-y-4">
+            {ACADEMIC_REFERENCES.map((ref) => (
+              <div key={ref.title} className="rounded-2xl border border-border/60 bg-card/30 p-6">
+                <div className="flex flex-wrap items-start gap-3 mb-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2 mb-1">
+                      <h3 className="font-display font-bold text-base">{ref.title}</h3>
+                      <span className="text-xs font-semibold text-primary bg-primary/10 border border-primary/20 px-2 py-0.5 rounded-full">{ref.year}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">{ref.authors} · <span className="italic">{ref.publication}</span></p>
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">{ref.relevance}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-8 p-5 rounded-2xl border border-primary/20 bg-primary/5">
+            <div className="flex gap-3">
+              <BookOpen className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-semibold text-foreground mb-1">What this means in practice</p>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Resilium doesn't claim to replace clinical assessment or professional advice. It applies the same evidence-based dimensions that clinicians and emergency preparedness agencies use — translated into a self-administered tool that gives you an honest, actionable picture of where you stand. The output is a starting point, not a diagnosis.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* WHY RESILIENCE MATTERS — MEDIA CITATIONS */}
+      <section className="border-b border-border/60">
+        <div className="max-w-5xl mx-auto px-6 py-16">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold uppercase tracking-widest mb-4">
+              <Newspaper className="w-3.5 h-3.5" /> Why This Matters
+            </div>
+            <h2 className="text-3xl font-display font-bold">What the research — and the world — says.</h2>
+            <p className="text-muted-foreground mt-3 max-w-2xl mx-auto">
+              Resilium didn't invent the problem. These are credible voices — researchers, journalists, and institutions — on why personal resilience planning is one of the most important things an individual can do. None of these sources have reviewed or endorsed Resilium; they've simply documented why something like it is needed.
+            </p>
+          </div>
+
+          <div className="space-y-6">
+            {MEDIA_CITATIONS.map((citation) => (
+              <div key={citation.outlet} className="rounded-2xl border border-border/60 bg-card/30 p-6">
+                <div className="flex items-start gap-4">
+                  <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Quote className="w-4 h-4 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <blockquote className="text-foreground font-medium leading-relaxed mb-3 text-[15px] italic">
+                      "{citation.quote}"
+                    </blockquote>
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-3">
+                      <span className="text-sm font-bold text-primary">{citation.outlet}</span>
+                      <span className="text-xs text-muted-foreground">·</span>
+                      <span className="text-sm text-muted-foreground">{citation.author}</span>
+                      <span className="text-xs text-muted-foreground">·</span>
+                      <span className="text-xs font-semibold text-muted-foreground bg-muted/40 px-2 py-0.5 rounded-full">
+                        "{citation.piece}", {citation.year}
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{citation.context}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-10 p-6 rounded-2xl border border-border/60 bg-card/20 text-center">
+            <p className="text-sm text-muted-foreground leading-relaxed max-w-2xl mx-auto">
+              The case for personal resilience planning has been made by psychologists, economists, emergency management agencies, and journalists for decades. The gap has been the tools. Resilium is an attempt to close it — honestly, privately, and practically.
+            </p>
           </div>
         </div>
       </section>

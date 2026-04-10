@@ -29,6 +29,9 @@ type AssessmentInput = {
   riskConcerns: string[];
   currency?: string;
   chronicCondition?: string;
+  chronicConditionName?: string;
+  chronicSeverity?: string;
+  chronicRequiresMedication?: boolean;
   trustedLocalContacts?: number;
   communityInvolvement?: string;
   mutualAidAccess?: boolean;
@@ -147,9 +150,18 @@ export async function generateResilienceReport(
     ? "CRITICAL: This user has no emergency supplies at all — treat this as the most urgent preparedness gap and make it the top short-term action."
     : "";
 
-  const chronicHealthNote = input.chronicCondition === "yes"
-    ? "IMPORTANT: The user has a chronic condition or disability affecting daily function. Do NOT recommend self-directed physical tasks such as manual labor, strenuous exercise drills, or physically demanding emergency preparations. Instead prioritize: assisted alternatives, digital preparation tools, professional support networks, and community-based resources. Note this explicitly in health checklist items."
-    : "";
+  const chronicHealthNote = (() => {
+    if (input.chronicCondition !== "yes") return "";
+    const parts: string[] = [];
+    if (input.chronicConditionName) parts.push(`Condition: ${input.chronicConditionName}.`);
+    if (input.chronicSeverity === "severe") parts.push("SEVERITY: Significant daily impact — treat this as a major health vulnerability in all planning.");
+    else if (input.chronicSeverity === "moderate") parts.push("SEVERITY: Moderate daily impact — account for this in health and mobility recommendations.");
+    else if (input.chronicSeverity === "mild") parts.push("SEVERITY: Mild — largely lifestyle-managed, treat as a minor consideration.");
+    if (input.chronicRequiresMedication === true) parts.push("CRITICAL: Requires ongoing medication or treatment — medication stockpiling, prescription continuity, and medical supply access must be top-priority checklist items.");
+    else if (input.chronicRequiresMedication === false) parts.push("Lifestyle-managed — no medication dependency. Focus on access to lifestyle supports and community resources.");
+    parts.push("Do NOT recommend strenuous physical tasks or physically demanding emergency preparations unless appropriate for the stated severity. Prioritize: assisted alternatives, digital preparation tools, professional networks, and community-based resources.");
+    return `IMPORTANT: The user has a chronic condition. ${parts.join(" ")}`;
+  })();
 
   const socialCapitalLevel = scores.socialCapital >= 70
     ? "strong"
@@ -183,7 +195,7 @@ USER PROFILE:
 - Dependents: ${input.dependentCount === 0 ? "None" : input.dependentCount === 1 ? "One" : input.dependentCount === 2 ? "Two or three" : "Four or more"}
 - Skills: ${input.skills.join(", ") || "none"}
 - Health status: ${input.healthStatus}
-- Chronic condition affecting daily function: ${input.chronicCondition ?? "not specified"}
+- Chronic condition: ${input.chronicCondition ?? "not specified"}${input.chronicCondition === "yes" && input.chronicConditionName ? ` (${input.chronicConditionName})` : ""}${input.chronicSeverity ? `, severity: ${input.chronicSeverity}` : ""}${input.chronicRequiresMedication != null ? `, requires medication: ${input.chronicRequiresMedication ? "yes" : "no"}` : ""}
 - Mobility level: ${input.mobilityLevel}
 - Housing type: ${input.housingType}
 - Emergency supplies: ${emergencyTierDesc}

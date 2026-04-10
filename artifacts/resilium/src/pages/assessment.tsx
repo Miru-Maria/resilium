@@ -659,9 +659,14 @@ const CURRENCIES = [
 
 type CurrencyCode = typeof CURRENCIES[number]["code"];
 
+type ChronicSeverity = "mild" | "moderate" | "severe";
+
 type ExtendedFormData = AssessmentInput & {
   emergencySupplyTier?: AssessmentInputEmergencySupplyTier;
   chronicCondition?: AssessmentInputChronicCondition;
+  chronicConditionName?: string;
+  chronicSeverity?: ChronicSeverity;
+  chronicRequiresMedication?: boolean;
   trustedLocalContacts?: number;
   communityInvolvement?: AssessmentInputCommunityInvolvement;
   mutualAidAccess?: boolean;
@@ -766,6 +771,9 @@ export default function AssessmentPage() {
     // extended
     emergencySupplyTier: undefined,
     chronicCondition: undefined,
+    chronicConditionName: undefined,
+    chronicSeverity: undefined,
+    chronicRequiresMedication: undefined,
     trustedLocalContacts: 1,
     communityInvolvement: "occasional",
     mutualAidAccess: undefined,
@@ -1601,6 +1609,72 @@ export default function AssessmentPage() {
                         </Button>
                       ))}
                     </div>
+
+                    {/* Chronic condition sub-questions — only shown when "Yes" is selected */}
+                    {formData.chronicCondition === "yes" && (
+                      <div className="mt-5 space-y-5 p-5 rounded-2xl border border-primary/20 bg-primary/5 animate-in slide-in-from-top-2 duration-200">
+                        <p className="text-xs font-semibold uppercase tracking-widest text-primary">Tell us a bit more — this helps us tailor your plan</p>
+
+                        {/* Condition name */}
+                        <div>
+                          <label className="text-sm font-semibold block mb-2">What condition do you have? <span className="text-muted-foreground font-normal">(optional)</span></label>
+                          <input
+                            type="text"
+                            className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground/50"
+                            placeholder="e.g. PCOS, arthritis, Type 2 diabetes, myopia…"
+                            value={formData.chronicConditionName ?? ""}
+                            onChange={e => updateField('chronicConditionName', e.target.value || undefined)}
+                            maxLength={120}
+                          />
+                        </div>
+
+                        {/* Severity */}
+                        <div>
+                          <label className="text-sm font-semibold block mb-2">How much does it impact your daily life?</label>
+                          <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Chronic condition severity">
+                            {([
+                              { id: "mild", label: "Mild", desc: "Manageable, mostly lifestyle-based" },
+                              { id: "moderate", label: "Moderate", desc: "Some daily impact or regular monitoring" },
+                              { id: "severe", label: "Significant", desc: "Substantial daily impact or ongoing treatment" },
+                            ] as { id: ChronicSeverity; label: string; desc: string }[]).map(opt => (
+                              <Button
+                                key={opt.id}
+                                role="radio"
+                                aria-checked={formData.chronicSeverity === opt.id}
+                                variant={formData.chronicSeverity === opt.id ? "default" : "outline"}
+                                className="h-auto py-3 px-3 rounded-xl flex-col gap-1 text-left"
+                                onClick={() => updateField('chronicSeverity', opt.id)}
+                              >
+                                <span className="text-sm font-semibold">{opt.label}</span>
+                                <span className="text-xs font-normal opacity-75 leading-snug">{opt.desc}</span>
+                              </Button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Medication / treatment */}
+                        <div>
+                          <label className="text-sm font-semibold block mb-2">Does it require regular medication or medical treatment?</label>
+                          <div className="flex gap-2" role="radiogroup" aria-label="Medication required">
+                            {[
+                              { id: true, label: "Yes — ongoing medication or treatment" },
+                              { id: false, label: "No — lifestyle-managed or resolved" },
+                            ].map(opt => (
+                              <Button
+                                key={String(opt.id)}
+                                role="radio"
+                                aria-checked={formData.chronicRequiresMedication === opt.id}
+                                variant={formData.chronicRequiresMedication === opt.id ? "default" : "outline"}
+                                className="flex-1 rounded-xl h-auto py-3 text-sm"
+                                onClick={() => updateField('chronicRequiresMedication', opt.id)}
+                              >
+                                {opt.label}
+                              </Button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
