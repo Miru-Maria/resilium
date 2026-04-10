@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
+import * as Sentry from "@sentry/react";
 import { useRoute } from "wouter";
 import { useGetReport, useGetChecklists, useUpdateChecklistItem, useGetSnapshots } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -28,15 +29,24 @@ declare global {
 
 class ResultsErrorBoundary extends React.Component<
   { children: React.ReactNode },
-  { hasError: boolean; error: string | null }
+  { hasError: boolean; error: string | null; componentStack: string | null }
 > {
   constructor(props: { children: React.ReactNode }) {
     super(props);
-    this.state = { hasError: false, error: null };
+    this.state = { hasError: false, error: null, componentStack: null };
   }
   static getDerivedStateFromError(error: unknown) {
     const msg = error instanceof Error ? error.message : String(error);
     return { hasError: true, error: msg };
+  }
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    this.setState({ componentStack: info.componentStack ?? null });
+    Sentry.captureException(error, {
+      extra: {
+        componentStack: info.componentStack,
+        errorBoundary: "ResultsErrorBoundary",
+      },
+    });
   }
   render() {
     if (this.state.hasError) {
@@ -48,7 +58,13 @@ class ResultsErrorBoundary extends React.Component<
             There was a problem displaying your report. Please try refreshing the page.
           </p>
           {this.state.error && (
-            <p className="text-xs text-muted-foreground/50 font-mono max-w-md break-all mb-8">{this.state.error}</p>
+            <p className="text-xs text-muted-foreground/50 font-mono max-w-md break-all mb-4">{this.state.error}</p>
+          )}
+          {this.state.componentStack && (
+            <details className="max-w-lg w-full text-left mb-6">
+              <summary className="text-xs text-muted-foreground/50 cursor-pointer">Component stack (for debugging)</summary>
+              <pre className="text-[9px] text-muted-foreground/40 font-mono whitespace-pre-wrap break-all mt-2 max-h-40 overflow-auto">{this.state.componentStack}</pre>
+            </details>
           )}
           <button
             onClick={() => window.location.reload()}
@@ -843,7 +859,7 @@ function ResultsPageInner() {
                 <div className="w-6 h-6 rounded-full bg-destructive/20 flex items-center justify-center flex-shrink-0 mt-0.5">
                   <span className="text-xs font-bold text-destructive">{idx + 1}</span>
                 </div>
-                <p className="text-sm font-medium text-foreground leading-snug">{vuln}</p>
+                <p className="text-sm font-medium text-foreground leading-snug">{typeof vuln === "string" ? vuln : typeof (vuln as any)?.text === "string" ? (vuln as any).text : JSON.stringify(vuln)}</p>
               </div>
             ))}
           </div>
@@ -1271,7 +1287,7 @@ function ResultsPageInner() {
                         <h5 className="font-bold text-sm mb-2 uppercase tracking-wide">Immediate Survival Steps</h5>
                         <ul className="list-disc pl-5 space-y-1 text-sm text-foreground">
                           {(scenario.immediateSteps ?? []).map((step, i) => (
-                            <li key={i}>{step}</li>
+                            <li key={i}>{typeof step === "string" ? step : typeof (step as any)?.text === "string" ? (step as any).text : JSON.stringify(step)}</li>
                           ))}
                         </ul>
                       </div>
