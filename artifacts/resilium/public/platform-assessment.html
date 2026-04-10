@@ -577,7 +577,7 @@
           <tr><td>Loading / splash screen</td><td><span class="badge badge-good">✓ Polished</span></td><td>Neural net animation, brain logo, premium feel — custom branded</td></tr>
           <tr><td>Sign-in</td><td><span class="badge badge-good">✓ Works</span></td><td>Clerk OAuth, token cache split (localStorage web / SecureStore native)</td></tr>
           <tr><td>Home tab</td><td><span class="badge badge-good">✓ Rich</span></td><td>Animated orbs, streak tracking, score display, daily motivations</td></tr>
-          <tr><td>About tab (formerly Explore)</td><td><span class="badge badge-good">✓ Good</span></td><td>Renamed and clarified — shows what Resilium is, how it works, who it's for</td></tr>
+          <tr><td>Progress tab (formerly Explore)</td><td><span class="badge badge-good">✓ Good</span></td><td>35-day activity calendar (colored dots from AsyncStorage), score history chart (Pro-gated), recent 7 check-ins — full plan-fulfillment tracking surface</td></tr>
           <tr><td>Plans tab</td><td><span class="badge badge-good">✓ Good</span></td><td>Plan list, score badges, Pro comparison modal wired</td></tr>
           <tr><td>Check-in tab</td><td><span class="badge badge-good">✓ Solid</span></td><td>5-dimension daily self-rating, local streak persistence via AsyncStorage</td></tr>
           <tr><td>Account / data tab</td><td><span class="badge badge-good">✓ Complete</span></td><td>GDPR export, deletion, subscription status, sign out</td></tr>
@@ -722,7 +722,7 @@
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">Admin user management (Clerk-sourced), testimonials, announcements, GDPR</span></li>
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">Admin marketing analytics, mobile analytics, security monitoring</span></li>
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">Admin UX testing with AI persona simulations</span></li>
-        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Mobile: all 5 tabs functional (Home, About, Plans, Check-in, Account)</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Mobile: all 5 tabs functional (Home, Progress, My Plans, Check-in, My Data)</span></li>
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">Mobile: daily check-in with streak tracking</span></li>
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">Mobile: plan comparison modal (Pro feature)</span></li>
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">Mobile: animated loading screen with custom brain logo branding</span></li>
@@ -737,7 +737,7 @@
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">Multi-currency support — 9 official currencies + custom code</span></li>
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">Draft saving for in-progress assessments</span></li>
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">App icon + splash — custom branded brain logo (updated)</span></li>
-        <li><span class="check-icon check-done">✓</span><span class="check-text-done">About tab — scope and purpose clarified</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Progress tab (formerly Explore / About) — rebuilt as plan-fulfillment tracking: 35-day activity calendar, score history chart (Pro gate), recent 7 check-ins</span></li>
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">Mobile coaching page upgraded — warm amber palette, score context cards, About Cristiana section, dark gradient CTA</span></li>
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">Mobile splash screen finalized — neural net animation (38 particles, 0.52 opacity), brain logo with counter-rotating SVG rings, amber glow pulse</span></li>
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">Resilience Profile card moved to Account tab (mobile) — shows score, assessment date, "View My Plans" CTA</span></li>
@@ -768,6 +768,11 @@
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">Admin Reports tab UI: live search, pagination controls, Age and Primary Goal columns added</span></li>
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">Coaching page: main nav links (About, Demo, Pricing, Sign In) added to header — direct-link visitors can browse the full site</span></li>
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">Landing page label aligned — "See a Sample Plan" CTA changed to "See a Demo" to match the nav link label</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Mobile ProGate — all 4 content tabs (Home, Progress, My Plans, Check-in) gated behind <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">ProGate</code> component; unsigned users see sign-in prompt, free users see upgrade CTA linking to pricing page</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Android removed from all materials — pitch deck Slide 1, admin monitoring page, push-token API schema updated to <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">["ios","web"]</code>; platform is iOS + Expo web only</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done"><code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">locationCountry</code> DB column added — canonical country extracted on every assessment submission (e.g. "Bucharest, Romania" → "Romania"); admin reports search extended to match on normalized country</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Pitch deck updated — Slide 6 Pro tier now includes iOS companion app for daily plan fulfillment; Slide 1 platform tag updated from "Android" to "iOS"</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Competitive analysis updated — positioning statement and Kano model delighters updated to cite iOS companion app (Pro-only) as a key differentiator no competitor offers</span></li>
       </ul>
 
       <!-- OUTSTANDING -->
@@ -778,9 +783,9 @@
         </thead>
         <tbody>
           <tr>
-            <td>App Store / Play Store submission</td>
+            <td>App Store (iOS) submission</td>
             <td><span class="badge badge-warn">In Progress</span></td>
-            <td>Intentionally deferred by owner — app builds, assets, and metadata preparation in progress.</td>
+            <td>Intentionally deferred by owner — iOS only (Android explicitly excluded). App builds, assets, and metadata preparation in progress.</td>
           </tr>
         </tbody>
       </table>
