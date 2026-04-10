@@ -24,6 +24,24 @@ function getUserId(req: Request): string | null {
   return (auth?.sessionClaims?.userId as string | undefined) || auth?.userId || null;
 }
 
+// ── Async job store ──────────────────────────────────────────────────────────
+// Holds in-progress and recently completed assessment jobs so the client can
+// poll for the result without the request staying open for 90+ seconds.
+type JobEntry =
+  | { status: "processing"; createdAt: number }
+  | { status: "complete";   createdAt: number; reportId: string }
+  | { status: "failed";     createdAt: number; error: string };
+
+const reportJobs = new Map<string, JobEntry>();
+
+// Prune jobs older than 15 minutes every 5 minutes
+setInterval(() => {
+  const cutoff = Date.now() - 15 * 60 * 1000;
+  for (const [id, job] of reportJobs) {
+    if (job.createdAt < cutoff) reportJobs.delete(id);
+  }
+}, 5 * 60 * 1000).unref();
+
 const router: IRouter = Router();
 
 const VALID_CURRENCIES = ["USD", "EUR", "GBP", "AUD", "CAD", "JPY", "INR", "BRL", "RON"] as const;
@@ -130,181 +148,169 @@ router.post("/assess", assessRateLimit, async (req, res) => {
 
     const currency = parseCurrency(req.body.currency);
 
-    const reportContent = await generateResilienceReport(
-      {
-        location: input.location,
-        ageBracket: input.ageBracket ?? undefined,
-        incomeStability: input.incomeStability,
-        savingsMonths: input.savingsMonths,
-        dependentCount: input.dependentCount,
-        relocationReadiness: input.relocationReadiness ?? undefined,
-        skills: input.skills as string[],
-        healthStatus: input.healthStatus,
-        mobilityLevel: input.mobilityLevel,
-        housingType: input.housingType,
-        hasEmergencySupplies: input.hasEmergencySupplies,
-        emergencySupplyTier: input.emergencySupplyTier ?? undefined,
-        psychologicalResilience: input.psychologicalResilience,
-        riskConcerns: input.riskConcerns as string[],
-        currency,
-        chronicCondition: input.chronicCondition ?? undefined,
-        trustedLocalContacts: input.trustedLocalContacts ?? undefined,
-        communityInvolvement: input.communityInvolvement ?? undefined,
-        mutualAidAccess: input.mutualAidAccess ?? undefined,
-        primaryGoal: input.primaryGoal ?? undefined,
-        successVision: input.successVision ?? undefined,
-      },
-      scores,
-      mentalResilienceSubScores
-    );
+    // ── Return a jobId immediately so the HTTP connection can close ──────────
+    // The AI call can take 90–120 s; Replit's proxy cuts connections at ~60 s.
+    // Processing continues in the background; the client polls /jobs/:jobId.
+    const jobId = randomUUID();
+    reportJobs.set(jobId, { status: "processing", createdAt: Date.now() });
+    res.status(202).json({ jobId, status: "processing" });
 
-    // Inject coaching referral for users with low psychological resilience
-    const APP_URL = process.env["APP_URL"] ?? "https://resilium.app";
-    if (scores.psychological < 50) {
-      const coachingResource = {
-        title: "1:1 Mental Resilience Coaching",
-        category: "Psychological",
-        description:
-          "Resilium maps the gap — a coach helps close it. Cristiana Paun offers tailored 1:1 sessions designed around your Resilium report, for people whose psychological resilience signals a need for structured human support alongside the practical action plan.",
-        url: `${APP_URL}/coaching?ref=resilium&score=${scores.psychological}`,
-        badge: "1:1 Session",
-        priority: "high" as const,
-      };
-      reportContent.recommendedResources = [
-        coachingResource,
-        ...(reportContent.recommendedResources ?? []),
-      ];
-    }
+    // ── Background processing ─────────────────────────────────────────────────
+    setImmediate(async () => {
+      try {
+        const reportContent = await generateResilienceReport(
+          {
+            location: input.location,
+            ageBracket: input.ageBracket ?? undefined,
+            incomeStability: input.incomeStability,
+            savingsMonths: input.savingsMonths,
+            dependentCount: input.dependentCount,
+            relocationReadiness: input.relocationReadiness ?? undefined,
+            skills: input.skills as string[],
+            healthStatus: input.healthStatus,
+            mobilityLevel: input.mobilityLevel,
+            housingType: input.housingType,
+            hasEmergencySupplies: input.hasEmergencySupplies,
+            emergencySupplyTier: input.emergencySupplyTier ?? undefined,
+            psychologicalResilience: input.psychologicalResilience,
+            riskConcerns: input.riskConcerns as string[],
+            currency,
+            chronicCondition: input.chronicCondition ?? undefined,
+            trustedLocalContacts: input.trustedLocalContacts ?? undefined,
+            communityInvolvement: input.communityInvolvement ?? undefined,
+            mutualAidAccess: input.mutualAidAccess ?? undefined,
+            primaryGoal: input.primaryGoal ?? undefined,
+            successVision: input.successVision ?? undefined,
+          },
+          scores,
+          mentalResilienceSubScores
+        );
 
-    const reportId = randomUUID();
-    const now = new Date();
-
-    await db.insert(resilienceReportsTable).values({
-      reportId,
-      sessionId: input.sessionId ?? null,
-      userId: userId ?? null,
-      currency: currency,
-      ageBracket: input.ageBracket ?? null,
-      location: input.location,
-      locationCountry: normalizeCountry(input.location),
-      incomeStability: input.incomeStability,
-      savingsMonths: input.savingsMonths,
-      dependentCount: input.dependentCount,
-      relocationReadiness: input.relocationReadiness ?? null,
-      skills: input.skills,
-      healthStatus: input.healthStatus,
-      mobilityLevel: input.mobilityLevel,
-      housingType: input.housingType,
-      hasEmergencySupplies: input.hasEmergencySupplies,
-      psychologicalResilience: input.psychologicalResilience,
-      riskConcerns: input.riskConcerns,
-      mrStressTolerance: mentalResilienceSubScores?.stressTolerance ?? null,
-      mrAdaptability: mentalResilienceSubScores?.adaptability ?? null,
-      mrLearningAgility: mentalResilienceSubScores?.learningAgility ?? null,
-      mrChangeManagement: mentalResilienceSubScores?.changeManagement ?? null,
-      mrEmotionalRegulation: mentalResilienceSubScores?.emotionalRegulation ?? null,
-      mrSocialSupport: mentalResilienceSubScores?.socialSupport ?? null,
-      mrComposite: mentalResilienceSubScores?.composite ?? null,
-      mrPathway: mentalResilienceSubScores?.pathway ?? null,
-      scoreOverall: scores.overall,
-      scoreFinancial: scores.financial,
-      scoreHealth: scores.health,
-      scoreSkills: scores.skills,
-      scoreMobility: scores.mobility,
-      scorePsychological: scores.psychological,
-      scoreResources: scores.resources,
-      scoreSocialCapital: scores.socialCapital ?? null,
-      riskProfileSummary: reportContent.riskProfileSummary,
-      topVulnerabilities: reportContent.topVulnerabilities,
-      actionPlan: reportContent.actionPlan,
-      scenarioSimulations: reportContent.scenarioSimulations,
-      dailyHabits: reportContent.dailyHabits,
-      checklistsByArea: reportContent.checklistsByArea ?? null,
-      recommendedResources: reportContent.recommendedResources ?? null,
-      primaryGoal: input.primaryGoal ?? null,
-      successVision: input.successVision ?? null,
-      emergencySupplyTier: input.emergencySupplyTier ?? null,
-      createdAt: now,
-    });
-
-    // Fire welcome email on first authenticated plan (fire-and-forget)
-    if (userId && typeof planCount === "number" && planCount === 0) {
-      (async () => {
-        try {
-          const clerkClient = createClerkClient({ secretKey: process.env["CLERK_SECRET_KEY"] });
-          const clerkUser = await clerkClient.users.getUser(userId);
-          const email = clerkUser.emailAddresses[0]?.emailAddress;
-          if (email) {
-            await sendWelcomeEmail({ email, firstName: clerkUser.firstName });
-          }
-        } catch (err) {
-          req.log.warn({ err }, "sendWelcomeEmail failed (non-critical)");
+        const APP_URL = process.env["APP_URL"] ?? "https://resilium.app";
+        if (scores.psychological < 50) {
+          const coachingResource = {
+            title: "1:1 Mental Resilience Coaching",
+            category: "Psychological",
+            description:
+              "Resilium maps the gap — a coach helps close it. Cristiana Paun offers tailored 1:1 sessions designed around your Resilium report, for people whose psychological resilience signals a need for structured human support alongside the practical action plan.",
+            url: `${APP_URL}/coaching?ref=resilium&score=${scores.psychological}`,
+            badge: "1:1 Session",
+            priority: "high" as const,
+          };
+          reportContent.recommendedResources = [
+            coachingResource,
+            ...(reportContent.recommendedResources ?? []),
+          ];
         }
-      })();
-    }
 
-    // Save a progress snapshot if sessionId is provided
-    if (input.sessionId) {
-      await db.insert(progressSnapshotsTable).values({
-        sessionId: input.sessionId,
-        reportId,
-        snapshotAt: now,
-        scoreOverall: scores.overall,
-        scoreFinancial: scores.financial,
-        scoreHealth: scores.health,
-        scoreSkills: scores.skills,
-        scoreMobility: scores.mobility,
-        scorePsychological: scores.psychological,
-        scoreResources: scores.resources,
-        mrComposite: mentalResilienceSubScores?.composite ?? null,
-      });
-    }
+        const reportId = randomUUID();
+        const now = new Date();
 
-    res.json({
-      reportId,
-      createdAt: now.toISOString(),
-      score: {
-        overall: scores.overall,
-        financial: scores.financial,
-        health: scores.health,
-        skills: scores.skills,
-        mobility: scores.mobility,
-        psychological: scores.psychological,
-        resources: scores.resources,
-        socialCapital: scores.socialCapital,
-      },
-      mentalResilienceProfile: mentalResilienceSubScores ?? undefined,
-      riskProfileSummary: reportContent.riskProfileSummary,
-      topVulnerabilities: reportContent.topVulnerabilities,
-      actionPlan: reportContent.actionPlan,
-      scenarioSimulations: reportContent.scenarioSimulations,
-      dailyHabits: reportContent.dailyHabits,
-      checklistsByArea: reportContent.checklistsByArea ?? undefined,
-      recommendedResources: reportContent.recommendedResources ?? undefined,
-      input: {
-        location: input.location,
-        incomeStability: input.incomeStability,
-        savingsMonths: input.savingsMonths,
-        dependentCount: input.dependentCount,
-        relocationReadiness: input.relocationReadiness,
-        skills: input.skills,
-        healthStatus: input.healthStatus,
-        mobilityLevel: input.mobilityLevel,
-        housingType: input.housingType,
-        hasEmergencySupplies: input.hasEmergencySupplies,
-        psychologicalResilience: input.psychologicalResilience,
-        riskConcerns: input.riskConcerns,
-        sessionId: input.sessionId,
-        mentalResilienceAnswers: input.mentalResilienceAnswers,
-      },
+        await db.insert(resilienceReportsTable).values({
+          reportId,
+          sessionId: input.sessionId ?? null,
+          userId: userId ?? null,
+          currency,
+          ageBracket: input.ageBracket ?? null,
+          location: input.location,
+          locationCountry: normalizeCountry(input.location),
+          incomeStability: input.incomeStability,
+          savingsMonths: input.savingsMonths,
+          dependentCount: input.dependentCount,
+          relocationReadiness: input.relocationReadiness ?? null,
+          skills: input.skills,
+          healthStatus: input.healthStatus,
+          mobilityLevel: input.mobilityLevel,
+          housingType: input.housingType,
+          hasEmergencySupplies: input.hasEmergencySupplies,
+          psychologicalResilience: input.psychologicalResilience,
+          riskConcerns: input.riskConcerns,
+          mrStressTolerance: mentalResilienceSubScores?.stressTolerance ?? null,
+          mrAdaptability: mentalResilienceSubScores?.adaptability ?? null,
+          mrLearningAgility: mentalResilienceSubScores?.learningAgility ?? null,
+          mrChangeManagement: mentalResilienceSubScores?.changeManagement ?? null,
+          mrEmotionalRegulation: mentalResilienceSubScores?.emotionalRegulation ?? null,
+          mrSocialSupport: mentalResilienceSubScores?.socialSupport ?? null,
+          mrComposite: mentalResilienceSubScores?.composite ?? null,
+          mrPathway: mentalResilienceSubScores?.pathway ?? null,
+          scoreOverall: scores.overall,
+          scoreFinancial: scores.financial,
+          scoreHealth: scores.health,
+          scoreSkills: scores.skills,
+          scoreMobility: scores.mobility,
+          scorePsychological: scores.psychological,
+          scoreResources: scores.resources,
+          scoreSocialCapital: scores.socialCapital ?? null,
+          riskProfileSummary: reportContent.riskProfileSummary,
+          topVulnerabilities: reportContent.topVulnerabilities,
+          actionPlan: reportContent.actionPlan,
+          scenarioSimulations: reportContent.scenarioSimulations,
+          dailyHabits: reportContent.dailyHabits,
+          checklistsByArea: reportContent.checklistsByArea ?? null,
+          recommendedResources: reportContent.recommendedResources ?? null,
+          primaryGoal: input.primaryGoal ?? null,
+          successVision: input.successVision ?? null,
+          emergencySupplyTier: input.emergencySupplyTier ?? null,
+          createdAt: now,
+        });
+
+        // Fire welcome email on first authenticated plan (fire-and-forget)
+        if (userId && typeof planCount === "number" && planCount === 0) {
+          (async () => {
+            try {
+              const clerkClient = createClerkClient({ secretKey: process.env["CLERK_SECRET_KEY"] });
+              const clerkUser = await clerkClient.users.getUser(userId);
+              const email = clerkUser.emailAddresses[0]?.emailAddress;
+              if (email) {
+                await sendWelcomeEmail({ email, firstName: clerkUser.firstName });
+              }
+            } catch (err) {
+              req.log.warn({ err }, "sendWelcomeEmail failed (non-critical)");
+            }
+          })();
+        }
+
+        // Save a progress snapshot if sessionId is provided
+        if (input.sessionId) {
+          await db.insert(progressSnapshotsTable).values({
+            sessionId: input.sessionId,
+            reportId,
+            snapshotAt: now,
+            scoreOverall: scores.overall,
+            scoreFinancial: scores.financial,
+            scoreHealth: scores.health,
+            scoreSkills: scores.skills,
+            scoreMobility: scores.mobility,
+            scorePsychological: scores.psychological,
+            scoreResources: scores.resources,
+            mrComposite: mentalResilienceSubScores?.composite ?? null,
+          });
+        }
+
+        reportJobs.set(jobId, { status: "complete", createdAt: Date.now(), reportId });
+        req.log.info({ jobId, reportId }, "Background report generation complete");
+      } catch (err) {
+        req.log.error({ err, jobId }, "Background report generation failed");
+        reportJobs.set(jobId, { status: "failed", createdAt: Date.now(), error: "Failed to generate report. Please try again." });
+      }
     });
   } catch (err) {
-    req.log.error({ err }, "Error generating resilience report");
+    req.log.error({ err }, "Error in assess endpoint (pre-dispatch)");
     res.status(500).json({
       error: "INTERNAL_ERROR",
-      message: "Failed to generate resilience report. Please try again.",
+      message: "Failed to start report generation. Please try again.",
     });
   }
+});
+
+// ── Job status polling endpoint ───────────────────────────────────────────────
+router.get("/jobs/:jobId", (req, res) => {
+  const job = reportJobs.get(req.params.jobId);
+  if (!job) {
+    res.status(404).json({ error: "JOB_NOT_FOUND", message: "Job not found or expired." });
+    return;
+  }
+  res.json(job);
 });
 
 router.get("/my-reports", async (req, res) => {

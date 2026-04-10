@@ -267,12 +267,12 @@ const T = {
     s14VisionSub: "Optional — but the more specific you are, the more targeted your plan becomes.",
     // loading / errors
     analysing: "Analyzing your profile and building your plan…",
-    analysingDesc: "This usually takes 60–90 seconds — please keep this tab open.",
+    analysingDesc: "Your responses are being analyzed — this usually takes 1–2 minutes. Please keep this tab open.",
     planLimitTitle: "Plan Limit Reached",
     planLimitBack: "Go Back",
     manageMyPlans: "Manage My Plans",
-    errorTitle: "Analysis Timed Out",
-    errorDesc: "AI analysis can take up to 90 seconds. Your report may have been created in the background.",
+    errorTitle: "Analysis Taking Longer Than Expected",
+    errorDesc: "The AI is still working on your report. Check My Plans — it should appear there shortly.",
     errorAuthHint: "Check My Plans — your report might already be there.",
     errorAnonHint: "If you were signed in, your report would be saved to your profile automatically.",
     checkMyPlans: "Check My Plans",
@@ -460,12 +460,12 @@ const T = {
     s14VisionPlaceholder: "ex. 'Șase luni de economii, un plan clar dacă îmi pierd locul de muncă și mai puțin stres zilnic.'",
     s14VisionSub: "Opțional — cu cât ești mai specific/ă, cu atât planul tău devine mai bine orientat.",
     analysing: "Analizăm profilul tău și construim planul…",
-    analysingDesc: "De obicei durează 60–90 secunde — te rugăm să menții această filă deschisă.",
+    analysingDesc: "Răspunsurile tale sunt analizate — de obicei durează 1–2 minute. Te rugăm să menții această filă deschisă.",
     planLimitTitle: "Limita Planului Atinsă",
     planLimitBack: "Înapoi",
     manageMyPlans: "Gestionați Planurile Mele",
-    errorTitle: "Analiză Expirată",
-    errorDesc: "Analiza AI poate dura până la 90 de secunde. Raportul tău poate fi creat în fundal.",
+    errorTitle: "Analiza Durează Mai Mult Decât De Obicei",
+    errorDesc: "AI-ul lucrează în continuare la raportul tău. Verifică Planurile Mele — ar trebui să apară în curând.",
     errorAuthHint: "Verifică Planurile Mele — raportul tău ar putea fi deja acolo.",
     errorAnonHint: "Dacă erai autentificat/ă, raportul ar fi salvat automat în profilul tău.",
     checkMyPlans: "Verifică Planurile Mele",
@@ -691,7 +691,7 @@ export default function AssessmentPage() {
   const [resumeDraft, setResumeDraft] = useState<any>(null);
 
   const { user, isLoaded } = useUser();
-  const { isSignedIn } = useAuth();
+  const { isSignedIn, getToken } = useAuth();
   // Timeout fallback: if Clerk hasn't loaded within 3 s, treat as anonymous
   const [authTimedOut, setAuthTimedOut] = useState(false);
   useEffect(() => {
@@ -771,7 +771,7 @@ export default function AssessmentPage() {
     mutualAidAccess: undefined,
   });
 
-  const { mutateAsync } = useSubmitAssessment();
+  useSubmitAssessment(); // keep hook registration; direct fetch used in handleSubmit
 
   // ── Draft persistence ─────────────────────────────────────────────────────
   // Load saved draft once Clerk identity is resolved
@@ -851,29 +851,82 @@ export default function AssessmentPage() {
         savingsMonths: finalSavingsMonths,
         currency: finalCurrency,
         sessionId,
-        // Ensure hasEmergencySupplies stays backward-compatible
-        hasEmergencySupplies: formData.emergencySupplyTier 
+        hasEmergencySupplies: formData.emergencySupplyTier
           ? formData.emergencySupplyTier !== "none" && formData.emergencySupplyTier !== "under_3days"
           : formData.hasEmergencySupplies,
       };
-      const report = await mutateAsync({ data: submitPayload as AssessmentInput });
-      if (!isAuthenticated) {
-        const prev = parseInt(localStorage.getItem(ANON_COUNT_KEY) ?? "0", 10);
-        localStorage.setItem(ANON_COUNT_KEY, String(prev + 1));
+
+      const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+      // Get Clerk token for the request (null for anonymous users — cookies cover that)
+      const token = await getToken().catch(() => null);
+      const authHeaders: Record<string, string> = token ? { "Authorization": `Bearer ${token}` } : {};
+
+      // ── Submit (returns 202 + jobId immediately) ──────────────────────────
+      const submitRes = await fetch(`${BASE}/api/resilience/assess`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json", ...authHeaders },
+        body: JSON.stringify(submitPayload),
+      });
+
+      if (!submitRes.ok) {
+        const body = await submitRes.json().catch(() => null);
+        const errCode = body?.error ?? "UNKNOWN";
+        if (errCode === "PLAN_LIMIT_EXCEEDED") {
+          setSubmitError({ code: "PLAN_LIMIT_EXCEEDED", message: body.message });
+        } else if (errCode === "VALIDATION_ERROR") {
+          setSubmitError({ code: "VALIDATION_ERROR", message: "Your answers couldn't be validated. Please try again." });
+        } else {
+          setSubmitError({ code: "UNKNOWN", message: body?.message ?? "Something went wrong. Please try again." });
+        }
+        setIsSubmitting(false);
+        return;
       }
-      localStorage.setItem("resilium_last_report_id", report.reportId);
-      if (draftKey) localStorage.removeItem(draftKey);
-      setLocation(`/results/${report.reportId}`);
+
+      const { jobId } = await submitRes.json();
+
+      // ── Poll until the report is ready ────────────────────────────────────
+      const POLL_INTERVAL_MS = 3000;
+      const POLL_TIMEOUT_MS  = 5 * 60 * 1000; // 5 minutes absolute ceiling
+      const pollStart = Date.now();
+
+      while (Date.now() - pollStart < POLL_TIMEOUT_MS) {
+        await new Promise<void>(r => setTimeout(r, POLL_INTERVAL_MS));
+
+        const pollRes = await fetch(`${BASE}/api/resilience/jobs/${jobId}`, {
+          credentials: "include",
+          headers: authHeaders,
+        });
+
+        if (!pollRes.ok) continue; // transient error — keep polling
+
+        const job = await pollRes.json();
+
+        if (job.status === "complete") {
+          if (!isAuthenticated) {
+            const prev = parseInt(localStorage.getItem(ANON_COUNT_KEY) ?? "0", 10);
+            localStorage.setItem(ANON_COUNT_KEY, String(prev + 1));
+          }
+          localStorage.setItem("resilium_last_report_id", job.reportId);
+          if (draftKey) localStorage.removeItem(draftKey);
+          setLocation(`/results/${job.reportId}`);
+          return;
+        }
+
+        if (job.status === "failed") {
+          throw new Error(job.error ?? "Report generation failed. Please try again.");
+        }
+
+        // status === "processing" — loop again
+      }
+
+      // Fell through the timeout — report is still being generated in the background
+      throw new Error("Analysis is taking longer than expected. Check My Plans — your report may be there.");
     } catch (error: any) {
       console.error("Assessment submission failed", error);
-      const body = error?.data ?? error?.response?.data ?? null;
-      const errCode = body?.error ?? "UNKNOWN";
-      console.error("Error body:", JSON.stringify(body), "| HTTP status:", error?.status);
-      if (errCode === "PLAN_LIMIT_EXCEEDED") {
-        setSubmitError({ code: "PLAN_LIMIT_EXCEEDED", message: body.message });
-      } else if (errCode === "VALIDATION_ERROR") {
-        setSubmitError({ code: "VALIDATION_ERROR", message: "Your answers couldn't be validated. Please try again." });
-      } else {
+      const isLimitError = error?.message?.includes("PLAN_LIMIT");
+      if (!isLimitError) {
         setSubmitError({ code: "UNKNOWN", message: error?.message ?? "Something went wrong. Please try again." });
       }
       setIsSubmitting(false);

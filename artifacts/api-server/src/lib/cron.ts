@@ -344,29 +344,51 @@ async function runE2eAssessmentTest() {
           socialSupport1: 3,
         },
       };
+      // Step 1: Submit — now returns 202 + jobId immediately
       const res = await fetch(`${APP_URL}/api/resilience/assess`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
-        signal: AbortSignal.timeout(120_000),
+        signal: AbortSignal.timeout(15_000),
       });
-      const durationMs = Date.now() - t;
       if (!res.ok) {
         const body = await res.text().catch(() => "");
-        checks.push({ name: "Submit assessment (POST /api/resilience/submit)", passed: false, durationMs, detail: `HTTP ${res.status}: ${body.slice(0, 200)}` });
+        checks.push({ name: "Submit assessment (POST /api/resilience/assess)", passed: false, durationMs: Date.now() - t, detail: `HTTP ${res.status}: ${body.slice(0, 200)}` });
       } else {
-        const data = await res.json() as any;
-        testReportId = data?.reportId;
-        const hasRequiredFields = !!(data?.reportId && data?.score?.overall != null && data?.checklistsByArea);
-        checks.push({
-          name: "Submit assessment (POST /api/resilience/submit)",
-          passed: hasRequiredFields,
-          durationMs,
-          detail: hasRequiredFields ? `Report ${testReportId} — score ${Math.round(data.score.overall)}/100` : `Missing fields in response: ${JSON.stringify(Object.keys(data ?? {}))}`,
-        });
+        const { jobId } = await res.json() as any;
+        const submitDuration = Date.now() - t;
+        checks.push({ name: "Submit assessment (POST /api/resilience/assess)", passed: !!jobId, durationMs: submitDuration, detail: jobId ? `jobId ${jobId.slice(0, 8)}…` : "No jobId returned" });
+
+        // Step 2: Poll until complete (up to 3 minutes for smoke test)
+        if (jobId) {
+          const pollStart = Date.now();
+          const MAX_POLL_MS = 3 * 60 * 1000;
+          let pollPassed = false;
+          let pollDetail = "Timed out waiting for job completion";
+          while (Date.now() - pollStart < MAX_POLL_MS) {
+            await new Promise(r => setTimeout(r, 5000));
+            try {
+              const pollRes = await fetch(`${APP_URL}/api/resilience/jobs/${jobId}`, { signal: AbortSignal.timeout(10_000) });
+              if (pollRes.ok) {
+                const job = await pollRes.json() as any;
+                if (job.status === "complete") {
+                  testReportId = job.reportId;
+                  pollPassed = true;
+                  pollDetail = `Report ${testReportId} generated in ${Math.round((Date.now() - pollStart) / 1000)}s`;
+                  break;
+                }
+                if (job.status === "failed") {
+                  pollDetail = job.error ?? "Job failed";
+                  break;
+                }
+              }
+            } catch { /* keep polling */ }
+          }
+          checks.push({ name: "Poll job to completion (GET /api/resilience/jobs/:id)", passed: pollPassed, durationMs: Date.now() - pollStart, detail: pollDetail });
+        }
       }
     } catch (err: any) {
-      checks.push({ name: "Submit assessment (POST /api/resilience/submit)", passed: false, durationMs: Date.now() - t, detail: err?.message });
+      checks.push({ name: "Submit assessment (POST /api/resilience/assess)", passed: false, durationMs: Date.now() - t, detail: err?.message });
     }
   }
 
