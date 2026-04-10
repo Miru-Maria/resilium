@@ -26,6 +26,43 @@ declare global {
   interface Window { Paddle?: any; }
 }
 
+class ResultsErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean; error: string | null }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error);
+    return { hasError: true, error: msg };
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
+          <AlertTriangle className="w-16 h-16 text-destructive mb-6" />
+          <h2 className="text-2xl font-display font-bold mb-2">Something Went Wrong</h2>
+          <p className="text-muted-foreground max-w-md mb-4">
+            There was a problem displaying your report. Please try refreshing the page.
+          </p>
+          {this.state.error && (
+            <p className="text-xs text-muted-foreground/50 font-mono max-w-md break-all mb-8">{this.state.error}</p>
+          )}
+          <button
+            onClick={() => window.location.reload()}
+            className="px-6 py-2 bg-primary text-primary-foreground rounded-full font-semibold text-sm"
+          >
+            Refresh Page
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 function FeedbackWidget({ reportId }: { reportId: string }) {
   const storageKey = `feedback_submitted_${reportId}`;
   const alreadySubmitted = typeof window !== "undefined" && localStorage.getItem(storageKey) === "true";
@@ -137,6 +174,7 @@ const AREA_LABELS: Record<string, string> = {
   mobility: "Mobility",
   psychological: "Psychological",
   resources: "Resources",
+  socialCapital: "Social Capital",
 };
 
 const AREA_ICONS: Record<string, React.ReactNode> = {
@@ -146,6 +184,7 @@ const AREA_ICONS: Record<string, React.ReactNode> = {
   mobility: <Navigation className="w-4 h-4 text-violet-400" />,
   psychological: <Brain className="w-4 h-4 text-rose-400" />,
   resources: <Package className="w-4 h-4 text-orange-400" />,
+  socialCapital: <Users className="w-4 h-4 text-teal-500" />,
 };
 
 const PRIORITY_CONFIG = {
@@ -166,7 +205,7 @@ function getMilestone(percent: number) {
   return MILESTONE_MARKERS.slice().reverse().find(m => percent >= m.percent);
 }
 
-export default function ResultsPage() {
+function ResultsPageInner() {
   const [, params] = useRoute("/results/:reportId");
   const rawReportId = params?.reportId || "";
   // If the old code navigated to /results/undefined, treat as missing
@@ -1473,5 +1512,13 @@ export default function ResultsPage() {
         mentalResilienceProfile={mrProfile}
       />
     </div>
+  );
+}
+
+export default function ResultsPage() {
+  return (
+    <ResultsErrorBoundary>
+      <ResultsPageInner />
+    </ResultsErrorBoundary>
   );
 }

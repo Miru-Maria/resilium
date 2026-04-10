@@ -96,7 +96,7 @@ function ClerkAuthBridge() {
       try {
         const token = await Promise.race([
           getToken(),
-          new Promise<null>((resolve) => setTimeout(() => resolve(null), 5000)),
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), 2000)),
         ]);
         return token;
       } catch {
