@@ -94,7 +94,9 @@ function getMilestone(percent: number) {
 
 const COACHING_AREAS = new Set(["psychological", "health"]);
 
-const AREA_RESOURCES: Record<string, Array<{ title: string; desc: string; url: string; badge: string }>> = {
+type ResourceEntry = { title: string; desc: string; url: string; badge: string };
+
+const AREA_RESOURCES_US: Record<string, ResourceEntry[]> = {
   financial: [
     { title: "Consumer Financial Protection Bureau", desc: "Free budgeting tools and financial guides from the U.S. government.", url: "https://www.consumerfinance.gov", badge: "Gov · Free" },
     { title: "FEMA Financial Preparedness", desc: "Build financial resilience for emergencies and unexpected events.", url: "https://www.fema.gov/emergency-managers/individuals-communities/prepare-financially", badge: "Gov · Free" },
@@ -125,6 +127,151 @@ const AREA_RESOURCES: Record<string, Array<{ title: string; desc: string; url: s
   ],
 };
 
+const AREA_RESOURCES_RO: Record<string, ResourceEntry[]> = {
+  financial: [
+    { title: "ANAF — Agenția Națională de Administrare Fiscală", desc: "Obligații fiscale, ghiduri de conformitate și instrumente de planificare financiară.", url: "https://www.anaf.ro", badge: "Gov · Gratuit" },
+    { title: "ASF România — Educație Financiară", desc: "Resurse de educație financiară de la Autoritatea de Supraveghere Financiară.", url: "https://www.asfromania.ro/consumatori/educatie-financiara", badge: "Gov · Gratuit" },
+    { title: "Rețeaua Rurală Națională — Granturi", desc: "Fonduri europene pentru proiecte de reziliență comunitară și economică.", url: "https://www.rndr.ro", badge: "Fonduri EU" },
+  ],
+  health: [
+    { title: "Casa Națională de Asigurări de Sănătate (CNAS)", desc: "Drepturi, asigurări și servicii medicale în sistemul național de sănătate.", url: "https://www.cnas.ro", badge: "Gov · Gratuit" },
+    { title: "DSP — Direcțiile de Sănătate Publică", desc: "Pregătire pentru urgențe de sănătate publică și ghiduri locale de sănătate.", url: "https://www.dsp.ro", badge: "Gov · Gratuit" },
+    { title: "Federația Română de Prim Ajutor", desc: "Cursuri de prim ajutor și pregătire pentru situații de urgență.", url: "https://www.frpa.ro", badge: "ONG · Cursuri" },
+  ],
+  skills: [
+    { title: "Coursera (Reziliență & Adaptabilitate)", desc: "Cursuri certificate de universități de top despre reziliență, leadership și gestionarea crizelor.", url: "https://www.coursera.org/search?query=resilience", badge: "Cursuri" },
+    { title: "LinkedIn Learning", desc: "Abilități practice pentru reconversie profesională și reziliență profesională.", url: "https://www.linkedin.com/learning", badge: "Skills" },
+    { title: "e-România — Servicii Digitale", desc: "Portal guvernamental pentru servicii publice digitale și automatizare.", url: "https://www.e-guvernare.ro", badge: "Gov · Gratuit" },
+  ],
+  mobility: [
+    { title: "MAE — Sfaturi de Călătorie", desc: "Avertizări și sfaturi oficiale ale Ministerului Afacerilor Externe pentru călătorii în străinătate.", url: "https://www.mae.ro/travel-conditions", badge: "Gov · Gratuit" },
+    { title: "Numbeo — Calitatea Vieții în România", desc: "Compară costul vieții, siguranța și calitatea vieții în orașe din România și din lume.", url: "https://www.numbeo.com/quality-of-life/country_result.jsp?country=Romania", badge: "Instrument Gratuit" },
+    { title: "Schengen Info — Vize & Mobilitate", desc: "Ghid complet despre drepturile de mobilitate în spațiul Schengen și UE.", url: "https://www.schengenvisainfo.com", badge: "Ghid" },
+  ],
+  psychological: [
+    { title: "Asociația pentru Sănătate Mintală România", desc: "Sprijin pentru sănătate mintală, resurse de auto-evaluare și suport comunitar.", url: "https://www.asocialromana.ro", badge: "ONG" },
+    { title: "Mindfulness-Based Stress Reduction (MBSR)", desc: "Program de 8 săptămâni bazat pe dovezi pentru gestionarea stresului și reziliență psihologică.", url: "https://www.umassmed.edu/cfm/mindfulness-based-programs/mbsr-courses/", badge: "Program" },
+    { title: "Pagina de Psihologie", desc: "Resurse de psihologie, articole și ghiduri de sănătate mintală în limba română.", url: "https://www.paginadepsihologie.ro", badge: "Resurse" },
+  ],
+  resources: [
+    { title: "IGSU — Inspectoratul General pentru Situații de Urgență", desc: "Ghid oficial de pregătire pentru urgențe, dezastre naturale și situații de criză în România.", url: "https://www.igsu.ro/informatii-publice/pregatirea-populatiei", badge: "Gov · Gratuit" },
+    { title: "Crucea Roșie Română", desc: "Cursuri de prim ajutor, pregătire pentru dezastre și rețea de răspuns în situații de urgență.", url: "https://www.crucearosie.ro", badge: "ONG" },
+    { title: "Ro-Alert — Sistemul de Avertizare", desc: "Sistemul național de alertare în caz de dezastre și situații de urgență.", url: "https://www.sts.ro/ro/ro-alert", badge: "Gov · Gratuit" },
+  ],
+  socialCapital: [
+    { title: "VoluntariatRomania.ro", desc: "Găsește oportunități de voluntariat și proiecte de construire comunitară din toată România.", url: "https://www.voluntariatsibiu.ro", badge: "Comunitate" },
+    { title: "Federația Organizațiilor Cetățenești", desc: "Rețea de ONG-uri și organizații civice pentru reziliență comunitară.", url: "https://fonpc.ro", badge: "ONG" },
+    { title: "Nextdoor România", desc: "Conectează-te cu vecinii și comunitatea locală pentru ajutor reciproc și reziliență.", url: "https://nextdoor.com", badge: "Comunitate" },
+  ],
+};
+
+const AREA_RESOURCES_GLOBAL: Record<string, ResourceEntry[]> = {
+  financial: [
+    { title: "Coursera — Personal Finance", desc: "University-certified courses on budgeting, investing, and building financial resilience.", url: "https://www.coursera.org/search?query=personal+finance", badge: "Courses" },
+    { title: "Numbeo — Cost of Living", desc: "Compare cost of living, prices, and quality of life across 500+ cities worldwide.", url: "https://www.numbeo.com/cost-of-living/", badge: "Free Tool" },
+  ],
+  health: [
+    { title: "WHO — Emergency Preparedness", desc: "World Health Organization health emergency preparedness resources.", url: "https://www.who.int/health-topics/emergency-preparedness", badge: "Intl · Free" },
+    { title: "Mental Health First Aid (International)", desc: "Learn to identify and respond to mental health crises in any context.", url: "https://www.mentalhealthfirstaid.org/international/", badge: "Course" },
+  ],
+  skills: [
+    { title: "Coursera (Resilience & Adaptability)", desc: "University-certified courses on resilience, leadership, and crisis skills.", url: "https://www.coursera.org/search?query=resilience", badge: "Courses" },
+    { title: "LinkedIn Learning", desc: "Practical skills for career pivots, remote work, and professional resilience.", url: "https://www.linkedin.com/learning", badge: "Skills" },
+  ],
+  mobility: [
+    { title: "Numbeo Quality of Life Index", desc: "Compare cost of living, safety, and quality of life across 500+ cities.", url: "https://www.numbeo.com/quality-of-life/", badge: "Free Tool" },
+    { title: "InterNations — Expat Community", desc: "Resources, community, and guides for international relocation and mobility planning.", url: "https://www.internations.org", badge: "Community" },
+  ],
+  psychological: [
+    { title: "Mindfulness-Based Stress Reduction (MBSR)", desc: "Evidence-based 8-week program to build stress tolerance and presence.", url: "https://www.umassmed.edu/cfm/mindfulness-based-programs/mbsr-courses/", badge: "Program" },
+    { title: "Headspace", desc: "Guided meditation and mindfulness to build psychological resilience.", url: "https://www.headspace.com", badge: "App" },
+  ],
+  resources: [
+    { title: "UN OCHA — Emergency Preparedness", desc: "United Nations emergency preparedness guidelines and international crisis resources.", url: "https://www.unocha.org/themes/emergency-response", badge: "Intl · Free" },
+    { title: "IFRC — Red Cross Network", desc: "International Red Cross and Red Crescent first aid, disaster preparedness, and response.", url: "https://www.ifrc.org", badge: "Non-Profit" },
+  ],
+  socialCapital: [
+    { title: "InterNations Community", desc: "Connect with expats and locals for community resilience and social capital building.", url: "https://www.internations.org", badge: "Community" },
+    { title: "Meetup — Local Groups", desc: "Find local community groups for mutual support and skill sharing.", url: "https://www.meetup.com", badge: "Community" },
+  ],
+};
+
+function getAreaResources(location: string | undefined): Record<string, ResourceEntry[]> {
+  if (!location) return AREA_RESOURCES_GLOBAL;
+  const loc = location.toLowerCase();
+  if (loc.includes("romania") || loc.includes("bucurești") || loc.includes("bucharest") || loc.includes("cluj") || loc.includes("timișoara") || loc.includes("iași") || loc.includes("brașov") || loc.includes("constanța")) {
+    return AREA_RESOURCES_RO;
+  }
+  if (loc.includes("united states") || loc.includes("usa") || loc.includes("u.s.") || loc.includes(", ca") || loc.includes(", ny") || loc.includes(", tx") || loc.includes(", fl") || loc.includes(", wa") || loc.includes(", co") || loc.includes(", il") || loc.includes(", ga") || loc.includes(", az") || loc.includes(", nc") || loc.includes(", oh") || loc.includes(", mi")) {
+    return AREA_RESOURCES_US;
+  }
+  return AREA_RESOURCES_GLOBAL;
+}
+
+const ONBOARDING_STEPS = [
+  {
+    icon: "🎯",
+    title: "Welcome to Your Action Plan",
+    desc: "This is your personal resilience roadmap — everything here is tailored to your assessment results, your goal, and your location.",
+  },
+  {
+    icon: "⏱️",
+    title: "Three Timeframes, Clear Priorities",
+    desc: "Actions are organized into 0–30 days (urgent), 3–6 months (high-priority), and long-term. Start with the first horizon and work down.",
+  },
+  {
+    icon: "✅",
+    title: "Check Off Actions As You Go",
+    desc: "Click any action to mark it complete. Your progress is saved to your account and shown on your Report scorecard.",
+  },
+  {
+    icon: "✨",
+    title: "AI-Guided Sub-Steps (Pro)",
+    desc: "For each action, click \"Break it down\" to get AI-generated step-by-step guidance tailored to your specific situation.",
+  },
+  {
+    icon: "📚",
+    title: "Local Resources Included",
+    desc: "Every section includes curated resources matched to your location — local government sources, organizations, and tools relevant to where you are.",
+  },
+];
+
+function OnboardingModal({ onDone }: { onDone: () => void }) {
+  const [step, setStep] = useState(0);
+  const current = ONBOARDING_STEPS[step];
+  const isLast = step === ONBOARDING_STEPS.length - 1;
+  return (
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-card border border-border rounded-3xl shadow-2xl shadow-black/30 max-w-md w-full p-8 animate-in zoom-in-95 duration-200">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex gap-1.5">
+            {ONBOARDING_STEPS.map((_, i) => (
+              <div key={i} className={cn("h-1.5 rounded-full transition-all", i === step ? "w-6 bg-primary" : "w-1.5 bg-muted")} />
+            ))}
+          </div>
+          <button onClick={onDone} className="text-muted-foreground hover:text-foreground text-xl leading-none">&times;</button>
+        </div>
+        <div className="text-5xl mb-5 text-center">{current?.icon}</div>
+        <h2 className="font-display font-bold text-xl text-center mb-2">{current?.title}</h2>
+        <p className="text-muted-foreground text-sm leading-relaxed text-center mb-8">{current?.desc}</p>
+        <div className="flex gap-3">
+          {step > 0 && (
+            <button onClick={() => setStep(s => s - 1)} className="flex-1 py-2.5 rounded-xl border border-border text-sm font-medium hover:bg-muted/30 transition-colors">
+              Back
+            </button>
+          )}
+          <button
+            onClick={() => isLast ? onDone() : setStep(s => s + 1)}
+            className="flex-1 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 transition-colors"
+          >
+            {isLast ? "Let's Start →" : "Next"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function PlanPage() {
   const [, params] = useRoute("/plan/:reportId");
   const reportId = params?.reportId || "";
@@ -132,6 +279,19 @@ export default function PlanPage() {
   const { isSignedIn } = useAuth();
   const { openSignIn } = useClerk();
   const isAuthenticated = !!isSignedIn;
+
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  useEffect(() => {
+    const key = "resilium_plan_onboarded_v1";
+    if (!localStorage.getItem(key)) {
+      const t = setTimeout(() => setShowOnboarding(true), 800);
+      return () => clearTimeout(t);
+    }
+  }, []);
+  const dismissOnboarding = () => {
+    localStorage.setItem("resilium_plan_onboarded_v1", "1");
+    setShowOnboarding(false);
+  };
 
   const { data: report, isLoading, error } = useGetReport(reportId, {
     query: { enabled: !!reportId, retry: (n, e: any) => (e?.response?.status ?? e?.status) !== 404 && n < 2 },
@@ -253,6 +413,8 @@ export default function PlanPage() {
   const successVision = (report as any).successVision as string | undefined;
   const goalLabel = primaryGoal ? (GOAL_LABELS[primaryGoal] ?? primaryGoal) : null;
   const goalIcon = primaryGoal ? (GOAL_ICONS[primaryGoal] ?? "⚡") : "⚡";
+  const reportLocation = (report as any)?.input?.location as string | undefined;
+  const AREA_RESOURCES = getAreaResources(reportLocation);
 
   const progressMap: Record<string, boolean> = {};
   (checklistData?.progress ?? []).forEach(p => { progressMap[`${p.area}::${p.itemId}`] = p.completed; });
@@ -331,23 +493,41 @@ export default function PlanPage() {
 
   return (
     <div className="min-h-screen pb-24">
+      {showOnboarding && <OnboardingModal onDone={dismissOnboarding} />}
       <style dangerouslySetInnerHTML={{ __html: `
         @media print {
+          html, body { background: white !important; color: #111 !important; font-size: 11pt !important; }
           header, .print\\:hidden { display: none !important; }
-          body { background: white !important; color: black !important; }
-          .bg-card, .bg-background, .bg-muted { background: white !important; }
-          .border { border-color: #ddd !important; }
-          .text-muted-foreground { color: #555 !important; }
-          .text-primary { color: #c05c18 !important; }
           .sticky { position: static !important; }
+          .bg-card, .bg-background, .bg-muted, .bg-muted\\/30, .bg-muted\\/20 { background: white !important; }
+          .border, .border-border, .border-border\\/60 { border-color: #ddd !important; }
+          .shadow-lg, .shadow-xl, .shadow-sm, .shadow-md { box-shadow: none !important; }
+          .text-muted-foreground { color: #555 !important; }
+          .text-primary { color: #b45309 !important; }
           main { padding-top: 0 !important; }
-          @page { margin: 1.5cm; size: A4; }
+          section { page-break-inside: avoid; margin-bottom: 1.5rem !important; }
+          h1, h2, h3 { page-break-after: avoid; }
+          .bg-gradient-to-b, .bg-gradient-to-br { background: white !important; }
+          .rounded-3xl, .rounded-2xl, .rounded-xl { border-radius: 8px !important; }
+          button, [role="button"] { display: none !important; }
+          a { color: #b45309 !important; text-decoration: underline; }
+          @page { margin: 1.5cm; size: A4 portrait; }
         }
       `}} />
       {/* Header */}
       <header className="w-full bg-card border-b border-border sticky top-14 z-50">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-end gap-4">
           <div className="flex items-center gap-2 text-sm">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="rounded-full text-muted-foreground hover:text-foreground gap-1.5 print:hidden"
+              onClick={() => { localStorage.removeItem("resilium_plan_onboarded_v1"); setShowOnboarding(true); }}
+              title="Show plan guide"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><circle cx="12" cy="12" r="10"/><path strokeLinecap="round" strokeLinejoin="round" d="M12 16v-4M12 8h.01"/></svg>
+              Help
+            </Button>
             <Button
               variant="ghost"
               size="sm"
