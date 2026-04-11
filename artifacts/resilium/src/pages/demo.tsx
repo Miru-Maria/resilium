@@ -150,7 +150,7 @@ const SAMPLE_SCENARIOS = [
 const AREA_LABELS: Record<string, string> = {
   financial: "Financial", health: "Health", skills: "Skills",
   mobility: "Mobility", psychological: "Psychological", resources: "Resources",
-  socialCapital: "Social Network",
+  socialCapital: "Social Capital",
 };
 
 const AREA_ICONS: Record<string, React.ReactNode> = {

@@ -227,7 +227,7 @@ const T = {
     ],
     traumaNote: "We understand this may be personal. Your answers shape a plan that takes this seriously.",
     // step 12
-    s12Title: "Community & Social Network",
+    s12Title: "Community & Social Capital",
     s12Sub: "Strong networks are often the most reliable resource in a crisis. Help me understand yours.",
     s12ContactsTitle: "Trusted contacts you could call on in a major crisis",
     s12ContactsSub: "People locally or abroad who would genuinely help you — family, friends, colleagues, or community.",
@@ -423,7 +423,7 @@ const T = {
       { id: "illness", label: "Boală Personală" },
     ],
     traumaNote: "Înțelegem că aceasta poate fi o temă personală. Răspunsurile tale modelează un plan care ia aceasta în serios.",
-    s12Title: "Comunitate & Rețea Socială",
+    s12Title: "Comunitate & Capital Social",
     s12Sub: "Rețelele puternice sunt adesea cea mai fiabilă resursă în criză. Ajută-mă să le înțeleg pe ale tale.",
     s12ContactsTitle: "Persoane de încredere pe care le-ai putea apela într-o criză majoră",
     s12ContactsSub: "Persoane din localitate sau din străinătate care te-ar ajuta cu adevărat — familie, prieteni, colegi sau comunitate.",
