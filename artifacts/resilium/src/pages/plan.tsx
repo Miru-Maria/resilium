@@ -45,20 +45,20 @@ const AREA_ICONS: Record<string, React.ElementType> = {
 };
 
 const AREA_COLORS: Record<string, string> = {
-  financial: "text-emerald-700 bg-emerald-500/10",
-  health: "text-blue-700 bg-blue-500/10",
-  skills: "text-violet-700 bg-violet-500/10",
-  mobility: "text-amber-700 bg-amber-500/10",
-  psychological: "text-rose-700 bg-rose-500/10",
-  resources: "text-orange-700 bg-orange-500/10",
-  socialCapital: "text-teal-700 bg-teal-500/10",
+  financial: "text-emerald-400 bg-emerald-500/15",
+  health: "text-sky-400 bg-sky-500/15",
+  skills: "text-violet-400 bg-violet-500/15",
+  mobility: "text-amber-400 bg-amber-500/15",
+  psychological: "text-rose-400 bg-rose-500/15",
+  resources: "text-orange-400 bg-orange-500/15",
+  socialCapital: "text-teal-400 bg-teal-500/15",
 };
 
 const PRIORITY_CONFIG = {
-  critical: { label: "Critical", className: "bg-destructive/10 text-destructive border-destructive/20" },
-  high: { label: "High", className: "bg-amber-500/10 text-amber-700 border-amber-500/20" },
-  medium: { label: "Medium", className: "bg-blue-500/10 text-blue-700 border-blue-500/20" },
-  low: { label: "Low", className: "bg-primary/10 text-primary border-primary/20" },
+  critical: { label: "Critical", className: "bg-red-500/20 text-red-400 border-red-500/35" },
+  high: { label: "High", className: "bg-amber-500/20 text-amber-400 border-amber-500/35" },
+  medium: { label: "Medium", className: "bg-sky-500/20 text-sky-400 border-sky-500/35" },
+  low: { label: "Low", className: "bg-primary/15 text-primary border-primary/30" },
 };
 
 const GOAL_LABELS: Record<string, string> = {
@@ -711,7 +711,7 @@ export default function PlanPage() {
                           {horizon.items.length > 0 && (
                             <span className={cn(
                               "text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full",
-                              doneInHorizon === horizon.items.length ? "bg-emerald-500/20 text-emerald-700" : "bg-muted text-muted-foreground"
+                              doneInHorizon === horizon.items.length ? "bg-emerald-500/20 text-emerald-400" : "bg-muted text-muted-foreground"
                             )}>
                               {doneInHorizon}/{horizon.items.length} done
                             </span>
@@ -730,9 +730,9 @@ export default function PlanPage() {
                         {horizon.narrativeItems.slice(0, 3).map((np, i) => (
                           <div key={i} className="bg-card rounded-2xl border border-border/60 p-4 flex items-start gap-3">
                             <div className={cn("w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 text-[10px] font-bold",
-                              np.priority === "critical" ? "bg-destructive/10 text-destructive" :
-                              np.priority === "high" ? "bg-amber-500/10 text-amber-700" :
-                              "bg-primary/10 text-primary"
+                              np.priority === "critical" ? "bg-red-500/20 text-red-400" :
+                              np.priority === "high" ? "bg-amber-500/20 text-amber-400" :
+                              "bg-primary/15 text-primary"
                             )}>
                               {i + 1}
                             </div>
@@ -800,7 +800,7 @@ export default function PlanPage() {
                                       >
                                         <div className={cn(
                                           "w-5 h-5 rounded-full border-2 flex-shrink-0 mt-0.5 flex items-center justify-center transition-all",
-                                          completed ? "border-emerald-500 bg-emerald-500" : "border-muted-foreground/40"
+                                          completed ? "border-emerald-500 bg-emerald-500" : "border-muted-foreground/60"
                                         )}>
                                           {completed && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
                                         </div>
@@ -811,7 +811,7 @@ export default function PlanPage() {
                                             </span>
                                             <span className={cn(
                                               "text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full",
-                                              item.pathway === "growth" ? "bg-emerald-500/10 text-emerald-700" : "bg-amber-500/10 text-amber-700"
+                                              item.pathway === "growth" ? "bg-emerald-500/20 text-emerald-400" : "bg-amber-500/20 text-amber-400"
                                             )}>
                                               {item.pathway === "growth" ? "Growth" : "Foundation"}
                                             </span>

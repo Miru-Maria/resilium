@@ -164,10 +164,10 @@ const AREA_ICONS: Record<string, React.ReactNode> = {
 };
 
 const PRIORITY_CONFIG = {
-  critical: { label: "Critical", className: "bg-destructive/10 text-destructive" },
-  high: { label: "High", className: "bg-amber-500/10 text-amber-700" },
-  medium: { label: "Medium", className: "bg-blue-500/10 text-blue-700" },
-  low: { label: "Low", className: "bg-primary/10 text-primary" },
+  critical: { label: "Critical", className: "bg-red-500/20 text-red-400" },
+  high: { label: "High", className: "bg-amber-500/20 text-amber-400" },
+  medium: { label: "Medium", className: "bg-sky-500/20 text-sky-400" },
+  low: { label: "Low", className: "bg-primary/15 text-primary" },
 };
 
 function getScoreColor(score: number) {
@@ -415,7 +415,7 @@ export default function DemoPage() {
           <div className="flex items-center gap-3 mb-6">
             <Brain className="w-6 h-6 text-primary" />
             <h2 className="font-display font-bold text-2xl">Mental Resilience Profile</h2>
-            <span className="ml-auto text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-700">
+            <span className="ml-auto text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400">
               Growth Pathway
             </span>
           </div>
@@ -494,7 +494,7 @@ export default function DemoPage() {
               </div>
               <button
                 type="button"
-                className="flex items-center gap-1.5 text-xs font-semibold rounded-full px-3 py-1.5 border border-emerald-200 bg-emerald-50 text-emerald-700 flex-shrink-0 dark:bg-emerald-900/20 dark:border-emerald-800"
+                className="flex items-center gap-1.5 text-xs font-semibold rounded-full px-3 py-1.5 border border-emerald-500/40 bg-emerald-500/15 text-emerald-400 flex-shrink-0"
                 onClick={() => toggleItem(`${nextItem.area}::${nextItem.id}`)}
               >
                 <CheckCircle className="w-3.5 h-3.5" /> Done
@@ -533,7 +533,7 @@ export default function DemoPage() {
                     {AREA_LABELS[area] ?? area}
                     <span className={cn(
                       "text-[10px] font-bold px-1.5 py-0.5 rounded-full",
-                      comp.done === comp.total && comp.total > 0 ? "bg-emerald-500/20 text-emerald-700" : "bg-muted text-muted-foreground"
+                      comp.done === comp.total && comp.total > 0 ? "bg-emerald-500/20 text-emerald-400" : "bg-muted text-muted-foreground"
                     )}>
                       {comp.done}/{comp.total}
                     </span>
@@ -572,7 +572,7 @@ export default function DemoPage() {
                         >
                           <div className={cn(
                             "w-5 h-5 rounded-full border-2 flex-shrink-0 mt-0.5 flex items-center justify-center transition-all",
-                            completed ? "border-emerald-500 bg-emerald-500" : "border-muted-foreground/40"
+                            completed ? "border-emerald-500 bg-emerald-500" : "border-muted-foreground/60"
                           )}>
                             {completed && <Check className="w-3 h-3 text-white" />}
                           </div>
@@ -583,7 +583,7 @@ export default function DemoPage() {
                               </span>
                               <span className={cn(
                                 "text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full",
-                                item.pathway === "growth" ? "bg-emerald-500/10 text-emerald-700" : "bg-amber-500/10 text-amber-700"
+                                item.pathway === "growth" ? "bg-emerald-500/20 text-emerald-400" : "bg-amber-500/20 text-amber-400"
                               )}>
                                 {item.pathway === "growth" ? "Growth" : "Foundation"}
                               </span>
@@ -661,9 +661,9 @@ export default function DemoPage() {
                     <div className="flex-1 space-y-1">
                       <div className="flex items-center gap-2 mb-1">
                         <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full ${
-                          item.priority === "critical" ? "bg-destructive/10 text-destructive" :
-                          item.priority === "high" ? "bg-amber-500/10 text-amber-700" :
-                          "bg-primary/10 text-primary"
+                          item.priority === "critical" ? "bg-red-500/20 text-red-400" :
+                          item.priority === "high" ? "bg-amber-500/20 text-amber-400" :
+                          "bg-primary/15 text-primary"
                         }`}>{item.priority} priority</span>
                         <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-secondary/30 text-secondary-foreground">
                           {item.category}
@@ -693,9 +693,9 @@ export default function DemoPage() {
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-left w-full pr-4">
                     <span className="font-bold text-lg">{scenario.scenario}</span>
                     <span className={`text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full w-max ${
-                      scenario.impact === "severe" ? "bg-destructive/10 text-destructive" :
-                      scenario.impact === "high" ? "bg-amber-500/10 text-amber-700" :
-                      "bg-emerald-500/10 text-emerald-700"
+                      scenario.impact === "severe" ? "bg-red-500/20 text-red-400" :
+                      scenario.impact === "high" ? "bg-amber-500/20 text-amber-400" :
+                      "bg-emerald-500/20 text-emerald-400"
                     }`}>{scenario.impact} Impact</span>
                   </div>
                 </AccordionTrigger>
