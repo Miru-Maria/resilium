@@ -44,7 +44,7 @@ const FREE_FEATURES = [
   "Full resilience score — all 6 dimensions",
   "AI-generated action plan",
   "Mental resilience profile",
-  "Print / Save PDF",
+  "Markdown export (Notion, Obsidian, etc.)",
   "GDPR-compliant data handling",
 ];
 

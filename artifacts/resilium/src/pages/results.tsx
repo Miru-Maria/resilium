@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { Progress } from "@/components/ui/progress";
-import { Loader2, Download, Printer, Share2, AlertTriangle, Check, CheckCircle, RefreshCcw, Activity, User, LogIn, Brain, TrendingUp, Award, Star, ExternalLink, Heart, BookOpen, ShieldCheck, Zap, Package, Globe, MapPin, Lock, Mail, ImageDown, Sparkles, ChevronDown, ChevronUp, DollarSign, Wrench, Navigation, Home, Users, Target } from "lucide-react";
+import { Loader2, Download, Share2, AlertTriangle, Check, CheckCircle, RefreshCcw, Activity, User, LogIn, Brain, TrendingUp, Award, Star, ExternalLink, Heart, BookOpen, ShieldCheck, Zap, Package, Globe, MapPin, Lock, Mail, ImageDown, Sparkles, ChevronDown, ChevronUp, DollarSign, Wrench, Navigation, Home, Users, Target } from "lucide-react";
 import { ResilientIcon } from "@/components/resilient-icon";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
@@ -548,8 +548,6 @@ function ResultsPageInner() {
     URL.revokeObjectURL(a.href);
     toast({ title: "Markdown exported", description: "You can import it into Notion, Evernote, or any markdown editor." });
   };
-
-  const handlePrint = () => window.print();
 
   const handleDonate = () => {
     if (!PADDLE_DONATION_PRICE_ID || !window.Paddle) return;
