@@ -728,20 +728,20 @@ export default function PlanPage() {
                       <div className="mb-6 space-y-3">
                         <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">Strategic Focus</p>
                         {horizon.narrativeItems.slice(0, 3).map((np, i) => (
-                          <div key={i} className="bg-card rounded-2xl border border-border/60 p-4 flex items-start gap-3">
+                          <div key={i} className="bg-white rounded-2xl border border-gray-200 p-4 flex items-start gap-3 shadow-sm">
                             <div className={cn("w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 text-[10px] font-bold",
-                              np.priority === "critical" ? "bg-red-500/20 text-red-400" :
-                              np.priority === "high" ? "bg-amber-500/20 text-amber-400" :
+                              np.priority === "critical" ? "bg-red-500/20 text-red-600" :
+                              np.priority === "high" ? "bg-amber-500/20 text-amber-600" :
                               "bg-primary/15 text-primary"
                             )}>
                               {i + 1}
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 flex-wrap mb-1">
-                                <span className="font-semibold text-sm">{np.title}</span>
-                                <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground">{np.category}</span>
+                                <span className="font-semibold text-sm text-gray-900">{np.title}</span>
+                                <span className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-500">{np.category}</span>
                               </div>
-                              <p className="text-xs text-muted-foreground leading-relaxed">{np.description}</p>
+                              <p className="text-xs text-gray-600 leading-relaxed">{np.description}</p>
                             </div>
                           </div>
                         ))}
@@ -789,8 +789,8 @@ export default function PlanPage() {
                                     <div
                                       key={item.id}
                                       className={cn(
-                                        "rounded-2xl border bg-card transition-all overflow-hidden",
-                                        completed ? "border-emerald-200 dark:border-emerald-900/30" : "border-border/60"
+                                        "rounded-2xl border bg-white transition-all overflow-hidden shadow-sm",
+                                        completed ? "border-emerald-300" : "border-gray-200"
                                       )}
                                     >
                                       {/* Main item row */}
@@ -811,15 +811,15 @@ export default function PlanPage() {
                                             </span>
                                             <span className={cn(
                                               "text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full",
-                                              item.pathway === "growth" ? "bg-emerald-500/20 text-emerald-400" : "bg-amber-500/20 text-amber-400"
+                                              item.pathway === "growth" ? "bg-emerald-500/15 text-emerald-700" : "bg-amber-500/15 text-amber-700"
                                             )}>
                                               {item.pathway === "growth" ? "Growth" : "Foundation"}
                                             </span>
                                           </div>
-                                          <h4 className={cn("font-bold text-sm leading-snug", completed && "line-through text-muted-foreground")}>
+                                          <h4 className={cn("font-bold text-sm leading-snug text-gray-900", completed && "line-through text-gray-400")}>
                                             {item.title}
                                           </h4>
-                                          <p className="text-muted-foreground text-xs mt-0.5 leading-relaxed">{item.description}</p>
+                                          <p className="text-gray-500 text-xs mt-0.5 leading-relaxed">{item.description}</p>
                                         </div>
                                       </div>
 
@@ -834,7 +834,7 @@ export default function PlanPage() {
                                               "flex items-center gap-1.5 text-xs font-semibold rounded-full px-3 py-1.5 border transition-all",
                                               isExpanded
                                                 ? "border-primary/40 bg-primary/5 text-primary"
-                                                : "border-border text-muted-foreground hover:border-primary/30 hover:text-primary"
+                                                : "border-gray-300 text-gray-500 hover:border-primary/40 hover:text-primary"
                                             )}
                                           >
                                             {isLoadingExpand ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
@@ -845,7 +845,7 @@ export default function PlanPage() {
                                           <Link href="/pricing">
                                             <button
                                               type="button"
-                                              className="flex items-center gap-1.5 text-xs rounded-full px-3 py-1.5 border border-border text-muted-foreground hover:border-primary/30 hover:text-primary transition-all"
+                                              className="flex items-center gap-1.5 text-xs rounded-full px-3 py-1.5 border border-gray-300 text-gray-500 hover:border-primary/40 hover:text-primary transition-all"
                                             >
                                               <Lock className="w-3 h-3" />
                                               Break it down — unlock Pro
@@ -880,36 +880,36 @@ export default function PlanPage() {
 
                                       {/* AI sub-steps panel */}
                                       {isExpanded && (
-                                        <div className="px-4 pb-5 border-t border-border/50 pt-4">
+                                        <div className="px-4 pb-5 border-t border-gray-200 pt-4">
                                           {isLoadingExpand ? (
-                                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                            <div className="flex items-center gap-2 text-sm text-gray-500">
                                               <Loader2 className="w-4 h-4 animate-spin text-primary" />
                                               Generating personalized steps for your profile…
                                             </div>
                                           ) : subSteps && subSteps.length > 0 ? (
                                             <div>
-                                              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-3">Step-by-step guidance</p>
+                                              <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">Step-by-step guidance</p>
                                               <ol className="space-y-3">
                                                 {subSteps.map((step, i) => (
                                                   <li key={i} className="flex items-start gap-3 text-sm">
                                                     <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center mt-0.5">
                                                       {i + 1}
                                                     </span>
-                                                    <span className="text-foreground leading-snug">{step}</span>
+                                                    <span className="text-gray-800 leading-snug">{step}</span>
                                                   </li>
                                                 ))}
                                               </ol>
                                             </div>
                                           ) : subSteps && subSteps.length === 0 ? (
-                                            <p className="text-sm text-muted-foreground">Could not generate steps — please try again.</p>
+                                            <p className="text-sm text-gray-500">Could not generate steps — please try again.</p>
                                           ) : null}
                                         </div>
                                       )}
 
                                       {/* Resources */}
                                       {resources.length > 0 && (
-                                        <div className="px-4 pb-4 border-t border-border/30 pt-3">
-                                          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">Resources</p>
+                                        <div className="px-4 pb-4 border-t border-gray-200 pt-3">
+                                          <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Resources</p>
                                           <div className="flex flex-wrap gap-2">
                                             {resources.map(r => (
                                               <a
