@@ -425,6 +425,9 @@ function ResultsPageInner() {
   }, [report]);
   const scrollToChecklist = () => checklistRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
 
+  // Declared here (before all early returns) to satisfy React's Rules of Hooks
+  const [showShareModal, setShowShareModal] = useState(false);
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center">
@@ -487,8 +490,6 @@ function ResultsPageInner() {
     if (score >= 20) return "Low";
     return "Critical";
   };
-
-  const [showShareModal, setShowShareModal] = useState(false);
 
   const handleEmailReport = () => {
     const subject = encodeURIComponent("My Resilium Resilience Report");

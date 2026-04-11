@@ -291,7 +291,7 @@ const T = {
       1: "Locație", 2: "Vârstă", 3: "Venituri", 4: "Reziliență Mentală",
       5: "Resurse Financiare", 6: "Dependenți", 7: "Abilități", 8: "Sănătate",
       9: "Mobilitate & Relocare", 10: "Locuință", 11: "Urgențe",
-      12: "Profilul de Risc", 13: "Capital Social",
+      12: "Profilul de Risc", 13: "Capital Social", 14: "Obiectivul Tău",
     } as Record<number, string>,
     back: "Înapoi",
     next: "Următor",
