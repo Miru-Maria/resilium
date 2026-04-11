@@ -26,19 +26,19 @@ function SectionHeader({
     <button
       type="button"
       onClick={onToggle}
-      className="w-full flex items-center gap-4 p-6 text-left hover:bg-muted/40 transition-colors rounded-t-2xl"
+      className="w-full flex items-center gap-4 p-6 text-left hover:bg-slate-50 transition-colors rounded-t-2xl"
     >
       <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
         <Icon className="w-5 h-5 text-primary" />
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-0.5">{label}</p>
-        <h2 className="text-lg font-bold font-display text-foreground">{title}</h2>
+        <h2 className="text-lg font-bold font-display text-gray-900">{title}</h2>
       </div>
       {isOpen ? (
-        <ChevronDown className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+        <ChevronDown className="w-5 h-5 text-slate-400 flex-shrink-0" />
       ) : (
-        <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+        <ChevronRight className="w-5 h-5 text-slate-400 flex-shrink-0" />
       )}
     </button>
   );
@@ -54,11 +54,11 @@ function ChecklistItem({ text, detail }: { text: string; detail?: string }) {
       {checked ? (
         <CheckSquare className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
       ) : (
-        <Square className="w-4 h-4 text-muted-foreground/50 flex-shrink-0 mt-0.5 group-hover:text-muted-foreground transition-colors" />
+        <Square className="w-4 h-4 text-slate-400 flex-shrink-0 mt-0.5 group-hover:text-slate-600 transition-colors" />
       )}
       <div>
-        <span className={cn("text-sm", checked ? "line-through text-muted-foreground" : "text-foreground")}>{text}</span>
-        {detail && <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{detail}</p>}
+        <span className={cn("text-sm", checked ? "line-through text-gray-400" : "text-gray-900")}>{text}</span>
+        {detail && <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{detail}</p>}
       </div>
     </li>
   );
@@ -82,7 +82,7 @@ function CopyBlock({ label, children }: { label: string; children: string }) {
   return (
     <div className="mb-4">
       <div className="flex items-center justify-between mb-1.5">
-        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{label}</span>
+        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{label}</span>
         <button
           type="button"
           onClick={handleCopy}
@@ -91,7 +91,7 @@ function CopyBlock({ label, children }: { label: string; children: string }) {
           {copied ? "Copied!" : "Copy"}
         </button>
       </div>
-      <pre className="whitespace-pre-wrap text-sm bg-muted/40 rounded-xl p-4 border border-border/60 font-sans leading-relaxed">
+      <pre className="whitespace-pre-wrap text-sm text-gray-800 bg-slate-100 rounded-xl p-4 border border-slate-200 font-sans leading-relaxed">
         {children}
       </pre>
     </div>
@@ -100,7 +100,7 @@ function CopyBlock({ label, children }: { label: string; children: string }) {
 
 function InfoBox({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-primary/5 border border-primary/15 rounded-xl p-4 text-sm text-muted-foreground leading-relaxed mb-4">
+    <div className="bg-primary/8 border border-primary/20 rounded-xl p-4 text-sm text-gray-700 leading-relaxed mb-4">
       {children}
     </div>
   );
@@ -108,20 +108,20 @@ function InfoBox({ children }: { children: React.ReactNode }) {
 
 function Table({ headers, rows }: { headers: string[]; rows: (string | React.ReactNode)[][] }) {
   return (
-    <div className="overflow-x-auto rounded-xl border border-border/60 mb-4">
+    <div className="overflow-x-auto rounded-xl border border-slate-200 mb-4">
       <table className="w-full text-sm">
-        <thead className="bg-muted/40">
+        <thead className="bg-slate-100">
           <tr>
             {headers.map(h => (
-              <th key={h} className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">{h}</th>
+              <th key={h} className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">{h}</th>
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-border/40">
+        <tbody className="divide-y divide-slate-200">
           {rows.map((row, ri) => (
-            <tr key={ri} className="hover:bg-muted/20 transition-colors">
+            <tr key={ri} className="hover:bg-slate-50 transition-colors">
               {row.map((cell, ci) => (
-                <td key={ci} className="px-4 py-3 text-foreground align-top">{cell}</td>
+                <td key={ci} className="px-4 py-3 text-gray-800 align-top">{cell}</td>
               ))}
             </tr>
           ))}
@@ -201,7 +201,7 @@ The assessment is free and anonymous — no email required. Takes about 12 minut
       <SubHeading><Calendar className="w-4 h-4" /> Launch Day Checklist</SubHeading>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
         <div>
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Before Launch (T−7 to T−1 days)</p>
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Before Launch (T−7 to T−1 days)</p>
           <ul className="space-y-3">
             <ChecklistItem text="Confirm your hunter — ask someone with Product Hunt followers and history" />
             <ChecklistItem text="Prepare the full gallery: 5 images, thumbnail, logo (all 1270×760 px)" />
@@ -213,7 +213,7 @@ The assessment is free and anonymous — no email required. Takes about 12 minut
           </ul>
         </div>
         <div>
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Launch Day (12:01 AM PT)</p>
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Launch Day (12:01 AM PT)</p>
           <ul className="space-y-3">
             <ChecklistItem text="Go live at 12:01 AM Pacific Time (reset hour)" detail="Earlier is better — more hours to accumulate votes." />
             <ChecklistItem text="Post the first comment immediately after launch" />
@@ -354,25 +354,25 @@ function ResearchReportSection() {
 
       <SubHeading><BookOpen className="w-4 h-4" /> Survey Methodology</SubHeading>
 
-      <div className="bg-muted/30 rounded-xl p-4 border border-border/60 mb-4">
-        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Collection Method</p>
+      <div className="bg-slate-100 rounded-xl p-4 border border-slate-200 mb-4">
+        <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-3">Collection Method</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-          <div className="p-3 rounded-lg bg-background border border-border/50">
-            <p className="font-semibold mb-1">Channel 1: In-Product</p>
-            <p className="text-muted-foreground text-xs">Ask all Resilium users who complete a report to opt into the research survey. Target: 500+ responses from actual assessment-takers.</p>
+          <div className="p-3 rounded-lg bg-white border border-slate-200">
+            <p className="font-semibold text-gray-900 mb-1">Channel 1: In-Product</p>
+            <p className="text-gray-600 text-xs">Ask all Resilium users who complete a report to opt into the research survey. Target: 500+ responses from actual assessment-takers.</p>
           </div>
-          <div className="p-3 rounded-lg bg-background border border-border/50">
-            <p className="font-semibold mb-1">Channel 2: Typeform</p>
-            <p className="text-muted-foreground text-xs">A standalone Typeform survey distributed via Reddit, Substack, and email. Target: 500+ additional responses from broader public.</p>
+          <div className="p-3 rounded-lg bg-white border border-slate-200">
+            <p className="font-semibold text-gray-900 mb-1">Channel 2: Typeform</p>
+            <p className="text-gray-600 text-xs">A standalone Typeform survey distributed via Reddit, Substack, and email. Target: 500+ additional responses from broader public.</p>
           </div>
-          <div className="p-3 rounded-lg bg-background border border-border/50">
-            <p className="font-semibold mb-1">Target N</p>
-            <p className="text-muted-foreground text-xs">Minimum 500 valid responses. 1,000+ for credible demographic breakdowns. Aim for 60% UK/US split for press relevance.</p>
+          <div className="p-3 rounded-lg bg-white border border-slate-200">
+            <p className="font-semibold text-gray-900 mb-1">Target N</p>
+            <p className="text-gray-600 text-xs">Minimum 500 valid responses. 1,000+ for credible demographic breakdowns. Aim for 60% UK/US split for press relevance.</p>
           </div>
         </div>
       </div>
 
-      <p className="text-sm font-semibold text-foreground mb-2">Core Survey Questions</p>
+      <p className="text-sm font-semibold text-gray-900 mb-2">Core Survey Questions</p>
       <Table
         headers={["#", "Question", "Type", "Dimension"]}
         rows={[
@@ -508,7 +508,7 @@ export default function AdminMarketingPage() {
 
         <div className="space-y-4">
           {/* Product Hunt */}
-          <div className="bg-card rounded-2xl border border-border/60 shadow-sm overflow-hidden">
+          <div className="bg-white/90 rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
             <SectionHeader
               icon={Rocket}
               label="Channel 1 — Product Hunt"
@@ -517,14 +517,14 @@ export default function AdminMarketingPage() {
               onToggle={() => toggle("product-hunt")}
             />
             {openSection === "product-hunt" && (
-              <div className="border-t border-border/60">
+              <div className="border-t border-slate-200">
                 <ProductHuntSection />
               </div>
             )}
           </div>
 
           {/* Reddit */}
-          <div className="bg-card rounded-2xl border border-border/60 shadow-sm overflow-hidden">
+          <div className="bg-white/90 rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
             <SectionHeader
               icon={MessageSquare}
               label="Channel 2 — Reddit Organic"
@@ -533,14 +533,14 @@ export default function AdminMarketingPage() {
               onToggle={() => toggle("reddit")}
             />
             {openSection === "reddit" && (
-              <div className="border-t border-border/60">
+              <div className="border-t border-slate-200">
                 <RedditSection />
               </div>
             )}
           </div>
 
           {/* Research Report */}
-          <div className="bg-card rounded-2xl border border-border/60 shadow-sm overflow-hidden">
+          <div className="bg-white/90 rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
             <SectionHeader
               icon={BarChart2}
               label="Channel 3 — Original Research"
@@ -549,7 +549,7 @@ export default function AdminMarketingPage() {
               onToggle={() => toggle("research-report")}
             />
             {openSection === "research-report" && (
-              <div className="border-t border-border/60">
+              <div className="border-t border-slate-200">
                 <ResearchReportSection />
               </div>
             )}
