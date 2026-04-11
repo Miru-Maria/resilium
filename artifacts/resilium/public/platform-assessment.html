@@ -397,6 +397,103 @@
     .main { padding: 32px 0 64px; }
     .topbar-nav { display: none; }
   }
+
+  /* ── Launch Checklist ── */
+  .launch-progress-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin-bottom: 28px;
+  }
+  .launch-progress-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 10px;
+  }
+  .launch-progress-top strong { font-size: 15px; color: var(--text); }
+  .launch-progress-top span { font-size: 13px; color: var(--text2); }
+  .launch-progress-track {
+    height: 8px;
+    background: var(--surface2);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .launch-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--success));
+    border-radius: 4px;
+    transition: width .35s ease;
+    width: 0%;
+  }
+  .launch-progress-hint { font-size: 12px; color: var(--text3); margin-top: 10px; }
+
+  .launch-list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 3px; margin-top: 10px; margin-bottom: 6px; }
+  .ll-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 11px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    line-height: 1.5;
+    cursor: pointer;
+    user-select: none;
+    border: 1px solid transparent;
+    transition: background .1s, border-color .1s, opacity .2s;
+  }
+  .ll-item:hover { background: var(--surface); border-color: var(--border); }
+  .ll-item:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+  .ll-checkbox {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    border-radius: 5px;
+    border: 2px solid var(--border);
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+    transition: background .12s, border-color .12s;
+    font-size: 11px;
+    font-weight: 700;
+    color: white;
+  }
+  .ll-item.ll-checked .ll-checkbox { background: var(--success); border-color: var(--success); }
+  .ll-item.ll-checked .ll-checkbox::after { content: "✓"; }
+  .ll-item.ll-checked { opacity: 0.55; }
+  .ll-item.ll-checked .ll-label { text-decoration: line-through; color: var(--text3); }
+  .ll-label { color: var(--text); font-weight: 500; flex: 1; }
+  .ll-note { color: var(--text3); font-size: 12px; display: block; margin-top: 2px; font-weight: 400; }
+  .ll-tag {
+    flex-shrink: 0;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-top: 2px;
+    white-space: nowrap;
+  }
+  .ll-tag-block  { background: var(--tag-open-bg); border: 1px solid var(--tag-open-border); color: var(--danger); }
+  .ll-tag-needed { background: var(--tag-med-bg); border: 1px solid var(--tag-med-border); color: var(--warn); }
+  .ll-tag-verify { background: rgba(96,165,250,.10); border: 1px solid rgba(96,165,250,.22); color: var(--info); }
+  .ll-tag-decide { background: rgba(167,139,250,.10); border: 1px solid rgba(167,139,250,.25); color: #a78bfa; }
+  .ll-tag-future { background: rgba(107,114,128,.10); border: 1px solid rgba(107,114,128,.2); color: var(--text3); }
+
+  .ll-group-counter {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text3);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 1px 9px;
+  }
 </style>
 </head>
 <body>
@@ -414,6 +511,7 @@
       <li><a href="#user-audit">UX Audit</a></li>
       <li><a href="#functionality">Functionality</a></li>
       <li><a href="#checklist">Checklist</a></li>
+      <li><a href="#launch-checklist">Launch</a></li>
     </ul>
   </nav>
   <span class="topbar-meta">April 2026 · Confidential</span>
@@ -446,6 +544,18 @@
     <div class="toc-section"><a class="toc-link" href="#checklist">Conclusive Checklist</a></div>
     <div class="toc-section toc-sub"><a class="toc-link" href="#checklist-done">Done</a></div>
     <div class="toc-section toc-sub"><a class="toc-link" href="#checklist-todo">Outstanding</a></div>
+
+    <div class="toc-divider"></div>
+
+    <div class="toc-section"><a class="toc-link" href="#launch-checklist">🚀 Launch Checklist</a></div>
+    <div class="toc-section toc-sub"><a class="toc-link" href="#lc-ios-prep">iOS — Preparation</a></div>
+    <div class="toc-section toc-sub"><a class="toc-link" href="#lc-ios-iap">iOS — In-App Purchases</a></div>
+    <div class="toc-section toc-sub"><a class="toc-link" href="#lc-ios-submit">iOS — Submission</a></div>
+    <div class="toc-section toc-sub"><a class="toc-link" href="#lc-paddle">Paddle Payments</a></div>
+    <div class="toc-section toc-sub"><a class="toc-link" href="#lc-prod">Production</a></div>
+    <div class="toc-section toc-sub"><a class="toc-link" href="#lc-mobile">Mobile Testing</a></div>
+    <div class="toc-section toc-sub"><a class="toc-link" href="#lc-design">Design Decisions</a></div>
+    <div class="toc-section toc-sub"><a class="toc-link" href="#lc-future">Nice-to-Have</a></div>
   </aside>
 
   <!-- MAIN CONTENT -->
@@ -828,11 +938,324 @@
       · Confidential internal document
     </div>
 
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- LAUNCH CHECKLIST                               -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="section-divider"></div>
+    <section class="section" id="launch-checklist">
+      <div class="section-eyebrow">Action Items</div>
+      <div class="section-title">Launch Checklist</div>
+
+      <div class="launch-progress-wrap">
+        <div class="launch-progress-top">
+          <strong>Overall Progress</strong>
+          <span id="lc-overall-text">0 / 36 completed</span>
+        </div>
+        <div class="launch-progress-track">
+          <div class="launch-progress-fill" id="lc-fill"></div>
+        </div>
+        <p class="launch-progress-hint">Click any item to mark it complete. Your progress saves in the browser automatically.</p>
+      </div>
+
+      <!-- ── iOS: Preparation ── -->
+      <div class="sub-heading" id="lc-ios-prep">🍎 iOS App Store — Preparation <span class="ll-group-counter" id="gp-ios-prep">0/6</span></div>
+      <ul class="launch-list" data-group="ios-prep">
+        <li class="ll-item" data-id="ios-apple-dev" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Apple Developer Program enrolled
+            <span class="ll-note">Required before any build or App Store submission. Annual $99/yr at developer.apple.com</span>
+          </div>
+          <span class="ll-tag ll-tag-block">Blocker</span>
+        </li>
+        <li class="ll-item" data-id="ios-app-icon" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">App icon set complete
+            <span class="ll-note">1024×1024 master PNG (no transparency). Expo auto-generates all smaller sizes from it via EAS Build.</span>
+          </div>
+          <span class="ll-tag ll-tag-block">Blocker</span>
+        </li>
+        <li class="ll-item" data-id="ios-screenshots" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">App Store screenshots captured
+            <span class="ll-note">Required sizes: 6.7" (iPhone 16 Pro Max) and 6.1" (iPhone 16). Optional but recommended: iPad Pro 12.9". Min 3 screenshots per size.</span>
+          </div>
+          <span class="ll-tag ll-tag-block">Blocker</span>
+        </li>
+        <li class="ll-item" data-id="ios-asc-listing" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">App Store Connect listing created
+            <span class="ll-note">App name, subtitle (≤30 chars), description, keywords (≤100 chars), primary category, support URL, privacy policy URL (use resilium-platform.com/privacy)</span>
+          </div>
+          <span class="ll-tag ll-tag-block">Blocker</span>
+        </li>
+        <li class="ll-item" data-id="ios-age-rating" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Age rating questionnaire completed in App Store Connect
+            <span class="ll-note">Health & Fitness / Lifestyle apps typically receive 4+ rating. Answer questionnaire in App Store Connect under the app listing.</span>
+          </div>
+          <span class="ll-tag ll-tag-needed">Needed</span>
+        </li>
+        <li class="ll-item" data-id="ios-eas-build" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Distribution build signed via EAS Build
+            <span class="ll-note">Run <code style="font-size:11px;background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px">eas build --platform ios --profile production</code>. Requires Apple Developer account + distribution certificate + provisioning profile (EAS can generate these).</span>
+          </div>
+          <span class="ll-tag ll-tag-block">Blocker</span>
+        </li>
+      </ul>
+
+      <!-- ── iOS: In-App Purchases ── -->
+      <div class="sub-heading" id="lc-ios-iap">💳 iOS App Store — In-App Purchases <span class="ll-group-counter" id="gp-ios-iap">0/5</span></div>
+      <ul class="launch-list" data-group="ios-iap">
+        <li class="ll-item" data-id="ios-revenuecat-account" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">RevenueCat account created and linked to App Store Connect
+            <span class="ll-note">App Store requires Apple billing for any subscription sold through the app. RevenueCat is the recommended integration layer. Free tier available at revenuecat.com</span>
+          </div>
+          <span class="ll-tag ll-tag-block">Blocker</span>
+        </li>
+        <li class="ll-item" data-id="ios-iap-product" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Pro subscription product created in App Store Connect
+            <span class="ll-note">Create both Monthly and Annual auto-renewable subscription products. Link them to RevenueCat offerings. Requires banking/tax info in App Store Connect first.</span>
+          </div>
+          <span class="ll-tag ll-tag-block">Blocker</span>
+        </li>
+        <li class="ll-item" data-id="ios-revenuecat-sdk" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">RevenueCat SDK wired into the mobile app
+            <span class="ll-note">Install <code style="font-size:11px;background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px">react-native-purchases</code>. Initialize with your RevenueCat API key. Hook into <code style="font-size:11px;background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px">useProStatus()</code> context so Pro features gate correctly on iOS.</span>
+          </div>
+          <span class="ll-tag ll-tag-needed">Needed</span>
+        </li>
+        <li class="ll-item" data-id="ios-paywall-screen" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">iOS paywall screen built in the mobile app
+            <span class="ll-note">Separate from the Paddle web flow — Apple requires their billing for in-app purchases. Must present the subscription options using native purchase APIs.</span>
+          </div>
+          <span class="ll-tag ll-tag-needed">Needed</span>
+        </li>
+        <li class="ll-item" data-id="ios-sandbox-test" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Sandbox purchase + restore tested on a physical iPhone
+            <span class="ll-note">Create a Sandbox Tester account in App Store Connect. Test purchase, subscription renewal, and "Restore Purchases" flow end-to-end on a real device.</span>
+          </div>
+          <span class="ll-tag ll-tag-verify">Verify</span>
+        </li>
+      </ul>
+
+      <!-- ── iOS: Submission ── -->
+      <div class="sub-heading" id="lc-ios-submit">🚀 iOS App Store — Submission <span class="ll-group-counter" id="gp-ios-submit">0/2</span></div>
+      <ul class="launch-list" data-group="ios-submit">
+        <li class="ll-item" data-id="ios-testflight" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">TestFlight build uploaded and tested on real iPhone
+            <span class="ll-note">Run through the full app on a real device via TestFlight before App Store submission. Invite at least one external tester. Check all 14 assessment steps, report generation, and Pro gating.</span>
+          </div>
+          <span class="ll-tag ll-tag-verify">Verify</span>
+        </li>
+        <li class="ll-item" data-id="ios-app-store-submit" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">App Store review submission sent
+            <span class="ll-note">Submit for review in App Store Connect. Apple's review typically takes 24–48 hours. First submission often takes longer. Have app privacy details and export compliance ready.</span>
+          </div>
+          <span class="ll-tag ll-tag-needed">Needed</span>
+        </li>
+      </ul>
+
+      <!-- ── Paddle ── -->
+      <div class="sub-heading" id="lc-paddle">💳 Payments — Paddle (Web) <span class="ll-group-counter" id="gp-paddle">0/5</span></div>
+      <ul class="launch-list" data-group="paddle">
+        <li class="ll-item" data-id="paddle-domain" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">resilium-platform.com added to Approved Domains in Paddle dashboard
+            <span class="ll-note">Settings → Checkout → Allowed Domains. Approval is pending. This is the only remaining blocker for web checkout — all code is already wired.</span>
+          </div>
+          <span class="ll-tag ll-tag-block">Blocker</span>
+        </li>
+        <li class="ll-item" data-id="paddle-checkout-test" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Checkout tested on production (resilium-platform.com)
+            <span class="ll-note">Click Upgrade on the live site. Complete a real or sandbox payment. Confirm the Paddle overlay opens, payment completes, and the success callback fires.</span>
+          </div>
+          <span class="ll-tag ll-tag-verify">Verify</span>
+        </li>
+        <li class="ll-item" data-id="paddle-pro-activate" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Pro status activates correctly after payment
+            <span class="ll-note">After a completed checkout, confirm the <code style="font-size:11px;background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px">useProStatus()</code> hook returns <code style="font-size:11px;background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px">isPro = true</code> and Pro-gated features unlock on the results and plan pages.</span>
+          </div>
+          <span class="ll-tag ll-tag-verify">Verify</span>
+        </li>
+        <li class="ll-item" data-id="paddle-webhook-verify" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Webhook receiving events from Paddle
+            <span class="ll-note">After a test purchase, check API server logs for incoming webhook events. <code style="font-size:11px;background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px">PADDLE_WEBHOOK_SECRET</code> is already in env. Confirm signature verification is passing.</span>
+          </div>
+          <span class="ll-tag ll-tag-verify">Verify</span>
+        </li>
+        <li class="ll-item" data-id="paddle-billing-toggle" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Monthly ↔ Annual billing toggle tested on pricing page
+            <span class="ll-note">Confirm both price IDs (monthly and annual) pass the correct value to the Paddle checkout overlay. Prices should display the correct discounted annual amount.</span>
+          </div>
+          <span class="ll-tag ll-tag-verify">Verify</span>
+        </li>
+      </ul>
+
+      <!-- ── Production Verification ── -->
+      <div class="sub-heading" id="lc-prod">🌐 Production Verification (resilium-platform.com) <span class="ll-group-counter" id="gp-prod">0/9</span></div>
+      <ul class="launch-list" data-group="prod">
+        <li class="ll-item" data-id="prod-signup" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Sign up + sign in flow (Clerk)
+            <span class="ll-note">Test new email account creation, email verification, sign in, and sign out. If Google OAuth is enabled in Clerk dashboard, test that path too. Only works on resilium-platform.com.</span>
+          </div>
+          <span class="ll-tag ll-tag-verify">Verify</span>
+        </li>
+        <li class="ll-item" data-id="prod-assessment" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Full assessment end-to-end on production
+            <span class="ll-note">Consent page → all 14 steps → "Generate Report" → AI report loads. Confirm the spinner appears, the async job completes, and the results redirect fires correctly.</span>
+          </div>
+          <span class="ll-tag ll-tag-verify">Verify</span>
+        </li>
+        <li class="ll-item" data-id="prod-results" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Results page renders correctly
+            <span class="ll-note">Score, radar chart (stable — no infinite growth), Critical Vulnerabilities, Next Action pill, Mental Resilience Profile, and Action Checklists all render with real AI-generated data.</span>
+          </div>
+          <span class="ll-tag ll-tag-verify">Verify</span>
+        </li>
+        <li class="ll-item" data-id="prod-plan" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Plan page checklist persistence
+            <span class="ll-note">Check off several items on the Plan page. Reload the page. Confirm checked items remain checked. This tests the database write path for checklist state.</span>
+          </div>
+          <span class="ll-tag ll-tag-verify">Verify</span>
+        </li>
+        <li class="ll-item" data-id="prod-markdown" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Markdown export downloads correctly
+            <span class="ll-note">Click the Markdown export button on both the Plan page and the Results page. Confirm a .md file downloads with the full report content, importable into Notion or Obsidian.</span>
+          </div>
+          <span class="ll-tag ll-tag-verify">Verify</span>
+        </li>
+        <li class="ll-item" data-id="prod-share" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Share modal works correctly
+            <span class="ll-note">Click Share on the Results page. Confirm the modal opens with score in the share text. Test Copy Link, X/Twitter, Facebook, and Reddit buttons. Click outside to close.</span>
+          </div>
+          <span class="ll-tag ll-tag-verify">Verify</span>
+        </li>
+        <li class="ll-item" data-id="prod-email-digest" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Email digest received after sign-up
+            <span class="ll-note">Weekly digest cron runs Sundays 18:00 UTC. 7-day reminder cron runs daily 09:00 UTC. Can trigger manually from Admin → Email section. Confirm RESEND_API_KEY is working in production.</span>
+          </div>
+          <span class="ll-tag ll-tag-verify">Verify</span>
+        </li>
+        <li class="ll-item" data-id="prod-admin" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Admin dashboard login and analytics visible
+            <span class="ll-note">Navigate to /admin on production. Log in with ADMIN_USERNAME / ADMIN_PASSWORD. Confirm user counts, assessment completions, and coaching stats load from the live database.</span>
+          </div>
+          <span class="ll-tag ll-tag-verify">Verify</span>
+        </li>
+        <li class="ll-item" data-id="prod-coaching" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Coaching page inquiry form submits correctly
+            <span class="ll-note">Fill out and submit the coaching inquiry form on the Coaching page. Confirm the submission is received (check admin dashboard or email inbox depending on where coaching leads are routed).</span>
+          </div>
+          <span class="ll-tag ll-tag-verify">Verify</span>
+        </li>
+      </ul>
+
+      <!-- ── Mobile App Testing ── -->
+      <div class="sub-heading" id="lc-mobile">📱 Mobile App Testing <span class="ll-group-counter" id="gp-mobile">0/5</span></div>
+      <ul class="launch-list" data-group="mobile">
+        <li class="ll-item" data-id="mobile-iphone-physical" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Tested on a physical iPhone (Expo Go or TestFlight)
+            <span class="ll-note">Scan the Expo QR code with the Camera app on iOS, or install via TestFlight. Simulators are not sufficient for full testing — touch targets, fonts, and animations can differ on device.</span>
+          </div>
+          <span class="ll-tag ll-tag-block">Blocker</span>
+        </li>
+        <li class="ll-item" data-id="mobile-assessment-full" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Full assessment flow completed on mobile
+            <span class="ll-note">Run through all 14 assessment steps on iPhone. Confirm navigation (Back/Next), keyboard behavior, and form interactions feel smooth on a small screen.</span>
+          </div>
+          <span class="ll-tag ll-tag-verify">Verify</span>
+        </li>
+        <li class="ll-item" data-id="mobile-step-render" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">All 14 assessment steps render correctly on small screen
+            <span class="ll-note">Pay special attention to Step 8 (chronic condition severity buttons — text overflow fix), Step 12 (risk profile grid), and Step 13 (Community & Social Capital — card layout).</span>
+          </div>
+          <span class="ll-tag ll-tag-verify">Verify</span>
+        </li>
+        <li class="ll-item" data-id="mobile-ai-report" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">AI report generation works end-to-end on mobile
+            <span class="ll-note">Complete the assessment and confirm the "Generate Report" button triggers the async job, the loading state displays correctly, and the results page loads with real data on mobile.</span>
+          </div>
+          <span class="ll-tag ll-tag-verify">Verify</span>
+        </li>
+        <li class="ll-item" data-id="mobile-pro-gating" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Pro gating on mobile works with graceful fallback
+            <span class="ll-note">If RevenueCat is not yet wired, confirm Pro-gated features degrade gracefully (show upgrade prompt, not crash). If RevenueCat is wired, test the full purchase → unlock flow.</span>
+          </div>
+          <span class="ll-tag ll-tag-verify">Verify</span>
+        </li>
+      </ul>
+
+      <!-- ── Design Decisions ── -->
+      <div class="sub-heading" id="lc-design">🎨 Design Decisions <span class="ll-group-counter" id="gp-design">0/1</span></div>
+      <ul class="launch-list" data-group="design">
+        <li class="ll-item" data-id="design-results-checklist" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Decide: results page checklist section (currently hidden)
+            <span class="ll-note">The per-area checklist is intentionally disabled on the Results page (<code style="font-size:11px;background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px">&amp;&amp; false</code> guard in results.tsx line 888). The interactive checklist lives on the Plan page. Option A: keep it Plan-only (current, cleaner). Option B: surface a read-only preview on Results too. One line of code to enable.</span>
+          </div>
+          <span class="ll-tag ll-tag-decide">Decision</span>
+        </li>
+      </ul>
+
+      <!-- ── Nice-to-Have / Future ── -->
+      <div class="sub-heading" id="lc-future">✨ Nice-to-Have / Future <span class="ll-group-counter" id="gp-future">0/3</span></div>
+      <ul class="launch-list" data-group="future">
+        <li class="ll-item" data-id="future-sentry" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Sentry Express instrumentation completed
+            <span class="ll-note">The Sentry SDK is imported but Express is not fully instrumented (shows a warning in server logs: "express is not instrumented"). Add <code style="font-size:11px;background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px">--import</code> flag to Node startup in production to capture server-side errors fully.</span>
+          </div>
+          <span class="ll-tag ll-tag-future">Future</span>
+        </li>
+        <li class="ll-item" data-id="future-push-notifs" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Push notifications for 7-day / 30-day resilience reminders
+            <span class="ll-note">Currently reminder-based outreach is email-only via cron jobs. Expo Push Notifications (<code style="font-size:11px;background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px">expo-notifications</code>) would let the mobile app reach users who haven't opened their email. Requires notification permission prompt in the app.</span>
+          </div>
+          <span class="ll-tag ll-tag-future">Future</span>
+        </li>
+        <li class="ll-item" data-id="future-app-rating" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">App Store rating prompt in mobile app
+            <span class="ll-note">Trigger <code style="font-size:11px;background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px">StoreReview.requestReview()</code> (from <code style="font-size:11px;background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px">expo-store-review</code>) after a user successfully generates their first resilience plan. Apple limits how often this prompt appears, so timing matters.</span>
+          </div>
+          <span class="ll-tag ll-tag-future">Future</span>
+        </li>
+      </ul>
+
+    </section>
+
   </main>
 </div>
 
 <script>
-  // Highlight active TOC link on scroll
+  // ── TOC scroll highlighting ──
   const links = document.querySelectorAll('.toc-link');
   const sections = document.querySelectorAll('.section[id], .sub-heading[id]');
   const obs = new IntersectionObserver((entries) => {
@@ -845,6 +1268,63 @@
     });
   }, { rootMargin: '-20% 0px -70% 0px' });
   sections.forEach(s => obs.observe(s));
+
+  // ── Launch Checklist ──
+  (function () {
+    const STORE_KEY = 'resilium_launch_checklist_v1';
+    const items = document.querySelectorAll('.ll-item');
+
+    function load() {
+      try { return new Set(JSON.parse(localStorage.getItem(STORE_KEY) || '[]')); }
+      catch { return new Set(); }
+    }
+    function save(set) {
+      localStorage.setItem(STORE_KEY, JSON.stringify([...set]));
+    }
+
+    let checked = load();
+
+    function applyItem(el) {
+      const id = el.dataset.id;
+      const on = checked.has(id);
+      el.classList.toggle('ll-checked', on);
+      el.setAttribute('aria-checked', String(on));
+    }
+
+    function updateProgress() {
+      const total = items.length;
+      const done = checked.size;
+      const pct = total ? (done / total * 100) : 0;
+      const fill = document.getElementById('lc-fill');
+      const text = document.getElementById('lc-overall-text');
+      if (fill) fill.style.width = pct.toFixed(1) + '%';
+      if (text) text.textContent = done + ' / ' + total + ' completed';
+
+      document.querySelectorAll('[data-group]').forEach(group => {
+        const gItems = group.querySelectorAll('.ll-item');
+        const gDone = [...gItems].filter(i => checked.has(i.dataset.id)).length;
+        const gEl = document.getElementById('gp-' + group.dataset.group);
+        if (gEl) gEl.textContent = gDone + '/' + gItems.length;
+      });
+    }
+
+    items.forEach(el => {
+      applyItem(el);
+      function toggle() {
+        const id = el.dataset.id;
+        if (checked.has(id)) { checked.delete(id); } else { checked.add(id); }
+        save(checked);
+        applyItem(el);
+        updateProgress();
+      }
+      el.addEventListener('click', toggle);
+      el.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+      });
+    });
+
+    updateProgress();
+  })();
 </script>
 
 </body>
