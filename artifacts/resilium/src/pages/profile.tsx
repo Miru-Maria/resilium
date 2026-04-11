@@ -998,38 +998,67 @@ function AccountTab({ user, plans, onAllPlansDeleted }: {
         </CardContent>
       </Card>
 
-      {/* Mobile app — Pro only */}
-      {subStatus?.isPro && (
-        <Card className="border border-primary/20 shadow-md bg-primary/[0.03]">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base font-display flex items-center gap-2">
-              <Smartphone className="w-4 h-4 text-primary" /> Mobile App
-              <Badge className="ml-1 bg-primary/15 text-primary border-primary/20 rounded-full text-xs font-bold">Pro</Badge>
-            </CardTitle>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Your Pro plan includes access to the Resilium mobile experience.
-            </p>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-foreground/80 leading-relaxed">
-              Track your daily check-in, review your Resilience Profile, and access your action plans on the go — optimised for mobile and available exclusively for Pro members.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3">
+      {/* Mobile app */}
+      <Card className="border border-primary/20 shadow-md bg-primary/[0.03]">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base font-display flex items-center gap-2">
+            <Smartphone className="w-4 h-4 text-primary" /> Mobile App
+          </CardTitle>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Take your resilience plan anywhere — on your phone or tablet.
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex flex-col sm:flex-row gap-5 items-start">
+            {/* QR code */}
+            <div className="flex-shrink-0 flex flex-col items-center gap-1.5">
+              <div className="rounded-xl border border-border/60 bg-white p-2 shadow-sm">
+                <img
+                  src="https://api.qrserver.com/v1/create-qr-code/?size=108x108&data=https%3A%2F%2Fresilium-platform.com%2Fresilium-mobile%2F&margin=2&color=1e293b"
+                  alt="QR code for Resilium mobile app"
+                  width={108}
+                  height={108}
+                  className="rounded"
+                />
+              </div>
+              <p className="text-[10px] text-muted-foreground text-center">Scan to open on phone</p>
+            </div>
+
+            {/* Actions */}
+            <div className="flex-1 space-y-3 pt-1">
+              <p className="text-sm text-foreground/80 leading-relaxed">
+                Review your Resilience Profile, track your progress, and access your action plans on the go — available in any mobile browser, no download needed.
+              </p>
               <a
                 href="https://resilium-platform.com/resilium-mobile/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity"
+                className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity"
               >
-                <Smartphone className="w-4 h-4" /> Open Mobile App
+                <Smartphone className="w-4 h-4" /> Open in Mobile Browser
               </a>
-              <p className="self-center text-xs text-muted-foreground">
-                Works in any mobile browser — no app store required.
-              </p>
+
+              {/* App Store — coming soon */}
+              <div className="flex items-center gap-3 pt-1">
+                <div className="relative">
+                  <img
+                    src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg"
+                    alt="Download on the App Store"
+                    className="h-9 opacity-40 select-none pointer-events-none"
+                    draggable={false}
+                  />
+                  <span className="absolute -top-1.5 -right-1 bg-slate-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none">
+                    Soon
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground leading-snug">
+                  iOS App Store listing<br />coming soon
+                </p>
+              </div>
             </div>
-          </CardContent>
-        </Card>
-      )}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Reminder preference */}
       <Card className="border-none shadow-md">
