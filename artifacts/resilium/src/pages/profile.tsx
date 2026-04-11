@@ -1720,10 +1720,28 @@ export default function ProfilePage() {
             </TabsContent>
 
             <TabsContent value="plans">
+              <div className="flex gap-3 items-start px-5 py-4 mb-4 rounded-2xl border border-border/40 bg-muted/20">
+                <BarChart2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-semibold text-foreground mb-0.5">What is a Plan?</p>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Each Plan is a full snapshot of one assessment — your resilience score, risk profile, vulnerabilities, and strategic recommendations. Every time you retake the assessment, a new Plan is created so you can see how your preparedness evolves over time. Your most recent Plan also drives your active Checklist.
+                  </p>
+                </div>
+              </div>
               <PlansTab plans={plans} onDelete={() => queryClient.invalidateQueries({ queryKey: ["myPlans"] })} />
             </TabsContent>
 
             <TabsContent value="checklist">
+              <div className="flex gap-3 items-start px-5 py-4 mb-4 rounded-2xl border border-border/40 bg-muted/20">
+                <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-semibold text-foreground mb-0.5">Plans vs. Checklists — why both?</p>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Your <span className="font-medium text-foreground">Plan</span> is the strategy — it tells you where you stand and why certain areas need attention. Your <span className="font-medium text-foreground">Checklist</span> is the execution layer — the specific, prioritized actions derived from that Plan that you work through over time. You need both: a plan without action stays insight, and action without strategy risks working on the wrong things first.
+                  </p>
+                </div>
+              </div>
               <ChecklistTab />
             </TabsContent>
 
