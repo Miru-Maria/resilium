@@ -192,12 +192,18 @@ function GlobalNav() {
                   </span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem asChild>
-                  <Link href="/profile?tab=plans" className="cursor-pointer">My Plans</Link>
-                </DropdownMenuItem>
+              <DropdownMenuContent align="end" sideOffset={8} className="w-48 z-[150]">
                 <DropdownMenuItem asChild>
                   <Link href="/profile?tab=account" className="cursor-pointer">Account</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/profile?tab=reports" className="cursor-pointer">Reports</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/profile?tab=plans" className="cursor-pointer">Plans</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/profile?tab=checklist" className="cursor-pointer">Checklist</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={logout} className="cursor-pointer text-destructive focus:text-destructive">Sign Out</DropdownMenuItem>
