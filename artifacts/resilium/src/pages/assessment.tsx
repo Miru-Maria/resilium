@@ -1642,11 +1642,11 @@ export default function AssessmentPage() {
                                 role="radio"
                                 aria-checked={formData.chronicSeverity === opt.id}
                                 variant={formData.chronicSeverity === opt.id ? "default" : "outline"}
-                                className="h-auto py-3 px-3 rounded-xl flex-col gap-1 text-left"
+                                className="h-auto py-3 px-3 rounded-xl flex-col items-start gap-1 text-left whitespace-normal overflow-hidden"
                                 onClick={() => updateField('chronicSeverity', opt.id)}
                               >
-                                <span className="text-sm font-semibold">{opt.label}</span>
-                                <span className="text-xs font-normal opacity-75 leading-snug">{opt.desc}</span>
+                                <span className="text-sm font-semibold w-full">{opt.label}</span>
+                                <span className="text-xs font-normal opacity-75 leading-snug w-full break-words">{opt.desc}</span>
                               </Button>
                             ))}
                           </div>
