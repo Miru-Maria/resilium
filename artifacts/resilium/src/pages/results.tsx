@@ -724,7 +724,7 @@ function ResultsPageInner() {
           </Card>
           
           <Card className="lg:col-span-2 border-none shadow-xl shadow-black/5 p-6">
-            <div className="h-[300px] md:h-full min-h-[300px]">
+            <div className="h-[380px]">
               <RadarChartView score={report.score} previousScore={previousScore} />
             </div>
             {previousScore && (

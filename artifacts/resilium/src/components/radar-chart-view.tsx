@@ -47,7 +47,7 @@ export function RadarChartView({ score, previousScore }: RadarChartViewProps) {
   ];
 
   return (
-    <div className="w-full h-full min-h-[300px] flex flex-col items-center justify-center gap-3">
+    <div className="w-full h-full flex flex-col items-center justify-center gap-3">
       <ResponsiveContainer width="100%" height="100%">
         <RadarChart cx="50%" cy="50%" outerRadius="68%" data={data}>
           <PolarGrid
