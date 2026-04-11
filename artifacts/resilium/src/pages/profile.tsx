@@ -178,10 +178,10 @@ const AREA_ICONS: Record<string, React.ReactNode> = {
 };
 
 const PRIORITY_STYLES: Record<string, { bg: string; text: string; label: string }> = {
-  critical: { bg: "bg-destructive/15", text: "text-destructive", label: "Critical" },
-  high:     { bg: "bg-amber-500/15",   text: "text-amber-600",   label: "High" },
-  medium:   { bg: "bg-blue-500/15",    text: "text-blue-600",    label: "Medium" },
-  low:      { bg: "bg-muted/60",       text: "text-muted-foreground", label: "Low" },
+  critical: { bg: "bg-red-500/20",    text: "text-red-600",    label: "Critical" },
+  high:     { bg: "bg-amber-500/15",  text: "text-amber-700",  label: "High" },
+  medium:   { bg: "bg-sky-500/15",    text: "text-sky-700",    label: "Medium" },
+  low:      { bg: "bg-gray-100",      text: "text-gray-500",   label: "Low" },
 };
 
 async function fetchMyPlans(): Promise<{ plans: PlanSummary[] }> {
@@ -767,7 +767,7 @@ function ChecklistTab() {
                   return (
                     <div
                       key={item.id}
-                      className={`flex gap-3 p-3 rounded-xl border transition-colors ${isChecked ? "bg-muted/30 border-border/50 opacity-70" : "bg-card border-border"}`}
+                      className={`flex gap-3 p-4 rounded-xl border transition-colors shadow-sm ${isChecked ? "bg-emerald-50/40 border-emerald-300 opacity-80" : "bg-white/90 border-slate-200"}`}
                     >
                       <Checkbox
                         id={key}
@@ -781,7 +781,7 @@ function ChecklistTab() {
                         <div className="flex items-start gap-2 flex-wrap">
                           <label
                             htmlFor={key}
-                            className={`text-sm font-medium cursor-pointer leading-snug ${isChecked ? "line-through text-muted-foreground" : "text-foreground"}`}
+                            className={`text-sm font-medium cursor-pointer leading-snug ${isChecked ? "line-through text-gray-400" : "text-gray-900"}`}
                           >
                             {item.title}
                           </label>
@@ -790,7 +790,7 @@ function ChecklistTab() {
                           </span>
                         </div>
                         {item.description && (
-                          <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{item.description}</p>
+                          <p className="text-xs text-gray-500 mt-1 leading-relaxed">{item.description}</p>
                         )}
                       </div>
                     </div>
