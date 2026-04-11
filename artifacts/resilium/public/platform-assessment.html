@@ -903,6 +903,7 @@
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">Results page dead code removed — <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">Printer</code> icon import and <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">handlePrint</code> function (remnants of the old print button) removed from results.tsx; no UI references to either existed</span></li>
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">Full autonomous e2e visual audit completed (April 11, 2026) — all public routes screenshotted and verified: landing (hero, How It Works, use-case personas, feature grid, footer), About (methodology, score bands, 6 academic citations), Pricing (Starter/Pro tiers, FAQ, billing toggle), Demo (radar chart, Mental Resilience Profile, Critical Vulnerabilities, Next Action pill, 7-tab Action Checklists), Coaching, Competitive Analysis, Consent, Admin login — all render correctly with no layout or JavaScript errors</span></li>
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">"Social Network" → "Social Capital" naming alignment — all user-facing occurrences unified: (1) assessment.tsx English step 13 heading <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">s12Title</code> changed from "Community &amp; Social Network" to "Community &amp; Social Capital"; (2) assessment.tsx Romanian <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">s12Title</code> changed from "Comunitate &amp; Rețea Socială" to "Comunitate &amp; Capital Social"; (3) demo.tsx <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">AREA_LABELS</code> <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">socialCapital</code> tab label changed from "Social Network" to "Social Capital". Progress breadcrumb (step 13: "Social Capital") and underlying score field key (<code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">socialCapital</code>) were already correct.</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Results page checklist section — design decision made: <strong style="color:var(--text)">Option A (Plan-only)</strong>. The per-area checklist remains on the Plan page only; the <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">&amp;&amp; false</code> guard in results.tsx (line 888) is intentionally kept. Results page stays clean and focused on the score, radar chart, vulnerabilities, and AI narrative. Action tracking belongs on the Plan page.</span></li>
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">Full assessment code audit completed (April 11, 2026) — all 14 steps verified via source code review and visual screenshots: Step 1 (Location + currency selector), Step 2 (Age bracket grid), Step 3 (Income stability + prefer-not-to-say), Step 4 (Mental resilience 1–5 scale per dimension question), Step 5 (Financial runway slider 0–36 months), Step 6 (Dependents grid), Step 7 (Skills multi-select), Step 8 (Health status + chronic condition sub-questions — name, severity with overflow fix, medication flag), Step 9 (Mobility + relocation readiness), Step 10 (Housing type), Step 11 (Emergency supplies tier), Step 12 (Risk profile multi-select with trauma note), Step 13 (Community &amp; Social Capital — trusted contacts, community involvement, mutual aid), Step 14 (Resilience goal + success vision textarea) — no rendering issues, translation gaps, or logic errors found</span></li>
       </ul>
 
@@ -917,11 +918,6 @@
             <td>App Store (iOS) submission</td>
             <td><span class="badge badge-warn">In Progress</span></td>
             <td>Intentionally deferred by owner — iOS only (Android explicitly excluded). App builds, assets, and metadata preparation in progress.</td>
-          </tr>
-          <tr>
-            <td>Results page checklist section</td>
-            <td><span class="badge badge-info">Design Decision</span></td>
-            <td>The per-area checklist panel in results.tsx is intentionally disabled (<code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">&amp;&amp; false</code> guard at line 888). The interactive checklist lives on the Plan page, which is the intended home for action tracking. Remove the guard to surface a read-only checklist preview directly on the Results page if that UX direction is later desired.</td>
           </tr>
           <tr>
             <td>Payment integration (Paddle)</td>
@@ -1216,10 +1212,10 @@
       <ul class="launch-list" data-group="design">
         <li class="ll-item" data-id="design-results-checklist" tabindex="0" role="checkbox" aria-checked="false">
           <div class="ll-checkbox"></div>
-          <div class="ll-label">Decide: results page checklist section (currently hidden)
-            <span class="ll-note">The per-area checklist is intentionally disabled on the Results page (<code style="font-size:11px;background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px">&amp;&amp; false</code> guard in results.tsx line 888). The interactive checklist lives on the Plan page. Option A: keep it Plan-only (current, cleaner). Option B: surface a read-only preview on Results too. One line of code to enable.</span>
+          <div class="ll-label">✓ Results page checklist — decided: Plan-only (Option A)
+            <span class="ll-note">The <code style="font-size:11px;background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px">&amp;&amp; false</code> guard in results.tsx line 888 stays. Checklist lives on the Plan page only. Results page remains focused on score, radar chart, vulnerabilities, and AI narrative. Decision recorded April 2026.</span>
           </div>
-          <span class="ll-tag ll-tag-decide">Decision</span>
+          <span class="ll-tag ll-tag-decide">Decided</span>
         </li>
       </ul>
 
