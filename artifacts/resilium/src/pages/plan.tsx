@@ -728,7 +728,7 @@ export default function PlanPage() {
                       <div className="mb-6 space-y-3">
                         <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">Strategic Focus</p>
                         {horizon.narrativeItems.slice(0, 3).map((np, i) => (
-                          <div key={i} className="bg-slate-50 rounded-2xl border border-slate-200 p-4 flex items-start gap-3 shadow-sm">
+                          <div key={i} className="bg-white/90 rounded-2xl border border-slate-200 p-4 flex items-start gap-3 shadow-sm">
                             <div className={cn("w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 text-[10px] font-bold",
                               np.priority === "critical" ? "bg-red-500/20 text-red-600" :
                               np.priority === "high" ? "bg-amber-500/20 text-amber-600" :
@@ -789,8 +789,8 @@ export default function PlanPage() {
                                     <div
                                       key={item.id}
                                       className={cn(
-                                        "rounded-2xl border bg-slate-50 transition-all overflow-hidden shadow-sm",
-                                        completed ? "border-emerald-300 bg-emerald-50/60" : "border-slate-200"
+                                        "rounded-2xl border bg-white/90 transition-all overflow-hidden shadow-sm",
+                                        completed ? "border-emerald-300 bg-emerald-50/40" : "border-slate-200"
                                       )}
                                     >
                                       {/* Main item row */}
@@ -918,7 +918,7 @@ export default function PlanPage() {
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 title={r.desc}
-                                                className="flex items-center gap-1.5 text-xs rounded-full px-3 py-1 border border-border bg-muted/30 text-muted-foreground hover:border-primary/30 hover:text-primary transition-all"
+                                                className="flex items-center gap-1.5 text-xs rounded-full px-3 py-1 border border-slate-300 bg-slate-100 text-slate-700 hover:border-primary/50 hover:bg-primary/5 hover:text-primary transition-all"
                                               >
                                                 <BookOpen className="w-3 h-3 flex-shrink-0" />
                                                 {r.title}
