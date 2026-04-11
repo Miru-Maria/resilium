@@ -3,17 +3,17 @@ import { Link } from "wouter";
 import { CircularProgress } from "@/components/circular-progress";
 import { RadarChartView } from "@/components/radar-chart-view";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { Progress } from "@/components/ui/progress";
 import { SiteFooter } from "@/components/site-footer";
-import { ResilientIcon } from "@/components/resilient-icon";
 import { cn } from "@/lib/utils";
 import {
-  AlertTriangle, CheckCircle, Activity, Brain, TrendingUp, Award,
+  AlertTriangle, Check, CheckCircle, Activity, Brain, TrendingUp, Award,
   ExternalLink, ArrowRight, Eye, Zap, Lock, Sparkles, ChevronDown, ChevronUp, Target,
-  DollarSign, Wrench, Navigation, Package,
+  DollarSign, Wrench, Navigation, Package, Users, Share2, Download,
+  Twitter, Facebook, Copy, X,
 } from "lucide-react";
 
 /* ──────────────────────────────────────────
@@ -160,6 +160,7 @@ const AREA_ICONS: Record<string, React.ReactNode> = {
   mobility: <Navigation className="w-4 h-4 text-violet-400" />,
   psychological: <Brain className="w-4 h-4 text-rose-400" />,
   resources: <Package className="w-4 h-4 text-orange-400" />,
+  socialCapital: <Users className="w-4 h-4 text-teal-500" />,
 };
 
 const PRIORITY_CONFIG = {
@@ -230,9 +231,52 @@ function ProTeaser({ title, description }: { title: string; description: string 
 /* ──────────────────────────────────────────
    Main Page
 ────────────────────────────────────────── */
+function ShareModal({ onClose }: { onClose: () => void }) {
+  const [copied, setCopied] = useState(false);
+  const url = "https://resilium-platform.com/demo";
+  const text = "I explored Resilium's demo plan — an AI-powered personal resilience scorecard across finances, health, skills & more. Really eye-opening. Check it out:";
+  const copy = () => {
+    navigator.clipboard.writeText(`${text} ${url}`).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2500); });
+  };
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <div className="relative bg-card rounded-3xl shadow-2xl border border-border w-full max-w-sm p-6 space-y-5" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between">
+          <h3 className="font-display font-bold text-xl">Share this demo</h3>
+          <button type="button" onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-muted transition-colors">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+        <p className="text-sm text-muted-foreground">Show others what a Resilium plan looks like.</p>
+        <div className="space-y-3">
+          <a href={`https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`} target="_blank" rel="noopener noreferrer"
+            className="flex items-center gap-3 w-full px-4 py-3 rounded-xl border border-border hover:bg-muted/40 transition-colors text-sm font-medium">
+            <Twitter className="w-4 h-4" /> Share on X / Twitter
+          </a>
+          <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`} target="_blank" rel="noopener noreferrer"
+            className="flex items-center gap-3 w-full px-4 py-3 rounded-xl border border-border hover:bg-muted/40 transition-colors text-sm font-medium">
+            <Facebook className="w-4 h-4" /> Share on Facebook
+          </a>
+          <a href={`https://www.reddit.com/submit?url=${encodeURIComponent(url)}&title=${encodeURIComponent("Check out Resilium — a personal resilience planning platform")}`} target="_blank" rel="noopener noreferrer"
+            className="flex items-center gap-3 w-full px-4 py-3 rounded-xl border border-border hover:bg-muted/40 transition-colors text-sm font-medium">
+            <Share2 className="w-4 h-4" /> Share on Reddit
+          </a>
+          <button type="button" onClick={copy}
+            className="flex items-center gap-3 w-full px-4 py-3 rounded-xl border border-border hover:bg-muted/40 transition-colors text-sm font-medium">
+            {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+            {copied ? "Copied to clipboard!" : "Copy link"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function DemoPage() {
   const [checkedItems, setCheckedItems] = useState<Set<string>>(new Set());
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
+  const [showShare, setShowShare] = useState(false);
 
   const toggleItem = (key: string) =>
     setCheckedItems(prev => {
@@ -262,6 +306,35 @@ export default function DemoPage() {
   const totalItems = allItems.length;
   const overallPercent = totalItems ? Math.round((totalDone / totalItems) * 100) : 0;
 
+  const handleMarkdownExport = () => {
+    const lines: string[] = [];
+    lines.push(`# Resilience Strategic Action Plan — Sample Demo`);
+    lines.push(`> Profile: Alex M., 34 · Goal: ${SAMPLE_GOAL.label}`);
+    lines.push(`> Overall Score: ${SAMPLE_SCORE.overall}/100`);
+    lines.push(``);
+    const horizons: Array<{ key: "shortTerm" | "midTerm" | "longTerm"; label: string }> = [
+      { key: "shortTerm", label: "## 0–30 Days" },
+      { key: "midTerm", label: "## 3–6 Months" },
+      { key: "longTerm", label: "## Long Term (6–18 Months)" },
+    ];
+    for (const h of horizons) {
+      lines.push(h.label);
+      for (const item of SAMPLE_ACTION_PLAN[h.key]) {
+        lines.push(`### [${item.priority.toUpperCase()}] ${item.category}: ${item.title}`);
+        lines.push(item.description);
+        lines.push(``);
+      }
+    }
+    lines.push(`---`);
+    lines.push(`*Generated by Resilium — resilium-platform.com*`);
+    const blob = new Blob([lines.join("\n")], { type: "text/markdown" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "resilium-demo-plan.md";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
+
   const mrDimensions = [
     { label: "Stress Tolerance", value: SAMPLE_MENTAL.stressTolerance },
     { label: "Adaptability", value: SAMPLE_MENTAL.adaptability },
@@ -273,6 +346,7 @@ export default function DemoPage() {
 
   return (
     <div className="min-h-screen pb-24">
+      {showShare && <ShareModal onClose={() => setShowShare(false)} />}
       {/* Header */}
       <DemoBanner />
 
@@ -291,6 +365,9 @@ export default function DemoPage() {
             <Target className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5" />
             <p className="text-sm text-muted-foreground italic">"{SAMPLE_GOAL.vision}"</p>
           </div>
+          <Button variant="outline" size="sm" className="rounded-full gap-1.5 flex-shrink-0" onClick={() => setShowShare(true)}>
+            <Share2 className="w-3.5 h-3.5" /> Share
+          </Button>
         </div>
 
         {/* HERO SCORES */}
@@ -497,7 +574,7 @@ export default function DemoPage() {
                             "w-5 h-5 rounded-full border-2 flex-shrink-0 mt-0.5 flex items-center justify-center transition-all",
                             completed ? "border-emerald-500 bg-emerald-500" : "border-muted-foreground/40"
                           )}>
-                            {completed && <CheckCircle className="w-3 h-3 text-white" />}
+                            {completed && <Check className="w-3 h-3 text-white" />}
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex flex-wrap items-center gap-2 mb-1">
@@ -567,6 +644,9 @@ export default function DemoPage() {
           <div className="flex items-center gap-3 mb-6">
             <TrendingUp className="w-6 h-6 text-emerald-600" />
             <h2 className="font-display font-bold text-2xl">Strategic Action Plan</h2>
+            <Button variant="outline" size="sm" className="ml-auto rounded-full gap-1.5 text-xs" onClick={handleMarkdownExport}>
+              <Download className="w-3.5 h-3.5" /> Markdown
+            </Button>
           </div>
           <Tabs defaultValue="shortTerm" className="w-full">
             <TabsList className="grid w-full grid-cols-3 mb-8 bg-muted/50 p-1 rounded-full">
