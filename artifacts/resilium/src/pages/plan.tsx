@@ -926,9 +926,6 @@ export default function PlanPage() {
                                               </a>
                                             ))}
                                           </div>
-                                          <p className="text-[9px] text-muted-foreground/50 mt-2 leading-relaxed">
-                                            Resources are provided for informational purposes only. Resilium has no affiliation with or financial interest in any of these sites unless explicitly stated. Use at your own discretion.
-                                          </p>
                                         </div>
                                       )}
                                     </div>
@@ -1079,6 +1076,12 @@ export default function PlanPage() {
           </div>
         </div>
       )}
+
+      <div className="max-w-5xl mx-auto px-6 pb-6 print:hidden">
+        <p className="text-xs text-muted-foreground border border-border/40 rounded-2xl px-5 py-3 bg-muted/20 leading-relaxed">
+          <span className="font-semibold text-foreground">Resource disclaimer:</span> All linked resources are provided for informational purposes only. Resilium has no affiliation with or financial interest in any of these sites unless explicitly stated. Use at your own discretion.
+        </p>
+      </div>
 
       <SiteFooter />
     </div>
