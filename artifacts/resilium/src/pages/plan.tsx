@@ -728,7 +728,7 @@ export default function PlanPage() {
                       <div className="mb-6 space-y-3">
                         <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">Strategic Focus</p>
                         {horizon.narrativeItems.slice(0, 3).map((np, i) => (
-                          <div key={i} className="bg-white rounded-2xl border border-gray-200 p-4 flex items-start gap-3 shadow-sm">
+                          <div key={i} className="bg-slate-50 rounded-2xl border border-slate-200 p-4 flex items-start gap-3 shadow-sm">
                             <div className={cn("w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 text-[10px] font-bold",
                               np.priority === "critical" ? "bg-red-500/20 text-red-600" :
                               np.priority === "high" ? "bg-amber-500/20 text-amber-600" :
@@ -789,8 +789,8 @@ export default function PlanPage() {
                                     <div
                                       key={item.id}
                                       className={cn(
-                                        "rounded-2xl border bg-white transition-all overflow-hidden shadow-sm",
-                                        completed ? "border-emerald-300" : "border-gray-200"
+                                        "rounded-2xl border bg-slate-50 transition-all overflow-hidden shadow-sm",
+                                        completed ? "border-emerald-300 bg-emerald-50/60" : "border-slate-200"
                                       )}
                                     >
                                       {/* Main item row */}
