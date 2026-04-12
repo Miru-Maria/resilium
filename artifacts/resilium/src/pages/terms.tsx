@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "wouter";
 import { SiteFooter } from "@/components/site-footer";
+import { PageSEO } from "@/components/page-seo";
 
 const LAST_UPDATED = "April 7, 2026";
 const CONTACT_EMAIL = "contact_resilium@pm.me";
@@ -8,6 +9,11 @@ const CONTACT_EMAIL = "contact_resilium@pm.me";
 export default function TermsPage() {
   return (
     <div className="min-h-screen flex flex-col">
+      <PageSEO
+        title="Terms and Conditions — Resilium"
+        description="Terms and conditions for using the Resilium personal resilience platform, including your rights, responsibilities, and how we handle your account."
+        canonical="https://resilium-platform.com/terms"
+      />
       <main className="flex-1 w-full max-w-3xl mx-auto px-6 py-12 space-y-10">
         <div>
           <h1 className="text-4xl font-display font-bold tracking-tight mb-3">Terms and Conditions</h1>

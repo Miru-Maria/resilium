@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import * as Sentry from "@sentry/react";
+import { NoIndexPage } from "@/components/page-seo";
 import { useRoute } from "wouter";
 import { useGetReport, useGetChecklists, useUpdateChecklistItem, useGetSnapshots } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -1445,6 +1446,7 @@ function ResultsPageInner() {
 export default function ResultsPage() {
   return (
     <ResultsErrorBoundary>
+      <NoIndexPage />
       <ResultsPageInner />
     </ResultsErrorBoundary>
   );

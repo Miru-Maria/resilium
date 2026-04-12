@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
+import { PageSEO } from "@/components/page-seo";
 import { ArrowLeft, CheckCircle, MessageCircle, TrendingUp, Heart, Brain, Shield } from "lucide-react";
 import { NeuralCanvas } from "../components/neural-canvas";
 
@@ -79,6 +80,11 @@ export default function CoachingPage() {
       fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
       position: "relative",
     }}>
+      <PageSEO
+        title="Personal Resilience Coaching — Resilium"
+        description="Work one-on-one with a coach to translate your Resilium score into lasting change. For people ready to go deeper than a score."
+        canonical="https://resilium-platform.com/coaching"
+      />
       {/* Google Fonts — Playfair Display for headings */}
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&display=swap');`}</style>
 

@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { useRoute, Link } from "wouter";
+import { NoIndexPage } from "@/components/page-seo";
 import {
   useGetReport,
   useGetChecklists,
@@ -535,6 +536,7 @@ export default function PlanPage() {
 
   return (
     <div className="min-h-screen pb-24">
+      <NoIndexPage />
       {showOnboarding && <OnboardingModal onDone={dismissOnboarding} />}
       <style dangerouslySetInnerHTML={{ __html: `
         @media print {

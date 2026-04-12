@@ -24,6 +24,7 @@ import {
   Clock,
 } from "lucide-react";
 import { SiteFooter } from "@/components/site-footer";
+import { PageSEO } from "@/components/page-seo";
 import { useUser, useAuth, useClerk } from "@clerk/react";
 
 import { ResilientIcon } from "@/components/resilient-icon";
@@ -280,6 +281,11 @@ function AnimatedBackground() {
 export default function LandingPage() {
   return (
     <div className="min-h-screen flex flex-col relative overflow-hidden">
+      <PageSEO
+        title="Resilium — Know Your Readiness. Build Your Resilience."
+        description="Get an objective resilience score across 6 dimensions of personal preparedness — financial, health, skills, mobility, psychological, and resources — plus a personalized 90-day action plan. Free assessment in 5 minutes."
+        canonical="https://resilium-platform.com/"
+      />
       {/* Animated background — hero section only */}
       <div className="absolute top-0 left-0 right-0 h-screen z-0 pointer-events-none overflow-hidden">
         <AnimatedBackground />

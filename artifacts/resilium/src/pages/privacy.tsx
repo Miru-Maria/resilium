@@ -1,5 +1,6 @@
 import React from "react";
 import { SiteFooter } from "@/components/site-footer";
+import { PageSEO } from "@/components/page-seo";
 
 const LAST_UPDATED = "March 24, 2026";
 const CONTACT_EMAIL = "contact_resilium@pm.me";
@@ -7,6 +8,11 @@ const CONTACT_EMAIL = "contact_resilium@pm.me";
 export default function PrivacyPage() {
   return (
     <div className="min-h-screen flex flex-col">
+      <PageSEO
+        title="Privacy Policy — Resilium"
+        description="How Resilium collects, uses, and protects your personal data. We are GDPR-compliant and committed to keeping your information private and secure."
+        canonical="https://resilium-platform.com/privacy"
+      />
       <main className="flex-1 w-full max-w-3xl mx-auto px-6 py-12 space-y-10">
         <div>
           <h1 className="text-4xl font-display font-bold tracking-tight mb-3">Privacy Policy</h1>

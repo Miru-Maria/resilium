@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "wouter";
 import { SiteFooter } from "@/components/site-footer";
+import { PageSEO } from "@/components/page-seo";
 import { Button } from "@/components/ui/button";
 import {
   Brain,
@@ -121,6 +122,11 @@ const MEDIA_CITATIONS = [
 export default function AboutPage() {
   return (
     <div className="min-h-screen flex flex-col">
+      <PageSEO
+        title="About Resilium — The Science Behind Your Resilience Score"
+        description="Resilium is built on two pillars and six measurable dimensions of personal resilience, grounded in academic research and real-world crisis experience. Learn what's behind your score."
+        canonical="https://resilium-platform.com/about"
+      />
       {/* Page header */}
       <section className="border-b border-border/60 bg-card/20">
         <div className="max-w-3xl mx-auto px-6 py-16 text-center">

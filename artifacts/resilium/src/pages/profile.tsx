@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { Link, useLocation, useSearch } from "wouter";
 import { SiteFooter } from "@/components/site-footer";
+import { NoIndexPage } from "@/components/page-seo";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -2368,6 +2369,7 @@ export default function ProfilePage() {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
+        <NoIndexPage />
         <ResilientIcon className="w-16 h-16 text-primary mb-6 opacity-60" />
         <h2 className="text-2xl font-display font-bold mb-2">Sign in to view your profile</h2>
         <p className="text-muted-foreground max-w-md mb-8">
@@ -2382,6 +2384,7 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen">
+      <NoIndexPage />
       {/* Header */}
       <main className="max-w-5xl mx-auto px-6 pt-8 pb-24">
         {/* Page title */}

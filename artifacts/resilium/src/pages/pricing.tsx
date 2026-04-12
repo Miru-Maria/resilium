@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { CheckCircle2, Zap, ShieldCheck, BarChart2, RefreshCw, Lock, ArrowRight, Sparkles, XCircle, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SiteFooter } from "@/components/site-footer";
+import { PageSEO } from "@/components/page-seo";
 import { useUser, useAuth, useClerk } from "@clerk/react";
 
 const PADDLE_CLIENT_TOKEN = import.meta.env.VITE_PADDLE_CLIENT_TOKEN as string | undefined;
@@ -158,6 +159,11 @@ export default function PricingPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <PageSEO
+        title="Pricing — Resilium"
+        description="Three full resilience assessments for free. Upgrade to track your progress over time, compare plans side by side, and model crisis scenarios before they happen."
+        canonical="https://resilium-platform.com/pricing"
+      />
       <main className="flex-1 max-w-5xl mx-auto w-full px-6 py-16">
         {isSuccess ? (
           <motion.div

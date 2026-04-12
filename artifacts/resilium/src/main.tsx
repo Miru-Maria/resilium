@@ -1,5 +1,6 @@
 import * as Sentry from "@sentry/react";
 import { createRoot } from "react-dom/client";
+import { HelmetProvider } from "react-helmet-async";
 import App from "./App";
 import "./index.css";
 
@@ -19,4 +20,8 @@ Sentry.init({
   enabled: import.meta.env.PROD,
 });
 
-createRoot(document.getElementById("root")!).render(<App />);
+createRoot(document.getElementById("root")!).render(
+  <HelmetProvider>
+    <App />
+  </HelmetProvider>
+);

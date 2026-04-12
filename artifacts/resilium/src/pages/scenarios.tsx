@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useRoute, Link } from "wouter";
+import { NoIndexPage } from "@/components/page-seo";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -241,6 +242,7 @@ export default function ScenariosPage() {
 
   return (
     <div className="min-h-screen pb-24">
+      <NoIndexPage />
       {/* Header */}
       <header className="w-full bg-card border-b border-border sticky top-14 z-50">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-end">

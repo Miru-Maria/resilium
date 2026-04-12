@@ -8,6 +8,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { Progress } from "@/components/ui/progress";
 import { SiteFooter } from "@/components/site-footer";
+import { PageSEO } from "@/components/page-seo";
 import { cn } from "@/lib/utils";
 import {
   AlertTriangle, Check, CheckCircle, Activity, Brain, TrendingUp, Award,
@@ -346,6 +347,11 @@ export default function DemoPage() {
 
   return (
     <div className="min-h-screen pb-24">
+      <PageSEO
+        title="Live Demo — See Resilium in Action"
+        description="Explore a complete sample resilience profile: see how Resilium scores six dimensions, surfaces key vulnerabilities, and builds a prioritized 90-day action checklist."
+        canonical="https://resilium-platform.com/demo"
+      />
       {showShare && <ShareModal onClose={() => setShowShare(false)} />}
       {/* Header */}
       <DemoBanner />

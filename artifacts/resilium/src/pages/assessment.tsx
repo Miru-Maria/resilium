@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, Link } from "wouter";
+import { PageSEO } from "@/components/page-seo";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -1190,6 +1191,11 @@ export default function AssessmentPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <PageSEO
+        title="Free Resilience Assessment — Resilium"
+        description="Take our structured 5-minute assessment and get an objective resilience score across six dimensions of personal preparedness. Understand exactly where you stand and what to work on first."
+        canonical="https://resilium-platform.com/assess"
+      />
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[9999] focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-lg focus:text-sm focus:font-medium"

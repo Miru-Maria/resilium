@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { NoIndexPage } from "@/components/page-seo";
 import { Shield, Lock, MapPin, DollarSign, Activity, Wrench, Home, AlertTriangle, Clock, EyeOff, Download, CheckCircle2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -94,6 +95,7 @@ export default function ConsentPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      <NoIndexPage />
       <header className="flex items-center justify-between px-5 py-4 border-b border-border/40">
         <button
           onClick={() => setLocation("/")}
