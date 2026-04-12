@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import { Link, useLocation, useSearch } from "wouter";
 import { SiteFooter } from "@/components/site-footer";
 import { Button } from "@/components/ui/button";
@@ -59,7 +59,15 @@ import {
   Award,
   Smartphone,
   FileText,
+  Bot,
+  BookOpen,
+  Send,
+  WifiOff,
+  MessageSquare,
+  Lock,
+  BookMarked,
 } from "lucide-react";
+import { guides, getEssentialGuides, getGuidesByLocation, type Guide } from "@/data/guides";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -1640,6 +1648,417 @@ function PlansTab({ plans, onDelete }: { plans: PlanSummary[]; onDelete: (id: st
   );
 }
 
+// ─── AI Companion Tab ─────────────────────────────────────────────────────────
+const COMPANION_CACHE_KEY = "resilium_companion_messages_v1";
+
+type CompanionMessage = { role: "user" | "assistant"; content: string; createdAt: string };
+
+function CompanionProGate() {
+  const [, navigate] = useLocation();
+  return (
+    <div className="flex flex-col items-center justify-center py-20 px-6 text-center gap-5">
+      <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
+        <Lock className="w-8 h-8 text-primary" />
+      </div>
+      <div>
+        <h3 className="text-xl font-display font-bold mb-2">AI Companion is a Pro Feature</h3>
+        <p className="text-muted-foreground text-sm max-w-sm leading-relaxed">
+          Get personalized resilience guidance, crisis planning advice, and motivation from an AI that knows your assessment results.
+        </p>
+      </div>
+      <Button onClick={() => navigate("/pricing")} className="rounded-full px-8">
+        Upgrade to Pro
+      </Button>
+    </div>
+  );
+}
+
+function CompanionChat() {
+  const [messages, setMessages] = useState<CompanionMessage[]>([]);
+  const [input, setInput] = useState("");
+  const [sending, setSending] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+  const { toast } = useToast();
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const onOnline = () => setIsOffline(false);
+    const onOffline = () => setIsOffline(true);
+    window.addEventListener("online", onOnline);
+    window.addEventListener("offline", onOffline);
+    return () => { window.removeEventListener("online", onOnline); window.removeEventListener("offline", onOffline); };
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch("/api/companion/history", { credentials: "include" });
+        if (!res.ok) throw new Error("fetch failed");
+        const data = await res.json();
+        const msgs: CompanionMessage[] = data.messages || [];
+        setMessages(msgs);
+        localStorage.setItem(COMPANION_CACHE_KEY, JSON.stringify(msgs));
+      } catch {
+        setIsOffline(true);
+        const cached = localStorage.getItem(COMPANION_CACHE_KEY);
+        if (cached) setMessages(JSON.parse(cached));
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+  }, [messages, sending]);
+
+  const sendMessage = async () => {
+    const text = input.trim();
+    if (!text || sending) return;
+    if (isOffline) {
+      toast({ title: "You're offline", description: "A connection is needed to chat.", variant: "destructive" });
+      return;
+    }
+    setInput("");
+    setSending(true);
+    const userMsg: CompanionMessage = { role: "user", content: text, createdAt: new Date().toISOString() };
+    const updated = [...messages, userMsg];
+    setMessages(updated);
+    try {
+      const res = await fetch("/api/companion/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ message: text }),
+      });
+      if (!res.ok) throw new Error("send failed");
+      const data = await res.json();
+      const final = [...updated, data.message as CompanionMessage];
+      setMessages(final);
+      localStorage.setItem(COMPANION_CACHE_KEY, JSON.stringify(final));
+    } catch {
+      toast({ title: "Couldn't send", description: "Please check your connection and try again.", variant: "destructive" });
+      setMessages(messages);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  if (loading) return (
+    <div className="flex items-center justify-center py-20">
+      <Loader2 className="w-8 h-8 text-primary animate-spin" />
+    </div>
+  );
+
+  const suggestedPrompts = [
+    "What should I focus on improving first?",
+    "How can I build a stronger financial safety net?",
+    "What would happen to my resilience if I lost my job?",
+    "What practical skills should I learn this year?",
+  ];
+
+  return (
+    <div className="flex flex-col h-[600px] rounded-2xl border border-border/60 overflow-hidden bg-card">
+      {isOffline && (
+        <div className="flex items-center gap-2 px-4 py-2.5 bg-amber-50 border-b border-amber-200 text-amber-700 text-sm">
+          <WifiOff className="w-3.5 h-3.5 flex-shrink-0" />
+          Offline — showing cached messages. New messages require a connection.
+        </div>
+      )}
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-5 space-y-4">
+        {messages.length === 0 && !sending && (
+          <div className="flex flex-col items-center text-center py-8 gap-4">
+            <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center">
+              <Bot className="w-7 h-7 text-primary" />
+            </div>
+            <div>
+              <h3 className="font-display font-bold text-lg mb-1">Your AI Companion</h3>
+              <p className="text-muted-foreground text-sm max-w-sm leading-relaxed">
+                I know your assessment results and will give you personalized guidance on planning, resources, and staying motivated through any crisis.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full max-w-lg">
+              {suggestedPrompts.map(p => (
+                <button
+                  key={p}
+                  className="text-left text-sm px-4 py-3 rounded-xl border border-border/60 bg-muted/30 hover:bg-muted/60 transition-colors text-muted-foreground hover:text-foreground"
+                  onClick={() => setInput(p)}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+        {messages.map((m, i) => (
+          <div key={i} className={`flex gap-3 ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+            {m.role === "assistant" && (
+              <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <Bot className="w-4 h-4 text-primary" />
+              </div>
+            )}
+            <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap ${
+              m.role === "user"
+                ? "bg-primary text-primary-foreground rounded-br-sm"
+                : "bg-muted text-foreground rounded-bl-sm"
+            }`}>
+              {m.content}
+            </div>
+          </div>
+        ))}
+        {sending && (
+          <div className="flex gap-3 justify-start">
+            <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <Bot className="w-4 h-4 text-primary" />
+            </div>
+            <div className="bg-muted rounded-2xl rounded-bl-sm px-4 py-2.5 text-sm text-muted-foreground">
+              <span className="inline-flex gap-1">
+                <span className="animate-bounce" style={{ animationDelay: "0ms" }}>•</span>
+                <span className="animate-bounce" style={{ animationDelay: "150ms" }}>•</span>
+                <span className="animate-bounce" style={{ animationDelay: "300ms" }}>•</span>
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
+      <div className="border-t border-border/60 p-4 flex gap-3 items-end">
+        <textarea
+          className="flex-1 resize-none rounded-xl border border-border/60 bg-background px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 min-h-[44px] max-h-32"
+          placeholder="Ask your AI Companion…"
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          rows={1}
+          maxLength={2000}
+          onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
+        />
+        <Button
+          size="icon"
+          className="rounded-xl h-11 w-11 flex-shrink-0"
+          onClick={sendMessage}
+          disabled={!input.trim() || sending}
+        >
+          {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function CompanionTab() {
+  const { data: subStatus, isLoading } = useQuery({
+    queryKey: ["subscription-status"],
+    queryFn: async () => {
+      const r = await fetch("/api/subscription/status", { credentials: "include" });
+      if (!r.ok) return null;
+      return r.json() as Promise<{ isPro: boolean }>;
+    },
+    staleTime: 60_000,
+  });
+
+  if (isLoading) return (
+    <div className="flex items-center justify-center py-20">
+      <Loader2 className="w-8 h-8 text-primary animate-spin" />
+    </div>
+  );
+
+  if (!subStatus?.isPro) return <CompanionProGate />;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex gap-3 items-start px-5 py-4 rounded-2xl border border-border/40 bg-muted/20">
+        <Bot className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+        <div>
+          <p className="text-sm font-semibold text-foreground mb-0.5">Personalized to your assessment</p>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Your AI Companion has access to your resilience scores and assessment answers. It gives guidance specific to your gaps, location, and situation — not generic advice. Ask about planning, resources, specific scenarios, or motivation.
+          </p>
+        </div>
+      </div>
+      <CompanionChat />
+    </div>
+  );
+}
+
+// ─── Guides Tab ───────────────────────────────────────────────────────────────
+const GUIDES_OFFLINE_KEY = "resilium_guides_downloaded_v1";
+
+function downloadGuide(guide: Guide) {
+  const lines: string[] = [
+    `RESILIUM CRISIS GUIDE`,
+    `═══════════════════════════════════════`,
+    `${guide.title}`,
+    `${guide.situation} · ${guide.readingTime} read`,
+    ``,
+    guide.summary,
+    ``,
+    `═══════════════════════════════════════`,
+    ``,
+  ];
+  guide.sections.forEach(s => {
+    lines.push(`── ${s.heading} ──`);
+    lines.push(s.content);
+    lines.push(``);
+  });
+  lines.push(`───────────────────────────────────────`);
+  lines.push(`Downloaded from Resilium · resilium-platform.com`);
+  lines.push(`Available offline at any time.`);
+  const blob = new Blob([lines.join("\n")], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `resilium-guide-${guide.id}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function GuideCard({ guide }: { guide: Guide }) {
+  const [open, setOpen] = useState(false);
+  const [openSection, setOpenSection] = useState<number | null>(null);
+  const [downloaded, setDownloaded] = useState(() => {
+    const saved = localStorage.getItem(GUIDES_OFFLINE_KEY);
+    return saved ? JSON.parse(saved).includes(guide.id) : false;
+  });
+
+  const handleDownload = () => {
+    downloadGuide(guide);
+    const saved = localStorage.getItem(GUIDES_OFFLINE_KEY);
+    const list: string[] = saved ? JSON.parse(saved) : [];
+    if (!list.includes(guide.id)) {
+      const updated = [...list, guide.id];
+      localStorage.setItem(GUIDES_OFFLINE_KEY, JSON.stringify(updated));
+      setDownloaded(true);
+    }
+  };
+
+  const situationColors: Record<string, string> = {
+    "Economic Disruption": "text-amber-700 bg-amber-50 border-amber-200",
+    "Natural Disaster": "text-red-700 bg-red-50 border-red-200",
+    "Infrastructure Failure": "text-indigo-700 bg-indigo-50 border-indigo-200",
+    "Security": "text-purple-700 bg-purple-50 border-purple-200",
+    "Health": "text-emerald-700 bg-emerald-50 border-emerald-200",
+    "General Emergency": "text-primary bg-primary/10 border-primary/20",
+  };
+  const situationClass = situationColors[guide.situation] || "text-primary bg-primary/10 border-primary/20";
+
+  return (
+    <div className="rounded-2xl border border-border/60 overflow-hidden bg-card">
+      <button
+        type="button"
+        className="w-full flex items-start gap-4 p-5 text-left hover:bg-muted/30 transition-colors"
+        onClick={() => setOpen(o => !o)}
+      >
+        <div className="flex-1 min-w-0">
+          <div className="flex flex-wrap items-center gap-2 mb-1.5">
+            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${situationClass}`}>
+              {guide.situation}
+            </span>
+            {guide.essential && (
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-full border text-primary bg-primary/10 border-primary/20">
+                Essential
+              </span>
+            )}
+            <span className="text-xs text-muted-foreground">{guide.readingTime}</span>
+          </div>
+          <p className="font-semibold text-foreground">{guide.title}</p>
+          {!open && <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{guide.summary}</p>}
+        </div>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <button
+            type="button"
+            title="Download for offline use"
+            onClick={e => { e.stopPropagation(); handleDownload(); }}
+            className="p-1.5 rounded-lg hover:bg-primary/10 transition-colors"
+          >
+            <Download className={`w-4 h-4 ${downloaded ? "text-primary" : "text-muted-foreground"}`} />
+          </button>
+          {open ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
+        </div>
+      </button>
+
+      {open && (
+        <div className="border-t border-border/40 px-5 pb-5 pt-4 space-y-1">
+          <p className="text-sm text-muted-foreground leading-relaxed mb-4">{guide.summary}</p>
+          {guide.sections.map((section, idx) => (
+            <div key={idx} className="border-t border-border/30 pt-3">
+              <button
+                type="button"
+                className="w-full flex items-center justify-between text-left py-1 hover:text-primary transition-colors"
+                onClick={() => setOpenSection(openSection === idx ? null : idx)}
+              >
+                <span className="text-sm font-semibold text-foreground">{section.heading}</span>
+                {openSection === idx
+                  ? <ChevronUp className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+                  : <ChevronDown className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+                }
+              </button>
+              {openSection === idx && (
+                <p className="text-sm text-muted-foreground leading-relaxed mt-2 whitespace-pre-line">{section.content}</p>
+              )}
+            </div>
+          ))}
+          <div className="mt-4 pt-3 border-t border-border/30 flex items-center justify-between">
+            <div className="flex items-center gap-1.5 text-xs text-emerald-600">
+              <Download className="w-3.5 h-3.5" />
+              Download as text file for offline use
+            </div>
+            <button
+              type="button"
+              onClick={handleDownload}
+              className="text-xs font-medium text-primary hover:underline"
+            >
+              {downloaded ? "Download again" : "Download guide"}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function GuidesTab({ location }: { location?: string }) {
+  const [filter, setFilter] = useState<"all" | "essential">("all");
+  const filteredGuides = filter === "essential" ? getEssentialGuides() : location ? getGuidesByLocation(location) : guides;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex gap-3 items-start px-5 py-4 rounded-2xl border border-border/40 bg-muted/20">
+        <BookOpen className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+        <div>
+          <p className="text-sm font-semibold text-foreground mb-0.5">Practical crisis guides — always available</p>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Location-relevant guides for the situations most likely to affect you. Expand any guide to read it in full. Download it as a text file to save it for offline reading when you don't have internet access.
+          </p>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2">
+        {(["all", "essential"] as const).map(f => (
+          <button
+            key={f}
+            type="button"
+            onClick={() => setFilter(f)}
+            className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
+              filter === f
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-background text-muted-foreground border-border/60 hover:border-primary/40"
+            }`}
+          >
+            {f === "all" ? (location ? "Relevant to You" : "All Guides") : "Essential Only"}
+          </button>
+        ))}
+        <span className="text-xs text-muted-foreground ml-auto">{filteredGuides.length} guides</span>
+      </div>
+
+      <div className="space-y-3">
+        {filteredGuides.map(guide => (
+          <GuideCard key={guide.id} guide={guide} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Page ───────────────────────────────────────────────────────────────
 export default function ProfilePage() {
   const { user, isLoaded } = useUser();
@@ -1657,8 +2076,8 @@ export default function ProfilePage() {
   const logout = () => signOut({ redirectUrl: "/" });
   const search = useSearch();
   const urlTab = new URLSearchParams(search).get("tab");
-  const validTabs = ["overview", "reports", "plans", "checklist", "account"];
-  const defaultTab = urlTab && validTabs.includes(urlTab) ? urlTab : "overview";
+  const validTabs = ["account", "overview", "reports", "plans", "checklist", "companion", "guides"];
+  const defaultTab = urlTab && validTabs.includes(urlTab) ? urlTab : "account";
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -1714,7 +2133,10 @@ export default function ProfilePage() {
           </div>
         ) : (
           <Tabs defaultValue={defaultTab} className="space-y-6">
-            <TabsList className="rounded-xl h-10 p-1 w-full sm:w-auto">
+            <TabsList className="rounded-xl h-10 p-1 flex-wrap gap-1 w-full sm:w-auto">
+              <TabsTrigger value="account" className="rounded-lg gap-1.5 text-sm">
+                <User className="w-3.5 h-3.5" /> Account
+              </TabsTrigger>
               <TabsTrigger value="overview" className="rounded-lg gap-1.5 text-sm">
                 <BarChart2 className="w-3.5 h-3.5" /> Overview
               </TabsTrigger>
@@ -1722,15 +2144,28 @@ export default function ProfilePage() {
                 <FileText className="w-3.5 h-3.5" /> Reports
               </TabsTrigger>
               <TabsTrigger value="plans" className="rounded-lg gap-1.5 text-sm">
-                <Activity className="w-3.5 h-3.5" /> Plans {plans.length > 0 && <span className="ml-0.5 text-xs opacity-60">({plans.length})</span>}
+                <Activity className="w-3.5 h-3.5" /> Plans
               </TabsTrigger>
               <TabsTrigger value="checklist" className="rounded-lg gap-1.5 text-sm">
                 <CheckCircle2 className="w-3.5 h-3.5" /> Checklist
               </TabsTrigger>
-              <TabsTrigger value="account" className="rounded-lg gap-1.5 text-sm">
-                <User className="w-3.5 h-3.5" /> Account
+              <TabsTrigger value="companion" className="rounded-lg gap-1.5 text-sm">
+                <Bot className="w-3.5 h-3.5" /> Companion
+              </TabsTrigger>
+              <TabsTrigger value="guides" className="rounded-lg gap-1.5 text-sm">
+                <BookOpen className="w-3.5 h-3.5" /> Guides
               </TabsTrigger>
             </TabsList>
+
+            <TabsContent value="account">
+              {user && (
+                <AccountTab
+                  user={user as any}
+                  plans={plans}
+                  onAllPlansDeleted={handleAllPlansDeleted}
+                />
+              )}
+            </TabsContent>
 
             <TabsContent value="overview">
               <OverviewTab plans={plans} />
@@ -1766,14 +2201,12 @@ export default function ProfilePage() {
               <ChecklistTab />
             </TabsContent>
 
-            <TabsContent value="account">
-              {user && (
-                <AccountTab
-                  user={user as any}
-                  plans={plans}
-                  onAllPlansDeleted={handleAllPlansDeleted}
-                />
-              )}
+            <TabsContent value="companion">
+              <CompanionTab />
+            </TabsContent>
+
+            <TabsContent value="guides">
+              <GuidesTab location={plans[plans.length - 1]?.location} />
             </TabsContent>
           </Tabs>
         )}

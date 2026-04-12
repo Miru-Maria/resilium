@@ -29,7 +29,7 @@ export default function TabLayout() {
         },
         tabBarLabelStyle: {
           fontFamily: "Inter_500Medium",
-          fontSize: 11,
+          fontSize: 10,
           marginTop: 2,
         },
       }}
@@ -67,6 +67,24 @@ export default function TabLayout() {
           title: "Check-in",
           tabBarIcon: ({ color, size }) => (
             <TabBarIcon name="check-circle" color={color} size={size - 2} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="companion"
+        options={{
+          title: "Companion",
+          tabBarIcon: ({ color, size }) => (
+            <TabBarIcon name="cpu" color={color} size={size - 2} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="guides"
+        options={{
+          title: "Guides",
+          tabBarIcon: ({ color, size }) => (
+            <TabBarIcon name="book-open" color={color} size={size - 2} />
           ),
         }}
       />
