@@ -952,16 +952,17 @@ export default function PlanPage() {
         </section>
 
         {/* STRESS TEST SCENARIOS */}
-        {scenarioSimulations && scenarioSimulations.length > 0 && (
-          <section>
-            <div className="flex items-center gap-3 mb-4">
-              <Activity className="w-6 h-6 text-primary" />
-              <div>
-                <h2 className="font-display font-bold text-2xl">Stress Test Scenarios</h2>
-                <p className="text-muted-foreground text-sm">How your profile holds up against key disruptions — informing where to prioritize above.</p>
-              </div>
+        <section>
+          <div className="flex items-center gap-3 mb-4">
+            <Activity className="w-6 h-6 text-primary" />
+            <div>
+              <h2 className="font-display font-bold text-2xl">Scenario Stress-Tests</h2>
+              <p className="text-muted-foreground text-sm">See how your resilience holds up when a real disruption hits.</p>
             </div>
-            <Accordion type="single" collapsible className="space-y-3">
+          </div>
+
+          {scenarioSimulations && scenarioSimulations.length > 0 && (
+            <Accordion type="single" collapsible className="space-y-3 mb-4">
               {scenarioSimulations.map((scenario, idx) => (
                 <AccordionItem
                   key={idx}
@@ -1007,23 +1008,60 @@ export default function PlanPage() {
                 </AccordionItem>
               ))}
             </Accordion>
-            <div className="mt-4 rounded-2xl border border-primary/20 bg-primary/5 p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+          )}
+
+          {isPro ? (
+            <div className="rounded-2xl border border-primary/20 bg-primary/5 p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
               <div className="flex-1 min-w-0">
-                <p className="font-bold text-sm">Run a deeper scenario stress test</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Choose a specific crisis — job loss, health emergency, natural disaster, or relocating abroad — and see AI-generated delta scores with tailored actions.</p>
+                <p className="font-bold text-sm">Run a scenario stress test</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Choose a crisis — job loss, health emergency, natural disaster, or relocation — and get AI-generated delta scores, gap areas, and tailored immediate actions.</p>
               </div>
-              {isPro ? (
-                <Link href={`/scenarios/${reportId}`}>
-                  <Button size="sm" className="rounded-full gap-1.5 shrink-0"><Activity className="w-3.5 h-3.5" /> Run Stress Test</Button>
-                </Link>
-              ) : (
-                <Link href="/pricing">
-                  <Button size="sm" variant="outline" className="rounded-full gap-1.5 shrink-0"><Lock className="w-3.5 h-3.5" /> Unlock with Pro</Button>
-                </Link>
-              )}
+              <Link href={`/scenarios/${reportId}`}>
+                <Button size="sm" className="rounded-full gap-1.5 shrink-0">
+                  <Activity className="w-3.5 h-3.5" /> Run Stress Test
+                </Button>
+              </Link>
             </div>
-          </section>
-        )}
+          ) : (
+            <div className="rounded-2xl border border-border bg-card overflow-hidden">
+              <div className="px-5 pt-5 pb-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <Lock className="w-4 h-4 text-muted-foreground" />
+                  <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Pro feature</p>
+                </div>
+                <p className="font-bold text-base mb-1">What happens to your plan if a crisis hits?</p>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Pick a scenario, and Resilium calculates how your score changes, which gaps become critical, and what your first 72 hours should look like — before the crisis happens.
+                </p>
+              </div>
+              <div className="border-t border-border divide-y divide-border/60 select-none">
+                {[
+                  { icon: "💼", label: "Job Loss", sub: "You lose your primary income source unexpectedly", badge: "High impact" },
+                  { icon: "🏥", label: "Health Emergency", sub: "A sudden illness or injury disrupts your life for months", badge: "Severe" },
+                  { icon: "🌍", label: "Forced Relocation", sub: "You need to move country or city within weeks", badge: "High impact" },
+                  { icon: "⛈️", label: "Natural Disaster", sub: "A local disaster disrupts infrastructure and supply chains", badge: "Variable" },
+                ].map(({ icon, label, sub, badge }) => (
+                  <div key={label} className="flex items-center gap-4 px-5 py-3.5 blur-[2px] pointer-events-none opacity-60">
+                    <span className="text-2xl flex-shrink-0">{icon}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-sm">{label}</p>
+                      <p className="text-xs text-muted-foreground truncate">{sub}</p>
+                    </div>
+                    <span className="text-[10px] font-bold uppercase tracking-wide text-amber-600 bg-amber-500/10 rounded-full px-2 py-0.5 flex-shrink-0">{badge}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="px-5 py-4 bg-muted/20 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                <p className="text-sm text-muted-foreground flex-1">Unlock scenario stress-tests and unlimited reassessments with Pro.</p>
+                <Link href="/pricing">
+                  <Button size="sm" className="rounded-full gap-1.5 shrink-0 shadow-md shadow-primary/20">
+                    <Zap className="w-3.5 h-3.5" /> Unlock with Pro
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          )}
+        </section>
 
         {/* COACHING CALLOUT — bottom of page, not in every item */}
         <section className="rounded-3xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 to-orange-500/10 p-6 md:p-8">

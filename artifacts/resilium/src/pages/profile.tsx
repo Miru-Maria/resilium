@@ -94,7 +94,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-const PLAN_LIMIT = 10;
+const PLAN_LIMIT = 3;
 
 interface PlanSummary {
   reportId: string;
