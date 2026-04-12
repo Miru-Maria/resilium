@@ -10,13 +10,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { Progress } from "@/components/ui/progress";
-import { Loader2, Download, Share2, AlertTriangle, Check, CheckCircle, RefreshCcw, Activity, User, LogIn, Brain, TrendingUp, Award, Star, ExternalLink, Heart, BookOpen, ShieldCheck, Zap, Package, Globe, MapPin, Lock, Mail, ImageDown, Sparkles, ChevronDown, ChevronUp, DollarSign, Wrench, Navigation, Home, Users, Target } from "lucide-react";
+import { Loader2, Download, Share2, AlertTriangle, Check, CheckCircle, RefreshCcw, Activity, User, LogIn, Brain, TrendingUp, Award, Star, ExternalLink, Heart, BookOpen, ShieldCheck, Zap, Package, Globe, MapPin, Lock, Mail, Sparkles, ChevronDown, ChevronUp, DollarSign, Wrench, Navigation, Home, Users, Target } from "lucide-react";
 import { ResilientIcon } from "@/components/resilient-icon";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { SiteFooter } from "@/components/site-footer";
 import { useUser, useAuth, useClerk } from "@clerk/react";
-import { ShareScorecardModal } from "@/components/share-scorecard-modal";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -248,7 +247,6 @@ function ResultsPageInner() {
   const login = () => openSignIn({});
   const logout = () => signOut({ redirectUrl: "/" });
   const queryClient = useQueryClient();
-  const [shareScorecardOpen, setShareScorecardOpen] = useState(false);
 
   // ── Job recovery polling ──────────────────────────────────────────────────
   // If we land here with an invalid/missing reportId (e.g. old JS bundle got a
@@ -660,9 +658,6 @@ function ResultsPageInner() {
           </Button>
           <Button variant="outline" size="sm" onClick={handleMarkdownExport} className="rounded-full">
             <Download className="w-4 h-4 mr-2" /> Markdown
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => setShareScorecardOpen(true)} className="rounded-full bg-primary/5 border-primary/30 text-primary hover:bg-primary/10">
-            <ImageDown className="w-4 h-4 mr-2" /> Share Score
           </Button>
           </div>
         </div>
@@ -1398,19 +1393,6 @@ function ResultsPageInner() {
         </div>
       )}
 
-      <ShareScorecardModal
-        isOpen={shareScorecardOpen}
-        onClose={() => setShareScorecardOpen(false)}
-        score={report.score}
-        overallLabel={
-          report.score.overall >= 80 ? "Highly Resilient" :
-          report.score.overall >= 60 ? "Well Prepared" :
-          report.score.overall >= 40 ? "Moderately Prepared" :
-          report.score.overall >= 20 ? "Developing Resilience" :
-          "Critically Vulnerable"
-        }
-        mentalResilienceProfile={mrProfile}
-      />
     </div>
   );
 }
