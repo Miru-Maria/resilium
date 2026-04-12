@@ -294,7 +294,7 @@ A single composite score you can improve over time, built from a structured asse
 → Scenario planning: see how your profile shifts under job loss, health emergency, relocation
 → Progress tracking: retake, compare, improve
 → AI Companion grounded in your scores — ask anything about your specific gaps (Pro)
-→ 10 crisis guides, location-aware, downloadable for offline use (free for all users)
+→ 15 crisis guides, location-aware, downloadable for offline use (free for all users)
 → No name or email required for your full report. Privacy-first by design.
 
 This is not a quiz with generic tips. It's a structured, scored assessment that reflects your specific circumstances and tells you exactly what to work on next.`}
@@ -326,7 +326,7 @@ The assessment is free and anonymous — no email required. Takes about 12 minut
           ["4", "Scenario modelling UI", "\"What if I lost my job tomorrow?\" Model disruption scenarios and see how your resilience profile shifts."],
           ["5", "Mental Resilience Profile cards", "Psychological readiness matters as much as logistics. Both are measured and both are actionable."],
           ["6", "AI Companion chat (Pro)", "Ask anything specific to your situation — gaps, location, next steps. Not generic advice."],
-          ["7", "Crisis Guides accordion (all users)", "10 practical, location-relevant guides — readable in-app or downloaded for offline use."],
+          ["7", "Crisis Guides accordion (all users)", "15 practical, location-relevant guides — readable in-app or downloaded for offline use."],
         ]}
       />
 

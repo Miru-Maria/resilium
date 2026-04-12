@@ -16,7 +16,7 @@ const POSITIONING = {
   primaryAlternative:
     "one-dimensional psychological tests (score only) or reactive emergency apps (alerts only)",
   keyDifferentiator:
-    "addresses all 6 dimensions of readiness — financial, health, skills, mobility, resources, and psychological — stays with you as a living document you actually work; its scoring model is grounded in peer-reviewed science (CD-RISC, Antonovsky Salutogenesis, FEMA preparedness framework); ships a Pro-gated AI Companion grounded in each user's assessment scores; and includes 10 practical offline crisis guides for all users — none of which any competitor offers",
+    "addresses all 6 dimensions of readiness — financial, health, skills, mobility, resources, and psychological — stays with you as a living document you actually work; its scoring model is grounded in peer-reviewed science (CD-RISC, Antonovsky Salutogenesis, FEMA preparedness framework); ships a Pro-gated AI Companion grounded in each user's assessment scores; includes 15 practical offline crisis guides for all users; delivers automated re-engagement via 7-day and 30-day email and push reminders; and surfaces Pro-only scenario stress-tests (job loss, health crisis, relocation, disaster) directly in the action plan — none of which any competitor offers",
 };
 
 const AUDIENCE_STATS = [
@@ -142,7 +142,7 @@ const WHITE_SPACE = [
 const KANO = [
   { category: "Basic (table stakes — must have)", items: "Free tier, some scoring mechanism, psychological dimension" },
   { category: "Performance (more = better)", items: "More assessed dimensions, better AI recommendations, more scenario types, deeper action steps" },
-  { category: "Delighter (unexpected, differentiating)", items: "Goal personalization, 'living document' plan, coaching referral, Pro AI Companion (personalized, assessment-grounded), 10 offline crisis guides (all users), financial dimension, privacy-first (no personal data), peer-reviewed scientific basis publicly documented (CD-RISC, Antonovsky, FEMA framework)" },
+  { category: "Delighter (unexpected, differentiating)", items: "Goal personalization, 'living document' plan, coaching referral, Pro AI Companion (personalized, assessment-grounded), 15 offline crisis guides (all users, offline-capable), scenario stress-tests in the action plan (Pro), automated 7-day and 30-day re-engagement email + push loop, financial dimension, privacy-first (no personal data), peer-reviewed scientific basis publicly documented (CD-RISC, Antonovsky, FEMA framework)" },
 ];
 
 const ACTION_PLAN = [

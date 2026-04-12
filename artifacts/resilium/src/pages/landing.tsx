@@ -578,7 +578,7 @@ export default function LandingPage() {
                 {
                   icon: <BookOpen className="w-5 h-5 text-primary" />,
                   title: "Crisis Guides",
-                  desc: "10 practical, location-relevant guides for financial crisis, power outages, flooding, medical emergencies, and more — readable offline.",
+                  desc: "15 practical, location-relevant guides for financial crisis, job loss, power outages, flooding, medical emergencies, digital security, and more — readable offline.",
                 },
               ].map(({ icon, title, desc, badge }: { icon: React.ReactNode; title: string; desc: string; badge?: string }) => (
                 <div key={title} className="p-5 rounded-2xl border border-border/60 bg-background hover:border-primary/30 transition-colors">
