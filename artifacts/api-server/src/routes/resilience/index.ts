@@ -486,7 +486,12 @@ router.get("/reports/:reportId", async (req, res) => {
         psychologicalResilience: row.psychologicalResilience,
         riskConcerns: row.riskConcerns as string[],
         householdMode: row.householdMode ?? undefined,
-        householdComposition: (row.householdComposition as any) ?? undefined,
+        householdComposition: (row.householdComposition as {
+          adults?: number;
+          hasMinors?: boolean;
+          hasMobilityLimitation?: boolean;
+          hasMultipleIncomes?: boolean;
+        } | null) ?? undefined,
       },
     });
   } catch (err) {

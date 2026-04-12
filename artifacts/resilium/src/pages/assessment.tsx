@@ -689,11 +689,11 @@ export default function AssessmentPage() {
   const [mrStep, setMrStep] = useState(0);
   const [assessmentPhase, setAssessmentPhase] = useState<"mode_select" | "composition" | "main">("mode_select");
   const [householdComposition, setHouseholdComposition] = useState<HouseholdComposition>({
-    adults: 2,
+    adults: 1,
     hasMinors: false,
     hasMobilityLimitation: false,
     hasMultipleIncomes: false,
-  }); // household requires ≥ 2 adults
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<{ code: string; message: string } | null>(null);
   const [currency, setCurrency] = useState<CurrencyCode>("USD");
@@ -1316,7 +1316,7 @@ export default function AssessmentPage() {
               <label className="block text-sm font-semibold mb-4">How many adults (18+) live in your household, including yourself?</label>
               <div className="flex items-center gap-4">
                 <button
-                  onClick={() => setHouseholdComposition(prev => ({ ...prev, adults: Math.max(2, prev.adults - 1) }))}
+                  onClick={() => setHouseholdComposition(prev => ({ ...prev, adults: Math.max(1, prev.adults - 1) }))}
                   className="w-10 h-10 rounded-full border-2 border-border bg-background hover:border-primary hover:bg-primary/5 flex items-center justify-center text-xl font-bold transition-colors"
                   aria-label="Decrease adults"
                 >−</button>

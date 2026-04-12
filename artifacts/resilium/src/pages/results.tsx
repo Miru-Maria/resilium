@@ -582,6 +582,10 @@ function ResultsPageInner() {
     progressMap[`${p.area}::${p.itemId}`] = p.completed;
   });
 
+  // Household context
+  const isHouseholdResults = report.householdMode === "household";
+  const hcResults = report.input?.householdComposition;
+
   // Sort areas by score ascending (worst first)
   const scoreByArea: Record<string, number> = {
     financial: report.score.financial,
@@ -1000,6 +1004,20 @@ function ResultsPageInner() {
                 const comp = areaCompletion(area, items);
                 return (
                   <TabsContent key={area} value={area} className="space-y-4 focus-visible:outline-none focus-visible:ring-0">
+                    {/* Household vulnerability flags for this dimension */}
+                    {isHouseholdResults && (
+                      <div className="flex flex-wrap gap-2 mb-1">
+                        {area === "mobility" && hcResults?.hasMobilityLimitation && (
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600">Mobility limitation in household</span>
+                        )}
+                        {area === "financial" && hcResults?.hasMultipleIncomes && (
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600">Multiple income sources</span>
+                        )}
+                        {area === "health" && hcResults?.hasMinors && (
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-sky-500/10 border border-sky-500/20 text-sky-600">Minors in household</span>
+                        )}
+                      </div>
+                    )}
                     {/* Area progress bar */}
                     <div className="flex items-center gap-3 mb-4">
                       <Progress value={comp.percent} className="h-2 flex-1" />
