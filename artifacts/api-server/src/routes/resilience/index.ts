@@ -485,6 +485,8 @@ router.get("/reports/:reportId", async (req, res) => {
         hasEmergencySupplies: row.hasEmergencySupplies,
         psychologicalResilience: row.psychologicalResilience,
         riskConcerns: row.riskConcerns as string[],
+        householdMode: row.householdMode ?? undefined,
+        householdComposition: (row.householdComposition as any) ?? undefined,
       },
     });
   } catch (err) {

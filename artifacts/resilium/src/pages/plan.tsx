@@ -460,9 +460,7 @@ export default function PlanPage() {
   const AREA_RESOURCES = getAreaResources(reportLocation);
 
   const isHouseholdPlan = report.householdMode === "household";
-  const hc = (report.input as any)?.householdComposition as {
-    adults?: number; hasMinors?: boolean; hasMobilityLimitation?: boolean; hasMultipleIncomes?: boolean;
-  } | undefined;
+  const hc = report.input.householdComposition;
 
   const progressMap: Record<string, boolean> = {};
   (checklistData?.progress ?? []).forEach(p => { progressMap[`${p.area}::${p.itemId}`] = p.completed; });

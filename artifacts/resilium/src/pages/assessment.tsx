@@ -693,7 +693,7 @@ export default function AssessmentPage() {
     hasMinors: false,
     hasMobilityLimitation: false,
     hasMultipleIncomes: false,
-  });
+  }); // household requires ≥ 2 adults
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<{ code: string; message: string } | null>(null);
   const [currency, setCurrency] = useState<CurrencyCode>("USD");
@@ -1256,8 +1256,9 @@ export default function AssessmentPage() {
                 setFormData(prev => ({ ...prev, householdMode: "individual" }));
                 setAssessmentPhase("main");
               }}
-              className="group text-left p-8 rounded-3xl border-2 border-border hover:border-primary bg-card hover:bg-primary/5 transition-all shadow-sm hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              className="group relative text-left p-8 rounded-3xl border-2 border-primary bg-primary/5 hover:bg-primary/10 transition-all shadow-sm hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
+              <span className="absolute top-4 right-4 text-xs font-bold uppercase tracking-wider text-primary bg-primary/10 px-2.5 py-1 rounded-full">Most common</span>
               <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
                 <UserCheck className="w-7 h-7 text-primary" />
               </div>
@@ -1274,7 +1275,7 @@ export default function AssessmentPage() {
               <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
                 <UsersRound className="w-7 h-7 text-primary" />
               </div>
-              <h2 className="text-xl font-display font-bold mb-2">My Household</h2>
+              <h2 className="text-xl font-display font-bold mb-2">My Household <span className="text-base font-normal text-muted-foreground">(2+ people)</span></h2>
               <p className="text-muted-foreground text-sm leading-relaxed">Covers your whole household — coordination plans, shared vulnerabilities, and collective readiness.</p>
             </button>
           </div>
@@ -1310,7 +1311,7 @@ export default function AssessmentPage() {
               <label className="block text-sm font-semibold mb-4">How many adults (18+) live in your household, including yourself?</label>
               <div className="flex items-center gap-4">
                 <button
-                  onClick={() => setHouseholdComposition(prev => ({ ...prev, adults: Math.max(1, prev.adults - 1) }))}
+                  onClick={() => setHouseholdComposition(prev => ({ ...prev, adults: Math.max(2, prev.adults - 1) }))}
                   className="w-10 h-10 rounded-full border-2 border-border bg-background hover:border-primary hover:bg-primary/5 flex items-center justify-center text-xl font-bold transition-colors"
                   aria-label="Decrease adults"
                 >−</button>
@@ -1933,7 +1934,7 @@ export default function AssessmentPage() {
                   </div>
                   <div>
                     <h3 className="text-xl font-display font-bold mb-1">{t.s8PhysicalTitle}</h3>
-                    <p className="text-sm text-muted-foreground mb-3">{isHousehold ? "How physically capable is the most active adult in your household?" : t.s8PhysicalSub}</p>
+                    <p className="text-sm text-muted-foreground mb-3">{isHousehold ? "Rate based on the least physically capable member — your plan is only as mobile as its least mobile person." : t.s8PhysicalSub}</p>
                     <div className="flex gap-2" role="radiogroup" aria-label="Physical capability">
                       {(t.mobilityOptions as { id: AssessmentInputMobilityLevel; label: string }[]).map(opt => (
                         <Button 
