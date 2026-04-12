@@ -264,6 +264,8 @@ router.get("/me/latest-checklist", async (req: Request, res: Response) => {
         checklistsByArea: resilienceReportsTable.checklistsByArea,
         location: resilienceReportsTable.location,
         createdAt: resilienceReportsTable.createdAt,
+        primaryGoal: resilienceReportsTable.primaryGoal,
+        successVision: resilienceReportsTable.successVision,
       })
       .from(resilienceReportsTable)
       .where(eq(resilienceReportsTable.userId, userId))
@@ -280,6 +282,8 @@ router.get("/me/latest-checklist", async (req: Request, res: Response) => {
       checklistsByArea: rows[0].checklistsByArea,
       location: rows[0].location,
       createdAt: rows[0].createdAt.toISOString(),
+      primaryGoal: rows[0].primaryGoal ?? null,
+      successVision: rows[0].successVision ?? null,
     });
   } catch (err) {
     req.log.error({ err }, "Error fetching latest checklist");

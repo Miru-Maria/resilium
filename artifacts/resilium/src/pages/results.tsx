@@ -19,6 +19,25 @@ import { useUser, useAuth, useClerk } from "@clerk/react";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
+const GOAL_LABELS: Record<string, string> = {
+  job_security: "Job & Income Security",
+  financial_independence: "Financial Independence",
+  disaster_preparedness: "Disaster Preparedness",
+  health_continuity: "Health Continuity",
+  geopolitical_risk: "Geopolitical Risk",
+  life_transition: "Life Transition",
+  general_resilience: "General Resilience",
+};
+const GOAL_ICONS: Record<string, string> = {
+  job_security: "💼",
+  financial_independence: "💰",
+  disaster_preparedness: "🛡️",
+  health_continuity: "🏥",
+  geopolitical_risk: "🌍",
+  life_transition: "🔄",
+  general_resilience: "⚡",
+};
+
 const PADDLE_CLIENT_TOKEN = import.meta.env.VITE_PADDLE_CLIENT_TOKEN as string | undefined;
 const PADDLE_DONATION_PRICE_ID = import.meta.env.VITE_PADDLE_DONATION_PRICE_ID as string | undefined;
 
@@ -678,6 +697,32 @@ function ResultsPageInner() {
             </Button>
           </div>
         )}
+
+        {/* GOAL REMINDER */}
+        {(() => {
+          const primaryGoal = (report as any).primaryGoal as string | undefined;
+          const successVision = (report as any).successVision as string | undefined;
+          const goalLabel = primaryGoal ? (GOAL_LABELS[primaryGoal] ?? primaryGoal) : null;
+          const goalIcon = primaryGoal ? (GOAL_ICONS[primaryGoal] ?? "⚡") : null;
+          if (!goalLabel) return null;
+          return (
+            <div className="flex items-center gap-3 flex-wrap">
+              <div className="flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-2">
+                <span className="text-lg">{goalIcon}</span>
+                <div>
+                  <span className="text-xs font-bold uppercase tracking-wider text-primary mr-2">Resilience Goal</span>
+                  <span className="text-sm font-semibold text-foreground">{goalLabel}</span>
+                </div>
+              </div>
+              {successVision && (
+                <div className="flex items-start gap-2 flex-1 min-w-0">
+                  <Target className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-muted-foreground italic">"{successVision}"</p>
+                </div>
+              )}
+            </div>
+          );
+        })()}
 
         {/* HERO SCORES SECTION */}
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">

@@ -616,6 +616,25 @@ function OverviewTab({ plans }: { plans: PlanSummary[] }) {
 }
 
 // ─── Checklist Tab ───────────────────────────────────────────────────────────
+const GOAL_LABELS: Record<string, string> = {
+  job_security: "Job & Income Security",
+  financial_independence: "Financial Independence",
+  disaster_preparedness: "Disaster Preparedness",
+  health_continuity: "Health Continuity",
+  geopolitical_risk: "Geopolitical Risk",
+  life_transition: "Life Transition",
+  general_resilience: "General Resilience",
+};
+const GOAL_ICONS: Record<string, string> = {
+  job_security: "💼",
+  financial_independence: "💰",
+  disaster_preparedness: "🛡️",
+  health_continuity: "🏥",
+  geopolitical_risk: "🌍",
+  life_transition: "🔄",
+  general_resilience: "⚡",
+};
+
 function ChecklistTab() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -626,6 +645,8 @@ function ChecklistTab() {
     checklistsByArea: ChecklistsByArea | null;
     location: string | null;
     createdAt: string | null;
+    primaryGoal: string | null;
+    successVision: string | null;
   }>({
     queryKey: ["latestChecklist"],
     queryFn: async () => {
@@ -708,8 +729,32 @@ function ChecklistTab() {
   }, 0);
   const overallPct = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
 
+  const primaryGoal = checklistData?.primaryGoal ?? null;
+  const successVision = checklistData?.successVision ?? null;
+  const goalLabel = primaryGoal ? (GOAL_LABELS[primaryGoal] ?? primaryGoal) : null;
+  const goalIcon = primaryGoal ? (GOAL_ICONS[primaryGoal] ?? "⚡") : null;
+
   return (
     <div className="space-y-5">
+      {/* GOAL REMINDER */}
+      {goalLabel && (
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-2">
+            <span className="text-lg">{goalIcon}</span>
+            <div>
+              <span className="text-xs font-bold uppercase tracking-wider text-primary mr-2">Resilience Goal</span>
+              <span className="text-sm font-semibold text-foreground">{goalLabel}</span>
+            </div>
+          </div>
+          {successVision && (
+            <div className="flex items-start gap-2 flex-1 min-w-0">
+              <Target className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-muted-foreground italic">"{successVision}"</p>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Overall progress bar */}
       <Card className="border-none shadow-md">
         <CardContent className="p-5">

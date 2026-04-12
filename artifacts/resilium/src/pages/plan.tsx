@@ -618,28 +618,35 @@ export default function PlanPage() {
 
         {/* GOAL + PROGRESS HERO */}
         <section>
-          <div className="flex flex-wrap items-start gap-4 mb-6">
-            <div>
+          <div className="flex flex-wrap items-start justify-between gap-3 mb-6">
+            {goalLabel && (
+              <div className="flex items-center gap-3 flex-wrap w-full">
+                <div className="flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-2">
+                  <span className="text-lg">{goalIcon}</span>
+                  <div>
+                    <span className="text-xs font-bold uppercase tracking-wider text-primary mr-2">Resilience Goal</span>
+                    <span className="text-sm font-semibold text-foreground">{goalLabel}</span>
+                  </div>
+                </div>
+                {successVision && (
+                  <div className="flex items-start gap-2 flex-1 min-w-0">
+                    <Target className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5" />
+                    <p className="text-sm text-muted-foreground italic">"{successVision}"</p>
+                  </div>
+                )}
+              </div>
+            )}
+            <div className="flex items-start justify-between w-full gap-4">
               <h1 className="font-display font-bold text-3xl md:text-4xl text-foreground">
-                {goalLabel ? (
-                  <span className="flex items-center gap-2">
-                    <span className="text-2xl">{goalIcon}</span>
-                    {goalLabel}
-                  </span>
-                ) : "Your Strategic Action Plan"}
+                Your Strategic Action Plan
               </h1>
-              {successVision && (
-                <p className="text-muted-foreground mt-2 text-sm max-w-xl italic">
-                  "{successVision}"
-                </p>
-              )}
-            </div>
-            <div className="ml-auto flex items-center gap-2 flex-shrink-0">
-              <Link href={`/results/${reportId}`}>
-                <Button variant="outline" size="sm" className="rounded-full gap-1.5 text-muted-foreground">
-                  Score: {report.score?.overall != null ? Math.round(report.score.overall) : "--"}/100
-                </Button>
-              </Link>
+              <div className="flex items-center gap-2 flex-shrink-0 mt-1">
+                <Link href={`/results/${reportId}`}>
+                  <Button variant="outline" size="sm" className="rounded-full gap-1.5 text-muted-foreground">
+                    Score: {report.score?.overall != null ? Math.round(report.score.overall) : "--"}/100
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
 
