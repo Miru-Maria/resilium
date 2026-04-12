@@ -47,7 +47,7 @@ export default function Slide3Solution() {
               className="text-[1.4vw] font-light leading-relaxed"
               style={{ color: "#8A7A6A", fontFamily: "Inter, sans-serif" }}
             >
-              Financial runway, skills, health, mobility, psychological capacity, and emergency resources — six weighted dimensions, answered in under 10 minutes. Available in English & Romanian.
+              Financial runway, skills, health, mobility, psychological capacity, and emergency resources — six weighted dimensions, answered in under 10 minutes. Assess as an individual or as a full household. Available in English & Romanian.
             </div>
           </div>
 

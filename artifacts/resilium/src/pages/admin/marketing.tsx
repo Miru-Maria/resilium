@@ -286,7 +286,7 @@ function ProductHuntSection() {
       </CopyBlock>
 
       <CopyBlock label="Short Description (≤ 260 chars)">
-        {`Resilium gives you a scored, structured resilience report across 6 life dimensions — finances, health, skills, mobility, psychology, and emergency resources — with a prioritized action plan tailored to your specific answers. No email required.`}
+        {`Resilium gives you a scored, structured resilience report across 6 life dimensions — finances, health, skills, mobility, psychology, and emergency resources — with a prioritized action plan tailored to your specific answers. Assess individually or as a full household. No email required.`}
       </CopyBlock>
 
       <CopyBlock label="Long-Form Product Description">
@@ -297,6 +297,7 @@ Resilium is a privacy-first platform that gives you an honest, scored picture of
 A single composite score you can improve over time, built from a structured assessment that takes 10–15 minutes to complete.
 
 → 6 resilience dimensions, each scored 0–100
+→ Household Assessment mode — assess your full family's readiness together (adults, dependents, mobility needs)
 → Personalized action plan with prioritized next steps based on your specific answers
 → Mental resilience profile across 6 psychological dimensions
 → Scenario planning: see how your profile shifts under job loss, health emergency, relocation
@@ -335,6 +336,7 @@ The assessment is free and anonymous — no email required. Takes about 12 minut
           ["5", "Mental Resilience Profile cards", "Psychological readiness matters as much as logistics. Both are measured and both are actionable."],
           ["6", "AI Companion chat (Pro)", "Ask anything specific to your situation — gaps, location, next steps. Not generic advice."],
           ["7", "Crisis Guides accordion (all users)", "15 practical, location-relevant guides — readable in-app or downloaded for offline use."],
+          ["8", "Household Assessment results screen", "Not just for individuals. Assess your full household and get a shared Resilience Score — adults, dependents, mobility needs accounted for."],
         ]}
       />
 
@@ -434,7 +436,7 @@ Happy to share the scoring framework if useful — I've been refining it.`}
       <CopyBlock label="Template 2 — Soft Demo Share (use when someone asks for tools/resources)">
         {`I've been working on something that addresses exactly this. It's a free structured assessment — takes about 12 minutes — and gives you scored results across six resilience dimensions (finances, health, skills, mobility, mental resilience, and emergency resources).
 
-The output isn't generic tips — it's a prioritized action plan based on your specific answers. No email required.
+You can assess as an individual or as a full household — adults, dependents, and mobility needs are all factored in. The output isn't generic tips — it's a prioritized action plan based on your specific answers. No email required.
 
 resilium-platform.com
 
@@ -455,6 +457,8 @@ It's a structured, scored assessment across six dimensions:
 - Psychological resilience (stress tolerance, adaptability, emotional regulation)
 - Emergency resources
 - Location risk
+
+You can take it as an individual or in Household mode — where the assessment accounts for adults, dependents, and any mobility limitations across your household and produces a shared score.
 
 You get a scored report, a personalized action plan tailored to your answers, and scenario modeling (e.g. "how does my profile change if I lose my job?"). No email required.
 

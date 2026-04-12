@@ -58,11 +58,20 @@ export default function Slide7Close() {
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: "2.2vw" }}>
-            <span style={NUM}>7</span>
+            <span style={NUM}>6</span>
             <div style={RULE} />
             <div>
               <div style={LABEL}>Resilience dimensions scored</div>
-              <div style={SUB}>financial, health, skills, mobility, housing, mental, social</div>
+              <div style={SUB}>financial, health, skills, mobility, psychological, resources</div>
+            </div>
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: "2.2vw" }}>
+            <span style={{ ...NUM, fontSize: "2.6vw" }}>Individual<br/>& Household</span>
+            <div style={RULE} />
+            <div>
+              <div style={LABEL}>Assessment modes</div>
+              <div style={SUB}>assess yourself, or your full household together</div>
             </div>
           </div>
 

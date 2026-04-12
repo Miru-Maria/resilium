@@ -109,6 +109,23 @@ export default function Slide4Audience() {
               Don&apos;t call themselves preppers — but they&apos;re quietly paying attention.
             </div>
           </div>
+          <div
+            className="rounded-xl px-[2vw] py-[2vh]"
+            style={{ background: "rgba(26,34,64,0.7)", borderLeft: "3px solid #E08040", ...a("0.95s", "slideInRight") }}
+          >
+            <div
+              className="text-[1.6vw] font-bold mb-[0.5vh]"
+              style={{ color: "#EAD9BE", fontFamily: "Plus Jakarta Sans, sans-serif" }}
+            >
+              Families &amp; Households
+            </div>
+            <div
+              className="text-[1.3vw] font-light"
+              style={{ color: "#8A7A6A", fontFamily: "Inter, sans-serif" }}
+            >
+              Parents, partners, multi-generational households — want a shared readiness score, not separate plans.
+            </div>
+          </div>
         </div>
       </div>
     </div>

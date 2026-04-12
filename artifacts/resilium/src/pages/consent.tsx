@@ -26,6 +26,7 @@ const DATA_POINTS = [
   { Icon: Wrench,       label: "Skills & capabilities" },
   { Icon: Home,         label: "Housing situation" },
   { Icon: AlertTriangle,label: "Risk concerns & priorities" },
+  { Icon: Shield,       label: "Household composition (optional — for family assessments)" },
 ];
 
 const INFO_CARDS = [

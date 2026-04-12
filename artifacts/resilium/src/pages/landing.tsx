@@ -6,6 +6,7 @@ import {
   ArrowRight,
   LogIn,
   User,
+  Users,
   Shield,
   Brain,
   MapPin,
@@ -520,6 +521,11 @@ export default function LandingPage() {
                   title: "Navigating a Life Transition",
                   desc: "Retirement, job loss, divorce, or relocating — disruption comes in many forms. Resilium gives you a clear-eyed picture of your current situation and a concrete path forward, at any age.",
                 },
+                {
+                  icon: <Users className="w-6 h-6 text-primary" />,
+                  title: "Families & Households",
+                  desc: "Resilium can assess your entire household — adults, dependents, and any mobility considerations — and produce a shared Household Resilience Score with a family-wide action plan.",
+                },
               ].map(({ icon, title, desc }) => (
                 <div key={title} className="flex gap-4 p-6 rounded-2xl border border-border/60 bg-card/40 hover:border-primary/30 transition-colors">
                   <div className="flex-shrink-0 w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center">{icon}</div>
@@ -585,6 +591,11 @@ export default function LandingPage() {
                   icon: <BookOpen className="w-5 h-5 text-primary" />,
                   title: "Crisis Guides",
                   desc: "15 practical, location-relevant guides for financial crisis, job loss, power outages, flooding, medical emergencies, digital security, and more — readable offline.",
+                },
+                {
+                  icon: <Users className="w-5 h-5 text-primary" />,
+                  title: "Household Assessment Mode",
+                  desc: "Assess your entire household — adults, dependents, and mobility needs — and get a shared Household Resilience Score with a family-wide action plan.",
                 },
               ].map(({ icon, title, desc, badge }: { icon: React.ReactNode; title: string; desc: string; badge?: string }) => (
                 <div key={title} className="p-5 rounded-2xl border border-border/60 bg-background hover:border-primary/30 transition-colors">
