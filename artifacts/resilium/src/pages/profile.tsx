@@ -2277,6 +2277,38 @@ function GuidesTab({ location, lowestDim }: { location?: string; lowestDim?: Dim
   );
 }
 
+// ─── Tab Error Boundary ───────────────────────────────────────────────────────
+interface TabErrorBoundaryState { hasError: boolean; error: Error | null }
+
+class TabErrorBoundary extends React.Component<
+  { children: React.ReactNode; tabName: string },
+  TabErrorBoundaryState
+> {
+  constructor(props: { children: React.ReactNode; tabName: string }) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error: Error): TabErrorBoundaryState {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error: Error) {
+    console.error(`[ProfilePage] Error in tab "${this.props.tabName}":`, error);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="flex flex-col items-center justify-center py-16 gap-4 text-center">
+          <p className="text-sm text-muted-foreground">Something went wrong loading this section.</p>
+          <Button variant="outline" size="sm" onClick={() => { this.setState({ hasError: false, error: null }); }}>
+            Try again
+          </Button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 // ─── Main Page ───────────────────────────────────────────────────────────────
 export default function ProfilePage() {
   const { user, isLoaded } = useUser();
@@ -2389,55 +2421,69 @@ export default function ProfilePage() {
             </TabsList>
 
             <TabsContent value="account">
-              {user && (
-                <AccountTab
-                  user={user as any}
-                  plans={plans}
-                  onAllPlansDeleted={handleAllPlansDeleted}
-                />
-              )}
+              <TabErrorBoundary tabName="account">
+                {user && (
+                  <AccountTab
+                    user={user as any}
+                    plans={plans}
+                    onAllPlansDeleted={handleAllPlansDeleted}
+                  />
+                )}
+              </TabErrorBoundary>
             </TabsContent>
 
             <TabsContent value="overview">
-              <OverviewTab plans={plans} />
+              <TabErrorBoundary tabName="overview">
+                <OverviewTab plans={plans} />
+              </TabErrorBoundary>
             </TabsContent>
 
             <TabsContent value="reports">
-              <ReportsTab plans={plans} />
+              <TabErrorBoundary tabName="reports">
+                <ReportsTab plans={plans} />
+              </TabErrorBoundary>
             </TabsContent>
 
             <TabsContent value="plans">
-              <div className="flex gap-3 items-start px-5 py-4 mb-4 rounded-2xl border border-border/40 bg-muted/20">
-                <BarChart2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-sm font-semibold text-foreground mb-0.5">What is a Plan?</p>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    Each Plan is a full snapshot of one assessment — your resilience score, risk profile, vulnerabilities, and strategic recommendations. Every time you retake the assessment, a new Plan is created so you can see how your preparedness evolves over time. Your most recent Plan also drives your active Checklist.
-                  </p>
+              <TabErrorBoundary tabName="plans">
+                <div className="flex gap-3 items-start px-5 py-4 mb-4 rounded-2xl border border-border/40 bg-muted/20">
+                  <BarChart2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-semibold text-foreground mb-0.5">What is a Plan?</p>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      Each Plan is a full snapshot of one assessment — your resilience score, risk profile, vulnerabilities, and strategic recommendations. Every time you retake the assessment, a new Plan is created so you can see how your preparedness evolves over time. Your most recent Plan also drives your active Checklist.
+                    </p>
+                  </div>
                 </div>
-              </div>
-              <PlansTab plans={plans} onDelete={() => queryClient.invalidateQueries({ queryKey: ["myPlans"] })} />
+                <PlansTab plans={plans} onDelete={() => queryClient.invalidateQueries({ queryKey: ["myPlans"] })} />
+              </TabErrorBoundary>
             </TabsContent>
 
             <TabsContent value="checklist">
-              <div className="flex gap-3 items-start px-5 py-4 mb-4 rounded-2xl border border-border/40 bg-muted/20">
-                <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-sm font-semibold text-foreground mb-0.5">Plans vs. Checklists — why both?</p>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    Your <span className="font-medium text-foreground">Plan</span> is the strategy — it tells you where you stand and why certain areas need attention. Your <span className="font-medium text-foreground">Checklist</span> is the execution layer — the specific, prioritized actions derived from that Plan that you work through over time. You need both: a plan without action stays insight, and action without strategy risks working on the wrong things first.
-                  </p>
+              <TabErrorBoundary tabName="checklist">
+                <div className="flex gap-3 items-start px-5 py-4 mb-4 rounded-2xl border border-border/40 bg-muted/20">
+                  <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-semibold text-foreground mb-0.5">Plans vs. Checklists — why both?</p>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      Your <span className="font-medium text-foreground">Plan</span> is the strategy — it tells you where you stand and why certain areas need attention. Your <span className="font-medium text-foreground">Checklist</span> is the execution layer — the specific, prioritized actions derived from that Plan that you work through over time. You need both: a plan without action stays insight, and action without strategy risks working on the wrong things first.
+                    </p>
+                  </div>
                 </div>
-              </div>
-              <ChecklistTab />
+                <ChecklistTab />
+              </TabErrorBoundary>
             </TabsContent>
 
             <TabsContent value="companion">
-              <CompanionTab latestPlan={latestPlan} />
+              <TabErrorBoundary tabName="companion">
+                <CompanionTab latestPlan={latestPlan} />
+              </TabErrorBoundary>
             </TabsContent>
 
             <TabsContent value="guides">
-              <GuidesTab location={latestPlan?.location} lowestDim={lowestDim} />
+              <TabErrorBoundary tabName="guides">
+                <GuidesTab location={latestPlan?.location} lowestDim={lowestDim} />
+              </TabErrorBoundary>
             </TabsContent>
           </Tabs>
         )}
