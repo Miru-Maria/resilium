@@ -293,6 +293,8 @@ A single composite score you can improve over time, built from a structured asse
 → Mental resilience profile across 6 psychological dimensions
 → Scenario planning: see how your profile shifts under job loss, health emergency, relocation
 → Progress tracking: retake, compare, improve
+→ AI Companion grounded in your scores — ask anything about your specific gaps (Pro)
+→ 10 crisis guides, location-aware, downloadable for offline use (free for all users)
 → No name or email required for your full report. Privacy-first by design.
 
 This is not a quiz with generic tips. It's a structured, scored assessment that reflects your specific circumstances and tells you exactly what to work on next.`}
@@ -304,7 +306,7 @@ This is not a quiz with generic tips. It's a structured, scored assessment that 
 
 I built this because I found myself anxious about "big picture" disruption risks — inflation, geopolitical instability, potential job loss — but couldn't find a tool that gave me an honest picture of where I actually stood. Everything I found was either generic advice, prepper-adjacent content, or surveys with no real output.
 
-So I built a structured, scored resilience assessment across 7 life dimensions — because vague reassurance doesn't help, but knowing exactly which gaps to close does.
+So I built a structured, scored resilience assessment across 6 life dimensions — because vague reassurance doesn't help, but knowing exactly which gaps to close does.
 
 A few things I'd love to hear from you:
 1. Which of the 6 dimensions surprises you most about your own situation?
