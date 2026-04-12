@@ -3,11 +3,12 @@ import { AdminLayout } from "./layout";
 import {
   Rocket, MessageSquare, BarChart2, ChevronDown, ChevronRight,
   CheckSquare, Square, Calendar, Target, FileText,
-  Newspaper, Globe, Search, BookOpen, TrendingUp, Megaphone, Map
+  Newspaper, Globe, Search, BookOpen, TrendingUp, Megaphone, Map,
+  Smartphone, ShieldCheck, Clock
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type SectionKey = "product-hunt" | "reddit" | "research-report";
+type SectionKey = "launch-readiness" | "product-hunt" | "reddit" | "research-report";
 
 function SectionHeader({
   icon: Icon,
@@ -127,6 +128,133 @@ function Table({ headers, rows }: { headers: string[]; rows: (string | React.Rea
           ))}
         </tbody>
       </table>
+    </div>
+  );
+}
+
+function LaunchReadinessSection() {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  return (
+    <div className="px-6 pb-8 space-y-1">
+
+      <InfoBox>
+        <strong>Paddle approval is the single gate between you and a confident launch.</strong> Everything below that isn't marked as pending is something you can complete right now. The mobile tasks are separated — none of them are required to go live on web.
+      </InfoBox>
+
+      {/* Paddle status callout */}
+      <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-2">
+        <Clock className="w-4 h-4 text-amber-500 flex-shrink-0" />
+        <div>
+          <p className="text-sm font-semibold text-amber-800">Waiting: Paddle domain approval</p>
+          <p className="text-xs text-amber-700 mt-0.5">Once <span className="font-mono">resilium-platform.com</span> is approved, complete items 1–2 below and you're live.</p>
+        </div>
+      </div>
+
+      <SubHeading><ShieldCheck className="w-4 h-4" /> Web Launch Requirements</SubHeading>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+        <div>
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Payments &amp; Core Flow</p>
+          <ul className="space-y-3">
+            <ChecklistItem
+              text="Paddle domain approval received"
+              detail="Check your Paddle dashboard inbox. Once approved, production checkout will activate on resilium-platform.com."
+            />
+            <ChecklistItem
+              text="Test the full payment flow with a real card"
+              detail="Free → Pro upgrade, both monthly and annual. Confirm Pro features unlock immediately after payment."
+            />
+            <ChecklistItem
+              text="Test the complete new-user journey end to end"
+              detail="Land on homepage → take assessment → view results → upgrade to Pro → confirm all Pro features work. Do this as a fresh incognito user."
+            />
+            <ChecklistItem
+              text="Admin login tested in production"
+              detail="Sign in to the admin panel at /admin using your separate username/password (not Clerk)."
+            />
+          </ul>
+        </div>
+        <div>
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Legal &amp; Discoverability</p>
+          <ul className="space-y-3">
+            <ChecklistItem
+              text="Privacy Policy page live"
+              detail="Required by EU GDPR (Romania-based). Must be linked in the site footer. Cover: data collected, storage, Clerk auth, Paddle billing, Resend email."
+            />
+            <ChecklistItem
+              text="Terms of Service page live"
+              detail="Protects you and sets user expectations. Link from footer and sign-up flow."
+            />
+            <ChecklistItem
+              text="Cookie / GDPR consent notice implemented"
+              detail="A simple banner on first visit is sufficient. Required for EU users by default."
+            />
+            <ChecklistItem
+              text="OpenGraph preview verified"
+              detail="Paste resilium-platform.com into https://opengraph.xyz — confirm the social card shows the correct image, title, and description."
+            />
+            <ChecklistItem
+              text="Transactional emails tested"
+              detail="Trigger at least one welcome email and one report delivery via Resend. Confirm they land in inbox (not spam)."
+            />
+          </ul>
+        </div>
+      </div>
+
+      {/* Collapsible mobile section */}
+      <div className="border border-slate-200 rounded-xl overflow-hidden mt-6">
+        <button
+          type="button"
+          onClick={() => setMobileOpen(o => !o)}
+          className="w-full flex items-center gap-3 px-4 py-3 bg-slate-50 hover:bg-slate-100 transition-colors text-left"
+        >
+          <Smartphone className="w-4 h-4 text-slate-400 flex-shrink-0" />
+          <div className="flex-1">
+            <span className="text-sm font-semibold text-gray-700">Mobile App Tasks</span>
+            <span className="ml-2 text-xs text-gray-400 font-normal">— not required for web launch</span>
+          </div>
+          {mobileOpen
+            ? <ChevronDown className="w-4 h-4 text-slate-400 flex-shrink-0" />
+            : <ChevronRight className="w-4 h-4 text-slate-400 flex-shrink-0" />}
+        </button>
+        {mobileOpen && (
+          <div className="px-4 py-4 border-t border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Immediate (Any Time)</p>
+              <ul className="space-y-3">
+                <ChecklistItem
+                  text="Enable Facebook OAuth in Clerk"
+                  detail="Clerk Dashboard → Configure → Social Connections → Facebook → Enable. Required before Facebook sign-in works in the mobile app."
+                />
+                <ChecklistItem
+                  text="Test mobile web app on your Android device"
+                  detail="Scan the QR code from the Account tab. Run through the full flow in Chrome on Android. This is the fastest quality check you can do."
+                />
+              </ul>
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">When You Have Real User Demand</p>
+              <ul className="space-y-3">
+                <ChecklistItem
+                  text="Create a Google Play developer account ($25 one-time)"
+                  detail="Submit the Android app. Your own Android device means you can test the native experience yourself — a real advantage."
+                />
+                <ChecklistItem
+                  text="Set up Google Play Billing for Pro subscriptions"
+                  detail="Required for in-app purchases on Android. Google takes 15–30% commission."
+                />
+                <ChecklistItem
+                  text="Create an Apple Developer account ($99/year)"
+                  detail="Required for App Store and TestFlight. Only pursue this when iOS demand is clear."
+                />
+                <ChecklistItem
+                  text="Set up RevenueCat for iOS in-app purchases"
+                  detail="Handles Apple's IAP receipts. Needed before Pro subscriptions work natively on iOS."
+                />
+              </ul>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -484,7 +612,7 @@ Resilium | resilium-platform.com`}
 }
 
 export default function AdminMarketingPage() {
-  const [openSection, setOpenSection] = useState<SectionKey | null>("product-hunt");
+  const [openSection, setOpenSection] = useState<SectionKey | null>("launch-readiness");
 
   const toggle = (key: SectionKey) => setOpenSection(prev => prev === key ? null : key);
 
@@ -507,6 +635,22 @@ export default function AdminMarketingPage() {
         </div>
 
         <div className="space-y-4">
+          {/* Launch Readiness */}
+          <div className="bg-white/90 rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <SectionHeader
+              icon={ShieldCheck}
+              label="Step 0 — Before You Launch"
+              title="Pre-Launch Readiness Checklist"
+              isOpen={openSection === "launch-readiness"}
+              onToggle={() => toggle("launch-readiness")}
+            />
+            {openSection === "launch-readiness" && (
+              <div className="border-t border-slate-200">
+                <LaunchReadinessSection />
+              </div>
+            )}
+          </div>
+
           {/* Product Hunt */}
           <div className="bg-white/90 rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
             <SectionHeader
