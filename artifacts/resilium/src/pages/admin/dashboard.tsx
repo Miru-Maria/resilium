@@ -190,15 +190,7 @@ export default function AdminDashboard() {
     setLocation("/admin/login");
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-10 h-10 text-primary animate-spin" />
-      </div>
-    );
-  }
-
-  if (error || !data) {
+  if (!loading && (error || !data)) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
         <AlertTriangle className="w-12 h-12 text-destructive" />
@@ -259,6 +251,12 @@ export default function AdminDashboard() {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
+            {!data ? (
+              <div className="flex items-center justify-center py-20">
+                <Loader2 className="w-8 h-8 text-primary animate-spin" />
+              </div>
+            ) : (
+            <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <StatCard title="Total Reports" value={data.overview.totalReports} icon={FileText} description="All time submissions" />
               <StatCard title="Avg Overall Score" value={`${data.overview.avgOverall}/100`} icon={Activity} description="Across all users" />
@@ -319,9 +317,17 @@ export default function AdminDashboard() {
                 </ResponsiveContainer>
               </CardContent>
             </Card>
+            </>
+            )}
           </TabsContent>
 
           <TabsContent value="demographics" className="space-y-6">
+            {!data ? (
+              <div className="flex items-center justify-center py-20">
+                <Loader2 className="w-8 h-8 text-primary animate-spin" />
+              </div>
+            ) : (
+            <>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {[
                 { label: "Age Bracket", key: "ageBracket" as const },
@@ -384,9 +390,17 @@ export default function AdminDashboard() {
                 </CardContent>
               </Card>
             </div>
+            </>
+            )}
           </TabsContent>
 
           <TabsContent value="scores" className="space-y-6">
+            {!data ? (
+              <div className="flex items-center justify-center py-20">
+                <Loader2 className="w-8 h-8 text-primary animate-spin" />
+              </div>
+            ) : (
+            <>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card className="border-none shadow-md">
                 <CardHeader>
@@ -440,9 +454,17 @@ export default function AdminDashboard() {
                 </CardContent>
               </Card>
             </div>
+            </>
+            )}
           </TabsContent>
 
           <TabsContent value="goals" className="space-y-6">
+            {!data ? (
+              <div className="flex items-center justify-center py-20">
+                <Loader2 className="w-8 h-8 text-primary animate-spin" />
+              </div>
+            ) : (
+            <>
             <Card className="border-none shadow-md">
               <CardHeader>
                 <CardTitle className="text-base font-display">Primary Goal Distribution</CardTitle>
@@ -468,9 +490,17 @@ export default function AdminDashboard() {
                 )}
               </CardContent>
             </Card>
+            </>
+            )}
           </TabsContent>
 
           <TabsContent value="risks">
+            {!data ? (
+              <div className="flex items-center justify-center py-20">
+                <Loader2 className="w-8 h-8 text-primary animate-spin" />
+              </div>
+            ) : (
+            <>
             <Card className="border-none shadow-md">
               <CardHeader>
                 <CardTitle className="text-base font-display">Most Frequently Cited Risk Concerns</CardTitle>
@@ -496,6 +526,8 @@ export default function AdminDashboard() {
                 )}
               </CardContent>
             </Card>
+            </>
+            )}
           </TabsContent>
 
           <TabsContent value="reports">
@@ -600,6 +632,12 @@ export default function AdminDashboard() {
           </TabsContent>
 
           <TabsContent value="feedback" className="space-y-6">
+            {!data ? (
+              <div className="flex items-center justify-center py-20">
+                <Loader2 className="w-8 h-8 text-primary animate-spin" />
+              </div>
+            ) : (
+            <>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <StatCard title="Total Feedback" value={data.feedback.totalFeedback} icon={MessageSquare} />
               <StatCard title="Average Rating" value={data.feedback.totalFeedback > 0 ? `${data.feedback.avgRating} / 5` : "—"} icon={Star} description={data.feedback.totalFeedback > 0 ? `Based on ${data.feedback.totalFeedback} ratings` : "No ratings yet"} />
@@ -644,6 +682,8 @@ export default function AdminDashboard() {
                   <p className="text-muted-foreground text-sm">No written comments yet</p>
                 </CardContent>
               </Card>
+            )}
+            </>
             )}
           </TabsContent>
         </Tabs>
