@@ -136,21 +136,21 @@ function ProductHuntSection() {
     <div className="px-6 pb-8 space-y-1">
 
       <InfoBox>
-        All copy below is ready to paste directly into Product Hunt. Use the "Credit score for resilience" angle throughout — it grounds an abstract concept in a universally understood framework.
+        All copy below is ready to paste directly into Product Hunt. Lead with the "honest, scored picture" angle — specific, structured, and gap-focused. Avoid vague superlatives; the product sells itself by being concrete where everything else is generic.
       </InfoBox>
 
       <SubHeading><Megaphone className="w-4 h-4" /> Core Copy</SubHeading>
 
       <CopyBlock label="Headline (max 60 chars)">
-        Resilium — Your Personal Resilience Score
+        Resilium — Your Personal Resilience Profile
       </CopyBlock>
 
       <CopyBlock label="Tagline (max 60 chars)">
-        The credit score for how ready you are when life breaks.
+        Know exactly where you stand before disruption finds you.
       </CopyBlock>
 
       <CopyBlock label="Short Description (≤ 260 chars)">
-        {`Resilium gives you a scored, AI-powered resilience report across 6 life dimensions — finances, health, skills, mobility, psychology, and emergency resources. Like a credit score, but for how well you'll survive disruption. No email required.`}
+        {`Resilium gives you a scored, structured resilience report across 6 life dimensions — finances, health, skills, mobility, psychology, and emergency resources — with a prioritized action plan tailored to your specific answers. No email required.`}
       </CopyBlock>
 
       <CopyBlock label="Long-Form Product Description">
@@ -158,12 +158,12 @@ function ProductHuntSection() {
 
 Resilium is a privacy-first platform that gives you an honest, scored picture of where you actually stand — across the financial, physical, psychological, and logistical dimensions that determine how well you weather disruption.
 
-Think of it like a credit score for personal resilience. A single number you can improve over time, built from a deep-dive assessment that takes 10–15 minutes to complete.
+A single composite score you can improve over time, built from a structured assessment that takes 10–15 minutes to complete.
 
 → 6 resilience dimensions, each scored 0–100
-→ AI-personalized action plan with prioritized next steps
+→ Personalized action plan with prioritized next steps based on your specific answers
 → Mental resilience profile across 6 psychological dimensions
-→ Scenario planning: see how your score shifts under job loss, health emergency, relocation
+→ Scenario planning: see how your profile shifts under job loss, health emergency, relocation
 → Progress tracking: retake, compare, improve
 → No name or email required for your full report. Privacy-first by design.
 
@@ -174,14 +174,14 @@ This is not a quiz with generic tips. It's a structured, scored assessment that 
       <CopyBlock label="First Comment (post immediately at launch)">
         {`Hey Product Hunt! 👋 I'm the person behind Resilium.
 
-I built this because I found myself anxious about "big picture" disruption risks — inflation, geopolitical instability, potential job loss — but couldn't find a tool that gave me an honest picture of where I actually stood. Everything I found was either generic advice, prepper-adjacent content, or surveys with no output.
+I built this because I found myself anxious about "big picture" disruption risks — inflation, geopolitical instability, potential job loss — but couldn't find a tool that gave me an honest picture of where I actually stood. Everything I found was either generic advice, prepper-adjacent content, or surveys with no real output.
 
-So I built the credit score for personal resilience. A structured, scored, AI-powered report across 7 life dimensions.
+So I built a structured, scored resilience assessment across 7 life dimensions — because vague reassurance doesn't help, but knowing exactly which gaps to close does.
 
 A few things I'd love to hear from you:
-1. Does the "credit score" framing resonate with how you'd describe preparedness risk?
-2. Which dimension surprises you the most in your own score?
-3. What scenario would you most want to model? (job loss, health crisis, relocation, etc.)
+1. Which of the 6 dimensions surprises you most about your own situation?
+2. What scenario would you most want to stress-test? (job loss, health crisis, relocation, etc.)
+3. What's missing that would make this genuinely useful for your life?
 
 The assessment is free and anonymous — no email required. Takes about 12 minutes. Would love your honest feedback. 🙏`}
       </CopyBlock>
@@ -193,8 +193,8 @@ The assessment is free and anonymous — no email required. Takes about 12 minut
           ["1", "Overall score screen — circular progress dial", "Your Resilium Score: one number that tells you how ready you actually are."],
           ["2", "Radar chart — 6-dimension breakdown", "Six dimensions. One honest picture. See exactly where you're strong and where you're exposed."],
           ["3", "Action checklist for lowest-scoring area", "Not generic tips — a prioritized action plan built around your specific gaps."],
-          ["4", "Scenario modelling UI", "\"What if I lost my job tomorrow?\" Model disruption scenarios and see how your score shifts."],
-          ["5", "Mental Resilience Profile cards", "Psychological readiness matters as much as logistics. I score both."],
+          ["4", "Scenario modelling UI", "\"What if I lost my job tomorrow?\" Model disruption scenarios and see how your resilience profile shifts."],
+          ["5", "Mental Resilience Profile cards", "Psychological readiness matters as much as logistics. Both are measured and both are actionable."],
         ]}
       />
 
@@ -221,7 +221,7 @@ The assessment is free and anonymous — no email required. Takes about 12 minut
             <ChecklistItem text="Post Twitter/X thread tagging Product Hunt" />
             <ChecklistItem text="Respond to every comment within 30 minutes throughout launch day" />
             <ChecklistItem text="Monitor upvote velocity — if slow, re-engage community channels at T+4 h and T+8 h" />
-            <ChecklistItem text="Cross-post to LinkedIn with the 'credit score for resilience' frame" />
+            <ChecklistItem text="Cross-post to LinkedIn with the 'know your resilience gaps before disruption hits' frame" />
           </ul>
         </div>
       </div>
@@ -256,7 +256,7 @@ function RedditSection() {
         headers={["Priority", "Subreddit", "Subscribers", "Why It Fits", "Entry Angle"]}
         rows={[
           ["1", "r/preppers", "1.5M+", "Core audience — serious about preparedness, data-literate, anti-hype", "Discuss the '6 dimensions of resilience' framework; offer the tool as a scoring mechanism they can use"],
-          ["2", "r/personalfinance", "20M+", "Financially anxious, structured thinkers; resonates with the 'credit score' metaphor", "Start threads on financial resilience buffer calculation; Resilium as a supplementary tool"],
+          ["2", "r/personalfinance", "20M+", "Financially anxious, structured thinkers; respond well to concrete calculations and runway metrics", "Start threads on financial resilience buffer calculation; Resilium as a supplementary tool"],
           ["3", "r/selfimprovement", "2M+", "Action-oriented, open to tools and frameworks for personal growth", "Frame as a 'structured self-assessment' not a prepper tool"],
           ["4", "r/financialindependence", "2M+", "FIRE community — highly data-driven, already thinking about runway and risk", "Resilience runway (months of buffer) directly maps to FI thinking"],
           ["5", "r/lostgeneration", "800K+", "Economically anxious millennials, feel unprepared and burned by the system", "Vulnerability-aware framing — not toxic positivity, honest picture of exposure"],
@@ -302,13 +302,13 @@ Happy to answer any questions about the methodology — I built it to solve this
       </CopyBlock>
 
       <CopyBlock label="Template 3 — 'I Built This' Show HN-Style Post">
-        {`I built a tool to score your personal resilience — the credit score for preparedness [Show Reddit]
+        {`I built a structured resilience assessment — because "build an emergency fund" isn't an answer [Show Reddit]
 
-Background: I found myself anxious about a cluster of overlapping risks — economic uncertainty, geopolitical instability, potential job disruption — but couldn't find a tool that gave me an honest picture of where I stood. Everything I found was either generic ("build an emergency fund"), ideology-heavy prepper content, or a quiz with no useful output.
+Background: I found myself anxious about a cluster of overlapping risks — economic uncertainty, geopolitical instability, potential job disruption — but couldn't find a tool that gave me an honest picture of where I stood. Everything I found was either generic advice, ideology-heavy prepper content, or a quiz with no useful output.
 
 So I built Resilium.
 
-It's a structured, AI-powered assessment that scores you across six dimensions:
+It's a structured, scored assessment across six dimensions:
 - Financial resilience (runway, income stability, debt exposure)
 - Skills (practical, transferable, crisis-relevant)
 - Health & mobility
@@ -316,11 +316,11 @@ It's a structured, AI-powered assessment that scores you across six dimensions:
 - Emergency resources
 - Location risk
 
-You get a scored report, a personalized action plan, and scenario modeling (e.g. "what happens to my score if I lose my job?"). No email required.
+You get a scored report, a personalized action plan tailored to your answers, and scenario modeling (e.g. "how does my profile change if I lose my job?"). No email required.
 
 What I'd love feedback on:
-1. Does the "credit score for resilience" framing resonate with you?
-2. Which dimension surprises you most in your own score?
+1. Which dimension surprises you most about your own situation?
+2. What scenario would you most want to stress-test?
 3. What's missing that would make this genuinely useful for your situation?
 
 [Link to Resilium]
