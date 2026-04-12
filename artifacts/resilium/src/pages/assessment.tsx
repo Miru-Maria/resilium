@@ -1629,7 +1629,7 @@ export default function AssessmentPage() {
               {/* STEP 3: INCOME STABILITY */}
               {step === 3 && (
                 <div className="space-y-6">
-                  <h2 className="text-3xl md:text-4xl font-display font-bold">{t.s3Title}</h2>
+                  <h2 className="text-3xl md:text-4xl font-display font-bold">{isHousehold ? "How stable is your household's primary income?" : t.s3Title}</h2>
                   <div className="grid gap-4" role="radiogroup" aria-label="Income stability">
                     {(t.incomeOptions as { id: string; title: string; desc: string }[]).map((opt) => (
                       <Card 
@@ -1716,8 +1716,8 @@ export default function AssessmentPage() {
               {/* STEP 5: SAVINGS / FINANCIAL RUNWAY */}
               {step === 5 && (
                 <div className="space-y-8">
-                  <h2 className="text-3xl md:text-4xl font-display font-bold">{t.s5Title}</h2>
-                  <p className="text-muted-foreground text-lg">{t.s5Sub}</p>
+                  <h2 className="text-3xl md:text-4xl font-display font-bold">{isHousehold ? "How long could your household cover expenses without income?" : t.s5Title}</h2>
+                  <p className="text-muted-foreground text-lg">{isHousehold ? "If all income stopped today, how many months could your household sustain itself without going into debt? This is one of the strongest predictors of crisis resilience." : t.s5Sub}</p>
                   
                   {!savingsPreferNotToSay ? (
                     <>
@@ -1790,8 +1790,8 @@ export default function AssessmentPage() {
               {/* STEP 7: SKILLS */}
               {step === 7 && (
                 <div className="space-y-6">
-                  <h2 className="text-3xl md:text-4xl font-display font-bold">{t.s7Title}</h2>
-                  <p className="text-muted-foreground">{t.s7Sub}</p>
+                  <h2 className="text-3xl md:text-4xl font-display font-bold">{isHousehold ? "What practical skills exist across your household?" : t.s7Title}</h2>
+                  <p className="text-muted-foreground">{isHousehold ? "Select all skills your household members collectively have — each one is a shared asset." : t.s7Sub}</p>
                   <div className="grid grid-cols-1 gap-3" role="group" aria-label="Practical skills">
                     {(t.skills as { id: string; label: string; desc: string }[]).map((opt) => (
                       <div 
@@ -1928,12 +1928,12 @@ export default function AssessmentPage() {
               {step === 9 && (
                 <div className="space-y-8">
                   <div>
-                    <h2 className="text-3xl md:text-4xl font-display font-bold">{t.s9Title}</h2>
-                    <p className="mt-2 text-muted-foreground text-sm">{t.s9Sub}</p>
+                    <h2 className="text-3xl md:text-4xl font-display font-bold">{isHousehold ? "Mobility & Relocation Capacity" : t.s9Title}</h2>
+                    <p className="mt-2 text-muted-foreground text-sm">{isHousehold ? "How physically capable and flexible is your household when it comes to relocating or responding to a crisis?" : t.s9Sub}</p>
                   </div>
                   <div>
                     <h3 className="text-xl font-display font-bold mb-1">{t.s8PhysicalTitle}</h3>
-                    <p className="text-sm text-muted-foreground mb-3">{t.s8PhysicalSub}</p>
+                    <p className="text-sm text-muted-foreground mb-3">{isHousehold ? "How physically capable is the most active adult in your household?" : t.s8PhysicalSub}</p>
                     <div className="flex gap-2" role="radiogroup" aria-label="Physical capability">
                       {(t.mobilityOptions as { id: AssessmentInputMobilityLevel; label: string }[]).map(opt => (
                         <Button 
@@ -1951,7 +1951,7 @@ export default function AssessmentPage() {
                   </div>
                   <div>
                     <h3 className="text-xl font-display font-bold mb-1">{t.s8RelocationTitle}</h3>
-                    <p className="text-sm text-muted-foreground mb-3">{t.s8RelocationSub}</p>
+                    <p className="text-sm text-muted-foreground mb-3">{isHousehold ? "How quickly could your household pack up and relocate if you had to?" : t.s8RelocationSub}</p>
                     <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Relocation readiness">
                       {(t.relocationOptions as { id: string; label: string; desc: string }[]).map(opt => (
                         <Card
@@ -2006,8 +2006,8 @@ export default function AssessmentPage() {
               {/* STEP 11: EMERGENCY SUPPLIES (TIERED) */}
               {step === 11 && (
                 <div className="space-y-6">
-                  <h2 className="text-3xl md:text-4xl font-display font-bold">{t.s10Title}</h2>
-                  <p className="text-muted-foreground text-lg">{t.s10Sub}</p>
+                  <h2 className="text-3xl md:text-4xl font-display font-bold">{isHousehold ? "Household Emergency Preparedness" : t.s10Title}</h2>
+                  <p className="text-muted-foreground text-lg">{isHousehold ? "How much emergency food, water, and essential medicines does your household have readily available?" : t.s10Sub}</p>
                   <div className="grid grid-cols-1 gap-3" role="radiogroup" aria-label="Emergency supplies tier">
                     {(t.emergencyOptions as { id: string; label: string; desc: string }[]).map((opt) => (
                       <Card 
@@ -2072,13 +2072,13 @@ export default function AssessmentPage() {
               {step === 13 && (
                 <div className="space-y-8">
                   <div>
-                    <h2 className="text-3xl md:text-4xl font-display font-bold">{t.s12Title}</h2>
-                    <p className="text-muted-foreground text-lg mt-2">{t.s12Sub}</p>
+                    <h2 className="text-3xl md:text-4xl font-display font-bold">{isHousehold ? "Household Community & Social Networks" : t.s12Title}</h2>
+                    <p className="text-muted-foreground text-lg mt-2">{isHousehold ? "A strong network is often your most reliable resource in a crisis — especially for households. Help us understand yours." : t.s12Sub}</p>
                   </div>
 
                   <div>
                     <h3 className="text-xl font-display font-bold mb-1">{t.s12ContactsTitle}</h3>
-                    <p className="text-sm text-muted-foreground mb-3">{t.s12ContactsSub}</p>
+                    <p className="text-sm text-muted-foreground mb-3">{isHousehold ? "People your household could collectively call on in a major crisis — family, friends, neighbors, or community." : t.s12ContactsSub}</p>
                     <div className="grid grid-cols-2 gap-3" role="radiogroup" aria-label="Trusted contacts">
                       {(t.contactOptions as { value: number; label: string; desc: string }[]).map((opt) => (
                         <Card

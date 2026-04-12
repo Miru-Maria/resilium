@@ -459,6 +459,11 @@ export default function PlanPage() {
   const reportLocation = (report as any)?.input?.location as string | undefined;
   const AREA_RESOURCES = getAreaResources(reportLocation);
 
+  const isHouseholdPlan = report.householdMode === "household";
+  const hc = (report.input as any)?.householdComposition as {
+    adults?: number; hasMinors?: boolean; hasMobilityLimitation?: boolean; hasMultipleIncomes?: boolean;
+  } | undefined;
+
   const progressMap: Record<string, boolean> = {};
   (checklistData?.progress ?? []).forEach(p => { progressMap[`${p.area}::${p.itemId}`] = p.completed; });
 
@@ -639,9 +644,27 @@ export default function PlanPage() {
               </div>
             )}
             <div className="flex items-start justify-between w-full gap-4">
-              <h1 className="font-display font-bold text-3xl md:text-4xl text-foreground">
-                Your Strategic Action Plan
-              </h1>
+              <div>
+                <h1 className="font-display font-bold text-3xl md:text-4xl text-foreground">
+                  {isHouseholdPlan ? "Household Action Plan" : "Your Strategic Action Plan"}
+                </h1>
+                {isHouseholdPlan && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {hc?.adults != null && (
+                      <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary">{hc.adults} adult{hc.adults !== 1 ? "s" : ""}</span>
+                    )}
+                    {hc?.hasMinors && (
+                      <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-sky-500/10 border border-sky-500/20 text-sky-500">Minors in household</span>
+                    )}
+                    {hc?.hasMobilityLimitation && (
+                      <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-500">Mobility flag</span>
+                    )}
+                    {hc?.hasMultipleIncomes && (
+                      <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500">Multiple incomes</span>
+                    )}
+                  </div>
+                )}
+              </div>
               <div className="flex items-center gap-2 flex-shrink-0 mt-1">
                 <Link href={`/results/${reportId}`}>
                   <Button variant="outline" size="sm" className="rounded-full gap-1.5 text-muted-foreground">

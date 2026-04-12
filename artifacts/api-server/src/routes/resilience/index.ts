@@ -145,8 +145,8 @@ router.post("/assess", assessRateLimit, async (req, res) => {
       trustedLocalContacts: input.trustedLocalContacts ?? undefined,
       communityInvolvement: input.communityInvolvement ?? undefined,
       mutualAidAccess: input.mutualAidAccess ?? undefined,
-      householdMode: (input as any).householdMode ?? undefined,
-      householdComposition: (input as any).householdComposition ?? undefined,
+      householdMode: input.householdMode ?? undefined,
+      householdComposition: input.householdComposition ?? undefined,
     });
 
     const { mentalResilienceSubScores, ...scores } = scoreResult;
@@ -189,8 +189,8 @@ router.post("/assess", assessRateLimit, async (req, res) => {
             mutualAidAccess: input.mutualAidAccess ?? undefined,
             primaryGoal: input.primaryGoal ?? undefined,
             successVision: input.successVision ?? undefined,
-            householdMode: (input as any).householdMode ?? undefined,
-            householdComposition: (input as any).householdComposition ?? undefined,
+            householdMode: input.householdMode ?? undefined,
+            householdComposition: input.householdComposition ?? undefined,
           },
           scores,
           mentalResilienceSubScores
@@ -268,8 +268,8 @@ router.post("/assess", assessRateLimit, async (req, res) => {
           primaryGoal: input.primaryGoal ?? null,
           successVision: input.successVision ?? null,
           emergencySupplyTier: input.emergencySupplyTier ?? null,
-          householdMode: (input as any).householdMode ?? null,
-          householdComposition: (input as any).householdComposition ?? null,
+          householdMode: input.householdMode ?? null,
+          householdComposition: input.householdComposition ?? null,
           createdAt: now,
         });
 

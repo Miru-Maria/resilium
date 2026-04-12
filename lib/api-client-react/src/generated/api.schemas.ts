@@ -326,6 +326,15 @@ export interface AssessmentInput {
   primaryGoal?: AssessmentInputPrimaryGoal;
   /** What success looks like for the user in 6 months (open text, max 500 chars) */
   successVision?: string;
+  /** Whether the assessment is for a single person or a full household */
+  householdMode?: "individual" | "household";
+  /** Composition details when householdMode is 'household' */
+  householdComposition?: {
+    adults?: number;
+    hasMinors?: boolean;
+    hasMobilityLimitation?: boolean;
+    hasMultipleIncomes?: boolean;
+  };
 }
 
 export type AssessmentInputPrimaryGoal =
@@ -520,6 +529,7 @@ export type ResilienceReportChecklistsByArea = {
 export interface ResilienceReport {
   reportId: string;
   createdAt: string;
+  householdMode?: "individual" | "household";
   score: ResilienceScore;
   mentalResilienceProfile?: MentalResilienceProfile;
   riskProfileSummary: string;
