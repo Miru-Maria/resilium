@@ -1063,30 +1063,46 @@ export default function PlanPage() {
           )}
         </section>
 
-        {/* COACHING CALLOUT — bottom of page, not in every item */}
-        <section className="rounded-3xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 to-orange-500/10 p-6 md:p-8">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center flex-shrink-0">
-              <Heart className="w-6 h-6 text-amber-600" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-amber-600 mb-1">Optional — Phoenix Insight Coaching</p>
-              <h3 className="font-display font-bold text-lg mb-2">
-                Some steps are easier with a real person.
-              </h3>
-              <p className="text-muted-foreground text-sm leading-relaxed mb-4 max-w-xl">
-                Cristiana Paun at Phoenix Insight Coaching offers 1:1 sessions built directly around your Resilium profile — especially useful for the psychological resilience and health continuity sections where progress is less linear. The first call is free, no commitment.
-              </p>
-              <div className="flex flex-wrap gap-3">
-                <Link href="/coaching">
-                  <Button className="rounded-full gap-2 bg-amber-600 hover:bg-amber-700 text-white shadow-md shadow-amber-600/20">
-                    <Heart className="w-4 h-4" /> Learn About Coaching
-                  </Button>
-                </Link>
+        {/* COACHING CALLOUT — score-aware, only surfaces when relevant */}
+        {(() => {
+          const psychScore = Math.round((report as any).score?.psychological ?? 100);
+          const healthScore = Math.round((report as any).score?.health ?? 100);
+          const lowestScore = Math.min(psychScore, healthScore);
+          if (lowestScore >= 70) return null;
+          const isPsych = psychScore <= healthScore;
+          const dimensionName = isPsych ? "Psychological Resilience" : "Health Continuity";
+          const contextLine = isPsych
+            ? `Your Psychological Resilience scored ${psychScore}/100. Progress here is less linear than logistics — habits of mind, stress tolerance, and adaptive thinking develop differently than stockpiling supplies or building savings. Most people find a thinking partner makes the difference.`
+            : `Your Health Continuity scored ${healthScore}/100. Planning around health risks is personal and often requires guidance that a checklist can't fully replace — especially when chronic conditions, dependents, or healthcare access are in the picture.`;
+          const scoreColor = lowestScore < 40 ? "text-destructive" : lowestScore < 55 ? "text-amber-600" : "text-foreground";
+          return (
+            <section className="rounded-3xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 to-orange-500/10 p-6 md:p-8">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center flex-shrink-0">
+                  <Heart className="w-6 h-6 text-amber-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-amber-600 mb-1">Optional — Phoenix Insight Coaching</p>
+                  <h3 className="font-display font-bold text-lg mb-2">
+                    Your {dimensionName} is where a real person helps most.
+                  </h3>
+                  <div className="flex items-baseline gap-2 mb-3">
+                    <span className={cn("text-3xl font-bold font-display", scoreColor)}>{lowestScore}</span>
+                    <span className="text-sm text-muted-foreground">/100 — {dimensionName}</span>
+                  </div>
+                  <p className="text-muted-foreground text-sm leading-relaxed mb-4 max-w-xl">
+                    {contextLine} Cristiana Paun at Phoenix Insight Coaching works directly from your Resilium profile. The first call is free, no commitment.
+                  </p>
+                  <Link href="/coaching">
+                    <Button className="rounded-full gap-2 bg-amber-600 hover:bg-amber-700 text-white shadow-md shadow-amber-600/20">
+                      <Heart className="w-4 h-4" /> Learn About Coaching
+                    </Button>
+                  </Link>
+                </div>
               </div>
-            </div>
-          </div>
-        </section>
+            </section>
+          );
+        })()}
 
         {/* BACK TO REPORT */}
         <section className="pb-4 text-center">
