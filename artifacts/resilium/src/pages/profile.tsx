@@ -1027,16 +1027,8 @@ function AccountTab({ user, plans, onAllPlansDeleted }: {
             {/* Actions */}
             <div className="flex-1 space-y-3 pt-1">
               <p className="text-sm text-foreground/80 leading-relaxed">
-                Review your Resilience Profile, track your progress, and access your action plans on the go — available in any mobile browser, no download needed.
+                Review your Resilience Profile, track your progress, and access your action plans on the go. Scan the QR code with your phone camera to open instantly.
               </p>
-              <a
-                href="https://resilium-platform.com/resilium-mobile/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity"
-              >
-                <Smartphone className="w-4 h-4" /> Open in Mobile Browser
-              </a>
 
               {/* App Store — coming soon */}
               <div className="flex items-center gap-3 pt-1">

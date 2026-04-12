@@ -9,6 +9,7 @@ import {
   ScrollView,
   Animated,
   Dimensions,
+  Linking,
 } from "react-native";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -196,13 +197,19 @@ function CompanionScrollContent({
       {/* Quick action grid */}
       <View style={{ flexDirection: "row", gap: 12 }}>
         {[
-          { icon: "bookmark", label: "My Plans", route: "/my-plans" },
-          { icon: "refresh-cw", label: "Reassess", route: "/assessment" },
-          { icon: "tag", label: "Go Pro", route: "/pricing" },
-        ].map(({ icon, label, route }) => (
+          { icon: "bookmark", label: "My Plans", onPress: () => router.push("/my-plans") },
+          {
+            icon: "refresh-cw",
+            label: "Reassess",
+            onPress: () => user
+              ? Linking.openURL("https://resilium-platform.com")
+              : router.push("/assessment" as any),
+          },
+          { icon: "tag", label: "Go Pro", onPress: () => router.push("/pricing" as any) },
+        ].map(({ icon, label, onPress }) => (
           <Pressable
             key={label}
-            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push(route as any); }}
+            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onPress(); }}
             style={({ pressed }) => [{ flex: 1, backgroundColor: colors.surface, borderRadius: 16, padding: 16, borderWidth: 1, borderColor: colors.border, alignItems: "center", gap: 8, opacity: pressed ? 0.8 : 1 }]}
           >
             <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primaryMuted, alignItems: "center", justifyContent: "center" }}>
