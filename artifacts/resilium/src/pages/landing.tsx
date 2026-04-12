@@ -19,6 +19,8 @@ import {
   DollarSign,
   Star,
   Quote,
+  MessageCircle,
+  BookOpen,
 } from "lucide-react";
 import { SiteFooter } from "@/components/site-footer";
 import { useUser, useAuth, useClerk } from "@clerk/react";
@@ -503,20 +505,22 @@ export default function LandingPage() {
                   desc: "How your geography affects your vulnerability — climate exposure, political stability, infrastructure resilience.",
                 },
                 {
-                  icon: <Shield className="w-5 h-5 text-primary" />,
-                  title: "Daily Resilience Habits",
-                  desc: "Recurring actions tailored to your profile that, compounded over time, move you from vulnerable to prepared.",
+                  icon: <MessageCircle className="w-5 h-5 text-primary" />,
+                  title: "AI Companion",
+                  badge: "Pro",
+                  desc: "Ask anything specific to your situation — your gaps, location, and what to tackle next. Grounded in your assessment, not generic advice.",
                 },
                 {
-                  icon: <TrendingUp className="w-5 h-5 text-primary" />,
-                  title: "Progress Tracking",
-                  desc: "Every plan you complete is saved. Reassess over time and see how your resilience score improves as you do the work.",
+                  icon: <BookOpen className="w-5 h-5 text-primary" />,
+                  title: "Crisis Guides",
+                  desc: "10 practical, location-relevant guides for financial crisis, power outages, flooding, medical emergencies, and more — readable offline.",
                 },
-              ].map(({ icon, title, desc }) => (
+              ].map(({ icon, title, desc, badge }: { icon: React.ReactNode; title: string; desc: string; badge?: string }) => (
                 <div key={title} className="p-5 rounded-2xl border border-border/60 bg-background hover:border-primary/30 transition-colors">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">{icon}</div>
                     <h3 className="font-semibold text-sm">{title}</h3>
+                    {badge && <span className="ml-auto text-[10px] font-bold uppercase tracking-widest text-primary bg-primary/10 px-2 py-0.5 rounded-full">{badge}</span>}
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed">{desc}</p>
                 </div>

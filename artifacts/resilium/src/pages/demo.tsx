@@ -234,7 +234,7 @@ function ProTeaser({ title, description }: { title: string; description: string 
 function ShareModal({ onClose }: { onClose: () => void }) {
   const [copied, setCopied] = useState(false);
   const url = "https://resilium-platform.com/demo";
-  const text = "I explored Resilium's demo plan — an AI-powered personal resilience scorecard across finances, health, skills & more. Really eye-opening. Check it out:";
+  const text = "I explored Resilium's demo plan — a structured personal resilience assessment across finances, health, skills & more. Really eye-opening. Check it out:";
   const copy = () => {
     navigator.clipboard.writeText(`${text} ${url}`).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2500); });
   };
@@ -716,18 +716,26 @@ export default function DemoPage() {
         </section>
 
         {/* PRO TEASERS */}
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <ProTeaser
-            title="Step-by-step AI Guidance"
-            description="Click 'Break it down' on any checklist item and get 4–7 concrete, location-specific sub-steps generated from your full profile and goal."
+            title="Step-by-step Guidance"
+            description="Click 'Break it down' on any checklist item and get 4–7 concrete, location-specific sub-steps tailored to your full profile and goal."
           />
           <ProTeaser
             title="Interactive Scenario Stress-Tests"
-            description="Adjust parameters — unemployment duration, medical severity, relocation distance — and let AI re-score your profile in real time."
+            description="Adjust parameters — unemployment duration, medical severity, relocation distance — and see how your resilience score shifts in real time."
           />
           <ProTeaser
             title="Score History & Plan Comparison"
             description="Track your resilience over multiple assessments. See exactly which dimensions improved and compare plan versions side-by-side."
+          />
+          <ProTeaser
+            title="AI Companion"
+            description="Ask questions specific to your gaps, location, and situation — not generic advice. The Companion has full context from your assessment answers and scores."
+          />
+          <ProTeaser
+            title="Crisis Guides"
+            description="10 practical, location-relevant guides covering financial crisis, power outages, flooding, earthquakes, and more — readable offline as a saved file."
           />
         </section>
 

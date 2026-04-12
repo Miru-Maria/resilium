@@ -323,6 +323,8 @@ The assessment is free and anonymous — no email required. Takes about 12 minut
           ["3", "Action checklist for lowest-scoring area", "Not generic tips — a prioritized action plan built around your specific gaps."],
           ["4", "Scenario modelling UI", "\"What if I lost my job tomorrow?\" Model disruption scenarios and see how your resilience profile shifts."],
           ["5", "Mental Resilience Profile cards", "Psychological readiness matters as much as logistics. Both are measured and both are actionable."],
+          ["6", "AI Companion chat (Pro)", "Ask anything specific to your situation — gaps, location, next steps. Not generic advice."],
+          ["7", "Crisis Guides accordion (all users)", "10 practical, location-relevant guides — readable in-app or downloaded for offline use."],
         ]}
       />
 
@@ -332,7 +334,7 @@ The assessment is free and anonymous — no email required. Takes about 12 minut
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Before Launch (T−7 to T−1 days)</p>
           <ul className="space-y-3">
             <ChecklistItem text="Confirm your hunter — ask someone with Product Hunt followers and history" />
-            <ChecklistItem text="Prepare the full gallery: 5 images, thumbnail, logo (all 1270×760 px)" />
+            <ChecklistItem text="Prepare the full gallery: 7 images, thumbnail, logo (all 1270×760 px)" />
             <ChecklistItem text="Finalise all copy: headline, tagline, short + long description" />
             <ChecklistItem text="Draft the first comment in advance — post it within 2 minutes of launch" />
             <ChecklistItem text="Notify your personal network (email/WhatsApp) to vote at launch time" />

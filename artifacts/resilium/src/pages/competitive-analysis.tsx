@@ -16,7 +16,7 @@ const POSITIONING = {
   primaryAlternative:
     "one-dimensional psychological tests (score only) or reactive emergency apps (alerts only)",
   keyDifferentiator:
-    "addresses all 6 dimensions of readiness — financial, health, skills, mobility, resources, and psychological — stays with you as a living document you actually work; its scoring model is grounded in peer-reviewed science (CD-RISC, Antonovsky Salutogenesis, FEMA preparedness framework); and it ships a dedicated iOS companion app for daily plan fulfillment (exclusive to Pro) that no competitor offers",
+    "addresses all 6 dimensions of readiness — financial, health, skills, mobility, resources, and psychological — stays with you as a living document you actually work; its scoring model is grounded in peer-reviewed science (CD-RISC, Antonovsky Salutogenesis, FEMA preparedness framework); ships a Pro-gated AI Companion grounded in each user's assessment scores; and includes 10 practical offline crisis guides for all users — none of which any competitor offers",
 };
 
 const AUDIENCE_STATS = [
@@ -142,7 +142,7 @@ const WHITE_SPACE = [
 const KANO = [
   { category: "Basic (table stakes — must have)", items: "Free tier, some scoring mechanism, psychological dimension" },
   { category: "Performance (more = better)", items: "More assessed dimensions, better AI recommendations, more scenario types, deeper action steps" },
-  { category: "Delighter (unexpected, differentiating)", items: "Goal personalization, 'living document' plan, coaching referral, iOS companion app for daily plan fulfillment (Pro-only), financial dimension, privacy-first (no personal data), peer-reviewed scientific basis publicly documented (CD-RISC, Antonovsky, FEMA framework), chronic condition-aware AI recommendations" },
+  { category: "Delighter (unexpected, differentiating)", items: "Goal personalization, 'living document' plan, coaching referral, Pro AI Companion (personalized, assessment-grounded), 10 offline crisis guides (all users), financial dimension, privacy-first (no personal data), peer-reviewed scientific basis publicly documented (CD-RISC, Antonovsky, FEMA framework)" },
 ];
 
 const ACTION_PLAN = [

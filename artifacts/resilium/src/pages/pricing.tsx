@@ -42,8 +42,9 @@ function usePaddle() {
 const FREE_FEATURES = [
   "3 lifetime assessments",
   "Full resilience score — all 6 dimensions",
-  "AI-generated action plan",
+  "Personalized action plan",
   "Mental resilience profile",
+  "10 practical crisis guides — readable offline",
   "Markdown export (Notion, Obsidian, etc.)",
   "GDPR-compliant data handling",
 ];
@@ -52,6 +53,7 @@ const FREE_LIMITS = [
   "No long-term trend tracking",
   "No plan comparison between assessments",
   "No scenario stress-testing",
+  "No AI Companion",
 ];
 
 const PRO_FEATURES = [
@@ -60,6 +62,7 @@ const PRO_FEATURES = [
   "Know what changed between plans and why — so you act on the right things",
   "Model crises before they hit: job loss, health emergency, relocation, disaster",
   "Carry a clear 90-day action list that updates every time you reassess",
+  "AI Companion — ask questions specific to your gaps, location, and situation",
 ];
 
 const FAQ_ITEMS = [
