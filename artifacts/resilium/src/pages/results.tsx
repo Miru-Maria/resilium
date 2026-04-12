@@ -728,7 +728,7 @@ function ResultsPageInner() {
         {/* HERO SCORES SECTION */}
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <Card className="lg:col-span-1 border-none shadow-xl shadow-black/5 bg-gradient-to-b from-card to-muted/20 flex flex-col items-center justify-center p-8 text-center">
-            <h2 className="font-display font-bold text-xl mb-8 text-foreground">{report.householdMode === "household" ? "Household Readiness" : "Overall Readiness"}</h2>
+            <h2 className="font-display font-bold text-xl mb-8 text-foreground">{report.householdMode === "household" ? "Household Resilience Score" : "Overall Readiness"}</h2>
             <CircularProgress 
               value={report.score.overall} 
               size={220} 

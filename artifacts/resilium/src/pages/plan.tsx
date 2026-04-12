@@ -799,11 +799,20 @@ export default function PlanPage() {
                           const resources = AREA_RESOURCES[area] ?? [];
                           return (
                             <div key={area}>
-                              <div className="flex items-center gap-2 mb-3">
+                              <div className="flex items-center gap-2 mb-3 flex-wrap">
                                 <div className={cn("w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0", areaColor)}>
                                   <AreaIcon className="w-3.5 h-3.5" />
                                 </div>
                                 <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{AREA_LABELS[area] ?? area}</span>
+                                {isHouseholdPlan && area === "mobility" && hc?.hasMobilityLimitation && (
+                                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600">Mobility limitation in household</span>
+                                )}
+                                {isHouseholdPlan && area === "financial" && hc?.hasMultipleIncomes && (
+                                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600">Multiple income sources</span>
+                                )}
+                                {isHouseholdPlan && area === "health" && hc?.hasMinors && (
+                                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-sky-500/10 border border-sky-500/20 text-sky-600">Minors in household</span>
+                                )}
                               </div>
                               <div className="space-y-3 pl-1">
                                 {items.map(item => {

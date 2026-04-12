@@ -898,11 +898,17 @@ export default function AssessmentPage() {
       const sessionId = localStorage.getItem(SESSION_KEY) ?? undefined;
       const finalCurrency = currency === "OTHER" ? (customCurrency || "USD") : currency;
       const finalSavingsMonths = savingsPreferNotToSay ? 3 : formData.savingsMonths;
+      // In household mode, derive dependentCount from composition (step 6 is skipped)
+      const derivedDependentCount = isHousehold
+        ? (householdComposition.hasMinors ? 1 : 0)
+        : formData.dependentCount;
+
       const submitPayload: AssessmentInput & { currency?: string; householdComposition?: HouseholdComposition } = {
         ...formData,
         savingsMonths: finalSavingsMonths,
         currency: finalCurrency,
         sessionId,
+        dependentCount: derivedDependentCount,
         hasEmergencySupplies: formData.emergencySupplyTier
           ? formData.emergencySupplyTier !== "none" && formData.emergencySupplyTier !== "under_3days"
           : formData.hasEmergencySupplies,
@@ -1256,9 +1262,8 @@ export default function AssessmentPage() {
                 setFormData(prev => ({ ...prev, householdMode: "individual" }));
                 setAssessmentPhase("main");
               }}
-              className="group relative text-left p-8 rounded-3xl border-2 border-primary bg-primary/5 hover:bg-primary/10 transition-all shadow-sm hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              className="group text-left p-8 rounded-3xl border-2 border-border hover:border-primary bg-card hover:bg-primary/5 transition-all shadow-sm hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
-              <span className="absolute top-4 right-4 text-xs font-bold uppercase tracking-wider text-primary bg-primary/10 px-2.5 py-1 rounded-full">Most common</span>
               <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
                 <UserCheck className="w-7 h-7 text-primary" />
               </div>
