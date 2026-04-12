@@ -687,7 +687,7 @@ export default function AssessmentPage() {
   const [, setLocation] = useLocation();
   const [step, setStep] = useState(1);
   const [mrStep, setMrStep] = useState(0);
-  const [assessmentPhase, setAssessmentPhase] = useState<"mode_select" | "composition" | "main">("mode_select");
+  const [assessmentPhase, setAssessmentPhase] = useState<"mode_select" | "composition" | "main">("main");
   const [householdComposition, setHouseholdComposition] = useState<HouseholdComposition>({
     adults: 1,
     hasMinors: false,
@@ -865,9 +865,10 @@ export default function AssessmentPage() {
   };
 
   const handlePrev = () => {
-    // Composition phase: go back to mode selection
+    // Composition phase: go back to step 1 (individual is the quiet default)
     if (assessmentPhase === "composition") {
-      setAssessmentPhase("mode_select");
+      setFormData(prev => ({ ...prev, householdMode: "individual" }));
+      setAssessmentPhase("main");
       return;
     }
     if (step === MR_STEP && mrStep > 0) {
@@ -879,13 +880,14 @@ export default function AssessmentPage() {
       setStep(5);
       return;
     }
-    // At step 1: navigate back to pre-assessment phase
+    // At step 1 in household mode: go back to composition
+    if (step === 1 && mrStep === 0 && isHousehold) {
+      setAssessmentPhase("composition");
+      return;
+    }
+    // At step 1 in individual mode: navigate to home
     if (step === 1 && mrStep === 0) {
-      if (isHousehold) {
-        setAssessmentPhase("composition");
-      } else {
-        setAssessmentPhase("mode_select");
-      }
+      setLocation("/");
       return;
     }
     if (step > 1) setStep(s => s - 1);
@@ -1298,7 +1300,7 @@ export default function AssessmentPage() {
           canonical="https://resilium-platform.com/assess"
         />
         <header className="w-full p-6 lg:p-8 flex items-center justify-start z-10">
-          <Button variant="ghost" className="gap-2 text-muted-foreground hover:text-foreground rounded-full" onClick={() => setAssessmentPhase("mode_select")}>
+          <Button variant="ghost" className="gap-2 text-muted-foreground hover:text-foreground rounded-full" onClick={() => { setFormData(prev => ({ ...prev, householdMode: "individual" })); setAssessmentPhase("main"); }}>
             <ArrowLeft className="w-4 h-4" /> Back
           </Button>
         </header>
@@ -1602,6 +1604,18 @@ export default function AssessmentPage() {
                       />
                     )}
                   </div>
+                  {/* Quiet household opt-in — only shown in individual mode */}
+                  {!isHousehold && (
+                    <div className="pt-2">
+                      <button
+                        type="button"
+                        onClick={() => { setFormData(prev => ({ ...prev, householdMode: "household" })); setAssessmentPhase("composition"); }}
+                        className="text-xs text-muted-foreground hover:text-primary transition-colors underline-offset-2 hover:underline"
+                      >
+                        Assessing for a household? Switch to household mode →
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
 
