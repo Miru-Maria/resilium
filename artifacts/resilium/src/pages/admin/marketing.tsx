@@ -46,11 +46,19 @@ function SectionHeader({
 }
 
 function ChecklistItem({ text, detail }: { text: string; detail?: string }) {
-  const [checked, setChecked] = useState(false);
+  const storageKey = `admin_mkt::${text}`;
+  const [checked, setChecked] = useState(() => {
+    try { return localStorage.getItem(storageKey) === "1"; } catch { return false; }
+  });
+  const toggle = () => {
+    const next = !checked;
+    setChecked(next);
+    try { localStorage.setItem(storageKey, next ? "1" : "0"); } catch {}
+  };
   return (
     <li
       className="flex items-start gap-3 cursor-pointer group"
-      onClick={() => setChecked(c => !c)}
+      onClick={toggle}
     >
       {checked ? (
         <CheckSquare className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
