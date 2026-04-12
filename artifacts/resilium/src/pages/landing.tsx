@@ -539,6 +539,50 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* Buildathon community reactions */}
+        <section className="w-full py-20 px-6">
+          <div className="max-w-5xl mx-auto">
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary text-center mb-3">Community</p>
+            <h2 className="text-3xl md:text-4xl font-display font-bold text-center mb-4">Early reactions</h2>
+            <p className="text-center text-muted-foreground max-w-xl mx-auto mb-12">
+              From Resilium's buildathon debut — real responses from real people, unedited.
+            </p>
+
+            {/* Pauline — featured */}
+            <div className="mb-5 p-6 rounded-2xl border-2 border-primary/30 bg-primary/5 flex flex-col gap-3">
+              <Quote className="w-5 h-5 text-primary/40" />
+              <p className="text-base leading-relaxed text-foreground/90">
+                "Definitely following this project. As a holistic &amp; executive performance coach, this is definitely something I'd love to get my clients to use!"
+              </p>
+              <div className="flex items-center gap-3 mt-1">
+                <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center text-xs font-bold text-primary">P</div>
+                <div>
+                  <p className="text-sm font-semibold text-foreground">Pauline H.</p>
+                  <p className="text-xs text-muted-foreground">Holistic &amp; Executive Performance Coach</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-5">
+              {[
+                { initial: "J", name: "Joel A.", quote: "Cristiana created something that 100% of us need and can use to our benefit. Well done!" },
+                { initial: "R", name: "Rochelle Y.", quote: "Simple, easy to understand and more importantly something that's needed, absolutely love this project!" },
+                { initial: "A", name: "Alejandro G.", quote: "Need this ASAP! Great idea." },
+                { initial: "S", name: "Soumojit G.", quote: "Love the website!" },
+              ].map(({ initial, name, quote }) => (
+                <div key={name} className="p-5 rounded-2xl border border-border/60 bg-background flex flex-col gap-3 hover:border-primary/30 transition-colors">
+                  <Quote className="w-4 h-4 text-primary/30" />
+                  <p className="text-sm leading-relaxed text-foreground/80 flex-1">"{quote}"</p>
+                  <div className="flex items-center gap-2.5 mt-1">
+                    <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">{initial}</div>
+                    <span className="text-xs font-medium text-muted-foreground">{name}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* What you'll get */}
         <section className="w-full bg-card/40 border-y border-border/60 py-20 px-6">
           <div className="max-w-5xl mx-auto">

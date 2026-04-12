@@ -69,7 +69,7 @@ export default function Slide5Testimonial() {
               marginBottom: "0.6vh",
             }}
           >
-            Pauline
+            Pauline H.
           </div>
           <div
             style={{
