@@ -12,7 +12,26 @@ export interface Guide {
   sections: GuideSection[];
   essential: boolean;
   readingTime: string;
+  dimension?: string;
 }
+
+export const GUIDE_DIMENSIONS: Record<string, string> = {
+  "financial-crisis": "financial",
+  "power-outage": "resources",
+  "flooding": "mobility",
+  "earthquake": "mobility",
+  "civil-unrest": "mobility",
+  "medical-emergency": "health",
+  "supply-chain": "resources",
+  "shelter-in-place": "resources",
+  "communications-blackout": "resources",
+  "pandemic-health-emergency": "health",
+  "career-skills-resilience": "skills",
+  "digital-security": "resources",
+  "legal-documents": "financial",
+  "mental-resilience-practices": "psychological",
+  "relocation-mobility": "mobility",
+};
 
 export const guides: Guide[] = [
   {
@@ -300,7 +319,162 @@ export const guides: Guide[] = [
         content: "Know in advance when to seek emergency care:\n• Difficulty breathing or shortness of breath at rest\n• Persistent chest pain or pressure\n• Confusion or inability to wake/stay awake\n• Bluish lips or face\n• High fever that does not respond to medication over 48 hours in adults (lower threshold for children and elderly)\n\nCall ahead to emergency services or hospital before arriving — they may direct you to specific facilities or provide preparation instructions."
       }
     ]
-  }
+  },
+  {
+    id: "career-skills-resilience",
+    title: "Career & Skills Resilience",
+    situation: "Economic Disruption",
+    summary: "How to audit your skills, protect against career disruption, and build the transferable capabilities that keep you employable through any economic shift.",
+    locationTags: ["global", "urban", "rural"],
+    essential: true,
+    readingTime: "7 min",
+    sections: [
+      {
+        heading: "Your Skills Audit: What You Actually Have",
+        content: "Most people dramatically underestimate the breadth of their skills — and overestimate the vulnerability of losing a specific job. Start with a realistic inventory:\n\n• Hard skills: Technical competencies with named tools, languages, certifications, or systems\n• Soft skills: Communication, project management, problem-solving, negotiation, teaching\n• Crisis-relevant skills: First aid, mechanical repair, manual labour, farming/food growing, language skills\n• Network skills: Who you know, and how well you can mobilize relationships\n\nThe question is not 'what is my job title?' but 'what can I do for someone that they would pay for, even in a disrupted economy?'"
+      },
+      {
+        heading: "Redundancy: Building Your Skills Stack",
+        content: "Resilient careers are T-shaped or M-shaped, not I-shaped. An I-shaped career (deep expertise in one narrow area) is the most fragile career structure.\n\nT-shaped: Deep in one domain, broad awareness of adjacent fields — you can collaborate, pivot, and fill gaps\nM-shaped: Deep expertise in 2–3 connected areas — rare, valuable, and far more resilient to disruption\n\nAsk: 'If my main skill became obsolete tomorrow, what would I fall back on?' If the answer is nothing, that's the gap to close first."
+      },
+      {
+        heading: "Skills Building Without Quitting Your Job",
+        content: "The most effective skill-building happens in small, consistent doses:\n\n• 30 minutes per day of deliberate practice compounds to roughly 180 hours per year — equivalent to a semester of focused study\n• Project-based learning beats passive consumption: build something, apply something, solve a real problem\n• High-ROI skills right now: Data literacy (SQL, spreadsheet analysis), cloud platforms, copywriting, sales, project management frameworks, a second spoken language, basic coding\n• Free or low-cost: Coursera audit mode, MIT OpenCourseWare, Khan Academy, YouTube tutorials for specific skills, local library access to LinkedIn Learning\n\nPay for skills with verifiable credentials: formal certification raises the signal value of learning."
+      },
+      {
+        heading: "Managing Career Disruption When It Arrives",
+        content: "When disruption hits (layoff, industry collapse, burnout leading to resignation):\n\nFirst 48 hours:\n• Notify close professional contacts — the people who already know your work are your strongest asset\n• Update your professional profile while your achievements are fresh in your mind\n• File for unemployment benefit immediately — delays mean lost entitlements\n\nFirst 30 days:\n• Spend 60% of your job search time on network activation (former colleagues, managers, mentors, clients) — not job boards\n• Direct referrals convert to interviews 5–10x more often than cold applications\n• Take any income-generating work to extend runway while you search at the right level\n\nIf the search extends beyond 60 days:\n• Treat the search itself as a part-time job: structured hours, clear metrics (10 targeted applications/week, 5 networking conversations/week)\n• Seek feedback on your interview performance — this is painful but valuable data"
+      },
+      {
+        heading: "Building Future-Proof Career Assets",
+        content: "The most durable career assets:\n\n1. Your reputation: Documented work (portfolio, case studies, public writing) that exists independently of any employer\n2. Your relationships: People who would answer your call and refer you without hesitation\n3. Your knowledge: Hard-won domain expertise that takes years to develop and cannot be easily replicated\n4. Your income diversity: Side income, freelance capacity, or skills that could generate income independently of employment\n\nEven small steps toward each of these — one case study written, one relationship maintained, one freelance client acquired — meaningfully improve your position."
+      }
+    ]
+  },
+  {
+    id: "digital-security",
+    title: "Digital Security & Cyber Resilience",
+    situation: "Infrastructure Failure",
+    summary: "Protecting your digital life against account takeovers, data breaches, identity theft, and the online fraud that spikes during crises.",
+    locationTags: ["global", "urban", "rural"],
+    essential: false,
+    readingTime: "6 min",
+    sections: [
+      {
+        heading: "Password Security: The Non-Negotiables",
+        content: "Weak or reused passwords are responsible for the vast majority of account breaches. The minimum viable security posture:\n\n• Use a password manager (Bitwarden is free and open-source; 1Password and Dashlane are paid but excellent). This solves 80% of your password problem.\n• Every account gets a unique, random password of 16+ characters. You don't need to memorize them — that's what the manager is for.\n• Your email account is your master key — it gets the strongest password and must have two-factor authentication enabled\n• Use hardware security keys (YubiKey) or authenticator apps (not SMS) for 2FA on critical accounts — banking, email, password manager\n• SMS-based 2FA is better than nothing but is vulnerable to SIM-swapping attacks. Migrate away from it where possible."
+      },
+      {
+        heading: "Account Recovery: Before You Need It",
+        content: "Most people discover their account recovery is broken at the worst possible moment. Do this now:\n\n• Verify recovery options for all critical accounts (email, banking, government portals): recovery email, phone number, backup codes\n• Print and store backup codes for your most critical accounts in a physically secure location (not digitally — if your account is locked, your digital files may be inaccessible)\n• Document: which email addresses you use for which services, phone numbers attached to accounts, approximate creation dates\n• Create a simple 'digital inheritance' document — instructions for a trusted person to access critical accounts in an emergency. Store with your will."
+      },
+      {
+        heading: "Digital Backups: The 3-2-1 Rule",
+        content: "Data loss is permanent. The 3-2-1 backup rule:\n• 3 copies of your data\n• On 2 different types of storage media\n• With 1 copy offsite or in the cloud\n\nPractical implementation:\n• Original: your device\n• Local backup: an external hard drive, backed up automatically on a schedule\n• Cloud backup: Backblaze ($99/year, unlimited), iCloud, Google One, or OneDrive\n\nPriority data to back up: financial documents and tax records, identity documents (scanned copies), photos, critical work files, password manager export (encrypted)\n\nTest your backups. A backup you have never tested is a backup you do not actually have."
+      },
+      {
+        heading: "Recognizing and Resisting Fraud",
+        content: "Fraud spikes dramatically during crises — scammers exploit uncertainty and urgency. Common patterns to recognize:\n\nPhishing: Emails or messages mimicking legitimate organizations (bank, government, employer) asking you to click a link or verify information. Rule: never click links in unsolicited messages — go directly to the organization's official website.\n\nSocial engineering: A caller claiming urgency (your account is suspended, your computer is infected, there's been fraud on your card). Rule: hang up, call the official number on the back of your card or on the official website.\n\nInvestment fraud: Guaranteed returns, cryptocurrency opportunities, time-limited offers. Rule: if it's unsolicited and sounds too good, it is.\n\nImpersonation: Fake officials, utility company staff, charity workers in the aftermath of a disaster. Rule: ask for identification, verify independently before any payment or access."
+      },
+      {
+        heading: "Crisis-Specific Digital Risks",
+        content: "During emergencies, people let their guard down and scammers know this:\n\n• Fake donation appeals appear within hours of any disaster — verify charities through your national charity regulator before donating\n• Emergency supply scams: fake sellers of scarce goods (PPE, fuel, medications) — use only established retailers or verified local sources\n• 'Official' communications: fraudulent government agency emails claiming relief payments or requiring urgent verification\n• Public Wi-Fi during crises: avoid accessing sensitive accounts (banking, email) on unencrypted networks — use your mobile data connection or a reputable VPN\n\nThe standard of care during a crisis should be higher, not lower."
+      }
+    ]
+  },
+  {
+    id: "legal-documents",
+    title: "Legal Documents & Estate Preparedness",
+    situation: "General Emergency",
+    summary: "The legal and document infrastructure that protects you and your family when normal systems are disrupted — and what to do if yours is incomplete.",
+    locationTags: ["global", "urban", "rural"],
+    essential: true,
+    readingTime: "7 min",
+    sections: [
+      {
+        heading: "The Documents You Must Have (and Where to Keep Them)",
+        content: "Missing or inaccessible documents become critical problems during crises — from crossing a border to proving insurance coverage. Priority documents:\n\nIdentity and citizenship:\n• Valid passport (check expiry — renew if less than 6 months from expiry)\n• National ID card or driving licence\n• Birth certificate (original)\n• Marriage/divorce certificates if applicable\n• Children's birth certificates\n\nFinancial:\n• Bank account details and bank emergency contact numbers\n• Insurance policies (home, health, life, vehicle): policy number, insurer, contact\n• Property ownership documents or lease agreement\n\nStorage: Original documents in a waterproof, fireproof box at home. Scanned digital copies in a secure cloud folder. A copy with a trusted person in another location."
+      },
+      {
+        heading: "Will and Estate Planning",
+        content: "Dying without a will (intestate) triggers a legal process that is slow, expensive, and may not reflect your wishes. Even a simple will prepared with a solicitor takes a few hours and costs €100–500 in most countries.\n\nYour will should specify:\n• Who inherits your assets and in what proportions\n• Who is the executor (the person who administers the estate)\n• Who is the guardian of any minor children\n\nDigital assets: Your will should also address digital accounts — or at minimum, you should leave a documented list of accounts and access instructions with a trusted person.\n\nUpdate your will after every major life event: marriage, divorce, birth of a child, death of a named beneficiary, significant change in assets."
+      },
+      {
+        heading: "Power of Attorney",
+        content: "A Power of Attorney (POA) authorizes someone to act on your behalf for financial, legal, or medical decisions if you become incapacitated.\n\nTypes:\n• General POA: Broad financial and legal powers — becomes void if you become mentally incapacitated\n• Lasting/Enduring POA: Remains in effect if you lose mental capacity — the one most people actually need\n• Medical/Healthcare POA: Authorizes someone to make medical decisions if you cannot\n\nWho to appoint: Someone you trust completely, who is organized and can handle complexity under pressure, and who understands your wishes.\n\nWithout a POA, if you become incapacitated, family members may need to apply to a court to manage your affairs — a process that takes months and can cost thousands."
+      },
+      {
+        heading: "Insurance Audit",
+        content: "Insurance you don't understand is insurance you can't claim on. Do this annually:\n\n1. Read your policy documents — specifically the exclusions and the claims procedure\n2. Photograph or video your possessions for contents insurance — store this evidence in the cloud\n3. Understand your coverage limits: are they current replacement value, or nominal sums set years ago?\n4. Know your excess/deductible — if it's higher than potential small claims, you're effectively self-insuring for those amounts\n5. Health insurance: know your network, your annual deductible, your emergency cover when abroad\n6. Critically: does your home insurance cover flood damage? In most countries, it does not by default. Flood insurance is separate."
+      },
+      {
+        heading: "Preparing for Border Crossing or Relocation",
+        content: "If your resilience plan includes the possibility of relocation (domestic or international), additional document readiness applies:\n\n• Valid travel documents: passport, visas, residency permits — all unexpired, with 6+ months of validity\n• Proof of funds: bank statements showing sufficient funds; a letter from your bank may help at border crossings\n• Medical records and prescriptions: a letter from your GP summarizing conditions and medications is invaluable at foreign medical facilities\n• Pet documentation if applicable: microchip certificate, vaccination records, health certificate — requirements vary significantly by destination country\n• Employment or study proof: if your right to reside depends on status, carry evidence\n\nStore digital copies of all these in a secure cloud folder accessible from any device."
+      }
+    ]
+  },
+  {
+    id: "mental-resilience-practices",
+    title: "Mental Resilience Practices",
+    situation: "Psychological",
+    summary: "Evidence-based techniques for maintaining psychological stability under pressure — from practical stress regulation to building the mental habits that let you think clearly in a crisis.",
+    locationTags: ["global", "urban", "rural"],
+    essential: true,
+    readingTime: "8 min",
+    sections: [
+      {
+        heading: "The Foundation: Regulated Nervous System",
+        content: "Psychological resilience is not about being fearless. It is about being able to return to a functional baseline after disruption. Your nervous system is the mechanism.\n\nUnder threat, the sympathetic nervous system activates (fight-or-flight): heart rate rises, vision narrows, complex thinking deteriorates. This is adaptive for short-term physical threats — it becomes a liability for the multi-day, multi-week cognitive demands of a real crisis.\n\nThe most evidence-backed technique for rapid nervous system regulation: controlled breathing. Specifically, extending the exhale longer than the inhale activates the parasympathetic system.\n\nBox breathing (used by special forces): Inhale 4 counts → hold 4 → exhale 4 → hold 4. Repeat 4–6 times. Measurable effect within 90 seconds.\n\nPhysiological sigh: Double inhale through the nose (fully) → long, slow exhale through the mouth. A single repetition can reduce acute anxiety. This is not metaphor — it deflates over-inflated alveoli and drops CO2 load rapidly."
+      },
+      {
+        heading: "The Worry Window: Managing Anticipatory Anxiety",
+        content: "Anticipatory anxiety — worrying about things that haven't happened — is the most common and most debilitating form of anxiety in non-acute situations. It consumes cognitive bandwidth without producing useful action.\n\nThe worry window technique:\n• Designate one specific time per day (15–30 minutes) as your 'worry time'\n• When anxious thoughts arise outside that window, write them down and explicitly defer them: 'I will think about this at 6 PM'\n• At your designated time, sit with your worry list deliberately — examine each item: is it actionable? If yes, create a specific next action. If not, acknowledge it and set it aside.\n\nThis technique works because it doesn't suppress anxiety (which backfires) but relocates it — preventing the constant background radiation of unmanaged worry that erodes cognitive function over days and weeks."
+      },
+      {
+        heading: "Cognitive Reframing Under Pressure",
+        content: "Under stress, the brain defaults to catastrophizing: assuming worst-case outcomes and treating them as inevitable. Reframing is the deliberate examination of that assumption.\n\nThe technique:\n1. Identify the catastrophic thought explicitly ('I will lose everything')\n2. Rate your confidence in it (0–100%) — you'll find it's often lower than it felt\n3. Ask: 'What evidence supports this? What evidence contradicts it?'\n4. Generate 2–3 alternative scenarios (best case, realistic case, worst case)\n5. Ask: 'If the worst case happens, what would I actually do?'\n\nThe goal is not forced optimism — it is accurate assessment. Accurate assessment leads to better decisions than distorted catastrophizing.\n\nFor decision-making under uncertainty: focus on what is within your control (actions, preparation, response) and explicitly release what is not (external events, other people's choices, market movements)."
+      },
+      {
+        heading: "Building Stress Tolerance Over Time",
+        content: "Psychological resilience is partly a skill that can be trained — not just an innate trait.\n\nStress inoculation: deliberate, controlled exposure to moderate stress builds the nervous system's capacity to tolerate and recover from disruption. Examples:\n• Cold exposure (cold showers or swimming): trains the nervous system to resist panic response to physical discomfort\n• Physical exercise (especially high-intensity): practices stress response and recovery repeatedly\n• Voluntary discomfort: fasting, sleeping rough occasionally, going without devices\n• Difficult conversations: practicing discomfort in low-stakes social situations trains tolerance\n\nThis is not self-punishment — it is deliberate capacity building. The goal is a nervous system that doesn't treat moderate difficulty as an emergency."
+      },
+      {
+        heading: "Social Connection as a Resilience Factor",
+        content: "The research on resilience consistently finds one of the strongest predictors of recovery from adversity is social connection. Not general sociability — specific, trusted relationships.\n\nWhat predicts resilience:\n• 1–3 people you can call in genuine distress, at any hour, without feeling you're a burden\n• A sense of being known and valued by a community (not follower counts)\n• Reciprocal relationships: you give as well as receive support\n\nUnder crisis conditions:\n• Name your support network explicitly — don't assume people know you want to be called on\n• Reach out first, proactively — waiting to ask for help until you're in crisis makes it harder to ask\n• If you live alone, identify your check-in protocol: who checks on you, and how frequently, during extended difficulty?\n\nIsolation amplifies every fear and narrows every perceived option. Connection does the opposite."
+      }
+    ]
+  },
+  {
+    id: "relocation-mobility",
+    title: "Relocation & Mobility Planning",
+    situation: "General Emergency",
+    summary: "How to assess whether and where to relocate, prepare for rapid departure, and manage the practical and emotional demands of moving under pressure.",
+    locationTags: ["global", "urban", "rural"],
+    essential: false,
+    readingTime: "6 min",
+    sections: [
+      {
+        heading: "The Relocation Decision: When to Go, When to Stay",
+        content: "Relocation is a major life decision that shouldn't be made reactively under stress. The framework for thinking clearly about it:\n\nReasons that justify serious consideration:\n• Physical safety: the current location poses a credible, sustained threat to personal safety\n• Economic collapse: the local economy has deteriorated to the point where income and savings cannot be sustained\n• Political instability: escalating persecution, rights erosion, or breakdown of institutional order\n• Environmental: climate risk that makes the location increasingly unlivable or uninsurable\n\nReasons that don't justify reactive relocation:\n• General anxiety about the future\n• A difficult period that is likely to be temporary\n• Following others who may be overreacting\n\nThe question to answer honestly: 'Is this situation likely to get substantially worse, or am I reacting to present discomfort?' If substantially worse: plan to move. If present discomfort: build resilience locally first."
+      },
+      {
+        heading: "The Go-Bag: 72-Hour Rapid Departure Kit",
+        content: "A go-bag is a pre-packed bag that allows you to leave in under 10 minutes and survive for 72 hours without access to your home. It is for emergencies requiring rapid departure — not a holiday bag.\n\nContents:\n• Documents: Passports, IDs, insurance policies, cash in local and one major international currency\n• Communication: Fully charged phone + charger + power bank (20,000+ mAh)\n• Cash: Enough for 72 hours of accommodation and food without card access\n• Medication: At least a 7-day supply of any essential prescription medication\n• Clothing: 2 days of warm, practical layers (assume you may sleep outside)\n• Water: 1.5 liters per person (supplement with tablets for purification)\n• Food: Non-perishable, high-calorie items for 2–3 days\n• First aid: Basic kit including any personal medical items\n\nKeep it packed and accessible. Review and update it every 6 months."
+      },
+      {
+        heading: "Choosing a Destination",
+        content: "If relocation is being planned (not reactive), evaluate destinations against your specific risk profile:\n\nFor domestic relocation:\n• Economic opportunity: is there actually work or business opportunity in the destination?\n• Relative stability: is the destination less exposed to the specific risk you're moving from?\n• Social network: do you have any existing connections there? Social isolation in a new location is a serious resilience risk.\n• Cost of living relative to your income or savings\n\nFor international relocation:\n• Visa and residency pathways: understand what legal status you can obtain, how long it takes, and what it costs\n• Healthcare access: public vs. private; cost of comprehensive health insurance as an expat\n• Language: if you don't speak the local language, the social isolation risk is significant — factor in learning time\n• Double taxation: understand your tax obligations in both your origin country and destination\n• Banking access: can you actually open a bank account as a foreign resident?"
+      },
+      {
+        heading: "Financial Preparation for Relocation",
+        content: "Relocation costs are routinely underestimated. Plan for:\n\n• Immediate costs: Transport, initial accommodation deposit + 1st month, shipping or storage of belongings\n• Setup costs: Re-registering vehicles, transferring documents, replacing items you couldn't bring\n• Income gap: The period between leaving old income and establishing new income — this can be months\n• Currency risk: If you're moving internationally, exchange rate movements can erode savings significantly. Hold a portion in the destination currency in advance.\n\nMinimum recommendation: 6 months of living expenses in the destination, liquid and accessible, before you move. 12 months is significantly more comfortable.\n\nKnow which of your financial assets are portable: bank accounts (international wire), investment accounts (check jurisdiction rules), property (sale may take months)."
+      },
+      {
+        heading: "The Emotional Reality of Relocation",
+        content: "Relocation under pressure is one of the most psychologically demanding experiences an adult can have. Acknowledging this prevents underestimating the cost:\n\n• Grief is normal: leaving a home, community, and familiar environment involves real loss regardless of the circumstances\n• The peak difficulty period is typically months 2–6 after arrival — the novelty has worn off but belonging hasn't developed yet\n• Identity disruption: your social status and sense of self is often reset to zero in a new context — this is disorienting even for resilient people\n• Children experience this more acutely: school transitions, language barriers, and friendship disruption can require specific, patient support\n\nBuild social connection deliberately and early in the new location: language classes, community groups, local sport or hobby clubs. The relationship-building investment pays off much faster than most people expect."
+      }
+    ]
+  },
 ];
 
 export function getGuidesByLocation(location: string): Guide[] {
@@ -328,4 +502,8 @@ export function getGuidesByLocation(location: string): Guide[] {
 
 export function getEssentialGuides(): Guide[] {
   return guides.filter(g => g.essential);
+}
+
+export function getGuidesByDimension(dimension: string): Guide[] {
+  return guides.filter(g => GUIDE_DIMENSIONS[g.id] === dimension);
 }

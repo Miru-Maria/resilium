@@ -21,6 +21,7 @@ import {
   Quote,
   MessageCircle,
   BookOpen,
+  Clock,
 } from "lucide-react";
 import { SiteFooter } from "@/components/site-footer";
 import { useUser, useAuth, useClerk } from "@clerk/react";
@@ -121,22 +122,86 @@ function TestimonialsSection() {
   );
 }
 
-function OnboardingBanner() {
+function SignedInBanner() {
   const { isSignedIn, isLoaded } = useAuth();
-  const [show, setShow] = useState(false);
+  const { user } = useUser();
+  const [state, setState] = useState<
+    | { kind: "loading" }
+    | { kind: "hidden" }
+    | { kind: "onboard" }
+    | { kind: "returning"; score: number; daysSince: number }
+  >({ kind: "loading" });
 
   useEffect(() => {
-    if (!isLoaded || !isSignedIn) return;
-    const dismissed = localStorage.getItem("resilium_onboarded_v1");
-    if (!dismissed) setShow(true);
+    if (!isLoaded) return;
+    if (!isSignedIn) { setState({ kind: "hidden" }); return; }
+
+    fetch(`${BASE}/api/users/me/plans`, { credentials: "include" })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (d?.plans?.length > 0) {
+          const latest = d.plans[d.plans.length - 1];
+          const daysSince = Math.floor(
+            (Date.now() - new Date(latest.createdAt).getTime()) / (1000 * 60 * 60 * 24)
+          );
+          setState({ kind: "returning", score: Math.round(latest.scoreOverall), daysSince });
+        } else {
+          const dismissed = localStorage.getItem("resilium_onboarded_v1");
+          setState(dismissed ? { kind: "hidden" } : { kind: "onboard" });
+        }
+      })
+      .catch(() => {
+        const dismissed = localStorage.getItem("resilium_onboarded_v1");
+        setState(dismissed ? { kind: "hidden" } : { kind: "onboard" });
+      });
   }, [isLoaded, isSignedIn]);
 
-  const dismiss = () => {
+  const dismissOnboard = () => {
     localStorage.setItem("resilium_onboarded_v1", "1");
-    setShow(false);
+    setState({ kind: "hidden" });
   };
 
-  if (!show) return null;
+  if (state.kind === "loading" || state.kind === "hidden") return null;
+
+  if (state.kind === "returning") {
+    const { score, daysSince } = state;
+    const scoreColor = score >= 70 ? "text-emerald-400" : score >= 40 ? "text-amber-400" : "text-destructive";
+    const nudge = daysSince >= 30
+      ? `It's been ${daysSince} days — your situation may have changed.`
+      : daysSince >= 14
+      ? `${daysSince} days since your last check-in — keep the momentum going.`
+      : `You last checked in ${daysSince} day${daysSince !== 1 ? "s" : ""} ago.`;
+    return (
+      <div className="w-full z-20 px-6 py-3">
+        <div className="max-w-5xl mx-auto flex items-center gap-4 px-5 py-4 rounded-2xl bg-card border border-border/60 backdrop-blur-sm shadow-sm">
+          <div className="flex-shrink-0 w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
+            <Shield className="w-4 h-4 text-primary" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-sm text-foreground">
+              Welcome back{user?.firstName ? `, ${user.firstName}` : ""}! Your resilience score is{" "}
+              <span className={`font-bold ${scoreColor}`}>{score}/100</span>.
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
+              <Clock className="w-3 h-3 inline-block flex-shrink-0" /> {nudge}
+            </p>
+          </div>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <Link href="/profile">
+              <Button size="sm" className="rounded-full text-xs font-semibold">
+                View Your Plan <ArrowRight className="ml-1 w-3 h-3" />
+              </Button>
+            </Link>
+            <Link href="/consent">
+              <Button size="sm" variant="outline" className="rounded-full text-xs font-semibold hidden sm:flex">
+                Reassess
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full z-20 px-6 py-3">
@@ -150,11 +215,11 @@ function OnboardingBanner() {
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           <Link href="/consent">
-            <Button size="sm" className="rounded-full text-xs font-semibold" onClick={dismiss}>
+            <Button size="sm" className="rounded-full text-xs font-semibold" onClick={dismissOnboard}>
               Start Assessment <ArrowRight className="ml-1 w-3 h-3" />
             </Button>
           </Link>
-          <button onClick={dismiss} className="text-muted-foreground hover:text-foreground transition-colors p-1">
+          <button onClick={dismissOnboard} className="text-muted-foreground hover:text-foreground transition-colors p-1">
             <span className="text-lg leading-none">×</span>
           </button>
         </div>
@@ -220,8 +285,8 @@ export default function LandingPage() {
         <AnimatedBackground />
       </div>
 
-      {/* Onboarding banner — shown to signed-in users who haven't started yet */}
-      <OnboardingBanner />
+      {/* Smart banner — onboarding for new users, re-engagement for returning users */}
+      <SignedInBanner />
 
       {/* Hero */}
       <main className="flex-1 flex flex-col items-center z-10">

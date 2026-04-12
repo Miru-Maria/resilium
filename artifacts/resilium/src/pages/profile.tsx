@@ -67,7 +67,7 @@ import {
   Lock,
   BookMarked,
 } from "lucide-react";
-import { guides, getEssentialGuides, getGuidesByLocation, type Guide } from "@/data/guides";
+import { guides, getEssentialGuides, getGuidesByLocation, getGuidesByDimension, type Guide } from "@/data/guides";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -433,8 +433,33 @@ function CompareModal({
   );
 }
 
+const PRIORITY_ORDER: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 };
+
 // ─── Overview Tab ────────────────────────────────────────────────────────────
 function OverviewTab({ plans }: { plans: PlanSummary[] }) {
+  const { data: checklistFocusData } = useQuery({
+    queryKey: ["latestChecklist"],
+    queryFn: async () => {
+      const res = await fetch("/api/users/me/latest-checklist", { credentials: "include" });
+      if (!res.ok) return null;
+      return res.json();
+    },
+    enabled: plans.length > 0,
+    staleTime: 60_000,
+  });
+
+  const { data: focusProgress } = useQuery<ProgressItem[]>({
+    queryKey: ["checklistProgress", checklistFocusData?.reportId],
+    queryFn: async () => {
+      const res = await fetch(`/api/resilience/reports/${checklistFocusData?.reportId}/checklists`, { credentials: "include" });
+      if (!res.ok) return [];
+      const json = await res.json();
+      return json.progress ?? [];
+    },
+    enabled: !!checklistFocusData?.reportId,
+    staleTime: 60_000,
+  });
+
   if (plans.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4 text-center">
@@ -596,6 +621,62 @@ function OverviewTab({ plans }: { plans: PlanSummary[] }) {
           </CardContent>
         </Card>
       )}
+
+      {/* This Week's Focus */}
+      {(() => {
+        if (!checklistFocusData?.checklistsByArea || !checklistFocusData?.reportId) return null;
+        const progressMap: Record<string, boolean> = {};
+        for (const item of focusProgress ?? []) {
+          progressMap[`${item.area}:${item.itemId}`] = item.completed;
+        }
+        const focusItems: Array<{ area: string; item: ChecklistItem }> = [];
+        for (const area of ["financial", "health", "skills", "mobility", "psychological", "resources"]) {
+          for (const item of checklistFocusData.checklistsByArea[area] ?? []) {
+            if (!progressMap[`${area}:${item.id}`]) {
+              focusItems.push({ area, item });
+            }
+          }
+        }
+        focusItems.sort((a, b) => (PRIORITY_ORDER[a.item.priority] ?? 3) - (PRIORITY_ORDER[b.item.priority] ?? 3));
+        const topItems = focusItems.slice(0, 3);
+        if (topItems.length === 0) return null;
+        const priorityColors: Record<string, string> = {
+          critical: "text-destructive border-destructive/30 bg-destructive/5",
+          high: "text-amber-700 border-amber-300 bg-amber-50",
+          medium: "text-blue-700 border-blue-200 bg-blue-50",
+          low: "text-muted-foreground border-border bg-muted/30",
+        };
+        return (
+          <Card className="border-none shadow-md">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base font-display flex items-center gap-2">
+                <Target className="w-4 h-4 text-primary" /> This Week's Focus
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-1 pb-4">
+              {topItems.map(({ area, item }) => (
+                <div key={item.id} className="flex items-start gap-3 py-2 border-b border-border/20 last:border-0">
+                  <div className="w-4 h-4 rounded-full border-2 border-primary/30 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-foreground leading-snug">{item.title}</p>
+                    <span className="text-xs text-muted-foreground capitalize">{DIM_LABELS[area as DimKey] ?? area}</span>
+                  </div>
+                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border capitalize flex-shrink-0 ${priorityColors[item.priority] ?? priorityColors.low}`}>
+                    {item.priority}
+                  </span>
+                </div>
+              ))}
+              <div className="pt-2">
+                <Link href="/profile?tab=checklist">
+                  <button type="button" className="text-xs font-medium text-primary hover:underline flex items-center gap-1">
+                    See all checklist items <ChevronRight className="w-3 h-3" />
+                  </button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })()}
 
       {/* CTA if only 1 plan */}
       {!hasMultiple && (
@@ -1698,22 +1779,94 @@ const COMPANION_CACHE_KEY = "resilium_companion_messages_v1";
 
 type CompanionMessage = { role: "user" | "assistant"; content: string; createdAt: string };
 
-function CompanionProGate() {
+const DIM_COMPANION_QUESTIONS: Record<string, string[]> = {
+  financial: [
+    "How do I build a financial runway that covers a 6-month income gap?",
+    "What's the right order of priorities if my income dropped tomorrow?",
+  ],
+  health: [
+    "What health resilience gaps should I tackle first given my profile?",
+    "How do I prepare for a medical emergency when professional help is delayed?",
+  ],
+  skills: [
+    "Which practical skills should I build first based on my current gaps?",
+    "How do I future-proof my career against economic disruption?",
+  ],
+  mobility: [
+    "How ready am I actually to evacuate if I had to leave in 2 hours?",
+    "What's the most important thing missing from my mobility and go-bag plan?",
+  ],
+  psychological: [
+    "How do I build mental resilience for the specific challenges I'm facing?",
+    "What daily habits actually improve stress tolerance over time?",
+  ],
+  resources: [
+    "What critical supplies am I still missing based on my situation?",
+    "How do I prioritize my emergency preparedness spending this month?",
+  ],
+};
+
+function CompanionProGate({ latestPlan }: { latestPlan?: PlanSummary }) {
   const [, navigate] = useLocation();
+
+  const lowestDim: DimKey | undefined = latestPlan ? (() => {
+    const scores: Record<DimKey, number> = {
+      financial: latestPlan.scoreFinancial,
+      health: latestPlan.scoreHealth,
+      skills: latestPlan.scoreSkills,
+      mobility: latestPlan.scoreMobility,
+      psychological: latestPlan.scorePsychological,
+      resources: latestPlan.scoreResources,
+    };
+    return DIM_KEYS.reduce((min, dim) => scores[dim] < scores[min] ? dim : min, DIM_KEYS[0]);
+  })() : undefined;
+
+  const lowestScore = lowestDim && latestPlan
+    ? Math.round([latestPlan.scoreFinancial, latestPlan.scoreHealth, latestPlan.scoreSkills, latestPlan.scoreMobility, latestPlan.scorePsychological, latestPlan.scoreResources][DIM_KEYS.indexOf(lowestDim)])
+    : null;
+
+  const sampleQuestions = lowestDim ? DIM_COMPANION_QUESTIONS[lowestDim] ?? DIM_COMPANION_QUESTIONS.financial : DIM_COMPANION_QUESTIONS.financial;
+
   return (
-    <div className="flex flex-col items-center justify-center py-20 px-6 text-center gap-5">
-      <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
-        <Lock className="w-8 h-8 text-primary" />
+    <div className="flex flex-col gap-6 max-w-lg mx-auto py-10 px-2">
+      <div className="flex flex-col items-center text-center gap-3">
+        <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center">
+          <Bot className="w-7 h-7 text-primary" />
+        </div>
+        <div>
+          <h3 className="text-xl font-display font-bold mb-1">Talk to a Companion that knows your results</h3>
+          <p className="text-muted-foreground text-sm leading-relaxed max-w-sm mx-auto">
+            Your AI Companion has read your assessment. It gives guidance specific to your gaps — not generic advice.
+          </p>
+        </div>
       </div>
-      <div>
-        <h3 className="text-xl font-display font-bold mb-2">AI Companion is a Pro Feature</h3>
-        <p className="text-muted-foreground text-sm max-w-sm leading-relaxed">
-          Get personalized resilience guidance, crisis planning advice, and motivation from an AI that knows your assessment results.
-        </p>
+
+      {lowestDim && lowestScore !== null && (
+        <div className="rounded-2xl border border-border/60 bg-muted/20 p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Target className="w-4 h-4 text-amber-500" />
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Your lowest area — {DIM_LABELS[lowestDim]} ({lowestScore}/100)
+            </span>
+          </div>
+          <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wider">Questions you could ask right now:</p>
+          <div className="space-y-2">
+            {sampleQuestions.map((q, i) => (
+              <div key={i} className="flex items-start gap-2 px-3 py-2.5 rounded-xl bg-background border border-border/40 select-none">
+                <MessageSquare className="w-3.5 h-3.5 text-primary/40 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-muted-foreground/70 italic leading-snug blur-[1.5px] select-none">{q}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="flex flex-col items-center gap-3">
+        <Button onClick={() => navigate("/pricing")} className="rounded-full px-8 gap-2">
+          <Lock className="w-4 h-4" /> Unlock with Pro
+        </Button>
+        <p className="text-xs text-muted-foreground">Unlimited conversations · Personalized to your scores · Cancel anytime</p>
       </div>
-      <Button onClick={() => navigate("/pricing")} className="rounded-full px-8">
-        Upgrade to Pro
-      </Button>
     </div>
   );
 }
@@ -1890,7 +2043,7 @@ function CompanionChat() {
   );
 }
 
-function CompanionTab() {
+function CompanionTab({ latestPlan }: { latestPlan?: PlanSummary }) {
   const { data: subStatus, isLoading } = useQuery({
     queryKey: ["subscription-status"],
     queryFn: async () => {
@@ -1907,7 +2060,7 @@ function CompanionTab() {
     </div>
   );
 
-  if (!subStatus?.isPro) return <CompanionProGate />;
+  if (!subStatus?.isPro) return <CompanionProGate latestPlan={latestPlan} />;
 
   return (
     <div className="space-y-4">
@@ -2061,9 +2214,20 @@ function GuideCard({ guide }: { guide: Guide }) {
   );
 }
 
-function GuidesTab({ location }: { location?: string }) {
-  const [filter, setFilter] = useState<"all" | "essential">("all");
-  const filteredGuides = filter === "essential" ? getEssentialGuides() : location ? getGuidesByLocation(location) : guides;
+function GuidesTab({ location, lowestDim }: { location?: string; lowestDim?: DimKey }) {
+  type GuideFilter = "for-you" | "all" | "essential";
+  const [filter, setFilter] = useState<GuideFilter>(lowestDim ? "for-you" : "all");
+
+  const filteredGuides =
+    filter === "for-you" && lowestDim ? getGuidesByDimension(lowestDim) :
+    filter === "essential" ? getEssentialGuides() :
+    location ? getGuidesByLocation(location) : guides;
+
+  const filterOptions: Array<{ id: GuideFilter; label: string; show: boolean }> = [
+    { id: "for-you", label: `Recommended for ${lowestDim ? DIM_LABELS[lowestDim] : "You"}`, show: !!lowestDim },
+    { id: "all", label: location ? "Relevant to You" : "All Guides", show: true },
+    { id: "essential", label: "Essential Only", show: true },
+  ];
 
   return (
     <div className="space-y-4">
@@ -2072,28 +2236,37 @@ function GuidesTab({ location }: { location?: string }) {
         <div>
           <p className="text-sm font-semibold text-foreground mb-0.5">Practical crisis guides — always available</p>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Location-relevant guides for the situations most likely to affect you. Expand any guide to read it in full. Download it as a text file to save it for offline reading when you don't have internet access.
+            {lowestDim
+              ? `Guides personalized to your profile — your ${DIM_LABELS[lowestDim].toLowerCase()} score is your lowest area. Expand any guide to read it in full, or download it for offline use.`
+              : "Location-relevant guides for the situations most likely to affect you. Expand any guide to read it in full. Download it as a text file to save it for offline reading when you don't have internet access."}
           </p>
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
-        {(["all", "essential"] as const).map(f => (
+      <div className="flex flex-wrap items-center gap-2">
+        {filterOptions.filter(f => f.show).map(f => (
           <button
-            key={f}
+            key={f.id}
             type="button"
-            onClick={() => setFilter(f)}
+            onClick={() => setFilter(f.id)}
             className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
-              filter === f
+              filter === f.id
                 ? "bg-primary text-primary-foreground border-primary"
                 : "bg-background text-muted-foreground border-border/60 hover:border-primary/40"
             }`}
           >
-            {f === "all" ? (location ? "Relevant to You" : "All Guides") : "Essential Only"}
+            {f.id === "for-you" && <Target className="w-3 h-3 inline-block mr-1.5 -mt-0.5 text-amber-500" />}
+            {f.label}
           </button>
         ))}
-        <span className="text-xs text-muted-foreground ml-auto">{filteredGuides.length} guides</span>
+        <span className="text-xs text-muted-foreground ml-auto">{filteredGuides.length} guide{filteredGuides.length !== 1 ? "s" : ""}</span>
       </div>
+
+      {filter === "for-you" && lowestDim && filteredGuides.length === 0 && (
+        <div className="text-center py-8 text-muted-foreground text-sm">
+          No specific guides for this dimension yet — showing all guides.
+        </div>
+      )}
 
       <div className="space-y-3">
         {filteredGuides.map(guide => (
@@ -2133,6 +2306,18 @@ export default function ProfilePage() {
   });
 
   const plans = data?.plans ?? [];
+  const latestPlan = plans.length > 0 ? plans[plans.length - 1] : undefined;
+  const lowestDim: DimKey | undefined = latestPlan ? (() => {
+    const scores: Record<DimKey, number> = {
+      financial: latestPlan.scoreFinancial,
+      health: latestPlan.scoreHealth,
+      skills: latestPlan.scoreSkills,
+      mobility: latestPlan.scoreMobility,
+      psychological: latestPlan.scorePsychological,
+      resources: latestPlan.scoreResources,
+    };
+    return DIM_KEYS.reduce((min, dim) => scores[dim] < scores[min] ? dim : min, DIM_KEYS[0]);
+  })() : undefined;
 
   const handleAllPlansDeleted = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: ["myPlans"] });
@@ -2247,11 +2432,11 @@ export default function ProfilePage() {
             </TabsContent>
 
             <TabsContent value="companion">
-              <CompanionTab />
+              <CompanionTab latestPlan={latestPlan} />
             </TabsContent>
 
             <TabsContent value="guides">
-              <GuidesTab location={plans[plans.length - 1]?.location} />
+              <GuidesTab location={latestPlan?.location} lowestDim={lowestDim} />
             </TabsContent>
           </Tabs>
         )}
