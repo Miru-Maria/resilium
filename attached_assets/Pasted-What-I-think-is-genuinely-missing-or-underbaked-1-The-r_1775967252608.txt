@@ -1,0 +1,24 @@
+What I think is genuinely missing or underbaked
+
+1. The re-engagement loop is weak
+The hardest problem in this category isn't getting someone to complete the assessment — it's getting them to come back 30 days later, look at their checklist, and feel progress. The email reminders exist (cron jobs are set up), but there's no in-app "pull" for returning users. Someone who finishes their assessment and closes the tab — what brings them back tomorrow? There's no streak, no "you have 3 items due this week," no visible progress nudge on the home/landing page for logged-in users. The checklist is powerful, but passive.
+
+2. The free → Pro conversion story isn't sharp enough
+The free tier is generous (3 full assessments + guides + plan). That's good for acquisition. But the moment a free user hits the Companion gate or finishes their 3rd assessment, is the upgrade proposition emotionally compelling enough? Right now it's a bullet list. The strongest SaaS conversions happen when the free user feels the gap — they're trying to use something and the upgrade offer appears at exactly the right moment with the right framing. Worth thinking about whether the gate UX can be sharper.
+
+3. Between assessments, the daily experience is thin
+A user who's been using the app for 3 weeks — what do they do today? The checklist is there, the companion is there. But there's no sense of rhythm or forward momentum. A "this week's focus" card, a single prioritized action per day, or even a weekly progress email ("you completed 4 items this week — you're in the top 30% of users your score range") would make the product feel alive between reassessments.
+
+4. The coaching referral is a stub
+When psychological score is low, the path to a human coach surfaces. But is there an actual coach on the other end? If it's just a contact form or a mailto link, that's a dead end that erodes trust at the most vulnerable moment.
+
+5. The guides library is a starting point, not a destination
+10 guides is good for launch. But as users engage, they'll hit the ceiling quickly. The library should grow — and ideally, guide suggestions should be personalized to what the user's lowest-scoring dimension is, not just their location.
+
+My overall opinion
+
+This is a strong, shipnable product — arguably more complete than most solo founder MVPs at this stage. The core value proposition is clear and differentiated, the tech is solid, and the recent additions (Companion, Guides, goal reminders) meaningfully improve the product.
+
+But more features aren't what it needs right now. The biggest gap is not functionality — it's the re-engagement habit loop and then real users to validate which parts actually matter. The risk right now is building the wrong next thing because you don't yet know what users actually return for.
+
+My recommendation: launch, and instrument everything. Track which tabs users visit most, where they drop off, whether the Companion gets used, and what checklist completion rates look like. Three weeks of real user behavior will tell you more than three more months of building.
