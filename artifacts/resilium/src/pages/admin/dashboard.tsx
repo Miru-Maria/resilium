@@ -560,7 +560,7 @@ export default function AdminDashboard() {
                               <td className="py-2.5 px-3 text-muted-foreground">{r.ageBracket || "—"}</td>
                               <td className="py-2.5 px-3 max-w-[120px] truncate text-muted-foreground text-xs">{r.primaryGoal?.replace(/_/g, " ") || "—"}</td>
                               <td className="py-2.5 px-3">
-                                <Link href={`/results/${r.reportId}`} className="text-primary hover:underline text-xs font-medium">
+                                <Link href={`/results/${r.reportId}?from=admin`} className="text-primary hover:underline text-xs font-medium">
                                   View →
                                 </Link>
                               </td>

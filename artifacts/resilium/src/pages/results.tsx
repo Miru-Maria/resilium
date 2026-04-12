@@ -634,7 +634,7 @@ function ResultsPageInner() {
       <header className="w-full bg-card border-b border-border sticky top-14 z-50 print:hidden">
         <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            {typeof window !== "undefined" && !!window.localStorage.getItem("admin_token") ? (
+            {new URLSearchParams(window.location.search).get("from") === "admin" ? (
               <Link href="/admin/dashboard?tab=reports">
                 <Button variant="ghost" size="sm" className="rounded-full text-muted-foreground hover:text-foreground gap-1.5">
                   ← Admin
