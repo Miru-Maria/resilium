@@ -2292,6 +2292,7 @@ export default function ProfilePage() {
   const isAuthenticated = !!isSignedIn;
   const login = () => openSignIn({});
   const logout = () => signOut({ redirectUrl: "/" });
+  const [, navigate] = useLocation();
   const search = useSearch();
   const urlTab = new URLSearchParams(search).get("tab");
   const validTabs = ["account", "overview", "reports", "plans", "checklist", "companion", "guides"];
@@ -2362,7 +2363,7 @@ export default function ProfilePage() {
             <Loader2 className="w-8 h-8 text-primary animate-spin" />
           </div>
         ) : (
-          <Tabs defaultValue={defaultTab} className="space-y-6">
+          <Tabs value={defaultTab} onValueChange={(val) => navigate(`/profile?tab=${val}`)} className="space-y-6">
             <TabsList className="rounded-xl h-10 p-1 flex-wrap gap-1 w-full sm:w-auto">
               <TabsTrigger value="account" className="rounded-lg gap-1.5 text-sm">
                 <User className="w-3.5 h-3.5" /> Account
