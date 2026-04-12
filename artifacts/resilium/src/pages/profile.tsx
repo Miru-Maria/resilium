@@ -2390,12 +2390,7 @@ export default function ProfilePage() {
           <p className="text-muted-foreground mt-1">Track your resilience journey and manage your account.</p>
         </div>
 
-        {plansLoading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 text-primary animate-spin" />
-          </div>
-        ) : (
-          <Tabs value={defaultTab} onValueChange={(val) => navigate(`/profile?tab=${val}`)} className="space-y-6">
+        <Tabs value={defaultTab} onValueChange={(val) => navigate(`/profile?tab=${val}`)} className="space-y-6">
             <TabsList className="rounded-xl h-10 p-1 flex-wrap gap-1 w-full sm:w-auto">
               <TabsTrigger value="account" className="rounded-lg gap-1.5 text-sm">
                 <User className="w-3.5 h-3.5" /> Account
@@ -2422,7 +2417,11 @@ export default function ProfilePage() {
 
             <TabsContent value="account">
               <TabErrorBoundary tabName="account">
-                {user && (
+                {plansLoading ? (
+                  <div className="flex items-center justify-center py-20">
+                    <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                  </div>
+                ) : user && (
                   <AccountTab
                     user={user as any}
                     plans={plans}
@@ -2434,28 +2433,48 @@ export default function ProfilePage() {
 
             <TabsContent value="overview">
               <TabErrorBoundary tabName="overview">
-                <OverviewTab plans={plans} />
+                {plansLoading ? (
+                  <div className="flex items-center justify-center py-20">
+                    <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                  </div>
+                ) : (
+                  <OverviewTab plans={plans} />
+                )}
               </TabErrorBoundary>
             </TabsContent>
 
             <TabsContent value="reports">
               <TabErrorBoundary tabName="reports">
-                <ReportsTab plans={plans} />
+                {plansLoading ? (
+                  <div className="flex items-center justify-center py-20">
+                    <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                  </div>
+                ) : (
+                  <ReportsTab plans={plans} />
+                )}
               </TabErrorBoundary>
             </TabsContent>
 
             <TabsContent value="plans">
               <TabErrorBoundary tabName="plans">
-                <div className="flex gap-3 items-start px-5 py-4 mb-4 rounded-2xl border border-border/40 bg-muted/20">
-                  <BarChart2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-semibold text-foreground mb-0.5">What is a Plan?</p>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      Each Plan is a full snapshot of one assessment — your resilience score, risk profile, vulnerabilities, and strategic recommendations. Every time you retake the assessment, a new Plan is created so you can see how your preparedness evolves over time. Your most recent Plan also drives your active Checklist.
-                    </p>
+                {plansLoading ? (
+                  <div className="flex items-center justify-center py-20">
+                    <Loader2 className="w-8 h-8 text-primary animate-spin" />
                   </div>
-                </div>
-                <PlansTab plans={plans} onDelete={() => queryClient.invalidateQueries({ queryKey: ["myPlans"] })} />
+                ) : (
+                  <>
+                    <div className="flex gap-3 items-start px-5 py-4 mb-4 rounded-2xl border border-border/40 bg-muted/20">
+                      <BarChart2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-semibold text-foreground mb-0.5">What is a Plan?</p>
+                        <p className="text-sm text-muted-foreground leading-relaxed">
+                          Each Plan is a full snapshot of one assessment — your resilience score, risk profile, vulnerabilities, and strategic recommendations. Every time you retake the assessment, a new Plan is created so you can see how your preparedness evolves over time. Your most recent Plan also drives your active Checklist.
+                        </p>
+                      </div>
+                    </div>
+                    <PlansTab plans={plans} onDelete={() => queryClient.invalidateQueries({ queryKey: ["myPlans"] })} />
+                  </>
+                )}
               </TabErrorBoundary>
             </TabsContent>
 
@@ -2486,7 +2505,6 @@ export default function ProfilePage() {
               </TabErrorBoundary>
             </TabsContent>
           </Tabs>
-        )}
       </main>
       <SiteFooter />
     </div>
