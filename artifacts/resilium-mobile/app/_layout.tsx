@@ -18,21 +18,11 @@ import { ClerkProvider } from "@clerk/expo";
 import * as SecureStore from "expo-secure-store";
 import { Feather } from "@expo/vector-icons";
 import * as Font from "expo-font";
-import * as Sentry from "@sentry/react-native";
-
 import { AppLoadingScreen } from "@/components/AppLoadingScreen";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { SessionProvider } from "@/context/session";
 import { ThemeProvider, useColors } from "@/context/theme";
 import { ProStatusProvider } from "@/context/proStatus";
-
-Sentry.init({
-  dsn: "https://18da13e057fbeb42d6a6d1346a664d62@o4511187075923968.ingest.de.sentry.io/4511187688816720",
-  environment: __DEV__ ? "development" : "production",
-  enableNative: Platform.OS !== "web",
-  tracesSampleRate: 0.1,
-  enabled: !__DEV__,
-});
 
 const webTokenCache = {
   async getToken(key: string) {
