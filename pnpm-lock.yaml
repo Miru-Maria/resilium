@@ -924,16 +924,6 @@ importers:
         specifier: ^7.1.1
         version: 7.1.1
 
-  lib/replit-auth-web:
-    dependencies:
-      '@workspace/api-client-react':
-        specifier: workspace:*
-        version: link:../api-client-react
-    devDependencies:
-      '@types/react':
-        specifier: 'catalog:'
-        version: 19.2.14
-
   scripts:
     devDependencies:
       '@types/node':
