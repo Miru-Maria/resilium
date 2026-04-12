@@ -56,6 +56,8 @@ export const resilienceReportsTable = pgTable("resilience_reports", {
   primaryGoal: text("primary_goal"),
   successVision: text("success_vision"),
   emergencySupplyTier: text("emergency_supply_tier"),
+  householdMode: text("household_mode"),
+  householdComposition: jsonb("household_composition"),
 });
 
 export const insertResilienceReportSchema = createInsertSchema(resilienceReportsTable).omit({ id: true });

@@ -8,7 +8,7 @@ import { Slider } from "@/components/ui/slider";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { useSubmitAssessment } from "@workspace/api-client-react";
-import { Loader2, ArrowRight, ArrowLeft, CheckCircle2, AlertCircle, Brain, Zap, Lock, MapPin, User, DollarSign, Wallet, Users, Wrench, Activity, Navigation, Home, ShieldCheck, TriangleAlert, Share2, Target } from "lucide-react";
+import { Loader2, ArrowRight, ArrowLeft, CheckCircle2, AlertCircle, Brain, Zap, Lock, MapPin, User, DollarSign, Wallet, Users, Wrench, Activity, Navigation, Home, ShieldCheck, TriangleAlert, Share2, Target, UserCheck, UsersRound } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SiteFooter } from "@/components/site-footer";
 import { useUser, useAuth } from "@clerk/react";
@@ -662,6 +662,13 @@ type CurrencyCode = typeof CURRENCIES[number]["code"];
 
 type ChronicSeverity = "mild" | "moderate" | "severe";
 
+type HouseholdComposition = {
+  adults: number;
+  hasMinors: boolean;
+  hasMobilityLimitation: boolean;
+  hasMultipleIncomes: boolean;
+};
+
 type ExtendedFormData = AssessmentInput & {
   emergencySupplyTier?: AssessmentInputEmergencySupplyTier;
   chronicCondition?: AssessmentInputChronicCondition;
@@ -673,12 +680,20 @@ type ExtendedFormData = AssessmentInput & {
   mutualAidAccess?: boolean;
   primaryGoal?: string;
   successVision?: string;
+  householdMode?: "individual" | "household";
 };
 
 export default function AssessmentPage() {
   const [, setLocation] = useLocation();
   const [step, setStep] = useState(1);
   const [mrStep, setMrStep] = useState(0);
+  const [assessmentPhase, setAssessmentPhase] = useState<"mode_select" | "composition" | "main">("mode_select");
+  const [householdComposition, setHouseholdComposition] = useState<HouseholdComposition>({
+    adults: 2,
+    hasMinors: false,
+    hasMobilityLimitation: false,
+    hasMultipleIncomes: false,
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<{ code: string; message: string } | null>(null);
   const [currency, setCurrency] = useState<CurrencyCode>("USD");
@@ -806,6 +821,7 @@ export default function AssessmentPage() {
   // Auto-save every 1.5s whenever form state changes (debounced)
   useEffect(() => {
     if (!draftLoaded || !draftKey) return;
+    if (assessmentPhase !== "main") return; // only save drafts in main phase
     const timer = setTimeout(() => {
       try {
         localStorage.setItem(draftKey, JSON.stringify({
@@ -817,12 +833,15 @@ export default function AssessmentPage() {
           customCurrency,
           savingsPreferNotToSay,
           incomePreferNotToSay,
+          householdComposition,
           savedAt: new Date().toISOString(),
         }));
       } catch {}
     }, 1500);
     return () => clearTimeout(timer);
-  }, [formData, step, mrStep, lang, currency, customCurrency, savingsPreferNotToSay, incomePreferNotToSay, draftLoaded, draftKey]);
+  }, [formData, step, mrStep, lang, currency, customCurrency, savingsPreferNotToSay, incomePreferNotToSay, householdComposition, assessmentPhase, draftLoaded, draftKey]);
+
+  const isHousehold = formData.householdMode === "household";
 
   const handleNext = () => {
     if (step === MR_STEP) {
@@ -837,12 +856,36 @@ export default function AssessmentPage() {
       handleSubmit();
       return;
     }
+    // Household mode: skip step 6 (dependents covered by composition)
+    if (step === 5 && isHousehold) {
+      setStep(7);
+      return;
+    }
     setStep(s => s + 1);
   };
 
   const handlePrev = () => {
+    // Composition phase: go back to mode selection
+    if (assessmentPhase === "composition") {
+      setAssessmentPhase("mode_select");
+      return;
+    }
     if (step === MR_STEP && mrStep > 0) {
       setMrStep(s => s - 1);
+      return;
+    }
+    // Household mode: skip step 6 when going back from step 7
+    if (step === 7 && isHousehold) {
+      setStep(5);
+      return;
+    }
+    // At step 1: navigate back to pre-assessment phase
+    if (step === 1 && mrStep === 0) {
+      if (isHousehold) {
+        setAssessmentPhase("composition");
+      } else {
+        setAssessmentPhase("mode_select");
+      }
       return;
     }
     if (step > 1) setStep(s => s - 1);
@@ -855,7 +898,7 @@ export default function AssessmentPage() {
       const sessionId = localStorage.getItem(SESSION_KEY) ?? undefined;
       const finalCurrency = currency === "OTHER" ? (customCurrency || "USD") : currency;
       const finalSavingsMonths = savingsPreferNotToSay ? 3 : formData.savingsMonths;
-      const submitPayload: AssessmentInput & { currency?: string } = {
+      const submitPayload: AssessmentInput & { currency?: string; householdComposition?: HouseholdComposition } = {
         ...formData,
         savingsMonths: finalSavingsMonths,
         currency: finalCurrency,
@@ -863,6 +906,7 @@ export default function AssessmentPage() {
         hasEmergencySupplies: formData.emergencySupplyTier
           ? formData.emergencySupplyTier !== "none" && formData.emergencySupplyTier !== "under_3days"
           : formData.hasEmergencySupplies,
+        householdComposition: isHousehold ? householdComposition : undefined,
       };
 
       const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -1047,6 +1091,8 @@ export default function AssessmentPage() {
     if (resumeDraft.customCurrency != null) setCustomCurrency(resumeDraft.customCurrency);
     if (resumeDraft.savingsPreferNotToSay != null) setSavingsPreferNotToSay(resumeDraft.savingsPreferNotToSay);
     if (resumeDraft.incomePreferNotToSay != null) setIncomePreferNotToSay(resumeDraft.incomePreferNotToSay);
+    if (resumeDraft.householdComposition) setHouseholdComposition(resumeDraft.householdComposition);
+    if (resumeDraft.formData?.householdMode) setAssessmentPhase("main");
     setShowResumeBanner(false);
   };
 
@@ -1167,6 +1213,199 @@ export default function AssessmentPage() {
             {t.tryAgain}
           </Button>
         </div>
+      </div>
+    );
+  }
+
+  // ── Pre-assessment phases: mode select and composition ──────────────────────
+  if (assessmentPhase === "mode_select") {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <PageSEO
+          title="Free Resilience Assessment — Resilium"
+          description="Take our structured 5-minute assessment and get an objective resilience score across six dimensions of personal preparedness."
+          canonical="https://resilium-platform.com/assess"
+        />
+        <header className="w-full p-6 lg:p-8 flex items-center justify-between z-10">
+          <Link href="/">
+            <Button variant="ghost" className="gap-2 text-muted-foreground hover:text-foreground rounded-full">
+              <ArrowLeft className="w-4 h-4" /> Back
+            </Button>
+          </Link>
+          <div className="flex items-center gap-1 rounded-full border border-border bg-card p-0.5 text-xs font-medium">
+            <button
+              onClick={() => setLang("en")}
+              className={cn("px-3 py-1 rounded-full transition-all", lang === "en" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")}
+              aria-label="Switch to English"
+            >EN</button>
+            <button
+              onClick={() => setLang("ro")}
+              className={cn("px-3 py-1 rounded-full transition-all", lang === "ro" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")}
+              aria-label="Comută la Română"
+            >RO</button>
+          </div>
+        </header>
+        <main className="flex-1 flex flex-col items-center justify-center w-full max-w-2xl mx-auto px-6 pb-24">
+          <div className="text-center mb-12">
+            <h1 className="text-3xl md:text-4xl font-display font-bold mb-4">Who is this assessment for?</h1>
+            <p className="text-muted-foreground text-lg max-w-md mx-auto">Choose the mode that fits your situation — your answers and plan will be tailored accordingly.</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full">
+            <button
+              onClick={() => {
+                setFormData(prev => ({ ...prev, householdMode: "individual" }));
+                setAssessmentPhase("main");
+              }}
+              className="group text-left p-8 rounded-3xl border-2 border-border hover:border-primary bg-card hover:bg-primary/5 transition-all shadow-sm hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            >
+              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
+                <UserCheck className="w-7 h-7 text-primary" />
+              </div>
+              <h2 className="text-xl font-display font-bold mb-2">Just Me</h2>
+              <p className="text-muted-foreground text-sm leading-relaxed">Individual assessment — your personal resilience across six key dimensions.</p>
+            </button>
+            <button
+              onClick={() => {
+                setFormData(prev => ({ ...prev, householdMode: "household" }));
+                setAssessmentPhase("composition");
+              }}
+              className="group text-left p-8 rounded-3xl border-2 border-border hover:border-primary bg-card hover:bg-primary/5 transition-all shadow-sm hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            >
+              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
+                <UsersRound className="w-7 h-7 text-primary" />
+              </div>
+              <h2 className="text-xl font-display font-bold mb-2">My Household</h2>
+              <p className="text-muted-foreground text-sm leading-relaxed">Covers your whole household — coordination plans, shared vulnerabilities, and collective readiness.</p>
+            </button>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (assessmentPhase === "composition") {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <PageSEO
+          title="Free Resilience Assessment — Resilium"
+          description="Take our structured 5-minute assessment and get an objective resilience score across six dimensions of personal preparedness."
+          canonical="https://resilium-platform.com/assess"
+        />
+        <header className="w-full p-6 lg:p-8 flex items-center justify-start z-10">
+          <Button variant="ghost" className="gap-2 text-muted-foreground hover:text-foreground rounded-full" onClick={() => setAssessmentPhase("mode_select")}>
+            <ArrowLeft className="w-4 h-4" /> Back
+          </Button>
+        </header>
+        <main className="flex-1 flex flex-col items-center justify-center w-full max-w-lg mx-auto px-6 pb-24">
+          <div className="text-center mb-10">
+            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-6">
+              <UsersRound className="w-8 h-8 text-primary" />
+            </div>
+            <h1 className="text-2xl md:text-3xl font-display font-bold mb-3">Tell us about your household</h1>
+            <p className="text-muted-foreground">This helps us tailor the plan for everyone who depends on it.</p>
+          </div>
+          <div className="w-full space-y-6">
+            {/* Number of adults */}
+            <Card className="p-6 border-none shadow-sm bg-card">
+              <label className="block text-sm font-semibold mb-4">How many adults (18+) live in your household, including yourself?</label>
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => setHouseholdComposition(prev => ({ ...prev, adults: Math.max(1, prev.adults - 1) }))}
+                  className="w-10 h-10 rounded-full border-2 border-border bg-background hover:border-primary hover:bg-primary/5 flex items-center justify-center text-xl font-bold transition-colors"
+                  aria-label="Decrease adults"
+                >−</button>
+                <span className="text-3xl font-display font-bold w-12 text-center">{householdComposition.adults}</span>
+                <button
+                  onClick={() => setHouseholdComposition(prev => ({ ...prev, adults: Math.min(12, prev.adults + 1) }))}
+                  className="w-10 h-10 rounded-full border-2 border-border bg-background hover:border-primary hover:bg-primary/5 flex items-center justify-center text-xl font-bold transition-colors"
+                  aria-label="Increase adults"
+                >+</button>
+              </div>
+            </Card>
+
+            {/* Minors */}
+            <Card className="p-6 border-none shadow-sm bg-card">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm font-semibold">Are there any minors (under 18) in the household?</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Children, teens living with you</p>
+                </div>
+                <div className="flex gap-2">
+                  {(["No", "Yes"] as const).map((opt) => {
+                    const val = opt === "Yes";
+                    return (
+                      <button
+                        key={opt}
+                        onClick={() => setHouseholdComposition(prev => ({ ...prev, hasMinors: val }))}
+                        className={cn(
+                          "px-4 py-2 rounded-full text-sm font-medium border-2 transition-all",
+                          householdComposition.hasMinors === val ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-muted-foreground hover:border-primary/50"
+                        )}
+                      >{opt}</button>
+                    );
+                  })}
+                </div>
+              </div>
+            </Card>
+
+            {/* Mobility limitation */}
+            <Card className="p-6 border-none shadow-sm bg-card">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm font-semibold">Does anyone in the household have a mobility limitation?</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Wheelchair user, limited walking ability, etc.</p>
+                </div>
+                <div className="flex gap-2">
+                  {(["No", "Yes"] as const).map((opt) => {
+                    const val = opt === "Yes";
+                    return (
+                      <button
+                        key={opt}
+                        onClick={() => setHouseholdComposition(prev => ({ ...prev, hasMobilityLimitation: val }))}
+                        className={cn(
+                          "px-4 py-2 rounded-full text-sm font-medium border-2 transition-all",
+                          householdComposition.hasMobilityLimitation === val ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-muted-foreground hover:border-primary/50"
+                        )}
+                      >{opt}</button>
+                    );
+                  })}
+                </div>
+              </div>
+            </Card>
+
+            {/* Multiple incomes */}
+            <Card className="p-6 border-none shadow-sm bg-card">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm font-semibold">Does the household have more than one income source?</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Two or more earners, multiple income streams</p>
+                </div>
+                <div className="flex gap-2">
+                  {(["No", "Yes"] as const).map((opt) => {
+                    const val = opt === "Yes";
+                    return (
+                      <button
+                        key={opt}
+                        onClick={() => setHouseholdComposition(prev => ({ ...prev, hasMultipleIncomes: val }))}
+                        className={cn(
+                          "px-4 py-2 rounded-full text-sm font-medium border-2 transition-all",
+                          householdComposition.hasMultipleIncomes === val ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-muted-foreground hover:border-primary/50"
+                        )}
+                      >{opt}</button>
+                    );
+                  })}
+                </div>
+              </div>
+            </Card>
+
+            <Button
+              className="w-full rounded-full h-14 text-base font-semibold shadow-lg shadow-primary/20 gap-2 mt-4"
+              onClick={() => setAssessmentPhase("main")}
+            >
+              Continue <ArrowRight className="w-5 h-5" />
+            </Button>
+          </div>
+        </main>
       </div>
     );
   }

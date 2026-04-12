@@ -145,6 +145,8 @@ router.post("/assess", assessRateLimit, async (req, res) => {
       trustedLocalContacts: input.trustedLocalContacts ?? undefined,
       communityInvolvement: input.communityInvolvement ?? undefined,
       mutualAidAccess: input.mutualAidAccess ?? undefined,
+      householdMode: (input as any).householdMode ?? undefined,
+      householdComposition: (input as any).householdComposition ?? undefined,
     });
 
     const { mentalResilienceSubScores, ...scores } = scoreResult;
@@ -187,6 +189,8 @@ router.post("/assess", assessRateLimit, async (req, res) => {
             mutualAidAccess: input.mutualAidAccess ?? undefined,
             primaryGoal: input.primaryGoal ?? undefined,
             successVision: input.successVision ?? undefined,
+            householdMode: (input as any).householdMode ?? undefined,
+            householdComposition: (input as any).householdComposition ?? undefined,
           },
           scores,
           mentalResilienceSubScores
@@ -264,6 +268,8 @@ router.post("/assess", assessRateLimit, async (req, res) => {
           primaryGoal: input.primaryGoal ?? null,
           successVision: input.successVision ?? null,
           emergencySupplyTier: input.emergencySupplyTier ?? null,
+          householdMode: (input as any).householdMode ?? null,
+          householdComposition: (input as any).householdComposition ?? null,
           createdAt: now,
         });
 
@@ -448,6 +454,7 @@ router.get("/reports/:reportId", async (req, res) => {
     res.json({
       reportId: row.reportId,
       createdAt: row.createdAt.toISOString(),
+      householdMode: row.householdMode ?? undefined,
       score: {
         overall: row.scoreOverall,
         financial: row.scoreFinancial,

@@ -27,6 +27,13 @@ type MentalResilienceSubScores = {
   pathway: "growth" | "compensation";
 };
 
+type HouseholdComposition = {
+  adults?: number;
+  hasMinors?: boolean;
+  hasMobilityLimitation?: boolean;
+  hasMultipleIncomes?: boolean;
+};
+
 type AssessmentInput = {
   location: string;
   ageBracket?: string;
@@ -55,6 +62,9 @@ type AssessmentInput = {
   trustedLocalContacts?: number;   // 0=none, 1=1-2, 2=3-5, 3=6+
   communityInvolvement?: "none" | "occasional" | "active";
   mutualAidAccess?: boolean;
+  // Household mode
+  householdMode?: "individual" | "household";
+  householdComposition?: HouseholdComposition;
 };
 
 // ─── Age modifiers ────────────────────────────────────────────────────────────
@@ -125,11 +135,28 @@ export function computeMentalResilienceSubScores(
 }
 
 export function calculateScores(input: AssessmentInput) {
-  const ageMods = getAgeModifiers(input.ageBracket);
-  const financial = Math.min(100, Math.max(0, calculateFinancialScore(input) + ageMods.financial));
-  const health = Math.min(100, Math.max(0, calculateHealthScore(input) + ageMods.health));
-  const skills = calculateSkillsScore(input);
-  const mobility = calculateMobilityScore(input);
+  // Household mode adjustments: apply before scoring
+  const effectiveInput: AssessmentInput = { ...input };
+
+  if (input.householdMode === "household" && input.householdComposition) {
+    const comp = input.householdComposition;
+    // Cap mobility at "low" if any household member has mobility limitation
+    if (comp.hasMobilityLimitation === true && effectiveInput.mobilityLevel !== "low") {
+      effectiveInput.mobilityLevel = "low";
+    }
+  }
+
+  const ageMods = getAgeModifiers(effectiveInput.ageBracket);
+  let financial = Math.min(100, Math.max(0, calculateFinancialScore(effectiveInput) + ageMods.financial));
+
+  // Multiple household incomes provide a financial resilience bonus (+8)
+  if (input.householdMode === "household" && input.householdComposition?.hasMultipleIncomes === true) {
+    financial = Math.min(100, financial + 8);
+  }
+
+  const health = Math.min(100, Math.max(0, calculateHealthScore(effectiveInput) + ageMods.health));
+  const skills = calculateSkillsScore(effectiveInput);
+  const mobility = calculateMobilityScore(effectiveInput);
   const resources = calculateResourcesScore(input);
   const socialCapital = calculateSocialCapitalScore(input);
 

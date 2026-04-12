@@ -142,6 +142,19 @@ export const SubmitAssessmentBody = zod.object({
     .boolean()
     .optional()
     .describe("Whether the user has access to a mutual aid network"),
+  householdMode: zod
+    .enum(["individual", "household"])
+    .optional()
+    .describe("Whether the assessment is for a single person or a household"),
+  householdComposition: zod
+    .object({
+      adults: zod.number().int().min(1).optional(),
+      hasMinors: zod.boolean().optional(),
+      hasMobilityLimitation: zod.boolean().optional(),
+      hasMultipleIncomes: zod.boolean().optional(),
+    })
+    .optional()
+    .describe("Household composition details (only when householdMode is 'household')"),
   mentalResilienceAnswers: zod
     .object({
       stressTolerance1: zod

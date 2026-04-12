@@ -11,6 +11,13 @@ type MentalResilienceSubScores = {
   pathway: "growth" | "compensation";
 };
 
+type HouseholdComposition = {
+  adults?: number;
+  hasMinors?: boolean;
+  hasMobilityLimitation?: boolean;
+  hasMultipleIncomes?: boolean;
+};
+
 type AssessmentInput = {
   location: string;
   ageBracket?: string;
@@ -37,6 +44,8 @@ type AssessmentInput = {
   mutualAidAccess?: boolean;
   primaryGoal?: string;
   successVision?: string;
+  householdMode?: "individual" | "household";
+  householdComposition?: HouseholdComposition;
 };
 
 type Scores = {
@@ -185,26 +194,49 @@ export async function generateResilienceReport(
     ? `SUCCESS VISION (user's own words): "${input.successVision}". Reference this explicitly in the risk profile summary and ensure the plan is oriented toward achieving it.`
     : "";
 
+  const householdContext = (() => {
+    if (input.householdMode !== "household" || !input.householdComposition) return "";
+    const comp = input.householdComposition;
+    const adultsLabel = comp.adults === 1 ? "1 adult" : comp.adults === 2 ? "2 adults" : comp.adults != null ? `${comp.adults}+ adults` : "multiple adults";
+    const parts: string[] = [
+      `ASSESSMENT MODE: HOUSEHOLD (covers the whole household, not just one individual).`,
+      `Household composition: ${adultsLabel}${comp.hasMinors ? ", children/minors present" : ""}${comp.hasMobilityLimitation ? ", at least one member has mobility limitation or chronic condition" : ""}${comp.hasMultipleIncomes ? ", multiple income sources" : ", single income source"}.`,
+    ];
+    if (comp.hasMobilityLimitation) {
+      parts.push("VULNERABILITY FLAG: Household has at least one member with limited mobility or a chronic condition. All evacuation, emergency prep, and mobility-related recommendations MUST account for the least-mobile household member — not the most capable one.");
+    }
+    if (comp.hasMinors) {
+      parts.push("Children are present. Include child-specific emergency preparations (medication, documents, comfort items, school evacuation contacts) in checklist items.");
+    }
+    if (comp.hasMultipleIncomes) {
+      parts.push("Multiple income sources provide financial resilience — acknowledge this strength in the risk profile summary.");
+    }
+    parts.push("HOUSEHOLD COORDINATION: Include at least 3 checklist items specifically for household coordination: (1) Create and practice a household emergency evacuation plan with a designated meeting point, (2) Establish an out-of-area contact that all household members can reach in an emergency, (3) Ensure all adults know where emergency supplies are stored and how to access them. Frame all action plan items in terms of 'your household' rather than 'you personally'.");
+    return `\nHOUSEHOLD CONTEXT:\n${parts.join("\n")}`;
+  })();
+
   const prompt = `You are a resilience planning expert. Based on the following assessment, generate a structured resilience report.
 
 USER PROFILE:
 - Location: ${input.location}
 - Age bracket: ${input.ageBracket ?? "not specified"}
-- Income stability: ${input.incomeStability}
-- Savings runway: ${input.savingsMonths} months
+- Assessment mode: ${input.householdMode === "household" ? "Household (covers all household members)" : "Individual"}
+- Income stability: ${input.incomeStability}${input.householdMode === "household" ? " (household income)" : ""}
+- Savings runway: ${input.savingsMonths} months${input.householdMode === "household" ? " (combined household)" : ""}
 - Dependents: ${input.dependentCount === 0 ? "None" : input.dependentCount === 1 ? "One" : input.dependentCount === 2 ? "Two or three" : "Four or more"}
-- Skills: ${input.skills.join(", ") || "none"}
+- Skills: ${input.skills.join(", ") || "none"}${input.householdMode === "household" ? " (collective household skills)" : ""}
 - Health status: ${input.healthStatus}
 - Chronic condition: ${input.chronicCondition ?? "not specified"}${input.chronicCondition === "yes" && input.chronicConditionName ? ` (${input.chronicConditionName})` : ""}${input.chronicSeverity ? `, severity: ${input.chronicSeverity}` : ""}${input.chronicRequiresMedication != null ? `, requires medication: ${input.chronicRequiresMedication ? "yes" : "no"}` : ""}
-- Mobility level: ${input.mobilityLevel}
+- Mobility level: ${input.mobilityLevel}${input.householdMode === "household" ? " (least mobile household member)" : ""}
 - Housing type: ${input.housingType}
-- Emergency supplies: ${emergencyTierDesc}
+- Emergency supplies: ${emergencyTierDesc}${input.householdMode === "household" ? " (household supplies)" : ""}
 - Psychological resilience (self-rated): ${input.psychologicalResilience}/10
 - Primary risk concerns: ${input.riskConcerns.join(", ")}
 - Preferred currency: ${input.currency ?? "USD"} (use this currency symbol and amounts in all financial advice and examples)
 - Social network: trusted contacts ${input.trustedLocalContacts ?? "unspecified"}, community involvement: ${input.communityInvolvement ?? "unspecified"}, community support access: ${input.mutualAidAccess ?? "unspecified"}
 ${goalContext}
 ${successVisionContext}
+${householdContext}
 
 RESILIENCE SCORES (0-100):
 - Overall: ${scores.overall}

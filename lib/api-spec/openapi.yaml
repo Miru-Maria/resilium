@@ -601,6 +601,27 @@ components:
         mutualAidAccess:
           type: boolean
           description: Whether the user has access to a mutual aid network
+        householdMode:
+          type: string
+          enum: [individual, household]
+          description: Whether the assessment is for a single person or a household
+        householdComposition:
+          type: object
+          description: Household composition details (only present when householdMode is "household")
+          properties:
+            adults:
+              type: integer
+              minimum: 1
+              description: Number of adults in the household
+            hasMinors:
+              type: boolean
+              description: Whether children or minors are present
+            hasMobilityLimitation:
+              type: boolean
+              description: Whether any household member has limited mobility or a chronic condition
+            hasMultipleIncomes:
+              type: boolean
+              description: Whether the household has more than one income source
       required:
         - location
         - incomeStability
