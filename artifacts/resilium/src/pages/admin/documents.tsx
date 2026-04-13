@@ -3,12 +3,13 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { AdminLayout } from "./layout";
 import { adminAuthHeaders } from "./layout";
-import { Loader2, FileText, LayoutTemplate, Download, RefreshCw, AlertCircle } from "lucide-react";
+import { Loader2, FileText, LayoutTemplate, BarChart2, Download, RefreshCw, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import CompetitiveAnalysisPage from "@/pages/competitive-analysis";
 
 const API = import.meta.env.BASE_URL.replace(/\/$/, "");
 
-type Tab = "marketing-strategy" | "platform-assessment";
+type Tab = "marketing-strategy" | "platform-assessment" | "competitive-analysis";
 
 function useAdminDoc(name: string) {
   const [content, setContent] = useState<string | null>(null);
@@ -146,19 +147,10 @@ function DocPanel({ name, type }: { name: string; type: Tab }) {
 export default function AdminDocumentsPage() {
   const [activeTab, setActiveTab] = useState<Tab>("marketing-strategy");
 
-  const tabs: Array<{ key: Tab; label: string; icon: React.ElementType; desc: string }> = [
-    {
-      key: "marketing-strategy",
-      label: "Marketing Strategy",
-      icon: FileText,
-      desc: "Go-to-market whitepaper — market context, audience segmentation, channel mix, pricing rationale, and growth flywheel.",
-    },
-    {
-      key: "platform-assessment",
-      label: "Platform Assessment",
-      icon: LayoutTemplate,
-      desc: "Full platform status snapshot — features, completion status, open issues, and quality assessment.",
-    },
+  const tabs: Array<{ key: Tab; label: string; icon: React.ElementType }> = [
+    { key: "marketing-strategy",   label: "Marketing Strategy",    icon: FileText },
+    { key: "platform-assessment",  label: "Platform Assessment",   icon: LayoutTemplate },
+    { key: "competitive-analysis", label: "Competitive Analysis",  icon: BarChart2 },
   ];
 
   return (
@@ -195,12 +187,18 @@ export default function AdminDocumentsPage() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-hidden">
-          {tabs.map((tab) => (
-            <div key={tab.key} className={cn("h-full", activeTab !== tab.key && "hidden")}>
-              <DocPanel name={tab.key} type={tab.key} />
-            </div>
-          ))}
+        <div className="flex-1 overflow-auto">
+          {activeTab === "competitive-analysis" ? (
+            <CompetitiveAnalysisPage />
+          ) : (
+            tabs
+              .filter((t) => t.key !== "competitive-analysis")
+              .map((tab) => (
+                <div key={tab.key} className={cn("h-full", activeTab !== tab.key && "hidden")}>
+                  <DocPanel name={tab.key} type={tab.key as "marketing-strategy" | "platform-assessment"} />
+                </div>
+              ))
+          )}
         </div>
       </div>
     </AdminLayout>
