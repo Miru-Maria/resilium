@@ -6,16 +6,15 @@ import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis
 } from "recharts";
 import {
-  ShieldAlert, LogOut, Loader2, AlertTriangle, FileText,
+  Loader2, AlertTriangle, FileText,
   Star, Activity, MessageSquare, Smartphone, Shield, LayoutDashboard, FlaskConical, ExternalLink, Eye,
   Search, ChevronLeft, ChevronRight, X
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import { adminAuthHeaders } from "./layout";
+import { adminAuthHeaders, AdminLayout } from "./layout";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 const COLORS = ["#6366f1", "#22d3ee", "#f59e0b", "#10b981", "#ec4899", "#8b5cf6", "#f97316", "#14b8a6"];
@@ -184,12 +183,6 @@ export default function AdminDashboard() {
     return () => { if (reportsDebounce.current) clearTimeout(reportsDebounce.current); };
   }, [activeTab, reportsPage, reportsSearch, fetchReports]);
 
-  const handleLogout = async () => {
-    localStorage.removeItem("admin_token");
-    await fetch(`${BASE}/api/admin/logout`, { method: "POST" });
-    setLocation("/admin/login");
-  };
-
   if (!loading && (error || !data)) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
@@ -204,36 +197,8 @@ export default function AdminDashboard() {
   const formatScore = (n: number) => Math.round(n);
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="bg-card border-b border-border sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <ShieldAlert className="w-5 h-5 text-primary" />
-            <span className="font-display font-bold text-lg text-primary">Resilium</span>
-            <Badge variant="secondary" className="ml-2 text-xs">Admin</Badge>
-          </div>
-          <nav className="hidden sm:flex items-center gap-1">
-            {[
-              { href: "/admin/testimonials", label: "Testimonials", icon: Star },
-              { href: "/admin/mobile", label: "Mobile", icon: Smartphone },
-              { href: "/admin/gdpr", label: "GDPR", icon: Shield },
-              { href: "/admin/consent-log", label: "Consent Log", icon: LayoutDashboard },
-              { href: "/admin/ux-testing", label: "AI UX Tester", icon: FlaskConical },
-            ].map(({ href, label, icon: Icon }) => (
-              <Link key={href} href={href}>
-                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground gap-1.5">
-                  <Icon className="w-3.5 h-3.5" />{label}
-                </Button>
-              </Link>
-            ))}
-          </nav>
-          <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground hover:text-foreground">
-            <LogOut className="w-4 h-4 mr-2" /> Sign out
-          </Button>
-        </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto px-6 py-8 space-y-8">
+    <AdminLayout activeSection="dashboard">
+      <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
         <div>
           <h1 className="font-display font-bold text-2xl text-foreground">Analytics Dashboard</h1>
           <p className="text-muted-foreground text-sm mt-1">Overview of all resilience assessments and user feedback.</p>
@@ -687,7 +652,7 @@ export default function AdminDashboard() {
             )}
           </TabsContent>
         </Tabs>
-      </main>
-    </div>
+      </div>
+    </AdminLayout>
   );
 }

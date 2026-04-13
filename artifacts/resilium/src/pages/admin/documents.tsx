@@ -3,13 +3,13 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { AdminLayout } from "./layout";
 import { adminAuthHeaders } from "./layout";
-import { Loader2, FileText, LayoutTemplate, BarChart2, Download, RefreshCw, AlertCircle } from "lucide-react";
+import { Loader2, FileText, LayoutTemplate, BarChart2, Download, RefreshCw, AlertCircle, Radar } from "lucide-react";
 import { cn } from "@/lib/utils";
 import CompetitiveAnalysisPage from "@/pages/competitive-analysis";
 
 const API = import.meta.env.BASE_URL.replace(/\/$/, "");
 
-type Tab = "marketing-strategy" | "platform-assessment" | "competitive-analysis";
+type Tab = "marketing-strategy" | "platform-assessment" | "competitive-analysis" | "competitor-monitoring";
 
 function useAdminDoc(name: string) {
   const [content, setContent] = useState<string | null>(null);
@@ -148,9 +148,10 @@ export default function AdminDocumentsPage() {
   const [activeTab, setActiveTab] = useState<Tab>("marketing-strategy");
 
   const tabs: Array<{ key: Tab; label: string; icon: React.ElementType }> = [
-    { key: "marketing-strategy",   label: "Marketing Strategy",    icon: FileText },
-    { key: "platform-assessment",  label: "Platform Assessment",   icon: LayoutTemplate },
-    { key: "competitive-analysis", label: "Competitive Analysis",  icon: BarChart2 },
+    { key: "marketing-strategy",    label: "Marketing Strategy",    icon: FileText },
+    { key: "platform-assessment",   label: "Platform Assessment",   icon: LayoutTemplate },
+    { key: "competitive-analysis",  label: "Competitive Analysis",  icon: BarChart2 },
+    { key: "competitor-monitoring", label: "Competitor Monitoring", icon: Radar },
   ];
 
   return (
@@ -195,7 +196,10 @@ export default function AdminDocumentsPage() {
               .filter((t) => t.key !== "competitive-analysis")
               .map((tab) => (
                 <div key={tab.key} className={cn("h-full", activeTab !== tab.key && "hidden")}>
-                  <DocPanel name={tab.key} type={tab.key as "marketing-strategy" | "platform-assessment"} />
+                  <DocPanel
+                    name={tab.key}
+                    type={tab.key === "platform-assessment" ? "platform-assessment" : "marketing-strategy"}
+                  />
                 </div>
               ))
           )}

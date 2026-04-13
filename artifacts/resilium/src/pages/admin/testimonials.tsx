@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { Link } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, CheckCircle2, XCircle, Star, MessageSquare, ArrowLeft } from "lucide-react";
+import { Loader2, CheckCircle2, XCircle, Star, MessageSquare } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { AdminLayout } from "./layout";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -70,16 +70,8 @@ export default function AdminTestimonialsPage() {
   const approvedCount = testimonials.filter(t => t.isPublished).length;
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <div className="flex items-center gap-3 mb-2">
-          <Link href="/admin/dashboard">
-            <Button variant="ghost" size="sm" className="gap-1.5">
-              <ArrowLeft className="w-4 h-4" /> Dashboard
-            </Button>
-          </Link>
-        </div>
-
+    <AdminLayout activeSection="testimonials">
+      <div className="max-w-4xl mx-auto p-6 space-y-6">
         <div>
           <h1 className="text-2xl font-bold">Testimonials</h1>
           <p className="text-muted-foreground text-sm mt-1">
@@ -184,6 +176,6 @@ export default function AdminTestimonialsPage() {
           </div>
         )}
       </div>
-    </div>
+    </AdminLayout>
   );
 }
