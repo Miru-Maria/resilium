@@ -81,7 +81,7 @@ class ResultsErrorBoundary extends React.Component<
           )}
           {this.state.componentStack && (
             <details className="max-w-lg w-full text-left mb-6">
-              <summary className="text-xs text-muted-foreground/50 cursor-pointer">Component stack (for debugging)</summary>
+              <summary className="text-xs text-muted-foreground/50 cursor-pointer">Technical details</summary>
               <pre className="text-[9px] text-muted-foreground/40 font-mono whitespace-pre-wrap break-all mt-2 max-h-40 overflow-auto">{this.state.componentStack}</pre>
             </details>
           )}

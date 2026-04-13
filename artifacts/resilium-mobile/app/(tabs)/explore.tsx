@@ -59,6 +59,7 @@ export default function ProgressScreen() {
   const [history, setHistory] = useState<CheckinEntry[]>([]);
   const [snapshots, setSnapshots] = useState<ScoreSnapshot[]>([]);
   const [streak, setStreak] = useState(0);
+  const [snapshotFetchError, setSnapshotFetchError] = useState(false);
 
   useEffect(() => {
     AsyncStorage.getItem(CHECKIN_KEY).then((raw) => {
@@ -101,7 +102,7 @@ export default function ProgressScreen() {
           })
         );
         setSnapshots(mapped);
-      } catch {}
+      } catch { setSnapshotFetchError(true); }
     })();
   }, []);
 
@@ -173,13 +174,21 @@ export default function ProgressScreen() {
           {/* Score Trend */}
           <View style={styles.section}>
             <Text style={styles.eyebrow}>SCORE TREND</Text>
-            <View style={styles.chartCard}>
-              <ScoreHistoryChart
-                snapshots={snapshots}
-                isPro={isPro}
-                width={CHART_W}
-              />
-            </View>
+            {snapshotFetchError && snapshots.length === 0 ? (
+              <View style={[styles.chartCard, { alignItems: "center", justifyContent: "center", paddingVertical: 32 }]}>
+                <Text style={{ fontFamily: "Inter_400Regular", fontSize: 13, color: colors.textMuted, textAlign: "center" }}>
+                  Couldn't load score history.{"\n"}Check your connection and pull to refresh.
+                </Text>
+              </View>
+            ) : (
+              <View style={styles.chartCard}>
+                <ScoreHistoryChart
+                  snapshots={snapshots}
+                  isPro={isPro}
+                  width={CHART_W}
+                />
+              </View>
+            )}
           </View>
 
         </ScrollView>

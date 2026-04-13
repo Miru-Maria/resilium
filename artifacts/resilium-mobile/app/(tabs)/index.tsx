@@ -87,6 +87,7 @@ function CompanionScrollContent({
   const [latestReportId, setLatestReportId] = useState<string | null>(null);
   const [streak, setStreak] = useState(0);
   const [greeting, setGreeting] = useState("Good morning");
+  const [scoreFetchError, setScoreFetchError] = useState(false);
 
   const motivation = MOTIVATIONS[new Date().getDay() % MOTIVATIONS.length];
 
@@ -124,13 +125,15 @@ function CompanionScrollContent({
           setScore(Math.round(latest.score?.overall ?? 0));
           setLatestReportId(latest.reportId);
         }
-      } catch {}
+      } catch { setScoreFetchError(true); }
     })();
   }, []);
 
   const dotColor = score === null ? colors.textMuted : score >= 70 ? colors.success : score >= 40 ? "#F59E0B" : colors.danger;
   const dotLabel = score === null ? "—" : String(score);
-  const ratingLabel = score === null ? "Loading..." : score >= 70 ? "Highly Resilient" : score >= 40 ? "Moderately Prepared" : "Critically Vulnerable";
+  const ratingLabel = score === null
+    ? (scoreFetchError ? "Couldn't load score" : "Loading...")
+    : score >= 70 ? "Highly Resilient" : score >= 40 ? "Moderately Prepared" : "Critically Vulnerable";
 
   return (
     <View style={{ paddingBottom: bottomPad + 40, gap: 18, paddingTop: 28 }}>
