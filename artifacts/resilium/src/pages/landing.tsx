@@ -284,7 +284,7 @@ export default function LandingPage() {
     <div className="min-h-screen flex flex-col relative overflow-hidden">
       <PageSEO
         title="Resilium — Know Your Readiness. Build Your Resilience."
-        description="Get an objective resilience score across 6 dimensions of personal preparedness — financial, health, skills, mobility, psychological, and resources — plus a personalized 90-day action plan. Free assessment in 5 minutes."
+        description="Get your personal resilience score across 6 dimensions and a GPT-powered 90-day action plan. Free assessment — no account required."
         canonical="https://resilium-platform.com/"
       />
       {/* Animated background — hero section only */}
