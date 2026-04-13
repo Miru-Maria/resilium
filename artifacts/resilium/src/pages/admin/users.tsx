@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { AdminLayout, adminAuthHeaders } from "./layout";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, Users, CalendarDays, BookOpen, AlertTriangle } from "lucide-react";
+import { Loader2, Users, CalendarDays, BookOpen, AlertTriangle, Copy, Check } from "lucide-react";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -25,6 +25,36 @@ async function fetchUsers(): Promise<{ users: AdminUser[] }> {
 function fmt(iso: string | null) {
   if (!iso) return "—";
   return new Date(iso).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+}
+
+function CopyId({ id }: { id: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(id);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    } catch {}
+  };
+
+  return (
+    <div className="flex items-center gap-1.5 group">
+      <span className="font-mono text-[10px] text-muted-foreground truncate max-w-[120px]" title={id}>
+        {id}
+      </span>
+      <button
+        type="button"
+        onClick={copy}
+        className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 p-0.5 rounded hover:bg-muted"
+        title="Copy user ID"
+      >
+        {copied
+          ? <Check className="w-3 h-3 text-emerald-500" />
+          : <Copy className="w-3 h-3 text-muted-foreground" />}
+      </button>
+    </div>
+  );
 }
 
 export default function AdminUsersPage() {
@@ -82,6 +112,7 @@ export default function AdminUsersPage() {
                 <thead>
                   <tr className="border-b border-border bg-muted/30">
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">User</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Clerk ID</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Plans</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Last Active</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Joined</th>
@@ -103,9 +134,12 @@ export default function AdminUsersPage() {
                             <p className="font-medium text-foreground truncate">
                               {[u.firstName, u.lastName].filter(Boolean).join(" ") || "—"}
                             </p>
-                            <p className="text-xs text-muted-foreground truncate">{u.email ?? u.id.slice(0, 16)}</p>
+                            <p className="text-xs text-muted-foreground truncate">{u.email ?? "—"}</p>
                           </div>
                         </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <CopyId id={u.id} />
                       </td>
                       <td className="px-4 py-3">
                         <span className="inline-flex items-center gap-1.5 text-foreground font-semibold">
@@ -124,7 +158,7 @@ export default function AdminUsersPage() {
                   ))}
                   {data.users.length === 0 && (
                     <tr>
-                      <td colSpan={4} className="px-4 py-12 text-center text-muted-foreground">No registered users yet.</td>
+                      <td colSpan={5} className="px-4 py-12 text-center text-muted-foreground">No registered users yet.</td>
                     </tr>
                   )}
                 </tbody>
