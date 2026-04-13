@@ -70,7 +70,7 @@ Our initial SAM is ~$1.5B combining wellness and direct-to-consumer. We are not 
 
 ### Free Tier
 
-- Full resilience assessment (all 7 dimensions)
+- Full resilience assessment (all 6 dimensions)
 - Full personalized report with score, dimension breakdown, and plain-English interpretation
 - Up to 2 saved plan snapshots
 - Percentile benchmarking vs. all Resilium users
@@ -234,7 +234,7 @@ Daily check-ins create an additional daily engagement layer between assessments,
 | Platform | What they do | What Resilium does differently |
 |---|---|---|
 | Ready.gov | Government checklists, static | Dynamic score, AI-personalized plan, scenario modeling |
-| FEMA preparedness guides | Disaster-focused, no scoring | Holistic 7-dimension framework including mental + financial |
+| FEMA preparedness guides | Disaster-focused, no scoring | Holistic 6-dimension framework including mental + financial |
 | Credit Karma / Mint | Financial snapshot only | Full resilience including psychological, social, practical dimensions |
 | Calm / Headspace | Mental health only | Actionable readiness across all life dimensions |
 
