@@ -627,10 +627,27 @@ Resilium | resilium-platform.com`}
   );
 }
 
-export default function AdminMarketingPage() {
-  const [openSection, setOpenSection] = useState<SectionKey | null>("launch-readiness");
+const OPEN_KEY = "admin_mkt::open_sections";
 
-  const toggle = (key: SectionKey) => setOpenSection(prev => prev === key ? null : key);
+const DEFAULT_OPEN = new Set<SectionKey>(["launch-readiness"]);
+
+export default function AdminMarketingPage() {
+  const [openSections, setOpenSections] = useState<Set<SectionKey>>(() => {
+    try {
+      const stored = localStorage.getItem(OPEN_KEY);
+      if (stored) return new Set<SectionKey>(JSON.parse(stored));
+    } catch {}
+    return DEFAULT_OPEN;
+  });
+
+  const toggle = (key: SectionKey) => {
+    setOpenSections(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key); else next.add(key);
+      try { localStorage.setItem(OPEN_KEY, JSON.stringify([...next])); } catch {}
+      return next;
+    });
+  };
 
   return (
     <AdminLayout activeSection="marketing">
@@ -657,10 +674,10 @@ export default function AdminMarketingPage() {
               icon={ShieldCheck}
               label="Step 0 — Before You Launch"
               title="Pre-Launch Readiness Checklist"
-              isOpen={openSection === "launch-readiness"}
+              isOpen={openSections.has("launch-readiness")}
               onToggle={() => toggle("launch-readiness")}
             />
-            {openSection === "launch-readiness" && (
+            {openSections.has("launch-readiness") && (
               <div className="border-t border-slate-200">
                 <LaunchReadinessSection />
               </div>
@@ -673,10 +690,10 @@ export default function AdminMarketingPage() {
               icon={Rocket}
               label="Channel 1 — Product Hunt"
               title="Product Hunt Launch Plan"
-              isOpen={openSection === "product-hunt"}
+              isOpen={openSections.has("product-hunt")}
               onToggle={() => toggle("product-hunt")}
             />
-            {openSection === "product-hunt" && (
+            {openSections.has("product-hunt") && (
               <div className="border-t border-slate-200">
                 <ProductHuntSection />
               </div>
@@ -689,10 +706,10 @@ export default function AdminMarketingPage() {
               icon={MessageSquare}
               label="Channel 2 — Reddit Organic"
               title="Reddit Organic Strategy"
-              isOpen={openSection === "reddit"}
+              isOpen={openSections.has("reddit")}
               onToggle={() => toggle("reddit")}
             />
-            {openSection === "reddit" && (
+            {openSections.has("reddit") && (
               <div className="border-t border-slate-200">
                 <RedditSection />
               </div>
@@ -705,10 +722,10 @@ export default function AdminMarketingPage() {
               icon={BarChart2}
               label="Channel 3 — Original Research"
               title='State of Personal Resilience 2026 Report'
-              isOpen={openSection === "research-report"}
+              isOpen={openSections.has("research-report")}
               onToggle={() => toggle("research-report")}
             />
-            {openSection === "research-report" && (
+            {openSections.has("research-report") && (
               <div className="border-t border-slate-200">
                 <ResearchReportSection />
               </div>
