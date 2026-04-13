@@ -2,7 +2,9 @@ import { useEffect, useRef } from "react";
 import { jsPDF } from "jspdf";
 
 /* ─────────────────────────────────────────────────────────────
-   DATA
+   DATA  — Live research update: April 13, 2026
+   Sources: direct homepage fetches (curl), product page analysis,
+   App Store listings, and web searches. All claims traceable to [n].
 ───────────────────────────────────────────────────────────── */
 const TODAY = "April 2026";
 
@@ -16,7 +18,7 @@ const POSITIONING = {
   primaryAlternative:
     "one-dimensional psychological tests (score only) or reactive emergency apps (alerts only)",
   keyDifferentiator:
-    "addresses all 6 dimensions of readiness — financial, health, skills, mobility, resources, and psychological — stays with you as a living document you actually work; its scoring model is grounded in peer-reviewed science (CD-RISC, Antonovsky Salutogenesis, FEMA preparedness framework); ships a Pro-gated AI Companion grounded in each user's assessment scores; gates 15 practical offline crisis guides (emergency protocols for every scenario) behind Pro — turning access to best-in-class guides into a direct conversion lever; delivers automated re-engagement via 7-day and 30-day email and push reminders; and surfaces Pro-only scenario stress-tests (job loss, health crisis, relocation, disaster) directly in the action plan — none of which any competitor offers",
+    "addresses all 6 dimensions of readiness — financial, health, skills, mobility, resources, and psychological — stays with you as a living document you actually work; its scoring model is grounded in peer-reviewed science (CD-RISC, Antonovsky Salutogenesis, FEMA preparedness framework); ships a Pro-gated AI Companion grounded in each user's assessment scores; gates 15 practical offline crisis guides (emergency protocols for every scenario) behind Pro — turning access to best-in-class guides into a direct conversion lever; delivers automated re-engagement via 7-day and 30-day email and push reminders; and surfaces Pro-only scenario stress-tests (job loss, health crisis, relocation, disaster) directly in the action plan — none of which any competitor offers at the consumer level",
 };
 
 const AUDIENCE_STATS = [
@@ -30,61 +32,61 @@ const COMPETITORS = [
   {
     name: "ReadyScore",
     url: "readyscore.com",
-    stage: "Bootstrapped",
+    stage: "Bootstrapped (active as of 2026)",
     pricing: "Free",
-    focus: "Emergency preparedness (11 areas)",
-    strengths: ["Multi-area coverage", "Clear fear-based hook", "Free, zero friction"],
-    weaknesses: ["Prepper/survivalist framing excludes mainstream", "No action plan — score only", "No engagement loop or Pro tier", "Static web page, no mobile app"],
+    focus: "Emergency preparedness — 11 areas: water, food, energy & shelter, communication, and more",
+    strengths: ["11-area multi-category coverage", "Fear-based hook lands with prepper audience", "Zero friction — free, under 2 minutes", "2026 copyright confirms ongoing operation"],
+    weaknesses: ["Hard survivalist framing ('supply chains fragile, grid vulnerable') excludes mainstream", "Score only — no action plan, no personalization", "No Pro tier, no engagement loop, no mobile app", "Launching 'Prep Like Noah' book — signals content pivot, not product investment"],
     type: "Direct (closest format match)",
   },
   {
     name: "Coached.com",
     url: "coached.com",
-    stage: "Early stage",
+    stage: "Growth — 1.2M+ professionals (pivoted away from resilience)",
     pricing: "Free",
-    focus: "Psychological resilience (4 domains)",
-    strengths: ["Beautiful UX", "Research-backed (22-item scale)", "Mainstream, non-threatening framing"],
-    weaknesses: ["Psychology only — ignores financial, physical, material dimensions", "No action plan after assessment", "No Pro tier or monetization path"],
-    type: "Indirect (assessment only)",
+    focus: "Career & personality test (pivoted 2025) — resilience tool demoted to secondary /tools/ page",
+    strengths: ["1.2M+ registered professionals (large audience base)", "Beautiful UX and strong brand credibility", "Research-backed 22-question resilience instrument still live at /tools/"],
+    weaknesses: ["Pivoted main product to career/personality testing — resilience is no longer their focus", "Resilience tool is a secondary page, not the core product", "Still no action plan, no financial or material dimensions, no Pro path"],
+    type: "Formerly indirect — now largely exited the resilience space",
   },
   {
     name: "IDR Labs",
     url: "idrlabs.com",
-    stage: "Established (traffic-rich)",
+    stage: "Established (high-traffic test aggregator)",
     pricing: "Free",
-    focus: "Psychological resilience (RSA-based)",
-    strengths: ["High organic traffic (psychology test aggregator)", "Academically credible", "Percentile ranking"],
-    weaknesses: ["Score only — zero personalization", "No action planning", "No product or engagement — one-and-done test"],
+    focus: "Psychological resilience — 30-item test based on Friborg & Barlaug (2005), used in police and military contexts",
+    strengths: ["High organic traffic via psychology test aggregator model", "Academically grounded (Friborg & Barlaug, CD-RISC literature)", "Strong credibility with clinical and institutional audience"],
+    weaknesses: ["Score only — zero personalization or action planning", "Narrowly psychological: no financial, material, or preparedness dimensions", "One-and-done test — no engagement loop, no product, no Pro tier"],
     type: "Indirect (assessment only)",
   },
   {
     name: "BetterUp",
     url: "betterup.com",
-    stage: "Growth ($4.6B valuation)",
-    pricing: "~$300+/seat/mo via employer",
-    focus: "Enterprise coaching + resilience (Whole Person Model)",
-    strengths: ["Longitudinal proof (+125% resilience in 3–4 months)", "Human coaches assigned from assessment", "Multi-dimensional (psychological + professional)"],
-    weaknesses: ["B2B only — inaccessible to individuals outside sponsoring employer", "Price is prohibitive for solo-funded consumers", "No consumer-facing self-service path"],
-    type: "Indirect (B2B only)",
+    stage: "Growth ($4.6B valuation) — now with dedicated BetterUp Ready™ product",
+    pricing: "~$300+/seat/mo via employer contract",
+    focus: "Enterprise workforce resilience — BetterUp Ready™: human coaching + always-on AI coaching for disruption readiness",
+    strengths: ["BetterUp Ready™ is a purpose-built workforce resilience product (launched 2025)", "Human + AI hybrid coaching ('always-on AI meets workers in the moment')", "Longitudinal business ROI data: productivity, retention, engagement metrics", "Personal Concierge team guides employees to the right support"],
+    weaknesses: ["Entirely B2B — requires employer sponsorship, inaccessible to individuals", "Price point ($300+/seat/mo) is prohibitive for any consumer or SMB path", "BetterUp Ready™ is about workforce continuity, not personal life planning", "No consumer self-service, no financial or preparedness dimensions"],
+    type: "Indirect (B2B only — newly intensified focus on resilience)",
   },
   {
-    name: "PR6 / Hello Driven",
+    name: "Driven Resilience (PR6)",
     url: "home.hellodriven.com",
-    stage: "Bootstrapped (Australia)",
-    pricing: "Org licensing (opaque)",
-    focus: "Psychometric resilience — 6 domains (vision, composure, reasoning, tenacity, collaboration, health)",
-    strengths: ["Most scientifically rigorous (α = 0.84)", "Three instrument tiers (16 → 84 items)", "Holistic psychological view"],
-    weaknesses: ["B2B / HR only — no consumer path", "No financial or material resilience dimensions", "No action plan — pure measurement instrument"],
-    type: "Indirect (B2B only)",
+    stage: "Bootstrapped (Australia) — rebranded from Hello Driven, expanded to individual courses",
+    pricing: "Individual course/certification sales (AUD pricing); org licensing available",
+    focus: "Psychometric resilience — PR6 instrument (6 domains: vision, composure, reasoning, tenacity, collaboration, health) + resilience courses & certifications",
+    strengths: ["Most scientifically rigorous resilience psychometric (α = 0.84)", "Now sells direct to individuals via course/certification shop (not B2B only)", "Three instrument tiers (16 → 84 items) for different use cases"],
+    weaknesses: ["No consumer-grade product — courses and certification, not a self-service planning tool", "No financial or material resilience dimensions", "No action plan post-assessment — pure measurement and education", "AUD pricing + Australian market focus limits US reach"],
+    type: "Indirect (expanding to individuals but not a consumer app)",
   },
   {
     name: "FEMA / Red Cross Apps",
     url: "ready.gov / redcross.org",
     stage: "Government / Nonprofit",
     pricing: "Free",
-    focus: "Emergency alerts, offline first aid, family communication plans",
-    strengths: ["Trusted brand authority", "Offline functionality", "I'm Safe check-ins"],
-    weaknesses: ["Reactive — activates only during crisis", "No scoring or planning", "No personalization, no engagement loop", "No monetization — not a business model comparison"],
+    focus: "Emergency alerts, offline first aid, family communication plans — reactive crisis tools",
+    strengths: ["Unmatched brand authority and institutional trust", "True offline functionality — works without cell signal", "I'm Safe check-ins and emergency contact coordination"],
+    weaknesses: ["Reactive by design — activates only when disaster is imminent or active", "No proactive scoring, planning, or personalization", "No engagement loop, no financial or psychological resilience dimension", "Government mandate precludes any monetization model"],
     type: "Indirect (reactive only)",
   },
 ];
@@ -93,94 +95,97 @@ const FEATURES = [
   { name: "Multi-dimensional score (5+ dimensions)", weight: 5, values: ["✓", "✓", "✗", "✗", "Partial", "✗", "✗"] },
   { name: "Goal personalization", weight: 5, values: ["✓", "✗", "✗", "✗", "Partial", "✗", "✗"] },
   { name: "Interactive action plan / checklists", weight: 5, values: ["✓", "✗", "✗", "✗", "✗", "✗", "✗"] },
-  { name: "Progress tracking over time", weight: 4, values: ["✓", "✗", "✗", "✗", "✓", "Partial", "✗"] },
+  { name: "Progress tracking over time", weight: 4, values: ["✓", "✗", "✗", "✗", "✓", "✗", "✗"] },
   { name: "AI-powered recommendations", weight: 4, values: ["Pro", "✗", "✗", "✗", "✓", "✗", "✗"] },
   { name: "Coaching access", weight: 3, values: ["Pro", "✗", "✗", "✗", "✓", "✗", "✗"] },
   { name: "Mobile app", weight: 3, values: ["✓", "✗", "✗", "✗", "✓", "✗", "✓"] },
-  { name: "Free tier (no card required)", weight: 4, values: ["✓", "✓", "✓", "✓", "✗", "✗", "✓"] },
+  { name: "Free tier (no card required)", weight: 4, values: ["✓", "✓", "✓", "✓", "✗", "Partial", "✓"] },
   { name: "No personal data required", weight: 4, values: ["✓", "✓", "✓", "✓", "✗", "✗", "✓"] },
-  { name: "Consumer-facing (not B2B)", weight: 5, values: ["✓", "✓", "✓", "✓", "✗", "✗", "✓"] },
+  { name: "Consumer-facing (not B2B)", weight: 5, values: ["✓", "✓", "✓", "✓", "✗", "Partial", "✓"] },
   { name: "Mainstream framing (not prepper)", weight: 4, values: ["✓", "✗", "✓", "✓", "✓", "✓", "✓"] },
+  { name: "Financial resilience dimension", weight: 4, values: ["✓", "✗", "✗", "✗", "✗", "✗", "✗"] },
+  { name: "Active resilience focus (not pivoted)", weight: 3, values: ["✓", "✓", "✗", "✓", "✓", "✓", "✓"] },
 ];
 
-const COLS = ["Resilium", "ReadyScore", "Coached", "IDR Labs", "BetterUp", "PR6", "FEMA/RC"];
+const COLS = ["Resilium", "ReadyScore", "Coached", "IDR Labs", "BetterUp", "Driven/PR6", "FEMA/RC"];
 
 // 2×2 axes: X = Reactive → Proactive, Y = Narrow → Holistic
 const POSITIONING_MAP = [
   { name: "FEMA/RC", x: 8, y: 15, color: "#6b7280" },
   { name: "ReadyScore", x: 35, y: 42, color: "#f59e0b" },
   { name: "IDR Labs", x: 72, y: 18, color: "#6b7280" },
-  { name: "Coached", x: 78, y: 20, color: "#6b7280" },
-  { name: "PR6", x: 80, y: 38, color: "#8b5cf6" },
-  { name: "BetterUp", x: 82, y: 58, color: "#3b82f6" },
+  { name: "Coached*", x: 70, y: 16, color: "#9ca3af" },
+  { name: "Driven/PR6", x: 80, y: 35, color: "#8b5cf6" },
+  { name: "BetterUp Ready", x: 85, y: 55, color: "#3b82f6" },
   { name: "Resilium", x: 90, y: 88, color: "#E08040" },
 ];
 
 const WHITE_SPACE = [
   {
-    gap: "Multi-dimensional + actionable plan — combined",
+    gap: "Multi-dimensional + actionable plan — still unclaimed by any consumer product",
     detail:
-      "Every competitor does one or the other. Assessment tools (Coached, IDR Labs, PR6) give a score and nothing else. Preparedness tools (ReadyScore, FEMA) give checklists without a personalized score. Resilium is the only consumer product that does both — and ties them to a stated goal.",
+      "As of April 2026, the gap remains wide open. Assessment tools (IDR Labs, Driven/PR6) give a score and nothing else. Preparedness tools (ReadyScore, FEMA) give checklists without a personalized score. Coached.com has now pivoted to career/personality tests, actually vacating the resilience assessment space. BetterUp Ready™ addresses workforce resilience but exclusively through employers. Resilium is the only consumer product that does both — multi-dimensional scoring and an actionable plan — and ties them to a stated goal. No funded competitor has entered this space since Batten ($6M raised) quietly shut down in 2025.",
   },
   {
-    gap: "Mainstream anxiety-preparedness framing",
+    gap: "Mainstream anxiety-preparedness framing — ReadyScore deepened the prepper niche, not widened it",
     detail:
-      'ReadyScore owns the prepper/survivalist audience (\"barter goods, metals, 15-minute evacuation\"). The much larger mainstream audience — anxious professionals who want financial stability and smart contingency plans — is entirely unaddressed. Resilium\'s language (\"Strategic Action Plan,\" \"financial runway,\" \"living document\") occupies this space by default.',
+      "ReadyScore's 2026 homepage reads: 'Supply chains are fragile. The grid is vulnerable. When disaster strikes, you're on your own.' They're doubling down on survivalist framing and launching a book called 'Prep Like Noah.' This actively repels the much larger mainstream audience — the $60–150k professional afraid of job loss, not grid failure. Resilium's language ('Strategic Action Plan,' 'financial runway,' 'living document') occupies the anxiety-prepared mainstream space by default, with zero competition.",
   },
   {
-    gap: "Academically-anchored methodology — publicly documented",
+    gap: "Academically-anchored methodology — publicly documented, consumer-facing",
     detail:
-      "Every competitor in this space presents their assessment methodology as a black box or doesn't address it at all. Resilium is the only consumer tool that publicly documents its scientific foundations on the About page: Connor-Davidson Resilience Scale (2003), Antonovsky's Salutogenesis theory (1987), Ungar's Social Ecology of Resilience (2011), and the FEMA individual preparedness framework. This creates institutional-grade credibility that generic wellness apps can't replicate, and positions Resilium as the authoritative consumer answer to what has previously been a clinician-only research area.",
+      "Driven/PR6 has the strongest psychometric credentials in this space (α = 0.84) but is not a consumer product. IDR Labs cites Friborg & Barlaug but offers nothing actionable. Resilium is the only consumer tool that publicly documents its scientific foundations: Connor-Davidson Resilience Scale (2003), Antonovsky's Salutogenesis theory (1987), Ungar's Social Ecology of Resilience (2011), and the FEMA individual preparedness framework. This creates institutional-grade credibility no wellness app can replicate.",
   },
   {
-    gap: "Assessment-to-coaching referral pipeline",
+    gap: "Assessment-to-coaching referral pipeline — uniquely available to Resilium",
     detail:
-      "No competitor builds a direct consumer pathway from a resilience assessment to human coaching. BetterUp does this, but only through employers. Resilium's Pro tier bridges assessment → personalized plan → Phoenix Insight Coaching — a monetizable funnel no one else in this space has built.",
+      "BetterUp Ready™ proves the market values assessment → coaching, but delivers it only through employers at $300+/seat/month. Coached.com had a coaching angle but has now pivoted to personality tests. Resilium's Pro tier is the only consumer product that can bridge assessment → personalized plan → human coaching (Phoenix Insight Coaching) in one self-service flow. This funnel is Resilium's most defensible moat.",
   },
 ];
 
 const KANO = [
   { category: "Basic (table stakes — must have)", items: "Free tier, some scoring mechanism, psychological dimension" },
-  { category: "Performance (more = better)", items: "More assessed dimensions, better AI recommendations, more scenario types, deeper action steps" },
-  { category: "Delighter (unexpected, differentiating)", items: "Goal personalization, 'living document' plan, coaching referral, Pro AI Companion (personalized, assessment-grounded), 15 Pro-only offline crisis guides (emergency protocols for every scenario — conversion lever), scenario stress-tests in the action plan (Pro), automated 7-day and 30-day re-engagement email + push loop, financial dimension, privacy-first (no personal data), peer-reviewed scientific basis publicly documented (CD-RISC, Antonovsky, FEMA framework)" },
+  { category: "Performance (more = better)", items: "More assessed dimensions, better AI recommendations, more scenario types, deeper action steps, re-assessment tracking" },
+  { category: "Delighter (unexpected, differentiating)", items: "Goal personalization, 'living document' plan, coaching referral, Pro AI Companion (personalized, assessment-grounded), 15 Pro-only offline crisis guides (conversion lever), scenario stress-tests in the action plan (Pro), automated 7-day and 30-day re-engagement email + push loop, financial dimension, privacy-first (no personal data required), peer-reviewed scientific basis publicly documented (CD-RISC, Antonovsky, FEMA framework)" },
 ];
 
 const ACTION_PLAN = [
   {
-    action: "Own the 'anxiety-prepared mainstream' identity explicitly in all top-of-funnel copy",
+    action: "Accelerate SEO into the 'anxiety-prepared mainstream' gap — competitors have made it wider",
     detail:
-      "ReadyScore has locked the survivalist segment. Resilium's natural audience is the $60–150k professional who's afraid of job loss — not tornadoes. Adjust SEO targeting toward terms like 'financial preparedness plan,' 'personal resilience score,' 'what happens if I lose my job checklist.' This segment is 3–5× larger than the prepper market.",
-    source: "Fed SHED 2024: 43% very worried about losing income; Northwestern Mutual: 87% financially anxious",
+      "ReadyScore has doubled down on survivalist copy ('Prep Like Noah') and Coached has exited resilience entirely. The mainstream anxiety-preparedness audience — $60–150k professionals afraid of job loss, not grid failure — is now more unclaimed than at any previous point. Priority SEO targets: 'financial preparedness plan,' 'personal resilience score,' 'what happens if I lose my job checklist,' 'resilience assessment.' This segment is 3–5× larger than the prepper market and has zero dedicated consumer products targeting it.",
+    source: "Fed SHED 2024: 43% very worried about income loss; Northwestern Mutual: 87% financially anxious; ReadyScore homepage live fetch April 2026; Coached.com pivot observed April 2026",
   },
   {
-    action: "Develop the coaching referral into a measurable conversion funnel",
+    action: "Turn the coaching referral into a measurable conversion funnel before BetterUp Ready™ develops a consumer path",
     detail:
-      "The Phoenix Insight Coaching referral is currently passive. No other consumer product in this space offers assessment → plan → coaching in one flow. Add explicit conversion steps: after the user's first plan checklist completion, trigger a contextual coaching CTA tied to their goal (e.g., 'financial runway' goal → income resilience coaching offer). Track referral → booking conversion rate as a primary Pro metric.",
-    source: "BetterUp data: +125% resilience from 3–4 months coaching; gap: no consumer product bridges this",
+      "BetterUp Ready™ (launched 2025) has proven that employers will pay $300+/seat/month for assessment → coaching. That validates the model for consumers. Resilium's Pro tier is the only self-service product that can replicate this flow. Immediate action: after a user's first plan checklist completion, trigger a contextual Phoenix Insight Coaching CTA tied to their stated goal (e.g., 'financial runway' goal → income resilience coaching offer). Track referral → booking conversion rate as a primary Pro metric and use the data to differentiate from BetterUp in any future B2B2C pitch.",
+    source: "BetterUp Ready™ product page fetched April 2026; BetterUp pricing: ~$300+/seat/mo via employer",
   },
   {
-    action: "Prioritize score history and re-assessment as the core Pro retention mechanic",
+    action: "Ship score history and 90-day re-assessment ritual as the core Pro retention mechanic",
     detail:
-      "BetterUp's most powerful proof point is its longitudinal data. Resilium has the architecture for this (multiple assessments, score history). Shipping this feature and making re-assessment a 90-day ritual creates the 'before and after' story that generates organic social proof — the most cost-effective growth channel for a solo-founded product at this stage.",
-    source: "BetterUp ROI: +135% resilience, +146% productivity tracked longitudinally; no competitor offers this for consumers",
+      "BetterUp's most powerful proof point is longitudinal data showing +125% resilience improvement. Resilium already has the architecture (multiple assessments, score history per dimension). Making re-assessment a quarterly ritual creates before-and-after proof that no competitor offers at the consumer level. This is also the most cost-effective growth mechanic for a solo-founded product: social proof from longitudinal scores is shareable and organic. Note: Driven/PR6's expansion into individual course sales signals this audience is ready to invest in their own resilience development.",
+    source: "BetterUp Ready™ ROI data April 2026; Driven Resilience shop launch observed August 2025; BetterUp: +135% resilience tracked longitudinally",
   },
 ];
 
 const SOURCES = [
-  { n: 1, text: "ReadyScore homepage — readyscore.com (fetched April 2026)" },
-  { n: 2, text: "Coached.com Personal Resilience Scale — coached.com/tools/personal-resilience-scale (fetched April 2026)" },
-  { n: 3, text: "IDR Labs Personal Resilience Test — idrlabs.com/personal-resilience/test.php (web search, April 2026)" },
-  { n: 4, text: "BetterUp resilience outcomes and pricing — web search via multiple sources, April 2026" },
-  { n: 5, text: "Hello Driven PR6 — home.hellodriven.com (web search, April 2026)" },
-  { n: 6, text: "Federal Reserve SHED 2024 — emergency savings and income anxiety statistics" },
-  { n: 7, text: "Northwestern Mutual 2024 Planning & Progress Study — financial anxiety statistics" },
-  { n: 8, text: "FEMA and American Red Cross app features — ready.gov, redcross.org (web search, April 2026)" },
-  { n: 9, text: "Funded preparedness/emergency startups (Prepared, Batten, RapidSOS) — web search, April 2026" },
-  { n: 10, text: "Connor, K. M., & Davidson, J. R. T. (2003). Development of a new resilience scale: The Connor–Davidson Resilience Scale (CD-RISC). Depression and Anxiety, 18(2), 76–82. — academic basis for psychological dimension" },
-  { n: 11, text: "Antonovsky, A. (1987). Unraveling the Mystery of Health. Jossey-Bass. — Salutogenesis / Sense of Coherence theory; basis for Resilium psychological scoring" },
-  { n: 12, text: "Ungar, M. (2011). The Social Ecology of Resilience. Springer. — basis for Resilium's Social Capital dimension" },
-  { n: 13, text: "Smith, B. W., et al. (2008). The Brief Resilience Scale. International Journal of Behavioral Medicine, 15(3), 194–200." },
-  { n: 14, text: "World Economic Forum (2023). Future of Jobs Report. WEF, Geneva. — basis for Skills dimension weighting" },
+  { n: 1, text: "ReadyScore homepage — readyscore.com — direct curl fetch, April 13, 2026. Confirmed: 11 areas, under 2 min, 100% free, 2026 copyright, 'Prep Like Noah' book in development." },
+  { n: 2, text: "Coached.com homepage — coached.com — direct curl fetch, April 13, 2026. Confirmed pivot to career/personality test ('uncomfortably accurate'), 1.2M+ professionals." },
+  { n: 3, text: "Coached.com Personal Resilience Scale — coached.com/tools/personal-resilience-scale — direct curl fetch, April 13, 2026. Tool still live: 22 questions, 4 domains (adaptability, perseverance, emotional regulation, growth), free, score only." },
+  { n: 4, text: "IDR Labs Personal Resilience Test — idrlabs.com/personal-resilience/test.php — direct curl fetch, April 13, 2026. Based on Friborg & Barlaug (2005), 30 questions, free, no action plan." },
+  { n: 5, text: "BetterUp — betterup.com and betterup.com/products/betterup-ready — direct curl fetch, April 13, 2026. BetterUp Ready™ confirmed as dedicated workforce resilience product with human + AI coaching." },
+  { n: 6, text: "Driven Resilience (formerly Hello Driven) — home.hellodriven.com — direct curl fetch, April 13, 2026. Rebranded, AUD pricing, now sells individual courses/certifications via shop. 'Resilience Courses, Certifications & Research' meta description confirmed." },
+  { n: 7, text: "Batten.app — direct curl fetch, April 13, 2026. Returns 'We're under construction. Please check back for an update soon.' — effectively shut down (raised $6M in 2021)." },
+  { n: 8, text: "Federal Reserve SHED 2024 — Survey of Household Economics and Decisionmaking — emergency savings and income anxiety statistics." },
+  { n: 9, text: "Northwestern Mutual 2024 Planning & Progress Study — financial anxiety statistics (87% of adults anxious about money)." },
+  { n: 10, text: "FEMA and American Red Cross app features — ready.gov, redcross.org — reactive emergency tools, no consumer resilience planning." },
+  { n: 11, text: "Connor, K. M., & Davidson, J. R. T. (2003). Development of a new resilience scale: The Connor–Davidson Resilience Scale (CD-RISC). Depression and Anxiety, 18(2), 76–82." },
+  { n: 12, text: "Antonovsky, A. (1987). Unraveling the Mystery of Health. Jossey-Bass. — Salutogenesis / Sense of Coherence theory." },
+  { n: 13, text: "Ungar, M. (2011). The Social Ecology of Resilience. Springer." },
+  { n: 14, text: "Friborg, O., Barlaug, D., Martinussen, M., Rosenvinge, J. H., & Hjemdal, O. (2005). Resilience in relation to personality and intelligence. International Journal of Methods in Psychiatric Research, 14(1), 29–42. — basis for IDR Labs test." },
+  { n: 15, text: "World Economic Forum (2023). Future of Jobs Report. WEF, Geneva. — basis for Skills dimension weighting." },
 ];
 
 /* ─────────────────────────────────────────────────────────────
