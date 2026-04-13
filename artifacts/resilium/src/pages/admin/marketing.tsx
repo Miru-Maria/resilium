@@ -631,7 +631,7 @@ const OPEN_KEY = "admin_mkt::open_sections";
 
 const DEFAULT_OPEN = new Set<SectionKey>(["launch-readiness"]);
 
-export default function AdminMarketingPage() {
+export function MarketingPageContent() {
   const [openSections, setOpenSections] = useState<Set<SectionKey>>(() => {
     try {
       const stored = localStorage.getItem(OPEN_KEY);
@@ -650,93 +650,99 @@ export default function AdminMarketingPage() {
   };
 
   return (
-    <AdminLayout activeSection="marketing">
-      <div className="p-8 max-w-5xl mx-auto">
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-              <Rocket className="w-5 h-5 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-display font-bold">Go-to-Market Launch Plan</h1>
-              <p className="text-sm text-muted-foreground">Product Hunt · Reddit Organic · State of Personal Resilience 2026 Report</p>
-            </div>
+    <div className="p-8 max-w-5xl mx-auto">
+      <div className="mb-8">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+            <Rocket className="w-5 h-5 text-primary" />
           </div>
-          <p className="text-sm text-muted-foreground mt-4 max-w-2xl leading-relaxed">
-            This document contains production-ready copy, templates, checklists, and timelines for three launch channels. Click any section to expand it. Use the "Copy" buttons to pull text directly into your tools.
-          </p>
-        </div>
-
-        <div className="space-y-4">
-          {/* Launch Readiness */}
-          <div className="bg-white/90 rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <SectionHeader
-              icon={ShieldCheck}
-              label="Step 0 — Before You Launch"
-              title="Pre-Launch Readiness Checklist"
-              isOpen={openSections.has("launch-readiness")}
-              onToggle={() => toggle("launch-readiness")}
-            />
-            {openSections.has("launch-readiness") && (
-              <div className="border-t border-slate-200">
-                <LaunchReadinessSection />
-              </div>
-            )}
-          </div>
-
-          {/* Product Hunt */}
-          <div className="bg-white/90 rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <SectionHeader
-              icon={Rocket}
-              label="Channel 1 — Product Hunt"
-              title="Product Hunt Launch Plan"
-              isOpen={openSections.has("product-hunt")}
-              onToggle={() => toggle("product-hunt")}
-            />
-            {openSections.has("product-hunt") && (
-              <div className="border-t border-slate-200">
-                <ProductHuntSection />
-              </div>
-            )}
-          </div>
-
-          {/* Reddit */}
-          <div className="bg-white/90 rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <SectionHeader
-              icon={MessageSquare}
-              label="Channel 2 — Reddit Organic"
-              title="Reddit Organic Strategy"
-              isOpen={openSections.has("reddit")}
-              onToggle={() => toggle("reddit")}
-            />
-            {openSections.has("reddit") && (
-              <div className="border-t border-slate-200">
-                <RedditSection />
-              </div>
-            )}
-          </div>
-
-          {/* Research Report */}
-          <div className="bg-white/90 rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <SectionHeader
-              icon={BarChart2}
-              label="Channel 3 — Original Research"
-              title='State of Personal Resilience 2026 Report'
-              isOpen={openSections.has("research-report")}
-              onToggle={() => toggle("research-report")}
-            />
-            {openSections.has("research-report") && (
-              <div className="border-t border-slate-200">
-                <ResearchReportSection />
-              </div>
-            )}
+          <div>
+            <h1 className="text-2xl font-display font-bold">Go-to-Market Launch Plan</h1>
+            <p className="text-sm text-muted-foreground">Product Hunt · Reddit Organic · State of Personal Resilience 2026 Report</p>
           </div>
         </div>
-
-        <p className="text-xs text-muted-foreground text-center mt-8">
-          Admin-only document · Resilium Go-to-Market Plan · Generated April 2026
+        <p className="text-sm text-muted-foreground mt-4 max-w-2xl leading-relaxed">
+          This document contains production-ready copy, templates, checklists, and timelines for three launch channels. Click any section to expand it. Use the "Copy" buttons to pull text directly into your tools.
         </p>
       </div>
+
+      <div className="space-y-4">
+        {/* Launch Readiness */}
+        <div className="bg-white/90 rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <SectionHeader
+            icon={ShieldCheck}
+            label="Step 0 — Before You Launch"
+            title="Pre-Launch Readiness Checklist"
+            isOpen={openSections.has("launch-readiness")}
+            onToggle={() => toggle("launch-readiness")}
+          />
+          {openSections.has("launch-readiness") && (
+            <div className="border-t border-slate-200">
+              <LaunchReadinessSection />
+            </div>
+          )}
+        </div>
+
+        {/* Product Hunt */}
+        <div className="bg-white/90 rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <SectionHeader
+            icon={Rocket}
+            label="Channel 1 — Product Hunt"
+            title="Product Hunt Launch Plan"
+            isOpen={openSections.has("product-hunt")}
+            onToggle={() => toggle("product-hunt")}
+          />
+          {openSections.has("product-hunt") && (
+            <div className="border-t border-slate-200">
+              <ProductHuntSection />
+            </div>
+          )}
+        </div>
+
+        {/* Reddit */}
+        <div className="bg-white/90 rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <SectionHeader
+            icon={MessageSquare}
+            label="Channel 2 — Reddit Organic"
+            title="Reddit Organic Strategy"
+            isOpen={openSections.has("reddit")}
+            onToggle={() => toggle("reddit")}
+          />
+          {openSections.has("reddit") && (
+            <div className="border-t border-slate-200">
+              <RedditSection />
+            </div>
+          )}
+        </div>
+
+        {/* Research Report */}
+        <div className="bg-white/90 rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <SectionHeader
+            icon={BarChart2}
+            label="Channel 3 — Original Research"
+            title='State of Personal Resilience 2026 Report'
+            isOpen={openSections.has("research-report")}
+            onToggle={() => toggle("research-report")}
+          />
+          {openSections.has("research-report") && (
+            <div className="border-t border-slate-200">
+              <ResearchReportSection />
+            </div>
+          )}
+        </div>
+      </div>
+
+      <p className="text-xs text-muted-foreground text-center mt-8">
+        Admin-only document · Resilium Go-to-Market Plan · Generated April 2026
+      </p>
+    </div>
+  );
+}
+
+export default function AdminMarketingPage() {
+  return (
+    <AdminLayout activeSection="marketing">
+      <MarketingPageContent />
     </AdminLayout>
   );
 }

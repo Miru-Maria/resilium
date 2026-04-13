@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Loader2, LayoutDashboard, Smartphone, Shield, LogOut, FlaskConical, Users, Megaphone, Rocket, KeyRound, Activity, FolderLock, Star } from "lucide-react";
+import { Loader2, LayoutDashboard, Smartphone, Shield, LogOut, FlaskConical, Users, Megaphone, KeyRound, Activity, FolderLock, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ResilientIcon } from "@/components/resilient-icon";
 
@@ -65,7 +65,6 @@ export function AdminLayout({ children, activeSection }: AdminLayoutProps) {
     { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard, key: "dashboard" },
     { href: "/admin/users", label: "Users", icon: Users, key: "users" },
     { href: "/admin/announcements", label: "Announcements", icon: Megaphone, key: "announcements" },
-    { href: "/admin/marketing", label: "GTM Plan", icon: Rocket, key: "marketing" },
     { href: "/admin/documents", label: "Documents", icon: FolderLock, key: "documents" },
     { href: "/admin/testimonials", label: "Testimonials", icon: Star, key: "testimonials" },
     { href: "/admin/mobile", label: "Mobile", icon: Smartphone, key: "mobile" },
