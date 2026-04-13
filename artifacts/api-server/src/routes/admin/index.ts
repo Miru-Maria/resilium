@@ -1,4 +1,5 @@
 import { Router, type IRouter } from "express";
+import path from "path";
 import { db, resilienceReportsTable, reportFeedbackTable, usersTable, planViewsTable, adminConfigTable } from "@workspace/db";
 import { desc, eq, count, max, and, isNotNull, gte, lte, ilike, or } from "drizzle-orm";
 import {
@@ -514,6 +515,28 @@ router.get("/reports", requireAdminSession, async (req, res) => {
     req.log.error({ err }, "Error fetching admin reports");
     res.status(500).json({ error: "INTERNAL_ERROR", message: "Failed to fetch reports." });
   }
+});
+
+const ADMIN_DOCS: Record<string, string> = {
+  "platform-assessment": "text/html; charset=utf-8",
+  "marketing-strategy": "text/plain; charset=utf-8",
+};
+
+router.get("/docs/:name", requireAdminSession, (req, res) => {
+  const { name } = req.params as { name: string };
+  if (!Object.prototype.hasOwnProperty.call(ADMIN_DOCS, name)) {
+    res.status(404).json({ error: "NOT_FOUND" });
+    return;
+  }
+  const ext = name === "platform-assessment" ? "html" : "md";
+  const filePath = path.resolve(process.cwd(), "admin-docs", `${name}.${ext}`);
+  res.setHeader("Content-Type", ADMIN_DOCS[name]!);
+  res.sendFile(filePath, (err) => {
+    if (err) {
+      logger.error({ err, name }, "Failed to serve admin doc");
+      if (!res.headersSent) res.status(500).json({ error: "INTERNAL_ERROR" });
+    }
+  });
 });
 
 router.use("/ux-test", uxTestRouter);

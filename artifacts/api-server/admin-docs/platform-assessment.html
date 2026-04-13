@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Resilium Platform Assessment — April 2026</title>
+<style>
+  :root {
+    --bg: #0D1225;
+    --surface: #141B30;
+    --surface2: #1A2340;
+    --border: #252E4A;
+    --primary: #E08040;
+    --primary-dim: rgba(224,128,64,.12);
+    --primary-border: rgba(224,128,64,.25);
+    --text: #F0EBE3;
+    --text2: #A09880;
+    --text3: #6A6070;
+    --success: #34D399;
+    --warn: #F59E0B;
+    --danger: #F87171;
+    --info: #60A5FA;
+    --tag-done-bg: rgba(52,211,153,.12);
+    --tag-done-border: rgba(52,211,153,.25);
+    --tag-open-bg: rgba(248,113,113,.10);
+    --tag-open-border: rgba(248,113,113,.25);
+    --tag-med-bg: rgba(245,158,11,.10);
+    --tag-med-border: rgba(245,158,11,.25);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.65;
+    min-height: 100vh;
+  }
+
+  /* ── Top bar ── */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(13,18,37,.88);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 32px;
+    gap: 24px;
+  }
+  .topbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    text-decoration: none;
+  }
+  .topbar-brand span { color: var(--primary); }
+  .topbar-meta { font-size: 12px; color: var(--text3); }
+  .topbar-nav {
+    display: flex;
+    gap: 20px;
+    list-style: none;
+  }
+  .topbar-nav a {
+    color: var(--text3);
+    text-decoration: none;
+    font-size: 13px;
+    transition: color .15s;
+  }
+  .topbar-nav a:hover { color: var(--primary); }
+
+  /* ── Layout ── */
+  .layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    max-width: 1160px;
+    margin: 0 auto;
+    gap: 0;
+    padding: 0 24px;
+  }
+
+  /* ── Sidebar TOC ── */
+  .toc {
+    position: sticky;
+    top: 57px;
+    height: calc(100vh - 57px);
+    overflow-y: auto;
+    padding: 32px 16px 32px 0;
+    border-right: 1px solid var(--border);
+  }
+  .toc-title {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text3);
+    padding: 0 12px 12px;
+  }
+  .toc-section { margin-bottom: 4px; }
+  .toc-link {
+    display: block;
+    padding: 7px 12px;
+    border-radius: 8px;
+    color: var(--text3);
+    text-decoration: none;
+    font-size: 13px;
+    transition: background .12s, color .12s;
+    line-height: 1.35;
+  }
+  .toc-link:hover { background: var(--surface); color: var(--text); }
+  .toc-link.active { background: var(--primary-dim); color: var(--primary); border: 1px solid var(--primary-border); }
+  .toc-sub {
+    padding-left: 20px;
+    font-size: 12px;
+  }
+  .toc-divider { height: 1px; background: var(--border); margin: 12px 12px; }
+
+  /* ── Main content ── */
+  .main { padding: 40px 0 80px 48px; }
+
+  /* ── Hero ── */
+  .hero {
+    margin-bottom: 56px;
+    padding-bottom: 40px;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: var(--primary);
+    background: var(--primary-dim);
+    border: 1px solid var(--primary-border);
+    padding: 5px 14px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+  }
+  .hero-title {
+    font-size: clamp(28px, 4vw, 42px);
+    font-weight: 800;
+    letter-spacing: -1.2px;
+    color: var(--text);
+    line-height: 1.15;
+    margin-bottom: 12px;
+  }
+  .hero-sub {
+    font-size: 16px;
+    color: var(--text2);
+    max-width: 560px;
+    line-height: 1.7;
+    margin-bottom: 24px;
+  }
+  .hero-meta {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .hero-stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 18px;
+    font-size: 13px;
+    color: var(--text2);
+  }
+  .hero-stat strong { display: block; font-size: 18px; color: var(--text); margin-bottom: 2px; }
+
+  /* ── Section ── */
+  .section {
+    margin-bottom: 64px;
+    scroll-margin-top: 80px;
+  }
+  .section-eyebrow {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    color: var(--primary);
+    margin-bottom: 8px;
+  }
+  .section-title {
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.6px;
+    color: var(--text);
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--primary);
+    display: inline-block;
+  }
+  .prose p { margin-bottom: 16px; color: var(--text2); font-size: 15px; line-height: 1.75; }
+  .prose strong { color: var(--text); font-weight: 600; }
+
+  /* ── Call-out box ── */
+  .callout {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px 28px;
+    margin: 24px 0;
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--text2);
+    position: relative;
+  }
+  .callout-accent { border-left: 3px solid var(--primary); }
+  .callout-success { border-left: 3px solid var(--success); }
+  .callout-warn { border-left: 3px solid var(--warn); }
+  .callout .callout-head { font-weight: 700; color: var(--text); margin-bottom: 8px; font-size: 14px; }
+
+  /* ── Market cards ── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px;
+  }
+  .card-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-body {
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.65;
+  }
+  .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .dot-success { background: var(--success); }
+  .dot-warn { background: var(--warn); }
+  .dot-danger { background: var(--danger); }
+  .dot-info { background: var(--info); }
+  .dot-primary { background: var(--primary); }
+
+  /* ── Audit table ── */
+  .audit-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+    font-size: 13.5px;
+  }
+  .audit-table thead th {
+    text-align: left;
+    padding: 10px 14px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--text3);
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .audit-table thead th:first-child { border-radius: 8px 0 0 0; }
+  .audit-table thead th:last-child { border-radius: 0 8px 0 0; }
+  .audit-table tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background .1s;
+  }
+  .audit-table tbody tr:hover { background: var(--surface); }
+  .audit-table tbody td {
+    padding: 11px 14px;
+    color: var(--text2);
+    vertical-align: middle;
+    line-height: 1.5;
+  }
+  .audit-table tbody td:first-child { font-weight: 600; color: var(--text); }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+  }
+  .badge-good { background: var(--tag-done-bg); border: 1px solid var(--tag-done-border); color: var(--success); }
+  .badge-warn { background: var(--tag-med-bg); border: 1px solid var(--tag-med-border); color: var(--warn); }
+  .badge-danger { background: var(--tag-open-bg); border: 1px solid var(--tag-open-border); color: var(--danger); }
+  .badge-open { background: var(--tag-open-bg); border: 1px solid var(--tag-open-border); color: var(--danger); }
+  .badge-info { background: rgba(96,165,250,.10); border: 1px solid rgba(96,165,250,.22); color: var(--info); }
+
+  /* ── Checklist ── */
+  .checklist { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 2px; margin-top: 16px; }
+  .checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    line-height: 1.5;
+    transition: background .1s;
+  }
+  .checklist li:hover { background: var(--surface); }
+  .check-icon { flex-shrink: 0; margin-top: 2px; font-size: 15px; }
+  .check-done { color: var(--success); }
+  .check-open { color: var(--danger); }
+  .check-warn { color: var(--warn); }
+  .check-text-done { color: var(--text2); }
+  .check-text-open { color: var(--text); font-weight: 500; }
+  .check-priority {
+    margin-left: auto;
+    flex-shrink: 0;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 20px;
+  }
+  .pri-high { background: var(--tag-open-bg); border: 1px solid var(--tag-open-border); color: var(--danger); }
+  .pri-med { background: var(--tag-med-bg); border: 1px solid var(--tag-med-border); color: var(--warn); }
+  .pri-low { background: rgba(107,114,128,.10); border: 1px solid rgba(107,114,128,.2); color: var(--text3); }
+
+  /* ── Platform tabs ── */
+  .platform-tabs {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .platform-tab {
+    padding: 8px 20px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text2);
+    cursor: default;
+  }
+  .platform-tab.active { background: var(--primary-dim); border-color: var(--primary-border); color: var(--primary); }
+
+  /* ── Section divider ── */
+  .section-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 48px 0;
+  }
+
+  /* ── Sub-heading ── */
+  .sub-heading {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 28px 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .sub-heading::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+
+  /* ── Footer ── */
+  .footer {
+    border-top: 1px solid var(--border);
+    padding: 28px 32px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--text3);
+    margin-top: 40px;
+  }
+  .footer a { color: var(--primary); text-decoration: none; }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+  /* ── Mobile ── */
+  @media (max-width: 860px) {
+    .layout { grid-template-columns: 1fr; }
+    .toc { display: none; }
+    .main { padding: 32px 0 64px; }
+    .topbar-nav { display: none; }
+  }
+
+  /* ── Launch Checklist ── */
+  .launch-progress-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin-bottom: 28px;
+  }
+  .launch-progress-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 10px;
+  }
+  .launch-progress-top strong { font-size: 15px; color: var(--text); }
+  .launch-progress-top span { font-size: 13px; color: var(--text2); }
+  .launch-progress-track {
+    height: 8px;
+    background: var(--surface2);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .launch-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--success));
+    border-radius: 4px;
+    transition: width .35s ease;
+    width: 0%;
+  }
+  .launch-progress-hint { font-size: 12px; color: var(--text3); margin-top: 10px; }
+
+  .launch-list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 3px; margin-top: 10px; margin-bottom: 6px; }
+  .ll-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 11px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    line-height: 1.5;
+    cursor: pointer;
+    user-select: none;
+    border: 1px solid transparent;
+    transition: background .1s, border-color .1s, opacity .2s;
+  }
+  .ll-item:hover { background: var(--surface); border-color: var(--border); }
+  .ll-item:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+  .ll-checkbox {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    border-radius: 5px;
+    border: 2px solid var(--border);
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+    transition: background .12s, border-color .12s;
+    font-size: 11px;
+    font-weight: 700;
+    color: white;
+  }
+  .ll-item.ll-checked .ll-checkbox { background: var(--success); border-color: var(--success); }
+  .ll-item.ll-checked .ll-checkbox::after { content: "✓"; }
+  .ll-item.ll-checked { opacity: 0.55; }
+  .ll-item.ll-checked .ll-label { text-decoration: line-through; color: var(--text3); }
+  .ll-label { color: var(--text); font-weight: 500; flex: 1; }
+  .ll-note { color: var(--text3); font-size: 12px; display: block; margin-top: 2px; font-weight: 400; }
+  .ll-tag {
+    flex-shrink: 0;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-top: 2px;
+    white-space: nowrap;
+  }
+  .ll-tag-block  { background: var(--tag-open-bg); border: 1px solid var(--tag-open-border); color: var(--danger); }
+  .ll-tag-needed { background: var(--tag-med-bg); border: 1px solid var(--tag-med-border); color: var(--warn); }
+  .ll-tag-verify { background: rgba(96,165,250,.10); border: 1px solid rgba(96,165,250,.22); color: var(--info); }
+  .ll-tag-decide { background: rgba(167,139,250,.10); border: 1px solid rgba(167,139,250,.25); color: #a78bfa; }
+  .ll-tag-future { background: rgba(107,114,128,.10); border: 1px solid rgba(107,114,128,.2); color: var(--text3); }
+
+  .ll-group-counter {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text3);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 1px 9px;
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <a class="topbar-brand" href="https://resilium-platform.com">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" fill="rgba(224,128,64,.15)" stroke="rgba(224,128,64,.4)" stroke-width="1"/><path d="M7 10c0-1.66 1.34-3 3-3s3 1.34 3 3-1.34 3-3 3" stroke="#E08040" stroke-width="1.5" stroke-linecap="round"/><circle cx="10" cy="10" r="1.5" fill="#E08040"/></svg>
+    <span>Resilium</span> &nbsp;Platform Assessment
+  </a>
+  <nav>
+    <ul class="topbar-nav">
+      <li><a href="#honest-opinion">Opinion</a></li>
+      <li><a href="#market">Market</a></li>
+      <li><a href="#user-audit">UX Audit</a></li>
+      <li><a href="#functionality">Functionality</a></li>
+      <li><a href="#checklist">Checklist</a></li>
+      <li><a href="#launch-checklist">Launch</a></li>
+    </ul>
+  </nav>
+  <span class="topbar-meta">April 2026 · Confidential</span>
+</div>
+
+<div class="layout">
+
+  <!-- SIDEBAR TOC -->
+  <aside class="toc">
+    <div class="toc-title">Contents</div>
+
+    <div class="toc-section"><a class="toc-link" href="#honest-opinion">My Honest Opinion</a></div>
+    <div class="toc-section"><a class="toc-link" href="#market">Market Reception</a></div>
+    <div class="toc-section toc-sub"><a class="toc-link" href="#market-optimism">For Optimism</a></div>
+    <div class="toc-section toc-sub"><a class="toc-link" href="#market-challenges">Honest Challenges</a></div>
+
+    <div class="toc-divider"></div>
+
+    <div class="toc-section"><a class="toc-link" href="#user-audit">User Testing Audit</a></div>
+    <div class="toc-section toc-sub"><a class="toc-link" href="#audit-web">Web App</a></div>
+    <div class="toc-section toc-sub"><a class="toc-link" href="#audit-mobile">Mobile App</a></div>
+    <div class="toc-section toc-sub"><a class="toc-link" href="#audit-admin">Admin Dashboard</a></div>
+
+    <div class="toc-divider"></div>
+
+    <div class="toc-section"><a class="toc-link" href="#functionality">Functionality Audit</a></div>
+
+    <div class="toc-divider"></div>
+
+    <div class="toc-section"><a class="toc-link" href="#checklist">Conclusive Checklist</a></div>
+    <div class="toc-section toc-sub"><a class="toc-link" href="#checklist-done">Done</a></div>
+    <div class="toc-section toc-sub"><a class="toc-link" href="#checklist-todo">Outstanding</a></div>
+
+    <div class="toc-divider"></div>
+
+    <div class="toc-section"><a class="toc-link" href="#launch-checklist">🚀 Launch Checklist</a></div>
+    <div class="toc-section toc-sub"><a class="toc-link" href="#lc-ios-prep">iOS — Preparation</a></div>
+    <div class="toc-section toc-sub"><a class="toc-link" href="#lc-ios-iap">iOS — In-App Purchases</a></div>
+    <div class="toc-section toc-sub"><a class="toc-link" href="#lc-ios-submit">iOS — Submission</a></div>
+    <div class="toc-section toc-sub"><a class="toc-link" href="#lc-paddle">Paddle Payments</a></div>
+    <div class="toc-section toc-sub"><a class="toc-link" href="#lc-prod">Production</a></div>
+    <div class="toc-section toc-sub"><a class="toc-link" href="#lc-mobile">Mobile Testing</a></div>
+    <div class="toc-section toc-sub"><a class="toc-link" href="#lc-design">Design Decisions</a></div>
+    <div class="toc-section toc-sub"><a class="toc-link" href="#lc-future">Nice-to-Have</a></div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+
+    <!-- HERO -->
+    <div class="hero">
+      <div class="hero-eyebrow">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1.2"/><path d="M6 3.5v3l2 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Resilium Platform · Full Assessment
+      </div>
+      <h1 class="hero-title">Platform Assessment<br />& Strategic Review</h1>
+      <p class="hero-sub">An honest, unvarnished evaluation of what's been built, how the market might receive it, and a precise checklist of what's done versus what remains.</p>
+      <div class="hero-meta">
+        <div class="hero-stat"><strong>~27,000</strong> Lines of Source Code</div>
+        <div class="hero-stat"><strong>3</strong> Platforms (Web · Mobile · Admin)</div>
+        <div class="hero-stat"><strong>April 2026</strong> Assessment Date</div>
+        <div class="hero-stat"><strong>Production</strong> <span style="color:var(--success)">●</span> Live</div>
+        <div class="hero-stat"><strong>Security</strong> Hardened</div>
+      </div>
+    </div>
+
+    <!-- ── SECTION 1: HONEST OPINION ── -->
+    <section class="section" id="honest-opinion">
+      <div class="section-eyebrow">Section 01</div>
+      <h2 class="section-title">My Honest Opinion</h2>
+
+      <div class="prose">
+        <p>This is a <strong>real product</strong>. Not a demo, not a prototype — a full-stack, full-featured platform with actual depth. The 14-step assessment, 6-dimension scoring model, AI report generation, dual platform (web + mobile), admin dashboard, email automation, GDPR compliance pipeline, push notifications, Paddle payments webhook, cron-driven engagement loops, and a pitch deck — the scope and execution quality here is genuinely impressive for what is essentially a solo-built product.</p>
+        <p>The code is disciplined: typed throughout (Zod for API contracts, Drizzle for DB), no TODO comments left in the codebase, thoughtful UI across both platforms, real rate limiting with Pro bypass, and error monitoring built in. These are professional signals.</p>
+      </div>
+
+      <div class="callout callout-warn">
+        <div class="callout-head">The honest caveat</div>
+        What this isn't yet is a <em>launched, market-tested</em> product. There's a meaningful gap between "built" and "in users' hands," and some of the wiring — particularly around payments and push notifications — hasn't been stress-tested in production. That gap is normal and closeable. The foundation is sound.
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- ── SECTION 2: MARKET RECEPTION ── -->
+    <section class="section" id="market">
+      <div class="section-eyebrow">Section 02</div>
+      <h2 class="section-title">Market Reception</h2>
+
+      <div class="sub-heading" id="market-optimism">The Case for Optimism</div>
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-title"><span class="dot dot-success"></span>Strong tailwinds</div>
+          <div class="card-body">"Personal resilience planning" has genuine market tailwinds — geopolitical anxiety, economic instability, and climate awareness are all rising globally, especially in Eastern Europe.</div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="dot dot-success"></span>No real competition</div>
+          <div class="card-body">Competitors are either generic survivalist content, expensive consultants, or PDF worksheets. An AI-scored, personalized, action-oriented system at $9/month doesn't exist yet.</div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="dot dot-success"></span>Smart free tier</div>
+          <div class="card-body">The assessment is so thorough and the output so personal that it creates a genuine "wow" moment before any paywall. The free tier converts by merit, not by pressure.</div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="dot dot-success"></span>Easy price point</div>
+          <div class="card-body">$9/month is psychologically easy to justify — one cup of coffee, comparable to a Netflix subscription, yet offers something genuinely actionable and personal.</div>
+        </div>
+      </div>
+
+      <div class="sub-heading" id="market-challenges">Honest Challenges</div>
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-title"><span class="dot dot-warn"></span>Category education needed</div>
+          <div class="card-body">Most people don't wake up thinking "I need a resilience plan." The marketing has to create the problem before solving it — this raises CAC and requires patience with content strategy.</div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="dot dot-warn"></span>Assessment length</div>
+          <div class="card-body">14 steps is thorough but long. Some users will drop off before completing it. Completion needs to feel rewarding enough to justify the time investment.</div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="dot dot-warn"></span>Mobile discoverability</div>
+          <div class="card-body">With no App Store presence yet, the mobile app isn't organically discoverable. It's currently only reachable via the web URL — a distribution gap that limits growth.</div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="dot dot-warn"></span>Pro value visibility</div>
+          <div class="card-body">The Pro features (percentile benchmarking, score trend history, AI comparison) need to be visible and compelling before users hit a paywall, or the upgrade feels arbitrary.</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- ── SECTION 3: USER AUDIT ── -->
+    <section class="section" id="user-audit">
+      <div class="section-eyebrow">Section 03</div>
+      <h2 class="section-title">User Testing Audit</h2>
+
+      <!-- Web -->
+      <div class="sub-heading" id="audit-web">Web App</div>
+      <div class="platform-tabs">
+        <div class="platform-tab active">resilium-platform.com</div>
+      </div>
+      <table class="audit-table">
+        <thead>
+          <tr><th>Flow / Screen</th><th>Status</th><th>Notes</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Landing page</td><td><span class="badge badge-good">✓ Good</span></td><td>Animated neural canvas, live testimonials from DB, trust signals all present</td></tr>
+          <tr><td>14-Step assessment</td><td><span class="badge badge-good">✓ Strong</span></td><td>Well-sequenced, draft saving, bilingual (EN/RO), progress bar, location detection; chronic condition sub-questions (name, severity, medication dependency) now captured when user selects Yes</td></tr>
+          <tr><td>Results page</td><td><span class="badge badge-good">✓ Strong</span></td><td>Score radar, risk profile card, action plan, feedback, social share modal (X/Facebook/Reddit/Instagram), Markdown export, goal reminder banner (resilience goal + vision pill at top of page)</td></tr>
+          <tr><td>Plan page</td><td><span class="badge badge-good">✓ Good</span></td><td>AI-generated action plan with DB-backed checklist progress tracking; goal reminder banner; Markdown export button (replaces Save PDF)</td></tr>
+          <tr><td>Scenarios page</td><td><span class="badge badge-good">✓ Good</span></td><td>Stress test simulations with impact ratings and immediate steps</td></tr>
+          <tr><td>Coaching page</td><td><span class="badge badge-good">✓ Functional</span></td><td>Phoenix brand, warm design, Playfair serif headings, correct for its purpose</td></tr>
+          <tr><td>Profile page</td><td><span class="badge badge-good">✓ Comprehensive</span></td><td>7 tabs in order: Account → Overview → Reports → Plans → Checklist → Companion (Pro) → Guides; GDPR export, subscription status, data deletion all wired</td></tr>
+          <tr><td>AI Companion tab (Profile)</td><td><span class="badge badge-good">✓ Pro-gated</span></td><td>DB-backed conversation history; gpt-4.1-mini; grounded in user's latest scores; localStorage offline cache (<code>resilium_companion_messages_v1</code>); free users see upgrade CTA</td></tr>
+          <tr><td>Guides tab (Profile)</td><td><span class="badge badge-good">✓ Free for All</span></td><td>10 crisis guides (financial, health, shelter, water, food, communications, evacuation, documents, mental health, community); location-aware; downloadable for offline reading; AsyncStorage download tracking (<code>resilium_guides_downloaded_v1</code>)</td></tr>
+          <tr><td>Pricing page</td><td><span class="badge badge-good">✓ Clean</span></td><td>Clear feature comparison, Paddle payment link-out, upgrade flow</td></tr>
+          <tr><td>Anonymous user experience</td><td><span class="badge badge-good">✓ Works</span></td><td>Free-tier gate enforced via localStorage + plan count, clear messaging</td></tr>
+          <tr><td>Onboarding modal</td><td><span class="badge badge-good">✓ Present</span></td><td>First-time user guidance active</td></tr>
+          <tr><td>About page</td><td><span class="badge badge-good">✓ Expanded</span></td><td>Now includes: Methodology, Scientific Foundation (6 academic citations), Media Citations (5 mainstream sources), Privacy, About the Project</td></tr>
+          <tr><td>Dark / light theme</td><td><span class="badge badge-good">✓ Works</span></td><td>Toggle present and persists across sessions</td></tr>
+          <tr><td>Competitive analysis PDF</td><td><span class="badge badge-good">✓ Fixed</span></td><td>jsPDF crash resolved; full PDF generation working</td></tr>
+        </tbody>
+      </table>
+
+      <!-- Mobile -->
+      <div class="sub-heading" id="audit-mobile">Mobile App</div>
+      <div class="platform-tabs">
+        <div class="platform-tab active">Expo / React Native</div>
+      </div>
+      <table class="audit-table">
+        <thead>
+          <tr><th>Screen / Feature</th><th>Status</th><th>Notes</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Loading / splash screen</td><td><span class="badge badge-good">✓ Polished</span></td><td>Neural net animation, brain logo, premium feel — custom branded</td></tr>
+          <tr><td>Sign-in</td><td><span class="badge badge-good">✓ Works</span></td><td>Clerk OAuth, token cache split (localStorage web / SecureStore native)</td></tr>
+          <tr><td>Home tab</td><td><span class="badge badge-good">✓ Rich</span></td><td>Animated orbs, streak tracking, score display, daily motivations</td></tr>
+          <tr><td>Progress tab (formerly Explore)</td><td><span class="badge badge-good">✓ Good</span></td><td>35-day activity calendar (colored dots from AsyncStorage), score history chart (Pro-gated), recent 7 check-ins — full plan-fulfillment tracking surface</td></tr>
+          <tr><td>Plans tab</td><td><span class="badge badge-good">✓ Good</span></td><td>Plan list, score badges, Pro comparison modal wired</td></tr>
+          <tr><td>Check-in tab</td><td><span class="badge badge-good">✓ Solid</span></td><td>5-dimension daily self-rating, local streak persistence via AsyncStorage</td></tr>
+          <tr><td>Account / data tab</td><td><span class="badge badge-good">✓ Complete</span></td><td>GDPR export, deletion, subscription status, sign out</td></tr>
+          <tr><td>Assessment</td><td><span class="badge badge-good">✓ Parity</span></td><td>Full flow matching the web version</td></tr>
+          <tr><td>Results</td><td><span class="badge badge-good">✓ Detailed</span></td><td>Score breakdown, action plan, dimension interpretation</td></tr>
+          <tr><td>Coaching page</td><td><span class="badge badge-good">✓ Upgraded</span></td><td>Now matches web structure — score context cards, About Cristiana, full CTA sections</td></tr>
+          <tr><td>AI Companion tab</td><td><span class="badge badge-good">✓ Pro-gated</span></td><td>DB-backed chat with user's latest scores as context; gpt-4.1-mini; AsyncStorage offline cache; free users see upgrade CTA</td></tr>
+          <tr><td>Guides tab</td><td><span class="badge badge-good">✓ Free for All</span></td><td>10 crisis guides bundled offline (always available without network); location-aware guide ordering; AsyncStorage download tracking</td></tr>
+          <tr><td>Pricing</td><td><span class="badge badge-good">✓ Present</span></td><td>Links out to web for Paddle checkout — correct for mobile payment flow</td></tr>
+          <tr><td>Icon rendering (nav bar, pricing, all screens)</td><td><span class="badge badge-good">✓ Fixed</span></td><td>Feather icons loaded via Font.loadAsync on all platforms — removes CDN dependency, icons render reliably on web and native</td></tr>
+          <tr><td>App Store / Play Store</td><td><span class="badge badge-warn">Pending</span></td><td>Intentionally deferred — owner working on submission</td></tr>
+        </tbody>
+      </table>
+
+      <!-- Admin -->
+      <div class="sub-heading" id="audit-admin">Admin Dashboard</div>
+      <div class="platform-tabs">
+        <div class="platform-tab active">/admin — Password Protected</div>
+      </div>
+      <table class="audit-table">
+        <thead>
+          <tr><th>Section</th><th>Status</th><th>Notes</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Login</td><td><span class="badge badge-good">✓ Works</span></td><td>Basic auth with admin credentials, session-secured</td></tr>
+          <tr><td>Analytics overview</td><td><span class="badge badge-good">✓ Strong</span></td><td>Recharts bar / pie / line / radar, live DB data, plan views metric</td></tr>
+          <tr><td>Demographic breakdown</td><td><span class="badge badge-good">✓ Thorough</span></td><td>Location, income, age, housing, mobility, dependents — all charted</td></tr>
+          <tr><td>User management</td><td><span class="badge badge-good">✓ Works</span></td><td>Clerk-sourced user list with plan counts and last-active timestamps</td></tr>
+          <tr><td>GDPR management</td><td><span class="badge badge-good">✓ Built</span></td><td>Manual deletion and data export triggers, consent log accessible</td></tr>
+          <tr><td>Announcements</td><td><span class="badge badge-good">✓ Functional</span></td><td>Create / edit banners shown to all users on the web app</td></tr>
+          <tr><td>Testimonials moderation</td><td><span class="badge badge-good">✓ Works</span></td><td>Approve / reject user feedback, approved items show on landing page</td></tr>
+          <tr><td>Marketing analytics</td><td><span class="badge badge-good">✓ Present</span></td><td>Marketing performance tracking integrated</td></tr>
+          <tr><td>Mobile analytics</td><td><span class="badge badge-good">✓ Built</span></td><td>Web vs. mobile session split, daily breakdown chart, score distribution</td></tr>
+          <tr><td>Security monitoring</td><td><span class="badge badge-good">✓ Present</span></td><td>Error rate tracking with in-memory window, alert emails on threshold</td></tr>
+          <tr><td>Sentry monitoring page</td><td><span class="badge badge-good">✓ Added</span></td><td>Dedicated /admin/monitoring page with project cards and deep-links to Issues, Performance, Replays, Alerts for all three Sentry projects</td></tr>
+          <tr><td>UX testing (AI personas)</td><td><span class="badge badge-good">✓ Novel</span></td><td>AI-simulated user sessions for UX analysis — genuinely clever differentiator</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- ── SECTION 4: FUNCTIONALITY ── -->
+    <section class="section" id="functionality">
+      <div class="section-eyebrow">Section 04</div>
+      <h2 class="section-title">Full Functionality Audit</h2>
+
+      <div class="prose">
+        <p>The following features are confirmed to be working end-to-end in the production environment at <a href="https://resilium-platform.com" style="color:var(--primary)">resilium-platform.com</a>. Each entry represents a complete, integrated user journey — not just a UI component.</p>
+      </div>
+
+      <div class="sub-heading">Core Platform</div>
+      <ul class="checklist">
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Assessment → AI scoring → AI report generation → saved to database</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">User authentication — Clerk, both web and mobile, token cache split correctly</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Plan limit enforcement — free tier capped at 3, Pro unlimited</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Subscription status check — Paddle webhook → database → status gate on all routes</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Rate limiting on assessment endpoint — 6/min, Pro subscribers bypass</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Checklist progress tracking — database-backed, persists across sessions</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Social sharing — share modal (X/Twitter, Facebook, Reddit, Instagram) on results page with score in share text; scorecard image generation removed (replaced by social share + Markdown export)</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Draft saving for in-progress assessments (localStorage)</span></li>
+      </ul>
+
+      <div class="sub-heading">Compliance & Data</div>
+      <ul class="checklist">
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">GDPR export and deletion pipeline — user-triggered and admin-triggered</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Consent collection and logging with platform tracking (web vs. mobile)</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Email unsubscribe with List-Unsubscribe header (RFC compliant)</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Terms, Privacy, Refund, Consent pages — all live and linked from footer</span></li>
+      </ul>
+
+      <div class="sub-heading">Email & Engagement Automation</div>
+      <ul class="checklist">
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Welcome email on first assessment (Resend) — triggered from resilium-platform.com domain</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">7-day re-engagement reminders — daily cron at 09:00 UTC</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">30-day reassessment reminders — Monday cron at 08:00 UTC</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">User weekly digest email — Sunday cron at 18:00 UTC</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Admin weekly digest with stats — Monday cron at 07:00 UTC</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Error rate alerts — email if 5+ server errors within any 10-minute window</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Wednesday 06:00 UTC — automated e2e assessment smoke test with email report (cron)</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Sunday 07:00 UTC — site-wide functionality audit across all endpoints + DB with email report (cron)</span></li>
+      </ul>
+
+      <div class="sub-heading">Push Notifications (Mobile)</div>
+      <ul class="checklist">
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Expo push token storage in database (users table)</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Push broadcast endpoint for targeted user notifications</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Push infrastructure wired to Expo push API with ticket handling</span></li>
+      </ul>
+
+      <div class="sub-heading">AI Companion & Crisis Guides</div>
+      <ul class="checklist">
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">AI Companion (Pro) — DB-backed conversations + messages tables; gpt-4.1-mini; system prompt grounded in user's latest assessment scores; conversation history persists across sessions; localStorage offline cache (<code>resilium_companion_messages_v1</code>); free users see upgrade CTA</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Guides tab (all users) — 10 crisis guides bundled in app (financial resilience, health emergencies, shelter, water, food, communications, evacuation, critical documents, mental health, community); location-aware ordering; one-tap offline download; download state tracked in localStorage/AsyncStorage (<code>resilium_guides_downloaded_v1</code>)</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Goal reminder banner — pill badge (emoji + "Resilience Goal" label + vision text) shown at top of Results, Plan, and Checklist tabs; API <code>/me/latest-checklist</code> extended to return <code>primaryGoal</code> and <code>successVision</code>; GOAL_LABELS / GOAL_ICONS constants defined in results.tsx and profile.tsx</span></li>
+      </ul>
+
+      <div class="sub-heading">Security & Reliability</div>
+      <ul class="checklist">
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">GDPR export endpoint: rate limiting (5/15 min) + session ownership check for authenticated users</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">GDPR data-request: rate limiting + UUID format validation on sessionId</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Checklist PATCH: requires authentication + report ownership verification</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Plan comparison AI endpoint: per-user rate limiting (10/hour)</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">React Query: targeted cache invalidation on sign-in (no full cache wipe)</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">ClerkAuthBridge: 5-second token fetch timeout prevents permanent API hangs</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Report queries: staleTime Infinity (immutable data, no unnecessary re-fetches)</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Welcome email failures: now logged as warnings (previously silently swallowed)</span></li>
+      </ul>
+
+      <div class="sub-heading">Admin & Analytics</div>
+      <ul class="checklist">
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Admin analytics — 7+ chart types pulling real-time database data</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Testimonials: collect on results → moderate in admin → display on landing</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Announcements: create in admin → display to all users instantly</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Progress snapshots table in DB (foundation for score trend history)</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Sentry error monitoring — wired across all 3 platforms; admin Sentry page with project deep-links</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Push notification permission prompt — bottom sheet modal fires after first assessment, AsyncStorage gate <code>resilium_push_prompted_v1</code>, requests <code>Expo.Notifications</code> permission, registers token via <code>registerPushTokenWithBackend</code></span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Score trend history chart (web + mobile, Pro gate) — <code>GET /api/users/me/score-history</code> endpoint; Recharts LineChart in Profile → Plans tab (web); react-native-svg line chart in My Plans tab (mobile); dimension lines gated behind Pro with upsell overlay for free users</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Mobile onboarding carousel — 3-slide FlatList pagingEnabled carousel (What is Resilium / Take Assessment / Build Your Plan), progress dots, Skip button, "Start My Assessment" CTA; AsyncStorage gate <code>resilium_onboarded_mobile_v1</code>; modal overlay on Home tab first launch</span></li>
+      </ul>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- ── SECTION 5: CHECKLIST ── -->
+    <section class="section" id="checklist">
+      <div class="section-eyebrow">Section 05</div>
+      <h2 class="section-title">Conclusive Checklist</h2>
+
+      <!-- DONE -->
+      <div class="sub-heading" id="checklist-done">Done</div>
+      <ul class="checklist">
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Full 14-step assessment with all dimensions</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">AI report generation via OpenAI integration</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">6-dimension scoring model (financial, health, skills, mobility, psychological, resources)</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Results page with radar chart, action plan, interactive checklists</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Scenarios / stress test simulations</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Coaching page — web (full Phoenix brand design) and mobile (parity achieved)</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">User authentication — Clerk, web + mobile</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Free-tier plan limit (3 plans) with clear messaging</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Paddle subscription webhook handler + subscription status gate</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Profile page with full plan history, GDPR controls, subscription status</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">GDPR export + deletion — user-triggered and admin-triggered</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Consent collection and platform logging (web vs. mobile split)</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Social share modal — X/Twitter, Facebook, Reddit, Instagram; scorecard branded image generation removed (score image sharing replaced by social share links + Markdown export)</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Dark / light theme — web and mobile</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Full email automation suite — welcome, re-engagement, reassessment, weekly digests</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Admin digest + error alert emails (weekly, Monday 07:00 UTC)</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Push notification infrastructure (Expo push API, token storage, broadcast)</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Admin dashboard with live analytics — 7+ chart types</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Admin user management (Clerk-sourced), testimonials, announcements, GDPR</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Admin marketing analytics, mobile analytics, security monitoring</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Admin UX testing with AI persona simulations</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Mobile: all 7 tabs functional (Home, Progress, My Plans, Check-in, My Data, Companion [Pro], Guides)</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Mobile: daily check-in with streak tracking</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Mobile: plan comparison modal (Pro feature)</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Mobile: animated loading screen with custom brain logo branding</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Mobile: full assessment + results flow at parity with web</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Rate limiting on all sensitive endpoints with Pro bypass</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Health monitoring endpoint</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Competitive analysis PDF generator (jsPDF crash fixed)</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Investor pitch deck artifact</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Terms, Privacy, Refund, About, Consent pages — all live</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Bilingual assessment (EN / RO)</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Location auto-detection (browser Geolocation API)</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Multi-currency support — 9 official currencies + custom code</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Draft saving for in-progress assessments</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">App icon + splash — custom branded brain logo (updated)</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Progress tab (formerly Explore / About) — rebuilt as plan-fulfillment tracking: 35-day activity calendar, score history chart (Pro gate), recent 7 check-ins</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Mobile coaching page upgraded — warm amber palette, score context cards, About Cristiana section, dark gradient CTA</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Mobile splash screen finalized — neural net animation (38 particles, 0.52 opacity), brain logo with counter-rotating SVG rings, amber glow pulse</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Resilience Profile card moved to Account tab (mobile) — shows score, assessment date, "View My Plans" CTA</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Sentry error monitoring wired — <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">@sentry/react</code> (web), <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">@sentry/react-native</code> (mobile), <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">@sentry/node</code> (API)</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Admin Sentry monitoring page — project cards with deep-links to Issues, Performance, Replays, and Alerts for all three platforms</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Automated e2e assessment smoke test — Wednesday 06:00 UTC cron, real API call, DB cleanup, email report</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Automated site-wide audit — Sunday 07:00 UTC cron, all endpoints + DB connectivity, email report</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">GDPR endpoints: rate limiting + session ownership check (authenticated users)</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Checklist progress PATCH: authentication required + report ownership verification</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Plan comparison (AI): per-user rate limiting (10 requests/hour)</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Mobile icon rendering — Feather font loaded via Font.loadAsync on all platforms, CDN dependency removed</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">ClerkAuthBridge: 5-second token fetch timeout prevents silent API hangs on slow connections</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">React Query cache invalidation: scoped to affected keys only on auth changes (no full cache wipe)</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Report query staleTime: Infinity — immutable reports are never unnecessarily re-fetched</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Welcome email failures now logged as server warnings (previously silently ignored)</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Blank page root cause fixed — two independent bugs in App.tsx (cache wipe + token fetch hang) resolved</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Percentile benchmarking — live on results page with DB-backed user comparison percentile display</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Dimension count standardized to 6 across all materials — landing page, pricing, about, pitch deck, admin marketing copy, platform-assessment.html</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Admin dashboard tab state persisted in URL (?tab=reports) — browser back button restores exact tab</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Admin "← Reports" breadcrumb on results page — one-click return to /admin/dashboard?tab=reports</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Full autonomous e2e audit conducted (April 9, 2026) — all public routes, assessment flow, admin dashboard, and API endpoints verified</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">GDPR consent bypass fixed — <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">sessionStorage</code> consent flag set in consent.tsx on Accept; assessment.tsx redirects to /consent if flag absent</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Assessment loading spinner reduced from 3 s to 500 ms — users reach assessment content almost immediately</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">GlobalNav Sign In visibility: auth timeout reduced from 3 s to 500 ms — Sign In button no longer hidden behind a 3-second pulse loader</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Admin analytics ageBracket fixed — removed over-restrictive null filter; all reports now counted (nulls shown as "unknown")</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Admin analytics location normalized — country extracted from raw location string (e.g. "Bucharest, Romania" → "Romania") before aggregation</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Admin Reports tab: dedicated paginated endpoint <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">GET /api/admin/reports</code> with search, page, limit, score filters — no longer capped at 50</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Admin Reports tab UI: live search, pagination controls, Age and Primary Goal columns added</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Coaching page: main nav links (About, Demo, Pricing, Sign In) added to header — direct-link visitors can browse the full site</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Landing page label aligned — "See a Sample Plan" CTA changed to "See a Demo" to match the nav link label</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Mobile ProGate — all 4 content tabs (Home, Progress, My Plans, Check-in) gated behind <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">ProGate</code> component; unsigned users see sign-in prompt, free users see upgrade CTA linking to pricing page</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Android removed from all materials — pitch deck Slide 1, admin monitoring page, push-token API schema updated to <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">["ios","web"]</code>; platform is iOS + Expo web only</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done"><code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">locationCountry</code> DB column added — canonical country extracted on every assessment submission (e.g. "Bucharest, Romania" → "Romania"); admin reports search extended to match on normalized country</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Pitch deck updated — Slide 6 Pro tier now includes iOS companion app for daily plan fulfillment; Slide 1 platform tag updated from "Android" to "iOS"</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Competitive analysis updated — positioning statement and Kano model delighters updated to cite iOS companion app (Pro-only) as a key differentiator no competitor offers</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">About page: Scientific Foundation section added — 6 peer-reviewed academic citations (CD-RISC, Brief Resilience Scale, Antonovsky Salutogenesis, Ungar Social Ecology, FEMA Preparedness Framework, WEF Future of Jobs Report) anchoring each Resilium dimension to validated science</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">About page: Media Citations section added — 5 authoritative mainstream sources (Harvard Business Review, American Psychological Association, TIME Magazine, The Economist, Forbes) citing the importance of personal resilience and the gap no other tool fills; framed as independent credibility signals, not product endorsements</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Assessment: Chronic condition sub-questions added — when user selects "Yes", an expandable card reveals: free-text condition name, severity selector (Mild / Moderate / Significant), and medication/treatment dependency (Yes / No). Data passes through to the AI prompt for personalized, condition-aware plan generation</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">AI report generation: chronic condition prompt updated — now uses condition name, severity level, and medication dependency to give targeted advice; medication-dependent users automatically get prescription continuity and supply stockpiling as top-priority checklist items</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Social share modal — results page Share button now opens a full-screen modal with share buttons for X (Twitter), Facebook, Reddit, and Instagram (copy to clipboard); click-outside to close; displays score in share text</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Markdown export on Results page — downloads a structured <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">.md</code> file of the full resilience report; importable into Notion, Obsidian, or any Markdown-aware tool</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Markdown export on Plan page — "Save PDF" button replaced with "Markdown" button; generates a structured action plan <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">.md</code> file covering all three horizon sections (0–30 days, 3–6 months, long-term)</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Scorecard image updated — background gradient updated to Resilium's navy palette (#0c1220 → #111827 → #1a2035); domain corrected from <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">resilium.app</code> → <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">resilium-platform.com</code> in both header and footer; footer tagline updated to "Know your readiness at"</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Checklist check icon fix — <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">CheckCircle</code> (bullseye appearance) replaced with clean <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">Check</code> icon across results and plan pages</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Demo page parity update — Share modal (X/Twitter, Facebook, Reddit, copy-link) added targeting the demo URL; Markdown export button added to the Strategic Action Plan section; Social Capital tab icon fixed (was blank, now renders a teal <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">Users</code> icon); check indicator corrected from <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">CheckCircle</code> to <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">Check</code>; unused imports cleaned (CardContent, CardHeader, CardTitle, ResilientIcon)</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Competitive analysis extended — key differentiator statement now cites scientific grounding; Kano Delighters updated to include "peer-reviewed methodology publicly documented" and "chronic condition-aware AI"; new white-space market gap entry added: "Academically-anchored methodology"; 5 academic sources added to the SOURCES list (CD-RISC, Antonovsky Salutogenesis, Ungar Social-Ecological Resilience, Brief Resilience Scale, WEF Future of Jobs 2025)</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Results page: <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">showShareModal</code> <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">useState</code> moved above all conditional early returns — eliminates a React Rules-of-Hooks violation where hook call count changed between the loading and loaded render cycles</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Assessment: Romanian translation step 14 progress label added — <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">ro.progress[14] = "Obiectivul Tău"</code>; previously the step 14 ("Your Goal") label was undefined in Romanian mode, causing the progress bar breadcrumb to render blank</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Assessment Health step: chronic condition severity buttons (Mild / Moderate / Significant) text overflow fixed — Recharts Button component base style <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">whitespace-nowrap</code> was preventing description text from wrapping; added <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">whitespace-normal overflow-hidden items-start</code> overrides so each button's description stays within its grid column</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Results page radar chart infinite growth fixed — <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">ResponsiveContainer height="100%"</code> inside a <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">md:h-full</code> wrapper triggered a ResizeObserver feedback loop causing both hero cards to grow unbounded; replaced with a fixed <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">h-[380px]</code> wrapper; also removed redundant <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">min-h-[300px]</code> from RadarChartView inner div</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Pricing page copy corrected — Starter feature "Print / Save PDF" updated to "Markdown export (Notion, Obsidian, etc.)" to reflect the actual export feature on the plan/results pages; the old PDF button was replaced with Markdown export in a prior session</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Results page dead code removed — <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">Printer</code> icon import and <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">handlePrint</code> function (remnants of the old print button) removed from results.tsx; no UI references to either existed</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Full autonomous e2e visual audit completed (April 11, 2026) — all public routes screenshotted and verified: landing (hero, How It Works, use-case personas, feature grid, footer), About (methodology, score bands, 6 academic citations), Pricing (Starter/Pro tiers, FAQ, billing toggle), Demo (radar chart, Mental Resilience Profile, Critical Vulnerabilities, Next Action pill, 7-tab Action Checklists), Coaching, Competitive Analysis, Consent, Admin login — all render correctly with no layout or JavaScript errors</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">"Social Network" → "Social Capital" naming alignment — all user-facing occurrences unified: (1) assessment.tsx English step 13 heading <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">s12Title</code> changed from "Community &amp; Social Network" to "Community &amp; Social Capital"; (2) assessment.tsx Romanian <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">s12Title</code> changed from "Comunitate &amp; Rețea Socială" to "Comunitate &amp; Capital Social"; (3) demo.tsx <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">AREA_LABELS</code> <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">socialCapital</code> tab label changed from "Social Network" to "Social Capital". Progress breadcrumb (step 13: "Social Capital") and underlying score field key (<code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">socialCapital</code>) were already correct.</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Results page checklist section — design decision made: <strong style="color:var(--text)">Option A (Plan-only)</strong>. The per-area checklist remains on the Plan page only; the <code style="font-size:12px;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px">&amp;&amp; false</code> guard in results.tsx (line 888) is intentionally kept. Results page stays clean and focused on the score, radar chart, vulnerabilities, and AI narrative. Action tracking belongs on the Plan page.</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Full assessment code audit completed (April 11, 2026) — all 14 steps verified via source code review and visual screenshots: Step 1 (Location + currency selector), Step 2 (Age bracket grid), Step 3 (Income stability + prefer-not-to-say), Step 4 (Mental resilience 1–5 scale per dimension question), Step 5 (Financial runway slider 0–36 months), Step 6 (Dependents grid), Step 7 (Skills multi-select), Step 8 (Health status + chronic condition sub-questions — name, severity with overflow fix, medication flag), Step 9 (Mobility + relocation readiness), Step 10 (Housing type), Step 11 (Emergency supplies tier), Step 12 (Risk profile multi-select with trauma note), Step 13 (Community &amp; Social Capital — trusted contacts, community involvement, mutual aid), Step 14 (Resilience goal + success vision textarea) — no rendering issues, translation gaps, or logic errors found</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">AI Companion tab — web (Profile tab 6) + mobile (tab 6); DB tables <code>conversations</code> + <code>messages</code>; gpt-4.1-mini; system prompt grounded in user's latest assessment scores; Pro-gated with upgrade CTA for free users; localStorage offline cache <code>resilium_companion_messages_v1</code></span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Crisis Guides tab — web (Profile tab 7) + mobile (tab 7); 10 guides bundled offline on mobile (always available without network); location-aware ordering; one-tap offline download on web; AsyncStorage download tracking <code>resilium_guides_downloaded_v1</code>; free for all users</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Profile tab order standardized — Account → Overview → Reports → Plans → Checklist → Companion (Pro) → Guides; applied consistently across web and mobile</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Goal reminder banner — pill badge (emoji + "Resilience Goal" label + success vision text) shown at top of Results, Plan, and Checklist tabs; <code>GET /api/users/me/latest-checklist</code> extended to return <code>primaryGoal</code> and <code>successVision</code>; GOAL_LABELS / GOAL_ICONS constants added to results.tsx and profile.tsx</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Admin link leak fixed — <code>?from=admin</code> URL param replaces localStorage check; admin dashboard now appends this param when linking to user reports; regular users browsing their own results never see the "← Admin" breadcrumb</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Scorecard image button removed — <code>share-scorecard-modal.tsx</code> and <code>scorecard-image.tsx</code> deleted (591 lines removed from results.tsx); social share modal (X/Twitter, Facebook, Reddit, Instagram) + Markdown export replace the feature cleanly</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Product-wide content audit — "AI-powered" language removed from all user-facing copy; replaced with "structured", "personalized", "scored"; applied to landing.tsx, pricing.tsx, demo.tsx, Slide6Monetization.tsx, admin/marketing.tsx, competitive-analysis.tsx; admin marketing gallery updated to 7 images including AI Companion and Crisis Guides</span></li>
+      </ul>
+
+      <!-- OUTSTANDING -->
+      <div class="sub-heading" id="checklist-todo">Outstanding / To Do</div>
+      <table class="audit-table">
+        <thead>
+          <tr><th>Item</th><th>Priority</th><th>Notes</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>App Store (iOS) submission</td>
+            <td><span class="badge badge-warn">In Progress</span></td>
+            <td>Intentionally deferred by owner — iOS only (Android explicitly excluded). App builds, assets, and metadata preparation in progress.</td>
+          </tr>
+          <tr>
+            <td>Payment integration (Paddle)</td>
+            <td><span class="badge badge-warn">In Progress</span></td>
+            <td>Paddle checkout integration is wired — client token, monthly and annual price IDs are all in env. Checkout is blocked in dev/preview (Paddle production keys only allow resilium-platform.com). Awaiting domain approval configuration in Paddle dashboard. RevenueCat is an alternative path for the iOS in-app purchase flow (App Store requires Apple billing for subscriptions sold through the app).</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <div class="footer">
+      Generated by Resilium AI Assistant · April 2026 ·
+      <a href="https://resilium-platform.com">resilium-platform.com</a>
+      · Confidential internal document
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- LAUNCH CHECKLIST                               -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="section-divider"></div>
+    <section class="section" id="launch-checklist">
+      <div class="section-eyebrow">Action Items</div>
+      <div class="section-title">Launch Checklist</div>
+
+      <div class="launch-progress-wrap">
+        <div class="launch-progress-top">
+          <strong>Overall Progress</strong>
+          <span id="lc-overall-text">0 / 36 completed</span>
+        </div>
+        <div class="launch-progress-track">
+          <div class="launch-progress-fill" id="lc-fill"></div>
+        </div>
+        <p class="launch-progress-hint">Click any item to mark it complete. Your progress saves in the browser automatically.</p>
+      </div>
+
+      <!-- ── iOS: Preparation ── -->
+      <div class="sub-heading" id="lc-ios-prep">🍎 iOS App Store — Preparation <span class="ll-group-counter" id="gp-ios-prep">0/6</span></div>
+      <ul class="launch-list" data-group="ios-prep">
+        <li class="ll-item" data-id="ios-apple-dev" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Apple Developer Program enrolled
+            <span class="ll-note">Required before any build or App Store submission. Annual $99/yr at developer.apple.com</span>
+          </div>
+          <span class="ll-tag ll-tag-block">Blocker</span>
+        </li>
+        <li class="ll-item" data-id="ios-app-icon" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">App icon set complete
+            <span class="ll-note">1024×1024 master PNG (no transparency). Expo auto-generates all smaller sizes from it via EAS Build.</span>
+          </div>
+          <span class="ll-tag ll-tag-block">Blocker</span>
+        </li>
+        <li class="ll-item" data-id="ios-screenshots" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">App Store screenshots captured
+            <span class="ll-note">Required sizes: 6.7" (iPhone 16 Pro Max) and 6.1" (iPhone 16). Optional but recommended: iPad Pro 12.9". Min 3 screenshots per size.</span>
+          </div>
+          <span class="ll-tag ll-tag-block">Blocker</span>
+        </li>
+        <li class="ll-item" data-id="ios-asc-listing" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">App Store Connect listing created
+            <span class="ll-note">App name, subtitle (≤30 chars), description, keywords (≤100 chars), primary category, support URL, privacy policy URL (use resilium-platform.com/privacy)</span>
+          </div>
+          <span class="ll-tag ll-tag-block">Blocker</span>
+        </li>
+        <li class="ll-item" data-id="ios-age-rating" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Age rating questionnaire completed in App Store Connect
+            <span class="ll-note">Health & Fitness / Lifestyle apps typically receive 4+ rating. Answer questionnaire in App Store Connect under the app listing.</span>
+          </div>
+          <span class="ll-tag ll-tag-needed">Needed</span>
+        </li>
+        <li class="ll-item" data-id="ios-eas-build" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Distribution build signed via EAS Build
+            <span class="ll-note">Run <code style="font-size:11px;background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px">eas build --platform ios --profile production</code>. Requires Apple Developer account + distribution certificate + provisioning profile (EAS can generate these).</span>
+          </div>
+          <span class="ll-tag ll-tag-block">Blocker</span>
+        </li>
+      </ul>
+
+      <!-- ── iOS: In-App Purchases ── -->
+      <div class="sub-heading" id="lc-ios-iap">💳 iOS App Store — In-App Purchases <span class="ll-group-counter" id="gp-ios-iap">0/5</span></div>
+      <ul class="launch-list" data-group="ios-iap">
+        <li class="ll-item" data-id="ios-revenuecat-account" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">RevenueCat account created and linked to App Store Connect
+            <span class="ll-note">App Store requires Apple billing for any subscription sold through the app. RevenueCat is the recommended integration layer. Free tier available at revenuecat.com</span>
+          </div>
+          <span class="ll-tag ll-tag-block">Blocker</span>
+        </li>
+        <li class="ll-item" data-id="ios-iap-product" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Pro subscription product created in App Store Connect
+            <span class="ll-note">Create both Monthly and Annual auto-renewable subscription products. Link them to RevenueCat offerings. Requires banking/tax info in App Store Connect first.</span>
+          </div>
+          <span class="ll-tag ll-tag-block">Blocker</span>
+        </li>
+        <li class="ll-item" data-id="ios-revenuecat-sdk" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">RevenueCat SDK wired into the mobile app
+            <span class="ll-note">Install <code style="font-size:11px;background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px">react-native-purchases</code>. Initialize with your RevenueCat API key. Hook into <code style="font-size:11px;background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px">useProStatus()</code> context so Pro features gate correctly on iOS.</span>
+          </div>
+          <span class="ll-tag ll-tag-needed">Needed</span>
+        </li>
+        <li class="ll-item" data-id="ios-paywall-screen" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">iOS paywall screen built in the mobile app
+            <span class="ll-note">Separate from the Paddle web flow — Apple requires their billing for in-app purchases. Must present the subscription options using native purchase APIs.</span>
+          </div>
+          <span class="ll-tag ll-tag-needed">Needed</span>
+        </li>
+        <li class="ll-item" data-id="ios-sandbox-test" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Sandbox purchase + restore tested on a physical iPhone
+            <span class="ll-note">Create a Sandbox Tester account in App Store Connect. Test purchase, subscription renewal, and "Restore Purchases" flow end-to-end on a real device.</span>
+          </div>
+          <span class="ll-tag ll-tag-verify">Verify</span>
+        </li>
+      </ul>
+
+      <!-- ── iOS: Submission ── -->
+      <div class="sub-heading" id="lc-ios-submit">🚀 iOS App Store — Submission <span class="ll-group-counter" id="gp-ios-submit">0/2</span></div>
+      <ul class="launch-list" data-group="ios-submit">
+        <li class="ll-item" data-id="ios-testflight" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">TestFlight build uploaded and tested on real iPhone
+            <span class="ll-note">Run through the full app on a real device via TestFlight before App Store submission. Invite at least one external tester. Check all 14 assessment steps, report generation, and Pro gating.</span>
+          </div>
+          <span class="ll-tag ll-tag-verify">Verify</span>
+        </li>
+        <li class="ll-item" data-id="ios-app-store-submit" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">App Store review submission sent
+            <span class="ll-note">Submit for review in App Store Connect. Apple's review typically takes 24–48 hours. First submission often takes longer. Have app privacy details and export compliance ready.</span>
+          </div>
+          <span class="ll-tag ll-tag-needed">Needed</span>
+        </li>
+      </ul>
+
+      <!-- ── Paddle ── -->
+      <div class="sub-heading" id="lc-paddle">💳 Payments — Paddle (Web) <span class="ll-group-counter" id="gp-paddle">0/5</span></div>
+      <ul class="launch-list" data-group="paddle">
+        <li class="ll-item" data-id="paddle-domain" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">resilium-platform.com added to Approved Domains in Paddle dashboard
+            <span class="ll-note">Settings → Checkout → Allowed Domains. Approval is pending. This is the only remaining blocker for web checkout — all code is already wired.</span>
+          </div>
+          <span class="ll-tag ll-tag-block">Blocker</span>
+        </li>
+        <li class="ll-item" data-id="paddle-checkout-test" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Checkout tested on production (resilium-platform.com)
+            <span class="ll-note">Click Upgrade on the live site. Complete a real or sandbox payment. Confirm the Paddle overlay opens, payment completes, and the success callback fires.</span>
+          </div>
+          <span class="ll-tag ll-tag-verify">Verify</span>
+        </li>
+        <li class="ll-item" data-id="paddle-pro-activate" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Pro status activates correctly after payment
+            <span class="ll-note">After a completed checkout, confirm the <code style="font-size:11px;background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px">useProStatus()</code> hook returns <code style="font-size:11px;background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px">isPro = true</code> and Pro-gated features unlock on the results and plan pages.</span>
+          </div>
+          <span class="ll-tag ll-tag-verify">Verify</span>
+        </li>
+        <li class="ll-item" data-id="paddle-webhook-verify" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Webhook receiving events from Paddle
+            <span class="ll-note">After a test purchase, check API server logs for incoming webhook events. <code style="font-size:11px;background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px">PADDLE_WEBHOOK_SECRET</code> is already in env. Confirm signature verification is passing.</span>
+          </div>
+          <span class="ll-tag ll-tag-verify">Verify</span>
+        </li>
+        <li class="ll-item" data-id="paddle-billing-toggle" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Monthly ↔ Annual billing toggle tested on pricing page
+            <span class="ll-note">Confirm both price IDs (monthly and annual) pass the correct value to the Paddle checkout overlay. Prices should display the correct discounted annual amount.</span>
+          </div>
+          <span class="ll-tag ll-tag-verify">Verify</span>
+        </li>
+      </ul>
+
+      <!-- ── Production Verification ── -->
+      <div class="sub-heading" id="lc-prod">🌐 Production Verification (resilium-platform.com) <span class="ll-group-counter" id="gp-prod">0/9</span></div>
+      <ul class="launch-list" data-group="prod">
+        <li class="ll-item" data-id="prod-signup" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Sign up + sign in flow (Clerk)
+            <span class="ll-note">Test new email account creation, email verification, sign in, and sign out. If Google OAuth is enabled in Clerk dashboard, test that path too. Only works on resilium-platform.com.</span>
+          </div>
+          <span class="ll-tag ll-tag-verify">Verify</span>
+        </li>
+        <li class="ll-item" data-id="prod-assessment" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Full assessment end-to-end on production
+            <span class="ll-note">Consent page → all 14 steps → "Generate Report" → AI report loads. Confirm the spinner appears, the async job completes, and the results redirect fires correctly.</span>
+          </div>
+          <span class="ll-tag ll-tag-verify">Verify</span>
+        </li>
+        <li class="ll-item" data-id="prod-results" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Results page renders correctly
+            <span class="ll-note">Score, radar chart (stable — no infinite growth), Critical Vulnerabilities, Next Action pill, Mental Resilience Profile, and Action Checklists all render with real AI-generated data.</span>
+          </div>
+          <span class="ll-tag ll-tag-verify">Verify</span>
+        </li>
+        <li class="ll-item" data-id="prod-plan" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Plan page checklist persistence
+            <span class="ll-note">Check off several items on the Plan page. Reload the page. Confirm checked items remain checked. This tests the database write path for checklist state.</span>
+          </div>
+          <span class="ll-tag ll-tag-verify">Verify</span>
+        </li>
+        <li class="ll-item" data-id="prod-markdown" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Markdown export downloads correctly
+            <span class="ll-note">Click the Markdown export button on both the Plan page and the Results page. Confirm a .md file downloads with the full report content, importable into Notion or Obsidian.</span>
+          </div>
+          <span class="ll-tag ll-tag-verify">Verify</span>
+        </li>
+        <li class="ll-item" data-id="prod-share" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Share modal works correctly
+            <span class="ll-note">Click Share on the Results page. Confirm the modal opens with score in the share text. Test Copy Link, X/Twitter, Facebook, and Reddit buttons. Click outside to close.</span>
+          </div>
+          <span class="ll-tag ll-tag-verify">Verify</span>
+        </li>
+        <li class="ll-item" data-id="prod-email-digest" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Email digest received after sign-up
+            <span class="ll-note">Weekly digest cron runs Sundays 18:00 UTC. 7-day reminder cron runs daily 09:00 UTC. Can trigger manually from Admin → Email section. Confirm RESEND_API_KEY is working in production.</span>
+          </div>
+          <span class="ll-tag ll-tag-verify">Verify</span>
+        </li>
+        <li class="ll-item" data-id="prod-admin" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Admin dashboard login and analytics visible
+            <span class="ll-note">Navigate to /admin on production. Log in with ADMIN_USERNAME / ADMIN_PASSWORD. Confirm user counts, assessment completions, and coaching stats load from the live database.</span>
+          </div>
+          <span class="ll-tag ll-tag-verify">Verify</span>
+        </li>
+        <li class="ll-item" data-id="prod-coaching" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Coaching page inquiry form submits correctly
+            <span class="ll-note">Fill out and submit the coaching inquiry form on the Coaching page. Confirm the submission is received (check admin dashboard or email inbox depending on where coaching leads are routed).</span>
+          </div>
+          <span class="ll-tag ll-tag-verify">Verify</span>
+        </li>
+      </ul>
+
+      <!-- ── Mobile App Testing ── -->
+      <div class="sub-heading" id="lc-mobile">📱 Mobile App Testing <span class="ll-group-counter" id="gp-mobile">0/5</span></div>
+      <ul class="launch-list" data-group="mobile">
+        <li class="ll-item" data-id="mobile-iphone-physical" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Tested on a physical iPhone (Expo Go or TestFlight)
+            <span class="ll-note">Scan the Expo QR code with the Camera app on iOS, or install via TestFlight. Simulators are not sufficient for full testing — touch targets, fonts, and animations can differ on device.</span>
+          </div>
+          <span class="ll-tag ll-tag-block">Blocker</span>
+        </li>
+        <li class="ll-item" data-id="mobile-assessment-full" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Full assessment flow completed on mobile
+            <span class="ll-note">Run through all 14 assessment steps on iPhone. Confirm navigation (Back/Next), keyboard behavior, and form interactions feel smooth on a small screen.</span>
+          </div>
+          <span class="ll-tag ll-tag-verify">Verify</span>
+        </li>
+        <li class="ll-item" data-id="mobile-step-render" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">All 14 assessment steps render correctly on small screen
+            <span class="ll-note">Pay special attention to Step 8 (chronic condition severity buttons — text overflow fix), Step 12 (risk profile grid), and Step 13 (Community & Social Capital — card layout).</span>
+          </div>
+          <span class="ll-tag ll-tag-verify">Verify</span>
+        </li>
+        <li class="ll-item" data-id="mobile-ai-report" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">AI report generation works end-to-end on mobile
+            <span class="ll-note">Complete the assessment and confirm the "Generate Report" button triggers the async job, the loading state displays correctly, and the results page loads with real data on mobile.</span>
+          </div>
+          <span class="ll-tag ll-tag-verify">Verify</span>
+        </li>
+        <li class="ll-item" data-id="mobile-pro-gating" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Pro gating on mobile works with graceful fallback
+            <span class="ll-note">If RevenueCat is not yet wired, confirm Pro-gated features degrade gracefully (show upgrade prompt, not crash). If RevenueCat is wired, test the full purchase → unlock flow.</span>
+          </div>
+          <span class="ll-tag ll-tag-verify">Verify</span>
+        </li>
+      </ul>
+
+      <!-- ── Design Decisions ── -->
+      <div class="sub-heading" id="lc-design">🎨 Design Decisions <span class="ll-group-counter" id="gp-design">0/1</span></div>
+      <ul class="launch-list" data-group="design">
+        <li class="ll-item" data-id="design-results-checklist" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">✓ Results page checklist — decided: Plan-only (Option A)
+            <span class="ll-note">The <code style="font-size:11px;background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px">&amp;&amp; false</code> guard in results.tsx line 888 stays. Checklist lives on the Plan page only. Results page remains focused on score, radar chart, vulnerabilities, and AI narrative. Decision recorded April 2026.</span>
+          </div>
+          <span class="ll-tag ll-tag-decide">Decided</span>
+        </li>
+      </ul>
+
+      <!-- ── Nice-to-Have / Future ── -->
+      <div class="sub-heading" id="lc-future">✨ Nice-to-Have / Future <span class="ll-group-counter" id="gp-future">0/3</span></div>
+      <ul class="launch-list" data-group="future">
+        <li class="ll-item" data-id="future-sentry" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Sentry Express instrumentation completed
+            <span class="ll-note">The Sentry SDK is imported but Express is not fully instrumented (shows a warning in server logs: "express is not instrumented"). Add <code style="font-size:11px;background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px">--import</code> flag to Node startup in production to capture server-side errors fully.</span>
+          </div>
+          <span class="ll-tag ll-tag-future">Future</span>
+        </li>
+        <li class="ll-item" data-id="future-push-notifs" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Push notifications for 7-day / 30-day resilience reminders
+            <span class="ll-note">Currently reminder-based outreach is email-only via cron jobs. Expo Push Notifications (<code style="font-size:11px;background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px">expo-notifications</code>) would let the mobile app reach users who haven't opened their email. Requires notification permission prompt in the app.</span>
+          </div>
+          <span class="ll-tag ll-tag-future">Future</span>
+        </li>
+        <li class="ll-item" data-id="future-app-rating" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">App Store rating prompt in mobile app
+            <span class="ll-note">Trigger <code style="font-size:11px;background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px">StoreReview.requestReview()</code> (from <code style="font-size:11px;background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px">expo-store-review</code>) after a user successfully generates their first resilience plan. Apple limits how often this prompt appears, so timing matters.</span>
+          </div>
+          <span class="ll-tag ll-tag-future">Future</span>
+        </li>
+      </ul>
+
+    </section>
+
+  </main>
+</div>
+
+<script>
+  // ── TOC scroll highlighting ──
+  const links = document.querySelectorAll('.toc-link');
+  const sections = document.querySelectorAll('.section[id], .sub-heading[id]');
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const active = document.querySelector(`.toc-link[href="#${e.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  sections.forEach(s => obs.observe(s));
+
+  // ── Launch Checklist ──
+  (function () {
+    const STORE_KEY = 'resilium_launch_checklist_v1';
+    const items = document.querySelectorAll('.ll-item');
+
+    function load() {
+      try { return new Set(JSON.parse(localStorage.getItem(STORE_KEY) || '[]')); }
+      catch { return new Set(); }
+    }
+    function save(set) {
+      localStorage.setItem(STORE_KEY, JSON.stringify([...set]));
+    }
+
+    let checked = load();
+
+    function applyItem(el) {
+      const id = el.dataset.id;
+      const on = checked.has(id);
+      el.classList.toggle('ll-checked', on);
+      el.setAttribute('aria-checked', String(on));
+    }
+
+    function updateProgress() {
+      const total = items.length;
+      const done = checked.size;
+      const pct = total ? (done / total * 100) : 0;
+      const fill = document.getElementById('lc-fill');
+      const text = document.getElementById('lc-overall-text');
+      if (fill) fill.style.width = pct.toFixed(1) + '%';
+      if (text) text.textContent = done + ' / ' + total + ' completed';
+
+      document.querySelectorAll('[data-group]').forEach(group => {
+        const gItems = group.querySelectorAll('.ll-item');
+        const gDone = [...gItems].filter(i => checked.has(i.dataset.id)).length;
+        const gEl = document.getElementById('gp-' + group.dataset.group);
+        if (gEl) gEl.textContent = gDone + '/' + gItems.length;
+      });
+    }
+
+    items.forEach(el => {
+      applyItem(el);
+      function toggle() {
+        const id = el.dataset.id;
+        if (checked.has(id)) { checked.delete(id); } else { checked.add(id); }
+        save(checked);
+        applyItem(el);
+        updateProgress();
+      }
+      el.addEventListener('click', toggle);
+      el.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+      });
+    });
+
+    updateProgress();
+  })();
+</script>
+
+</body>
+</html>

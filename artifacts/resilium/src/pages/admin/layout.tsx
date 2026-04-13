@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Loader2, LayoutDashboard, Smartphone, Shield, LogOut, FlaskConical, Users, Megaphone, Rocket, KeyRound, Activity } from "lucide-react";
+import { Loader2, LayoutDashboard, Smartphone, Shield, LogOut, FlaskConical, Users, Megaphone, Rocket, KeyRound, Activity, FolderLock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ResilientIcon } from "@/components/resilient-icon";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
-  activeSection?: "dashboard" | "mobile" | "gdpr" | "consent" | "ux-testing" | "users" | "announcements" | "marketing" | "security" | "monitoring";
+  activeSection?: "dashboard" | "mobile" | "gdpr" | "consent" | "ux-testing" | "users" | "announcements" | "marketing" | "security" | "monitoring" | "documents";
 }
 
 export function getAdminToken(): string | null {
@@ -66,6 +66,7 @@ export function AdminLayout({ children, activeSection }: AdminLayoutProps) {
     { href: "/admin/users", label: "Users", icon: Users, key: "users" },
     { href: "/admin/announcements", label: "Announcements", icon: Megaphone, key: "announcements" },
     { href: "/admin/marketing", label: "GTM Plan", icon: Rocket, key: "marketing" },
+    { href: "/admin/documents", label: "Documents", icon: FolderLock, key: "documents" },
     { href: "/admin/mobile", label: "Mobile", icon: Smartphone, key: "mobile" },
     { href: "/admin/gdpr", label: "GDPR", icon: Shield, key: "gdpr" },
     { href: "/admin/consent-log", label: "Consent Log", icon: Shield, key: "consent" },
