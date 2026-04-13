@@ -36,14 +36,20 @@ router.post(
   paddleWebhookRateLimit,
   async (req, res) => {
     const webhookSecret = process.env["PADDLE_WEBHOOK_SECRET"];
+    const sandboxSecret = process.env["PADDLE_SANDBOX_WEBHOOK_SECRET"];
     // express.raw() (registered in app.ts before express.json()) captures the body as a Buffer
     const rawBody = Buffer.isBuffer(req.body) ? req.body.toString("utf8") : JSON.stringify(req.body);
 
-    if (webhookSecret) {
+    if (webhookSecret || sandboxSecret) {
       const sig = req.headers["paddle-signature"] as string | undefined;
-      if (!verifyPaddleSignature(rawBody, sig, webhookSecret)) {
+      const validProd    = webhookSecret ? verifyPaddleSignature(rawBody, sig, webhookSecret) : false;
+      const validSandbox = sandboxSecret ? verifyPaddleSignature(rawBody, sig, sandboxSecret) : false;
+      if (!validProd && !validSandbox) {
         logger.warn("Paddle webhook signature verification failed");
         return res.status(401).json({ error: "Invalid signature" });
+      }
+      if (validSandbox && !validProd) {
+        logger.info("Paddle webhook verified via sandbox secret");
       }
     }
 

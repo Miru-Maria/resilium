@@ -7,9 +7,23 @@ import { SiteFooter } from "@/components/site-footer";
 import { PageSEO } from "@/components/page-seo";
 import { useUser, useAuth, useClerk } from "@clerk/react";
 
+const PADDLE_ENV = (import.meta.env.VITE_PADDLE_ENVIRONMENT as string | undefined) ?? "production";
+const IS_SANDBOX = PADDLE_ENV === "sandbox";
+
+// Production credentials
 const PADDLE_CLIENT_TOKEN = import.meta.env.VITE_PADDLE_CLIENT_TOKEN as string | undefined;
 const PADDLE_PRICE_ID_MONTHLY = import.meta.env.VITE_PADDLE_PRICE_ID as string | undefined;
 const PADDLE_PRICE_ID_ANNUAL = import.meta.env.VITE_PADDLE_PRICE_ID_ANNUAL as string | undefined;
+
+// Sandbox credentials (used when VITE_PADDLE_ENVIRONMENT=sandbox)
+const PADDLE_SANDBOX_CLIENT_TOKEN = import.meta.env.VITE_PADDLE_SANDBOX_CLIENT_TOKEN as string | undefined;
+const PADDLE_SANDBOX_PRICE_ID_MONTHLY = import.meta.env.VITE_PADDLE_SANDBOX_PRICE_ID as string | undefined;
+const PADDLE_SANDBOX_PRICE_ID_ANNUAL = import.meta.env.VITE_PADDLE_SANDBOX_PRICE_ID_ANNUAL as string | undefined;
+
+// Active credentials — resolved at module load time
+const ACTIVE_TOKEN = IS_SANDBOX ? PADDLE_SANDBOX_CLIENT_TOKEN : PADDLE_CLIENT_TOKEN;
+const ACTIVE_PRICE_MONTHLY = IS_SANDBOX ? PADDLE_SANDBOX_PRICE_ID_MONTHLY : PADDLE_PRICE_ID_MONTHLY;
+const ACTIVE_PRICE_ANNUAL = IS_SANDBOX ? PADDLE_SANDBOX_PRICE_ID_ANNUAL : PADDLE_PRICE_ID_ANNUAL;
 
 declare global {
   interface Window {
@@ -21,7 +35,7 @@ function usePaddle() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (!PADDLE_CLIENT_TOKEN) return;
+    if (!ACTIVE_TOKEN) return;
     if (window.Paddle) {
       setReady(true);
       return;
@@ -30,7 +44,9 @@ function usePaddle() {
     script.src = "https://cdn.paddle.com/paddle/v2/paddle.js";
     script.async = true;
     script.onload = () => {
-      window.Paddle?.Initialize({ token: PADDLE_CLIENT_TOKEN });
+      const initOptions: Record<string, unknown> = { token: ACTIVE_TOKEN };
+      if (IS_SANDBOX) initOptions.environment = "sandbox";
+      window.Paddle?.Initialize(initOptions);
       setReady(true);
     };
     document.head.appendChild(script);
@@ -135,7 +151,7 @@ export default function PricingPage() {
   const [billing, setBilling] = useState<BillingPeriod>("monthly");
 
   const isAnnual = billing === "annual";
-  const priceId = isAnnual ? PADDLE_PRICE_ID_ANNUAL : PADDLE_PRICE_ID_MONTHLY;
+  const priceId = isAnnual ? ACTIVE_PRICE_ANNUAL : ACTIVE_PRICE_MONTHLY;
 
   const handleUpgrade = () => {
     if (!isAuthenticated) {
@@ -205,6 +221,14 @@ export default function PricingPage() {
               <p className="text-muted-foreground text-lg max-w-xl mx-auto mb-8">
                 Three full assessments for free. Upgrade to track your progress over time, compare plans, and model crisis scenarios before they hit.
               </p>
+
+              {/* Sandbox mode indicator */}
+              {IS_SANDBOX && (
+                <div className="inline-flex items-center gap-2 bg-amber-100 border border-amber-300 text-amber-800 text-xs font-bold rounded-full px-4 py-1.5 mb-6">
+                  <span>⚠️</span>
+                  <span>SANDBOX MODE — test payments only, no real charges</span>
+                </div>
+              )}
 
               {/* Billing toggle */}
               <div className="inline-flex items-center gap-1 bg-muted/40 border border-border rounded-full p-1">

@@ -39,7 +39,10 @@ const GOAL_ICONS: Record<string, string> = {
   general_resilience: "⚡",
 };
 
-const PADDLE_CLIENT_TOKEN = import.meta.env.VITE_PADDLE_CLIENT_TOKEN as string | undefined;
+const PADDLE_IS_SANDBOX = (import.meta.env.VITE_PADDLE_ENVIRONMENT as string | undefined) === "sandbox";
+const PADDLE_CLIENT_TOKEN = PADDLE_IS_SANDBOX
+  ? (import.meta.env.VITE_PADDLE_SANDBOX_CLIENT_TOKEN as string | undefined)
+  : (import.meta.env.VITE_PADDLE_CLIENT_TOKEN as string | undefined);
 const PADDLE_DONATION_PRICE_ID = import.meta.env.VITE_PADDLE_DONATION_PRICE_ID as string | undefined;
 
 declare global {
@@ -360,7 +363,11 @@ function ResultsPageInner() {
     const script = document.createElement("script");
     script.src = "https://cdn.paddle.com/paddle/v2/paddle.js";
     script.async = true;
-    script.onload = () => window.Paddle?.Initialize({ token: PADDLE_CLIENT_TOKEN });
+    script.onload = () => {
+      const initOpts: Record<string, unknown> = { token: PADDLE_CLIENT_TOKEN };
+      if (PADDLE_IS_SANDBOX) initOpts.environment = "sandbox";
+      window.Paddle?.Initialize(initOpts);
+    };
     document.head.appendChild(script);
   }, []);
 
