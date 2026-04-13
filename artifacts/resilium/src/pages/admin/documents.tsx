@@ -38,12 +38,19 @@ function useAdminDoc(name: string) {
 
 function MarkdownDoc({ content }: { content: string }) {
   return (
-    <div className="prose prose-sm prose-slate max-w-none p-8
-      prose-headings:font-display prose-headings:tracking-tight
-      prose-h1:text-2xl prose-h2:text-lg prose-h2:border-b prose-h2:pb-2 prose-h2:mt-8
-      prose-table:text-xs prose-th:bg-slate-100 prose-th:font-semibold
-      prose-td:align-top prose-code:text-primary prose-code:bg-primary/8
-      prose-pre:bg-slate-100 prose-pre:border prose-pre:border-slate-200
+    <div className="prose prose-sm prose-invert max-w-none p-8
+      prose-headings:font-display prose-headings:tracking-tight prose-headings:text-white
+      prose-h1:text-2xl prose-h1:font-bold prose-h1:mb-1
+      prose-h2:text-lg prose-h2:font-semibold prose-h2:border-b prose-h2:border-white/10 prose-h2:pb-2 prose-h2:mt-8
+      prose-h3:text-base prose-h3:font-semibold prose-h3:text-slate-200
+      prose-p:text-slate-300 prose-li:text-slate-300
+      prose-strong:text-white
+      prose-table:text-xs prose-th:bg-white/5 prose-th:font-semibold prose-th:text-slate-200
+      prose-td:align-top prose-td:text-slate-300
+      prose-hr:border-white/10
+      prose-code:text-primary prose-code:bg-white/5 prose-code:rounded
+      prose-pre:bg-white/5 prose-pre:border prose-pre:border-white/10
+      prose-a:text-primary
     ">
       <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
     </div>
