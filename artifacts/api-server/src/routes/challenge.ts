@@ -1,0 +1,117 @@
+import { Router } from "express";
+import { requireAuth } from "@clerk/express";
+import { db, challengeStateTable } from "@workspace/db";
+import { eq } from "drizzle-orm";
+
+const router = Router();
+
+router.get("/api/challenge", requireAuth(), async (req, res) => {
+  try {
+    const userId = req.auth?.userId;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const [row] = await db
+      .select()
+      .from(challengeStateTable)
+      .where(eq(challengeStateTable.userId, userId))
+      .limit(1);
+
+    if (!row) return res.status(404).json({ error: "No challenge started" });
+
+    res.json({
+      startedAt: row.startedAt.toISOString(),
+      dimensionOrder: JSON.parse(row.dimensionOrder),
+      completedDays: JSON.parse(row.completedDays),
+    });
+  } catch (err) {
+    req.log.error({ err }, "Error fetching challenge");
+    res.status(500).json({ error: "Failed to fetch challenge" });
+  }
+});
+
+router.post("/api/challenge/start", requireAuth(), async (req, res) => {
+  try {
+    const userId = req.auth?.userId;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const { dimensionOrder } = req.body as { dimensionOrder: string[] };
+    if (!Array.isArray(dimensionOrder) || dimensionOrder.length !== 6) {
+      return res.status(400).json({ error: "Invalid dimension order" });
+    }
+
+    const [existing] = await db
+      .select()
+      .from(challengeStateTable)
+      .where(eq(challengeStateTable.userId, userId))
+      .limit(1);
+
+    if (existing) {
+      return res.json({
+        startedAt: existing.startedAt.toISOString(),
+        dimensionOrder: JSON.parse(existing.dimensionOrder),
+        completedDays: JSON.parse(existing.completedDays),
+      });
+    }
+
+    const [row] = await db
+      .insert(challengeStateTable)
+      .values({
+        userId,
+        dimensionOrder: JSON.stringify(dimensionOrder),
+        completedDays: "[]",
+      })
+      .returning();
+
+    res.status(201).json({
+      startedAt: row.startedAt.toISOString(),
+      dimensionOrder: JSON.parse(row.dimensionOrder),
+      completedDays: JSON.parse(row.completedDays),
+    });
+  } catch (err) {
+    req.log.error({ err }, "Error starting challenge");
+    res.status(500).json({ error: "Failed to start challenge" });
+  }
+});
+
+router.post("/api/challenge/complete/:day", requireAuth(), async (req, res) => {
+  try {
+    const userId = req.auth?.userId;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const day = Number(req.params["day"]);
+    if (!Number.isInteger(day) || day < 1 || day > 30) {
+      return res.status(400).json({ error: "Invalid day number" });
+    }
+
+    const [row] = await db
+      .select()
+      .from(challengeStateTable)
+      .where(eq(challengeStateTable.userId, userId))
+      .limit(1);
+
+    if (!row) return res.status(404).json({ error: "No challenge started" });
+
+    const completedDays: number[] = JSON.parse(row.completedDays);
+    if (!completedDays.includes(day)) {
+      completedDays.push(day);
+      completedDays.sort((a, b) => a - b);
+    }
+
+    const [updated] = await db
+      .update(challengeStateTable)
+      .set({ completedDays: JSON.stringify(completedDays) })
+      .where(eq(challengeStateTable.userId, userId))
+      .returning();
+
+    res.json({
+      startedAt: updated.startedAt.toISOString(),
+      dimensionOrder: JSON.parse(updated.dimensionOrder),
+      completedDays: JSON.parse(updated.completedDays),
+    });
+  } catch (err) {
+    req.log.error({ err }, "Error completing challenge day");
+    res.status(500).json({ error: "Failed to complete day" });
+  }
+});
+
+export default router;

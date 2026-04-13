@@ -41,6 +41,7 @@ import AdminMarketingPage from "@/pages/admin/marketing";
 import AdminSecurityPage from "@/pages/admin/security";
 import AdminMonitoringPage from "@/pages/admin/monitoring";
 import AdminDocumentsPage from "@/pages/admin/documents";
+import AdminAnalyticsPage from "@/pages/admin/analytics";
 import ConsentPage from "@/pages/consent";
 import CoachingPage from "@/pages/coaching";
 import DemoPage from "@/pages/demo";
@@ -273,6 +274,7 @@ function Router() {
       <Route path="/admin/documents" component={AdminDocumentsPage} />
       <Route path="/admin/security" component={AdminSecurityPage} />
       <Route path="/admin/monitoring" component={AdminMonitoringPage} />
+      <Route path="/admin/analytics" component={AdminAnalyticsPage} />
       <Route path="/coaching" component={CoachingPage} />
       <Route path="/demo" component={DemoPage} />
       <Route path="/scenarios/:reportId" component={ScenariosPage} />

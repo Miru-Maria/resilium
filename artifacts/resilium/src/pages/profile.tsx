@@ -69,6 +69,10 @@ import {
   BookMarked,
 } from "lucide-react";
 import { guides, getEssentialGuides, getGuidesByLocation, getGuidesByDimension, type Guide } from "@/data/guides";
+import { saveToCache, loadFromCache, plansListCacheKey } from "@/lib/offline-cache";
+import { DailyTipCard } from "@/components/daily-tip-card";
+import { AchievementBadges } from "@/components/achievement-badges";
+import { ChallengeCard } from "@/components/challenge-card";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -461,6 +465,29 @@ function OverviewTab({ plans }: { plans: PlanSummary[] }) {
     staleTime: 60_000,
   });
 
+  const { data: subStatus } = useQuery({
+    queryKey: ["subscription-status"],
+    queryFn: async () => {
+      const r = await fetch("/api/subscription/status", { credentials: "include" });
+      if (!r.ok) return null;
+      return r.json() as Promise<{ isPro: boolean }>;
+    },
+    staleTime: 60_000,
+  });
+
+  const [streak, setStreak] = useState(0);
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("resilium_streak_v1");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        setStreak(parsed.count ?? 0);
+      }
+    } catch {}
+  }, []);
+
+  const isPro = subStatus?.isPro ?? false;
+
   if (plans.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4 text-center">
@@ -591,6 +618,13 @@ function OverviewTab({ plans }: { plans: PlanSummary[] }) {
         </Card>
       </div>
 
+      {/* Daily coaching tip */}
+      <DailyTipCard lowestDim={consistentlyLowestDim ?? (plans.length === 1 ? (() => {
+        const p = plans[0];
+        const scores: Record<DimKey, number> = { financial: p.scoreFinancial, health: p.scoreHealth, skills: p.scoreSkills, mobility: p.scoreMobility, psychological: p.scorePsychological, resources: p.scoreResources };
+        return DIM_KEYS.reduce((min, d) => scores[d] < scores[min] ? d : min, DIM_KEYS[0]);
+      })() : null)} />
+
       {/* Progress line chart */}
       {hasMultiple && (
         <Card className="border-none shadow-md">
@@ -677,6 +711,28 @@ function OverviewTab({ plans }: { plans: PlanSummary[] }) {
             </CardContent>
           </Card>
         );
+      })()}
+
+      {/* Achievements */}
+      <AchievementBadges
+        planCount={plans.length}
+        streak={streak}
+        isPro={isPro}
+        allDimsAssessed={plans.length > 0}
+      />
+
+      {/* 30-Day Resilience Challenge */}
+      {plans.length > 0 && (() => {
+        const latest = plans[plans.length - 1];
+        const latestScores: Partial<Record<DimKey, number>> = {
+          financial: latest.scoreFinancial,
+          health: latest.scoreHealth,
+          skills: latest.scoreSkills,
+          mobility: latest.scoreMobility,
+          psychological: latest.scorePsychological,
+          resources: latest.scoreResources,
+        };
+        return <ChallengeCard latestScores={latestScores} isPro={isPro} />;
       })()}
 
       {/* CTA if only 1 plan */}
@@ -2370,13 +2426,24 @@ export default function ProfilePage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data, isLoading: plansLoading } = useQuery({
+  const userId = user?.id ?? "";
+  const cachedPlansEntry = userId ? loadFromCache<{ plans: PlanSummary[] }>(plansListCacheKey(userId)) : null;
+
+  const { data, isLoading: plansLoading, isError: plansError } = useQuery({
     queryKey: ["myPlans"],
     queryFn: fetchMyPlans,
     enabled: isAuthenticated,
+    placeholderData: cachedPlansEntry?.data ?? undefined,
   });
 
-  const plans = data?.plans ?? [];
+  useEffect(() => {
+    if (data?.plans && userId) {
+      saveToCache(plansListCacheKey(userId), data);
+    }
+  }, [data, userId]);
+
+  const isShowingCachedPlans = plansError && !!cachedPlansEntry?.data;
+  const plans = (data?.plans ?? cachedPlansEntry?.data?.plans ?? []);
   const latestPlan = plans.length > 0 ? plans[plans.length - 1] : undefined;
   const lowestDim: DimKey | undefined = latestPlan ? (() => {
     const scores: Record<DimKey, number> = {
@@ -2429,6 +2496,18 @@ export default function ProfilePage() {
           <h1 className="text-3xl font-display font-bold text-foreground">My Profile</h1>
           <p className="text-muted-foreground mt-1">Track your resilience journey and manage your account.</p>
         </div>
+
+        {/* Offline banner */}
+        {isShowingCachedPlans && (
+          <div className="flex items-center gap-3 px-5 py-3.5 mb-4 rounded-2xl bg-sky-500/5 border border-sky-500/30">
+            <WifiOff className="w-4 h-4 text-sky-500 flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-sky-700 dark:text-sky-400">Viewing cached profile</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Server unreachable — showing your last-saved plans. Changes won't sync until you're back online.</p>
+            </div>
+            <span className="flex-shrink-0 text-[10px] font-bold uppercase tracking-wider bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/30 rounded-full px-2 py-1">Offline</span>
+          </div>
+        )}
 
         <Tabs value={defaultTab} onValueChange={(val) => navigate(`/profile?tab=${val}`)} className="space-y-6">
             <TabsList className="rounded-xl h-10 p-1 flex-wrap gap-1 w-full sm:w-auto">

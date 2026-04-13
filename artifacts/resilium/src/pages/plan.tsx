@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { useRoute, Link } from "wouter";
 import { NoIndexPage } from "@/components/page-seo";
+import { saveToCache, loadFromCache, reportCacheKey } from "@/lib/offline-cache";
 import {
   useGetReport,
   useGetChecklists,
@@ -295,7 +296,7 @@ export default function PlanPage() {
     setShowOnboarding(false);
   };
 
-  const { data: report, isLoading, error } = useGetReport(reportId, {
+  const { data: fetchedReport, isLoading, error } = useGetReport(reportId, {
     query: { enabled: !!reportId, retry: (n: number, e: any) => (e?.response?.status ?? e?.status) !== 404 && n < 2 } as any,
   });
 
@@ -313,6 +314,28 @@ export default function PlanPage() {
       .then(d => d && setIsPro(!!d.isActive))
       .catch(() => {});
   }, [isAuthenticated]);
+
+  // ── Offline caching ───────────────────────────────────────────────────────────
+  const [offlinePlan, setOfflinePlan] = useState<any>(null);
+  const [isOfflineMode, setIsOfflineMode] = useState(false);
+
+  useEffect(() => {
+    if (fetchedReport && isPro && reportId) {
+      saveToCache(reportCacheKey(reportId), fetchedReport);
+    }
+  }, [fetchedReport, isPro, reportId]);
+
+  useEffect(() => {
+    if ((error || (!isLoading && !fetchedReport)) && reportId && !offlinePlan) {
+      const cached = loadFromCache<any>(reportCacheKey(reportId));
+      if (cached) {
+        setOfflinePlan(cached.data);
+        setIsOfflineMode(true);
+      }
+    }
+  }, [error, isLoading, fetchedReport, reportId, offlinePlan]);
+
+  const report = fetchedReport ?? offlinePlan;
 
   // ── Streak tracking ──────────────────────────────────────────────────────────
   const [streak, setStreak] = useState(0);
@@ -442,7 +465,7 @@ export default function PlanPage() {
     );
   }
 
-  if (error || !report) {
+  if (!report) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center">
         <AlertTriangle className="w-16 h-16 text-destructive mb-6" />
@@ -607,6 +630,22 @@ export default function PlanPage() {
       </header>
 
       <main className="max-w-5xl mx-auto px-6 pt-10 space-y-10">
+
+        {/* OFFLINE BANNER */}
+        {isOfflineMode && (
+          <div className="flex items-center gap-3 px-5 py-3.5 rounded-2xl bg-sky-500/5 border border-sky-500/30">
+            <div className="w-7 h-7 rounded-lg bg-sky-500/15 flex items-center justify-center flex-shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-sky-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" /></svg>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-sky-700 dark:text-sky-400">Viewing offline cache</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Can't reach the server — showing your last saved plan from your device. Checklist changes will sync when you reconnect.
+              </p>
+            </div>
+            <span className="flex-shrink-0 text-[10px] font-bold uppercase tracking-wider bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/30 rounded-full px-2 py-1">Pro Offline</span>
+          </div>
+        )}
 
         {/* SAVE PROMPT — anonymous users */}
         {!isAuthenticated && (

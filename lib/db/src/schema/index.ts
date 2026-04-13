@@ -27,3 +27,4 @@ export * from "./monitoring";
 export * from "./conversations";
 export * from "./messages";
 export * from "./checkins";
+export * from "./challenge";
