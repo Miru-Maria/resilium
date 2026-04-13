@@ -396,7 +396,7 @@ export default function HomeScreen() {
             <Pressable onPress={handleMyPlans} style={styles.myPlansBanner}>
               <Feather name="bookmark" size={14} color={colors.primary} />
               <Text style={styles.myPlansBannerText}>
-                Signed in as {user.firstName || user.email || "you"} — view saved plans
+                Signed in as {user?.firstName || user?.email || "you"} — view saved plans
               </Text>
               <Feather name="arrow-right" size={14} color={colors.primary} />
             </Pressable>

@@ -1038,7 +1038,7 @@ const createStyles = (colors: ColorsType) => StyleSheet.create({
     borderRadius: 10,
     borderWidth: 2,
     borderColor: colors.border,
-    backgroundColor: colors.card,
+    backgroundColor: colors.surface,
   },
   currencyBtnSelected: {
     borderColor: colors.primary,

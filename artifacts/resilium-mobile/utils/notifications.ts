@@ -16,7 +16,7 @@ async function getNotifications(): Promise<typeof import("expo-notifications") |
         shouldShowAlert: true,
         shouldPlaySound: false,
         shouldSetBadge: false,
-      }),
+      } as import("expo-notifications").NotificationBehavior),
     });
     _Notifications = mod;
     return mod;

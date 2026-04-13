@@ -19,7 +19,7 @@ import { Feather, FontAwesome } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import * as WebBrowser from "expo-web-browser";
-import { useSSO, useSignIn } from "@clerk/expo";
+import { useSSO, useSignIn, useClerk } from "@clerk/expo";
 import { NeuralNetSVG } from "@/components/NeuralNetSVG";
 import { useColors } from "@/context/theme";
 import { ColorsType } from "@/constants/colors";
@@ -31,7 +31,9 @@ const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get("window");
 export default function SignInScreen() {
   const insets = useSafeAreaInsets();
   const { startSSOFlow } = useSSO();
-  const { signIn, setActive, isLoaded } = useSignIn();
+  const { signIn, fetchStatus } = useSignIn();
+  const { setActive } = useClerk();
+  const isLoaded = fetchStatus === "idle";
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
@@ -50,9 +52,12 @@ export default function SignInScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setEmailLoading(true);
     try {
-      const result = await signIn.create({ identifier: email.trim(), password });
-      if (result.status === "complete" && setActive) {
-        await setActive({ session: result.createdSessionId });
+      const { error: createErr } = await signIn.create({ identifier: email.trim() });
+      if (createErr) throw createErr;
+      const { error: pwErr } = await signIn.password({ password });
+      if (pwErr) throw pwErr;
+      if (signIn.status === "complete") {
+        await setActive({ session: signIn.createdSessionId });
         router.replace("/");
       } else {
         Alert.alert("Sign-in incomplete", "Please check your credentials and try again.");

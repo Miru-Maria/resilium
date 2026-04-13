@@ -741,7 +741,6 @@ export default function ResultsScreen() {
         ref={scorecardRef}
         options={{ format: "png", quality: 1.0 }}
         style={styles.hiddenScorecard}
-        collapsable={false}
       >
         <MobileScorecardImage score={report.score} scoreLabel={scoreLabel} scoreColor={scoreColor} mentalResilienceProfile={report.mentalResilienceProfile} />
       </ViewShot>

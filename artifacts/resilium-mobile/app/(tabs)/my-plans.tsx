@@ -224,7 +224,7 @@ export default function MyPlansScreen() {
                   >
                     {comparing
                       ? <ActivityIndicator size="small" color={colors.background} />
-                      : <Feather name="git-compare" size={14} color={colors.background} />
+                      : <Feather name="shuffle" size={14} color={colors.background} />
                     }
                     <Text style={styles.compareBtnText}>
                       {comparing ? "Comparing…" : "Compare Last Two Plans (AI)"}

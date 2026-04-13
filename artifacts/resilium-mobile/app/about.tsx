@@ -105,8 +105,8 @@ export default function AboutScreen() {
         {/* Legal links */}
         <View style={s.legalRow}>
           {[
-            { label: "Privacy Policy", url: "https://resilium-ai.replit.app/privacy" },
-            { label: "Terms of Service", url: "https://resilium-ai.replit.app/terms" },
+            { label: "Privacy Policy", url: "https://resilium-platform.com/privacy" },
+            { label: "Terms of Service", url: "https://resilium-platform.com/terms" },
           ].map(({ label, url }) => (
             <Pressable key={label} onPress={() => Linking.openURL(url)}>
               <Text style={s.legalLink}>{label}</Text>
@@ -148,7 +148,7 @@ const styles = (C: ColorsType) =>
     dimRow: { flexDirection: "row", gap: 14, alignItems: "flex-start" },
     dimIcon: {
       width: 36, height: 36, borderRadius: 10,
-      backgroundColor: C.primarySubtle ?? `${C.primary}18`,
+      backgroundColor: C.primaryMuted,
       alignItems: "center", justifyContent: "center",
       flexShrink: 0,
     },
@@ -165,7 +165,7 @@ const styles = (C: ColorsType) =>
     stepTitle: { fontSize: 14, fontFamily: "Inter_600SemiBold", color: C.text, marginBottom: 3 },
     stepBody: { fontSize: 13, fontFamily: "Inter_400Regular", color: C.textSecondary, lineHeight: 19 },
     proCard: {
-      backgroundColor: C.card ?? C.surface,
+      backgroundColor: C.surface,
       borderRadius: 16,
       padding: 20,
       borderWidth: 1,

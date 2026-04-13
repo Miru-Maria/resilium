@@ -196,7 +196,7 @@ router.post("/assess", assessRateLimit, async (req, res) => {
           mentalResilienceSubScores
         );
 
-        const APP_URL = process.env["APP_URL"] ?? "https://resilium.app";
+        const APP_URL = process.env["APP_URL"] ?? "https://resilium-platform.com";
         if (scores.psychological < 50) {
           const coachingResource = {
             title: "1:1 Mental Resilience Coaching",
