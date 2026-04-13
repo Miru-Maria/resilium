@@ -27,12 +27,60 @@
     <!-- Theme -->
     <meta name="theme-color" content="#0D1225" />
 
+    <link rel="canonical" href="https://resilium-platform.com/" />
+    <meta property="og:url" content="https://resilium-platform.com/" />
+    <meta property="og:locale" content="en_US" />
+
     <link rel="icon" type="image/png" href="/logo.png" />
-  <!-- Redirect legacy replit.app domain to canonical domain -->
-  <script>if(location.hostname==='resilium-ai.replit.app'){location.replace('https://resilium-platform.com'+location.pathname+location.search+location.hash);}</script>
+
+    <!-- Async font loading — Inter (body) + Playfair Display (coaching page headings) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap"></noscript>
+
+    <!-- Structured data — WebSite + Organization (visible to all crawlers immediately) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://resilium-platform.com/#website",
+          "url": "https://resilium-platform.com/",
+          "name": "Resilium",
+          "description": "Personal resilience scoring and action-planning platform across 6 dimensions: financial, health, skills, mobility, psychological, and resources.",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+              "@type": "EntryPoint",
+              "urlTemplate": "https://resilium-platform.com/?q={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
+          }
+        },
+        {
+          "@type": "Organization",
+          "@id": "https://resilium-platform.com/#organization",
+          "url": "https://resilium-platform.com/",
+          "name": "Resilium",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://resilium-platform.com/logo.png"
+          },
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "contactType": "customer support",
+            "email": "contact_resilium@pm.me"
+          }
+        }
+      ]
+    }
+    </script>
+
+  <!-- Redirect legacy replit.app domain to canonical domain -->
+  <script>if(location.hostname==='resilium-ai.replit.app'){location.replace('https://resilium-platform.com'+location.pathname+location.search+location.hash);}</script>
   </head>
   <body>
     <div id="root"></div>

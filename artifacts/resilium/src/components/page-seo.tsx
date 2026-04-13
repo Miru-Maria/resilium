@@ -23,6 +23,7 @@ export function PageSEO({ title, description, canonical, noIndex = false, ogImag
       <meta name="robots" content={noIndex ? "noindex, nofollow" : "index, follow"} />
 
       <meta property="og:type" content="website" />
+      <meta property="og:locale" content="en_US" />
       <meta property="og:site_name" content={SITE_NAME} />
       <meta property="og:title" content={fullTitle} />
       <meta property="og:description" content={description} />

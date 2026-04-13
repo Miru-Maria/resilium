@@ -85,9 +85,6 @@ export default function CoachingPage() {
         description="Work one-on-one with a coach to translate your Resilium score into lasting change. For people ready to go deeper than a score."
         canonical="https://resilium-platform.com/coaching"
       />
-      {/* Google Fonts — Playfair Display for headings */}
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&display=swap');`}</style>
-
       {/* Neural canvas — Phoenix ember × gold, behind all content */}
       <div style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none" }}>
         <NeuralCanvas

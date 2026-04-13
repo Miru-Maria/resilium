@@ -160,7 +160,7 @@ export default function PricingPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <PageSEO
-        title="Pricing — Resilium"
+        title="Resilience Assessment Plans & Pricing — Resilium"
         description="Three full resilience assessments for free. Upgrade to track your progress over time, compare plans side by side, and model crisis scenarios before they happen."
         canonical="https://resilium-platform.com/pricing"
       />
@@ -174,7 +174,7 @@ export default function PricingPage() {
             <div className="w-20 h-20 rounded-full bg-green-500/10 flex items-center justify-center mx-auto mb-6">
               <CheckCircle2 className="w-10 h-10 text-green-500" />
             </div>
-            <h1 className="text-3xl font-display font-bold mb-3">You're all set!</h1>
+            <h2 className="text-3xl font-display font-bold mb-3">You're all set!</h2>
             <p className="text-muted-foreground mb-8 max-w-md mx-auto">
               Your Pro subscription is now active. Start as many assessments as you like.
             </p>
