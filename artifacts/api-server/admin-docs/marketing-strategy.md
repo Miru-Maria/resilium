@@ -1,7 +1,7 @@
 # Resilium: Personal Resilience Intelligence Platform
 ## Marketing & Distribution Strategy Whitepaper
 
-**Version 1.0 — March 2026**
+**Version 1.1 — April 2026**
 
 ---
 
@@ -20,10 +20,11 @@ This document outlines Resilium's go-to-market strategy, target audience segment
 Research from the American Psychological Association shows that 75% of adults experience significant stress around major life events, yet fewer than 20% have a documented plan for any category of disruption. Existing tools — emergency binders, financial advisors, insurance brokers — address fragments of the problem in isolation.
 
 No consumer-grade platform brings together:
+
 - Psychological resilience profiling (mental toughness, stress tolerance, adaptability)
 - Financial buffer quantification (months of runway, asset liquidity)
 - Practical preparedness checklists (go-bag, documents, continuity contacts)
-- AI-driven scenario stress-testing (what happens to my score if I lose my job?)
+- AI-driven scenario stress-testing ("what happens to my score if I lose my job?")
 
 Resilium fills this gap.
 
@@ -68,34 +69,42 @@ Our initial SAM is ~$1.5B combining wellness and direct-to-consumer. We are not 
 ## 3. Freemium Funnel & Conversion
 
 ### Free Tier
-- Full resilience assessment (all 4 dimensions)
+
+- Full resilience assessment (all 7 dimensions)
 - Full personalized report with score, dimension breakdown, and plain-English interpretation
 - Up to 2 saved plan snapshots
 - Percentile benchmarking vs. all Resilium users
+- Daily mood/wellbeing check-ins
 
 **Purpose:** Maximize top-of-funnel volume. The free report has standalone value — it creates a "wow" moment users want to share. Each share is a referral loop.
 
 ### Pro Tier ($9/month or $79/year)
+
 - Unlimited plan saves and history
-- AI Plan (GPT-5 powered 90-day action roadmap)
+- AI Companion (GPT-5 powered personalized guidance, chat interface)
+- AI Plan (90-day structured action roadmap)
 - Scenario stress-testing (job loss, health crisis, relocation, natural disaster)
+- Crisis Guides — step-by-step offline-capable emergency protocols
 - Priority re-assessment reminders and trend tracking
-- PDF export of full report + action plan
+- Markdown export of full report + action plan (importable into Notion, Obsidian, Evernote)
 
 ### Conversion Levers
+
 1. **Score wall** — The free report shows "What's holding you back" but locks the prioritized action items behind Pro.
 2. **Scenario gate** — "Run Scenario Stress-Test" is surfaced prominently in results; clicking triggers a Pro upgrade prompt with a preview of the output.
-3. **Plan save limit** — On the third save attempt, a paywall appears showing the history feature.
-4. **Email drip** — After free assessment, users receive 5-email sequence over 14 days (Day 0: report summary, Day 2: "your #1 weakness", Day 5: scenario preview, Day 9: Pro feature walkthrough, Day 14: limited-time discount).
+3. **Guides gate** — Crisis Guides are visible as a tab with a Pro badge; free users see a locked preview listing guide categories, then a prompt to upgrade.
+4. **Plan save limit** — On the third save attempt, a paywall appears showing the history feature.
+5. **Email drip** — After free assessment, users receive a 5-email sequence over 14 days (Day 0: report summary, Day 2: "your #1 weakness", Day 5: scenario preview, Day 9: Pro feature walkthrough, Day 14: limited-time discount).
 
 ### Target Funnel Metrics (Year 1)
+
 | Stage | Volume | Rate |
 |---|---|---|
 | Unique visitors | 180,000 | — |
 | Assessment started | 72,000 | 40% |
 | Assessment completed | 36,000 | 50% |
 | Email captured | 28,800 | 80% |
-| Free→Pro conversion | 1,440 | 5% |
+| Free → Pro conversion | 1,440 | 5% |
 | Annual plan uptake (of Pro) | 576 | 40% |
 
 **Year 1 MRR target:** $11,600/month → ~$139K ARR
@@ -117,6 +126,7 @@ High-intent keywords have low competition and high buyer intent in this space:
 | "job loss financial plan" | 3,200 | 31 |
 
 **Content pillars:**
+
 1. Scenario deep-dives ("How to prepare financially for a job loss in 2026")
 2. Dimension explainers ("What is financial resilience and how do you build it?")
 3. Score-based hooks ("People with resilience scores above 75 do these 7 things")
@@ -137,6 +147,7 @@ Each article ends with an inline CTA to take the free assessment. Because Resili
 ### 4.3 Paid Acquisition (Tertiary — 15%)
 
 Deploy paid budget only after organic signals confirm which angles convert. Start with:
+
 - **Google Search** — target "emergency preparedness plan", "financial resilience assessment" (high intent, bottom of funnel)
 - **Meta** — lookalike audiences off email list; video creative showing the app flow
 
@@ -152,22 +163,22 @@ Target blended CAC < $18 for free users, < $65 for Pro conversions (LTV > $96 at
 
 ---
 
-## 5. Mobile Distribution (App Stores)
+## 5. Mobile Distribution (iOS App Store)
+
+Resilium ships a native iOS app (web-only mode also available via the mobile web experience). Android is not in scope for the initial launch.
 
 ### iOS App Store
+
 - **Category:** Health & Fitness (primary), Finance (secondary)
 - **Keywords:** resilience, emergency plan, preparedness, financial wellness, stress score
-- **Screenshots:** Score reveal screen, AI plan section, scenario stress-test, dimension breakdown
+- **Screenshots:** Score reveal screen, AI Companion chat, crisis guides, dimension breakdown
 - **Review prompts:** Trigger at score reveal (high-emotion moment) for maximum conversion to 5-star
 
-### Google Play Store
-- Same core metadata, adapted for Play Store guidelines
-- Leverage Android's larger install base in international markets (UK, Australia, Canada — English-first expansion targets)
-
 ### ASO Strategy
+
 - A/B test icon (shield vs. graph vs. checkmark symbol)
 - Feature graphic emphasizes "Know your score in 8 minutes"
-- Localization for en-GB, en-AU in Month 6
+- Localization for en-GB, en-AU in Month 9 (post-product-market-fit)
 
 ---
 
@@ -193,7 +204,10 @@ Assessment → Score → AI Plan → Scenario Stress-Test
 
 The natural lifecycle is quarterly — resilience scores change as life circumstances change. Quarterly re-assessment reminders drive app opens, which surface Pro upsells for free users and validate value for Pro users.
 
+Daily check-ins create an additional daily engagement layer between assessments, building habit loops and streak-based retention.
+
 ### Email Lifecycle (Pro Users)
+
 - **Week 1:** "Your AI Plan — week 1 checklist" (action items from their plan)
 - **Month 1:** "You're 30 days in — here's your progress" (checklist completion summary)
 - **Month 3:** "Time to retake your assessment — things may have changed"
@@ -220,11 +234,12 @@ The natural lifecycle is quarterly — resilience scores change as life circumst
 | Platform | What they do | What Resilium does differently |
 |---|---|---|
 | Ready.gov | Government checklists, static | Dynamic score, AI-personalized plan, scenario modeling |
-| FEMA preparedness guides | Disaster-focused, no scoring | Holistic 4-dimension framework including mental + financial |
+| FEMA preparedness guides | Disaster-focused, no scoring | Holistic 7-dimension framework including mental + financial |
 | Credit Karma / Mint | Financial snapshot only | Full resilience including psychological, social, practical dimensions |
 | Calm / Headspace | Mental health only | Actionable readiness across all life dimensions |
 
 Resilium's defensible moat:
+
 1. **Proprietary dataset** — as assessments accumulate, percentile benchmarks become more meaningful and harder to replicate
 2. **AI scenario engine** — personalized what-if modeling at individual level is technically complex and requires tightly integrated scoring + LLM pipeline
 3. **Cross-dimension correlation** — insight like "your financial cushion partially offsets your low social support" is unique to Resilium's integrated model
@@ -251,7 +266,7 @@ At $1M ARR (Month 18), the business reaches payback on this investment assuming 
 
 Resilium addresses a genuine, underserved need at the intersection of personal finance, mental health, and practical preparedness. The freemium model, content-led acquisition, and B2B expansion path create three compounding growth engines that reinforce each other. The AI-powered score + scenario engine provides a defensible technical moat that competitors cannot quickly replicate.
 
-The immediate priority is driving free assessment volume through SEO and creator partnerships, optimizing the free→Pro conversion funnel, and closing the first B2B pilot to validate enterprise pricing. With disciplined execution on this plan, $1M ARR is achievable within 18 months of public launch.
+The immediate priority is driving free assessment volume through SEO and creator partnerships, optimizing the free → Pro conversion funnel, and closing the first B2B pilot to validate enterprise pricing. With disciplined execution on this plan, $1M ARR is achievable within 18 months of public launch.
 
 ---
 
