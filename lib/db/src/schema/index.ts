@@ -26,3 +26,4 @@ export * from "./subscriptions";
 export * from "./monitoring";
 export * from "./conversations";
 export * from "./messages";
+export * from "./checkins";

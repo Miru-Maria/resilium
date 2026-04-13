@@ -13,6 +13,7 @@ import coachingRouter from "./coaching.js";
 import draftsRouter from "./drafts.js";
 import emailRouter from "./email.js";
 import companionRouter from "./companion.js";
+import checkinsRouter from "./checkins.js";
 
 const router: IRouter = Router();
 
@@ -30,5 +31,6 @@ router.use(coachingRouter);
 router.use("/drafts", draftsRouter);
 router.use(emailRouter);
 router.use(companionRouter);
+router.use(checkinsRouter);
 
 export default router;

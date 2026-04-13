@@ -32,6 +32,7 @@ type ExportedData = {
 const NOTIF_PREFS_KEY = "resilium_notif_prefs_v1";
 const CHECKIN_KEY = "resilium_checkin_history_v1";
 const STREAK_KEY = "resilium_streak_v1";
+const DOMAIN = process.env.EXPO_PUBLIC_DOMAIN;
 
 type CheckinEntry = { date: string; scores: Record<string, number> };
 
@@ -94,6 +95,27 @@ export default function MyDataScreen() {
       } catch {}
     });
   }, []);
+
+  useEffect(() => {
+    if (!isSignedIn) return;
+    (async () => {
+      try {
+        const headers = await getAuthHeaders();
+        const res = await fetch(`https://${DOMAIN}/api/checkins`, { headers });
+        if (!res.ok) return;
+        const data = await res.json();
+        const serverEntries: Array<{ date: string; scores: Record<string, number> }> = data.checkins ?? [];
+        if (serverEntries.length === 0) return;
+        const raw = await AsyncStorage.getItem(CHECKIN_KEY);
+        const local: Array<{ date: string; scores: Record<string, number> }> = raw ? JSON.parse(raw) : [];
+        const byDate = new Map(local.map(e => [e.date, e]));
+        for (const entry of serverEntries) byDate.set(entry.date, entry);
+        const merged = Array.from(byDate.values()).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 30);
+        await AsyncStorage.setItem(CHECKIN_KEY, JSON.stringify(merged));
+        setCheckinHistory(merged);
+      } catch {}
+    })();
+  }, [isSignedIn]);
 
   useEffect(() => {
     AsyncStorage.getItem(NOTIF_PREFS_KEY).then(val => {

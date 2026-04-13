@@ -19,6 +19,8 @@ import { ColorsType } from "@/constants/colors";
 import { ProGate } from "@/components/ProGate";
 
 const CHECKIN_KEY = "resilium_checkin_history_v1";
+const STREAK_KEY = "resilium_streak_v1";
+const DOMAIN = process.env.EXPO_PUBLIC_DOMAIN;
 
 const DIMENSIONS = [
   { key: "financial",    label: "Financial",     icon: "dollar-sign", desc: "How secure do you feel financially today?" },
@@ -98,7 +100,7 @@ export default function CheckinScreen() {
   const insets = useSafeAreaInsets();
   const segments = useSegments();
   const isTabRoot = segments[0] === "(tabs)";
-  const { isSignedIn } = useAuth();
+  const { isSignedIn, getAuthHeaders } = useAuth();
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
@@ -136,16 +138,47 @@ export default function CheckinScreen() {
   const avgColor = overallAvg >= 4 ? colors.success : overallAvg >= 3 ? "#F59E0B" : colors.danger;
   const avgLabel = overallAvg >= 4 ? "Looking strong" : overallAvg >= 3 ? "Holding steady" : "Some gaps to address";
 
+  const syncToBackend = async (date: string, scores: Record<DimKey, number>) => {
+    try {
+      const headers = await getAuthHeaders();
+      await fetch(`https://${DOMAIN}/api/checkins`, {
+        method: "POST",
+        headers: { ...headers, "Content-Type": "application/json" },
+        body: JSON.stringify({ date, scores }),
+      });
+    } catch {
+      // silent — local AsyncStorage is always the source of truth
+    }
+  };
+
   const handleSubmit = async () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     const today = new Date().toISOString().split("T")[0];
+
     const raw = await AsyncStorage.getItem(CHECKIN_KEY);
     const history: Array<{ date: string; scores: Record<string, number> }> = raw ? JSON.parse(raw) : [];
     const filtered = history.filter(h => h.date !== today);
     filtered.unshift({ date: today, scores: values });
     await AsyncStorage.setItem(CHECKIN_KEY, JSON.stringify(filtered.slice(0, 30)));
+
+    // Update streak
+    const streakRaw = await AsyncStorage.getItem(STREAK_KEY);
+    let streakCount = 1;
+    if (streakRaw) {
+      try {
+        const data: { lastDate: string; count: number } = JSON.parse(streakRaw);
+        const yesterday = new Date(Date.now() - 86_400_000).toISOString().split("T")[0];
+        if (data.lastDate === yesterday) streakCount = data.count + 1;
+        else if (data.lastDate === today) streakCount = data.count;
+      } catch {}
+    }
+    await AsyncStorage.setItem(STREAK_KEY, JSON.stringify({ lastDate: today, count: streakCount }));
+
     setSubmitted(true);
     setAlreadyDoneToday(true);
+
+    // Sync to backend (fire-and-forget, signed-in users only)
+    if (isSignedIn) syncToBackend(today, values);
   };
 
   return (
