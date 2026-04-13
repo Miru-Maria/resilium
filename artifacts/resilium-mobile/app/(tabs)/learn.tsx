@@ -344,7 +344,7 @@ export default function LearnScreen() {
               {segment === "companion" ? "AI Companion" : "Crisis Guides"}
             </Text>
             <Text style={{ fontFamily: "Inter_400Regular", fontSize: 12, marginTop: 1, color: colors.textMuted }}>
-              {segment === "companion" ? "Personalized resilience guidance" : "All guides available offline"}
+              {segment === "companion" ? "Personalized resilience guidance" : "Pro: Emergency protocols for every scenario"}
             </Text>
           </View>
         </View>
@@ -368,7 +368,9 @@ export default function LearnScreen() {
       {segment === "companion" ? (
         <CompanionPanel colors={colors} insets={insets} />
       ) : (
-        <GuidesPanel colors={colors} insets={insets} />
+        <ProGate>
+          <GuidesPanel colors={colors} insets={insets} />
+        </ProGate>
       )}
     </View>
   );

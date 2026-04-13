@@ -680,9 +680,15 @@ function ResultsPageInner() {
           <Button variant="outline" size="sm" onClick={() => setShowShareModal(true)} className="rounded-full">
             <Share2 className="w-4 h-4 mr-2" /> Share
           </Button>
-          <Button variant="outline" size="sm" onClick={handleMarkdownExport} className="rounded-full">
-            <Download className="w-4 h-4 mr-2" /> Markdown
-          </Button>
+          {isPro ? (
+            <Button variant="outline" size="sm" onClick={handleMarkdownExport} className="rounded-full">
+              <Download className="w-4 h-4 mr-2" /> Markdown
+            </Button>
+          ) : (
+            <Button variant="outline" size="sm" onClick={() => window.location.href = "/pricing"} className="rounded-full opacity-60">
+              <Lock className="w-3.5 h-3.5 mr-2" /> Markdown
+            </Button>
+          )}
           </div>
         </div>
       </header>

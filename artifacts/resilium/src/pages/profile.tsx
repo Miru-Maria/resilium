@@ -2062,6 +2062,60 @@ function CompanionTab({ latestPlan }: { latestPlan?: PlanSummary }) {
   );
 }
 
+// ─── Guides Pro Gate ──────────────────────────────────────────────────────────
+function GuidesProGate() {
+  const [, navigate] = useLocation();
+  return (
+    <div className="flex flex-col gap-6 max-w-lg mx-auto py-10 px-2">
+      <div className="flex flex-col items-center text-center gap-3">
+        <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center">
+          <BookOpen className="w-7 h-7 text-primary" />
+        </div>
+        <div>
+          <h3 className="text-xl font-display font-bold mb-1">Crisis Guides — Pro feature</h3>
+          <p className="text-muted-foreground text-sm leading-relaxed max-w-sm mx-auto">
+            Step-by-step emergency protocols tailored to your resilience gaps. Downloadable for offline use when it matters most.
+          </p>
+        </div>
+      </div>
+      <div className="rounded-2xl border border-border/60 bg-muted/20 p-4 space-y-2">
+        {["Job loss & income disruption", "Medical emergency planning", "Natural disaster readiness", "Psychological crisis support", "Financial fallback protocols"].map(item => (
+          <div key={item} className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Lock className="w-3.5 h-3.5 text-primary/50 flex-shrink-0" />
+            <span>{item}</span>
+          </div>
+        ))}
+      </div>
+      <Button onClick={() => navigate("/pricing")} className="rounded-full">
+        Upgrade to Pro to unlock guides
+        <ArrowRight className="w-4 h-4 ml-2" />
+      </Button>
+    </div>
+  );
+}
+
+function GuidesTabWithProGate({ location, lowestDim }: { location?: string; lowestDim?: DimKey }) {
+  const { data: subStatus, isLoading } = useQuery({
+    queryKey: ["subscription-status"],
+    queryFn: async () => {
+      const r = await fetch("/api/subscription/status", { credentials: "include" });
+      if (!r.ok) return null;
+      return r.json() as Promise<{ isPro: boolean }>;
+    },
+    staleTime: 60_000,
+  });
+
+  if (isLoading) return (
+    <div className="flex items-center justify-center py-20">
+      <Loader2 className="w-8 h-8 text-primary animate-spin" />
+    </div>
+  );
+
+  if (!subStatus?.isPro) return <GuidesProGate />;
+
+  return <GuidesTab location={location} lowestDim={lowestDim} />;
+}
+
 // ─── Guides Tab ───────────────────────────────────────────────────────────────
 const GUIDES_OFFLINE_KEY = "resilium_guides_downloaded_v1";
 
@@ -2398,6 +2452,7 @@ export default function ProfilePage() {
               </TabsTrigger>
               <TabsTrigger value="guides" className="rounded-lg gap-1.5 text-sm">
                 <BookOpen className="w-3.5 h-3.5" /> Guides
+                <span className="ml-0.5 text-[9px] font-bold uppercase tracking-wider text-primary/70 bg-primary/10 px-1.5 py-0.5 rounded-full">Pro</span>
               </TabsTrigger>
             </TabsList>
 
@@ -2487,7 +2542,7 @@ export default function ProfilePage() {
 
             <TabsContent value="guides">
               <TabErrorBoundary tabName="guides">
-                <GuidesTab location={latestPlan?.location} lowestDim={lowestDim} />
+                <GuidesTabWithProGate location={latestPlan?.location} lowestDim={lowestDim} />
               </TabErrorBoundary>
             </TabsContent>
           </Tabs>
