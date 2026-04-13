@@ -1,5 +1,6 @@
 import { Router, type IRouter } from "express";
 import path from "path";
+import { fileURLToPath } from "url";
 import { db, resilienceReportsTable, reportFeedbackTable, usersTable, planViewsTable, adminConfigTable } from "@workspace/db";
 import { desc, eq, count, max, and, isNotNull, gte, lte, ilike, or } from "drizzle-orm";
 import {
@@ -529,7 +530,8 @@ router.get("/docs/:name", requireAdminSession, (req, res) => {
     return;
   }
   const ext = name === "platform-assessment" ? "html" : "md";
-  const filePath = path.resolve(process.cwd(), "admin-docs", `${name}.${ext}`);
+  const adminDocsDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "admin-docs");
+  const filePath = path.resolve(adminDocsDir, `${name}.${ext}`);
   res.setHeader("Content-Type", ADMIN_DOCS[name]!);
   res.sendFile(filePath, (err) => {
     if (err) {
