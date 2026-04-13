@@ -249,3 +249,33 @@ export async function sendSiteAuditReport(opts: {
   const html = `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0D1225;font-family:'Helvetica Neue',Arial,sans-serif;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:40px 20px;"><table width="560" cellpadding="0" cellspacing="0" style="background:#131929;border-radius:16px;overflow:hidden;"><tr><td style="background:${opts.passed ? "#166534" : "#7f1d1d"};padding:20px 32px;"><h1 style="margin:0;color:#fff;font-size:18px;font-weight:800;">${icon} Site Audit · ${passing}/${opts.checks.length} Passing</h1><p style="margin:6px 0 0;color:rgba(255,255,255,0.7);font-size:12px;">${new Date().toUTCString()} · ${opts.totalMs}ms total</p></td></tr><tr><td style="padding:24px 32px;"><table width="100%" cellpadding="0" cellspacing="0" style="background:#1a2235;border-radius:10px;">${rowsHtml}</table><p style="margin:20px 0 0;"><a href="${APP_URL}/admin" style="color:#E08040;font-size:13px;">Open Admin Panel →</a></p></td></tr></table></td></tr></table></body></html>`;
   await send({ to: ADMIN_TO, subject, text, html });
 }
+
+// ─── Competitor Alert ─────────────────────────────────────────────────────────
+export async function sendCompetitorAlert(
+  alerts: Array<{ competitor: string; url: string; note: string }>,
+): Promise<void> {
+  const subject = `🔍 Resilium Competitor Monitor — ${alerts.length} change${alerts.length !== 1 ? "s" : ""} detected`;
+  const lines = alerts.map(a => `• ${a.competitor} (${a.url})\n  ${a.note}`);
+  const text = [`Competitor changes detected at ${new Date().toUTCString()}`, "", ...lines, "", `Admin: ${APP_URL}/admin`].join("\n");
+  const html = `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0D1225;font-family:'Helvetica Neue',Arial,sans-serif;color:#EAD9BE;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:40px 20px;"><table width="560" cellpadding="0" cellspacing="0" style="background:#131929;border-radius:16px;overflow:hidden;"><tr><td style="background:#7c2d12;padding:20px 32px;"><h1 style="margin:0;color:#fff;font-size:18px;font-weight:800;">🔍 Competitor Monitor Alert</h1><p style="margin:6px 0 0;color:rgba(255,255,255,0.7);font-size:12px;">${new Date().toUTCString()}</p></td></tr><tr><td style="padding:24px 32px;">${alerts.map(a => `<div style="margin-bottom:16px;padding:12px 16px;background:#1a2235;border-radius:8px;"><strong style="color:#E08040;">${a.competitor}</strong><br><a href="${a.url}" style="color:#7a6a5a;font-size:12px;">${a.url}</a><p style="margin:6px 0 0;font-size:13px;">${a.note}</p></div>`).join("")}<p style="margin:20px 0 0;"><a href="${APP_URL}/admin" style="color:#E08040;font-size:13px;">Open Admin Panel →</a></p></td></tr></table></td></tr></table></body></html>`;
+  await send({ to: ADMIN_TO, subject, text, html });
+}
+
+// ─── Health Check Summary ─────────────────────────────────────────────────────
+export async function sendHealthCheckSummary(opts: {
+  overallStatus: "pass" | "fail";
+  passCount: number;
+  failCount: number;
+  results: unknown[];
+  triggeredBy: string;
+}): Promise<void> {
+  const icon = opts.overallStatus === "pass" ? "✅" : "⚠️";
+  const subject = `${icon} Resilium Health Check — ${opts.passCount}/${opts.passCount + opts.failCount} passing (${opts.triggeredBy})`;
+  const text = [
+    `Resilium Health Check — ${new Date().toUTCString()}`,
+    `Triggered by: ${opts.triggeredBy}`,
+    `Overall: ${opts.overallStatus.toUpperCase()} | Pass: ${opts.passCount} | Fail: ${opts.failCount}`,
+  ].join("\n");
+  const html = `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0D1225;font-family:'Helvetica Neue',Arial,sans-serif;color:#EAD9BE;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:40px 20px;"><table width="560" cellpadding="0" cellspacing="0" style="background:#131929;border-radius:16px;overflow:hidden;"><tr><td style="background:${opts.overallStatus === "pass" ? "#166534" : "#7f1d1d"};padding:20px 32px;"><h1 style="margin:0;color:#fff;font-size:18px;font-weight:800;">${icon} Health Check · ${opts.passCount}/${opts.passCount + opts.failCount} Passing</h1><p style="margin:6px 0 0;color:rgba(255,255,255,0.7);font-size:12px;">${new Date().toUTCString()} · Triggered by: ${opts.triggeredBy}</p></td></tr><tr><td style="padding:24px 32px;"><p style="margin:0;"><a href="${APP_URL}/admin" style="color:#E08040;font-size:13px;">Open Admin Panel →</a></p></td></tr></table></td></tr></table></body></html>`;
+  await send({ to: ADMIN_TO, subject, text, html });
+}

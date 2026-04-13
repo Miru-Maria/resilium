@@ -37,7 +37,7 @@ router.post("/consent", async (req, res) => {
 
 router.get("/export/:sessionId", gdprRateLimit, async (req, res) => {
   try {
-    const { sessionId } = req.params;
+    const sessionId = req.params["sessionId"] as string;
     if (!sessionId || !UUID_RE.test(sessionId)) {
       res.status(400).json({ error: "VALIDATION_ERROR", message: "Valid session ID (UUID) is required." });
       return;

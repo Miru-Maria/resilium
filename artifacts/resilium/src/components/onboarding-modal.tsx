@@ -13,6 +13,7 @@ export function OnboardingModal() {
       const timer = setTimeout(() => setOpen(true), 800);
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, []);
 
   const dismiss = () => {

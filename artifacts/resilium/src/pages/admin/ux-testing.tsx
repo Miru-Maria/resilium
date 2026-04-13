@@ -46,7 +46,7 @@ interface PersonaProgress {
 }
 
 function getToken() { return localStorage.getItem("admin_token"); }
-function authH() { const t = getToken(); return t ? { Authorization: `Bearer ${t}` } : {}; }
+function authH(): Record<string, string> { const t = getToken(); return t ? { Authorization: `Bearer ${t}` } : {}; }
 
 async function fetchPersonas(): Promise<{ personas: PersonaMeta[] }> {
   const res = await fetch("/api/admin/ux-test/personas", { headers: authH() });

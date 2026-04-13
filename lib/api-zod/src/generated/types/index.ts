@@ -47,4 +47,3 @@ export * from "./resilienceScore";
 export * from "./scenarioSimulation";
 export * from "./scenarioSimulationImpact";
 export * from "./snapshotsResponse";
-export * from "./updateChecklistItemBody";

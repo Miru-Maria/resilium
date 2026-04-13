@@ -99,7 +99,7 @@ router.get("/runs", async (req: Request, res: Response) => {
 router.get("/runs/:runId", async (req: Request, res: Response) => {
   if (!requireAdmin(req, res)) return;
 
-  const { runId } = req.params;
+  const runId = req.params["runId"] as string;
 
   const runs = await db
     .select()
@@ -149,7 +149,7 @@ router.get("/runs/:runId", async (req: Request, res: Response) => {
 router.delete("/runs/:runId", async (req: Request, res: Response) => {
   if (!requireAdmin(req, res)) return;
 
-  const { runId } = req.params;
+  const runId = req.params["runId"] as string;
 
   const existing = await db
     .select()
@@ -180,7 +180,7 @@ router.delete("/runs/:runId", async (req: Request, res: Response) => {
 router.post("/runs/:runId/cancel", async (req: Request, res: Response) => {
   if (!requireAdmin(req, res)) return;
 
-  const { runId } = req.params;
+  const runId = req.params["runId"] as string;
 
   await db
     .update(uxTestRunsTable)
@@ -216,7 +216,7 @@ router.get("/runs/:runId/stream", (req: Request, res: Response) => {
     return;
   }
 
-  const { runId } = req.params;
+  const runId = req.params["runId"] as string;
 
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache");

@@ -200,7 +200,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import type { ResilienceScore, MentalResilienceProfile, ChecklistItem } from "@workspace/api-client-react/src/generated/api.schemas";
+import type { ResilienceScore, MentalResilienceProfile, ChecklistItem } from "@workspace/api-client-react";
 
 /** Safely converts any AI-returned value to a string before rendering as a React child. */
 function toStr(val: unknown): string {
@@ -280,20 +280,20 @@ function ResultsPageInner() {
     query: {
       enabled: !!reportId,
       staleTime: Infinity,
-      retry: (failureCount, error: any) => {
+      retry: (failureCount: number, error: any) => {
         const status = error?.response?.status ?? error?.status;
         if (status === 404) return false;
         return failureCount < 2;
       },
-    }
+    } as any,
   });
 
   const { data: checklistData, refetch: refetchChecklist } = useGetChecklists(reportId, {
-    query: { enabled: !!reportId }
+    query: { enabled: !!reportId } as any,
   });
 
   const { data: snapshotsData } = useGetSnapshots(reportId, {
-    query: { enabled: !!reportId }
+    query: { enabled: !!reportId } as any,
   });
 
   useEffect(() => {
@@ -968,8 +968,8 @@ function ResultsPageInner() {
                 <Progress value={overallPercent} className="h-3 mb-3" />
                 {milestone && (
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <span>{milestone.icon}</span>
-                    <span className="font-medium">{overallPercent}% — {milestone.label}</span>
+                    <span>{milestone!.icon}</span>
+                    <span className="font-medium">{overallPercent}% — {milestone!.label}</span>
                   </div>
                 )}
               </div>

@@ -99,7 +99,7 @@ export async function runCompetitorChecks(triggeredBy = "cron"): Promise<{
   }
 
   if (alerts.length > 0) {
-    await sendCompetitorAlert(alerts).catch((e) =>
+    await sendCompetitorAlert(alerts).catch((e: unknown) =>
       logger.error({ e }, "Failed to send competitor alert email")
     );
   }

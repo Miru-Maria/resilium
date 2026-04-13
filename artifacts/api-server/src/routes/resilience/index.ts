@@ -147,7 +147,7 @@ router.post("/assess", assessRateLimit, async (req, res) => {
       mutualAidAccess: input.mutualAidAccess ?? undefined,
       householdMode: input.householdMode ?? undefined,
       householdComposition: input.householdComposition ?? undefined,
-    });
+    } as any);
 
     const { mentalResilienceSubScores, ...scores } = scoreResult;
 

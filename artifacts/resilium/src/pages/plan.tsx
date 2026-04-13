@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import {
-  Loader2, AlertTriangle, Check, ChevronDown, ChevronUp,
+  Loader2, AlertTriangle, Check, CheckCircle, ChevronDown, ChevronUp,
   Sparkles, Lock, Heart, ExternalLink, Target, ArrowRight,
   TrendingUp, Clock, Star, Activity, Brain, Shield, BookOpen,
   Globe, Zap, DollarSign, Stethoscope, MapPin, Award, ChevronRight,
@@ -21,7 +21,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { useToast } from "@/hooks/use-toast";
 import { useUser, useAuth, useClerk } from "@clerk/react";
 import { cn } from "@/lib/utils";
-import type { ChecklistItem } from "@workspace/api-client-react/src/generated/api.schemas";
+import type { ChecklistItem } from "@workspace/api-client-react";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -288,6 +288,7 @@ export default function PlanPage() {
       const t = setTimeout(() => setShowOnboarding(true), 800);
       return () => clearTimeout(t);
     }
+    return undefined;
   }, []);
   const dismissOnboarding = () => {
     localStorage.setItem("resilium_plan_onboarded_v1", "1");
@@ -295,11 +296,11 @@ export default function PlanPage() {
   };
 
   const { data: report, isLoading, error } = useGetReport(reportId, {
-    query: { enabled: !!reportId, retry: (n, e: any) => (e?.response?.status ?? e?.status) !== 404 && n < 2 },
+    query: { enabled: !!reportId, retry: (n: number, e: any) => (e?.response?.status ?? e?.status) !== 404 && n < 2 } as any,
   });
 
   const { data: checklistData, refetch: refetchChecklist } = useGetChecklists(reportId, {
-    query: { enabled: !!reportId },
+    query: { enabled: !!reportId } as any,
   });
 
   const { mutateAsync: updateItem } = useUpdateChecklistItem();

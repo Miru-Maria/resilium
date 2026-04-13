@@ -8,7 +8,7 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
-import type { ResilienceScore } from "@workspace/api-client-react/src/generated/api.schemas";
+import type { ResilienceScore } from "@workspace/api-client-react";
 
 interface RadarChartViewProps {
   score: ResilienceScore;

@@ -33,7 +33,7 @@ interface RunReport {
   results: PersonaResult[];
 }
 
-function authH() { const t = localStorage.getItem("admin_token"); return t ? { Authorization: `Bearer ${t}` } : {}; }
+function authH(): Record<string, string> { const t = localStorage.getItem("admin_token"); return t ? { Authorization: `Bearer ${t}` } : {}; }
 
 async function fetchRunReport(runId: string): Promise<RunReport> {
   const res = await fetch(`/api/admin/ux-test/runs/${runId}`, { headers: authH() });

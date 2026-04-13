@@ -46,7 +46,7 @@ router.post("/scenarios/:reportId", scenarioRateLimit, async (req, res) => {
     return res.status(401).json({ error: "Authentication required for scenario analysis" });
   }
 
-  const { reportId } = req.params;
+  const reportId = req.params["reportId"] as string;
   const parsed = BodySchema.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ error: "Invalid input", details: parsed.error.flatten() });

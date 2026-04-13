@@ -104,7 +104,7 @@ router.delete("/me/plans/:reportId", async (req: Request, res: Response) => {
     return;
   }
 
-  const { reportId } = req.params;
+  const reportId = req.params["reportId"] as string;
 
   try {
     const rows = await db
@@ -154,7 +154,8 @@ router.get("/me/score-history", async (req: Request, res: Response) => {
 
     const reportIds = userReports.map(r => r.reportId);
     if (reportIds.length === 0) {
-      return res.json({ snapshots: [], isPro: false });
+      res.json({ snapshots: [], isPro: false });
+      return;
     }
 
     const [snapshots, subRows] = await Promise.all([

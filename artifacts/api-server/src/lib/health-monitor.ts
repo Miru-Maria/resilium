@@ -83,7 +83,7 @@ export async function runHealthChecks(triggeredBy = "cron"): Promise<{
     triggeredBy,
   });
 
-  await sendHealthCheckSummary({ overallStatus, passCount, failCount, results, triggeredBy }).catch((e) =>
+  await sendHealthCheckSummary({ overallStatus, passCount, failCount, results, triggeredBy }).catch((e: unknown) =>
     logger.error({ e }, "Failed to send health check email")
   );
 

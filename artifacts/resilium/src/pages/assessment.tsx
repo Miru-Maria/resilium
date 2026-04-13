@@ -1625,7 +1625,7 @@ export default function AssessmentPage() {
                   <h2 className="text-3xl md:text-4xl font-display font-bold">{t.s2Title}</h2>
                   <p className="text-muted-foreground text-lg">{t.s2Sub}</p>
                   <div className="grid grid-cols-2 gap-3" role="radiogroup" aria-label="Age bracket">
-                    {(t.ageBrackets as { id: AssessmentInputAgeBracket; label: string; desc: string }[]).map((opt) => (
+                    {(t.ageBrackets as unknown as { id: AssessmentInputAgeBracket; label: string; desc: string }[]).map((opt) => (
                       <Card
                         key={opt.id}
                         role="radio"
@@ -1651,7 +1651,7 @@ export default function AssessmentPage() {
                 <div className="space-y-6">
                   <h2 className="text-3xl md:text-4xl font-display font-bold">{isHousehold ? "How stable is your household's primary income?" : t.s3Title}</h2>
                   <div className="grid gap-4" role="radiogroup" aria-label="Income stability">
-                    {(t.incomeOptions as { id: string; title: string; desc: string }[]).map((opt) => (
+                    {(t.incomeOptions as unknown as { id: string; title: string; desc: string }[]).map((opt) => (
                       <Card 
                         key={opt.id}
                         role="radio"
@@ -1786,7 +1786,7 @@ export default function AssessmentPage() {
                   <h2 className="text-3xl md:text-4xl font-display font-bold">{t.s6Title}</h2>
                   <p className="text-muted-foreground text-lg">{t.s6Sub}</p>
                   <div className="grid grid-cols-2 gap-4" role="radiogroup" aria-label="Number of dependents">
-                    {(t.dependentOptions as { value: number; label: string; desc: string }[]).map((opt) => (
+                    {(t.dependentOptions as unknown as { value: number; label: string; desc: string }[]).map((opt) => (
                       <Card
                         key={opt.value}
                         role="radio"
@@ -1813,7 +1813,7 @@ export default function AssessmentPage() {
                   <h2 className="text-3xl md:text-4xl font-display font-bold">{isHousehold ? "What practical skills exist across your household?" : t.s7Title}</h2>
                   <p className="text-muted-foreground">{isHousehold ? "Select all skills your household members collectively have — each one is a shared asset." : t.s7Sub}</p>
                   <div className="grid grid-cols-1 gap-3" role="group" aria-label="Practical skills">
-                    {(t.skills as { id: string; label: string; desc: string }[]).map((opt) => (
+                    {(t.skills as unknown as { id: string; label: string; desc: string }[]).map((opt) => (
                       <div 
                         key={opt.id}
                         role="checkbox"
@@ -1843,7 +1843,7 @@ export default function AssessmentPage() {
                   <div>
                     <h3 className="text-xl font-display font-bold mb-3">{t.s8HealthTitle}</h3>
                     <div className="flex gap-2" role="radiogroup" aria-label="Health status">
-                      {(t.healthOptions as { id: AssessmentInputHealthStatus; label: string }[]).map(opt => (
+                      {(t.healthOptions as unknown as { id: AssessmentInputHealthStatus; label: string }[]).map(opt => (
                         <Button 
                           key={opt.id}
                           role="radio"
@@ -1861,7 +1861,7 @@ export default function AssessmentPage() {
                     <h3 className="text-xl font-display font-bold mb-1">{t.s8ChronicTitle}</h3>
                     <p className="text-sm text-muted-foreground mb-3">{t.s8ChronicSub}</p>
                     <div className="flex gap-2" role="radiogroup" aria-label="Chronic condition">
-                      {(t.chronicOptions as { id: string; label: string }[]).map(opt => (
+                      {(t.chronicOptions as unknown as { id: string; label: string }[]).map(opt => (
                         <Button 
                           key={opt.id}
                           role="radio"
@@ -1955,7 +1955,7 @@ export default function AssessmentPage() {
                     <h3 className="text-xl font-display font-bold mb-1">{t.s8PhysicalTitle}</h3>
                     <p className="text-sm text-muted-foreground mb-3">{isHousehold ? "Rate based on the least physically capable member — your plan is only as mobile as its least mobile person." : t.s8PhysicalSub}</p>
                     <div className="flex gap-2" role="radiogroup" aria-label="Physical capability">
-                      {(t.mobilityOptions as { id: AssessmentInputMobilityLevel; label: string }[]).map(opt => (
+                      {(t.mobilityOptions as unknown as { id: AssessmentInputMobilityLevel; label: string }[]).map(opt => (
                         <Button 
                           key={opt.id}
                           role="radio"
@@ -1973,7 +1973,7 @@ export default function AssessmentPage() {
                     <h3 className="text-xl font-display font-bold mb-1">{t.s8RelocationTitle}</h3>
                     <p className="text-sm text-muted-foreground mb-3">{isHousehold ? "How quickly could your household pack up and relocate if you had to?" : t.s8RelocationSub}</p>
                     <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Relocation readiness">
-                      {(t.relocationOptions as { id: string; label: string; desc: string }[]).map(opt => (
+                      {(t.relocationOptions as unknown as { id: string; label: string; desc: string }[]).map(opt => (
                         <Card
                           key={opt.id}
                           role="radio"
@@ -2003,7 +2003,7 @@ export default function AssessmentPage() {
                     <p className="mt-2 text-muted-foreground text-sm">{t.housingStepSub}</p>
                   </div>
                   <div className="grid grid-cols-1 gap-3" role="radiogroup" aria-label="Housing situation">
-                    {(t.housingOptions as { id: string; label: string }[]).map((opt) => (
+                    {(t.housingOptions as unknown as { id: string; label: string }[]).map((opt) => (
                       <Card 
                         key={opt.id}
                         role="radio"
@@ -2029,7 +2029,7 @@ export default function AssessmentPage() {
                   <h2 className="text-3xl md:text-4xl font-display font-bold">{isHousehold ? "Household Emergency Preparedness" : t.s10Title}</h2>
                   <p className="text-muted-foreground text-lg">{isHousehold ? "How much emergency food, water, and essential medicines does your household have readily available?" : t.s10Sub}</p>
                   <div className="grid grid-cols-1 gap-3" role="radiogroup" aria-label="Emergency supplies tier">
-                    {(t.emergencyOptions as { id: string; label: string; desc: string }[]).map((opt) => (
+                    {(t.emergencyOptions as unknown as { id: string; label: string; desc: string }[]).map((opt) => (
                       <Card 
                         key={opt.id}
                         role="radio"
@@ -2056,7 +2056,7 @@ export default function AssessmentPage() {
                   <h2 className="text-3xl md:text-4xl font-display font-bold">{t.s11Title}</h2>
                   <p className="text-muted-foreground">{t.s11Sub}</p>
                   <div className="grid grid-cols-2 gap-3" role="group" aria-label="Risk concerns">
-                    {(t.riskOptions as { id: string; label: string }[]).map((opt) => {
+                    {(t.riskOptions as unknown as { id: string; label: string }[]).map((opt) => {
                       const isSelected = formData.riskConcerns.includes(opt.id as AssessmentInputRiskConcernsItem);
                       const isTraumaAdjacent = opt.id === 'war_conflict' || opt.id === 'illness';
                       return (
@@ -2100,7 +2100,7 @@ export default function AssessmentPage() {
                     <h3 className="text-xl font-display font-bold mb-1">{t.s12ContactsTitle}</h3>
                     <p className="text-sm text-muted-foreground mb-3">{isHousehold ? "People your household could collectively call on in a major crisis — family, friends, neighbors, or community." : t.s12ContactsSub}</p>
                     <div className="grid grid-cols-2 gap-3" role="radiogroup" aria-label="Trusted contacts">
-                      {(t.contactOptions as { value: number; label: string; desc: string }[]).map((opt) => (
+                      {(t.contactOptions as unknown as { value: number; label: string; desc: string }[]).map((opt) => (
                         <Card
                           key={opt.value}
                           role="radio"
@@ -2124,7 +2124,7 @@ export default function AssessmentPage() {
                     <h3 className="text-xl font-display font-bold mb-1">{t.s12InvolvementTitle}</h3>
                     <p className="text-sm text-muted-foreground mb-3">{t.s12InvolvementSub}</p>
                     <div className="grid grid-cols-1 gap-3" role="radiogroup" aria-label="Community involvement">
-                      {(t.involvementOptions as { id: string; label: string; desc: string }[]).map((opt) => (
+                      {(t.involvementOptions as unknown as { id: string; label: string; desc: string }[]).map((opt) => (
                         <Card
                           key={opt.id}
                           role="radio"
@@ -2183,7 +2183,7 @@ export default function AssessmentPage() {
                   <div>
                     <h3 className="text-xl font-display font-bold mb-1">{t.s14GoalLabel}</h3>
                     <div className="grid grid-cols-1 gap-3" role="radiogroup" aria-label="Resilience goal">
-                      {(t.goalOptions as { id: string; emoji: string; label: string; desc: string }[]).map((opt) => (
+                      {(t.goalOptions as unknown as { id: string; emoji: string; label: string; desc: string }[]).map((opt) => (
                         <Card
                           key={opt.id}
                           role="radio"
@@ -2193,8 +2193,8 @@ export default function AssessmentPage() {
                             "p-4 cursor-pointer flex items-start gap-4 transition-all duration-200",
                             formData.primaryGoal === opt.id ? "step-card-active" : "hover:border-primary/30"
                           )}
-                          onClick={() => updateField('primaryGoal', opt.id)}
-                          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); updateField('primaryGoal', opt.id); } }}
+                          onClick={() => updateField('primaryGoal', opt.id as any)}
+                          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); updateField('primaryGoal', opt.id as any); } }}
                         >
                           <span className="text-2xl mt-0.5 shrink-0">{opt.emoji}</span>
                           <div>
