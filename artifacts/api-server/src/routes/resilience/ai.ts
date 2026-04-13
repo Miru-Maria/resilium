@@ -1,4 +1,5 @@
 import { openai } from "@workspace/integrations-openai-ai-server";
+import { MAIN_MODEL, MINI_MODEL } from "../../lib/models.js";
 
 type MentalResilienceSubScores = {
   stressTolerance: number;
@@ -371,7 +372,7 @@ Return ONLY the JSON, no additional text.`;
 
   const callAI = async (): Promise<ReportContent> => {
     const response = await openai.chat.completions.create({
-      model: "gpt-5.2",
+      model: MAIN_MODEL,
       max_completion_tokens: 8192,
       messages: [
         { role: "system", content: "You are a resilience planning expert. Always respond with valid JSON only." },
@@ -448,7 +449,7 @@ Generate 4 to 7 specific, actionable sub-steps to complete this checklist item. 
 Return ONLY a JSON object with this exact shape: {"steps": ["step text here", "step text here"]}`;
 
   const response = await openai.chat.completions.create({
-    model: "gpt-4.1-mini",
+    model: MINI_MODEL,
     max_completion_tokens: 1024,
     messages: [
       { role: "system", content: "You are a resilience planning expert. Respond with valid JSON only." },

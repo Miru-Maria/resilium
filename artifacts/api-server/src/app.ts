@@ -7,23 +7,9 @@ import router from "./routes";
 import { logger } from "./lib/logger";
 import { recordServerError, startCron } from "./lib/cron.js";
 
-const REPLIT_DOMAIN = "resilium-ai.replit.app";
-const CANONICAL_DOMAIN = "resilium-platform.com";
-
 const app: Express = express();
 
 app.set("trust proxy", 1);
-
-// 301-redirect legacy Replit domain to canonical domain
-app.use((req: Request, res: Response, next: NextFunction) => {
-  const host = (req.headers["x-forwarded-host"] as string | undefined) ?? req.headers.host ?? "";
-  if (host.includes(REPLIT_DOMAIN)) {
-    const target = `https://${CANONICAL_DOMAIN}${req.url}`;
-    res.redirect(301, target);
-    return;
-  }
-  next();
-});
 
 app.use(
   pinoHttp({

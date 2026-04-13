@@ -106,7 +106,6 @@ export default function ProgressScreen() {
   }, []);
 
   const calendarDays = useMemo(() => buildCalendarDays(history), [history]);
-  const recentCheckins = history.slice(0, 7);
   const totalCheckins = history.length;
 
   return (
@@ -183,95 +182,6 @@ export default function ProgressScreen() {
             </View>
           </View>
 
-          {/* Recent Check-ins */}
-          {recentCheckins.length > 0 ? (
-            <View style={styles.section}>
-              <Text style={styles.eyebrow}>RECENT CHECK-INS</Text>
-              <View style={styles.checkinList}>
-                {recentCheckins.map((entry, idx) => {
-                  const vals = Object.values(entry.scores);
-                  const avg = Math.round(
-                    vals.reduce((s, v) => s + v, 0) / vals.length
-                  );
-                  const dc =
-                    avg >= 4
-                      ? colors.success
-                      : avg >= 3
-                      ? "#F59E0B"
-                      : colors.danger;
-                  const label =
-                    avg >= 4 ? "Strong" : avg >= 3 ? "Moderate" : "Low";
-                  const date = new Date(entry.date + "T12:00:00");
-                  const formatted = date.toLocaleDateString("en-US", {
-                    weekday: "short",
-                    month: "short",
-                    day: "numeric",
-                  });
-                  const isLast = idx === recentCheckins.length - 1;
-                  return (
-                    <View
-                      key={entry.date}
-                      style={[
-                        styles.checkinRow,
-                        !isLast && { borderBottomWidth: 1, borderBottomColor: colors.border },
-                      ]}
-                    >
-                      <View style={{ flex: 1 }}>
-                        <Text style={[styles.checkinDate, { color: colors.text }]}>
-                          {formatted}
-                        </Text>
-                        <View style={styles.dimDots}>
-                          {Object.entries(entry.scores).map(([k, v]) => (
-                            <View
-                              key={k}
-                              style={[
-                                styles.dimDot,
-                                {
-                                  backgroundColor:
-                                    v >= 4
-                                      ? colors.success
-                                      : v >= 3
-                                      ? "#F59E0B"
-                                      : colors.danger,
-                                },
-                              ]}
-                            />
-                          ))}
-                        </View>
-                      </View>
-                      <View
-                        style={[
-                          styles.avgBadge,
-                          {
-                            backgroundColor: dc + "18",
-                            borderColor: dc + "44",
-                          },
-                        ]}
-                      >
-                        <Text style={[styles.avgScore, { color: dc }]}>
-                          {avg}/5
-                        </Text>
-                        <Text style={[styles.avgLabel, { color: dc }]}>
-                          {label}
-                        </Text>
-                      </View>
-                    </View>
-                  );
-                })}
-              </View>
-            </View>
-          ) : (
-            <View style={styles.emptyState}>
-              <Feather name="activity" size={32} color={colors.textMuted} />
-              <Text style={[styles.emptyTitle, { color: colors.text }]}>
-                No check-ins yet
-              </Text>
-              <Text style={[styles.emptyBody, { color: colors.textMuted }]}>
-                Complete your first daily check-in to start tracking your
-                resilience progress.
-              </Text>
-            </View>
-          )}
         </ScrollView>
       </View>
     </ProGate>
@@ -379,67 +289,5 @@ const createStyles = (colors: ColorsType) =>
       padding: 16,
       borderWidth: 1,
       borderColor: colors.border,
-    },
-    checkinList: {
-      borderRadius: 14,
-      overflow: "hidden",
-      borderWidth: 1,
-      borderColor: colors.border,
-      backgroundColor: colors.surface,
-    },
-    checkinRow: {
-      flexDirection: "row",
-      alignItems: "center",
-      paddingHorizontal: 16,
-      paddingVertical: 14,
-      gap: 12,
-    },
-    checkinDate: {
-      fontFamily: "Inter_600SemiBold",
-      fontSize: 13,
-      marginBottom: 6,
-    },
-    dimDots: {
-      flexDirection: "row",
-      gap: 4,
-    },
-    dimDot: {
-      width: 8,
-      height: 8,
-      borderRadius: 4,
-    },
-    avgBadge: {
-      alignItems: "center",
-      paddingHorizontal: 10,
-      paddingVertical: 6,
-      borderRadius: 10,
-      borderWidth: 1,
-      gap: 1,
-      minWidth: 60,
-    },
-    avgScore: {
-      fontFamily: "Inter_700Bold",
-      fontSize: 15,
-    },
-    avgLabel: {
-      fontFamily: "Inter_400Regular",
-      fontSize: 10,
-    },
-    emptyState: {
-      marginTop: 64,
-      alignItems: "center",
-      gap: 12,
-      paddingHorizontal: 24,
-    },
-    emptyTitle: {
-      fontFamily: "Inter_700Bold",
-      fontSize: 18,
-      letterSpacing: -0.3,
-    },
-    emptyBody: {
-      fontFamily: "Inter_400Regular",
-      fontSize: 14,
-      lineHeight: 21,
-      textAlign: "center",
     },
   });

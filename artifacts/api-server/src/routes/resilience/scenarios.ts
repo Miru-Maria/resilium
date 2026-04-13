@@ -3,6 +3,7 @@ import { getAuth } from "@clerk/express";
 import { db, resilienceReportsTable, subscriptionsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
+import { MAIN_MODEL } from "../../lib/models.js";
 import { openai } from "@workspace/integrations-openai-ai-server";
 import { logger } from "../../lib/logger.js";
 import rateLimit from "express-rate-limit";
@@ -150,7 +151,7 @@ Respond with a JSON object with exactly this structure:
 Make score deltas specific to the user's profile — a person with $0 savings experiences a much larger financial delta than one with 12 months of runway.`;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-5.2",
+      model: MAIN_MODEL,
       messages: [{ role: "user", content: prompt }],
       response_format: { type: "json_object" },
       temperature: 0.4,

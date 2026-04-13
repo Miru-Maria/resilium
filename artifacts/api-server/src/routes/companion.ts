@@ -3,6 +3,7 @@ import { getAuth } from "@clerk/express";
 import { db, conversations, messages, subscriptionsTable, resilienceReportsTable } from "@workspace/db";
 import { eq, desc, and } from "drizzle-orm";
 import { openai } from "@workspace/integrations-openai-ai-server";
+import { MINI_MODEL } from "../lib/models.js";
 import rateLimit from "express-rate-limit";
 import { logger } from "../lib/logger.js";
 
@@ -180,7 +181,7 @@ Your approach:
 - American English spelling.`;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4.1-mini",
+      model: MINI_MODEL,
       messages: [
         { role: "system", content: systemPrompt },
         ...priorMessages,

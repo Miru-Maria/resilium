@@ -30,6 +30,10 @@ type ExportedData = {
 };
 
 const NOTIF_PREFS_KEY = "resilium_notif_prefs_v1";
+const CHECKIN_KEY = "resilium_checkin_history_v1";
+const STREAK_KEY = "resilium_streak_v1";
+
+type CheckinEntry = { date: string; scores: Record<string, number> };
 
 type NotifPrefs = {
   dailyHabit: boolean;
@@ -56,6 +60,8 @@ export default function MyDataScreen() {
   const [subscription, setSubscription] = useState<{ status: string; isActive: boolean; planName?: string; currentPeriodEnd?: string } | null>(null);
   const [notifPrefs, setNotifPrefs] = useState<NotifPrefs>(DEFAULT_PREFS);
   const [notifPermission, setNotifPermission] = useState<boolean | null>(null);
+  const [checkinHistory, setCheckinHistory] = useState<CheckinEntry[]>([]);
+  const [checkinStreak, setCheckinStreak] = useState(0);
 
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -73,6 +79,21 @@ export default function MyDataScreen() {
       } catch {}
     })();
   }, [isSignedIn]);
+
+  useEffect(() => {
+    AsyncStorage.getItem(CHECKIN_KEY).then(raw => {
+      if (raw) { try { setCheckinHistory(JSON.parse(raw)); } catch {} }
+    });
+    AsyncStorage.getItem(STREAK_KEY).then(raw => {
+      if (!raw) return;
+      try {
+        const data: { lastDate: string; count: number } = JSON.parse(raw);
+        const today = new Date().toISOString().split("T")[0];
+        const yesterday = new Date(Date.now() - 86_400_000).toISOString().split("T")[0];
+        if (data.lastDate === today || data.lastDate === yesterday) setCheckinStreak(data.count);
+      } catch {}
+    });
+  }, []);
 
   useEffect(() => {
     AsyncStorage.getItem(NOTIF_PREFS_KEY).then(val => {
@@ -316,6 +337,47 @@ export default function MyDataScreen() {
                 <Text style={styles.upgradeSubBtnText}>Upgrade to Pro</Text>
               </Pressable>
             )}
+          </View>
+        )}
+
+        {checkinHistory.length > 0 && (
+          <View style={styles.checkinSection}>
+            <View style={styles.checkinSectionHeader}>
+              <Text style={styles.checkinEyebrow}>RECENT CHECK-INS</Text>
+              {checkinStreak >= 2 && (
+                <View style={[styles.streakBadge, { backgroundColor: "rgba(224,128,64,0.12)", borderColor: "rgba(224,128,64,0.25)" }]}>
+                  <Text style={{ fontSize: 11 }}>🔥</Text>
+                  <Text style={[styles.streakText, { color: colors.primary }]}>{checkinStreak}-day streak</Text>
+                </View>
+              )}
+            </View>
+            <View style={[styles.checkinList, { borderColor: colors.border, backgroundColor: colors.surface }]}>
+              {checkinHistory.slice(0, 7).map((entry, idx) => {
+                const vals = Object.values(entry.scores);
+                const avg = Math.round(vals.reduce((s, v) => s + v, 0) / vals.length);
+                const dc = avg >= 4 ? colors.success : avg >= 3 ? "#F59E0B" : colors.danger;
+                const label = avg >= 4 ? "Strong" : avg >= 3 ? "Moderate" : "Low";
+                const date = new Date(entry.date + "T12:00:00");
+                const formatted = date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+                const isLast = idx === Math.min(checkinHistory.length, 7) - 1;
+                return (
+                  <View key={entry.date} style={[styles.checkinRow, !isLast && { borderBottomWidth: 1, borderBottomColor: colors.border }]}>
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.checkinDate, { color: colors.text }]}>{formatted}</Text>
+                      <View style={styles.dimDots}>
+                        {Object.entries(entry.scores).map(([k, v]) => (
+                          <View key={k} style={[styles.dimDot, { backgroundColor: v >= 4 ? colors.success : v >= 3 ? "#F59E0B" : colors.danger }]} />
+                        ))}
+                      </View>
+                    </View>
+                    <View style={[styles.avgBadge, { backgroundColor: dc + "18", borderColor: dc + "44" }]}>
+                      <Text style={[styles.avgScore, { color: dc }]}>{avg}/5</Text>
+                      <Text style={[styles.avgLabel, { color: dc }]}>{label}</Text>
+                    </View>
+                  </View>
+                );
+              })}
+            </View>
           </View>
         )}
 
@@ -712,4 +774,33 @@ const createStyles = (colors: ColorsType) => StyleSheet.create({
   notifWarningText: {
     fontFamily: "Inter_400Regular", fontSize: 12, color: "#B45309", flex: 1, lineHeight: 17,
   },
+  checkinSection: { gap: 10 },
+  checkinSectionHeader: {
+    flexDirection: "row", alignItems: "center", justifyContent: "space-between",
+  },
+  checkinEyebrow: {
+    fontFamily: "Inter_700Bold", fontSize: 10, letterSpacing: 1.2,
+    color: colors.textMuted, textTransform: "uppercase",
+  },
+  streakBadge: {
+    flexDirection: "row", alignItems: "center", gap: 4,
+    borderRadius: 8, paddingHorizontal: 8, paddingVertical: 4, borderWidth: 1,
+  },
+  streakText: { fontFamily: "Inter_600SemiBold", fontSize: 11 },
+  checkinList: {
+    borderRadius: 16, borderWidth: 1, overflow: "hidden",
+  },
+  checkinRow: {
+    flexDirection: "row", alignItems: "center", gap: 12,
+    paddingVertical: 12, paddingHorizontal: 14,
+  },
+  checkinDate: { fontFamily: "Inter_600SemiBold", fontSize: 13, marginBottom: 5 },
+  dimDots: { flexDirection: "row", gap: 5 },
+  dimDot: { width: 8, height: 8, borderRadius: 4 },
+  avgBadge: {
+    alignItems: "center", borderRadius: 10, paddingVertical: 6,
+    paddingHorizontal: 10, borderWidth: 1, minWidth: 60,
+  },
+  avgScore: { fontFamily: "Inter_700Bold", fontSize: 14 },
+  avgLabel: { fontFamily: "Inter_400Regular", fontSize: 10, marginTop: 1 },
 });

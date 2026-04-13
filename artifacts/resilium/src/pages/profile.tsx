@@ -1165,23 +1165,6 @@ function AccountTab({ user, plans, onAllPlansDeleted }: {
                 Review your Resilience Profile, track your progress, and access your action plans on the go. Scan the QR code with your phone camera to open instantly.
               </p>
 
-              {/* App Store — coming soon */}
-              <div className="flex items-center gap-3 pt-1">
-                <div className="relative">
-                  <img
-                    src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg"
-                    alt="Download on the App Store"
-                    className="h-9 opacity-40 select-none pointer-events-none"
-                    draggable={false}
-                  />
-                  <span className="absolute -top-1.5 -right-1 bg-slate-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none">
-                    Soon
-                  </span>
-                </div>
-                <p className="text-xs text-muted-foreground leading-snug">
-                  iOS App Store listing<br />coming soon
-                </p>
-              </div>
             </div>
           </div>
         </CardContent>

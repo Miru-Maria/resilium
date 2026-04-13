@@ -1,5 +1,6 @@
 import { randomUUID } from "crypto";
 import { db, resilienceReportsTable, uxTestResultsTable, uxTestRunsTable } from "@workspace/db";
+import { MINI_MODEL } from "../../../lib/models.js";
 import { and, eq, inArray } from "drizzle-orm";
 import { calculateScores } from "../../resilience/scoring.js";
 import { generateResilienceReport } from "../../resilience/ai.js";
@@ -58,7 +59,7 @@ Respond with JSON: {"rating": <1-5>, "notes": "<2-3 sentence evaluation>", "obse
 Return ONLY the JSON.`;
 
   const response = await openai.chat.completions.create({
-    model: "gpt-4.1-mini",
+    model: MINI_MODEL,
     max_completion_tokens: 512,
     messages: [
       { role: "system", content: "You are a UX evaluation expert. Always respond with valid JSON only." },
@@ -105,7 +106,7 @@ Format this as a clear, structured analysis that a product team can act on. Use 
 Limit to 600 words.`;
 
   const response = await openai.chat.completions.create({
-    model: "gpt-4.1-mini",
+    model: MINI_MODEL,
     max_completion_tokens: 1024,
     messages: [
       { role: "system", content: "You are a UX research expert synthesizing test results." },

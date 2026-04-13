@@ -71,20 +71,11 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="companion"
+        name="learn"
         options={{
-          title: "Companion",
+          title: "Learn",
           tabBarIcon: ({ color, size }) => (
-            <TabBarIcon name="cpu" color={color} size={size - 2} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="guides"
-        options={{
-          title: "Guides",
-          tabBarIcon: ({ color, size }) => (
-            <TabBarIcon name="book-open" color={color} size={size - 2} />
+            <TabBarIcon name="layers" color={color} size={size - 2} />
           ),
         }}
       />
@@ -97,6 +88,8 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen name="companion" options={{ href: null }} />
+      <Tabs.Screen name="guides" options={{ href: null }} />
     </Tabs>
   );
 }

@@ -35,7 +35,7 @@ router.post(
   "/paddle/webhook",
   paddleWebhookRateLimit,
   async (req, res) => {
-    const webhookSecret = process.env["PADDLE_RESILIUM_WEBHOOK_SECRET_KEY"] ?? process.env["PADDLE_WEBHOOK_SECRET"];
+    const webhookSecret = process.env["PADDLE_WEBHOOK_SECRET"];
     // express.raw() (registered in app.ts before express.json()) captures the body as a Buffer
     const rawBody = Buffer.isBuffer(req.body) ? req.body.toString("utf8") : JSON.stringify(req.body);
 

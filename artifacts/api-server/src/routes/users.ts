@@ -3,6 +3,7 @@ import { getAuth, createClerkClient } from "@clerk/express";
 import { db, resilienceReportsTable, usersTable, subscriptionsTable, checklistProgressTable, progressSnapshotsTable, reportFeedbackTable } from "@workspace/db";
 import { and, eq, inArray, desc } from "drizzle-orm";
 import { openai } from "@workspace/integrations-openai-ai-server";
+import { MINI_MODEL } from "../lib/models.js";
 import { sendWelcomeEmail } from "../lib/email.js";
 import rateLimit from "express-rate-limit";
 
@@ -430,7 +431,7 @@ Write a concise, insightful comparison in plain English. Structure your response
 Return only valid JSON.`;
 
     const aiRes = await openai.chat.completions.create({
-      model: "gpt-4.1-mini",
+      model: MINI_MODEL,
       max_completion_tokens: 700,
       messages: [
         { role: "system", content: "You are a resilience advisor. Always respond with valid JSON only." },
