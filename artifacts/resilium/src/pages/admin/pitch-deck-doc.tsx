@@ -97,7 +97,7 @@ const SLIDES = [
     keyPoints: [
       "10 minutes to first score — no account required to start",
       "6 resilience dimensions — financial, health, skills, mobility, psychological, resources",
-      "Individual & Household assessment modes",
+      "2 assessment modes — individual or full household (assess your family together)",
       "0–100 score — clear, actionable, with top vulnerabilities and personalised plan",
       "Free to start — always — 3 full assessments before deciding on Pro",
     ],
