@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
+import { OnboardingModal } from "@/components/onboarding-modal";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import {
@@ -292,6 +293,7 @@ export default function LandingPage() {
         <AnimatedBackground />
       </div>
 
+      <OnboardingModal />
       {/* Smart banner — onboarding for new users, re-engagement for returning users */}
       <SignedInBanner />
 
