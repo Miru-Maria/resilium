@@ -24,6 +24,12 @@ uri = "file://attached_assets/generated_images/resilium-linkedin-banner.png"
 type = "image"
 title = "resilium linkedin banner"
 
+[[generated]]
+id = "txvoyUG7x7LOK65kYm3IX"
+uri = "file://attached_assets/generated_images/resilium-linkedin-banner-v2-bg.png"
+type = "image"
+title = "resilium linkedin banner v2 background"
+
 [[outputs]]
 id = "Idq-hMXsmfbVatslIDfxJ"
 uri = "file://attached_assets/resilium-thumbnail.png"
@@ -89,3 +95,9 @@ id = "ddWCPcl70VdsgFU4aMequ"
 uri = "file://attached_assets/generated_images/resilium-linkedin-banner.png"
 type = "image"
 title = "Resilium LinkedIn Banner"
+
+[[outputs]]
+id = "j0wWLzGhWJ7SnujlAlkVS"
+uri = "file://attached_assets/generated_images/resilium-linkedin-banner-v2.jpg"
+type = "image"
+title = "Resilium LinkedIn Banner — with tagline"
