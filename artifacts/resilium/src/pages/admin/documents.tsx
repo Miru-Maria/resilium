@@ -1,14 +1,25 @@
 import React, { useState } from "react";
 import { AdminLayout } from "./layout";
-import { FileText, LayoutTemplate, BarChart2, Radar, Rocket } from "lucide-react";
+import { FileText, LayoutTemplate, BarChart2, Radar, Rocket, BookOpen, Code2, Layers } from "lucide-react";
 import { cn } from "@/lib/utils";
 import CompetitiveAnalysisPage from "@/pages/competitive-analysis";
 import MarketingStrategyDoc from "./marketing-strategy-doc";
 import CompetitorMonitoringDoc from "./competitor-monitoring-doc";
 import PlatformAssessmentDoc from "./platform-assessment-doc";
 import { MarketingPageContent } from "./marketing";
+import WhitepaperDoc from "./whitepaper-doc";
+import TechnicalSpecDoc from "./technical-spec-doc";
+import PitchDeckDoc from "./pitch-deck-doc";
 
-type Tab = "marketing-strategy" | "platform-assessment" | "competitive-analysis" | "gtm-plan" | "competitor-monitoring";
+type Tab =
+  | "marketing-strategy"
+  | "platform-assessment"
+  | "competitive-analysis"
+  | "gtm-plan"
+  | "competitor-monitoring"
+  | "whitepaper"
+  | "technical-spec"
+  | "pitch-deck";
 
 export default function AdminDocumentsPage() {
   const [activeTab, setActiveTab] = useState<Tab>("marketing-strategy");
@@ -19,6 +30,9 @@ export default function AdminDocumentsPage() {
     { key: "competitive-analysis",  label: "Competitive Analysis",  icon: BarChart2 },
     { key: "gtm-plan",              label: "GTM Plan",              icon: Rocket },
     { key: "competitor-monitoring", label: "Competitor Monitoring", icon: Radar },
+    { key: "whitepaper",            label: "White Paper",           icon: BookOpen },
+    { key: "technical-spec",        label: "Technical Spec",        icon: Code2 },
+    { key: "pitch-deck",            label: "Pitch Deck",            icon: Layers },
   ];
 
   return (
@@ -56,11 +70,14 @@ export default function AdminDocumentsPage() {
         </div>
 
         <div className="flex-1 overflow-auto">
-          {activeTab === "marketing-strategy" && <MarketingStrategyDoc />}
-          {activeTab === "platform-assessment" && <PlatformAssessmentDoc />}
-          {activeTab === "competitive-analysis" && <CompetitiveAnalysisPage />}
-          {activeTab === "gtm-plan" && <MarketingPageContent />}
+          {activeTab === "marketing-strategy"    && <MarketingStrategyDoc />}
+          {activeTab === "platform-assessment"   && <PlatformAssessmentDoc />}
+          {activeTab === "competitive-analysis"  && <CompetitiveAnalysisPage />}
+          {activeTab === "gtm-plan"              && <MarketingPageContent />}
           {activeTab === "competitor-monitoring" && <CompetitorMonitoringDoc />}
+          {activeTab === "whitepaper"            && <WhitepaperDoc />}
+          {activeTab === "technical-spec"        && <TechnicalSpecDoc />}
+          {activeTab === "pitch-deck"            && <PitchDeckDoc />}
         </div>
       </div>
     </AdminLayout>

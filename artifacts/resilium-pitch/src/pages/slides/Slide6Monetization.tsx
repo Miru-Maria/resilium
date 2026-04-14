@@ -56,7 +56,7 @@ export default function Slide6Monetization() {
                 className="text-[1.1vw] font-semibold px-[0.8vw] py-[0.4vh] rounded-full"
                 style={{ background: "rgba(224,128,64,0.15)", color: "#E08040", fontFamily: "Inter, sans-serif" }}
               >
-                2 full assessments
+                3 full assessments
               </div>
             </div>
             <div

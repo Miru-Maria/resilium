@@ -89,7 +89,7 @@ export default function Slide7Close() {
             <div style={RULE} />
             <div>
               <div style={LABEL}>To start — always</div>
-              <div style={SUB}>2 full assessments before you decide on Pro</div>
+              <div style={SUB}>3 full assessments before you decide on Pro</div>
             </div>
           </div>
         </div>
