@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { AdminLayout } from "./layout";
-import { FileText, LayoutTemplate, BarChart2, Radar, Rocket, BookOpen, Code2, Layers } from "lucide-react";
+import { FileText, LayoutTemplate, BarChart2, Radar, Rocket, BookOpen, Code2, Layers, Palette, Megaphone } from "lucide-react";
 import { cn } from "@/lib/utils";
 import CompetitiveAnalysisPage from "@/pages/competitive-analysis";
 import MarketingStrategyDoc from "./marketing-strategy-doc";
@@ -10,6 +10,8 @@ import { MarketingPageContent } from "./marketing";
 import WhitepaperDoc from "./whitepaper-doc";
 import TechnicalSpecDoc from "./technical-spec-doc";
 import PitchDeckDoc from "./pitch-deck-doc";
+import BrandIdentityDoc from "./brand-identity-doc";
+import ContentStrategyDoc from "./content-strategy-doc";
 
 type Tab =
   | "marketing-strategy"
@@ -19,7 +21,9 @@ type Tab =
   | "competitor-monitoring"
   | "whitepaper"
   | "technical-spec"
-  | "pitch-deck";
+  | "pitch-deck"
+  | "brand-identity"
+  | "content-strategy";
 
 export default function AdminDocumentsPage() {
   const [activeTab, setActiveTab] = useState<Tab>("marketing-strategy");
@@ -33,6 +37,8 @@ export default function AdminDocumentsPage() {
     { key: "whitepaper",            label: "White Paper",           icon: BookOpen },
     { key: "technical-spec",        label: "Technical Spec",        icon: Code2 },
     { key: "pitch-deck",            label: "Pitch Deck",            icon: Layers },
+    { key: "brand-identity",        label: "Brand Identity",        icon: Palette },
+    { key: "content-strategy",      label: "Content Strategy",      icon: Megaphone },
   ];
 
   return (
@@ -78,6 +84,8 @@ export default function AdminDocumentsPage() {
           {activeTab === "whitepaper"            && <WhitepaperDoc />}
           {activeTab === "technical-spec"        && <TechnicalSpecDoc />}
           {activeTab === "pitch-deck"            && <PitchDeckDoc />}
+          {activeTab === "brand-identity"        && <BrandIdentityDoc />}
+          {activeTab === "content-strategy"      && <ContentStrategyDoc />}
         </div>
       </div>
     </AdminLayout>
