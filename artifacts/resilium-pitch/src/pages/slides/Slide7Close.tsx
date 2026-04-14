@@ -67,7 +67,7 @@ export default function Slide7Close() {
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: "2.2vw" }}>
-            <span style={{ ...NUM, fontSize: "1.7vw" }}>Individual<br/>& Household</span>
+            <span style={{ ...NUM, fontSize: "1.4vw", width: "11vw" }}>Individual<br/>& Household</span>
             <div style={RULE} />
             <div>
               <div style={LABEL}>Assessment modes</div>
