@@ -67,11 +67,11 @@ export default function Slide7Close() {
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: "2.2vw" }}>
-            <span style={{ ...NUM, fontSize: "1.4vw", width: "11vw" }}>Individual<br/>& Household</span>
+            <span style={NUM}>2</span>
             <div style={RULE} />
             <div>
               <div style={LABEL}>Assessment modes</div>
-              <div style={SUB}>assess yourself, or your full household together</div>
+              <div style={SUB}>individual or full household — assess yourself or your family together</div>
             </div>
           </div>
 
