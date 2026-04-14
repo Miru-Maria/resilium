@@ -18,6 +18,12 @@ uri = "file://attached_assets/generated_images/resilium-video-thumbnail.png"
 type = "image"
 title = "resilium video thumbnail with text"
 
+[[generated]]
+id = "dFiqOG1KnJvAi-Rzv2l28"
+uri = "file://attached_assets/generated_images/resilium-linkedin-banner.png"
+type = "image"
+title = "resilium linkedin banner"
+
 [[outputs]]
 id = "Idq-hMXsmfbVatslIDfxJ"
 uri = "file://attached_assets/resilium-thumbnail.png"
@@ -77,3 +83,9 @@ id = "mWdOMc3bR8dWSCiJ15ZU5"
 uri = "file://attached_assets/generated_images/resilium-video-thumbnail.png"
 type = "image"
 title = "Resilium Video Thumbnail"
+
+[[outputs]]
+id = "ddWCPcl70VdsgFU4aMequ"
+uri = "file://attached_assets/generated_images/resilium-linkedin-banner.png"
+type = "image"
+title = "Resilium LinkedIn Banner"
