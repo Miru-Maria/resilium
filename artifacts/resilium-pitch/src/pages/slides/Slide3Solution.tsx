@@ -71,7 +71,7 @@ export default function Slide3Solution() {
               className="text-[1.4vw] font-light leading-relaxed"
               style={{ color: "#8A7A6A", fontFamily: "Inter, sans-serif" }}
             >
-              GPT-5.2 produces a 0–100 resilience score, top vulnerabilities, 5 scenario stress-tests, and a personalized action plan.
+              gpt-5.4 produces a 0–100 resilience score, top vulnerabilities, 4 scenario stress-tests, and a personalized action plan. An AI Companion (gpt-4.1-mini) answers follow-up questions in context.
             </div>
           </div>
 
@@ -95,7 +95,7 @@ export default function Slide3Solution() {
               className="text-[1.4vw] font-light leading-relaxed"
               style={{ color: "#8A7A6A", fontFamily: "Inter, sans-serif" }}
             >
-              Daily habits, checklists, progress snapshots over time. Pro users unlock crisis scenario simulations and coaching referrals.
+              Daily coaching tips, streak tracking, achievement badges, and a 30-day resilience challenge weighted to your weakest areas. Pro users unlock scenario simulations, AI Companion, and offline plan access.
             </div>
           </div>
         </div>

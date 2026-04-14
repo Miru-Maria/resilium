@@ -1,5 +1,5 @@
 # Resilium: Full Technical Specification
-## Version 2.0 — March 2026
+## Version 3.0 — April 2026
 
 ---
 
@@ -27,7 +27,7 @@ resilium/
 |---|---|---|---|
 | `api-server` | Node.js 24 | `$PORT` (8080 dev) | REST API, AI orchestration, auth, webhooks |
 | `resilium` | Vite 7 / React 19 | `$PORT` (5173 dev) | Web frontend (SPA) |
-| `resilium-mobile` | Expo SDK 53 | `$PORT` | React Native app (web + iOS + Android) |
+| `resilium-mobile` | Expo SDK 53 | `$PORT` | React Native app (iOS + web only) |
 
 ---
 
@@ -43,8 +43,8 @@ resilium/
 | ORM | Drizzle ORM | 0.39.x |
 | Database | PostgreSQL | 16 (Replit managed) |
 | Session store | connect-pg-simple | pg-backed sessions |
-| Authentication | Replit Auth (OpenID Connect / PKCE) | — |
-| AI provider | OpenAI gpt-5.2 via Replit AI Integrations proxy | gpt-5.2 |
+| Authentication | Clerk (JWT verification via `@clerk/express`) | — |
+| AI provider | OpenAI gpt-5.4 (reports) / gpt-4.1-mini (AI Companion) via Replit AI Integrations proxy | — |
 | Rate limiting | express-rate-limit | 7.x |
 | Build | esbuild (via custom build.mjs) | 0.24.x |
 
@@ -83,7 +83,6 @@ resilium/
 | Package | Purpose |
 |---|---|
 | `@workspace/db` | Drizzle schema, types, and database client |
-| `@workspace/replit-auth-web` | Shared Replit Auth hook (`useAuth`) for web |
 
 ---
 
@@ -103,7 +102,7 @@ profile_image_url VARCHAR
 created_at        TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 updated_at        TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 ```
-Populated and maintained by Replit Auth on every login via upsert.
+Populated and maintained by Clerk on every authenticated request via upsert.
 
 #### `sessions`
 ```sql
@@ -212,6 +211,19 @@ created_at   TIMESTAMP DEFAULT NOW()
 ```
 Stores Expo push tokens for server-initiated notifications.
 
+#### `challenge_progress`
+```sql
+id          SERIAL PRIMARY KEY
+user_id     VARCHAR NOT NULL REFERENCES users(id) ON DELETE CASCADE
+day         INTEGER NOT NULL             -- 1–30
+completed   BOOLEAN NOT NULL DEFAULT false
+completed_at TIMESTAMP
+action_text TEXT
+dimension   TEXT
+created_at  TIMESTAMP DEFAULT NOW()
+```
+Stores per-user 30-day resilience challenge progress.
+
 #### Additional Tables
 - `gdpr_consent` — versioned consent records with session ID, version string, and timestamp
 - `gdpr_requests` — tracks data export/deletion requests with contact email and request type
@@ -226,7 +238,7 @@ Stores Expo push tokens for server-initiated notifications.
 
 Base path: `/api`
 
-Authentication: Replit Auth session cookie (`connect.sid`) for user routes; admin cookie-based session for admin routes.
+Authentication: Clerk JWT (Bearer token or session cookie set by `@clerk/express` middleware) for user routes; separate admin cookie-based session (`admin_token` header or `admin_session` cookie) for admin routes.
 
 ### 4.1 Assessment & Reports
 
@@ -301,13 +313,12 @@ Returns scenario impact delta on each dimension, recovery timeline estimate, and
 
 ### 4.4 Authentication
 
+Authentication is handled by **Clerk**. The API server verifies Clerk JWTs using `@clerk/express` middleware (`clerkMiddleware`, `requireAuth`). No server-side OIDC flow is implemented.
+
 | Method | Endpoint | Description |
 |---|---|---|
-| `GET` | `/auth/user` | Current session user |
-| `GET` | `/login` | Initiate Replit Auth OIDC flow |
-| `GET` | `/callback` | OIDC callback handler |
-| `GET` | `/logout` | Clear session |
-| `POST` | `/auth/mobile-token` | Exchange OIDC token for mobile session |
+| `GET` | `/auth/user` | Returns current authenticated user (requires valid Clerk JWT) |
+| `POST` | `/auth/mobile-token` | Accepts a Clerk session token from the mobile app and returns the user record |
 
 ### 4.5 Subscriptions
 
@@ -345,7 +356,9 @@ Returns scenario impact delta on each dimension, recovery timeline estimate, and
 | `POST` | `/admin/login` | Authenticate with `ADMIN_USERNAME` / `ADMIN_PASSWORD` |
 | `GET` | `/admin/session` | Validate admin session |
 | `GET` | `/admin/analytics` | Full platform analytics aggregate |
+| `GET` | `/admin/analytics/users` | User KPIs (totals, conversion rate, 12-month trends, dimension averages, plan distribution, free→Pro funnel) |
 | `GET` | `/admin/analytics/mobile` | Mobile-specific metrics |
+| `GET` | `/admin/users` | Paginated user list with subscription status |
 | `GET` | `/admin/ux-test/personas` | List available UX test personas |
 | `POST` | `/admin/ux-test/run` | Start a persona simulation run |
 | `GET` | `/admin/ux-test/runs` | List past simulation runs |
@@ -497,7 +510,10 @@ All scores are clamped to [0, 100].
 
 ### 6.1 Architecture
 
-The AI layer uses OpenAI's gpt-5.2 model via Replit's AI Integrations proxy, which handles API key management and billing. The server never stores or exposes the raw API key.
+The AI layer uses two OpenAI models via Replit's AI Integrations proxy, which handles API key management and billing. The server never stores or exposes the raw API key.
+
+- **gpt-5.4** (`MAIN_MODEL`) — full resilience report generation and scenario stress-tests
+- **gpt-4.1-mini** (`MINI_MODEL`) — AI Companion conversational responses (lighter, lower-cost)
 
 ### 6.2 Report Generation Flow
 
@@ -549,18 +565,15 @@ Scenarios supported: `job_loss`, `natural_disaster`, `health_crisis`, `relocatio
 
 ## 7. Authentication & Security
 
-### 7.1 User Authentication (Replit Auth)
+### 7.1 User Authentication (Clerk)
 
-Resilium uses Replit's managed OpenID Connect implementation:
+Resilium uses **Clerk** for user authentication on both web and mobile:
 
-1. User initiates login → redirect to Replit OIDC provider
-2. PKCE challenge generated and verified
-3. Callback receives authorisation code → exchanged for tokens
-4. User record upserted into `users` table
-5. Session established via `express-session` with PostgreSQL store
-6. `authMiddleware` populates `req.user` on all authenticated requests
+**Web:** Clerk's React SDK (`@clerk/react`) provides `<ClerkProvider>`, `<SignIn>`, `<SignUp>`, and `useAuth()` / `useUser()` hooks. The API server uses `@clerk/express` middleware to verify JWTs on every authenticated request. User records are upserted into the `users` table using the Clerk `userId` as the primary key.
 
-Session cookies are `HttpOnly`, `Secure` (production), `SameSite: lax`, 24-hour TTL.
+**Mobile:** Clerk's Expo SDK (`@clerk/clerk-expo`) provides session management. The Expo app exchanges its Clerk session token via `POST /api/auth/mobile-token` to bootstrap a server-side session.
+
+**Session cookies:** For API compatibility, `express-session` with a PostgreSQL store is used alongside Clerk JWT verification. Session cookies are `HttpOnly`, `Secure` (production), `SameSite: lax`, 24-hour TTL.
 
 ### 7.2 Admin Authentication
 
@@ -622,24 +635,37 @@ If `!isPro && count >= 2`, the paywall screen is shown. Gate fails open on API e
 | `/about` | About Resilium | No |
 | `/demo` | Static fictional demo report for "Alex M." | No |
 | `/pricing` | Pro plan pricing and comparison | No |
-| `/assess` | 11-step assessment (gated at 2 free) | No (gated) |
+| `/consent` | GDPR consent capture before assessment | No |
+| `/assess` | 14-step assessment (gated at 2 free) | No (gated) |
 | `/results/:reportId` | Full AI report, radar chart, checklists, feedback | No |
+| `/plan/:reportId` | Saved action plan view (Pro offline-capable) | Yes (Pro) |
 | `/scenarios/:reportId` | Scenario stress-test runner | Yes (Pro) |
+| `/coaching` | Phoenix Insight Coaching referral | No |
 | `/profile` | Saved reports, progress tracking, account settings | Yes |
+| `/sign-in` | Clerk sign-in page | No |
+| `/sign-up` | Clerk sign-up page | No |
 | `/privacy` | Privacy Policy | No |
 | `/terms` | Terms & Conditions | No |
 | `/refund` | Refund Policy | No |
 | `/admin/login` | Admin login | No |
 | `/admin/dashboard` | Analytics overview (6 tabs) | Admin |
-| `/admin/ux-test` | AI persona UX testing runner | Admin |
-| `/admin/ux-test/report/:runId` | Per-run results | Admin |
+| `/admin/analytics` | User KPIs, 12-month trends, dimension averages, funnel | Admin |
+| `/admin/users` | User management | Admin |
+| `/admin/announcements` | Site announcement management | Admin |
+| `/admin/testimonials` | Testimonials management | Admin |
+| `/admin/marketing` | Marketing tools | Admin |
+| `/admin/documents` | Document management | Admin |
+| `/admin/security` | Security settings | Admin |
+| `/admin/monitoring` | System monitoring | Admin |
+| `/admin/ux-testing` | AI persona UX testing runner | Admin |
+| `/admin/ux-test/report/:runId` | Per-run UX test results | Admin |
 | `/admin/mobile` | Mobile analytics | Admin |
 | `/admin/gdpr` | GDPR request management | Admin |
 | `/admin/consent-log` | Consent audit trail | Admin |
 
 ### 9.2 Assessment Flow
 
-The assessment is a multi-step single-page form. Step 1 is the Mental Resilience questionnaire — 10 Likert-scale questions shown one at a time with a sub-step progress counter. Steps 2–11 cover location, income, savings, dependents, skills, health, mobility, housing, emergency supplies, psychological self-rating, and risk concerns. Navigation is animated via Framer Motion `AnimatePresence`. State is held in a single `formData` React state object.
+The assessment is a multi-step single-page form. Step 1 is the Mental Resilience questionnaire — 10 Likert-scale questions shown one at a time with a sub-step progress counter. Steps 2–14 cover location, income, savings, dependents, skills, health, mobility, housing, emergency supplies, psychological self-rating, and risk concerns. Navigation is animated via Framer Motion `AnimatePresence`. State is held in a single `formData` React state object.
 
 ### 9.3 Results Page
 
@@ -659,7 +685,17 @@ Four-tab layout:
 
 ### 9.6 Admin Dashboard
 
-Admin pages use a shared `AdminLayout` component (sidebar navigation, session check). Six-tab analytics view: Overview, Demographics, Score Analytics, Risk Concerns, Reports, Feedback. Sidebar links to Mobile Analytics, GDPR Management, Consent Log, and UX Testing. Site announcements can be created and toggled active/inactive.
+Admin pages use a shared `AdminLayout` component (sidebar navigation, session check). Six-tab overview analytics (Overview, Demographics, Score Analytics, Risk Concerns, Reports, Feedback). Sidebar navigation includes:
+
+- **Analytics** — KPI cards (total users, Pro count, conversion rate, total assessments), 12-month signup and assessment trend line charts, horizontal bar chart of average dimension scores (per-dimension colors), plan distribution chart, and a free→Pro conversion funnel visualisation
+- **Users** — paginated user list with subscription status
+- **Announcements** — create and toggle site-wide banners
+- **Testimonials / Marketing / Documents** — content management sub-pages
+- **Security / Monitoring** — system health panels
+- **Mobile Analytics** — daily trends, score distribution, top locations
+- **GDPR Management** — fulfill or delete requests
+- **Consent Log** — paginated consent audit trail
+- **UX Testing** — AI persona testing runner with live SSE progress stream
 
 ---
 
@@ -775,6 +811,9 @@ Resilium is deployed on Replit's managed cloud infrastructure:
 |---|---|---|---|
 | `DATABASE_URL` | API server | Yes | PostgreSQL connection string |
 | `SESSION_SECRET` | API server | Yes | Express session signing key |
+| `CLERK_SECRET_KEY` | API server | Yes | Clerk server-side secret key |
+| `CLERK_PUBLISHABLE_KEY` | API server | Yes | Clerk publishable key (used by `@clerk/express`) |
+| `VITE_CLERK_PUBLISHABLE_KEY` | Web frontend | Yes | Clerk publishable key for React SDK |
 | `ADMIN_USERNAME` | API server | Yes | Admin panel credentials |
 | `ADMIN_PASSWORD` | API server | Yes | Admin panel credentials |
 | `PADDLE_WEBHOOK_SECRET` | API server | For payments | Webhook HMAC verification |
@@ -782,10 +821,10 @@ Resilium is deployed on Replit's managed cloud infrastructure:
 | `VITE_PADDLE_PRICE_ID` | Web frontend | For payments | Monthly Pro subscription price ID |
 | `VITE_PADDLE_PRICE_ID_ANNUAL` | Web frontend | For payments | Annual Pro subscription price ID |
 | `VITE_PADDLE_DONATION_PRICE_ID` | Web frontend | No | Donation price ID |
+| `RESEND_API_KEY` | API server | For email | Resend email delivery API key |
 | `AI_INTEGRATIONS_OPENAI_BASE_URL` | API server | Yes | Auto-provisioned by Replit AI Integrations |
 | `AI_INTEGRATIONS_OPENAI_API_KEY` | API server | Yes | Auto-provisioned by Replit AI Integrations |
 | `REPLIT_DOMAINS` | Shared | Yes | Auto-provisioned by Replit |
-| `REPL_ID` | Shared | Yes | Auto-provisioned by Replit |
 
 ### 12.3 Build Process
 
@@ -793,7 +832,7 @@ Resilium is deployed on Replit's managed cloud infrastructure:
 
 **Web app:** Vite production build with tree-shaking, code splitting, and asset fingerprinting. `BASE_URL` injected at build time for path-prefixed proxy routing.
 
-**Mobile app:** Expo web build via Metro bundler for web deployment. Native builds (iOS/Android) via EAS Build.
+**Mobile app:** Expo web build via Metro bundler for web deployment. Native builds (iOS only) via EAS Build. Android is not currently targeted.
 
 ### 12.4 Database Migrations
 
@@ -848,4 +887,4 @@ Playwright-based tests run against the full stack to validate assessment flow, r
 
 ---
 
-*Resilium Technical Specification — Version 2.0 — March 2026*
+*Resilium Technical Specification — Version 3.0 — April 2026*

@@ -1,5 +1,5 @@
 # Resilium: Personal Resilience Planning
-## White Paper — March 2026
+## White Paper — April 2026
 
 ---
 
@@ -112,7 +112,12 @@ Available scenarios: **Job Loss**, **Natural Disaster**, **Health Crisis**, **Re
 
 ### 2.5 AI Engine
 
-Resilium's AI engine uses large language model reasoning (OpenAI gpt-5.2 class) to generate contextually appropriate, individually tailored report narratives and action plans. The AI is not used as a scoring mechanism — scoring is deterministic and transparent — but as a language and reasoning layer that:
+Resilium's AI engine uses two OpenAI models accessed via Replit's AI Integrations proxy:
+
+- **gpt-5.4** — primary report generation. Produces the full resilience narrative, vulnerability analysis, action plan, daily habits, and scenario stress-test simulations.
+- **gpt-4.1-mini** — powers the AI Companion, a context-aware conversational interface that allows Pro users to ask follow-up questions about any dimension, habit, or action plan item in the context of their actual scores.
+
+The AI is not used as a scoring mechanism — scoring is fully deterministic and transparent — but as a language and reasoning layer that:
 
 - Synthesises multi-dimensional score data into coherent narrative
 - Identifies non-obvious interaction effects between dimensions (e.g., high mobility + low financial resilience = specific evacuation risk pattern)
@@ -166,7 +171,7 @@ Resilium operates on a freemium subscription model:
 
 **Free Tier:** Two complete assessments with full AI-generated reports. Designed to demonstrate the platform's full value before monetisation is requested.
 
-**Pro (£9/month or £79/year via Paddle):** Unlimited assessments, longitudinal progress tracking with trend visualisation, scenario stress-test suite (4 scenarios), plan comparison with AI analysis, and priority support. Pro users also access the full scenario runner page and unlock advanced report features.
+**Pro (£9/month or £79/year via Paddle):** Unlimited assessments, longitudinal progress tracking with trend visualisation, scenario stress-test suite (4 scenarios), plan comparison with AI analysis, AI Companion conversational guidance, daily coaching tip cards, achievement badges, 30-day resilience challenge, offline plan access, and priority support.
 
 **Donation option:** A one-time donation is available on the results page for users who wish to support the platform without committing to a subscription.
 
@@ -217,13 +222,17 @@ Resilium explicitly does not provide medical, financial, or legal advice. All ou
 Resilium is fully built, tested, and operational. The platform features:
 
 - **Web application** — React 19 / Vite 7 / TypeScript with Tailwind CSS and shadcn/ui; dark-only brand palette (`#0D1225` background, `#E08040` orange primary)
-- **Mobile application** — Expo SDK 53 (React Native); identical dark palette; push notification support (30-day check-in reminders); haptic feedback throughout assessment
+- **Mobile application** — Expo SDK 53 (React Native); iOS and web; identical dark palette; push notification support (30-day check-in reminders); haptic feedback throughout assessment
 - **API server** — Node.js 24 / Express 5; esbuild compilation; full OpenAPI specification
-- **Database** — PostgreSQL 16 with Drizzle ORM; 12 production tables; automated GDPR cleanup
-- **Authentication** — Replit Auth (OIDC/PKCE) for users; cookie-based admin authentication
+- **Database** — PostgreSQL 16 with Drizzle ORM; production tables covering users, reports, subscriptions, checklists, snapshots, challenge progress, GDPR, and admin audit; automated GDPR cleanup
+- **Authentication** — Clerk (JWT-based) for users; separate cookie-based admin authentication
 - **Payments** — Paddle subscription billing with HMAC-verified webhooks
 - **AI UX testing** — 8 built-in persona simulations with AI-evaluated quality scoring and live SSE progress streaming; exportable reports
-- **Admin dashboard** — 6-tab analytics, mobile metrics, GDPR management, consent audit log, site announcement system
+- **Admin dashboard** — analytics dashboard (KPI cards, 12-month trends, dimension averages, conversion funnel), 6-tab overview, user management, mobile metrics, GDPR management, consent audit log, site announcement system, document management, security and monitoring panels
+- **Engagement features** — daily coaching tip cards (dimension-targeted), achievement badges, streak tracking, 30-day resilience challenge with progress ring
+- **Offline capability** — Pro users' last-viewed action plan cached locally (7-day TTL); profile plan list cached; both shown with an offline banner when the server is unreachable
+- **Error monitoring** — Sentry integrated across all three artifacts; enabled in production only
+- **Email** — Resend-powered welcome email on first login; weekly digest cron; one-click unsubscribe with HMAC tokens
 
 ---
 
