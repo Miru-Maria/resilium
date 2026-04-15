@@ -1,9 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { useLocation, Link } from "wouter";
+import { useLocation, useSearch, Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Loader2, LayoutDashboard, Smartphone, Shield, LogOut, FlaskConical, Users, Megaphone, KeyRound, Activity, FolderLock, Star, BarChart2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ResilientIcon } from "@/components/resilient-icon";
+import {
+  Loader2, LayoutDashboard, Smartphone, Shield, LogOut,
+  FlaskConical, Users, Megaphone, KeyRound, Activity, FolderLock,
+  Star, BarChart2, FileText, LayoutTemplate, Radar, Rocket,
+  BookOpen, Code2, Layers, Palette, ChevronDown,
+} from "lucide-react";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -19,10 +24,26 @@ export function adminAuthHeaders(): Record<string, string> {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
+const DOC_ITEMS = [
+  { key: "marketing-strategy",    label: "Marketing Strategy",    icon: FileText },
+  { key: "platform-assessment",   label: "Platform Assessment",   icon: LayoutTemplate },
+  { key: "competitive-analysis",  label: "Competitive Analysis",  icon: BarChart2 },
+  { key: "gtm-plan",              label: "GTM Plan",              icon: Rocket },
+  { key: "competitor-monitoring", label: "Competitor Monitoring", icon: Radar },
+  { key: "whitepaper",            label: "White Paper",           icon: BookOpen },
+  { key: "technical-spec",        label: "Technical Spec",        icon: Code2 },
+  { key: "pitch-deck",            label: "Pitch Deck",            icon: Layers },
+  { key: "brand-identity",        label: "Brand Identity",        icon: Palette },
+  { key: "content-strategy",      label: "Content Strategy",      icon: Megaphone },
+];
+
 export function AdminLayout({ children, activeSection }: AdminLayoutProps) {
   const [, navigate] = useLocation();
+  const search = useSearch();
   const [checking, setChecking] = useState(true);
   const [authed, setAuthed] = useState(false);
+
+  const activeDoc = new URLSearchParams(search).get("doc") ?? "marketing-strategy";
 
   useEffect(() => {
     const token = getAdminToken();
@@ -62,19 +83,20 @@ export function AdminLayout({ children, activeSection }: AdminLayoutProps) {
   if (!authed) return null;
 
   const navItems = [
-    { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard, key: "dashboard" },
-    { href: "/admin/users", label: "Users", icon: Users, key: "users" },
-    { href: "/admin/analytics", label: "Analytics", icon: BarChart2, key: "analytics" },
-    { href: "/admin/announcements", label: "Announcements", icon: Megaphone, key: "announcements" },
-    { href: "/admin/documents", label: "Documents", icon: FolderLock, key: "documents" },
-    { href: "/admin/testimonials", label: "Testimonials", icon: Star, key: "testimonials" },
-    { href: "/admin/mobile", label: "Mobile", icon: Smartphone, key: "mobile" },
-    { href: "/admin/gdpr", label: "GDPR", icon: Shield, key: "gdpr" },
-    { href: "/admin/consent-log", label: "Consent Log", icon: Shield, key: "consent" },
-    { href: "/admin/ux-testing", label: "AI UX Tester", icon: FlaskConical, key: "ux-testing" },
-    { href: "/admin/security", label: "Security", icon: KeyRound, key: "security" },
-    { href: "/admin/monitoring", label: "Sentry", icon: Activity, key: "monitoring" },
+    { href: "/admin/dashboard",    label: "Dashboard",    icon: LayoutDashboard, key: "dashboard" },
+    { href: "/admin/users",        label: "Users",        icon: Users,           key: "users" },
+    { href: "/admin/analytics",    label: "Analytics",    icon: BarChart2,       key: "analytics" },
+    { href: "/admin/announcements",label: "Announcements",icon: Megaphone,       key: "announcements" },
+    { href: "/admin/testimonials", label: "Testimonials", icon: Star,            key: "testimonials" },
+    { href: "/admin/mobile",       label: "Mobile",       icon: Smartphone,      key: "mobile" },
+    { href: "/admin/gdpr",         label: "GDPR",         icon: Shield,          key: "gdpr" },
+    { href: "/admin/consent-log",  label: "Consent Log",  icon: Shield,          key: "consent" },
+    { href: "/admin/ux-testing",   label: "AI UX Tester", icon: FlaskConical,    key: "ux-testing" },
+    { href: "/admin/security",     label: "Security",     icon: KeyRound,        key: "security" },
+    { href: "/admin/monitoring",   label: "Sentry",       icon: Activity,        key: "monitoring" },
   ];
+
+  const isDocuments = activeSection === "documents";
 
   return (
     <div className="min-h-screen bg-muted/30 flex">
@@ -86,7 +108,8 @@ export function AdminLayout({ children, activeSection }: AdminLayoutProps) {
             <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">Admin</span>
           </div>
         </div>
-        <nav className="flex-1 p-3 space-y-1">
+
+        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
           {navItems.map((item) => (
             <Link key={item.key} href={item.href}>
               <span
@@ -102,7 +125,47 @@ export function AdminLayout({ children, activeSection }: AdminLayoutProps) {
               </span>
             </Link>
           ))}
+
+          {/* Documents with inline submenu */}
+          <div>
+            <Link href="/admin/documents">
+              <span
+                className={cn(
+                  "flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium cursor-pointer transition-colors",
+                  isDocuments
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                )}
+              >
+                <FolderLock className="w-4 h-4" />
+                <span className="flex-1">Documents</span>
+                <ChevronDown className={cn("w-3 h-3 transition-transform", isDocuments && "rotate-180")} />
+              </span>
+            </Link>
+
+            {isDocuments && (
+              <div className="mt-1 ml-3 pl-3 border-l border-gray-200 space-y-0.5">
+                {DOC_ITEMS.map(({ key, label, icon: Icon }) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => navigate(`/admin/documents?doc=${key}`)}
+                    className={cn(
+                      "flex items-center gap-2 w-full text-left px-2 py-1.5 rounded-md text-xs transition-colors",
+                      activeDoc === key
+                        ? "text-primary font-semibold bg-primary/8"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted",
+                    )}
+                  >
+                    <Icon className="w-3 h-3 flex-shrink-0" />
+                    <span className="truncate">{label}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </nav>
+
         <div className="p-3 border-t">
           <Button variant="ghost" size="sm" className="w-full justify-start gap-2" onClick={handleLogout}>
             <LogOut className="w-4 h-4" />
