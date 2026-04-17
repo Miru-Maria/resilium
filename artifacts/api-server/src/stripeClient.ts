@@ -1,6 +1,15 @@
 import Stripe from "stripe";
 
 async function getCredentials(): Promise<{ publishableKey: string; secretKey: string }> {
+  // Fallback: use environment secrets directly (required in production deployment)
+  if (process.env.STRIPE_SECRET_KEY && process.env.STRIPE_PUBLISHABLE_KEY) {
+    return {
+      secretKey: process.env.STRIPE_SECRET_KEY,
+      publishableKey: process.env.STRIPE_PUBLISHABLE_KEY,
+    };
+  }
+
+  // Development: fetch from Replit integration connector
   const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
   const xReplitToken = process.env.REPL_IDENTITY
     ? "repl " + process.env.REPL_IDENTITY
@@ -9,7 +18,7 @@ async function getCredentials(): Promise<{ publishableKey: string; secretKey: st
       : null;
 
   if (!hostname || !xReplitToken) {
-    throw new Error("Missing Replit environment variables. Ensure the Stripe integration is connected.");
+    throw new Error("Stripe keys not configured. Add STRIPE_SECRET_KEY and STRIPE_PUBLISHABLE_KEY environment secrets.");
   }
 
   const isProduction = process.env.REPLIT_DEPLOYMENT === "1";
@@ -33,7 +42,7 @@ async function getCredentials(): Promise<{ publishableKey: string; secretKey: st
   const settings = data.items?.[0]?.settings;
 
   if (!settings?.secret || !settings?.publishable) {
-    throw new Error("Stripe integration not connected or missing keys. Connect Stripe via the Integrations tab first.");
+    throw new Error("Stripe integration not connected. Add STRIPE_SECRET_KEY and STRIPE_PUBLISHABLE_KEY secrets, or connect Stripe via the Integrations tab.");
   }
 
   return { publishableKey: settings.publishable, secretKey: settings.secret };
