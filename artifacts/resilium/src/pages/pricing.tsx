@@ -1,60 +1,13 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { motion } from "framer-motion";
 import { CheckCircle2, Zap, ShieldCheck, BarChart2, RefreshCw, Lock, ArrowRight, Sparkles, XCircle, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SiteFooter } from "@/components/site-footer";
 import { PageSEO } from "@/components/page-seo";
-import { useUser, useAuth, useClerk } from "@clerk/react";
+import { useAuth, useClerk } from "@clerk/react";
 
-const PADDLE_ENV = (import.meta.env.VITE_PADDLE_ENVIRONMENT as string | undefined) ?? "production";
-const IS_SANDBOX = PADDLE_ENV === "sandbox";
-
-// Production credentials
-const PADDLE_CLIENT_TOKEN = import.meta.env.VITE_PADDLE_CLIENT_TOKEN as string | undefined;
-const PADDLE_PRICE_ID_MONTHLY = import.meta.env.VITE_PADDLE_PRICE_ID as string | undefined;
-const PADDLE_PRICE_ID_ANNUAL = import.meta.env.VITE_PADDLE_PRICE_ID_ANNUAL as string | undefined;
-
-// Sandbox credentials (used when VITE_PADDLE_ENVIRONMENT=sandbox)
-const PADDLE_SANDBOX_CLIENT_TOKEN = import.meta.env.VITE_PADDLE_SANDBOX_CLIENT_TOKEN as string | undefined;
-const PADDLE_SANDBOX_PRICE_ID_MONTHLY = import.meta.env.VITE_PADDLE_SANDBOX_PRICE_ID as string | undefined;
-const PADDLE_SANDBOX_PRICE_ID_ANNUAL = import.meta.env.VITE_PADDLE_SANDBOX_PRICE_ID_ANNUAL as string | undefined;
-
-// Active credentials — resolved at module load time
-const ACTIVE_TOKEN = IS_SANDBOX ? PADDLE_SANDBOX_CLIENT_TOKEN : PADDLE_CLIENT_TOKEN;
-const ACTIVE_PRICE_MONTHLY = IS_SANDBOX ? PADDLE_SANDBOX_PRICE_ID_MONTHLY : PADDLE_PRICE_ID_MONTHLY;
-const ACTIVE_PRICE_ANNUAL = IS_SANDBOX ? PADDLE_SANDBOX_PRICE_ID_ANNUAL : PADDLE_PRICE_ID_ANNUAL;
-
-declare global {
-  interface Window {
-    Paddle?: any;
-  }
-}
-
-function usePaddle() {
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    if (!ACTIVE_TOKEN) return;
-    if (window.Paddle) {
-      setReady(true);
-      return;
-    }
-    const script = document.createElement("script");
-    script.src = "https://cdn.paddle.com/paddle/v2/paddle.js";
-    script.async = true;
-    script.onload = () => {
-      const initOptions: Record<string, unknown> = { token: ACTIVE_TOKEN };
-      if (IS_SANDBOX) initOptions.environment = "sandbox";
-      window.Paddle?.Initialize(initOptions);
-      setReady(true);
-    };
-    document.head.appendChild(script);
-    return () => { document.head.removeChild(script); };
-  }, []);
-
-  return ready;
-}
+const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 const FREE_FEATURES = [
   "3 lifetime assessments",
@@ -101,7 +54,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "How is payment handled?",
-    a: "Payments are processed securely by Paddle, our authorised merchant of record. Your card details are never stored by Resilium — Paddle handles all billing and payment compliance.",
+    a: "Payments are processed securely by Stripe. Your card details are never stored by Resilium — Stripe handles all billing and payment compliance.",
   },
   {
     q: "Can I get a refund?",
@@ -141,34 +94,39 @@ type BillingPeriod = "monthly" | "annual";
 
 export default function PricingPage() {
   const [, setLocation] = useLocation();
-  const { user } = useUser();
   const { isSignedIn } = useAuth();
   const { openSignIn } = useClerk();
   const isAuthenticated = !!isSignedIn;
   const login = () => openSignIn({});
-  const paddleReady = usePaddle();
   const [loading, setLoading] = useState(false);
   const [billing, setBilling] = useState<BillingPeriod>("monthly");
 
   const isAnnual = billing === "annual";
-  const priceId = isAnnual ? ACTIVE_PRICE_ANNUAL : ACTIVE_PRICE_MONTHLY;
 
-  const handleUpgrade = () => {
+  const handleUpgrade = async () => {
     if (!isAuthenticated) {
       login();
       return;
     }
-    if (!priceId || !window.Paddle) {
-      alert("Payment system is not configured yet. Please check back soon.");
-      return;
-    }
     setLoading(true);
-    window.Paddle.Checkout.open({
-      items: [{ priceId, quantity: 1 }],
-      customData: { userId: user?.id ?? "" },
-      successUrl: `${window.location.origin}${import.meta.env.BASE_URL}pricing?success=1`,
-    });
-    setLoading(false);
+    try {
+      const resp = await fetch(`${BASE}/api/stripe/checkout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ billingPeriod: billing }),
+      });
+      const data = await resp.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.error ?? "Failed to start checkout. Please try again.");
+      }
+    } catch {
+      alert("Failed to start checkout. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const isSuccess = new URLSearchParams(window.location.search).get("success") === "1";
@@ -221,14 +179,6 @@ export default function PricingPage() {
               <p className="text-muted-foreground text-lg max-w-xl mx-auto mb-8">
                 Three full assessments for free. Upgrade to track your progress over time, compare plans, and model crisis scenarios before they hit.
               </p>
-
-              {/* Sandbox mode indicator */}
-              {IS_SANDBOX && (
-                <div className="inline-flex items-center gap-2 bg-amber-100 border border-amber-300 text-amber-800 text-xs font-bold rounded-full px-4 py-1.5 mb-6">
-                  <span>⚠️</span>
-                  <span>SANDBOX MODE — test payments only, no real charges</span>
-                </div>
-              )}
 
               {/* Billing toggle */}
               <div className="inline-flex items-center gap-1 bg-muted/40 border border-border rounded-full p-1">
@@ -345,7 +295,9 @@ export default function PricingPage() {
                   disabled={loading}
                 >
                   <Zap className="w-4 h-4" />
-                  {!isAuthenticated
+                  {loading
+                    ? "Preparing checkout…"
+                    : !isAuthenticated
                     ? "Sign in to upgrade"
                     : isAnnual
                     ? "Get Pro — Annual"

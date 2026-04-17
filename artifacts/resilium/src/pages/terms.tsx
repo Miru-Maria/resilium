@@ -50,7 +50,7 @@ export default function TermsPage() {
 
         <Section title="4. Subscriptions and Billing">
           <p>
-            Resilium offers a free Starter plan and a paid Pro subscription. Subscriptions are billed through Paddle, our authorised payment processor. By subscribing, you agree to Paddle's terms of service and authorise recurring charges to your chosen payment method at the applicable rate.
+            Resilium offers a free Starter plan and a paid Pro subscription. Subscriptions are billed through Stripe, our authorised payment processor. By subscribing, you agree to Stripe's terms of service and authorise recurring charges to your chosen payment method at the applicable rate.
           </p>
           <ul className="list-disc pl-6 space-y-1">
             <li><strong>Monthly plans</strong> are billed every 30 days from the subscription start date.</li>

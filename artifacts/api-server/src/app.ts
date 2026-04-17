@@ -32,8 +32,8 @@ app.use(
 );
 app.use(cors({ credentials: true, origin: true }));
 
-// Capture raw body for Paddle webhook HMAC verification before express.json() consumes it
-app.use("/api/paddle/webhook", express.raw({ type: "*/*" }));
+// Capture raw body for Stripe webhook verification before express.json() consumes it
+app.use("/api/stripe/webhook", express.raw({ type: "*/*" }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

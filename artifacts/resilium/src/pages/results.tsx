@@ -39,15 +39,6 @@ const GOAL_ICONS: Record<string, string> = {
   general_resilience: "⚡",
 };
 
-const PADDLE_IS_SANDBOX = (import.meta.env.VITE_PADDLE_ENVIRONMENT as string | undefined) === "sandbox";
-const PADDLE_CLIENT_TOKEN = PADDLE_IS_SANDBOX
-  ? (import.meta.env.VITE_PADDLE_SANDBOX_CLIENT_TOKEN as string | undefined)
-  : (import.meta.env.VITE_PADDLE_CLIENT_TOKEN as string | undefined);
-const PADDLE_DONATION_PRICE_ID = import.meta.env.VITE_PADDLE_DONATION_PRICE_ID as string | undefined;
-
-declare global {
-  interface Window { Paddle?: any; }
-}
 
 class ResultsErrorBoundary extends React.Component<
   { children: React.ReactNode },
@@ -358,18 +349,6 @@ function ResultsPageInner() {
     }
   }, [reportId, updateItem, refetchChecklist, toast]);
 
-  useEffect(() => {
-    if (!PADDLE_CLIENT_TOKEN || window.Paddle) return;
-    const script = document.createElement("script");
-    script.src = "https://cdn.paddle.com/paddle/v2/paddle.js";
-    script.async = true;
-    script.onload = () => {
-      const initOpts: Record<string, unknown> = { token: PADDLE_CLIENT_TOKEN };
-      if (PADDLE_IS_SANDBOX) initOpts.environment = "sandbox";
-      window.Paddle?.Initialize(initOpts);
-    };
-    document.head.appendChild(script);
-  }, []);
 
   // Time-delayed save prompt for anonymous users
   useEffect(() => {
@@ -574,14 +553,6 @@ function ResultsPageInner() {
     toast({ title: "Markdown exported", description: "You can import it into Notion, Evernote, or any markdown editor." });
   };
 
-  const handleDonate = () => {
-    if (!PADDLE_DONATION_PRICE_ID || !window.Paddle) return;
-    window.Paddle.Checkout.open({
-      items: [{ priceId: PADDLE_DONATION_PRICE_ID, quantity: 1 }],
-    });
-  };
-
-  const hasDonation = !!(PADDLE_CLIENT_TOKEN && PADDLE_DONATION_PRICE_ID);
 
   // Checklist progress lookup
   const progressMap: Record<string, boolean> = {};
@@ -1345,18 +1316,12 @@ function ResultsPageInner() {
             <Heart className="w-8 h-8 text-primary mx-auto mb-3" />
             <h3 className="font-display font-bold text-xl mb-2">Support Resilium</h3>
             <p className="text-muted-foreground text-sm max-w-md mx-auto mb-5">
-              If this report was helpful, consider a small contribution to keep Resilium running and improving.
+              If this report was helpful, share it with someone who might need it.
             </p>
             <div className="flex flex-wrap gap-3 justify-center">
-              {hasDonation ? (
-                <Button className="rounded-full gap-2" onClick={handleDonate}>
-                  <Heart className="w-4 h-4" /> Support Resilium — $5
-                </Button>
-              ) : (
-                <Button className="rounded-full gap-2" onClick={() => setShowShareModal(true)}>
-                  <Share2 className="w-4 h-4" /> Share Your Score
-                </Button>
-              )}
+              <Button className="rounded-full gap-2" onClick={() => setShowShareModal(true)}>
+                <Share2 className="w-4 h-4" /> Share Your Score
+              </Button>
               <Button variant="outline" className="rounded-full gap-2" onClick={() => setShowShareModal(true)}>
                 <Share2 className="w-4 h-4" /> Share
               </Button>

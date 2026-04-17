@@ -61,7 +61,7 @@ export default function RefundPage() {
             <li>The reason for your refund request (optional but helpful)</li>
           </ul>
           <p>
-            We will respond within 5 business days. Approved refunds are processed back to your original payment method via Paddle, our payment processor, and typically appear within 5–10 business days depending on your bank.
+            We will respond within 5 business days. Approved refunds are processed back to your original payment method via Stripe, our payment processor, and typically appear within 5–10 business days depending on your bank.
           </p>
         </Section>
 

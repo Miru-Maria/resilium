@@ -60,33 +60,6 @@ export default defineConfig({
     "import.meta.env.VITE_CLERK_PUBLISHABLE_KEY": JSON.stringify(
       "pk_live_Y2xlcmsucmVzaWxpdW0tcGxhdGZvcm0uY29tJA"
     ),
-    // Paddle — injected from environment secrets at build time.
-    "import.meta.env.VITE_PADDLE_ENVIRONMENT": JSON.stringify(
-      process.env.VITE_PADDLE_ENVIRONMENT ?? "production"
-    ),
-    // Production credentials
-    "import.meta.env.VITE_PADDLE_CLIENT_TOKEN": JSON.stringify(
-      process.env.VITE_PADDLE_CLIENT_TOKEN ?? ""
-    ),
-    "import.meta.env.VITE_PADDLE_PRICE_ID": JSON.stringify(
-      process.env.VITE_PADDLE_PRICE_ID ?? ""
-    ),
-    "import.meta.env.VITE_PADDLE_PRICE_ID_ANNUAL": JSON.stringify(
-      process.env.VITE_PADDLE_PRICE_ID_ANNUAL ?? ""
-    ),
-    "import.meta.env.VITE_PADDLE_DONATION_PRICE_ID": JSON.stringify(
-      process.env.VITE_PADDLE_DONATION_PRICE_ID ?? ""
-    ),
-    // Sandbox credentials (used when VITE_PADDLE_ENVIRONMENT=sandbox)
-    "import.meta.env.VITE_PADDLE_SANDBOX_CLIENT_TOKEN": JSON.stringify(
-      process.env.VITE_PADDLE_SANDBOX_CLIENT_TOKEN ?? ""
-    ),
-    "import.meta.env.VITE_PADDLE_SANDBOX_PRICE_ID": JSON.stringify(
-      process.env.VITE_PADDLE_SANDBOX_PRICE_ID ?? ""
-    ),
-    "import.meta.env.VITE_PADDLE_SANDBOX_PRICE_ID_ANNUAL": JSON.stringify(
-      process.env.VITE_PADDLE_SANDBOX_PRICE_ID_ANNUAL ?? ""
-    ),
   },
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
