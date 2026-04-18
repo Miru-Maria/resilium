@@ -1,11 +1,17 @@
 import Stripe from "stripe";
 import { Router } from "express";
 import { getAuth } from "@clerk/express";
+import { z } from "zod";
 import { getUncachableStripeClient } from "../stripeClient.js";
 import { db, usersTable, subscriptionsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { logger } from "../lib/logger.js";
 import { sendProUpgradeEmail } from "../lib/email.js";
+import { stripeCheckoutLimiter, stripePortalLimiter } from "../lib/rate-limiters.js";
+
+const checkoutSchema = z.object({
+  billingPeriod: z.enum(["monthly", "annual"]),
+});
 
 const router = Router();
 
@@ -160,12 +166,17 @@ async function upsertSubscription(
 }
 
 // Create a Stripe Checkout session
-router.post("/stripe/checkout", async (req, res) => {
+router.post("/stripe/checkout", stripeCheckoutLimiter, async (req, res) => {
   const auth = getAuth(req);
   const userId = (auth?.sessionClaims?.userId as string | undefined) || auth?.userId;
   if (!userId) return res.status(401).json({ error: "Unauthenticated" });
 
-  const { billingPeriod } = req.body as { billingPeriod?: string };
+  const parsed = checkoutSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ error: "VALIDATION_ERROR", message: "billingPeriod must be 'monthly' or 'annual'" });
+  }
+
+  const { billingPeriod } = parsed.data;
   const isAnnual = billingPeriod === "annual";
 
   try {
@@ -224,7 +235,7 @@ router.post("/stripe/checkout", async (req, res) => {
 });
 
 // Customer portal (manage subscription)
-router.post("/stripe/portal", async (req, res) => {
+router.post("/stripe/portal", stripePortalLimiter, async (req, res) => {
   const auth = getAuth(req);
   const userId = (auth?.sessionClaims?.userId as string | undefined) || auth?.userId;
   if (!userId) return res.status(401).json({ error: "Unauthenticated" });

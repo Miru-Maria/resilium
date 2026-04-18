@@ -3,6 +3,7 @@ import { getAuth } from "@clerk/express";
 import { db, checkinEntriesTable } from "@workspace/db";
 import { eq, desc, and } from "drizzle-orm";
 import { logger } from "../lib/logger.js";
+import { checkinLimiter } from "../lib/rate-limiters.js";
 
 const router = Router();
 
@@ -47,7 +48,7 @@ router.get("/checkins", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/checkins", async (req: Request, res: Response) => {
+router.post("/checkins", checkinLimiter, async (req: Request, res: Response) => {
   const userId = getUserId(req);
   if (!userId) return res.status(401).json({ error: "Unauthorized" });
 

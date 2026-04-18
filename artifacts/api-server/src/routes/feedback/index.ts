@@ -1,10 +1,11 @@
 import { Router, type IRouter } from "express";
 import { db, reportFeedbackTable, resilienceReportsTable } from "@workspace/db";
 import { eq, and, desc } from "drizzle-orm";
+import { feedbackLimiter } from "../../lib/rate-limiters.js";
 
 const router: IRouter = Router();
 
-router.post("/", async (req, res) => {
+router.post("/", feedbackLimiter, async (req, res) => {
   try {
     const { reportId, rating, comment } = req.body as Record<string, unknown>;
 

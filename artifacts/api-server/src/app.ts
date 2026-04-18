@@ -7,6 +7,7 @@ import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
 import { recordServerError, startCron } from "./lib/cron.js";
+import { globalLimiter } from "./lib/rate-limiters.js";
 
 const app: Express = express();
 
@@ -96,6 +97,7 @@ app.use((_req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
+app.use(globalLimiter);
 app.use("/api", router);
 
 // ── Sentry error handler — must come after all routes ───────────────────────

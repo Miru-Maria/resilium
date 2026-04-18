@@ -2,12 +2,13 @@ import { Router, type IRouter, type Request, type Response } from "express";
 import { db, usersTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { verifyUnsubscribeToken } from "../lib/unsubscribe.js";
+import { emailUnsubscribeLimiter } from "../lib/rate-limiters.js";
 
 const router: IRouter = Router();
 
 const APP_URL = process.env["APP_URL"] ?? "https://resilium-platform.com";
 
-router.get("/email/unsubscribe", async (req: Request, res: Response) => {
+router.get("/email/unsubscribe", emailUnsubscribeLimiter, async (req: Request, res: Response) => {
   const { uid, sig } = req.query as { uid?: string; sig?: string };
 
   if (!uid || !sig) {
@@ -32,7 +33,7 @@ router.get("/email/unsubscribe", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/email/resubscribe", async (req: Request, res: Response) => {
+router.post("/email/resubscribe", emailUnsubscribeLimiter, async (req: Request, res: Response) => {
   const { uid, sig } = req.body as { uid?: string; sig?: string };
 
   if (!uid || !sig || !verifyUnsubscribeToken(uid, sig)) {
