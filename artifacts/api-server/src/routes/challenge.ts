@@ -115,4 +115,42 @@ router.post("/api/challenge/complete/:day", requireAuth(), async (req, res): Pro
   }
 });
 
+router.delete("/api/challenge/complete/:day", requireAuth(), async (req, res): Promise<void> => {
+  try {
+    const userId = getAuth(req).userId;
+    if (!userId) { res.status(401).json({ error: "Unauthorized" }); return; }
+
+    const day = Number(req.params["day"]);
+    if (!Number.isInteger(day) || day < 1 || day > 30) {
+      res.status(400).json({ error: "Invalid day number" }); return;
+    }
+
+    const [row] = await db
+      .select()
+      .from(challengeStateTable)
+      .where(eq(challengeStateTable.userId, userId))
+      .limit(1);
+
+    if (!row) { res.status(404).json({ error: "No challenge started" }); return; }
+
+    const completedDays: number[] = JSON.parse(row.completedDays);
+    const filtered = completedDays.filter((d) => d !== day);
+
+    const [updated] = await db
+      .update(challengeStateTable)
+      .set({ completedDays: JSON.stringify(filtered) })
+      .where(eq(challengeStateTable.userId, userId))
+      .returning();
+
+    res.json({
+      startedAt: updated.startedAt.toISOString(),
+      dimensionOrder: JSON.parse(updated.dimensionOrder),
+      completedDays: JSON.parse(updated.completedDays),
+    });
+  } catch (err) {
+    req.log.error({ err }, "Error uncompleting challenge day");
+    res.status(500).json({ error: "Failed to uncomplete day" });
+  }
+});
+
 export default router;

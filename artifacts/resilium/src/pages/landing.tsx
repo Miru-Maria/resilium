@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
 import { OnboardingModal } from "@/components/onboarding-modal";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
@@ -145,6 +147,7 @@ interface ChallengeProgress {
 function SignedInBanner() {
   const { isSignedIn, isLoaded, getToken } = useAuth();
   const { user } = useUser();
+  const { toast } = useToast();
   const [state, setState] = useState<
     | { kind: "loading" }
     | { kind: "hidden" }
@@ -271,9 +274,27 @@ function SignedInBanner() {
     setState({ kind: "hidden" });
   };
 
+  const handleUndoComplete = async (day: number, prevState: typeof state) => {
+    try {
+      const token = await getToken();
+      const authHeaders: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
+      const res = await fetch(`${BASE}/api/challenge/complete/${day}`, {
+        method: "DELETE",
+        headers: authHeaders,
+        credentials: "include",
+      });
+      if (res.ok) {
+        setState(prevState);
+      }
+    } catch {
+      // silent — undo failed, state remains as-is
+    }
+  };
+
   const handleMarkComplete = async (day: number) => {
     if (markingComplete) return;
     setMarkingComplete(true);
+    const prevState = state;
     try {
       const token = await getToken();
       const authHeaders: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
@@ -299,6 +320,15 @@ function SignedInBanner() {
             completedDays: newCompletedDays,
             todayAction: nextAction ? { day: nextAction.day, title: nextAction.title } : null,
           },
+        });
+        toast({
+          title: "Day marked complete!",
+          description: `Day ${day} has been completed.`,
+          action: (
+            <ToastAction altText="Undo" onClick={() => handleUndoComplete(day, prevState)}>
+              Undo
+            </ToastAction>
+          ),
         });
       }
     } catch {

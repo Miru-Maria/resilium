@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { buildChallenge, getPersonalizedOrder, type DimKey, type ChallengeAction } from "@/data/challenge-content";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@clerk/react";
+import { useToast } from "@/hooks/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -36,6 +38,7 @@ interface ChallengeCardProps {
 export function ChallengeCard({ latestScores, isPro }: ChallengeCardProps) {
   const { getToken } = useAuth();
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   const [expanded, setExpanded] = useState(false);
 
   const { data: state, isLoading } = useQuery<ChallengeState | null>({
@@ -69,6 +72,20 @@ export function ChallengeCard({ latestScores, isPro }: ChallengeCardProps) {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["challenge"] }),
   });
 
+  const uncompleteMutation = useMutation({
+    mutationFn: async (day: number) => {
+      const token = await getToken();
+      const res = await fetch(`${BASE}/api/challenge/complete/${day}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Failed to undo day completion");
+      return res.json();
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["challenge"] }),
+  });
+
   const completeMutation = useMutation({
     mutationFn: async (day: number) => {
       const token = await getToken();
@@ -80,7 +97,18 @@ export function ChallengeCard({ latestScores, isPro }: ChallengeCardProps) {
       if (!res.ok) throw new Error("Failed to mark day complete");
       return res.json();
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["challenge"] }),
+    onSuccess: (_data, day) => {
+      queryClient.invalidateQueries({ queryKey: ["challenge"] });
+      toast({
+        title: "Day marked complete!",
+        description: `Day ${day} has been completed.`,
+        action: (
+          <ToastAction altText="Undo" onClick={() => uncompleteMutation.mutate(day)}>
+            Undo
+          </ToastAction>
+        ),
+      });
+    },
   });
 
   if (!isPro) {
