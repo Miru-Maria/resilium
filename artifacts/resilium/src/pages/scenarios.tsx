@@ -179,10 +179,10 @@ function DeltaIndicator({ delta }: { delta: number }) {
 export default function ScenariosPage() {
   const [, params] = useRoute("/scenarios/:reportId");
   const reportId = params?.reportId ?? "";
-  const { isSignedIn } = useAuth();
+  const { isSignedIn, isLoaded } = useAuth();
   const isAuthenticated = !!isSignedIn;
 
-  const { data: subStatus } = useSubscriptionStatus();
+  const { data: subStatus } = useSubscriptionStatus({ enabled: !!isLoaded && isAuthenticated });
   const [selectedScenario, setSelectedScenario] = useState<ScenarioKey | null>(null);
   const [paramValues, setParamValues] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(false);

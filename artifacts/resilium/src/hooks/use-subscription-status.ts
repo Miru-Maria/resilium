@@ -10,7 +10,11 @@ export interface SubscriptionStatus {
   cancelScheduled?: boolean;
 }
 
-export function useSubscriptionStatus() {
+interface UseSubscriptionStatusOptions {
+  enabled?: boolean;
+}
+
+export function useSubscriptionStatus({ enabled = true }: UseSubscriptionStatusOptions = {}) {
   return useQuery<SubscriptionStatus | null>({
     queryKey: ["subscription-status"],
     queryFn: async () => {
@@ -19,5 +23,6 @@ export function useSubscriptionStatus() {
       return r.json() as Promise<SubscriptionStatus>;
     },
     staleTime: 60_000,
+    enabled,
   });
 }

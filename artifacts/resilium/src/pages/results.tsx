@@ -256,7 +256,7 @@ function ResultsPageInner() {
   const reportId = rawReportId === "undefined" ? "" : rawReportId;
   const { toast } = useToast();
   const { user } = useUser();
-  const { isSignedIn } = useAuth();
+  const { isSignedIn, isLoaded } = useAuth();
   const { openSignIn, signOut } = useClerk();
   const isAuthenticated = !!isSignedIn;
   const login = () => openSignIn({});
@@ -372,7 +372,7 @@ function ResultsPageInner() {
       .catch(() => {});
   }, [report?.score?.overall]);
 
-  const { data: subStatusData } = useSubscriptionStatus();
+  const { data: subStatusData } = useSubscriptionStatus({ enabled: !!isLoaded && isAuthenticated });
   const isPro = subStatusData?.isPro ?? false;
 
   const [expandedSteps, setExpandedSteps] = useState<Record<string, string[]>>({});
