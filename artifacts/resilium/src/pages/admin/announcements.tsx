@@ -43,6 +43,7 @@ export default function AdminAnnouncementsPage() {
 
   const createMutation = useMutation({
     mutationFn: async () => {
+      if (!adminToken) throw new Error("Not authenticated");
       const res = await fetch(`${BASE}/api/admin/announcements`, {
         method: "POST",
         headers: { "Content-Type": "application/json", ...adminAuthHeaders() },
@@ -62,6 +63,7 @@ export default function AdminAnnouncementsPage() {
 
   const toggleMutation = useMutation({
     mutationFn: async ({ id, isActive }: { id: number; isActive: boolean }) => {
+      if (!adminToken) throw new Error("Not authenticated");
       const res = await fetch(`${BASE}/api/admin/announcements/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json", ...adminAuthHeaders() },
@@ -79,6 +81,7 @@ export default function AdminAnnouncementsPage() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
+      if (!adminToken) throw new Error("Not authenticated");
       const res = await fetch(`${BASE}/api/admin/announcements/${id}`, {
         method: "DELETE",
         headers: adminAuthHeaders(),

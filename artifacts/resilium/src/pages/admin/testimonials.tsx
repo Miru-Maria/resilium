@@ -41,6 +41,7 @@ export default function AdminTestimonialsPage() {
 
   const mutation = useMutation({
     mutationFn: async ({ id, isPublished }: { id: number; isPublished: boolean }) => {
+      if (!adminToken) throw new Error("Not authenticated");
       const res = await fetch(`${BASE}/api/admin/testimonials/${id}`, {
         method: "PATCH",
         headers: {
