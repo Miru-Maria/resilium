@@ -27,7 +27,7 @@ const FRONTEND_STACK = [
   { layer: "Animation", tech: "Framer Motion 12.x" },
   { layer: "Charts", tech: "Recharts 2.x" },
   { layer: "Icons", tech: "Lucide React" },
-  { layer: "Payments", tech: "Paddle.js v2 (overlay checkout)" },
+  { layer: "Payments", tech: "Stripe (server-side Checkout Sessions)" },
   { layer: "Auth", tech: "Clerk React SDK (@clerk/react)" },
   { layer: "Error monitoring", tech: "Sentry (@sentry/react)" },
 ];
@@ -51,7 +51,7 @@ const DB_TABLES = [
   { name: "users", desc: "User accounts (Clerk userId as PK). Upserted on every authenticated request." },
   { name: "sessions", desc: "express-session PostgreSQL store. Indexed on expire." },
   { name: "resilience_reports", desc: "Core report: inputs, six dimension scores, MRC sub-scores, pathway, and all AI-generated JSONB fields." },
-  { name: "subscriptions", desc: "Paddle subscription state per user: status, paddle IDs, current_period_end." },
+  { name: "subscriptions", desc: "Stripe subscription state per user: status, stripeCustomerId, stripeSubscriptionId, current_period_end." },
   { name: "checklist_progress", desc: "Per-report, per-area checklist item completion (boolean + timestamp)." },
   { name: "progress_snapshots", desc: "Historical score snapshots per report — enables longitudinal trend chart." },
   { name: "challenge_progress", desc: "Per-user 30-day resilience challenge: day number, completion, action_text, dimension." },
@@ -101,11 +101,9 @@ const ENV_VARS = [
   { name: "CLERK_PUBLISHABLE_KEY", scope: "API", req: "Yes", desc: "Clerk publishable key (@clerk/express)" },
   { name: "VITE_CLERK_PUBLISHABLE_KEY", scope: "Web", req: "Yes", desc: "Clerk publishable key for React SDK" },
   { name: "ADMIN_USERNAME / ADMIN_PASSWORD", scope: "API", req: "Yes", desc: "Admin panel credentials" },
-  { name: "PADDLE_WEBHOOK_SECRET", scope: "API", req: "Payments", desc: "Webhook HMAC verification" },
-  { name: "VITE_PADDLE_CLIENT_TOKEN", scope: "Web", req: "Payments", desc: "Paddle.js initialisation token" },
-  { name: "VITE_PADDLE_PRICE_ID", scope: "Web", req: "Payments", desc: "Monthly Pro subscription price ID" },
-  { name: "VITE_PADDLE_PRICE_ID_ANNUAL", scope: "Web", req: "Payments", desc: "Annual Pro subscription price ID" },
-  { name: "VITE_PADDLE_DONATION_PRICE_ID", scope: "Web", req: "No", desc: "Donation price ID" },
+  { name: "STRIPE_SECRET_KEY", scope: "API", req: "Payments", desc: "Stripe secret API key (sk_live_... in production, sk_test_... in sandbox)" },
+  { name: "STRIPE_PUBLISHABLE_KEY", scope: "API/Web", req: "Payments", desc: "Stripe publishable key — used for client-side Stripe.js if needed" },
+  { name: "STRIPE_WEBHOOK_SECRET", scope: "API", req: "Payments", desc: "Stripe webhook signing secret (whsec_...) — verifies event authenticity" },
   { name: "RESEND_API_KEY", scope: "API", req: "Email", desc: "Resend email delivery API key" },
   { name: "AI_INTEGRATIONS_OPENAI_BASE_URL", scope: "API", req: "Yes", desc: "Auto-provisioned by Replit AI Integrations" },
   { name: "AI_INTEGRATIONS_OPENAI_API_KEY", scope: "API", req: "Yes", desc: "Auto-provisioned by Replit AI Integrations" },
@@ -371,7 +369,7 @@ export default function TechnicalSpecDoc() {
             {[
               { title: "User Auth — Clerk", items: ["Web: @clerk/react SDK — ClerkProvider, SignIn, SignUp, useAuth(), useUser()", "API: @clerk/express middleware verifies JWTs on every authenticated request", "Mobile: @clerk/clerk-expo SDK, session token exchanged via POST /api/auth/mobile-token", "User records upserted into users table using Clerk userId as primary key", "Session cookies: HttpOnly, Secure (prod), SameSite: lax, 24-hour TTL"] },
               { title: "Admin Auth", items: ["Credentials from ADMIN_USERNAME / ADMIN_PASSWORD environment secrets", "Successful login sets a signed HTTP-only cookie (admin_token)", "All /api/admin/* routes validate the admin cookie via middleware", "Admin sessions expire after 24 hours", "Completely separate from user auth (no Clerk involvement)"] },
-              { title: "Paddle Webhook Security", items: ["HMAC-SHA256 over {timestamp}:{rawBody} using PADDLE_WEBHOOK_SECRET", "Raw request body captured before JSON parsing to ensure signature integrity", "Invalid signatures → 401 rejection", "Rate limiting: 6 assessments/min per IP for anonymous users (express-rate-limit)"] },
+              { title: "Stripe Webhook Security", items: ["Stripe-Signature header verified using STRIPE_WEBHOOK_SECRET (whsec_...)", "Raw request body captured before JSON parsing to ensure signature integrity", "Invalid signatures → 400 rejection", "Handles: checkout.session.completed, customer.subscription.updated, customer.subscription.deleted", "Rate limiting: 6 assessments/min per IP for anonymous users (express-rate-limit)"] },
             ].map(s => (
               <div key={s.title} className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
                 <div className="font-bold text-gray-900 text-xs mb-3">{s.title}</div>

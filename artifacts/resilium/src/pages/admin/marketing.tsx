@@ -146,15 +146,15 @@ function LaunchReadinessSection() {
     <div className="px-6 pb-8 space-y-1">
 
       <InfoBox>
-        <strong>Paddle approval is the single gate between you and a confident launch.</strong> Everything below that isn't marked as pending is something you can complete right now. The mobile tasks are separated — none of them are required to go live on web.
+        <strong>Stripe business verification is the single gate between you and live payments.</strong> Sandbox checkout is fully working and tested. Once your SRL CUI arrives, complete business verification in Stripe, swap the live keys, and you're taking real payments.
       </InfoBox>
 
-      {/* Paddle status callout */}
+      {/* Stripe status callout */}
       <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-2">
         <Clock className="w-4 h-4 text-amber-500 flex-shrink-0" />
         <div>
-          <p className="text-sm font-semibold text-amber-800">Waiting: Paddle domain approval</p>
-          <p className="text-xs text-amber-700 mt-0.5">Once <span className="font-mono">resilium-platform.com</span> is approved, complete items 1–2 below and you're live.</p>
+          <p className="text-sm font-semibold text-amber-800">Waiting: Stripe business verification</p>
+          <p className="text-xs text-amber-700 mt-0.5">Requires SRL CUI from Registrul Comerțului. Sandbox payments are live and tested on <span className="font-mono">resilium-platform.com</span>.</p>
         </div>
       </div>
 
@@ -164,8 +164,12 @@ function LaunchReadinessSection() {
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Payments &amp; Core Flow</p>
           <ul className="space-y-3">
             <ChecklistItem
-              text="Paddle domain approval received"
-              detail="Check your Paddle dashboard inbox. Once approved, production checkout will activate on resilium-platform.com."
+              text="Complete Stripe business verification"
+              detail="Requires SRL CUI from Registrul Comerțului. In Stripe dashboard: add business details, representative ID, and Romanian IBAN for payouts."
+            />
+            <ChecklistItem
+              text="Swap sandbox keys for live Stripe keys and re-run seed script"
+              detail="Replace STRIPE_SECRET_KEY, STRIPE_PUBLISHABLE_KEY, and STRIPE_WEBHOOK_SECRET in Replit secrets with live values. Then run: node scripts/seed-stripe-products.mjs to create products in the live account."
             />
             <ChecklistItem
               text="Test the full payment flow with a real card"
@@ -186,7 +190,7 @@ function LaunchReadinessSection() {
           <ul className="space-y-3">
             <ChecklistItem
               text="Privacy Policy page live"
-              detail="Required by EU GDPR (Romania-based). Must be linked in the site footer. Cover: data collected, storage, Clerk auth, Paddle billing, Resend email."
+              detail="Required by EU GDPR (Romania-based). Must be linked in the site footer. Cover: data collected, storage, Clerk auth, Stripe billing, Resend email."
             />
             <ChecklistItem
               text="Terms of Service page live"

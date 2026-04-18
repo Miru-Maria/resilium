@@ -15,7 +15,7 @@ const WEB_AUDIT = [
   { area: "Profile page", status: "strong", note: "7 tabs: Account → Overview → Reports → Plans → Checklist → Companion (Pro) → Guides; GDPR export, subscription status, data deletion all wired" },
   { area: "AI Companion tab", status: "good", note: "DB-backed conversation history; gpt-4.1-mini; grounded in user's latest scores; localStorage offline cache; free users see upgrade CTA" },
   { area: "Guides tab", status: "good", note: "10 crisis guides; location-aware; downloadable for offline reading; AsyncStorage download tracking" },
-  { area: "Pricing page", status: "good", note: "Clear feature comparison, Paddle payment link-out, upgrade flow" },
+  { area: "Pricing page", status: "good", note: "Clear feature comparison, Stripe server-side checkout, upgrade flow tested end-to-end" },
   { area: "Anonymous user experience", status: "good", note: "Free-tier gate enforced via localStorage + plan count, clear messaging" },
   { area: "About page", status: "good", note: "Methodology, Scientific Foundation (6 academic citations), Media Citations (5 mainstream sources), Privacy, About the Project" },
   { area: "Dark / light theme", status: "good", note: "Toggle present and persists across sessions" },
@@ -59,7 +59,7 @@ const FUNCTIONALITY_GROUPS = [
       "Assessment → AI scoring → AI report generation → saved to database",
       "User authentication — Clerk, both web and mobile, token cache split correctly",
       "Plan limit enforcement — free tier capped at 3, Pro unlimited",
-      "Subscription status check — Paddle webhook → database → status gate on all routes",
+      "Subscription status check — Stripe webhook → database → status gate on all routes",
       "Rate limiting on assessment endpoint — 6/min, Pro subscribers bypass",
       "Checklist progress tracking — database-backed, persists across sessions",
       "Social sharing — share modal (X/Twitter, Facebook, Reddit, Instagram) on results page",
@@ -141,7 +141,7 @@ const DONE_ITEMS = [
   "Coaching page — web (full Phoenix brand design) and mobile (parity achieved)",
   "User authentication — Clerk, web + mobile",
   "Free-tier plan limit (3 plans) with clear messaging",
-  "Paddle subscription webhook handler + subscription status gate",
+  "Stripe subscription webhook handler + subscription status gate (sandbox tested, production ready)",
   "Profile page with full plan history, GDPR controls, subscription status",
   "GDPR export + deletion — user-triggered and admin-triggered",
   "Consent collection and platform logging (web vs. mobile split)",
@@ -193,9 +193,9 @@ const OUTSTANDING = [
     note: "Intentionally deferred by owner — iOS only (Android explicitly excluded). App builds, assets, and metadata preparation in progress.",
   },
   {
-    item: "Payment integration (Paddle)",
+    item: "Payment integration (Stripe) — awaiting business verification",
     status: "In Progress",
-    note: "Paddle checkout integration is wired — client token, monthly and annual price IDs are all in env. Checkout is blocked in dev/preview (Paddle production keys only allow resilium-platform.com). Awaiting domain approval in Paddle dashboard. RevenueCat is an alternative path for the iOS in-app purchase flow.",
+    note: "Stripe checkout is fully working — sandbox tested end-to-end, Pro plan activates after payment, webhook verified with STRIPE_WEBHOOK_SECRET. Awaiting Stripe business verification (requires SRL CUI from Registrul Comerțului). Once verified, swap sandbox keys for live keys to accept real payments.",
   },
 ];
 
@@ -226,7 +226,7 @@ const LAUNCH_GROUPS: LaunchGroup[] = [
       { id: "ios-revenuecat-account", label: "RevenueCat account created and linked to App Store Connect", note: "App Store requires Apple billing for any subscription sold through the app. RevenueCat is the recommended integration layer. Free tier available at revenuecat.com", tag: "Blocker" },
       { id: "ios-iap-product", label: "Pro subscription product created in App Store Connect", note: "Create both Monthly and Annual auto-renewable subscription products. Link them to RevenueCat offerings. Requires banking/tax info in App Store Connect first.", tag: "Blocker" },
       { id: "ios-revenuecat-sdk", label: "RevenueCat SDK wired into the mobile app", note: "Install react-native-purchases. Initialize with your RevenueCat API key. Hook into useProStatus() context so Pro features gate correctly on iOS.", tag: "Needed" },
-      { id: "ios-paywall-screen", label: "iOS paywall screen built in the mobile app", note: "Separate from the Paddle web flow — Apple requires their billing for in-app purchases. Must present the subscription options using native purchase APIs.", tag: "Needed" },
+      { id: "ios-paywall-screen", label: "iOS paywall screen built in the mobile app", note: "Separate from the Stripe web flow — Apple requires their own billing for in-app purchases. Must present the subscription options using native purchase APIs via RevenueCat.", tag: "Needed" },
       { id: "ios-sandbox-test", label: "Sandbox purchase + restore tested on a physical iPhone", note: "Create a Sandbox Tester account in App Store Connect. Test purchase, subscription renewal, and 'Restore Purchases' flow end-to-end on a real device.", tag: "Verify" },
     ],
   },
@@ -239,14 +239,14 @@ const LAUNCH_GROUPS: LaunchGroup[] = [
     ],
   },
   {
-    id: "paddle",
-    label: "💳 Payments — Paddle (Web)",
+    id: "stripe",
+    label: "💳 Payments — Stripe (Web)",
     items: [
-      { id: "paddle-domain", label: "resilium-platform.com added to Approved Domains in Paddle dashboard", note: "Settings → Checkout → Allowed Domains. This is the only remaining blocker for web checkout — all code is already wired.", tag: "Blocker" },
-      { id: "paddle-checkout-test", label: "Checkout tested on production (resilium-platform.com)", note: "Click Upgrade on the live site. Complete a real or sandbox payment. Confirm the Paddle overlay opens, payment completes, and the success callback fires.", tag: "Verify" },
-      { id: "paddle-pro-activate", label: "Pro status activates correctly after payment", note: "After a completed checkout, confirm useProStatus() returns isPro = true and Pro-gated features unlock on the results and plan pages.", tag: "Verify" },
-      { id: "paddle-webhook-verify", label: "Webhook receiving events from Paddle", note: "After a test purchase, check API server logs for incoming webhook events. PADDLE_WEBHOOK_SECRET is already in env. Confirm signature verification is passing.", tag: "Verify" },
-      { id: "paddle-billing-toggle", label: "Monthly ↔ Annual billing toggle tested on pricing page", note: "Confirm both price IDs (monthly and annual) pass the correct value to the Paddle checkout overlay.", tag: "Verify" },
+      { id: "stripe-sandbox-done", label: "Sandbox checkout tested end-to-end ✓", note: "Completed April 2026. Stripe sandbox checkout → Pro plan activates → webhook confirmed. Both monthly and annual flows working.", tag: "Verify" },
+      { id: "stripe-business-verify", label: "Complete Stripe business verification", note: "Requires SRL CUI from Registrul Comerțului. In Stripe dashboard: complete business details, add representative ID, add Romanian IBAN for payouts.", tag: "Blocker" },
+      { id: "stripe-live-keys", label: "Swap sandbox keys for live Stripe keys", note: "Once verified, replace STRIPE_SECRET_KEY and STRIPE_PUBLISHABLE_KEY in Replit secrets with live keys (sk_live_... and pk_live_...). Update STRIPE_WEBHOOK_SECRET with the live webhook signing secret.", tag: "Needed" },
+      { id: "stripe-live-products", label: "Run seed script against live Stripe account", note: "After switching to live keys, run: node scripts/seed-stripe-products.mjs — this creates the Resilium Pro product and prices in your live Stripe account.", tag: "Needed" },
+      { id: "stripe-live-test", label: "Verify full payment flow in production with a real card", note: "Make a live purchase on resilium-platform.com. Confirm Pro activates, webhook fires, and subscription appears in Stripe dashboard.", tag: "Verify" },
     ],
   },
   {
@@ -467,7 +467,7 @@ export default function PlatformAssessmentDoc() {
           <div className="w-10 h-1 bg-[#E08040] rounded mb-6" />
           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-4 text-sm text-gray-700 leading-relaxed">
             <p>
-              This is a <strong className="text-gray-900">real product</strong>. Not a demo, not a prototype — a full-stack, full-featured platform with actual depth. The 14-step assessment, 6-dimension scoring model, AI report generation, dual platform (web + mobile), admin dashboard, email automation, GDPR compliance pipeline, push notifications, Paddle payments webhook, cron-driven engagement loops, and a pitch deck — the scope and execution quality here is genuinely impressive for what is essentially a solo-built product.
+              This is a <strong className="text-gray-900">real product</strong>. Not a demo, not a prototype — a full-stack, full-featured platform with actual depth. The 14-step assessment, 6-dimension scoring model, AI report generation, dual platform (web + mobile), admin dashboard, email automation, GDPR compliance pipeline, push notifications, Stripe payments with verified webhooks, cron-driven engagement loops, and a pitch deck — the scope and execution quality here is genuinely impressive for what is essentially a solo-built product.
             </p>
             <p>
               The code is disciplined: typed throughout (Zod for API contracts, Drizzle for DB), no TODO comments left in the codebase, thoughtful UI across both platforms, real rate limiting with Pro bypass, and error monitoring built in. These are professional signals.

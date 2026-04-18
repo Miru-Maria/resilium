@@ -355,7 +355,7 @@ export default function WhitepaperDoc() {
               { title: "API Server", desc: "Node.js 24 / Express 5 · esbuild compilation · Full OpenAPI specification · Rate limiting" },
               { title: "Database", desc: "PostgreSQL 16 · Drizzle ORM · Production tables: users, reports, subscriptions, checklists, snapshots, challenge progress, GDPR, admin audit · Automated GDPR cleanup" },
               { title: "Authentication", desc: "Clerk (JWT-based) for users · Separate cookie-based admin auth with ADMIN_USERNAME / ADMIN_PASSWORD environment secrets" },
-              { title: "Payments", desc: "Paddle subscription billing · HMAC-SHA256 verified webhooks · Monthly (£9) and annual (£79) Pro plans · One-time donation" },
+              { title: "Payments", desc: "Stripe subscription billing · Stripe-Signature verified webhooks · Monthly ($9) and annual ($79) Pro plans · Server-side Checkout Sessions" },
               { title: "Engagement Features", desc: "Daily coaching tip cards · Achievement badges · Streak tracking · 30-day resilience challenge with progress ring" },
               { title: "Offline Capability", desc: "Pro users' last-viewed action plan cached locally (7-day TTL) · Profile plan list cached · Offline banner shown when server is unreachable" },
               { title: "Admin Dashboard", desc: "Analytics (KPI cards, 12-month trends, dimension averages, conversion funnel) · User management · GDPR · Announcements · UX testing framework (8 personas)" },
