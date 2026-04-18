@@ -551,7 +551,7 @@
     <div class="toc-section toc-sub"><a class="toc-link" href="#lc-ios-prep">iOS — Preparation</a></div>
     <div class="toc-section toc-sub"><a class="toc-link" href="#lc-ios-iap">iOS — In-App Purchases</a></div>
     <div class="toc-section toc-sub"><a class="toc-link" href="#lc-ios-submit">iOS — Submission</a></div>
-    <div class="toc-section toc-sub"><a class="toc-link" href="#lc-paddle">Paddle Payments</a></div>
+    <div class="toc-section toc-sub"><a class="toc-link" href="#lc-stripe">Stripe Payments</a></div>
     <div class="toc-section toc-sub"><a class="toc-link" href="#lc-prod">Production</a></div>
     <div class="toc-section toc-sub"><a class="toc-link" href="#lc-mobile">Mobile Testing</a></div>
     <div class="toc-section toc-sub"><a class="toc-link" href="#lc-design">Design Decisions</a></div>
@@ -584,7 +584,7 @@
       <h2 class="section-title">My Honest Opinion</h2>
 
       <div class="prose">
-        <p>This is a <strong>real product</strong>. Not a demo, not a prototype — a full-stack, full-featured platform with actual depth. The 14-step assessment, 6-dimension scoring model, AI report generation, dual platform (web + mobile), admin dashboard, email automation, GDPR compliance pipeline, push notifications, Paddle payments webhook, cron-driven engagement loops, and a pitch deck — the scope and execution quality here is genuinely impressive for what is essentially a solo-built product.</p>
+        <p>This is a <strong>real product</strong>. Not a demo, not a prototype — a full-stack, full-featured platform with actual depth. The 14-step assessment, 6-dimension scoring model, AI report generation, dual platform (web + mobile), admin dashboard, email automation, GDPR compliance pipeline, push notifications, Stripe payments with verified webhooks, cron-driven engagement loops, and a pitch deck — the scope and execution quality here is genuinely impressive for what is essentially a solo-built product.</p>
         <p>The code is disciplined: typed throughout (Zod for API contracts, Drizzle for DB), no TODO comments left in the codebase, thoughtful UI across both platforms, real rate limiting with Pro bypass, and error monitoring built in. These are professional signals.</p>
       </div>
 
@@ -668,7 +668,7 @@
           <tr><td>Profile page</td><td><span class="badge badge-good">✓ Comprehensive</span></td><td>7 tabs in order: Account → Overview → Reports → Plans → Checklist → Companion (Pro) → Guides; GDPR export, subscription status, data deletion all wired</td></tr>
           <tr><td>AI Companion tab (Profile)</td><td><span class="badge badge-good">✓ Pro-gated</span></td><td>DB-backed conversation history; gpt-4.1-mini; grounded in user's latest scores; localStorage offline cache (<code>resilium_companion_messages_v1</code>); free users see upgrade CTA</td></tr>
           <tr><td>Guides tab (Profile)</td><td><span class="badge badge-good">✓ Free for All</span></td><td>10 crisis guides (financial, health, shelter, water, food, communications, evacuation, documents, mental health, community); location-aware; downloadable for offline reading; AsyncStorage download tracking (<code>resilium_guides_downloaded_v1</code>)</td></tr>
-          <tr><td>Pricing page</td><td><span class="badge badge-good">✓ Clean</span></td><td>Clear feature comparison, Paddle payment link-out, upgrade flow</td></tr>
+          <tr><td>Pricing page</td><td><span class="badge badge-good">✓ Clean</span></td><td>Clear feature comparison, Stripe server-side checkout, upgrade flow tested end-to-end</td></tr>
           <tr><td>Anonymous user experience</td><td><span class="badge badge-good">✓ Works</span></td><td>Free-tier gate enforced via localStorage + plan count, clear messaging</td></tr>
           <tr><td>Onboarding modal</td><td><span class="badge badge-good">✓ Present</span></td><td>First-time user guidance active</td></tr>
           <tr><td>About page</td><td><span class="badge badge-good">✓ Expanded</span></td><td>Now includes: Methodology, Scientific Foundation (6 academic citations), Media Citations (5 mainstream sources), Privacy, About the Project</td></tr>
@@ -699,7 +699,7 @@
           <tr><td>Coaching page</td><td><span class="badge badge-good">✓ Upgraded</span></td><td>Now matches web structure — score context cards, About Cristiana, full CTA sections</td></tr>
           <tr><td>AI Companion tab</td><td><span class="badge badge-good">✓ Pro-gated</span></td><td>DB-backed chat with user's latest scores as context; gpt-4.1-mini; AsyncStorage offline cache; free users see upgrade CTA</td></tr>
           <tr><td>Guides tab</td><td><span class="badge badge-good">✓ Free for All</span></td><td>10 crisis guides bundled offline (always available without network); location-aware guide ordering; AsyncStorage download tracking</td></tr>
-          <tr><td>Pricing</td><td><span class="badge badge-good">✓ Present</span></td><td>Links out to web for Paddle checkout — correct for mobile payment flow</td></tr>
+          <tr><td>Pricing</td><td><span class="badge badge-good">✓ Present</span></td><td>Links out to web for Stripe checkout — correct for mobile payment flow</td></tr>
           <tr><td>Icon rendering (nav bar, pricing, all screens)</td><td><span class="badge badge-good">✓ Fixed</span></td><td>Feather icons loaded via Font.loadAsync on all platforms — removes CDN dependency, icons render reliably on web and native</td></tr>
           <tr><td>App Store / Play Store</td><td><span class="badge badge-warn">Pending</span></td><td>Intentionally deferred — owner working on submission</td></tr>
         </tbody>
@@ -747,7 +747,7 @@
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">Assessment → AI scoring → AI report generation → saved to database</span></li>
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">User authentication — Clerk, both web and mobile, token cache split correctly</span></li>
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">Plan limit enforcement — free tier capped at 3, Pro unlimited</span></li>
-        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Subscription status check — Paddle webhook → database → status gate on all routes</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Subscription status check — Stripe webhook → database → status gate on all routes</span></li>
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">Rate limiting on assessment endpoint — 6/min, Pro subscribers bypass</span></li>
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">Checklist progress tracking — database-backed, persists across sessions</span></li>
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">Social sharing — share modal (X/Twitter, Facebook, Reddit, Instagram) on results page with score in share text; scorecard image generation removed (replaced by social share + Markdown export)</span></li>
@@ -831,7 +831,7 @@
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">Coaching page — web (full Phoenix brand design) and mobile (parity achieved)</span></li>
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">User authentication — Clerk, web + mobile</span></li>
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">Free-tier plan limit (3 plans) with clear messaging</span></li>
-        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Paddle subscription webhook handler + subscription status gate</span></li>
+        <li><span class="check-icon check-done">✓</span><span class="check-text-done">Stripe subscription webhook handler + subscription status gate (sandbox tested, production ready)</span></li>
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">Profile page with full plan history, GDPR controls, subscription status</span></li>
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">GDPR export + deletion — user-triggered and admin-triggered</span></li>
         <li><span class="check-icon check-done">✓</span><span class="check-text-done">Consent collection and platform logging (web vs. mobile split)</span></li>
@@ -938,9 +938,9 @@
             <td>Intentionally deferred by owner — iOS only (Android explicitly excluded). App builds, assets, and metadata preparation in progress.</td>
           </tr>
           <tr>
-            <td>Payment integration (Paddle)</td>
+            <td>Payment integration (Stripe) — awaiting business verification</td>
             <td><span class="badge badge-warn">In Progress</span></td>
-            <td>Paddle checkout integration is wired — client token, monthly and annual price IDs are all in env. Checkout is blocked in dev/preview (Paddle production keys only allow resilium-platform.com). Awaiting domain approval configuration in Paddle dashboard. RevenueCat is an alternative path for the iOS in-app purchase flow (App Store requires Apple billing for subscriptions sold through the app).</td>
+            <td>Stripe checkout is fully working — sandbox tested end-to-end, Pro plan activates after payment, webhook verified. Awaiting Stripe business verification (requires SRL CUI from Registrul Comerțului).</td>
           </tr>
         </tbody>
       </table>
@@ -1045,7 +1045,7 @@
         <li class="ll-item" data-id="ios-paywall-screen" tabindex="0" role="checkbox" aria-checked="false">
           <div class="ll-checkbox"></div>
           <div class="ll-label">iOS paywall screen built in the mobile app
-            <span class="ll-note">Separate from the Paddle web flow — Apple requires their billing for in-app purchases. Must present the subscription options using native purchase APIs.</span>
+            <span class="ll-note">Separate from the Stripe web flow — Apple requires their billing for in-app purchases. Must present the subscription options using native purchase APIs.</span>
           </div>
           <span class="ll-tag ll-tag-needed">Needed</span>
         </li>
@@ -1077,41 +1077,41 @@
         </li>
       </ul>
 
-      <!-- ── Paddle ── -->
-      <div class="sub-heading" id="lc-paddle">💳 Payments — Paddle (Web) <span class="ll-group-counter" id="gp-paddle">0/5</span></div>
-      <ul class="launch-list" data-group="paddle">
-        <li class="ll-item" data-id="paddle-domain" tabindex="0" role="checkbox" aria-checked="false">
+      <!-- ── Stripe ── -->
+      <div class="sub-heading" id="lc-stripe">💳 Payments — Stripe (Web) <span class="ll-group-counter" id="gp-stripe">0/5</span></div>
+      <ul class="launch-list" data-group="stripe">
+        <li class="ll-item" data-id="stripe-sandbox-done" tabindex="0" role="checkbox" aria-checked="false">
           <div class="ll-checkbox"></div>
-          <div class="ll-label">resilium-platform.com added to Approved Domains in Paddle dashboard
-            <span class="ll-note">Settings → Checkout → Allowed Domains. Approval is pending. This is the only remaining blocker for web checkout — all code is already wired.</span>
+          <div class="ll-label">Sandbox checkout tested end-to-end ✓
+            <span class="ll-note">Completed April 2026. Stripe sandbox checkout → Pro plan activates → webhook confirmed. Both monthly and annual flows working.</span>
+          </div>
+          <span class="ll-tag ll-tag-verify">Verify</span>
+        </li>
+        <li class="ll-item" data-id="stripe-business-verify" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="ll-checkbox"></div>
+          <div class="ll-label">Complete Stripe business verification
+            <span class="ll-note">Requires SRL CUI from Registrul Comerțului. In Stripe dashboard: complete business details, add representative ID, add Romanian IBAN for payouts.</span>
           </div>
           <span class="ll-tag ll-tag-block">Blocker</span>
         </li>
-        <li class="ll-item" data-id="paddle-checkout-test" tabindex="0" role="checkbox" aria-checked="false">
+        <li class="ll-item" data-id="stripe-live-keys" tabindex="0" role="checkbox" aria-checked="false">
           <div class="ll-checkbox"></div>
-          <div class="ll-label">Checkout tested on production (resilium-platform.com)
-            <span class="ll-note">Click Upgrade on the live site. Complete a real or sandbox payment. Confirm the Paddle overlay opens, payment completes, and the success callback fires.</span>
+          <div class="ll-label">Swap sandbox keys for live Stripe keys
+            <span class="ll-note">Replace <code style="font-size:11px;background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px">STRIPE_SECRET_KEY</code> and <code style="font-size:11px;background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px">STRIPE_PUBLISHABLE_KEY</code> in Replit secrets with live keys. Update <code style="font-size:11px;background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px">STRIPE_WEBHOOK_SECRET</code> with the live signing secret.</span>
           </div>
-          <span class="ll-tag ll-tag-verify">Verify</span>
+          <span class="ll-tag ll-tag-needed">Needed</span>
         </li>
-        <li class="ll-item" data-id="paddle-pro-activate" tabindex="0" role="checkbox" aria-checked="false">
+        <li class="ll-item" data-id="stripe-live-products" tabindex="0" role="checkbox" aria-checked="false">
           <div class="ll-checkbox"></div>
-          <div class="ll-label">Pro status activates correctly after payment
-            <span class="ll-note">After a completed checkout, confirm the <code style="font-size:11px;background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px">useProStatus()</code> hook returns <code style="font-size:11px;background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px">isPro = true</code> and Pro-gated features unlock on the results and plan pages.</span>
+          <div class="ll-label">Run seed script against live Stripe account
+            <span class="ll-note">After switching to live keys, run: <code style="font-size:11px;background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px">node scripts/seed-stripe-products.mjs</code> — creates the Resilium Pro product and prices in your live Stripe account.</span>
           </div>
-          <span class="ll-tag ll-tag-verify">Verify</span>
+          <span class="ll-tag ll-tag-needed">Needed</span>
         </li>
-        <li class="ll-item" data-id="paddle-webhook-verify" tabindex="0" role="checkbox" aria-checked="false">
+        <li class="ll-item" data-id="stripe-live-test" tabindex="0" role="checkbox" aria-checked="false">
           <div class="ll-checkbox"></div>
-          <div class="ll-label">Webhook receiving events from Paddle
-            <span class="ll-note">After a test purchase, check API server logs for incoming webhook events. <code style="font-size:11px;background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px">PADDLE_WEBHOOK_SECRET</code> is already in env. Confirm signature verification is passing.</span>
-          </div>
-          <span class="ll-tag ll-tag-verify">Verify</span>
-        </li>
-        <li class="ll-item" data-id="paddle-billing-toggle" tabindex="0" role="checkbox" aria-checked="false">
-          <div class="ll-checkbox"></div>
-          <div class="ll-label">Monthly ↔ Annual billing toggle tested on pricing page
-            <span class="ll-note">Confirm both price IDs (monthly and annual) pass the correct value to the Paddle checkout overlay. Prices should display the correct discounted annual amount.</span>
+          <div class="ll-label">Verify full payment flow in production with a real card
+            <span class="ll-note">Make a live purchase on resilium-platform.com. Confirm Pro activates, webhook fires, and subscription appears in Stripe dashboard.</span>
           </div>
           <span class="ll-tag ll-tag-verify">Verify</span>
         </li>
