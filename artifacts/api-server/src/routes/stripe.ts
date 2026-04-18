@@ -1,3 +1,4 @@
+import Stripe from "stripe";
 import { Router } from "express";
 import { getAuth } from "@clerk/express";
 import { getUncachableStripeClient } from "../stripeClient.js";
@@ -62,7 +63,7 @@ async function handleStripeEvent(event: any) {
 
     // Fetch the full subscription to get period end
     const stripe = await getUncachableStripeClient();
-    const sub = await stripe.subscriptions.retrieve(subscriptionId);
+    const sub = await stripe.subscriptions.retrieve(subscriptionId) as any;
     const currentPeriodEnd = sub.current_period_end
       ? new Date(sub.current_period_end * 1000)
       : undefined;

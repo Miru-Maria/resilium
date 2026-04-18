@@ -1,14 +1,14 @@
 import { Router } from "express";
-import { requireAuth } from "@clerk/express";
+import { requireAuth, getAuth } from "@clerk/express";
 import { db, challengeStateTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 
 const router = Router();
 
-router.get("/api/challenge", requireAuth(), async (req, res) => {
+router.get("/api/challenge", requireAuth(), async (req, res): Promise<void> => {
   try {
-    const userId = req.auth?.userId;
-    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+    const userId = getAuth(req).userId;
+    if (!userId) { res.status(401).json({ error: "Unauthorized" }); return; }
 
     const [row] = await db
       .select()
@@ -16,7 +16,7 @@ router.get("/api/challenge", requireAuth(), async (req, res) => {
       .where(eq(challengeStateTable.userId, userId))
       .limit(1);
 
-    if (!row) return res.status(404).json({ error: "No challenge started" });
+    if (!row) { res.status(404).json({ error: "No challenge started" }); return; }
 
     res.json({
       startedAt: row.startedAt.toISOString(),
@@ -29,14 +29,14 @@ router.get("/api/challenge", requireAuth(), async (req, res) => {
   }
 });
 
-router.post("/api/challenge/start", requireAuth(), async (req, res) => {
+router.post("/api/challenge/start", requireAuth(), async (req, res): Promise<void> => {
   try {
-    const userId = req.auth?.userId;
-    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+    const userId = getAuth(req).userId;
+    if (!userId) { res.status(401).json({ error: "Unauthorized" }); return; }
 
     const { dimensionOrder } = req.body as { dimensionOrder: string[] };
     if (!Array.isArray(dimensionOrder) || dimensionOrder.length !== 6) {
-      return res.status(400).json({ error: "Invalid dimension order" });
+      res.status(400).json({ error: "Invalid dimension order" }); return;
     }
 
     const [existing] = await db
@@ -46,11 +46,12 @@ router.post("/api/challenge/start", requireAuth(), async (req, res) => {
       .limit(1);
 
     if (existing) {
-      return res.json({
+      res.json({
         startedAt: existing.startedAt.toISOString(),
         dimensionOrder: JSON.parse(existing.dimensionOrder),
         completedDays: JSON.parse(existing.completedDays),
       });
+      return;
     }
 
     const [row] = await db
@@ -73,14 +74,14 @@ router.post("/api/challenge/start", requireAuth(), async (req, res) => {
   }
 });
 
-router.post("/api/challenge/complete/:day", requireAuth(), async (req, res) => {
+router.post("/api/challenge/complete/:day", requireAuth(), async (req, res): Promise<void> => {
   try {
-    const userId = req.auth?.userId;
-    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+    const userId = getAuth(req).userId;
+    if (!userId) { res.status(401).json({ error: "Unauthorized" }); return; }
 
     const day = Number(req.params["day"]);
     if (!Number.isInteger(day) || day < 1 || day > 30) {
-      return res.status(400).json({ error: "Invalid day number" });
+      res.status(400).json({ error: "Invalid day number" }); return;
     }
 
     const [row] = await db
@@ -89,7 +90,7 @@ router.post("/api/challenge/complete/:day", requireAuth(), async (req, res) => {
       .where(eq(challengeStateTable.userId, userId))
       .limit(1);
 
-    if (!row) return res.status(404).json({ error: "No challenge started" });
+    if (!row) { res.status(404).json({ error: "No challenge started" }); return; }
 
     const completedDays: number[] = JSON.parse(row.completedDays);
     if (!completedDays.includes(day)) {
