@@ -6,7 +6,7 @@ import {
   LineChart, Line, CartesianGrid,
 } from "recharts";
 import {
-  Users, TrendingUp, Award, Activity, Loader2, AlertTriangle, Target,
+  Users, TrendingUp, Award, Activity, Loader2, AlertTriangle, Target, Zap,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -17,6 +17,7 @@ interface UserAnalytics {
     totalUsers: number;
     totalPro: number;
     usersWithAtLeastOnePlan: number;
+    activeUsers30d: number;
     conversionRate: number;
   };
   signupsByMonth: { month: string; count: number }[];
@@ -106,13 +107,20 @@ export default function AdminAnalyticsPage() {
         {data && (
           <>
             {/* KPI cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
               <StatCard
                 title="Total Users"
                 value={data.totals.totalUsers}
                 sub="registered accounts"
                 icon={Users}
                 color="text-blue-500"
+              />
+              <StatCard
+                title="Active (30d)"
+                value={data.totals.activeUsers30d}
+                sub="reports, check-ins, or messages"
+                icon={Zap}
+                color="text-orange-500"
               />
               <StatCard
                 title="With Assessment"

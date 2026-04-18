@@ -174,8 +174,24 @@ router.get("/users", async (req, res) => {
       else planBuckets["3 plans"]++;
     }
 
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const activeUsersResult = await db.execute(sql`
+      SELECT COUNT(DISTINCT user_id)::int AS count FROM (
+        SELECT user_id FROM resilience_reports WHERE user_id IS NOT NULL AND created_at >= ${thirtyDaysAgo}
+        UNION
+        SELECT user_id FROM checkin_entries WHERE created_at >= ${thirtyDaysAgo}
+        UNION
+        SELECT c.user_id FROM conversations c
+          JOIN messages m ON m.conversation_id = c.id
+          WHERE m.created_at >= ${thirtyDaysAgo}
+      ) active_users
+    `);
+    const activeUsers30d = Number((activeUsersResult.rows[0] as { count: number } | undefined)?.count ?? 0);
+
     res.json({
-      totals: { totalUsers, totalPro, usersWithAtLeastOnePlan, conversionRate: totalUsers > 0 ? Math.round((totalPro / totalUsers) * 1000) / 10 : 0 },
+      totals: { totalUsers, totalPro, usersWithAtLeastOnePlan, activeUsers30d, conversionRate: totalUsers > 0 ? Math.round((totalPro / totalUsers) * 1000) / 10 : 0 },
       signupsByMonth: Object.entries(signupsByMonth).map(([month, count]) => ({ month, count })),
       assessmentsByMonth: Object.entries(assessmentsByMonth).map(([month, count]) => ({ month, count })),
       dimensionAverages: [
