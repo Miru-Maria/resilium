@@ -190,6 +190,40 @@ router.get("/users", async (req, res) => {
     `);
     const activeUsers30d = Number((activeUsersResult.rows[0] as { count: number } | undefined)?.count ?? 0);
 
+    const activeUsersTrendResult = await db.execute(sql`
+      SELECT
+        TO_CHAR(date_trunc('day', activity_at), 'YYYY-MM-DD') AS day,
+        COUNT(DISTINCT user_id)::int AS count
+      FROM (
+        SELECT user_id, created_at AS activity_at
+          FROM resilience_reports
+          WHERE user_id IS NOT NULL AND created_at >= ${thirtyDaysAgo}
+        UNION ALL
+        SELECT user_id, created_at AS activity_at
+          FROM checkin_entries
+          WHERE created_at >= ${thirtyDaysAgo}
+        UNION ALL
+        SELECT c.user_id, m.created_at AS activity_at
+          FROM conversations c
+          JOIN messages m ON m.conversation_id = c.id
+          WHERE m.created_at >= ${thirtyDaysAgo}
+      ) all_activity
+      GROUP BY date_trunc('day', activity_at)
+      ORDER BY day
+    `);
+
+    const trendMap: Record<string, number> = {};
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      trendMap[d.toISOString().slice(0, 10)] = 0;
+    }
+    for (const row of activeUsersTrendResult.rows as { day: string; count: number }[]) {
+      const key = row.day.slice(0, 10);
+      if (key in trendMap) trendMap[key] = Number(row.count);
+    }
+    const activeUsersByDay = Object.entries(trendMap).map(([date, count]) => ({ date, count }));
+
     res.json({
       totals: { totalUsers, totalPro, usersWithAtLeastOnePlan, activeUsers30d, conversionRate: totalUsers > 0 ? Math.round((totalPro / totalUsers) * 1000) / 10 : 0 },
       signupsByMonth: Object.entries(signupsByMonth).map(([month, count]) => ({ month, count })),
@@ -203,6 +237,7 @@ router.get("/users", async (req, res) => {
         { name: "Resources", value: Math.round(Number(dimAvgs?.resources ?? 0) * 10) / 10 },
       ],
       planBuckets: Object.entries(planBuckets).map(([label, count]) => ({ label, count })),
+      activeUsersByDay,
     });
   } catch (err) {
     req.log.error({ err }, "Error fetching user analytics");

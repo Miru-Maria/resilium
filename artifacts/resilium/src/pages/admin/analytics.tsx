@@ -24,6 +24,7 @@ interface UserAnalytics {
   assessmentsByMonth: { month: string; count: number }[];
   dimensionAverages: { name: string; value: number }[];
   planBuckets: { label: string; count: number }[];
+  activeUsersByDay: { date: string; count: number }[];
 }
 
 async function fetchUserAnalytics(): Promise<UserAnalytics> {
@@ -144,6 +145,36 @@ export default function AdminAnalyticsPage() {
                 color="text-violet-500"
               />
             </div>
+
+            {/* Active users trend */}
+            <Card className="border-none shadow-md">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-display flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-orange-500" /> Daily Active Users — Last 30 Days
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={200}>
+                  <LineChart data={data.activeUsersByDay.map((d) => ({
+                    ...d,
+                    label: new Date(d.date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+                  }))}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
+                    <XAxis
+                      dataKey="label"
+                      tick={{ fontSize: 10 }}
+                      axisLine={false}
+                      tickLine={false}
+                      interval={Math.floor(data.activeUsersByDay.length / 6)}
+                    />
+                    <YAxis tick={{ fontSize: 10 }} axisLine={false} tickLine={false} width={24} allowDecimals={false} />
+                    <Tooltip contentStyle={{ borderRadius: 8, fontSize: 12 }} formatter={(v: number) => [v, "Active Users"]} />
+                    <Line type="monotone" dataKey="count" name="Active Users" stroke="#f97316" strokeWidth={2.5} dot={false} activeDot={{ r: 5 }} />
+                  </LineChart>
+                </ResponsiveContainer>
+                <p className="text-xs text-muted-foreground mt-2 text-center">Users with at least one report, check-in, or companion message that day</p>
+              </CardContent>
+            </Card>
 
             {/* Growth charts */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
