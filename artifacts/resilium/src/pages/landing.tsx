@@ -43,6 +43,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { usePwaInstall } from "@/hooks/use-pwa-install";
+import { Download } from "lucide-react";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -518,6 +520,32 @@ function AnimatedBackground() {
   );
 }
 
+function PwaInstallBanner() {
+  const { isInstallable, triggerInstall, dismiss } = usePwaInstall();
+  if (!isInstallable) return null;
+  return (
+    <div className="w-full z-20 px-6 pt-3">
+      <div className="max-w-5xl mx-auto flex items-center gap-4 px-5 py-3 rounded-2xl bg-card border border-primary/30 backdrop-blur-sm shadow-sm">
+        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+          <Download className="w-4 h-4 text-primary" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold text-sm text-foreground leading-tight">Install Resilium</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Add to your home screen for quick offline access.</p>
+        </div>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <Button size="sm" className="rounded-full text-xs font-semibold" onClick={triggerInstall}>
+            Install
+          </Button>
+          <button onClick={dismiss} className="text-muted-foreground hover:text-foreground transition-colors p-1" aria-label="Dismiss install prompt">
+            <span className="text-lg leading-none">×</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function LandingPage() {
   return (
     <div className="min-h-screen flex flex-col relative overflow-hidden">
@@ -532,6 +560,8 @@ export default function LandingPage() {
       </div>
 
       <OnboardingModal />
+      {/* PWA install prompt banner */}
+      <PwaInstallBanner />
       {/* Smart banner — onboarding for new users, re-engagement for returning users */}
       <SignedInBanner />
 
