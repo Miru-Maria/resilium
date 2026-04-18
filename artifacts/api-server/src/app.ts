@@ -1,6 +1,7 @@
 import * as Sentry from "@sentry/node";
 import express, { type Express, type Request, type Response, type NextFunction } from "express";
 import cors from "cors";
+import helmet from "helmet";
 import { clerkMiddleware } from "@clerk/express";
 import pinoHttp from "pino-http";
 import router from "./routes";
@@ -11,6 +12,38 @@ const app: Express = express();
 
 app.set("trust proxy", 1);
 
+// ── Security headers (Helmet) ────────────────────────────────────────────────
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false,
+  }),
+);
+
+// ── CORS — restrict to known origins ────────────────────────────────────────
+const ALLOWED_ORIGINS = [
+  "https://resilium-platform.com",
+  /^https:\/\/.*\.resilium-platform\.com$/,
+  /^https:\/\/.*\.replit\.app$/,
+  /^https:\/\/.*\.repl\.co$/,
+  /^https:\/\/.*\.replit\.dev$/,
+];
+
+app.use(
+  cors({
+    credentials: true,
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      const allowed = ALLOWED_ORIGINS.some((o) =>
+        typeof o === "string" ? o === origin : o.test(origin),
+      );
+      if (allowed) return callback(null, true);
+      return callback(new Error("Not allowed by CORS"));
+    },
+  }),
+);
+
+// ── Request logging ──────────────────────────────────────────────────────────
 app.use(
   pinoHttp({
     logger,
@@ -30,13 +63,13 @@ app.use(
     },
   }),
 );
-app.use(cors({ credentials: true, origin: true }));
 
-// Capture raw body for Stripe webhook verification before express.json() consumes it
+// ── Body parsing — with size limits to prevent DoS ──────────────────────────
 app.use("/api/stripe/webhook", express.raw({ type: "*/*" }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "1mb" }));
+app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 
+// ── Clerk authentication ─────────────────────────────────────────────────────
 const CLERK_JWT_KEY = `-----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAw388/bHaXpS3CQvoBxRb
 Msq91ZENbDikY/WK0dH7hUeV/C3bai1iw3fyYNLBuwziBvxfPlowbeKcmEPb6MjD
@@ -48,12 +81,12 @@ cQIDAQAB
 -----END PUBLIC KEY-----`;
 
 app.use(clerkMiddleware({
-  publishableKey: "pk_live_Y2xlcmsucmVzaWxpdW0tcGxhdGZvcm0uY29tJA",
+  publishableKey: process.env["CLERK_PUBLISHABLE_KEY"] || "pk_live_Y2xlcmsucmVzaWxpdW0tcGxhdGZvcm0uY29tJA",
   secretKey: process.env["CLERK_SECRET_KEY"],
   jwtKey: CLERK_JWT_KEY,
 }));
 
-// Error-rate tracking middleware — must be BEFORE routes so finish listener is attached
+// ── Error-rate tracking ──────────────────────────────────────────────────────
 app.use((_req: Request, res: Response, next: NextFunction) => {
   res.on("finish", () => {
     if (res.statusCode >= 500) {
@@ -65,10 +98,10 @@ app.use((_req: Request, res: Response, next: NextFunction) => {
 
 app.use("/api", router);
 
-// Sentry error handler — must come after all routes
+// ── Sentry error handler — must come after all routes ───────────────────────
 Sentry.setupExpressErrorHandler(app);
 
-// Start background cron jobs
+// ── Background cron jobs ─────────────────────────────────────────────────────
 startCron();
 
 export default app;

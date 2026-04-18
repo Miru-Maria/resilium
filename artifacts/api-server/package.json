@@ -10,7 +10,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@clerk/express": "^2.0.8",
+    "@clerk/express": "^2.1.4",
     "@opentelemetry/api": "^1.9.1",
     "@sentry/node": "^10.47.0",
     "@workspace/api-zod": "workspace:*",
@@ -20,9 +20,10 @@
     "drizzle-orm": "catalog:",
     "express": "^5",
     "express-rate-limit": "^8.3.1",
+    "helmet": "^8.1.0",
     "http-proxy-middleware": "^3.0.5",
     "node-cron": "^4.2.1",
-    "nodemailer": "^8.0.4",
+    "nodemailer": "^8.0.5",
     "pg": "^8.20.0",
     "pino": "^9",
     "pino-http": "^10",
@@ -32,6 +33,7 @@
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
+    "@types/helmet": "^4.0.0",
     "@types/node": "catalog:",
     "@types/node-cron": "^3.0.11",
     "@types/nodemailer": "^7.0.11",
