@@ -220,6 +220,17 @@ function SignedInBanner() {
     retry: 1,
   });
 
+  const { data: subStatus } = useQuery({
+    queryKey: ["subscription-status"],
+    queryFn: async () => {
+      const r = await fetch(`${BASE}/api/subscription/status`, { credentials: "include" });
+      return r.ok ? (r.json() as Promise<{ isPro: boolean }>) : { isPro: false };
+    },
+    enabled: !!isSignedIn && !!isLoaded,
+    staleTime: 5 * 60 * 1000,
+    retry: 1,
+  });
+
   const challengeProgress: ChallengeProgress | null =
     challengeRaw?.completedDays ? deriveChallengeProgress(challengeRaw) : null;
 
@@ -238,9 +249,9 @@ function SignedInBanner() {
       allDimsAssessed: allDimsAssessedFromPlan(latest),
       streak: streakRaw,
       completedDaysCount: challengeRaw?.completedDays?.length ?? 0,
-      isPro: false,
+      isPro: subStatus?.isPro ?? false,
     });
-  }, [plansData, challengeRaw]);
+  }, [plansData, challengeRaw, subStatus]);
 
   useEffect(() => {
     if (!isLoaded) return;
