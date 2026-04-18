@@ -36,7 +36,7 @@ interface ChallengeCardProps {
 }
 
 export function ChallengeCard({ latestScores, isPro }: ChallengeCardProps) {
-  const { getToken } = useAuth();
+  const { getToken, isLoaded, isSignedIn } = useAuth();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [expanded, setExpanded] = useState(false);
@@ -54,6 +54,7 @@ export function ChallengeCard({ latestScores, isPro }: ChallengeCardProps) {
       return res.json();
     },
     staleTime: 60 * 1000,
+    enabled: !!isLoaded && !!isSignedIn,
   });
 
   const startMutation = useMutation({

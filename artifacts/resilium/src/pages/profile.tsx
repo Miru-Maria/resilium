@@ -268,10 +268,11 @@ const SCORE_DIMS: { key: keyof ScoreMap; label: string }[] = [
 function CompareModal({
   open, onClose, reportIdA, reportIdB,
 }: { open: boolean; onClose: () => void; reportIdA: string; reportIdB: string }) {
+  const { isLoaded, isSignedIn } = useAuth();
   const { data, isLoading, error } = useQuery<CompareResult>({
     queryKey: ["compare", reportIdA, reportIdB],
     queryFn: () => comparePlans(reportIdA, reportIdB),
-    enabled: open && !!reportIdA && !!reportIdB,
+    enabled: !!isLoaded && !!isSignedIn && open && !!reportIdA && !!reportIdB,
     staleTime: 5 * 60 * 1000,
   });
 
@@ -444,6 +445,8 @@ const PRIORITY_ORDER: Record<string, number> = { critical: 0, high: 1, medium: 2
 
 // ─── Overview Tab ────────────────────────────────────────────────────────────
 function OverviewTab({ plans }: { plans: PlanSummary[] }) {
+  const { isLoaded, isSignedIn } = useAuth();
+
   const { data: checklistFocusData } = useQuery({
     queryKey: ["latestChecklist"],
     queryFn: async () => {
@@ -451,7 +454,7 @@ function OverviewTab({ plans }: { plans: PlanSummary[] }) {
       if (!res.ok) return null;
       return res.json();
     },
-    enabled: plans.length > 0,
+    enabled: !!isLoaded && !!isSignedIn && plans.length > 0,
     staleTime: 60_000,
   });
 
@@ -463,7 +466,7 @@ function OverviewTab({ plans }: { plans: PlanSummary[] }) {
       const json = await res.json();
       return json.progress ?? [];
     },
-    enabled: !!checklistFocusData?.reportId,
+    enabled: !!isLoaded && !!isSignedIn && !!checklistFocusData?.reportId,
     staleTime: 60_000,
   });
 
@@ -478,6 +481,7 @@ function OverviewTab({ plans }: { plans: PlanSummary[] }) {
       return res.json();
     },
     staleTime: 60 * 1000,
+    enabled: !!isLoaded && !!isSignedIn,
   });
 
   const completedDaysCount = challengeData?.completedDays?.length ?? 0;
@@ -782,6 +786,7 @@ const GOAL_ICONS: Record<string, string> = {
 };
 
 function ChecklistTab() {
+  const { isLoaded, isSignedIn } = useAuth();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
@@ -800,6 +805,7 @@ function ChecklistTab() {
       if (!res.ok) throw new Error("Failed to fetch checklist");
       return res.json();
     },
+    enabled: !!isLoaded && !!isSignedIn,
   });
 
   const reportId = checklistData?.reportId ?? null;
@@ -812,7 +818,7 @@ function ChecklistTab() {
       const json = await res.json();
       return json.progress ?? [];
     },
-    enabled: !!reportId,
+    enabled: !!isLoaded && !!isSignedIn && !!reportId,
   });
 
   const toggleMutation = useMutation({
@@ -1378,10 +1384,12 @@ const DIM_COLORS: Record<string, string> = {
 };
 
 function ScoreHistorySection() {
+  const { isLoaded, isSignedIn } = useAuth();
   const { data, isLoading } = useQuery<{ snapshots: ScoreSnapshot[]; isPro: boolean }>({
     queryKey: ["scoreHistory"],
     queryFn: () => fetch("/api/users/me/score-history", { credentials: "include" }).then(r => r.json()),
     staleTime: 60_000,
+    enabled: !!isLoaded && !!isSignedIn,
   });
 
   if (isLoading) return (
@@ -2393,8 +2401,8 @@ class TabErrorBoundary extends React.Component<
 
 // ─── Main Page ───────────────────────────────────────────────────────────────
 export default function ProfilePage() {
-  const { user, isLoaded } = useUser();
-  const { isSignedIn } = useAuth();
+  const { user } = useUser();
+  const { isSignedIn, isLoaded } = useAuth();
   const { openSignIn, signOut } = useClerk();
   const [authTimedOut, setAuthTimedOut] = useState(false);
   useEffect(() => {
@@ -2420,7 +2428,7 @@ export default function ProfilePage() {
   const { data, isLoading: plansLoading, isError: plansError } = useQuery({
     queryKey: ["myPlans"],
     queryFn: fetchMyPlans,
-    enabled: isAuthenticated,
+    enabled: !!isLoaded && isAuthenticated,
     placeholderData: cachedPlansEntry?.data ?? undefined,
   });
 
