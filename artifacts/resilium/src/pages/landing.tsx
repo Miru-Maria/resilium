@@ -28,6 +28,8 @@ import {
 import { SiteFooter } from "@/components/site-footer";
 import { PageSEO } from "@/components/page-seo";
 import { useUser, useAuth, useClerk } from "@clerk/react";
+import { DailyTipCard } from "@/components/daily-tip-card";
+import type { DimKey } from "@/data/tips-bank";
 
 import { ResilientIcon } from "@/components/resilient-icon";
 import {
@@ -132,7 +134,7 @@ function SignedInBanner() {
     | { kind: "loading" }
     | { kind: "hidden" }
     | { kind: "onboard" }
-    | { kind: "returning"; score: number; daysSince: number }
+    | { kind: "returning"; score: number; daysSince: number; lowestDim: DimKey | null }
   >({ kind: "loading" });
 
   useEffect(() => {
@@ -147,7 +149,16 @@ function SignedInBanner() {
           const daysSince = Math.floor(
             (Date.now() - new Date(latest.createdAt).getTime()) / (1000 * 60 * 60 * 24)
           );
-          setState({ kind: "returning", score: Math.round(latest.scoreOverall), daysSince });
+          const dimScores: Record<DimKey, number> = {
+            financial: latest.scoreFinancial ?? 100,
+            health: latest.scoreHealth ?? 100,
+            skills: latest.scoreSkills ?? 100,
+            mobility: latest.scoreMobility ?? 100,
+            psychological: latest.scorePsychological ?? 100,
+            resources: latest.scoreResources ?? 100,
+          };
+          const lowestDim = (Object.entries(dimScores).sort(([, a], [, b]) => a - b)[0][0] as DimKey);
+          setState({ kind: "returning", score: Math.round(latest.scoreOverall), daysSince, lowestDim });
         } else {
           const dismissed = localStorage.getItem("resilium_onboarded_v1");
           setState(dismissed ? { kind: "hidden" } : { kind: "onboard" });
@@ -167,7 +178,7 @@ function SignedInBanner() {
   if (state.kind === "loading" || state.kind === "hidden") return null;
 
   if (state.kind === "returning") {
-    const { score, daysSince } = state;
+    const { score, daysSince, lowestDim } = state;
     const scoreColor = score >= 70 ? "text-emerald-400" : score >= 40 ? "text-amber-400" : "text-destructive";
     const nudge = daysSince >= 30
       ? `It's been ${daysSince} days — your situation may have changed.`
@@ -175,7 +186,7 @@ function SignedInBanner() {
       ? `${daysSince} days since your last check-in — keep the momentum going.`
       : `You last checked in ${daysSince} day${daysSince !== 1 ? "s" : ""} ago.`;
     return (
-      <div className="w-full z-20 px-6 py-3">
+      <div className="w-full z-20 px-6 py-3 space-y-3">
         <div className="max-w-5xl mx-auto flex items-center gap-4 px-5 py-4 rounded-2xl bg-card border border-border/60 backdrop-blur-sm shadow-sm">
           <div className="flex-shrink-0 w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
             <Shield className="w-4 h-4 text-primary" />
@@ -202,6 +213,11 @@ function SignedInBanner() {
             </Link>
           </div>
         </div>
+        {lowestDim && (
+          <div className="max-w-5xl mx-auto">
+            <DailyTipCard lowestDim={lowestDim} />
+          </div>
+        )}
       </div>
     );
   }

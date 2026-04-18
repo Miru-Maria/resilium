@@ -1976,8 +1976,12 @@ function CompanionChat() {
       setMessages(final);
       localStorage.setItem(COMPANION_CACHE_KEY, JSON.stringify(final));
     } catch {
-      toast({ title: "Couldn't send", description: "Please check your connection and try again.", variant: "destructive" });
-      setMessages(messages);
+      const errorMsg: CompanionMessage = {
+        role: "assistant",
+        content: "I'm having trouble reaching the AI right now. Your message is still above — please try again in a moment.",
+        createdAt: new Date().toISOString(),
+      };
+      setMessages([...updated, errorMsg]);
     } finally {
       setSending(false);
     }

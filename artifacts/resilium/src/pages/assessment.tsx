@@ -1178,11 +1178,16 @@ export default function AssessmentPage() {
         <AlertCircle className="w-16 h-16 text-amber-500 mb-6" />
         <h2 className="text-2xl font-display font-bold mb-2">{t.planLimitTitle}</h2>
         <p className="text-muted-foreground max-w-md mb-8">{submitError.message}</p>
-        <div className="flex gap-3">
-          <Link href="/profile">
-            <Button className="rounded-full">{t.manageMyPlans}</Button>
+        <div className="flex flex-col sm:flex-row gap-3 items-center justify-center">
+          <Link href="/pricing">
+            <Button className="rounded-full font-semibold" style={{ background: "#E08040", color: "#0D1225" }}>
+              Upgrade to Pro
+            </Button>
           </Link>
-          <Button variant="outline" className="rounded-full" onClick={() => setSubmitError(null)}>
+          <Link href="/profile">
+            <Button variant="outline" className="rounded-full">{t.manageMyPlans}</Button>
+          </Link>
+          <Button variant="ghost" className="rounded-full text-muted-foreground" onClick={() => setSubmitError(null)}>
             {t.planLimitBack}
           </Button>
         </div>
