@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { OnboardingModal } from "@/components/onboarding-modal";
 import { Button } from "@/components/ui/button";
@@ -135,6 +136,12 @@ function TestimonialsSection() {
   );
 }
 
+interface ChallengeRaw {
+  startedAt: string;
+  dimensionOrder: string[];
+  completedDays: number[];
+}
+
 interface ChallengeProgress {
   completedCount: number;
   pct: number;
@@ -144,10 +151,34 @@ interface ChallengeProgress {
   completedDays: number[];
 }
 
+function deriveChallengeProgress(cd: ChallengeRaw): ChallengeProgress {
+  const completedDays: number[] = cd.completedDays;
+  const completedCount = completedDays.length;
+  const pct = Math.round((completedCount / 30) * 100);
+  const startDate = new Date(cd.startedAt);
+  const currentDay = Math.min(
+    Math.floor((Date.now() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1,
+    30
+  );
+  const dimensionOrder: string[] = cd.dimensionOrder ?? [];
+  const completedSet = new Set(completedDays);
+  const actions = dimensionOrder.length > 0 ? buildChallenge(dimensionOrder as any) : [];
+  const nextAction = actions.find((a) => !completedSet.has(a.day)) ?? null;
+  return {
+    completedCount,
+    pct,
+    currentDay,
+    todayAction: nextAction ? { day: nextAction.day, title: nextAction.title } : null,
+    dimensionOrder,
+    completedDays,
+  };
+}
+
 function SignedInBanner() {
   const { isSignedIn, isLoaded, getToken } = useAuth();
   const { user } = useUser();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [state, setState] = useState<
     | { kind: "loading" }
     | { kind: "hidden" }
@@ -157,11 +188,29 @@ function SignedInBanner() {
         score: number;
         daysSince: number;
         lowestDim: DimKey | null;
-        challengeProgress: ChallengeProgress | null;
         badgeCount: number;
       }
   >({ kind: "loading" });
   const [markingComplete, setMarkingComplete] = useState(false);
+
+  const { data: challengeRaw } = useQuery<ChallengeRaw | null>({
+    queryKey: ["challenge"],
+    queryFn: async () => {
+      const token = await getToken();
+      const res = await fetch(`${BASE}/api/challenge`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        credentials: "include",
+      });
+      if (res.status === 404) return null;
+      if (!res.ok) throw new Error("Failed to fetch challenge");
+      return res.json();
+    },
+    enabled: !!isSignedIn && !!isLoaded,
+    staleTime: 60 * 1000,
+  });
+
+  const challengeProgress: ChallengeProgress | null =
+    challengeRaw?.completedDays ? deriveChallengeProgress(challengeRaw) : null;
 
   useEffect(() => {
     if (!isLoaded) return;
@@ -208,9 +257,6 @@ function SignedInBanner() {
           return v ? (JSON.parse(v)?.count ?? 0) : 0;
         } catch { return 0; }
       })();
-      // Counts the 5 badges computable without an extra subscription API call.
-      // The "Pro Member" badge (shown in Profile) is excluded here to avoid an
-      // additional round-trip; users see the full picture on their Profile page.
       const badgeCount = [
         planCount >= 1,
         planCount >= 3,
@@ -219,50 +265,11 @@ function SignedInBanner() {
         streakRaw >= 30,
       ].filter(Boolean).length;
 
-      // Challenge fetch is optional — if it fails we still show the returning banner.
-      let challengeProgress: ChallengeProgress | null = null;
-      try {
-        const token = await getToken();
-        const authHeaders: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
-        const challengeResp = await fetch(`${BASE}/api/challenge`, {
-          headers: authHeaders,
-          credentials: "include",
-        });
-        if (challengeResp.ok) {
-          const cd = await challengeResp.json();
-          if (cd?.completedDays) {
-            const completedDays: number[] = cd.completedDays;
-            const completedCount = completedDays.length;
-            const pct = Math.round((completedCount / 30) * 100);
-            const startDate = new Date(cd.startedAt);
-            const currentDay = Math.min(
-              Math.floor((Date.now() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1,
-              30
-            );
-            const dimensionOrder: string[] = cd.dimensionOrder ?? [];
-            const completedSet = new Set(completedDays);
-            const actions = dimensionOrder.length > 0 ? buildChallenge(dimensionOrder as any) : [];
-            const nextAction = actions.find((a) => !completedSet.has(a.day)) ?? null;
-            challengeProgress = {
-              completedCount,
-              pct,
-              currentDay,
-              todayAction: nextAction ? { day: nextAction.day, title: nextAction.title } : null,
-              dimensionOrder,
-              completedDays,
-            };
-          }
-        }
-      } catch {
-        // challenge fetch is optional; proceed without it
-      }
-
       setState({
         kind: "returning",
         score: Math.round(latest.scoreOverall),
         daysSince,
         lowestDim,
-        challengeProgress,
         badgeCount,
       });
     };
@@ -274,7 +281,7 @@ function SignedInBanner() {
     setState({ kind: "hidden" });
   };
 
-  const handleUndoComplete = async (day: number, prevState: typeof state) => {
+  const handleUndoComplete = async (day: number) => {
     try {
       const token = await getToken();
       const authHeaders: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
@@ -284,7 +291,7 @@ function SignedInBanner() {
         credentials: "include",
       });
       if (res.ok) {
-        setState(prevState);
+        queryClient.invalidateQueries({ queryKey: ["challenge"] });
       }
     } catch {
       // silent — undo failed, state remains as-is
@@ -294,7 +301,6 @@ function SignedInBanner() {
   const handleMarkComplete = async (day: number) => {
     if (markingComplete) return;
     setMarkingComplete(true);
-    const prevState = state;
     try {
       const token = await getToken();
       const authHeaders: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
@@ -303,29 +309,13 @@ function SignedInBanner() {
         headers: authHeaders,
         credentials: "include",
       });
-      if (res.ok && state.kind === "returning" && state.challengeProgress) {
-        const cp = state.challengeProgress;
-        const newCompletedDays = [...cp.completedDays, day];
-        const newCompletedCount = newCompletedDays.length;
-        const newPct = Math.round((newCompletedCount / 30) * 100);
-        const completedSet = new Set(newCompletedDays);
-        const actions = cp.dimensionOrder.length > 0 ? buildChallenge(cp.dimensionOrder as any) : [];
-        const nextAction = actions.find((a) => !completedSet.has(a.day)) ?? null;
-        setState({
-          ...state,
-          challengeProgress: {
-            ...cp,
-            completedCount: newCompletedCount,
-            pct: newPct,
-            completedDays: newCompletedDays,
-            todayAction: nextAction ? { day: nextAction.day, title: nextAction.title } : null,
-          },
-        });
+      if (res.ok) {
+        queryClient.invalidateQueries({ queryKey: ["challenge"] });
         toast({
           title: "Day marked complete!",
           description: `Day ${day} has been completed.`,
           action: (
-            <ToastAction altText="Undo" onClick={() => handleUndoComplete(day, prevState)}>
+            <ToastAction altText="Undo" onClick={() => handleUndoComplete(day)}>
               Undo
             </ToastAction>
           ),
@@ -341,7 +331,7 @@ function SignedInBanner() {
   if (state.kind === "loading" || state.kind === "hidden") return null;
 
   if (state.kind === "returning") {
-    const { score, daysSince, lowestDim, challengeProgress, badgeCount } = state;
+    const { score, daysSince, lowestDim, badgeCount } = state;
     const scoreColor = score >= 70 ? "text-emerald-400" : score >= 40 ? "text-amber-400" : "text-destructive";
     const nudge = daysSince >= 30
       ? `It's been ${daysSince} days — your situation may have changed.`
