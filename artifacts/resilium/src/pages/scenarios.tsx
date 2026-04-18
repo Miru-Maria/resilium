@@ -182,7 +182,7 @@ export default function ScenariosPage() {
   const { isSignedIn, isLoaded } = useAuth();
   const isAuthenticated = !!isSignedIn;
 
-  const { data: subStatus } = useSubscriptionStatus({ enabled: !!isLoaded && isAuthenticated });
+  const { data: subStatus } = useSubscriptionStatus();
   const [selectedScenario, setSelectedScenario] = useState<ScenarioKey | null>(null);
   const [paramValues, setParamValues] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(false);

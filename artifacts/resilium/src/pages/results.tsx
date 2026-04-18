@@ -372,7 +372,7 @@ function ResultsPageInner() {
       .catch(() => {});
   }, [report?.score?.overall]);
 
-  const { data: subStatusData } = useSubscriptionStatus({ enabled: !!isLoaded && isAuthenticated });
+  const { data: subStatusData } = useSubscriptionStatus();
   const isPro = subStatusData?.isPro ?? false;
 
   const [expandedSteps, setExpandedSteps] = useState<Record<string, string[]>>({});

@@ -221,7 +221,7 @@ function SignedInBanner() {
     retry: 1,
   });
 
-  const { data: subStatus } = useSubscriptionStatus({ enabled: !!isLoaded && !!isSignedIn });
+  const { data: subStatus } = useSubscriptionStatus();
 
   const challengeProgress: ChallengeProgress | null =
     challengeRaw?.completedDays ? deriveChallengeProgress(challengeRaw) : null;

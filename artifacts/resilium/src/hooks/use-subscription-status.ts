@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@clerk/react";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -10,11 +11,9 @@ export interface SubscriptionStatus {
   cancelScheduled?: boolean;
 }
 
-interface UseSubscriptionStatusOptions {
-  enabled?: boolean;
-}
+export function useSubscriptionStatus() {
+  const { isLoaded, isSignedIn } = useAuth();
 
-export function useSubscriptionStatus({ enabled = true }: UseSubscriptionStatusOptions = {}) {
   return useQuery<SubscriptionStatus | null>({
     queryKey: ["subscription-status"],
     queryFn: async () => {
@@ -23,6 +22,6 @@ export function useSubscriptionStatus({ enabled = true }: UseSubscriptionStatusO
       return r.json() as Promise<SubscriptionStatus>;
     },
     staleTime: 60_000,
-    enabled,
+    enabled: !!isLoaded && !!isSignedIn,
   });
 }
