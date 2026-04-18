@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useSubscriptionStatus } from "@/hooks/use-subscription-status";
 import { useRoute, Link } from "wouter";
 import { NoIndexPage } from "@/components/page-seo";
 import { Button } from "@/components/ui/button";
@@ -181,21 +182,12 @@ export default function ScenariosPage() {
   const { isSignedIn } = useAuth();
   const isAuthenticated = !!isSignedIn;
 
-  const [subStatus, setSubStatus] = useState<{ isPro: boolean } | null>(null);
+  const { data: subStatus } = useSubscriptionStatus();
   const [selectedScenario, setSelectedScenario] = useState<ScenarioKey | null>(null);
   const [paramValues, setParamValues] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ScenarioResult | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  // Check Pro status
-  useEffect(() => {
-    if (!isAuthenticated) return;
-    fetch(`${BASE}/api/subscription/status`, { credentials: "include" })
-      .then(r => r.ok ? r.json() : null)
-      .then(d => setSubStatus(d))
-      .catch(() => setSubStatus({ isPro: false }));
-  }, [isAuthenticated]);
 
   // Init default param values when scenario changes
   useEffect(() => {
@@ -302,7 +294,7 @@ export default function ScenariosPage() {
           </Card>
         )}
 
-        {(isAuthenticated && (subStatus === null || subStatus.isPro)) && (
+        {(isAuthenticated && (subStatus === undefined || subStatus?.isPro)) && (
           <>
             {/* Scenario picker */}
             <section>

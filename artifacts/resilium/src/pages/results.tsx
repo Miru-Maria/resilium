@@ -4,6 +4,7 @@ import { NoIndexPage } from "@/components/page-seo";
 import { useRoute } from "wouter";
 import { useGetReport, useGetChecklists, useUpdateChecklistItem, useGetSnapshots } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useSubscriptionStatus } from "@/hooks/use-subscription-status";
 import { CircularProgress } from "@/components/circular-progress";
 import { RadarChartView } from "@/components/radar-chart-view";
 import { Button } from "@/components/ui/button";
@@ -371,14 +372,8 @@ function ResultsPageInner() {
       .catch(() => {});
   }, [report?.score?.overall]);
 
-  const [isPro, setIsPro] = useState(false);
-  useEffect(() => {
-    if (!isAuthenticated) return;
-    fetch(`${BASE}/api/users/me/subscription`, { credentials: "include" })
-      .then(r => r.ok ? r.json() : null)
-      .then(d => d && setIsPro(!!d.isActive))
-      .catch(() => {});
-  }, [isAuthenticated]);
+  const { data: subStatusData } = useSubscriptionStatus();
+  const isPro = subStatusData?.isPro ?? false;
 
   const [expandedSteps, setExpandedSteps] = useState<Record<string, string[]>>({});
   const [loadingSteps, setLoadingSteps] = useState<Record<string, boolean>>({});

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { computeBadgeCount, allDimsAssessedFromPlan } from "@/lib/badge-criteria";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSubscriptionStatus } from "@/hooks/use-subscription-status";
 import { Link } from "wouter";
 import { OnboardingModal } from "@/components/onboarding-modal";
 import { Button } from "@/components/ui/button";
@@ -220,16 +221,7 @@ function SignedInBanner() {
     retry: 1,
   });
 
-  const { data: subStatus } = useQuery({
-    queryKey: ["subscription-status"],
-    queryFn: async () => {
-      const r = await fetch(`${BASE}/api/subscription/status`, { credentials: "include" });
-      return r.ok ? (r.json() as Promise<{ isPro: boolean }>) : { isPro: false };
-    },
-    enabled: !!isSignedIn && !!isLoaded,
-    staleTime: 5 * 60 * 1000,
-    retry: 1,
-  });
+  const { data: subStatus } = useSubscriptionStatus();
 
   const challengeProgress: ChallengeProgress | null =
     challengeRaw?.completedDays ? deriveChallengeProgress(challengeRaw) : null;

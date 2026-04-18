@@ -98,6 +98,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
+import { useSubscriptionStatus } from "@/hooks/use-subscription-status";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 const PLAN_LIMIT = 3;
@@ -466,15 +467,7 @@ function OverviewTab({ plans }: { plans: PlanSummary[] }) {
     staleTime: 60_000,
   });
 
-  const { data: subStatus } = useQuery({
-    queryKey: ["subscription-status"],
-    queryFn: async () => {
-      const r = await fetch("/api/subscription/status", { credentials: "include" });
-      if (!r.ok) return null;
-      return r.json() as Promise<{ isPro: boolean }>;
-    },
-    staleTime: 60_000,
-  });
+  const { data: subStatus } = useSubscriptionStatus();
 
   const { data: challengeData } = useQuery<{ completedDays: number[] } | null>({
     queryKey: ["challenge"],
@@ -1027,15 +1020,7 @@ function AccountTab({ user, plans, onAllPlansDeleted }: {
   const { openUserProfile } = useClerk();
   const { user: clerkUser } = useUser();
 
-  const { data: subStatus } = useQuery({
-    queryKey: ["subscription-status"],
-    queryFn: async () => {
-      const r = await fetch("/api/subscription/status", { credentials: "include" });
-      if (!r.ok) return null;
-      return r.json() as Promise<{ isPro: boolean; status: string; planName?: string; currentPeriodEnd?: string | null; cancelScheduled?: boolean }>;
-    },
-    staleTime: 60_000,
-  });
+  const { data: subStatus } = useSubscriptionStatus();
   const [, navigate] = useLocation();
   const [deleteAllOpen, setDeleteAllOpen] = useState(false);
   const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
@@ -2103,15 +2088,7 @@ function CompanionChat() {
 }
 
 function CompanionTab({ latestPlan }: { latestPlan?: PlanSummary }) {
-  const { data: subStatus, isLoading } = useQuery({
-    queryKey: ["subscription-status"],
-    queryFn: async () => {
-      const r = await fetch("/api/subscription/status", { credentials: "include" });
-      if (!r.ok) return null;
-      return r.json() as Promise<{ isPro: boolean }>;
-    },
-    staleTime: 60_000,
-  });
+  const { data: subStatus, isLoading } = useSubscriptionStatus();
 
   if (isLoading) return (
     <div className="flex items-center justify-center py-20">
@@ -2170,15 +2147,7 @@ function GuidesProGate() {
 }
 
 function GuidesTabWithProGate({ location, lowestDim }: { location?: string; lowestDim?: DimKey }) {
-  const { data: subStatus, isLoading } = useQuery({
-    queryKey: ["subscription-status"],
-    queryFn: async () => {
-      const r = await fetch("/api/subscription/status", { credentials: "include" });
-      if (!r.ok) return null;
-      return r.json() as Promise<{ isPro: boolean }>;
-    },
-    staleTime: 60_000,
-  });
+  const { data: subStatus, isLoading } = useSubscriptionStatus();
 
   if (isLoading) return (
     <div className="flex items-center justify-center py-20">
