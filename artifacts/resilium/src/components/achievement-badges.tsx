@@ -64,7 +64,9 @@ export function AchievementBadges({ planCount, streak, isPro, allDimsAssessed, c
           ))}
         </div>
         {earned.length > 0 && (
-          <p className="text-xs text-muted-foreground mt-3">{earned.length} of {badges.length} earned</p>
+          <p className="text-xs text-muted-foreground mt-3">
+            {earned.length} of {badges.length} earned
+          </p>
         )}
       </CardContent>
     </Card>

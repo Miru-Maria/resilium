@@ -93,3 +93,16 @@ export function computeBadgeCriteria(input: BadgeCriteriaInput): BadgeCriteria[]
 export function computeBadgeCount(input: BadgeCriteriaInput): number {
   return computeBadgeCriteria(input).filter((b) => b.earned).length;
 }
+
+const DIMENSION_SCORE_KEYS = [
+  "scoreFinancial",
+  "scoreHealth",
+  "scoreSkills",
+  "scoreMobility",
+  "scorePsychological",
+  "scoreResources",
+] as const;
+
+export function allDimsAssessedFromPlan(plan: Record<string, unknown>): boolean {
+  return DIMENSION_SCORE_KEYS.every((k) => plan[k] !== null && plan[k] !== undefined);
+}

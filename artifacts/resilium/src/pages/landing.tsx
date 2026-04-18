@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { computeBadgeCount, allDimsAssessedFromPlan } from "@/lib/badge-criteria";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { OnboardingModal } from "@/components/onboarding-modal";
@@ -37,7 +38,6 @@ import { useUser, useAuth, useClerk } from "@clerk/react";
 import { DailyTipCard } from "@/components/daily-tip-card";
 import type { DimKey } from "@/data/tips-bank";
 import { buildChallenge } from "@/data/challenge-content";
-import { computeBadgeCount } from "@/lib/badge-criteria";
 
 import { ResilientIcon } from "@/components/resilient-icon";
 import {
@@ -227,23 +227,17 @@ function SignedInBanner() {
     const plans = plansData?.plans;
     if (!plans?.length) return 0;
     const latest = plans[plans.length - 1];
-    const planCount = plans.length;
-    const allDimsAssessed = [
-      "scoreFinancial", "scoreHealth", "scoreSkills",
-      "scoreMobility", "scorePsychological", "scoreResources",
-    ].every((k: string) => latest[k] !== null && latest[k] !== undefined);
     const streakRaw = (() => {
       try {
         const v = localStorage.getItem("resilium_streak_v1");
         return v ? (JSON.parse(v)?.count ?? 0) : 0;
       } catch { return 0; }
     })();
-    const completedDaysCount = challengeRaw?.completedDays?.length ?? 0;
     return computeBadgeCount({
-      planCount,
-      allDimsAssessed,
+      planCount: plans.length,
+      allDimsAssessed: allDimsAssessedFromPlan(latest),
       streak: streakRaw,
-      completedDaysCount,
+      completedDaysCount: challengeRaw?.completedDays?.length ?? 0,
       isPro: false,
     });
   }, [plansData, challengeRaw]);

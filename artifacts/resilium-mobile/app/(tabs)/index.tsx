@@ -27,7 +27,7 @@ import { useSession } from "@/context/session";
 import { useAuth } from "@/context/auth";
 import { useColors } from "@/context/theme";
 import { ColorsType } from "@/constants/colors";
-import { computeBadgeCount } from "@/utils/badge-criteria";
+import { computeBadgeCount, allDimsAssessedFromPlan } from "@/utils/badge-criteria";
 
 const { width: SCREEN_W } = Dimensions.get("window");
 
@@ -169,22 +169,16 @@ function CompanionScrollContent({
           const plans: any[] = data.plans ?? [];
           if (plans.length > 0) {
             const latest = plans[plans.length - 1];
-            const planCount = plans.length;
-            const allDimsAssessed = [
-              "scoreFinancial", "scoreHealth", "scoreSkills",
-              "scoreMobility", "scorePsychological", "scoreResources",
-            ].every(k => latest[k] !== null && latest[k] !== undefined);
             const streakRaw: number = await AsyncStorage.getItem("resilium_streak_v1").then(v => {
               try { return v ? (JSON.parse(v)?.count ?? 0) : 0; } catch { return 0; }
             });
-            const count = computeBadgeCount({
-              planCount,
-              allDimsAssessed,
+            setBadgeCount(computeBadgeCount({
+              planCount: plans.length,
+              allDimsAssessed: allDimsAssessedFromPlan(latest),
               streak: streakRaw,
               completedDaysCount,
               isPro: false,
-            });
-            setBadgeCount(count);
+            }));
           }
         }
       } catch {
