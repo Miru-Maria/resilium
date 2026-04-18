@@ -61,17 +61,21 @@ async function fetchRuns(): Promise<{ runs: RunSummary[] }> {
 }
 
 async function deleteRun(runId: string): Promise<void> {
+  const token = getToken();
+  if (!token) throw new Error("Admin authentication required");
   const res = await fetch(`/api/admin/ux-test/runs/${runId}`, {
     method: "DELETE",
-    headers: authH(),
+    headers: { Authorization: `Bearer ${token}` },
   });
   if (!res.ok) throw new Error("Failed to delete run");
 }
 
 async function cancelRun(runId: string): Promise<void> {
+  const token = getToken();
+  if (!token) throw new Error("Admin authentication required");
   const res = await fetch(`/api/admin/ux-test/runs/${runId}/cancel`, {
     method: "POST",
-    headers: authH(),
+    headers: { Authorization: `Bearer ${token}` },
   });
   if (!res.ok) throw new Error("Failed to cancel run");
 }
@@ -207,6 +211,10 @@ export default function UxTestingPage() {
   }
 
   async function startRun() {
+    if (!adminToken) {
+      setRunError("Admin authentication required. Please log in.");
+      return;
+    }
     if (selectedKeys.size === 0) return;
     setIsRunning(true);
     setRunComplete(false);
