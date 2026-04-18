@@ -72,6 +72,7 @@ import { guides, getEssentialGuides, getGuidesByLocation, getGuidesByDimension, 
 import { saveToCache, loadFromCache, plansListCacheKey } from "@/lib/offline-cache";
 import { DailyTipCard } from "@/components/daily-tip-card";
 import { AchievementBadges } from "@/components/achievement-badges";
+import { allDimsAssessedFromPlan } from "@/lib/badges";
 import { ChallengeCard } from "@/components/challenge-card";
 import {
   AlertDialog,
@@ -731,7 +732,7 @@ function OverviewTab({ plans }: { plans: PlanSummary[] }) {
         planCount={plans.length}
         streak={streak}
         isPro={isPro}
-        allDimsAssessed={plans.length > 0}
+        allDimsAssessed={plans.length > 0 && allDimsAssessedFromPlan(plans[plans.length - 1])}
         completedDaysCount={completedDaysCount}
       />
 
