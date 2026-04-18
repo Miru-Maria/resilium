@@ -1,5 +1,5 @@
 import React from "react";
-import { AdminLayout, adminAuthHeaders } from "./layout";
+import { AdminLayout, adminAuthHeaders, getAdminToken } from "./layout";
 import { useQuery } from "@tanstack/react-query";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
@@ -68,10 +68,12 @@ const DIM_COLORS: Record<string, string> = {
 };
 
 export default function AdminAnalyticsPage() {
+  const adminToken = getAdminToken();
   const { data, isLoading, error } = useQuery({
     queryKey: ["adminUserAnalytics"],
     queryFn: fetchUserAnalytics,
     staleTime: 2 * 60 * 1000,
+    enabled: !!adminToken,
   });
 
   const fmtMonth = (key: string) => {

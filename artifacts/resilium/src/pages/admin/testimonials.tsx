@@ -22,6 +22,7 @@ interface Testimonial {
 }
 
 export default function AdminTestimonialsPage() {
+  const adminToken = getAdminToken();
   const { toast } = useToast();
   const qc = useQueryClient();
   const [filter, setFilter] = useState<"all" | "pending" | "approved">("pending");
@@ -35,6 +36,7 @@ export default function AdminTestimonialsPage() {
       if (!res.ok) throw new Error("Failed to fetch");
       return res.json() as Promise<{ testimonials: Testimonial[] }>;
     },
+    enabled: !!adminToken,
   });
 
   const mutation = useMutation({

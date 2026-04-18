@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { AdminLayout, adminAuthHeaders } from "./layout";
+import { AdminLayout, adminAuthHeaders, getAdminToken } from "./layout";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Megaphone, Plus, Trash2, Eye, EyeOff, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,7 @@ const TYPE_LABELS: Record<string, { label: string; classes: string }> = {
 };
 
 export default function AdminAnnouncementsPage() {
+  const adminToken = getAdminToken();
   const { toast } = useToast();
   const qc = useQueryClient();
   const [message, setMessage] = useState("");
@@ -37,6 +38,7 @@ export default function AdminAnnouncementsPage() {
     queryKey: ["adminAnnouncements"],
     queryFn: fetchAnnouncements,
     staleTime: 30 * 1000,
+    enabled: !!adminToken,
   });
 
   const createMutation = useMutation({
