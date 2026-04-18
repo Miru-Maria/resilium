@@ -24,6 +24,9 @@ import {
   MessageCircle,
   BookOpen,
   Clock,
+  Trophy,
+  Award,
+  Flame,
 } from "lucide-react";
 import { SiteFooter } from "@/components/site-footer";
 import { PageSEO } from "@/components/page-seo";
@@ -127,47 +130,121 @@ function TestimonialsSection() {
   );
 }
 
+interface ChallengeProgress {
+  completedCount: number;
+  pct: number;
+  currentDay: number;
+}
+
 function SignedInBanner() {
-  const { isSignedIn, isLoaded } = useAuth();
+  const { isSignedIn, isLoaded, getToken } = useAuth();
   const { user } = useUser();
   const [state, setState] = useState<
     | { kind: "loading" }
     | { kind: "hidden" }
     | { kind: "onboard" }
-    | { kind: "returning"; score: number; daysSince: number; lowestDim: DimKey | null }
+    | {
+        kind: "returning";
+        score: number;
+        daysSince: number;
+        lowestDim: DimKey | null;
+        challengeProgress: ChallengeProgress | null;
+        badgeCount: number;
+      }
   >({ kind: "loading" });
 
   useEffect(() => {
     if (!isLoaded) return;
     if (!isSignedIn) { setState({ kind: "hidden" }); return; }
 
-    fetch(`${BASE}/api/users/me/plans`, { credentials: "include" })
-      .then(r => r.ok ? r.json() : null)
-      .then(d => {
-        if (d?.plans?.length > 0) {
-          const latest = d.plans[d.plans.length - 1];
-          const daysSince = Math.floor(
-            (Date.now() - new Date(latest.createdAt).getTime()) / (1000 * 60 * 60 * 24)
-          );
-          const dimScores: Record<DimKey, number> = {
-            financial: latest.scoreFinancial ?? 100,
-            health: latest.scoreHealth ?? 100,
-            skills: latest.scoreSkills ?? 100,
-            mobility: latest.scoreMobility ?? 100,
-            psychological: latest.scorePsychological ?? 100,
-            resources: latest.scoreResources ?? 100,
-          };
-          const lowestDim = (Object.entries(dimScores).sort(([, a], [, b]) => a - b)[0][0] as DimKey);
-          setState({ kind: "returning", score: Math.round(latest.scoreOverall), daysSince, lowestDim });
-        } else {
-          const dismissed = localStorage.getItem("resilium_onboarded_v1");
-          setState(dismissed ? { kind: "hidden" } : { kind: "onboard" });
-        }
-      })
-      .catch(() => {
+    const load = async () => {
+      let plansData: ReturnType<typeof JSON.parse> | null = null;
+      try {
+        const plansResp = await fetch(`${BASE}/api/users/me/plans`, { credentials: "include" });
+        plansData = plansResp.ok ? await plansResp.json() : null;
+      } catch {
+        // plans fetch failed — fall through to onboard/hidden
+      }
+
+      if (!plansData?.plans?.length) {
         const dismissed = localStorage.getItem("resilium_onboarded_v1");
         setState(dismissed ? { kind: "hidden" } : { kind: "onboard" });
+        return;
+      }
+
+      const plans = plansData.plans;
+      const latest = plans[plans.length - 1];
+      const daysSince = Math.floor(
+        (Date.now() - new Date(latest.createdAt).getTime()) / (1000 * 60 * 60 * 24)
+      );
+      const dimScores: Record<DimKey, number> = {
+        financial: latest.scoreFinancial ?? 100,
+        health: latest.scoreHealth ?? 100,
+        skills: latest.scoreSkills ?? 100,
+        mobility: latest.scoreMobility ?? 100,
+        psychological: latest.scorePsychological ?? 100,
+        resources: latest.scoreResources ?? 100,
+      };
+      const lowestDim = (Object.entries(dimScores).sort(([, a], [, b]) => a - b)[0][0] as DimKey);
+
+      const planCount = plans.length;
+      const allDimsAssessed = [
+        "scoreFinancial", "scoreHealth", "scoreSkills",
+        "scoreMobility", "scorePsychological", "scoreResources",
+      ].every(k => latest[k] !== null && latest[k] !== undefined);
+      const streakRaw = (() => {
+        try {
+          const v = localStorage.getItem("resilium_streak_v1");
+          return v ? (JSON.parse(v)?.count ?? 0) : 0;
+        } catch { return 0; }
+      })();
+      // Counts the 5 badges computable without an extra subscription API call.
+      // The "Pro Member" badge (shown in Profile) is excluded here to avoid an
+      // additional round-trip; users see the full picture on their Profile page.
+      const badgeCount = [
+        planCount >= 1,
+        planCount >= 3,
+        allDimsAssessed,
+        streakRaw >= 7,
+        streakRaw >= 30,
+      ].filter(Boolean).length;
+
+      // Challenge fetch is optional — if it fails we still show the returning banner.
+      let challengeProgress: ChallengeProgress | null = null;
+      try {
+        const token = await getToken();
+        const authHeaders: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
+        const challengeResp = await fetch(`${BASE}/api/challenge`, {
+          headers: authHeaders,
+          credentials: "include",
+        });
+        if (challengeResp.ok) {
+          const cd = await challengeResp.json();
+          if (cd?.completedDays) {
+            const completedCount = cd.completedDays.length;
+            const pct = Math.round((completedCount / 30) * 100);
+            const startDate = new Date(cd.startedAt);
+            const currentDay = Math.min(
+              Math.floor((Date.now() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1,
+              30
+            );
+            challengeProgress = { completedCount, pct, currentDay };
+          }
+        }
+      } catch {
+        // challenge fetch is optional; proceed without it
+      }
+
+      setState({
+        kind: "returning",
+        score: Math.round(latest.scoreOverall),
+        daysSince,
+        lowestDim,
+        challengeProgress,
+        badgeCount,
       });
+    };
+    load();
   }, [isLoaded, isSignedIn]);
 
   const dismissOnboard = () => {
@@ -178,15 +255,17 @@ function SignedInBanner() {
   if (state.kind === "loading" || state.kind === "hidden") return null;
 
   if (state.kind === "returning") {
-    const { score, daysSince, lowestDim } = state;
+    const { score, daysSince, lowestDim, challengeProgress, badgeCount } = state;
     const scoreColor = score >= 70 ? "text-emerald-400" : score >= 40 ? "text-amber-400" : "text-destructive";
     const nudge = daysSince >= 30
       ? `It's been ${daysSince} days — your situation may have changed.`
       : daysSince >= 14
       ? `${daysSince} days since your last check-in — keep the momentum going.`
       : `You last checked in ${daysSince} day${daysSince !== 1 ? "s" : ""} ago.`;
+    const circumference = 2 * Math.PI * 11;
     return (
-      <div className="w-full z-20 px-6 py-3 space-y-3">
+      <div className="w-full z-20 px-6 py-3 space-y-2">
+        {/* Main welcome banner */}
         <div className="max-w-5xl mx-auto flex items-center gap-4 px-5 py-4 rounded-2xl bg-card border border-border/60 backdrop-blur-sm shadow-sm">
           <div className="flex-shrink-0 w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
             <Shield className="w-4 h-4 text-primary" />
@@ -213,6 +292,71 @@ function SignedInBanner() {
             </Link>
           </div>
         </div>
+
+        {/* Compact challenge + badge strip */}
+        <div className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {/* 30-day challenge progress */}
+          <Link href="/profile">
+            <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-colors cursor-pointer">
+              {challengeProgress ? (
+                <>
+                  <div className="relative flex-shrink-0 w-8 h-8">
+                    <svg className="w-8 h-8 -rotate-90" viewBox="0 0 30 30">
+                      <circle cx="15" cy="15" r="11" stroke="hsl(var(--muted))" strokeWidth="3" fill="none" />
+                      <circle
+                        cx="15" cy="15" r="11"
+                        stroke="hsl(var(--primary))" strokeWidth="3" fill="none"
+                        strokeDasharray={`${circumference}`}
+                        strokeDashoffset={`${circumference * (1 - challengeProgress.pct / 100)}`}
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                    <span className="absolute inset-0 flex items-center justify-center text-[8px] font-bold text-foreground">
+                      {challengeProgress.pct}%
+                    </span>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-foreground leading-tight">30-Day Challenge</p>
+                    <p className="text-[11px] text-muted-foreground leading-tight">
+                      Day {challengeProgress.currentDay} · {challengeProgress.completedCount}/30 done
+                    </p>
+                  </div>
+                  <Flame className="w-3.5 h-3.5 text-orange-400 ml-auto flex-shrink-0" />
+                </>
+              ) : (
+                <>
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Trophy className="w-4 h-4 text-primary/70" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-semibold text-foreground leading-tight">30-Day Challenge</p>
+                    <p className="text-[11px] text-muted-foreground leading-tight">Start your daily micro-actions</p>
+                  </div>
+                  <ChevronRight className="w-3.5 h-3.5 text-muted-foreground ml-auto flex-shrink-0" />
+                </>
+              )}
+            </div>
+          </Link>
+
+          {/* Badge count */}
+          <Link href="/profile">
+            <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-colors cursor-pointer">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center">
+                <Award className="w-4 h-4 text-amber-500" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-semibold text-foreground leading-tight">Achievements</p>
+                <p className="text-[11px] text-muted-foreground leading-tight">
+                  {badgeCount > 0
+                    ? `${badgeCount} badge${badgeCount !== 1 ? "s" : ""} earned`
+                    : "Earn your first badge"}
+                </p>
+              </div>
+              <ChevronRight className="w-3.5 h-3.5 text-muted-foreground ml-auto flex-shrink-0" />
+            </div>
+          </Link>
+        </div>
+
         {lowestDim && (
           <div className="max-w-5xl mx-auto">
             <DailyTipCard lowestDim={lowestDim} />
