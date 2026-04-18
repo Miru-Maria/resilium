@@ -37,6 +37,7 @@ import { useUser, useAuth, useClerk } from "@clerk/react";
 import { DailyTipCard } from "@/components/daily-tip-card";
 import type { DimKey } from "@/data/tips-bank";
 import { buildChallenge } from "@/data/challenge-content";
+import { computeBadgeCount } from "@/lib/badge-criteria";
 
 import { ResilientIcon } from "@/components/resilient-icon";
 import {
@@ -238,15 +239,13 @@ function SignedInBanner() {
       } catch { return 0; }
     })();
     const completedDaysCount = challengeRaw?.completedDays?.length ?? 0;
-    return [
-      planCount >= 1,
-      planCount >= 3,
+    return computeBadgeCount({
+      planCount,
       allDimsAssessed,
-      streakRaw >= 7,
-      streakRaw >= 30,
-      completedDaysCount >= 10,
-      completedDaysCount >= 30,
-    ].filter(Boolean).length;
+      streak: streakRaw,
+      completedDaysCount,
+      isPro: false,
+    });
   }, [plansData, challengeRaw]);
 
   useEffect(() => {

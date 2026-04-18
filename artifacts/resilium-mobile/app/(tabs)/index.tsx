@@ -27,6 +27,7 @@ import { useSession } from "@/context/session";
 import { useAuth } from "@/context/auth";
 import { useColors } from "@/context/theme";
 import { ColorsType } from "@/constants/colors";
+import { computeBadgeCount } from "@/utils/badge-criteria";
 
 const { width: SCREEN_W } = Dimensions.get("window");
 
@@ -147,6 +148,22 @@ function CompanionScrollContent({
           fetch(`https://${domain}/api/challenge`, { headers }),
         ]);
 
+        let completedDaysCount = 0;
+
+        if (challengeRes.status === "fulfilled" && challengeRes.value.ok) {
+          const cd = await challengeRes.value.json();
+          if (cd?.completedDays) {
+            completedDaysCount = cd.completedDays.length;
+            const pct = Math.round((completedDaysCount / 30) * 100);
+            const startDate = new Date(cd.startedAt);
+            const currentDay = Math.min(
+              Math.floor((Date.now() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1,
+              30
+            );
+            setChallengeProgress({ completedCount: completedDaysCount, pct, currentDay });
+          }
+        }
+
         if (plansRes.status === "fulfilled" && plansRes.value.ok) {
           const data = await plansRes.value.json();
           const plans: any[] = data.plans ?? [];
@@ -160,28 +177,14 @@ function CompanionScrollContent({
             const streakRaw: number = await AsyncStorage.getItem("resilium_streak_v1").then(v => {
               try { return v ? (JSON.parse(v)?.count ?? 0) : 0; } catch { return 0; }
             });
-            const count = [
-              planCount >= 1,
-              planCount >= 3,
+            const count = computeBadgeCount({
+              planCount,
               allDimsAssessed,
-              streakRaw >= 7,
-              streakRaw >= 30,
-            ].filter(Boolean).length;
+              streak: streakRaw,
+              completedDaysCount,
+              isPro: false,
+            });
             setBadgeCount(count);
-          }
-        }
-
-        if (challengeRes.status === "fulfilled" && challengeRes.value.ok) {
-          const cd = await challengeRes.value.json();
-          if (cd?.completedDays) {
-            const completedCount: number = cd.completedDays.length;
-            const pct = Math.round((completedCount / 30) * 100);
-            const startDate = new Date(cd.startedAt);
-            const currentDay = Math.min(
-              Math.floor((Date.now() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1,
-              30
-            );
-            setChallengeProgress({ completedCount, pct, currentDay });
           }
         }
       } catch {

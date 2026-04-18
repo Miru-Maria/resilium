@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getExpoPushToken, registerPushTokenWithBackend, requestNotificationPermission } from "@/utils/notifications";
+import { computeBadgeCriteria } from "@/utils/badge-criteria";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
@@ -63,6 +64,10 @@ export default function MyDataScreen() {
   const [notifPermission, setNotifPermission] = useState<boolean | null>(null);
   const [checkinHistory, setCheckinHistory] = useState<CheckinEntry[]>([]);
   const [checkinStreak, setCheckinStreak] = useState(0);
+  const [planCount, setPlanCount] = useState(0);
+  const [allDimsAssessed, setAllDimsAssessed] = useState(false);
+  const [completedDaysCount, setCompletedDaysCount] = useState(0);
+  const [streak, setStreak] = useState(0);
 
   const colors = useColors();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -91,10 +96,43 @@ export default function MyDataScreen() {
         const data: { lastDate: string; count: number } = JSON.parse(raw);
         const today = new Date().toISOString().split("T")[0];
         const yesterday = new Date(Date.now() - 86_400_000).toISOString().split("T")[0];
-        if (data.lastDate === today || data.lastDate === yesterday) setCheckinStreak(data.count);
+        if (data.lastDate === today || data.lastDate === yesterday) {
+          setCheckinStreak(data.count);
+          setStreak(data.count);
+        }
       } catch {}
     });
   }, []);
+
+  useEffect(() => {
+    if (!isSignedIn) return;
+    (async () => {
+      try {
+        const headers = await getAuthHeaders();
+        const [plansRes, challengeRes] = await Promise.allSettled([
+          fetch(`https://${DOMAIN}/api/users/me/plans`, { headers }),
+          fetch(`https://${DOMAIN}/api/challenge`, { headers }),
+        ]);
+        if (plansRes.status === "fulfilled" && plansRes.value.ok) {
+          const data = await plansRes.value.json();
+          const plans: any[] = data.plans ?? [];
+          setPlanCount(plans.length);
+          if (plans.length > 0) {
+            const latest = plans[plans.length - 1];
+            const dims = [
+              "scoreFinancial", "scoreHealth", "scoreSkills",
+              "scoreMobility", "scorePsychological", "scoreResources",
+            ];
+            setAllDimsAssessed(dims.every(k => latest[k] !== null && latest[k] !== undefined));
+          }
+        }
+        if (challengeRes.status === "fulfilled" && challengeRes.value.ok) {
+          const cd = await challengeRes.value.json();
+          if (cd?.completedDays) setCompletedDaysCount(cd.completedDays.length);
+        }
+      } catch {}
+    })();
+  }, [isSignedIn]);
 
   useEffect(() => {
     if (!isSignedIn) return;
@@ -361,6 +399,59 @@ export default function MyDataScreen() {
             )}
           </View>
         )}
+
+        {isSignedIn && planCount > 0 && (() => {
+          const isPro = subscription?.isActive ?? false;
+          const badges = computeBadgeCriteria({ planCount, allDimsAssessed, streak, completedDaysCount, isPro });
+          const earned = badges.filter(b => b.earned);
+          const locked = badges.filter(b => !b.earned);
+          const BADGE_COLORS: Record<string, { bg: string; border: string; text: string }> = {
+            amber: { bg: "rgba(217,119,6,0.1)", border: "rgba(217,119,6,0.25)", text: "#92400E" },
+            blue: { bg: "rgba(37,99,235,0.1)", border: "rgba(37,99,235,0.25)", text: "#1E40AF" },
+            violet: { bg: "rgba(124,58,237,0.1)", border: "rgba(124,58,237,0.25)", text: "#5B21B6" },
+            orange: { bg: "rgba(234,88,12,0.1)", border: "rgba(234,88,12,0.25)", text: "#9A3412" },
+            emerald: { bg: "rgba(5,150,105,0.1)", border: "rgba(5,150,105,0.25)", text: "#065F46" },
+            rose: { bg: "rgba(225,29,72,0.1)", border: "rgba(225,29,72,0.25)", text: "#9F1239" },
+            "emerald-dark": { bg: "rgba(4,120,87,0.1)", border: "rgba(4,120,87,0.3)", text: "#064E3B" },
+            primary: { bg: "rgba(42,59,50,0.1)", border: "rgba(42,59,50,0.25)", text: colors.primary },
+          };
+          return (
+            <View style={[styles.subscriptionCard, { gap: 12 }]}>
+              <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                  <Feather name="award" size={16} color={colors.primary} />
+                  <Text style={styles.subscriptionTitle}>Achievements</Text>
+                </View>
+                <Text style={{ fontFamily: "Inter_400Regular", fontSize: 12, color: colors.textMuted }}>
+                  {earned.length}/{badges.length} earned
+                </Text>
+              </View>
+              <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+                {earned.map(badge => {
+                  const c = BADGE_COLORS[badge.colorKey] ?? BADGE_COLORS.amber;
+                  return (
+                    <View
+                      key={badge.id}
+                      style={{ flexDirection: "row", alignItems: "center", gap: 5, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20, borderWidth: 1, backgroundColor: c.bg, borderColor: c.border }}
+                    >
+                      <Feather name={badge.iconName} size={12} color={c.text} />
+                      <Text style={{ fontFamily: "Inter_600SemiBold", fontSize: 11, color: c.text }}>{badge.label}</Text>
+                    </View>
+                  );
+                })}
+                {locked.map(badge => (
+                  <View
+                    key={badge.id}
+                    style={{ flexDirection: "row", alignItems: "center", gap: 5, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20, borderWidth: 1, backgroundColor: colors.surface, borderColor: colors.border, opacity: 0.45 }}
+                  >
+                    <Feather name={badge.iconName} size={12} color={colors.textMuted} />
+                    <Text style={{ fontFamily: "Inter_400Regular", fontSize: 11, color: colors.textMuted }}>{badge.label}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+          );
+        })()}
 
         {checkinHistory.length > 0 && (
           <View style={styles.checkinSection}>
