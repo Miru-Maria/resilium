@@ -188,7 +188,6 @@ function SignedInBanner() {
         score: number;
         daysSince: number;
         lowestDim: DimKey | null;
-        badgeCount: number;
       }
   >({ kind: "loading" });
   const [markingComplete, setMarkingComplete] = useState(false);
@@ -209,72 +208,80 @@ function SignedInBanner() {
     staleTime: 60 * 1000,
   });
 
+  const { data: plansData, isError: plansError, fetchStatus: plansFetchStatus } = useQuery({
+    queryKey: ["user-plans"],
+    queryFn: async () => {
+      const resp = await fetch(`${BASE}/api/users/me/plans`, { credentials: "include" });
+      return resp.ok ? resp.json() : null;
+    },
+    enabled: !!isSignedIn && !!isLoaded,
+    staleTime: 5 * 60 * 1000,
+    retry: 1,
+  });
+
   const challengeProgress: ChallengeProgress | null =
     challengeRaw?.completedDays ? deriveChallengeProgress(challengeRaw) : null;
+
+  const badgeCount = React.useMemo(() => {
+    const plans = plansData?.plans;
+    if (!plans?.length) return 0;
+    const latest = plans[plans.length - 1];
+    const planCount = plans.length;
+    const allDimsAssessed = [
+      "scoreFinancial", "scoreHealth", "scoreSkills",
+      "scoreMobility", "scorePsychological", "scoreResources",
+    ].every((k: string) => latest[k] !== null && latest[k] !== undefined);
+    const streakRaw = (() => {
+      try {
+        const v = localStorage.getItem("resilium_streak_v1");
+        return v ? (JSON.parse(v)?.count ?? 0) : 0;
+      } catch { return 0; }
+    })();
+    const completedDaysCount = challengeRaw?.completedDays?.length ?? 0;
+    return [
+      planCount >= 1,
+      planCount >= 3,
+      allDimsAssessed,
+      streakRaw >= 7,
+      streakRaw >= 30,
+      completedDaysCount >= 10,
+      completedDaysCount >= 30,
+    ].filter(Boolean).length;
+  }, [plansData, challengeRaw]);
 
   useEffect(() => {
     if (!isLoaded) return;
     if (!isSignedIn) { setState({ kind: "hidden" }); return; }
+    if (plansData === undefined && !plansError && plansFetchStatus === "fetching") return;
 
-    const load = async () => {
-      let plansData: ReturnType<typeof JSON.parse> | null = null;
-      try {
-        const plansResp = await fetch(`${BASE}/api/users/me/plans`, { credentials: "include" });
-        plansData = plansResp.ok ? await plansResp.json() : null;
-      } catch {
-        // plans fetch failed — fall through to onboard/hidden
-      }
+    if (!plansData?.plans?.length) {
+      const dismissed = localStorage.getItem("resilium_onboarded_v1");
+      setState(dismissed ? { kind: "hidden" } : { kind: "onboard" });
+      return;
+    }
 
-      if (!plansData?.plans?.length) {
-        const dismissed = localStorage.getItem("resilium_onboarded_v1");
-        setState(dismissed ? { kind: "hidden" } : { kind: "onboard" });
-        return;
-      }
-
-      const plans = plansData.plans;
-      const latest = plans[plans.length - 1];
-      const daysSince = Math.floor(
-        (Date.now() - new Date(latest.createdAt).getTime()) / (1000 * 60 * 60 * 24)
-      );
-      const dimScores: Record<DimKey, number> = {
-        financial: latest.scoreFinancial ?? 100,
-        health: latest.scoreHealth ?? 100,
-        skills: latest.scoreSkills ?? 100,
-        mobility: latest.scoreMobility ?? 100,
-        psychological: latest.scorePsychological ?? 100,
-        resources: latest.scoreResources ?? 100,
-      };
-      const lowestDim = (Object.entries(dimScores).sort(([, a], [, b]) => a - b)[0][0] as DimKey);
-
-      const planCount = plans.length;
-      const allDimsAssessed = [
-        "scoreFinancial", "scoreHealth", "scoreSkills",
-        "scoreMobility", "scorePsychological", "scoreResources",
-      ].every(k => latest[k] !== null && latest[k] !== undefined);
-      const streakRaw = (() => {
-        try {
-          const v = localStorage.getItem("resilium_streak_v1");
-          return v ? (JSON.parse(v)?.count ?? 0) : 0;
-        } catch { return 0; }
-      })();
-      const badgeCount = [
-        planCount >= 1,
-        planCount >= 3,
-        allDimsAssessed,
-        streakRaw >= 7,
-        streakRaw >= 30,
-      ].filter(Boolean).length;
-
-      setState({
-        kind: "returning",
-        score: Math.round(latest.scoreOverall),
-        daysSince,
-        lowestDim,
-        badgeCount,
-      });
+    const plans = plansData.plans;
+    const latest = plans[plans.length - 1];
+    const daysSince = Math.floor(
+      (Date.now() - new Date(latest.createdAt).getTime()) / (1000 * 60 * 60 * 24)
+    );
+    const dimScores: Record<DimKey, number> = {
+      financial: latest.scoreFinancial ?? 100,
+      health: latest.scoreHealth ?? 100,
+      skills: latest.scoreSkills ?? 100,
+      mobility: latest.scoreMobility ?? 100,
+      psychological: latest.scorePsychological ?? 100,
+      resources: latest.scoreResources ?? 100,
     };
-    load();
-  }, [isLoaded, isSignedIn]);
+    const lowestDim = (Object.entries(dimScores).sort(([, a], [, b]) => a - b)[0][0] as DimKey);
+
+    setState({
+      kind: "returning",
+      score: Math.round(latest.scoreOverall),
+      daysSince,
+      lowestDim,
+    });
+  }, [isLoaded, isSignedIn, plansData, plansError, plansFetchStatus]);
 
   const dismissOnboard = () => {
     localStorage.setItem("resilium_onboarded_v1", "1");
@@ -331,7 +338,7 @@ function SignedInBanner() {
   if (state.kind === "loading" || state.kind === "hidden") return null;
 
   if (state.kind === "returning") {
-    const { score, daysSince, lowestDim, badgeCount } = state;
+    const { score, daysSince, lowestDim } = state;
     const scoreColor = score >= 70 ? "text-emerald-400" : score >= 40 ? "text-amber-400" : "text-destructive";
     const nudge = daysSince >= 30
       ? `It's been ${daysSince} days — your situation may have changed.`

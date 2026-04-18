@@ -475,6 +475,19 @@ function OverviewTab({ plans }: { plans: PlanSummary[] }) {
     staleTime: 60_000,
   });
 
+  const { data: challengeData } = useQuery<{ completedDays: number[] } | null>({
+    queryKey: ["challenge"],
+    queryFn: async () => {
+      const res = await fetch("/api/challenge", { credentials: "include" });
+      if (res.status === 404) return null;
+      if (!res.ok) throw new Error("Failed to fetch challenge");
+      return res.json();
+    },
+    staleTime: 60 * 1000,
+  });
+
+  const completedDaysCount = challengeData?.completedDays?.length ?? 0;
+
   const [streak, setStreak] = useState(0);
   useEffect(() => {
     try {
@@ -719,6 +732,7 @@ function OverviewTab({ plans }: { plans: PlanSummary[] }) {
         streak={streak}
         isPro={isPro}
         allDimsAssessed={plans.length > 0}
+        completedDaysCount={completedDaysCount}
       />
 
       {/* 30-Day Resilience Challenge */}

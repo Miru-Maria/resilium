@@ -16,9 +16,10 @@ interface AchievementBadgesProps {
   streak: number;
   isPro: boolean;
   allDimsAssessed: boolean;
+  completedDaysCount?: number;
 }
 
-export function AchievementBadges({ planCount, streak, isPro, allDimsAssessed }: AchievementBadgesProps) {
+export function AchievementBadges({ planCount, streak, isPro, allDimsAssessed, completedDaysCount = 0 }: AchievementBadgesProps) {
   const badges: BadgeSpec[] = [
     {
       id: "first_plan",
@@ -59,6 +60,22 @@ export function AchievementBadges({ planCount, streak, isPro, allDimsAssessed }:
       icon: <Trophy className="w-4 h-4" />,
       earned: streak >= 30,
       color: "text-emerald-600 bg-emerald-50 border-emerald-200",
+    },
+    {
+      id: "challenge_warrior",
+      label: "Challenge Warrior",
+      description: "Completed 10 days of the 30-day challenge",
+      icon: <Flame className="w-4 h-4" />,
+      earned: completedDaysCount >= 10,
+      color: "text-rose-600 bg-rose-50 border-rose-200",
+    },
+    {
+      id: "challenge_champion",
+      label: "Challenge Champion",
+      description: "Completed all 30 days of the challenge",
+      icon: <Trophy className="w-4 h-4" />,
+      earned: completedDaysCount >= 30,
+      color: "text-emerald-700 bg-emerald-50 border-emerald-300",
     },
     {
       id: "pro",
