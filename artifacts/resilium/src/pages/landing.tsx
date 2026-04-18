@@ -33,6 +33,7 @@ import { PageSEO } from "@/components/page-seo";
 import { useUser, useAuth, useClerk } from "@clerk/react";
 import { DailyTipCard } from "@/components/daily-tip-card";
 import type { DimKey } from "@/data/tips-bank";
+import { buildChallenge } from "@/data/challenge-content";
 
 import { ResilientIcon } from "@/components/resilient-icon";
 import {
@@ -134,6 +135,9 @@ interface ChallengeProgress {
   completedCount: number;
   pct: number;
   currentDay: number;
+  todayAction: { day: number; title: string } | null;
+  dimensionOrder: string[];
+  completedDays: number[];
 }
 
 function SignedInBanner() {
@@ -152,6 +156,7 @@ function SignedInBanner() {
         badgeCount: number;
       }
   >({ kind: "loading" });
+  const [markingComplete, setMarkingComplete] = useState(false);
 
   useEffect(() => {
     if (!isLoaded) return;
@@ -221,14 +226,26 @@ function SignedInBanner() {
         if (challengeResp.ok) {
           const cd = await challengeResp.json();
           if (cd?.completedDays) {
-            const completedCount = cd.completedDays.length;
+            const completedDays: number[] = cd.completedDays;
+            const completedCount = completedDays.length;
             const pct = Math.round((completedCount / 30) * 100);
             const startDate = new Date(cd.startedAt);
             const currentDay = Math.min(
               Math.floor((Date.now() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1,
               30
             );
-            challengeProgress = { completedCount, pct, currentDay };
+            const dimensionOrder: string[] = cd.dimensionOrder ?? [];
+            const completedSet = new Set(completedDays);
+            const actions = dimensionOrder.length > 0 ? buildChallenge(dimensionOrder as any) : [];
+            const nextAction = actions.find((a) => !completedSet.has(a.day)) ?? null;
+            challengeProgress = {
+              completedCount,
+              pct,
+              currentDay,
+              todayAction: nextAction ? { day: nextAction.day, title: nextAction.title } : null,
+              dimensionOrder,
+              completedDays,
+            };
           }
         }
       } catch {
@@ -250,6 +267,43 @@ function SignedInBanner() {
   const dismissOnboard = () => {
     localStorage.setItem("resilium_onboarded_v1", "1");
     setState({ kind: "hidden" });
+  };
+
+  const handleMarkComplete = async (day: number) => {
+    if (markingComplete) return;
+    setMarkingComplete(true);
+    try {
+      const token = await getToken();
+      const authHeaders: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
+      const res = await fetch(`${BASE}/api/challenge/complete/${day}`, {
+        method: "POST",
+        headers: authHeaders,
+        credentials: "include",
+      });
+      if (res.ok && state.kind === "returning" && state.challengeProgress) {
+        const cp = state.challengeProgress;
+        const newCompletedDays = [...cp.completedDays, day];
+        const newCompletedCount = newCompletedDays.length;
+        const newPct = Math.round((newCompletedCount / 30) * 100);
+        const completedSet = new Set(newCompletedDays);
+        const actions = cp.dimensionOrder.length > 0 ? buildChallenge(cp.dimensionOrder as any) : [];
+        const nextAction = actions.find((a) => !completedSet.has(a.day)) ?? null;
+        setState({
+          ...state,
+          challengeProgress: {
+            ...cp,
+            completedCount: newCompletedCount,
+            pct: newPct,
+            completedDays: newCompletedDays,
+            todayAction: nextAction ? { day: nextAction.day, title: nextAction.title } : null,
+          },
+        });
+      }
+    } catch {
+      // silent — user can try again
+    } finally {
+      setMarkingComplete(false);
+    }
   };
 
   if (state.kind === "loading" || state.kind === "hidden") return null;
@@ -296,47 +350,71 @@ function SignedInBanner() {
         {/* Compact challenge + badge strip */}
         <div className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-2">
           {/* 30-day challenge progress */}
-          <Link href="/profile">
-            <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-colors cursor-pointer">
-              {challengeProgress ? (
-                <>
-                  <div className="relative flex-shrink-0 w-8 h-8">
-                    <svg className="w-8 h-8 -rotate-90" viewBox="0 0 30 30">
-                      <circle cx="15" cy="15" r="11" stroke="hsl(var(--muted))" strokeWidth="3" fill="none" />
-                      <circle
-                        cx="15" cy="15" r="11"
-                        stroke="hsl(var(--primary))" strokeWidth="3" fill="none"
-                        strokeDasharray={`${circumference}`}
-                        strokeDashoffset={`${circumference * (1 - challengeProgress.pct / 100)}`}
-                        strokeLinecap="round"
-                      />
-                    </svg>
-                    <span className="absolute inset-0 flex items-center justify-center text-[8px] font-bold text-foreground">
-                      {challengeProgress.pct}%
-                    </span>
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs font-semibold text-foreground leading-tight">30-Day Challenge</p>
-                    <p className="text-[11px] text-muted-foreground leading-tight">
-                      Day {challengeProgress.currentDay} · {challengeProgress.completedCount}/30 done
-                    </p>
-                  </div>
-                  <Flame className="w-3.5 h-3.5 text-orange-400 ml-auto flex-shrink-0" />
-                </>
-              ) : (
-                <>
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Trophy className="w-4 h-4 text-primary/70" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs font-semibold text-foreground leading-tight">30-Day Challenge</p>
-                    <p className="text-[11px] text-muted-foreground leading-tight">Start your daily micro-actions</p>
-                  </div>
-                  <ChevronRight className="w-3.5 h-3.5 text-muted-foreground ml-auto flex-shrink-0" />
-                </>
-              )}
+          {challengeProgress ? (
+            <div className="flex items-start gap-3 px-4 py-3 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-colors">
+              <div className="relative flex-shrink-0 w-8 h-8 mt-0.5">
+                <svg className="w-8 h-8 -rotate-90" viewBox="0 0 30 30">
+                  <circle cx="15" cy="15" r="11" stroke="hsl(var(--muted))" strokeWidth="3" fill="none" />
+                  <circle
+                    cx="15" cy="15" r="11"
+                    stroke="hsl(var(--primary))" strokeWidth="3" fill="none"
+                    strokeDasharray={`${circumference}`}
+                    strokeDashoffset={`${circumference * (1 - challengeProgress.pct / 100)}`}
+                    strokeLinecap="round"
+                    style={{ transition: "stroke-dashoffset 0.4s ease" }}
+                  />
+                </svg>
+                <span className="absolute inset-0 flex items-center justify-center text-[8px] font-bold text-foreground">
+                  {challengeProgress.pct}%
+                </span>
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-semibold text-foreground leading-tight">30-Day Challenge</p>
+                <p className="text-[11px] text-muted-foreground leading-tight">
+                  Day {challengeProgress.currentDay} · {challengeProgress.completedCount}/30 done
+                </p>
+                {challengeProgress.todayAction && (
+                  <p className="text-[11px] text-foreground/70 leading-tight mt-0.5 truncate">
+                    {challengeProgress.todayAction.title}
+                  </p>
+                )}
+                {challengeProgress.todayAction ? (
+                  <button
+                    className="mt-1.5 inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-primary text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-50"
+                    disabled={markingComplete}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleMarkComplete(challengeProgress.todayAction!.day);
+                    }}
+                  >
+                    <CheckCircle2 className="w-3 h-3" />
+                    {markingComplete ? "Saving…" : "Mark Complete"}
+                  </button>
+                ) : challengeProgress.completedCount === 30 ? (
+                  <span className="mt-1 inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-500">
+                    <CheckCircle2 className="w-3 h-3" /> All done!
+                  </span>
+                ) : null}
+              </div>
+              <Link href="/profile" onClick={(e) => e.stopPropagation()}>
+                <Flame className="w-3.5 h-3.5 text-orange-400 flex-shrink-0 mt-1 hover:opacity-80 transition-opacity" />
+              </Link>
             </div>
-          </Link>
+          ) : (
+            <Link href="/profile">
+              <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-colors cursor-pointer">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Trophy className="w-4 h-4 text-primary/70" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-semibold text-foreground leading-tight">30-Day Challenge</p>
+                  <p className="text-[11px] text-muted-foreground leading-tight">Start your daily micro-actions</p>
+                </div>
+                <ChevronRight className="w-3.5 h-3.5 text-muted-foreground ml-auto flex-shrink-0" />
+              </div>
+            </Link>
+          )}
 
           {/* Badge count */}
           <Link href="/profile">
