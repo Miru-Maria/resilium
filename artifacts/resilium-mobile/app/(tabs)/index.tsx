@@ -17,6 +17,7 @@ import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Svg, { Circle } from "react-native-svg";
 
 import { NeuralNetSVG } from "@/components/NeuralNetSVG";
 import { OnboardingCarousel, shouldShowOnboarding } from "@/components/OnboardingCarousel";
@@ -88,6 +89,13 @@ function CompanionScrollContent({
   const [streak, setStreak] = useState(0);
   const [greeting, setGreeting] = useState("Good morning");
   const [scoreFetchError, setScoreFetchError] = useState(false);
+  const [challengeProgress, setChallengeProgress] = useState<{
+    completedCount: number;
+    pct: number;
+    currentDay: number;
+  } | null>(null);
+  const [badgeCount, setBadgeCount] = useState(0);
+  const [engagementLoaded, setEngagementLoaded] = useState(false);
 
   const motivation = MOTIVATIONS[new Date().getDay() % MOTIVATIONS.length];
 
@@ -126,6 +134,61 @@ function CompanionScrollContent({
           setLatestReportId(latest.reportId);
         }
       } catch { setScoreFetchError(true); }
+    })();
+  }, []);
+
+  useEffect(() => {
+    const domain = process.env.EXPO_PUBLIC_DOMAIN;
+    (async () => {
+      try {
+        const headers = await getAuthHeaders();
+        const [plansRes, challengeRes] = await Promise.allSettled([
+          fetch(`https://${domain}/api/users/me/plans`, { headers }),
+          fetch(`https://${domain}/api/challenge`, { headers }),
+        ]);
+
+        if (plansRes.status === "fulfilled" && plansRes.value.ok) {
+          const data = await plansRes.value.json();
+          const plans: any[] = data.plans ?? [];
+          if (plans.length > 0) {
+            const latest = plans[plans.length - 1];
+            const planCount = plans.length;
+            const allDimsAssessed = [
+              "scoreFinancial", "scoreHealth", "scoreSkills",
+              "scoreMobility", "scorePsychological", "scoreResources",
+            ].every(k => latest[k] !== null && latest[k] !== undefined);
+            const streakRaw: number = await AsyncStorage.getItem("resilium_streak_v1").then(v => {
+              try { return v ? (JSON.parse(v)?.count ?? 0) : 0; } catch { return 0; }
+            });
+            const count = [
+              planCount >= 1,
+              planCount >= 3,
+              allDimsAssessed,
+              streakRaw >= 7,
+              streakRaw >= 30,
+            ].filter(Boolean).length;
+            setBadgeCount(count);
+          }
+        }
+
+        if (challengeRes.status === "fulfilled" && challengeRes.value.ok) {
+          const cd = await challengeRes.value.json();
+          if (cd?.completedDays) {
+            const completedCount: number = cd.completedDays.length;
+            const pct = Math.round((completedCount / 30) * 100);
+            const startDate = new Date(cd.startedAt);
+            const currentDay = Math.min(
+              Math.floor((Date.now() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1,
+              30
+            );
+            setChallengeProgress({ completedCount, pct, currentDay });
+          }
+        }
+      } catch {
+        // non-critical — proceed without challenge/badge data
+      } finally {
+        setEngagementLoaded(true);
+      }
     })();
   }, []);
 
@@ -175,6 +238,84 @@ function CompanionScrollContent({
           )}
         </View>
       </View>
+
+      {/* Challenge + Badge strip */}
+      {engagementLoaded && (
+        <View style={{ flexDirection: "row", gap: 10 }}>
+          {/* 30-Day Challenge */}
+          <Pressable
+            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push("/profile" as any); }}
+            style={({ pressed }) => [{
+              flex: 1, flexDirection: "row", alignItems: "center", gap: 10,
+              backgroundColor: colors.surface, borderRadius: 16, padding: 14,
+              borderWidth: 1, borderColor: colors.border,
+              opacity: pressed ? 0.8 : 1,
+            }]}
+          >
+            {challengeProgress ? (
+              <>
+                <View style={{ width: 34, height: 34 }}>
+                  <Svg width={34} height={34} style={{ transform: [{ rotate: "-90deg" }] }}>
+                    <Circle cx={17} cy={17} r={13} stroke={colors.border} strokeWidth={3} fill="none" />
+                    <Circle
+                      cx={17} cy={17} r={13}
+                      stroke={colors.primary} strokeWidth={3} fill="none"
+                      strokeDasharray={`${2 * Math.PI * 13}`}
+                      strokeDashoffset={`${2 * Math.PI * 13 * (1 - challengeProgress.pct / 100)}`}
+                      strokeLinecap="round"
+                    />
+                  </Svg>
+                  <View style={{ position: "absolute", inset: 0, alignItems: "center", justifyContent: "center" }}>
+                    <Text style={{ fontFamily: "Inter_700Bold", fontSize: 7, color: colors.text }}>
+                      {challengeProgress.pct}%
+                    </Text>
+                  </View>
+                </View>
+                <View style={{ flex: 1, gap: 2 }}>
+                  <Text style={{ fontFamily: "Inter_600SemiBold", fontSize: 12, color: colors.text }}>30-Day Challenge</Text>
+                  <Text style={{ fontFamily: "Inter_400Regular", fontSize: 11, color: colors.textMuted }}>
+                    Day {challengeProgress.currentDay} · {challengeProgress.completedCount}/30 done
+                  </Text>
+                </View>
+                <Feather name="zap" size={13} color="#F97316" />
+              </>
+            ) : (
+              <>
+                <View style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: colors.primaryMuted, alignItems: "center", justifyContent: "center" }}>
+                  <Feather name="award" size={16} color={colors.primary} />
+                </View>
+                <View style={{ flex: 1, gap: 2 }}>
+                  <Text style={{ fontFamily: "Inter_600SemiBold", fontSize: 12, color: colors.text }}>30-Day Challenge</Text>
+                  <Text style={{ fontFamily: "Inter_400Regular", fontSize: 11, color: colors.textMuted }}>Start micro-actions</Text>
+                </View>
+                <Feather name="chevron-right" size={13} color={colors.textMuted} />
+              </>
+            )}
+          </Pressable>
+
+          {/* Badge count */}
+          <Pressable
+            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); router.push("/profile" as any); }}
+            style={({ pressed }) => [{
+              flex: 1, flexDirection: "row", alignItems: "center", gap: 10,
+              backgroundColor: colors.surface, borderRadius: 16, padding: 14,
+              borderWidth: 1, borderColor: colors.border,
+              opacity: pressed ? 0.8 : 1,
+            }]}
+          >
+            <View style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: "rgba(245,158,11,0.12)", alignItems: "center", justifyContent: "center" }}>
+              <Feather name="star" size={16} color="#F59E0B" />
+            </View>
+            <View style={{ flex: 1, gap: 2 }}>
+              <Text style={{ fontFamily: "Inter_600SemiBold", fontSize: 12, color: colors.text }}>Achievements</Text>
+              <Text style={{ fontFamily: "Inter_400Regular", fontSize: 11, color: colors.textMuted }}>
+                {badgeCount > 0 ? `${badgeCount} badge${badgeCount !== 1 ? "s" : ""} earned` : "Earn your first badge"}
+              </Text>
+            </View>
+            <Feather name="chevron-right" size={13} color={colors.textMuted} />
+          </Pressable>
+        </View>
+      )}
 
       {/* Daily Check-In — primary CTA */}
       <Pressable
