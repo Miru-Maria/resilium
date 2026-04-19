@@ -17,7 +17,14 @@ app.set("trust proxy", 1);
 // ── Security headers (Helmet) ────────────────────────────────────────────────
 app.use(
   helmet({
-    contentSecurityPolicy: false,
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'none'"],
+        frameAncestors: ["'none'"],
+        formAction: ["'none'"],
+        baseUri: ["'none'"],
+      },
+    },
     crossOriginEmbedderPolicy: false,
   }),
 );

@@ -1,4 +1,4 @@
-const VERSION = "3.0";
+const VERSION = "3.1";
 const DATE = "April 2026";
 
 const BACKEND_STACK = [
@@ -62,6 +62,7 @@ const DB_TABLES = [
   { name: "feedback", desc: "Per-report star ratings and free-text comments." },
   { name: "site_announcements", desc: "Admin-controlled platform-wide banners with active toggle." },
   { name: "ux_test_runs / ux_test_results", desc: "AI persona UX testing framework — run metadata and per-persona score results." },
+  { name: "admin_audit_log", desc: "Append-only record of all admin actions: logins (success/fail), logouts, password changes, manual backup triggers, and GDPR actions. Includes IP and user-agent." },
 ];
 
 const WEB_ROUTES = [
@@ -107,6 +108,7 @@ const ENV_VARS = [
   { name: "RESEND_API_KEY", scope: "API", req: "Email", desc: "Resend email delivery API key" },
   { name: "AI_INTEGRATIONS_OPENAI_BASE_URL", scope: "API", req: "Yes", desc: "Auto-provisioned by Replit AI Integrations" },
   { name: "AI_INTEGRATIONS_OPENAI_API_KEY", scope: "API", req: "Yes", desc: "Auto-provisioned by Replit AI Integrations" },
+  { name: "DEFAULT_OBJECT_STORAGE_BUCKET_ID", scope: "API", req: "Backups", desc: "Replit Object Storage bucket ID — used for daily automated DB backups (stored as JSON, 7-day retention)" },
   { name: "REPLIT_DOMAINS", scope: "Shared", req: "Yes", desc: "Auto-provisioned by Replit" },
 ];
 
@@ -246,6 +248,8 @@ export default function TechnicalSpecDoc() {
                 { type: "Consent & GDPR records", ret: "Indefinite (legal record)" },
                 { type: "Subscription records", ret: "Until account deletion (cascade)" },
                 { type: "Push tokens", ret: "Until session deletion (cascade)" },
+                { type: "Admin audit log", ret: "Indefinite (security record — all admin actions logged)" },
+                { type: "DB snapshots (Object Storage)", ret: "7 days — auto-pruned by backup cron; JSON format" },
               ].map(r => (
                 <div key={r.type} className="flex gap-2 items-start text-xs">
                   <span className="mt-1 w-1 h-1 rounded-full bg-[#E08040] flex-shrink-0" />
@@ -368,7 +372,7 @@ export default function TechnicalSpecDoc() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
               { title: "User Auth — Clerk", items: ["Web: @clerk/react SDK — ClerkProvider, SignIn, SignUp, useAuth(), useUser()", "API: @clerk/express middleware verifies JWTs on every authenticated request", "Mobile: @clerk/clerk-expo SDK, session token exchanged via POST /api/auth/mobile-token", "User records upserted into users table using Clerk userId as primary key", "Session cookies: HttpOnly, Secure (prod), SameSite: lax, 24-hour TTL"] },
-              { title: "Admin Auth", items: ["Credentials from ADMIN_USERNAME / ADMIN_PASSWORD environment secrets", "Successful login sets a signed HTTP-only cookie (admin_token)", "All /api/admin/* routes validate the admin cookie via middleware", "Admin sessions expire after 24 hours", "Completely separate from user auth (no Clerk involvement)"] },
+              { title: "Admin Auth", items: ["Credentials from ADMIN_USERNAME / ADMIN_PASSWORD environment secrets", "Successful login sets a signed httpOnly cookie (admin_sess) — never accessible to JavaScript", "All /api/admin/* routes validate the admin cookie via requireAdminSession middleware", "Admin sessions expire after 24 hours", "All admin actions (login, logout, password changes, backups, GDPR) are appended to the admin_audit_log table with IP + user-agent", "Content Security Policy: default-src 'none' on API; strict per-source CSP on web frontend (Clerk, Sentry, Google Fonts only)", "security.txt at /.well-known/security.txt with responsible disclosure policy"] },
               { title: "Stripe Webhook Security", items: ["Stripe-Signature header verified using STRIPE_WEBHOOK_SECRET (whsec_...)", "Raw request body captured before JSON parsing to ensure signature integrity", "Invalid signatures → 400 rejection", "Handles: checkout.session.completed, customer.subscription.updated, customer.subscription.deleted", "Rate limiting: 6 assessments/min per IP for anonymous users (express-rate-limit)"] },
             ].map(s => (
               <div key={s.title} className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">

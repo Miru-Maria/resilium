@@ -39,7 +39,9 @@ const MOBILE_AUDIT = [
 ];
 
 const ADMIN_AUDIT = [
-  { area: "Login", status: "good", note: "Basic auth with admin credentials, session-secured" },
+  { area: "Login", status: "strong", note: "httpOnly cookie session (admin_sess) — token inaccessible to JS. All login/logout/password change/backup actions logged in admin_audit_log table with IP. CSP headers on API (default-src 'none') and web frontend (per-source allowlist: Clerk, Sentry, Google Fonts only)." },
+  { area: "Audit log", status: "strong", note: "Append-only DB table recording every admin action (login success/fail, logout, password change, manual backup trigger, GDPR actions) with timestamp, IP, and user-agent. Visible in admin Security page." },
+  { area: "Backup panel", status: "strong", note: "Daily automated DB snapshots at 02:30 UTC (7-table JSON, 7-day retention). On-demand trigger from Security page. Backup history table with dates and file sizes." },
   { area: "Analytics overview", status: "strong", note: "Recharts bar / pie / line / radar, live DB data, plan views metric" },
   { area: "Demographic breakdown", status: "good", note: "Location, income, age, housing, mobility, dependents — all charted" },
   { area: "User management", status: "good", note: "Clerk-sourced user list with plan counts and last-active timestamps" },

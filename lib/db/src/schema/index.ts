@@ -29,3 +29,4 @@ export * from "./messages";
 export * from "./checkins";
 export * from "./challenge";
 export * from "./drip";
+export * from "./admin-audit-log";

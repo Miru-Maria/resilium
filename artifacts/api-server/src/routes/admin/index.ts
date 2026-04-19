@@ -1,7 +1,7 @@
-import { Router, type IRouter } from "express";
+import { Router, type IRouter, type Request } from "express";
 import path from "path";
 import { fileURLToPath } from "url";
-import { db, resilienceReportsTable, reportFeedbackTable, usersTable, planViewsTable, adminConfigTable } from "@workspace/db";
+import { db, resilienceReportsTable, reportFeedbackTable, usersTable, planViewsTable, adminConfigTable, adminAuditLogTable } from "@workspace/db";
 import { desc, eq, count, max, and, isNotNull, gte, lte, ilike, or } from "drizzle-orm";
 import {
   requireAdminSession, generateAdminToken, verifyAdminToken,
@@ -16,6 +16,17 @@ import adminAnnouncementsRouter from "./announcements.js";
 import { getCoachingClickCount } from "../../lib/cron.js";
 import { logger } from "../../lib/logger.js";
 import { sendWelcomeEmail, sendProUpgradeEmail, sendReassessmentReminder, sendUserWeeklyDigest } from "../../lib/email.js";
+import { runDatabaseBackup, listBackups } from "../../lib/backup.js";
+
+async function auditLog(action: string, details: Record<string, unknown>, req: Request): Promise<void> {
+  try {
+    const ip = (req.headers["x-forwarded-for"] as string | undefined)?.split(",")[0]?.trim() ?? req.ip ?? null;
+    const userAgent = (req.headers["user-agent"] as string | undefined) ?? null;
+    await db.insert(adminAuditLogTable).values({ action, details, ip, userAgent });
+  } catch (err) {
+    logger.warn({ err, action }, "Audit log write failed (non-fatal)");
+  }
+}
 
 const ADMIN_PASSWORD_KEY = "admin_password_hash";
 
@@ -72,13 +83,16 @@ router.post("/login", adminLoginRateLimit, async (req, res) => {
       maxAge: 24 * 60 * 60 * 1000,
       path: "/",
     });
+    await auditLog("login_success", { username }, req);
     res.json({ success: true });
   } else {
+    await auditLog("login_failed", { username }, req);
     res.status(401).json({ error: "INVALID_CREDENTIALS", message: "Invalid username or password." });
   }
 });
 
-router.post("/logout", (req, res) => {
+router.post("/logout", async (req, res) => {
+  await auditLog("logout", {}, req);
   res.clearCookie(ADMIN_SESSION_COOKIE, { path: "/" });
   res.json({ success: true });
 });
@@ -125,6 +139,7 @@ router.post("/change-password", requireAdminSession, async (req, res) => {
     await db.insert(adminConfigTable)
       .values({ key: ADMIN_PASSWORD_KEY, value: hash })
       .onConflictDoUpdate({ target: adminConfigTable.key, set: { value: hash } });
+    await auditLog("password_changed", {}, req);
     res.json({ success: true, message: "Password updated successfully." });
   } catch (err) {
     logger.error({ err }, "Failed to update admin password");
@@ -554,6 +569,41 @@ router.get("/docs/:name", requireAdminSession, (req, res) => {
       if (!res.headersSent) res.status(500).json({ error: "INTERNAL_ERROR" });
     }
   });
+});
+
+router.get("/audit-log", requireAdminSession, async (req, res) => {
+  try {
+    const rows = await db
+      .select()
+      .from(adminAuditLogTable)
+      .orderBy(desc(adminAuditLogTable.createdAt))
+      .limit(200);
+    res.json({ entries: rows.map(r => ({ id: r.id, action: r.action, details: r.details, ip: r.ip, createdAt: r.createdAt.toISOString() })) });
+  } catch (err) {
+    logger.error({ err }, "Failed to fetch audit log");
+    res.status(500).json({ error: "INTERNAL_ERROR" });
+  }
+});
+
+router.get("/backups", requireAdminSession, async (_req, res) => {
+  try {
+    const files = await listBackups();
+    res.json({ backups: files });
+  } catch (err) {
+    logger.error({ err }, "Failed to list backups");
+    res.status(500).json({ error: "INTERNAL_ERROR", message: "Failed to list backups." });
+  }
+});
+
+router.post("/backups/trigger", requireAdminSession, async (req, res) => {
+  try {
+    await auditLog("backup_triggered", { source: "manual" }, req);
+    runDatabaseBackup().catch(e => logger.error({ e }, "Manual backup failed"));
+    res.json({ success: true, message: "Backup started. It will complete in the background." });
+  } catch (err) {
+    logger.error({ err }, "Failed to trigger backup");
+    res.status(500).json({ error: "INTERNAL_ERROR", message: "Failed to trigger backup." });
+  }
 });
 
 router.use("/ux-test", uxTestRouter);

@@ -62,6 +62,35 @@ async function pruneOldBackups(bucket: ReturnType<Storage["bucket"]>): Promise<v
   }
 }
 
+export interface BackupFileMeta {
+  filename: string;
+  timestamp: number;
+  sizeBytes: number;
+  iso: string;
+}
+
+export async function listBackups(): Promise<BackupFileMeta[]> {
+  const bucketId = process.env["DEFAULT_OBJECT_STORAGE_BUCKET_ID"];
+  if (!bucketId) return [];
+  const storage = getStorageClient();
+  const bucket = storage.bucket(bucketId);
+  const [files] = await bucket.getFiles({ prefix: "backups/db-backup-" });
+  const results: BackupFileMeta[] = files
+    .map(f => {
+      const match = f.name.match(/db-backup-(\d+)\.json$/);
+      const timestamp = match ? parseInt(match[1]!, 10) : 0;
+      return {
+        filename: f.name,
+        timestamp,
+        sizeBytes: parseInt(String(f.metadata?.["size"] ?? "0"), 10),
+        iso: new Date(timestamp).toISOString(),
+      };
+    })
+    .filter(f => f.timestamp > 0)
+    .sort((a, b) => b.timestamp - a.timestamp);
+  return results;
+}
+
 export async function runDatabaseBackup(): Promise<void> {
   const bucketId = process.env["DEFAULT_OBJECT_STORAGE_BUCKET_ID"];
   if (!bucketId) {
