@@ -33,6 +33,7 @@ export default function AdminLoginPage() {
       const res = await fetch(`${BASE}/api/admin/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ username, password }),
       });
       const data = await res.json().catch(() => ({}));
