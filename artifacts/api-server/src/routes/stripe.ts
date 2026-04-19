@@ -7,7 +7,7 @@ import { db, usersTable, subscriptionsTable, emailDripQueueTable } from "@worksp
 import { eq, and, isNull } from "drizzle-orm";
 import { logger } from "../lib/logger.js";
 import { sendProUpgradeEmail, sendPaymentFailedEmail, sendCancellationEmail, sendPaymentSucceededEmail } from "../lib/email.js";
-import { stripeCheckoutLimiter, stripePortalLimiter } from "../lib/rate-limiters.js";
+import { stripeCheckoutLimiter, stripePortalLimiter, stripeDonationLimiter } from "../lib/rate-limiters.js";
 
 const checkoutSchema = z.object({
   billingPeriod: z.enum(["monthly", "annual"]),
@@ -347,6 +347,56 @@ router.post("/stripe/portal", stripePortalLimiter, async (req, res) => {
   } catch (err: any) {
     logger.error({ err }, "Failed to create Stripe portal session");
     return res.status(500).json({ error: "Failed to create portal session" });
+  }
+});
+
+// One-time donation checkout (no auth required)
+const donationSchema = z.object({
+  amount: z.number().int().min(100).max(100000).optional().default(500), // cents, default $5
+  returnPath: z.string().optional().default("/"),
+});
+
+router.post("/stripe/donate", stripeDonationLimiter, async (req, res) => {
+  const parsed = donationSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ error: "VALIDATION_ERROR", message: "Invalid donation parameters." });
+  }
+
+  const { amount, returnPath } = parsed.data;
+
+  try {
+    const stripe = await getUncachableStripeClient();
+
+    const baseUrl = process.env.REPLIT_DEPLOYMENT === "1"
+      ? "https://resilium-platform.com"
+      : `https://${process.env.REPLIT_DOMAINS?.split(",")[0]}`;
+
+    const returnUrl = `${baseUrl}${returnPath.startsWith("/") ? returnPath : "/" + returnPath}`;
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      mode: "payment",
+      line_items: [
+        {
+          quantity: 1,
+          price_data: {
+            currency: "usd",
+            unit_amount: amount,
+            product_data: {
+              name: "Support Resilium",
+              description: "A one-time contribution to support the Resilium project. Thank you — it means a lot.",
+            },
+          },
+        },
+      ],
+      success_url: `${returnUrl}?donated=1`,
+      cancel_url: returnUrl,
+    });
+
+    return res.json({ url: session.url });
+  } catch (err: any) {
+    logger.error({ err }, "Failed to create Stripe donation session");
+    return res.status(500).json({ error: "Failed to create donation session" });
   }
 });
 

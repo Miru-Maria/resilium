@@ -426,6 +426,25 @@ function ResultsPageInner() {
 
   // Declared here (before all early returns) to satisfy React's Rules of Hooks
   const [showShareModal, setShowShareModal] = useState(false);
+  const [isDonating, setIsDonating] = useState(false);
+  const donated = new URLSearchParams(window.location.search).get("donated") === "1";
+
+  const handleDonate = async () => {
+    setIsDonating(true);
+    try {
+      const res = await fetch(`${BASE}/api/stripe/donate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount: 500, returnPath: window.location.pathname }),
+      });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+    } catch {
+      // silent — button will re-enable
+    } finally {
+      setIsDonating(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -1308,19 +1327,32 @@ function ResultsPageInner() {
         {/* SUPPORT BANNER */}
         <section className="print:hidden">
           <div className="rounded-2xl border border-primary/20 bg-primary/5 p-8 text-center">
-            <Heart className="w-8 h-8 text-primary mx-auto mb-3" />
-            <h3 className="font-display font-bold text-xl mb-2">Support Resilium</h3>
-            <p className="text-muted-foreground text-sm max-w-md mx-auto mb-5">
-              If this report was helpful, share it with someone who might need it.
-            </p>
-            <div className="flex flex-wrap gap-3 justify-center">
-              <Button className="rounded-full gap-2" onClick={() => setShowShareModal(true)}>
-                <Share2 className="w-4 h-4" /> Share Your Score
-              </Button>
-              <Button variant="outline" className="rounded-full gap-2" onClick={() => setShowShareModal(true)}>
-                <Share2 className="w-4 h-4" /> Share
-              </Button>
-            </div>
+            {donated ? (
+              <>
+                <Heart className="w-8 h-8 text-primary mx-auto mb-3 fill-primary" />
+                <h3 className="font-display font-bold text-xl mb-2">Thank You</h3>
+                <p className="text-muted-foreground text-sm max-w-md mx-auto">
+                  Your contribution means a lot. It helps keep Resilium running and free for those who need it most.
+                </p>
+              </>
+            ) : (
+              <>
+                <Heart className="w-8 h-8 text-primary mx-auto mb-3" />
+                <h3 className="font-display font-bold text-xl mb-2">Support Resilium</h3>
+                <p className="text-muted-foreground text-sm max-w-md mx-auto mb-5">
+                  If this report was useful to you, consider leaving a one-time contribution. No subscription — just a way to give back if you'd like to.
+                </p>
+                <Button
+                  className="rounded-full gap-2"
+                  onClick={handleDonate}
+                  disabled={isDonating}
+                >
+                  {isDonating
+                    ? <><Loader2 className="w-4 h-4 animate-spin" /> Redirecting…</>
+                    : <><Heart className="w-4 h-4" /> Support the Project</>}
+                </Button>
+              </>
+            )}
           </div>
         </section>
 

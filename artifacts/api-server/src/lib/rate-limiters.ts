@@ -78,3 +78,12 @@ export const challengeLimiter = rateLimit({
   keyGenerator: userKey,
   message: { error: "RATE_LIMITED", message: "Too many challenge actions. Please try again later." },
 });
+
+export const stripeDonationLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  validate: { xForwardedForHeader: false },
+  message: { error: "RATE_LIMITED", message: "Too many donation attempts. Please try again later." },
+});
