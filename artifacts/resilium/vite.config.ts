@@ -64,6 +64,7 @@ export default defineConfig({
         globPatterns: ["**/*.{js,css,html,ico,png,svg,webp,woff,woff2}"],
         navigateFallback: "offline.html",
         navigateFallbackDenylist: [/^\/api/],
+        maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
       },
       devOptions: {
         enabled: false,
@@ -102,6 +103,31 @@ export default defineConfig({
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
     sourcemap: "hidden",
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes("node_modules")) return undefined;
+          if (id.includes("@clerk")) return "vendor-clerk";
+          if (
+            id.includes("recharts") ||
+            id.includes("d3-") ||
+            id.includes("victory")
+          ) return "vendor-charts";
+          if (id.includes("@tanstack")) return "vendor-query";
+          if (
+            id.includes("react-dom") ||
+            id.includes("react-router") ||
+            id.includes("scheduler")
+          ) return "vendor-react";
+          if (
+            id.includes("@radix-ui") ||
+            id.includes("cmdk") ||
+            id.includes("vaul")
+          ) return "vendor-ui";
+          return "vendor-misc";
+        },
+      },
+    },
   },
   server: {
     port,
