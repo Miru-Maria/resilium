@@ -164,6 +164,50 @@ export async function sendUserWeeklyDigest(opts: {
   await send({ to: opts.email, subject: `Your weekly resilience check-in, ${name}`, html: htmlWithUnsub, text, headers: listHeader });
 }
 
+// ─── Payment Failed Email ─────────────────────────────────────────────────────
+
+export async function sendPaymentFailedEmail(opts: { email: string; firstName?: string | null; periodEnd?: Date | null; userId?: string }) {
+  if (!opts.email) return;
+  const name = opts.firstName ?? "there";
+  const accessUntil = opts.periodEnd
+    ? opts.periodEnd.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
+    : null;
+  const accessLine = accessUntil ? `\n\nYou still have Pro access until ${accessUntil}. If payment is not updated before then, your account will move to the free plan.` : "";
+  const unsubHtml = opts.userId ? unsubscribeFooterHtml(opts.userId) : "";
+  const unsubText = opts.userId ? unsubscribeFooterText(opts.userId) : "";
+  const listHeader = opts.userId ? { "List-Unsubscribe": buildListUnsubscribeHeader(opts.userId), "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" } : undefined;
+  await send({
+    to: opts.email,
+    subject: "Action needed — Resilium payment failed",
+    text: `Hi ${name},\n\nWe weren't able to process your Resilium Pro payment. This can happen if your card expired, was replaced, or had insufficient funds.${accessLine}\n\nTo keep your Pro access, please update your payment method:\n${APP_URL}/profile\n\nIf you think this is a mistake, contact your bank or reply to this email and I'll help.\n\n— Cristiana at Resilium${unsubText}`,
+    html: `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0D1225;font-family:'Helvetica Neue',Arial,sans-serif;color:#EAD9BE;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:40px 20px;"><table width="560" cellpadding="0" cellspacing="0" style="background:#131929;border-radius:16px;overflow:hidden;"><tr><td style="background:#c0392b;padding:24px 32px;"><h1 style="margin:0;color:#fff;font-size:22px;font-weight:800;letter-spacing:-0.5px;">Resilium — Action Needed</h1></td></tr><tr><td style="padding:32px;"><h2 style="margin:0 0 16px;color:#EAD9BE;font-size:20px;font-weight:700;">Payment failed, ${name}</h2><p style="margin:0 0 16px;color:#b8a99a;line-height:1.6;">We weren't able to process your Resilium Pro payment. This usually happens when a card has expired, been replaced, or has insufficient funds.</p>${accessUntil ? `<div style="background:#2a1a1a;border:1px solid #5a2a2a;border-radius:10px;padding:16px 20px;margin:0 0 24px;"><p style="margin:0;color:#f87171;font-size:14px;font-weight:600;">⏳ Pro access until ${accessUntil}</p><p style="margin:8px 0 0;color:#b8a99a;font-size:13px;line-height:1.5;">If payment is not updated before this date, your account will move to the free plan and your scenario stress-tests, AI companion, and unlimited history will be paused.</p></div>` : ""}<a href="${APP_URL}/profile" style="display:inline-block;background:#E08040;color:#0D1225;font-weight:700;font-size:15px;padding:14px 28px;border-radius:10px;text-decoration:none;margin-bottom:24px;">Update Payment Method →</a><p style="margin:0;color:#7a6a5a;font-size:13px;line-height:1.6;">If you believe this is a mistake, contact your bank or simply reply to this email and I'll sort it out.<br><br>— Cristiana at Resilium</p>${unsubHtml}</td></tr></table></td></tr></table></body></html>`,
+    headers: listHeader,
+  });
+}
+
+// ─── Cancellation Confirmation Email ──────────────────────────────────────────
+
+export async function sendCancellationEmail(opts: { email: string; firstName?: string | null; periodEnd?: Date | null; userId?: string }) {
+  if (!opts.email) return;
+  const name = opts.firstName ?? "there";
+  const accessUntil = opts.periodEnd
+    ? opts.periodEnd.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
+    : null;
+  const accessLine = accessUntil
+    ? `You keep full Pro access until ${accessUntil} — nothing changes before then.`
+    : "Your Pro access will remain active through the end of your current billing period.";
+  const unsubHtml = opts.userId ? unsubscribeFooterHtml(opts.userId) : "";
+  const unsubText = opts.userId ? unsubscribeFooterText(opts.userId) : "";
+  const listHeader = opts.userId ? { "List-Unsubscribe": buildListUnsubscribeHeader(opts.userId), "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" } : undefined;
+  await send({
+    to: opts.email,
+    subject: "Your Resilium Pro subscription has been cancelled",
+    text: `Hi ${name},\n\nYour Resilium Pro subscription has been cancelled. ${accessLine}\n\nAfter that, your account moves to the free plan — your reports, scores, and history are never deleted.\n\nIf you change your mind, you can resubscribe at any time from your profile:\n${APP_URL}/pricing\n\nThank you for being a Resilium Pro member.\n\n— Cristiana at Resilium${unsubText}`,
+    html: `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0D1225;font-family:'Helvetica Neue',Arial,sans-serif;color:#EAD9BE;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:40px 20px;"><table width="560" cellpadding="0" cellspacing="0" style="background:#131929;border-radius:16px;overflow:hidden;"><tr><td style="background:#E08040;padding:24px 32px;"><h1 style="margin:0;color:#0D1225;font-size:22px;font-weight:800;">Resilium</h1></td></tr><tr><td style="padding:32px;"><h2 style="margin:0 0 16px;color:#EAD9BE;font-size:20px;font-weight:700;">Subscription cancelled, ${name}</h2><p style="margin:0 0 16px;color:#b8a99a;line-height:1.6;">Your Resilium Pro subscription has been cancelled. ${accessLine}</p><div style="background:#1a2235;border-radius:10px;padding:16px 20px;margin:0 0 24px;border:1px solid #2a3245;"><p style="margin:0 0 8px;color:#EAD9BE;font-size:14px;font-weight:600;">What happens next</p><p style="margin:0 0 6px;color:#b8a99a;font-size:13px;line-height:1.5;">✓ Your reports, scores, and plan history are never deleted</p><p style="margin:0 0 6px;color:#b8a99a;font-size:13px;line-height:1.5;">✓ You keep 3 lifetime assessments on the free plan</p><p style="margin:0;color:#b8a99a;font-size:13px;line-height:1.5;">✓ You can resubscribe at any time — your data will be exactly where you left it</p></div><a href="${APP_URL}/pricing" style="display:inline-block;background:#1a2235;color:#E08040;font-weight:700;font-size:14px;padding:12px 24px;border-radius:10px;text-decoration:none;border:1px solid #E08040;margin-bottom:24px;">Resubscribe anytime →</a><p style="margin:0;color:#7a6a5a;font-size:13px;line-height:1.6;">Thank you for being a Resilium Pro member. If you have feedback on what could have been better, I'd genuinely love to hear it — just reply to this email.<br><br>— Cristiana at Resilium</p>${unsubHtml}</td></tr></table></td></tr></table></body></html>`,
+    headers: listHeader,
+  });
+}
+
 // ─── Error Alert ──────────────────────────────────────────────────────────────
 
 export async function sendErrorAlert(opts: { errorCount: number; recentErrors: string[] }) {

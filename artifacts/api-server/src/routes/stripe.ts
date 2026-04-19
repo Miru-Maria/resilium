@@ -6,7 +6,7 @@ import { getUncachableStripeClient } from "../stripeClient.js";
 import { db, usersTable, subscriptionsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { logger } from "../lib/logger.js";
-import { sendProUpgradeEmail } from "../lib/email.js";
+import { sendProUpgradeEmail, sendPaymentFailedEmail, sendCancellationEmail } from "../lib/email.js";
 import { stripeCheckoutLimiter, stripePortalLimiter } from "../lib/rate-limiters.js";
 
 const checkoutSchema = z.object({
@@ -75,6 +75,33 @@ async function handleStripeEvent(event: any) {
       : undefined;
 
     await upsertSubscription(userId, subscriptionId, customerId, "active", false, currentPeriodEnd, event);
+    return;
+  }
+
+  if (type === "invoice.payment_failed") {
+    const invoice = event.data.object;
+    const customerId: string = invoice.customer;
+    try {
+      const stripe = await getUncachableStripeClient();
+      const customer = await stripe.customers.retrieve(customerId);
+      if (customer.deleted) return;
+      const userId: string | undefined = (customer as any).metadata?.userId;
+      if (!userId) return;
+      const userRows = await db.select({ email: usersTable.email, firstName: usersTable.firstName })
+        .from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+      const sub = await db.select({ currentPeriodEnd: subscriptionsTable.currentPeriodEnd })
+        .from(subscriptionsTable).where(eq(subscriptionsTable.userId, userId)).limit(1);
+      if (userRows[0]?.email) {
+        sendPaymentFailedEmail({
+          email: userRows[0].email,
+          firstName: userRows[0].firstName,
+          periodEnd: sub[0]?.currentPeriodEnd ?? null,
+          userId,
+        }).catch(() => {});
+      }
+    } catch (err) {
+      logger.error({ err }, "Failed to send payment_failed email");
+    }
     return;
   }
 
@@ -159,6 +186,21 @@ async function upsertSubscription(
           email: userRows[0].email,
           firstName: userRows[0].firstName,
           periodEnd: currentPeriodEnd ?? null,
+        }).catch(() => {});
+      }
+    } catch { /* non-fatal */ }
+  }
+
+  if (resolvedStatus === "cancelled" && event.type === "customer.subscription.deleted") {
+    try {
+      const userRows = await db.select({ email: usersTable.email, firstName: usersTable.firstName })
+        .from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+      if (userRows[0]?.email) {
+        sendCancellationEmail({
+          email: userRows[0].email,
+          firstName: userRows[0].firstName,
+          periodEnd: currentPeriodEnd ?? null,
+          userId,
         }).catch(() => {});
       }
     } catch { /* non-fatal */ }

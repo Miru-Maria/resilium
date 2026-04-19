@@ -1032,6 +1032,7 @@ function AccountTab({ user, plans, onAllPlansDeleted }: {
   const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [portalLoading, setPortalLoading] = useState(false);
 
   const reminderKey = "resilium_reminder_days";
   const [reminderDays, setReminderDays] = useState<number | null>(() => {
@@ -1072,6 +1073,27 @@ function AccountTab({ user, plans, onAllPlansDeleted }: {
       toast({ title: "Export failed", description: "Please try again.", variant: "destructive" });
     } finally {
       setExporting(false);
+    }
+  };
+
+  const handleManageSubscription = async () => {
+    if (!navigator.onLine) {
+      toast({ title: "You're offline", description: "An internet connection is required to manage your subscription.", variant: "destructive" });
+      return;
+    }
+    setPortalLoading(true);
+    try {
+      const resp = await fetch("/api/stripe/portal", { method: "POST", credentials: "include" });
+      const data = await resp.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        toast({ title: "Could not open billing portal", description: data.error ?? "Please try again.", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Could not open billing portal", description: "Please try again.", variant: "destructive" });
+    } finally {
+      setPortalLoading(false);
     }
   };
 
@@ -1174,7 +1196,18 @@ function AccountTab({ user, plans, onAllPlansDeleted }: {
                   )}
                 </div>
               </div>
-              <Badge className="bg-primary/15 text-primary border-primary/20 rounded-full text-xs font-bold">Pro</Badge>
+              <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                <Badge className="bg-primary/15 text-primary border-primary/20 rounded-full text-xs font-bold">Pro</Badge>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="text-xs h-7 px-2 text-muted-foreground hover:text-foreground rounded-full"
+                  onClick={handleManageSubscription}
+                  disabled={portalLoading}
+                >
+                  {portalLoading ? "Opening…" : "Manage subscription"}
+                </Button>
+              </div>
             </div>
           ) : (
             <div className="flex items-center justify-between gap-4 p-4 rounded-2xl bg-muted/30 border border-border">
