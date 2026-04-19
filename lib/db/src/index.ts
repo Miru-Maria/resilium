@@ -10,7 +10,18 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+export const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  max: 10,
+  idleTimeoutMillis: 30_000,
+  connectionTimeoutMillis: 5_000,
+});
+
+// Swallow idle-client errors emitted when the server terminates a connection
+// (e.g. DB restarts, maintenance). node-postgres reconnects automatically;
+// without this handler the error becomes an uncaught exception.
+pool.on("error", (_err) => {});
+
 export const db = drizzle(pool, { schema });
 
 export * from "./schema";
