@@ -57,26 +57,14 @@ function parseCurrency(value: unknown): SupportedCurrency {
 }
 
 const assessRateLimit = rateLimit({
-  windowMs: 60 * 1000,
-  max: 6,
+  windowMs: 60 * 60 * 1000,
+  max: 5,
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: (req) => getUserId(req as Request) ?? req.ip ?? "anonymous",
   message: {
     error: "RATE_LIMITED",
-    message: "Too many assessment requests. Please wait a minute before trying again.",
-  },
-  // Only skip rate limiting for active Pro subscribers — not all authenticated users
-  skip: async (req) => {
-    const userId = getUserId(req as Request);
-    if (!userId) return false;
-    try {
-      const subs = await db
-        .select({ status: subscriptionsTable.status })
-        .from(subscriptionsTable)
-        .where(eq(subscriptionsTable.userId, userId))
-        .limit(1);
-      return subs.length > 0 && (subs[0].status === "active" || subs[0].status === "cancel_scheduled");
-    } catch { return false; }
+    message: "You've run 5 assessments this hour. Please wait before starting another.",
   },
 });
 
