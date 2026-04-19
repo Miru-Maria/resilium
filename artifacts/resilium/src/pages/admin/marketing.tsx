@@ -538,6 +538,14 @@ function MasterChecklistSection() {
   );
 }
 
+function SubHeading({ children }: { children: React.ReactNode }) {
+  return (
+    <h3 className="text-sm font-bold uppercase tracking-widest text-primary mt-6 mb-3 flex items-center gap-2">
+      {children}
+    </h3>
+  );
+}
+
 function CopyBlock({ label, children }: { label: string; children: string }) {
   const [copied, setCopied] = useState(false);
   const handleCopy = () => {
@@ -722,6 +730,67 @@ function RedditSection() {
       <InfoBox>
         Reddit rewards genuine participation. The rule here is: give value first, mention Resilium second (if at all). Never post a link in your first comment in a subreddit.
       </InfoBox>
+
+      <SubHeading><BookOpen className="w-4 h-4" /> Reddit Beginner Guide — Start Here</SubHeading>
+
+      <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-5 mb-4 text-sm text-gray-700 leading-relaxed">
+
+        <div>
+          <p className="font-semibold text-gray-900 mb-2">Step 1 — Create your account</p>
+          <ul className="space-y-1.5 text-xs text-gray-600">
+            <li>• Go to <strong>reddit.com</strong> → Create Account. Use a username that isn't obviously you or your business — something neutral like <em>resilient_planner</em> or <em>prep_framework</em>. Reddit is pseudonymous by culture.</li>
+            <li>• Verify your email. No phone number required.</li>
+            <li>• Upload a profile picture (optional but looks less bot-like). Don't use the Resilium logo yet.</li>
+            <li>• On mobile: download the official Reddit app (most convenient for daily commenting).</li>
+          </ul>
+        </div>
+
+        <div>
+          <p className="font-semibold text-gray-900 mb-2">Step 2 — Understand karma (the currency of Reddit trust)</p>
+          <ul className="space-y-1.5 text-xs text-gray-600">
+            <li>• Karma is Reddit's reputation score. Every upvote on your comments earns you karma. Most subreddits restrict new accounts with low karma from posting links or making top-level posts.</li>
+            <li>• <strong>Week 1 goal:</strong> reach 100+ comment karma before you post a link anywhere. This takes 5–8 genuine comments that get upvoted.</li>
+            <li>• You can see your karma on your profile page. Don't obsess over it — focus on writing genuinely helpful comments and it accumulates naturally.</li>
+          </ul>
+        </div>
+
+        <div>
+          <p className="font-semibold text-gray-900 mb-2">Step 3 — How to actually comment on Reddit</p>
+          <ul className="space-y-1.5 text-xs text-gray-600">
+            <li>• Go to a subreddit (e.g. reddit.com/r/preppers). Browse the front page — posts are sorted by Hot, New, Rising, Top.</li>
+            <li>• Click a post title to open the thread. Read the original post and a few top comments to understand the conversation.</li>
+            <li>• Scroll to find a comment you can genuinely add to, or scroll to the bottom and click <strong>"Add a comment"</strong> to reply to the original post directly.</li>
+            <li>• Write your reply. Use plain text — no HTML, just line breaks. Reddit supports markdown (e.g. **bold**, *italic*) but plain text reads best.</li>
+            <li>• Click <strong>Save</strong>. That's it. Your comment is live immediately (sometimes with a short delay for new accounts).</li>
+          </ul>
+        </div>
+
+        <div>
+          <p className="font-semibold text-gray-900 mb-2">Step 4 — Check subreddit rules before posting anything</p>
+          <ul className="space-y-1.5 text-xs text-gray-600">
+            <li>• Every subreddit has its own rules. On desktop: look at the right sidebar. On mobile: tap the subreddit name → About → Rules.</li>
+            <li>• Key things to look for: "No self-promotion", "No links to personal sites", "No commercial content". Some subs allow it after a certain karma threshold.</li>
+            <li>• If you break rules, your post gets removed and you can be banned from that subreddit permanently. Read before posting — it takes 60 seconds.</li>
+            <li>• r/preppers and r/selfimprovement allow occasional self-promotion if it's genuinely relevant. r/personalfinance has strict rules — use r/financialindependence as the safer alternative.</li>
+          </ul>
+        </div>
+
+        <div>
+          <p className="font-semibold text-gray-900 mb-2">Step 5 — What gets you banned (avoid these)</p>
+          <ul className="space-y-1.5 text-xs text-gray-600">
+            <li>• Posting your link in your first 1–2 comments in any subreddit.</li>
+            <li>• Copy-pasting the same comment across multiple subreddits (Reddit's spam filter catches this).</li>
+            <li>• Posting only promotional content — Reddit expects at least 9 non-promotional comments for every 1 promotional one (the 9:1 rule).</li>
+            <li>• Upvoting your own comments from a second account. Reddit tracks this.</li>
+            <li>• Ignoring direct questions or replies. Respond to everyone who engages in Week 3–4 — this signals authentic participation.</li>
+          </ul>
+        </div>
+
+        <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+          <p className="text-xs font-semibold text-amber-800 mb-1">The single most important rule</p>
+          <p className="text-xs text-amber-700">In Weeks 1 and 2, act as if Resilium doesn't exist. You're just someone who thinks carefully about resilience and preparedness, sharing what you know. The credibility you build in those two weeks is what makes Week 3 and Week 4 work.</p>
+        </div>
+      </div>
 
       <SubHeading><Search className="w-4 h-4" /> Target Subreddits — Priority Order</SubHeading>
       <Table
