@@ -337,6 +337,149 @@ export async function sendCompetitorAlert(
   await send({ to: ADMIN_TO, subject, text, html });
 }
 
+// ─── Assessment Drip Sequence ─────────────────────────────────────────────────
+// 5-email sequence fired after a free user completes an assessment.
+// Feature-flagged — only active when DRIP_EMAILS_ENABLED=true.
+// Cancelled automatically when the user upgrades to Pro.
+
+function dripHeader(accentColor: string, title: string): string {
+  return `<tr><td style="background:${accentColor};padding:20px 32px;"><h1 style="margin:0;color:#0D1225;font-size:20px;font-weight:800;letter-spacing:-0.3px;">Resilium</h1><p style="margin:4px 0 0;color:rgba(13,18,37,0.7);font-size:13px;">${title}</p></td></tr>`;
+}
+
+function dripWrapper(inner: string): string {
+  return `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0D1225;font-family:'Helvetica Neue',Arial,sans-serif;color:#EAD9BE;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:40px 20px;"><table width="560" cellpadding="0" cellspacing="0" style="background:#131929;border-radius:16px;overflow:hidden;">${inner}</table></td></tr></table></body></html>`;
+}
+
+function dripBody(content: string): string {
+  return `<tr><td style="padding:32px;">${content}</td></tr>`;
+}
+
+function dripCta(href: string, label: string): string {
+  return `<a href="${href}" style="display:inline-block;background:#E08040;color:#0D1225;font-weight:700;font-size:15px;padding:14px 28px;border-radius:10px;text-decoration:none;">${label}</a>`;
+}
+
+export async function sendDripDay0Email(opts: {
+  email: string;
+  firstName?: string | null;
+  userId: string;
+  reportId: string;
+  scoreOverall: number;
+}): Promise<void> {
+  if (!opts.email) return;
+  const name = opts.firstName ?? "there";
+  const reportUrl = `${APP_URL}/results/${opts.reportId}`;
+  const unsubHtml = unsubscribeFooterHtml(opts.userId);
+  const listHeader = { "List-Unsubscribe": buildListUnsubscribeHeader(opts.userId), "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" };
+  const html = dripWrapper(
+    dripHeader("#E08040", "Your resilience report is ready") +
+    dripBody(`<h2 style="margin:0 0 16px;color:#EAD9BE;font-size:20px;font-weight:700;">You scored ${opts.scoreOverall}/100, ${name}</h2><p style="margin:0 0 20px;color:#b8a99a;line-height:1.6;">Your Resilium report is ready. It shows exactly where you're strong, where you're exposed, and the single most important thing you can do next.</p>${dripCta(reportUrl, "View Your Full Report →")}<p style="margin:24px 0 0;color:#5a4a3a;font-size:13px;line-height:1.6;">Your score reflects seven dimensions of resilience: financial, health, skills, mobility, emergency resources, psychological, and social capital. Each one is scored individually so you know precisely where to focus.${unsubHtml}</p>`)
+  );
+  const text = `Hi ${name},\n\nYour Resilium report is ready — you scored ${opts.scoreOverall}/100.\n\nView it here: ${reportUrl}\n\n— Cristiana at Resilium\n\nTo unsubscribe: ${buildUnsubscribeUrl(opts.userId)}`;
+  await send({ to: opts.email, subject: `Your Resilium score: ${opts.scoreOverall}/100 — here's your report`, html, text, headers: listHeader });
+}
+
+export async function sendDripDay2Email(opts: {
+  email: string;
+  firstName?: string | null;
+  userId: string;
+  reportId: string;
+  scoreOverall: number;
+  weakestDimension: string;
+}): Promise<void> {
+  if (!opts.email) return;
+  const name = opts.firstName ?? "there";
+  const reportUrl = `${APP_URL}/results/${opts.reportId}`;
+  const unsubHtml = unsubscribeFooterHtml(opts.userId);
+  const listHeader = { "List-Unsubscribe": buildListUnsubscribeHeader(opts.userId), "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" };
+
+  const tips: Record<string, string> = {
+    Financial: "Calculate your exact runway: (monthly savings + liquid assets) ÷ monthly essential expenses. If it's under 3 months, that's your single most urgent gap.",
+    Health: "Schedule one health appointment you've been putting off. A single action creates momentum on the dimension that affects everything else.",
+    Skills: "Identify one practical skill gap — first aid, basic repair, or a language — and spend 20 minutes this week on it. Compound over 90 days.",
+    Mobility: "Review whether your important documents (passport, insurance, medical records) are digitised and accessible from anywhere. Takes 30 minutes, pays off for years.",
+    Psychological: "Write down the one disruption scenario you're most worried about and three concrete actions you'd take. Externalising the fear turns it into a plan.",
+    Resources: "Build a 72-hour emergency kit: 3 litres of water per person per day, 3 days of non-perishable food, a first aid kit, and copies of critical documents.",
+    "Social Capital": "Message one trusted person in your life and explicitly discuss your support network. Most people discover their social resilience is higher than they assumed.",
+  };
+  const tip = tips[opts.weakestDimension] ?? "Review your lowest-scoring dimension first — it typically has the highest leverage for improving your overall resilience.";
+
+  const html = dripWrapper(
+    dripHeader("#E08040", "Your biggest resilience gap") +
+    dripBody(`<h2 style="margin:0 0 8px;color:#EAD9BE;font-size:20px;font-weight:700;">Your lowest score: ${opts.weakestDimension}</h2><p style="margin:0 0 20px;color:#b8a99a;line-height:1.6;">Of the seven dimensions in your report, <strong style="color:#EAD9BE;">${opts.weakestDimension}</strong> is where you have the most room to grow — and the highest leverage for moving your overall score.</p><div style="background:#1a2235;border-radius:10px;padding:16px 20px;margin-bottom:24px;"><p style="margin:0 0 6px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#E08040;">One action for this week</p><p style="margin:0;color:#EAD9BE;font-size:14px;line-height:1.7;">${tip}</p></div>${dripCta(reportUrl, "See Your Full Report →")}<p style="margin:20px 0 0;color:#5a4a3a;font-size:13px;line-height:1.6;">Your full report includes prioritised action steps for every dimension — and Resilium Pro adds AI-powered guidance tailored to your specific answers.</p>${unsubHtml}`)
+  );
+  const text = `Hi ${name},\n\nYour lowest-scoring dimension is ${opts.weakestDimension}.\n\nOne action for this week:\n${tip}\n\nSee your full report: ${reportUrl}\n\n— Cristiana at Resilium\n\nTo unsubscribe: ${buildUnsubscribeUrl(opts.userId)}`;
+  await send({ to: opts.email, subject: `Your #1 resilience gap — and one thing you can do this week`, html, text, headers: listHeader });
+}
+
+export async function sendDripDay5Email(opts: {
+  email: string;
+  firstName?: string | null;
+  userId: string;
+  reportId: string;
+  scoreOverall: number;
+}): Promise<void> {
+  if (!opts.email) return;
+  const name = opts.firstName ?? "there";
+  const pricingUrl = `${APP_URL}/pricing`;
+  const unsubHtml = unsubscribeFooterHtml(opts.userId);
+  const listHeader = { "List-Unsubscribe": buildListUnsubscribeHeader(opts.userId), "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" };
+  const html = dripWrapper(
+    dripHeader("#E08040", "Scenario stress-testing") +
+    dripBody(`<h2 style="margin:0 0 16px;color:#EAD9BE;font-size:20px;font-weight:700;">What if your biggest risk happened tomorrow?</h2><p style="margin:0 0 16px;color:#b8a99a;line-height:1.6;">Your report shows where you stand today. But resilience is about handling disruption — so the real question is: <strong style="color:#EAD9BE;">how does your profile shift under pressure?</strong></p><p style="margin:0 0 20px;color:#b8a99a;line-height:1.6;">Resilium Pro lets you run scenario stress-tests — modelling job loss, a health crisis, relocation, or a major economic shock — and shows exactly how your score changes and which actions matter most under each scenario.</p><div style="background:#1a2235;border-radius:10px;padding:16px 20px;margin-bottom:24px;"><p style="margin:0 0 8px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#E08040;">Scenarios available in Pro</p><p style="margin:0 0 4px;color:#EAD9BE;font-size:14px;">→ Job loss or income disruption</p><p style="margin:0 0 4px;color:#EAD9BE;font-size:14px;">→ Major health event</p><p style="margin:0 0 4px;color:#EAD9BE;font-size:14px;">→ Relocation under pressure</p><p style="margin:0;color:#EAD9BE;font-size:14px;">→ Extended economic shock</p></div>${dripCta(pricingUrl, "Unlock Scenario Stress-Tests →")}<p style="margin:20px 0 0;color:#5a4a3a;font-size:13px;">Pro is $9/month or $79/year. Cancel any time.${unsubHtml}</p>`)
+  );
+  const text = `Hi ${name},\n\nYour Resilium report shows where you stand today. Scenario stress-testing shows how your profile shifts under job loss, health crisis, relocation, or economic shock — and which actions matter most under each.\n\nThis is a Pro feature. Unlock it here: ${pricingUrl}\n\n— Cristiana at Resilium\n\nTo unsubscribe: ${buildUnsubscribeUrl(opts.userId)}`;
+  await send({ to: opts.email, subject: `What if your biggest risk happened tomorrow? Run the scenario.`, html, text, headers: listHeader });
+}
+
+export async function sendDripDay9Email(opts: {
+  email: string;
+  firstName?: string | null;
+  userId: string;
+  reportId: string;
+  scoreOverall: number;
+}): Promise<void> {
+  if (!opts.email) return;
+  const name = opts.firstName ?? "there";
+  const pricingUrl = `${APP_URL}/pricing`;
+  const unsubHtml = unsubscribeFooterHtml(opts.userId);
+  const listHeader = { "List-Unsubscribe": buildListUnsubscribeHeader(opts.userId), "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" };
+  const features = [
+    { icon: "⚡", title: "AI Plan", desc: "A 90-day structured action roadmap built around your specific score — not generic advice." },
+    { icon: "🔮", title: "Scenario Stress-Tests", desc: "Model job loss, health crisis, relocation, and economic shock. See how your profile shifts." },
+    { icon: "🤖", title: "AI Companion", desc: "Ask anything about your gaps, your situation, or your next steps. It knows your score." },
+    { icon: "📋", title: "Unlimited History", desc: "Retake assessments and track your resilience over time. Every snapshot saved." },
+    { icon: "🚨", title: "Crisis Guides", desc: "15 step-by-step emergency protocols — downloadable for offline use." },
+  ];
+  const featureHtml = features.map(f => `<div style="margin-bottom:10px;padding:12px 16px;background:#1a2235;border-radius:8px;"><strong style="color:#E08040;">${f.icon} ${f.title}</strong><p style="margin:4px 0 0;color:#b8a99a;font-size:13px;">${f.desc}</p></div>`).join("");
+  const html = dripWrapper(
+    dripHeader("#E08040", "Everything Pro unlocks for you") +
+    dripBody(`<h2 style="margin:0 0 8px;color:#EAD9BE;font-size:20px;font-weight:700;">You scored ${opts.scoreOverall}/100.</h2><p style="margin:0 0 20px;color:#b8a99a;line-height:1.6;">Here's what Resilium Pro adds to that starting point, ${name}:</p>${featureHtml}<div style="margin-top:24px;">${dripCta(pricingUrl, "Upgrade to Pro — $9/month →")}</div><p style="margin:16px 0 0;color:#5a4a3a;font-size:13px;">Or $79/year (save 27%). Cancel any time.${unsubHtml}</p>`)
+  );
+  const text = `Hi ${name},\n\nHere's everything Resilium Pro adds to your score of ${opts.scoreOverall}/100:\n\n• AI Plan — 90-day personalized action roadmap\n• Scenario Stress-Tests — job loss, health crisis, relocation, economic shock\n• AI Companion — answers grounded in your specific score\n• Unlimited history — track progress over time\n• 15 Crisis Guides — offline-capable emergency protocols\n\nUpgrade: ${pricingUrl}\n\n— Cristiana at Resilium\n\nTo unsubscribe: ${buildUnsubscribeUrl(opts.userId)}`;
+  await send({ to: opts.email, subject: `Everything Pro unlocks for you — built around your score`, html, text, headers: listHeader });
+}
+
+export async function sendDripDay14Email(opts: {
+  email: string;
+  firstName?: string | null;
+  userId: string;
+  reportId: string;
+  scoreOverall: number;
+}): Promise<void> {
+  if (!opts.email) return;
+  const name = opts.firstName ?? "there";
+  const pricingUrl = `${APP_URL}/pricing`;
+  const reportUrl = `${APP_URL}/results/${opts.reportId}`;
+  const unsubHtml = unsubscribeFooterHtml(opts.userId);
+  const listHeader = { "List-Unsubscribe": buildListUnsubscribeHeader(opts.userId), "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" };
+  const html = dripWrapper(
+    dripHeader("#E08040", "A year from now") +
+    dripBody(`<h2 style="margin:0 0 16px;color:#EAD9BE;font-size:20px;font-weight:700;">Will you know your resilience score?</h2><p style="margin:0 0 16px;color:#b8a99a;line-height:1.6;">Two weeks ago you scored ${opts.scoreOverall}/100 on your Resilium assessment. Most people who don't act on that report are in exactly the same position a year later — with the same gaps, the same exposure, and the same quiet anxiety.</p><p style="margin:0 0 20px;color:#b8a99a;line-height:1.6;">Pro gives you the structure to actually move that number — through an AI-built action plan, progress tracking across retakes, and scenario modelling so you know what matters most under pressure.</p>${dripCta(pricingUrl, "Start Building Your Resilience →")}<p style="margin:20px 0 0;color:#5a4a3a;font-size:13px;line-height:1.6;">Or <a href="${reportUrl}" style="color:#7a6a5a;text-decoration:underline;">review your free report</a> again and take one action this week.${unsubHtml}</p>`)
+  );
+  const text = `Hi ${name},\n\nTwo weeks ago you scored ${opts.scoreOverall}/100 on your Resilium assessment.\n\nIf you haven't taken action yet, now is still a good time. Pro adds the structure to actually move your score.\n\nUpgrade: ${pricingUrl}\nOr review your report: ${reportUrl}\n\n— Cristiana at Resilium\n\nTo unsubscribe: ${buildUnsubscribeUrl(opts.userId)}`;
+  await send({ to: opts.email, subject: `Two weeks on — your resilience score is still ${opts.scoreOverall}/100`, html, text, headers: listHeader });
+}
+
 // ─── Health Check Summary ─────────────────────────────────────────────────────
 export async function sendHealthCheckSummary(opts: {
   overallStatus: "pass" | "fail";

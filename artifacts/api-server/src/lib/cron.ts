@@ -1,7 +1,7 @@
 import cron from "node-cron";
-import { db, subscriptionsTable, reportFeedbackTable, resilienceReportsTable, usersTable } from "@workspace/db";
-import { and, desc, eq, gte, inArray, sql } from "drizzle-orm";
-import { sendAdminDigest, sendErrorAlert, sendReassessmentReminder, sendUserWeeklyDigest, sendE2eAssessmentReport, sendSiteAuditReport, type E2eCheckResult } from "./email.js";
+import { db, subscriptionsTable, reportFeedbackTable, resilienceReportsTable, usersTable, emailDripQueueTable } from "@workspace/db";
+import { and, desc, eq, gte, inArray, isNull, lte, sql } from "drizzle-orm";
+import { sendAdminDigest, sendErrorAlert, sendReassessmentReminder, sendUserWeeklyDigest, sendE2eAssessmentReport, sendSiteAuditReport, sendDripDay2Email, sendDripDay5Email, sendDripDay9Email, sendDripDay14Email, type E2eCheckResult } from "./email.js";
 import { sendPushNotificationsToUsers } from "./push.js";
 import { logger } from "./logger.js";
 import { createClerkClient } from "@clerk/express";
@@ -522,6 +522,86 @@ async function runSiteAudit() {
   );
 }
 
+// ─── Post-assessment drip email processor ────────────────────────────────────
+
+async function runDripProcessor() {
+  if (process.env["DRIP_EMAILS_ENABLED"] !== "true") return;
+
+  try {
+    logger.info("Running drip email processor");
+    const now = new Date();
+
+    const dueRows = await db
+      .select()
+      .from(emailDripQueueTable)
+      .where(and(
+        lte(emailDripQueueTable.scheduledFor, now),
+        isNull(emailDripQueueTable.sentAt),
+        isNull(emailDripQueueTable.cancelledAt),
+      ));
+
+    if (dueRows.length === 0) {
+      logger.info("Drip processor: no due emails");
+      return;
+    }
+
+    logger.info({ count: dueRows.length }, "Drip processor: emails due");
+    const clerkClient = createClerkClient({ secretKey: process.env["CLERK_SECRET_KEY"] });
+    const optedOut = await getOptedOutUserIds();
+
+    for (const row of dueRows) {
+      if (optedOut.has(row.userId)) {
+        await db.update(emailDripQueueTable).set({ cancelledAt: now }).where(eq(emailDripQueueTable.id, row.id));
+        continue;
+      }
+
+      try {
+        const clerkUser = await clerkClient.users.getUser(row.userId);
+        const email = clerkUser.emailAddresses[0]?.emailAddress;
+        if (!email) {
+          await db.update(emailDripQueueTable).set({ cancelledAt: now }).where(eq(emailDripQueueTable.id, row.id));
+          continue;
+        }
+
+        const base = {
+          email,
+          firstName: clerkUser.firstName,
+          userId: row.userId,
+          reportId: row.reportId,
+          scoreOverall: row.scoreOverall,
+        };
+
+        switch (row.emailType) {
+          case "day2":
+            await sendDripDay2Email({ ...base, weakestDimension: row.weakestDimension ?? "Financial" });
+            break;
+          case "day5":
+            await sendDripDay5Email(base);
+            break;
+          case "day9":
+            await sendDripDay9Email(base);
+            break;
+          case "day14":
+            await sendDripDay14Email(base);
+            break;
+          default:
+            logger.warn({ emailType: row.emailType, id: row.id }, "Drip processor: unknown emailType — skipping");
+            continue;
+        }
+
+        await db.update(emailDripQueueTable).set({ sentAt: now }).where(eq(emailDripQueueTable.id, row.id));
+        logger.info({ id: row.id, userId: row.userId, emailType: row.emailType }, "Drip email sent");
+      } catch (err) {
+        logger.error({ err, id: row.id, userId: row.userId, emailType: row.emailType }, "Drip email send failed");
+      }
+    }
+
+    logger.info({ processed: dueRows.length }, "Drip processor complete");
+  } catch (err) {
+    logger.error({ err }, "Drip processor failed");
+  }
+}
+
 // ─── Start cron ───────────────────────────────────────────────────────────────
 
 export function startCron(): void {
@@ -555,5 +635,10 @@ export function startCron(): void {
     runSiteAudit().catch(() => {});
   }, { timezone: "UTC" });
 
-  logger.info("Cron jobs scheduled (admin digest: Mon 07:00, user digest: Sun 18:00, 7d reminders: daily 09:00, 30d reminders: Mon 08:00, e2e test: Wed 06:00, site audit: Sun 07:00 UTC)");
+  // Every hour at :15 — post-assessment drip email processor (no-op when DRIP_EMAILS_ENABLED≠true)
+  cron.schedule("15 * * * *", () => {
+    runDripProcessor().catch(() => {});
+  }, { timezone: "UTC" });
+
+  logger.info("Cron jobs scheduled (admin digest: Mon 07:00, user digest: Sun 18:00, 7d reminders: daily 09:00, 30d reminders: Mon 08:00, e2e test: Wed 06:00, site audit: Sun 07:00, drip: hourly :15 UTC)");
 }

@@ -2,8 +2,8 @@ import { Router, type IRouter, type Request } from "express";
 import { getAuth, createClerkClient } from "@clerk/express";
 import { randomUUID } from "crypto";
 import { SubmitAssessmentBody, GetReportParams } from "@workspace/api-zod";
-import { db, resilienceReportsTable, checklistProgressTable, progressSnapshotsTable, subscriptionsTable, planViewsTable, usersTable } from "@workspace/db";
-import { eq, and, count, inArray } from "drizzle-orm";
+import { db, resilienceReportsTable, checklistProgressTable, progressSnapshotsTable, subscriptionsTable, planViewsTable, usersTable, emailDripQueueTable } from "@workspace/db";
+import { eq, and, count, inArray, isNull, lte } from "drizzle-orm";
 
 import { calculateScores } from "./scoring.js";
 import { generateResilienceReport } from "./ai.js";
@@ -11,7 +11,7 @@ import { PLAN_LIMIT } from "../users.js";
 import rateLimit from "express-rate-limit";
 import scenariosRouter from "./scenarios.js";
 import guidedStepsRouter from "./guided-steps.js";
-import { sendWelcomeEmail } from "../../lib/email.js";
+import { sendWelcomeEmail, sendDripDay0Email } from "../../lib/email.js";
 
 function normalizeCountry(location: string): string | null {
   if (!location || !location.trim()) return null;
@@ -274,6 +274,56 @@ router.post("/assess", assessRateLimit, async (req, res) => {
               }
             } catch (err) {
               req.log.warn({ err }, "sendWelcomeEmail failed (non-critical)");
+            }
+          })();
+        }
+
+        // Queue post-assessment drip sequence for authenticated users
+        // Only fires when DRIP_EMAILS_ENABLED=true (set once Stripe business verification is complete)
+        if (userId && process.env["DRIP_EMAILS_ENABLED"] === "true") {
+          (async () => {
+            try {
+              const clerkClient = createClerkClient({ secretKey: process.env["CLERK_SECRET_KEY"] });
+              const clerkUser = await clerkClient.users.getUser(userId);
+              const email = clerkUser.emailAddresses[0]?.emailAddress;
+              if (!email) return;
+
+              // Compute weakest dimension for Day 2 personalisation
+              const dimMap: Record<string, number> = {
+                Financial: scores.financial,
+                Health: scores.health,
+                Skills: scores.skills,
+                Mobility: scores.mobility,
+                Psychological: scores.psychological,
+                Resources: scores.resources,
+              };
+              if (scores.socialCapital != null) dimMap["Social Capital"] = scores.socialCapital;
+              const weakestDimension = Object.entries(dimMap).sort((a, b) => a[1] - b[1])[0]?.[0] ?? "Financial";
+
+              const overall = Math.round(scores.overall);
+              const now2 = new Date();
+              const dayOffset = (d: number) => new Date(now2.getTime() + d * 24 * 60 * 60 * 1000);
+
+              // Insert all 5 queue rows
+              await db.insert(emailDripQueueTable).values([
+                { userId, reportId, emailType: "day0",  scoreOverall: overall, weakestDimension, scheduledFor: now2 },
+                { userId, reportId, emailType: "day2",  scoreOverall: overall, weakestDimension, scheduledFor: dayOffset(2) },
+                { userId, reportId, emailType: "day5",  scoreOverall: overall, weakestDimension, scheduledFor: dayOffset(5) },
+                { userId, reportId, emailType: "day9",  scoreOverall: overall, weakestDimension, scheduledFor: dayOffset(9) },
+                { userId, reportId, emailType: "day14", scoreOverall: overall, weakestDimension, scheduledFor: dayOffset(14) },
+              ]);
+
+              // Fire Day 0 immediately and mark as sent so the cron skips it
+              await sendDripDay0Email({ email, firstName: clerkUser.firstName, userId, reportId, scoreOverall: overall });
+              await db.update(emailDripQueueTable)
+                .set({ sentAt: new Date() })
+                .where(and(
+                  eq(emailDripQueueTable.userId, userId),
+                  eq(emailDripQueueTable.reportId, reportId),
+                  eq(emailDripQueueTable.emailType, "day0"),
+                ));
+            } catch (err) {
+              req.log.warn({ err }, "Drip queue insertion failed (non-critical)");
             }
           })();
         }

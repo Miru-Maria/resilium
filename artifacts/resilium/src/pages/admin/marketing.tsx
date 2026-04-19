@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type SectionKey = "launch-readiness" | "product-hunt" | "reddit" | "research-report";
+type SectionKey = "master-checklist" | "launch-readiness" | "product-hunt" | "reddit" | "research-report";
 
 function SectionHeader({
   icon: Icon,
@@ -70,6 +70,261 @@ function ChecklistItem({ text, detail }: { text: string; detail?: string }) {
         {detail && <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{detail}</p>}
       </div>
     </li>
+  );
+}
+
+function CompletedItem({ text, detail }: { text: string; detail?: string }) {
+  return (
+    <li className="flex items-start gap-3 opacity-60">
+      <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
+      <div>
+        <span className="text-sm line-through text-gray-500">{text}</span>
+        {detail && <p className="text-xs text-gray-400 mt-0.5 leading-relaxed">{detail}</p>}
+      </div>
+    </li>
+  );
+}
+
+function CategoryHeading({ icon: Icon, children }: { icon?: React.ElementType; children: React.ReactNode }) {
+  return (
+    <div className="flex items-center gap-2 mt-8 mb-3 first:mt-0">
+      {Icon && <Icon className="w-3.5 h-3.5 text-primary flex-shrink-0" />}
+      <span className="text-xs font-bold uppercase tracking-widest text-primary">{children}</span>
+      <div className="flex-1 h-px bg-primary/20" />
+    </div>
+  );
+}
+
+function MasterChecklistSection() {
+  return (
+    <div className="px-6 pb-8">
+      <p className="text-sm text-gray-500 leading-relaxed mb-6">
+        Every action item across all channels in one flat list. Check items off as you complete them — your progress is saved automatically. Open the sections below for detailed copy templates, Reddit strategy, and research report guidance.
+      </p>
+
+      {/* ── Business & Payments ──────────────────────────────────────────── */}
+      <CategoryHeading icon={Target}> Business &amp; Payments</CategoryHeading>
+      <ul className="space-y-3">
+        <ChecklistItem
+          text="Register SRL with Registrul Comerțului"
+          detail="This is the prerequisite for everything below. Obtain your CUI (tax ID) — required for Stripe business verification, VAT configuration, and legal invoicing."
+        />
+        <ChecklistItem
+          text="Complete Stripe business verification"
+          detail="In Stripe Dashboard: add business details, representative identity, and Romanian IBAN for payouts. Requires SRL CUI."
+        />
+        <ChecklistItem
+          text="Swap Stripe keys to live mode once verification is approved"
+          detail="Replace STRIPE_SECRET_KEY, STRIPE_PUBLISHABLE_KEY, and STRIPE_WEBHOOK_SECRET in Replit Secrets with live values. Then run the seed script to create products in the live account."
+        />
+        <ChecklistItem
+          text="Configure Stripe Tax for VAT collection"
+          detail="Enable in Stripe Dashboard → Tax. Select Romania as origin, add EU VAT rules. Required before charging EU customers as a business."
+        />
+        <ChecklistItem
+          text="Enable the post-assessment email drip sequence"
+          detail="Set DRIP_EMAILS_ENABLED=true in Replit Secrets. Sends 5 targeted emails (Days 0, 2, 5, 9, 14) to free users after each assessment to drive Pro upgrades. Activate once the payment system is live."
+        />
+        <ChecklistItem
+          text="Test full payment flow with a real card"
+          detail="Test both monthly ($9) and annual ($79) plans. Confirm Pro features unlock immediately after payment, and that the customer portal lets users manage/cancel."
+        />
+        <ChecklistItem
+          text="Test the complete new-user journey end to end"
+          detail="Incognito browser: land on homepage → take assessment → view results → upgrade to Pro → confirm all Pro features work. Do this as a fresh incognito user."
+        />
+        <ChecklistItem
+          text="Verify first Pro renewal webhook fired correctly"
+          detail="Check Stripe Dashboard → Developers → Webhooks after the first subscription renewal cycle. Confirm invoice.payment_succeeded was received and the renewal email was sent."
+        />
+      </ul>
+
+      {/* ── Technical & Monitoring ───────────────────────────────────────── */}
+      <CategoryHeading icon={Globe}> Technical &amp; Monitoring</CategoryHeading>
+      <ul className="space-y-3">
+        <ChecklistItem
+          text="Set up web analytics (Plausible recommended — GDPR-friendly)"
+          detail="Add Plausible script to index.html. No cookie consent required — it's cookieless by design. Gives you visitor → assessment → upgrade funnel visibility."
+        />
+        <ChecklistItem
+          text="Verify OpenGraph preview on social"
+          detail="Paste resilium-platform.com into https://opengraph.xyz — confirm the social card shows the correct image, title, and description before sharing anywhere."
+        />
+        <ChecklistItem
+          text="Submit sitemap.xml to Google Search Console"
+          detail="Create /public/sitemap.xml covering /, /pricing, /about. Add property in Google Search Console and submit the sitemap URL."
+        />
+        <ChecklistItem
+          text="Run monthly dependency security audit"
+          detail="Schedule for first Monday of each month. Checks for newly disclosed vulnerabilities in Clerk, Drizzle, Vite, and other packages."
+        />
+        <ChecklistItem
+          text="Monitor assessment completion rate (target: >50% of starts)"
+          detail="Check the admin analytics dashboard. If drop-off is high, check which step loses users and simplify that step."
+        />
+        <ChecklistItem
+          text="Monitor free → Pro conversion rate (target: >5% at 90 days)"
+          detail="Track via Stripe Dashboard MRR growth vs. Clerk user count. Email drip sequence should materially improve this."
+        />
+        <ChecklistItem
+          text="Review Sentry weekly for new error patterns"
+          detail="Even one week of real users will surface edge cases. Filter by 'new issues' since launch date."
+        />
+        <ChecklistItem
+          text="Check Clerk Dashboard for first real signups"
+          detail="Look for any bot/spam sign-up patterns. Review the 'Users' tab in Clerk production dashboard."
+        />
+      </ul>
+
+      {/* ── Legal & Compliance ───────────────────────────────────────────── */}
+      <CategoryHeading icon={ShieldCheck}> Legal &amp; Compliance</CategoryHeading>
+      <ul className="space-y-3">
+        <CompletedItem
+          text="Privacy Policy page live"
+          detail="Live at /privacy since March 24, 2026."
+        />
+        <CompletedItem
+          text="Terms of Service page live"
+          detail="Live at /terms since April 7, 2026."
+        />
+        <CompletedItem
+          text="Cookie / GDPR consent notice implemented"
+          detail="Cookie bar on first visit. Dismissal persisted in localStorage. April 2026."
+        />
+        <CompletedItem
+          text="GDPR data collection consent flow with audit log"
+          detail="Full consent page at /consent. Consent entries logged to database per GDPR Art. 6(1)(a)."
+        />
+        <ChecklistItem
+          text="Verify Resend domain SPF/DKIM records are confirmed"
+          detail="In Resend dashboard, confirm that resilium-platform.com shows as verified with correct SPF and DKIM DNS records. Prevents emails landing in spam."
+        />
+        <ChecklistItem
+          text="Publish GDPR contact email address"
+          detail="Add a GDPR/data subject requests email address to the Privacy Policy and contact page. Required for Art. 17 deletion and Art. 15 access requests."
+        />
+      </ul>
+
+      {/* ── Product Hunt Launch ───────────────────────────────────────────── */}
+      <CategoryHeading icon={Rocket}> Product Hunt Launch</CategoryHeading>
+      <ul className="space-y-3">
+        <ChecklistItem
+          text="Confirm your Product Hunt hunter"
+          detail="Ask someone with PH followers and a history of successful hunts to post for you. A hunter with 500+ followers measurably improves Day 1 performance."
+        />
+        <ChecklistItem
+          text="Prepare Product Hunt gallery — 7 images + thumbnail at 1270×760 px"
+          detail="Full copy and caption guidance is in the Product Hunt section below. Export from Figma or Canva at exactly 1270×760 px for best display."
+        />
+        <ChecklistItem
+          text="Finalise Product Hunt headline, tagline, and description copy"
+          detail="Ready-to-paste copy is in the Product Hunt section below. Read and personalise before publishing."
+        />
+        <ChecklistItem
+          text="Draft first maker comment (post within 2 minutes of going live)"
+          detail="Template is in the Product Hunt section below. Copy it, personalise the opening line, and paste it immediately after launch."
+        />
+        <ChecklistItem
+          text="Notify personal network 24 hours before launch"
+          detail="Email and WhatsApp contacts asking them to visit the PH page and upvote at the exact launch time. Pre-launch votes don't count."
+        />
+        <ChecklistItem
+          text="Schedule community posts for PH launch day"
+          detail="r/preppers, r/personalfinance, r/selfimprovement. Post the launch link with a personal note — not just the URL."
+        />
+        <ChecklistItem
+          text="Prepare Twitter/X launch thread"
+          detail="7-tweet thread covering: what Resilium does, the problem it solves, one compelling data point, how it works (3 steps), and the PH link."
+        />
+        <ChecklistItem
+          text="Go live on Product Hunt at 12:01 AM Pacific Time (Tuesday–Thursday)"
+          detail="Tuesday–Thursday launches perform best. 12:01 AM PT gives you a full 24-hour window."
+        />
+        <ChecklistItem
+          text="Post first maker comment immediately after launch"
+          detail="Paste the pre-written comment from the Product Hunt section below. The first comment anchors the conversation."
+        />
+        <ChecklistItem
+          text="Respond to every PH comment within 30 minutes throughout launch day"
+          detail="Engagement velocity is a PH ranking signal. Stay on the page all day. Thank every upvoter who comments."
+        />
+        <ChecklistItem
+          text="Write 24-hour retrospective post (Medium or Substack)"
+          detail="Generates backlinks, SEO, and personal brand. Publish ~T+24h with honest numbers: upvotes, signups, conversions, lessons."
+        />
+      </ul>
+
+      {/* ── Reddit & Content ──────────────────────────────────────────────── */}
+      <CategoryHeading icon={MessageSquare}> Reddit &amp; Content</CategoryHeading>
+      <ul className="space-y-3">
+        <ChecklistItem
+          text="Week 1 — 5–8 substantive comments/day in r/preppers, r/personalfinance, r/anxiety"
+          detail="No links, no product mentions. Genuine, helpful answers only. You're building karma and credibility. Post timing: 8–10 AM or 6–9 PM ET."
+        />
+        <ChecklistItem
+          text="Week 2 — Post original value discussions in r/selfimprovement, r/financialindependence, r/Frugal"
+          detail="Share methodology, frameworks, or data. Zero product mentions. Templates are in the Reddit section below."
+        />
+        <ChecklistItem
+          text="Week 3 — Soft introduction: mention Resilium organically in relevant threads"
+          detail="Only when directly relevant. One link per thread maximum. Never in reply to your own posts."
+        />
+        <ChecklistItem
+          text="Week 4 — Post 'I built this' in r/preppers and r/selfimprovement"
+          detail="Full post templates are in the Reddit section below. Authentic story of why you built it. Lead with the problem, not the product."
+        />
+        <ChecklistItem
+          text="Write first 3 SEO articles — target: 'personal resilience plan', 'emergency preparedness checklist', 'resilience score assessment'"
+          detail="2,000–3,000 words each. Original research angle wherever possible. Internal link to /assess and /pricing from each article."
+        />
+        <ChecklistItem
+          text="Email a personal T+24h founder note to everyone who signed up on launch day"
+          detail="Plain text. One sentence on what you're building and why. Ask one question: 'What made you sign up?' Builds early community."
+        />
+      </ul>
+
+      {/* ── Research Report ───────────────────────────────────────────────── */}
+      <CategoryHeading icon={BarChart2}> Research Report</CategoryHeading>
+      <ul className="space-y-3">
+        <ChecklistItem
+          text="Distribute Typeform survey to Resilium users and target Reddit communities"
+          detail="Target: 500+ valid responses as minimum for publishable research. Full distribution plan is in the Research section below."
+        />
+        <ChecklistItem
+          text="Reach 1,000+ survey responses for credible demographic breakdowns"
+          detail="Above 1,000 responses you can reliably break down by age, income, country, and household structure — making the research genuinely citable."
+        />
+        <ChecklistItem
+          text="Write the 'State of Personal Resilience 2026' report (7 sections)"
+          detail="Full structure and section descriptions are in the Research section below. Aim for 4,000–6,000 words with charts. Publish as a dedicated landing page."
+        />
+        <ChecklistItem
+          text="Pitch the report to 5 journalists in personal finance, preparedness, and wellness"
+          detail="Target beats: personal finance editors at major outlets, preparedness/prepping writers, mental health and wellness journalists. Use data as the hook."
+        />
+      </ul>
+
+      {/* ── Mobile — later ───────────────────────────────────────────────── */}
+      <CategoryHeading icon={Smartphone}> Mobile — When You Have Real User Demand</CategoryHeading>
+      <ul className="space-y-3">
+        <ChecklistItem
+          text="Enable Facebook OAuth in Clerk"
+          detail="Clerk Dashboard → Configure → Social Connections → Facebook. Required for Facebook sign-in in the mobile app."
+        />
+        <ChecklistItem
+          text="Test mobile web app on your Android device"
+          detail="Scan the QR code from the Account tab. Run through the full flow in Chrome on Android. This is the fastest quality check you can do."
+        />
+        <ChecklistItem
+          text="Create a Google Play developer account ($25 one-time)"
+          detail="Only when Android demand is clear. Lets you publish the native app and use Play Billing for subscriptions."
+        />
+        <ChecklistItem
+          text="Create an Apple Developer account ($99/year)"
+          detail="Only when iOS demand is clear. Required for App Store and TestFlight distribution."
+        />
+      </ul>
+    </div>
   );
 }
 
@@ -146,15 +401,15 @@ function LaunchReadinessSection() {
     <div className="px-6 pb-8 space-y-1">
 
       <InfoBox>
-        <strong>Stripe is live.</strong> Real payments are active on <span className="font-mono">resilium-platform.com</span>. Monthly ($9) and annual ($79) plans are configured. EU SCA/3DS is enabled. The next milestone is completing SRL registration in Romania and configuring Stripe Tax for VAT collection.
+        <strong>Stripe keys are configured</strong> but business verification is <strong>not yet complete</strong> — real payments are blocked until the SRL CUI is obtained from Registrul Comerțului and submitted in the Stripe Dashboard. Monthly ($9) and annual ($79) plans are set up, EU SCA/3DS is enabled, and webhooks are configured. Everything is ready to go live once verification clears.
       </InfoBox>
 
       {/* Stripe status callout */}
-      <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3 mb-2">
-        <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+      <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-2">
+        <Clock className="w-4 h-4 text-amber-500 flex-shrink-0" />
         <div>
-          <p className="text-sm font-semibold text-emerald-800">Live: Stripe payments active — real cards accepted</p>
-          <p className="text-xs text-emerald-700 mt-0.5">Monthly ($9/mo) · Annual ($79/yr) · EU SCA/3DS enabled · Webhooks configured · Manage Subscription (customer portal) active. Pending: Stripe Tax / VAT (after SRL CUI).</p>
+          <p className="text-sm font-semibold text-amber-800">Waiting: Stripe business verification — real payments blocked</p>
+          <p className="text-xs text-amber-700 mt-0.5">Requires SRL CUI from Registrul Comerțului. Once approved: submit business details + IBAN in Stripe Dashboard → payments go live. Also pending: Stripe Tax / VAT configuration (after CUI).</p>
         </div>
       </div>
 
@@ -688,7 +943,7 @@ Resilium | resilium-platform.com`}
 
 const OPEN_KEY = "admin_mkt::open_sections";
 
-const DEFAULT_OPEN = new Set<SectionKey>(["launch-readiness"]);
+const DEFAULT_OPEN = new Set<SectionKey>(["master-checklist"]);
 
 export function MarketingPageContent() {
   const [openSections, setOpenSections] = useState<Set<SectionKey>>(() => {
@@ -717,21 +972,37 @@ export function MarketingPageContent() {
           </div>
           <div>
             <h1 className="text-2xl font-display font-bold">Go-to-Market Launch Plan</h1>
-            <p className="text-sm text-muted-foreground">Product Hunt · Reddit Organic · State of Personal Resilience 2026 Report</p>
+            <p className="text-sm text-muted-foreground">Master Checklist · Product Hunt · Reddit Organic · Research Report</p>
           </div>
         </div>
         <p className="text-sm text-muted-foreground mt-4 max-w-2xl leading-relaxed">
-          This document contains production-ready copy, templates, checklists, and timelines for three launch channels. Click any section to expand it. Use the "Copy" buttons to pull text directly into your tools.
+          The Master Checklist at the top consolidates every action item from all channels. The sections below contain full copy templates, Reddit strategy, and research report guidance. Check items off in the master list — progress is saved to your browser.
         </p>
       </div>
 
       <div className="space-y-4">
+        {/* Master Checklist — default open */}
+        <div className="bg-white/90 rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <SectionHeader
+            icon={CheckSquare}
+            label="Master Checklist"
+            title="Everything You Need to Do — in One List"
+            isOpen={openSections.has("master-checklist")}
+            onToggle={() => toggle("master-checklist")}
+          />
+          {openSections.has("master-checklist") && (
+            <div className="border-t border-slate-200">
+              <MasterChecklistSection />
+            </div>
+          )}
+        </div>
+
         {/* Launch Readiness */}
         <div className="bg-white/90 rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
           <SectionHeader
             icon={ShieldCheck}
-            label="Step 0 — Before You Launch"
-            title="Pre-Launch Readiness Checklist"
+            label="Detail — Before You Launch"
+            title="Pre-Launch Readiness Detail"
             isOpen={openSections.has("launch-readiness")}
             onToggle={() => toggle("launch-readiness")}
           />

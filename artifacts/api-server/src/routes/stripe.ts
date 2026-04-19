@@ -3,8 +3,8 @@ import { Router } from "express";
 import { getAuth } from "@clerk/express";
 import { z } from "zod";
 import { getUncachableStripeClient } from "../stripeClient.js";
-import { db, usersTable, subscriptionsTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { db, usersTable, subscriptionsTable, emailDripQueueTable } from "@workspace/db";
+import { eq, and, isNull } from "drizzle-orm";
 import { logger } from "../lib/logger.js";
 import { sendProUpgradeEmail, sendPaymentFailedEmail, sendCancellationEmail, sendPaymentSucceededEmail } from "../lib/email.js";
 import { stripeCheckoutLimiter, stripePortalLimiter } from "../lib/rate-limiters.js";
@@ -75,6 +75,20 @@ async function handleStripeEvent(event: any) {
       : undefined;
 
     await upsertSubscription(userId, subscriptionId, customerId, "active", false, currentPeriodEnd, event);
+
+    // Cancel any pending drip emails — user is now Pro, no need to convert them
+    try {
+      await db.update(emailDripQueueTable)
+        .set({ cancelledAt: new Date() })
+        .where(and(
+          eq(emailDripQueueTable.userId, userId),
+          isNull(emailDripQueueTable.sentAt),
+          isNull(emailDripQueueTable.cancelledAt),
+        ));
+      logger.info({ userId }, "Drip sequence cancelled — user upgraded to Pro");
+    } catch (err) {
+      logger.warn({ err, userId }, "Failed to cancel drip sequence on Pro upgrade (non-critical)");
+    }
     return;
   }
 
