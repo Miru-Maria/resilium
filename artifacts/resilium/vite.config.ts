@@ -62,7 +62,7 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,webp,woff,woff2}"],
-        navigateFallback: "offline.html",
+        navigateFallback: "index.html",
         navigateFallbackDenylist: [/^\/api/],
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
       },
