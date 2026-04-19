@@ -26,11 +26,11 @@ export function adminAuthHeaders(): Record<string, string> {
 }
 
 const DOC_ITEMS = [
-  { key: "marketing-strategy",    label: "Marketing Strategy",    icon: FileText },
+  { key: "gtm-plan",              label: "GTM Plan",              icon: Rocket },
   { key: "platform-assessment",   label: "Platform Assessment",   icon: LayoutTemplate },
   { key: "competitive-analysis",  label: "Competitive Analysis",  icon: BarChart2 },
-  { key: "gtm-plan",              label: "GTM Plan",              icon: Rocket },
   { key: "competitor-monitoring", label: "Competitor Monitoring", icon: Radar },
+  { key: "marketing-strategy",    label: "Marketing Strategy",    icon: FileText },
   { key: "whitepaper",            label: "White Paper",           icon: BookOpen },
   { key: "technical-spec",        label: "Technical Spec",        icon: Code2 },
   { key: "pitch-deck",            label: "Pitch Deck",            icon: Layers },

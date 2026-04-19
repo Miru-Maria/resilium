@@ -304,6 +304,64 @@ function MasterChecklistSection() {
         />
       </ul>
 
+      {/* ── Pre-Launch Production Verification ───────────────────────────── */}
+      <CategoryHeading icon={CheckCircle2}> Pre-Launch Production Verification</CategoryHeading>
+      <ul className="space-y-3">
+        <ChecklistItem
+          text="Sign up + sign in flow works end-to-end on production (Clerk)"
+          detail="Test new email account creation, email verification, sign in, and sign out on resilium-platform.com. Clerk authentication only works on the production domain."
+        />
+        <ChecklistItem
+          text="Full 14-step assessment completes correctly on production"
+          detail="Consent page → all 14 steps → 'Generate Report' → AI report loads. Confirm the spinner appears, the async job completes, and the results redirect fires correctly."
+        />
+        <ChecklistItem
+          text="Results page renders with real AI-generated data"
+          detail="Score, radar chart, Critical Vulnerabilities, Next Action pill, Mental Resilience Profile, and Action Checklists all render with real data — not placeholder content."
+        />
+        <ChecklistItem
+          text="Plan page checklist items persist after page reload"
+          detail="Check off several items on the Plan page. Reload the page. Confirm checked items remain checked — verifying DB-backed persistence is working."
+        />
+        <ChecklistItem
+          text="Markdown export downloads correctly from Results and Plan pages"
+          detail="Click the Markdown export button on both the Plan page and the Results page. Confirm a .md file downloads with full report content."
+        />
+        <ChecklistItem
+          text="Share modal opens and all share buttons work"
+          detail="Click Share on the Results page. Confirm the modal opens with score in the share text. Test Copy Link, X/Twitter, Facebook, and Reddit buttons."
+        />
+        <ChecklistItem
+          text="Coaching page inquiry form submits correctly"
+          detail="Fill out and submit the coaching inquiry form. Confirm the submission is received."
+        />
+        <ChecklistItem
+          text="Admin dashboard accessible and analytics data loads"
+          detail="Navigate to /admin on production. Confirm user counts, assessment completions, and coaching stats load from the live database."
+        />
+        <ChecklistItem
+          text="Email delivery confirmed working in production"
+          detail="Trigger a welcome or digest email and confirm it arrives. Check Resend dashboard for delivery confirmation. Verify SPF/DKIM records are confirmed in Resend."
+        />
+      </ul>
+
+      {/* ── Future / Nice-to-Have ─────────────────────────────────────────── */}
+      <CategoryHeading icon={Clock}> Future / Nice-to-Have</CategoryHeading>
+      <ul className="space-y-3">
+        <ChecklistItem
+          text="Complete Sentry Express server-side instrumentation"
+          detail="The Sentry SDK is imported but Express is not fully instrumented. Add the --import flag to the Node startup command in production to capture all server-side errors."
+        />
+        <ChecklistItem
+          text="Push notifications for 7-day / 30-day resilience reminders"
+          detail="Currently reminder outreach is email-only via cron jobs. expo-notifications would allow the mobile app to reach users who don't open emails."
+        />
+        <ChecklistItem
+          text="App Store rating prompt after first resilience plan generated"
+          detail="Trigger StoreReview.requestReview() (from expo-store-review) after a user successfully generates their first plan. Best time to ask for a review."
+        />
+      </ul>
+
       {/* ── Mobile — later ───────────────────────────────────────────────── */}
       <CategoryHeading icon={Smartphone}> Mobile — When You Have Real User Demand</CategoryHeading>
       <ul className="space-y-3">

@@ -18,7 +18,7 @@ const WEB_AUDIT = [
   { area: "Pricing page", status: "good", note: "Clear feature comparison, Stripe server-side checkout, upgrade flow tested end-to-end" },
   { area: "Anonymous user experience", status: "good", note: "Free-tier gate enforced via localStorage + plan count, clear messaging" },
   { area: "About page", status: "good", note: "Methodology, Scientific Foundation (6 academic citations), Media Citations (5 mainstream sources), Privacy, About the Project" },
-  { area: "Dark / light theme", status: "good", note: "Toggle present and persists across sessions" },
+  { area: "Dark / light theme", status: "removed", note: "Theme toggle removed — app uses a single polished dark theme; no toggle in UI." },
   { area: "Competitive analysis PDF", status: "good", note: "jsPDF crash resolved; full PDF generation working" },
 ];
 
@@ -148,7 +148,6 @@ const DONE_ITEMS = [
   "GDPR export + deletion — user-triggered and admin-triggered",
   "Consent collection and platform logging (web vs. mobile split)",
   "Social share modal — X/Twitter, Facebook, Reddit, Instagram",
-  "Dark / light theme — web and mobile",
   "Full email automation suite — welcome, re-engagement, reassessment, weekly digests",
   "Admin digest + error alert emails (weekly, Monday 07:00 UTC)",
   "Push notification infrastructure (Expo push API, token storage, broadcast)",
@@ -188,20 +187,7 @@ const DONE_ITEMS = [
   "Product-wide content audit — 'AI-powered' language replaced with 'structured'/'personalized'",
 ];
 
-const OUTSTANDING = [
-  {
-    item: "App Store (iOS) submission",
-    status: "In Progress",
-    note: "Intentionally deferred by owner — iOS only (Android explicitly excluded). App builds, assets, and metadata preparation in progress.",
-  },
-  {
-    item: "Payment integration (Stripe) — awaiting business verification",
-    status: "In Progress",
-    note: "Stripe checkout is fully working — sandbox tested end-to-end, Pro plan activates after payment, webhook verified with STRIPE_WEBHOOK_SECRET. Awaiting Stripe business verification (requires SRL CUI from Registrul Comerțului). Once verified, swap sandbox keys for live keys to accept real payments.",
-  },
-];
-
-/* ─── LAUNCH CHECKLIST DATA ──────────────────────────────── */
+/* ─── MOBILE LAUNCH CHECKLIST DATA ──────────────────────── */
 
 type TagType = "Blocker" | "Needed" | "Verify" | "Decide" | "Future";
 
@@ -241,32 +227,6 @@ const LAUNCH_GROUPS: LaunchGroup[] = [
     ],
   },
   {
-    id: "stripe",
-    label: "💳 Payments — Stripe (Web)",
-    items: [
-      { id: "stripe-sandbox-done", label: "Sandbox checkout tested end-to-end ✓", note: "Completed April 2026. Stripe sandbox checkout → Pro plan activates → webhook confirmed. Both monthly and annual flows working.", tag: "Verify" },
-      { id: "stripe-business-verify", label: "Complete Stripe business verification", note: "Requires SRL CUI from Registrul Comerțului. In Stripe dashboard: complete business details, add representative ID, add Romanian IBAN for payouts.", tag: "Blocker" },
-      { id: "stripe-live-keys", label: "Swap sandbox keys for live Stripe keys", note: "Once verified, replace STRIPE_SECRET_KEY and STRIPE_PUBLISHABLE_KEY in Replit secrets with live keys (sk_live_... and pk_live_...). Update STRIPE_WEBHOOK_SECRET with the live webhook signing secret.", tag: "Needed" },
-      { id: "stripe-live-products", label: "Run seed script against live Stripe account", note: "After switching to live keys, run: node scripts/seed-stripe-products.mjs — this creates the Resilium Pro product and prices in your live Stripe account.", tag: "Needed" },
-      { id: "stripe-live-test", label: "Verify full payment flow in production with a real card", note: "Make a live purchase on resilium-platform.com. Confirm Pro activates, webhook fires, and subscription appears in Stripe dashboard.", tag: "Verify" },
-    ],
-  },
-  {
-    id: "prod",
-    label: "🌐 Production Verification (resilium-platform.com)",
-    items: [
-      { id: "prod-signup", label: "Sign up + sign in flow (Clerk)", note: "Test new email account creation, email verification, sign in, and sign out. Only works on resilium-platform.com.", tag: "Verify" },
-      { id: "prod-assessment", label: "Full assessment end-to-end on production", note: "Consent page → all 14 steps → 'Generate Report' → AI report loads. Confirm the spinner appears, the async job completes, and the results redirect fires correctly.", tag: "Verify" },
-      { id: "prod-results", label: "Results page renders correctly", note: "Score, radar chart (stable), Critical Vulnerabilities, Next Action pill, Mental Resilience Profile, and Action Checklists all render with real AI-generated data.", tag: "Verify" },
-      { id: "prod-plan", label: "Plan page checklist persistence", note: "Check off several items on the Plan page. Reload the page. Confirm checked items remain checked.", tag: "Verify" },
-      { id: "prod-markdown", label: "Markdown export downloads correctly", note: "Click the Markdown export button on both the Plan page and the Results page. Confirm a .md file downloads with full report content.", tag: "Verify" },
-      { id: "prod-share", label: "Share modal works correctly", note: "Click Share on the Results page. Confirm the modal opens with score in the share text. Test Copy Link, X/Twitter, Facebook, and Reddit buttons.", tag: "Verify" },
-      { id: "prod-email-digest", label: "Email digest received after sign-up", note: "Weekly digest cron runs Sundays 18:00 UTC. 7-day reminder cron runs daily 09:00 UTC. Confirm RESEND_API_KEY is working in production.", tag: "Verify" },
-      { id: "prod-admin", label: "Admin dashboard login and analytics visible", note: "Navigate to /admin on production. Log in with ADMIN_USERNAME / ADMIN_PASSWORD. Confirm user counts, assessment completions, and coaching stats load.", tag: "Verify" },
-      { id: "prod-coaching", label: "Coaching page inquiry form submits correctly", note: "Fill out and submit the coaching inquiry form. Confirm the submission is received.", tag: "Verify" },
-    ],
-  },
-  {
     id: "mobile",
     label: "📱 Mobile App Testing",
     items: [
@@ -275,22 +235,6 @@ const LAUNCH_GROUPS: LaunchGroup[] = [
       { id: "mobile-step-render", label: "All 14 assessment steps render correctly on small screen", note: "Pay special attention to Step 8 (chronic condition severity buttons), Step 12 (risk profile grid), and Step 13 (Community & Social Capital — card layout).", tag: "Verify" },
       { id: "mobile-ai-report", label: "AI report generation works end-to-end on mobile", note: "Complete the assessment and confirm the 'Generate Report' button triggers the async job, the loading state displays correctly, and the results page loads with real data.", tag: "Verify" },
       { id: "mobile-pro-gating", label: "Pro gating on mobile works with graceful fallback", note: "If RevenueCat is not yet wired, confirm Pro-gated features degrade gracefully (show upgrade prompt, not crash).", tag: "Verify" },
-    ],
-  },
-  {
-    id: "design",
-    label: "🎨 Design Decisions",
-    items: [
-      { id: "design-results-checklist", label: "Results page checklist — decided: Plan-only (Option A)", note: "The && false guard in results.tsx line 888 stays. Checklist lives on the Plan page only. Results page remains focused on score, radar chart, vulnerabilities, and AI narrative. Decision recorded April 2026.", tag: "Decide" },
-    ],
-  },
-  {
-    id: "future",
-    label: "✨ Nice-to-Have / Future",
-    items: [
-      { id: "future-sentry", label: "Sentry Express instrumentation completed", note: "The Sentry SDK is imported but Express is not fully instrumented. Add --import flag to Node startup in production to capture server-side errors fully.", tag: "Future" },
-      { id: "future-push-notifs", label: "Push notifications for 7-day / 30-day resilience reminders", note: "Currently reminder-based outreach is email-only via cron jobs. expo-notifications would let the mobile app reach users who haven't opened their email.", tag: "Future" },
-      { id: "future-app-rating", label: "App Store rating prompt in mobile app", note: "Trigger StoreReview.requestReview() (from expo-store-review) after a user successfully generates their first resilience plan.", tag: "Future" },
     ],
   },
 ];
@@ -314,8 +258,9 @@ function StatusBadge({ status }: { status: string }) {
     good: "bg-emerald-100 text-emerald-700",
     functional: "bg-emerald-100 text-emerald-700",
     pending: "bg-amber-100 text-amber-700",
+    removed: "bg-gray-100 text-gray-500",
   };
-  const label: Record<string, string> = { strong: "✓ Strong", good: "✓ Good", functional: "✓ Functional", pending: "Pending" };
+  const label: Record<string, string> = { strong: "✓ Strong", good: "✓ Good", functional: "✓ Functional", pending: "Pending", removed: "Removed" };
   return (
     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap ${map[status] ?? "bg-gray-100 text-gray-600"}`}>
       {label[status] ?? status}
@@ -418,7 +363,7 @@ function LaunchChecklist() {
 /* ─── MAIN COMPONENT ─────────────────────────────────────── */
 
 export default function PlatformAssessmentDoc() {
-  const NAVS = ["opinion", "market", "user-audit", "functionality", "checklist", "launch-checklist"];
+  const NAVS = ["opinion", "market", "user-audit", "functionality", "done", "mobile-launch"];
 
   return (
     <div className="min-h-screen bg-[#F7F7FA] font-sans">
@@ -449,7 +394,7 @@ export default function PlatformAssessmentDoc() {
           <p className="text-gray-400 text-sm mb-6 max-w-xl leading-relaxed">An honest, unvarnished evaluation of what's been built, how the market might receive it, and a precise checklist of what's done versus what remains.</p>
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
             {[
-              { val: "~27,000", label: "Lines of Source Code" },
+              { val: "~65,000", label: "Lines of Source Code" },
               { val: "3", label: "Platforms (Web · Mobile · Admin)" },
               { val: "April 2026", label: "Assessment Date" },
               { val: "Production", label: "Status: Live ●" },
@@ -588,13 +533,12 @@ export default function PlatformAssessmentDoc() {
           </div>
         </section>
 
-        {/* Section 5: Conclusive Checklist */}
-        <section id="checklist">
-          <h2 className="text-2xl font-bold text-gray-900 mb-1">Conclusive Checklist</h2>
+        {/* Section 5: Done */}
+        <section id="done">
+          <h2 className="text-2xl font-bold text-gray-900 mb-1">What's Done</h2>
           <div className="w-10 h-1 bg-[#E08040] rounded mb-6" />
-
-          <p className="text-sm font-semibold text-gray-900 mb-3">Done <span className="text-gray-400 font-normal text-xs">({DONE_ITEMS.length} items)</span></p>
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 mb-6 max-h-96 overflow-y-auto">
+          <p className="text-sm text-gray-500 mb-4">{DONE_ITEMS.length} completed items — verified end-to-end on resilium-platform.com as of April 2026.</p>
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 max-h-96 overflow-y-auto">
             <ul className="space-y-1.5">
               {DONE_ITEMS.map((item, i) => (
                 <li key={i} className="flex gap-2.5 items-start text-xs text-gray-600 leading-snug">
@@ -604,36 +548,13 @@ export default function PlatformAssessmentDoc() {
               ))}
             </ul>
           </div>
-
-          <p className="text-sm font-semibold text-gray-900 mb-3">Outstanding / To Do</p>
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-[#0D1225] text-white">
-                  <th className="text-left px-4 py-3 font-semibold text-sm">Item</th>
-                  <th className="text-left px-4 py-3 font-semibold text-sm w-28">Priority</th>
-                  <th className="text-left px-4 py-3 font-semibold text-sm">Notes</th>
-                </tr>
-              </thead>
-              <tbody>
-                {OUTSTANDING.map((o, i) => (
-                  <tr key={i} className={`border-b border-gray-100 ${i % 2 === 0 ? "bg-white" : "bg-gray-50/50"}`}>
-                    <td className="px-4 py-3 font-semibold text-gray-900 text-xs">{o.item}</td>
-                    <td className="px-4 py-3 text-xs">
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">{o.status}</span>
-                    </td>
-                    <td className="px-4 py-3 text-xs text-gray-600 leading-snug">{o.note}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
         </section>
 
-        {/* Section 6: Launch Checklist */}
-        <section id="launch-checklist">
-          <h2 className="text-2xl font-bold text-gray-900 mb-1">Launch Checklist</h2>
-          <div className="w-10 h-1 bg-[#E08040] rounded mb-6" />
+        {/* Section 6: Mobile Launch Checklist */}
+        <section id="mobile-launch">
+          <h2 className="text-2xl font-bold text-gray-900 mb-1">Mobile Launch Checklist</h2>
+          <div className="w-10 h-1 bg-[#E08040] rounded mb-3" />
+          <p className="text-sm text-gray-500 mb-6">iOS App Store submission and mobile QA checklist. All web and business launch tasks are tracked in the GTM Plan.</p>
           <LaunchChecklist />
         </section>
 
