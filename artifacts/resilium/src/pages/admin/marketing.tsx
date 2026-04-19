@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type SectionKey = "master-checklist" | "launch-readiness" | "mobile-launch" | "product-hunt" | "reddit" | "research-report";
+type SectionKey = "master-checklist" | "mobile-launch" | "product-hunt" | "reddit" | "research-report";
 
 /* ─── MOBILE LAUNCH CHECKLIST ─────────────────────────────── */
 
@@ -250,9 +250,17 @@ function CategoryHeading({ icon: Icon, children }: { icon?: React.ElementType; c
 function MasterChecklistSection() {
   return (
     <div className="px-6 pb-8">
-      <p className="text-sm text-gray-500 leading-relaxed mb-6">
-        Every action item across all channels in one flat list. Check items off as you complete them — your progress is saved automatically. Open the sections below for detailed copy templates, Reddit strategy, and research report guidance.
+      <p className="text-sm text-gray-500 leading-relaxed mb-4">
+        Every action item across all channels in one flat list. Check items off as you complete them — progress saves automatically. Open the sections below for detailed copy templates, Reddit strategy, and research report guidance.
       </p>
+
+      <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-6">
+        <Clock className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
+        <div>
+          <p className="text-sm font-semibold text-amber-800">Stripe is configured but real payments are blocked</p>
+          <p className="text-xs text-amber-700 mt-0.5">Requires SRL CUI from Registrul Comerțului. Once approved: submit business details + Romanian IBAN in Stripe Dashboard → swap to live keys → payments go live. Stripe Tax / VAT configuration follows after CUI.</p>
+        </div>
+      </div>
 
       {/* ── Business & Payments ──────────────────────────────────────────── */}
       <CategoryHeading icon={Target}> Business &amp; Payments</CategoryHeading>
@@ -522,19 +530,11 @@ function MasterChecklistSection() {
           detail="Clerk Dashboard → Configure → Social Connections → Facebook. Required for Facebook sign-in in the mobile app."
         />
         <ChecklistItem
-          text="iOS App Store submission — see Mobile Launch Checklist in Platform Assessment"
-          detail="Full iOS submission checklist (Apple Developer account, screenshots, App Store Connect listing, EAS build, RevenueCat IAP, TestFlight) is tracked in the Platform Assessment doc under Mobile Launch."
+          text="iOS App Store submission — see Mobile Launch Checklist section on this page"
+          detail="Full iOS submission checklist (Apple Developer account, screenshots, App Store Connect listing, EAS build, RevenueCat IAP, TestFlight) is in the Mobile Launch Checklist section below."
         />
       </ul>
     </div>
-  );
-}
-
-function SubHeading({ children }: { children: React.ReactNode }) {
-  return (
-    <h3 className="text-sm font-bold uppercase tracking-widest text-primary mt-6 mb-3 flex items-center gap-2">
-      {children}
-    </h3>
   );
 }
 
@@ -593,192 +593,6 @@ function Table({ headers, rows }: { headers: string[]; rows: (string | React.Rea
           ))}
         </tbody>
       </table>
-    </div>
-  );
-}
-
-function LaunchReadinessSection() {
-  const [mobileOpen, setMobileOpen] = useState(false);
-  return (
-    <div className="px-6 pb-8 space-y-1">
-
-      <InfoBox>
-        <strong>Stripe keys are configured</strong> but business verification is <strong>not yet complete</strong> — real payments are blocked until the SRL CUI is obtained from Registrul Comerțului and submitted in the Stripe Dashboard. Monthly ($9) and annual ($79) plans are set up, EU SCA/3DS is enabled, and webhooks are configured. Everything is ready to go live once verification clears.
-      </InfoBox>
-
-      {/* Stripe status callout */}
-      <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-2">
-        <Clock className="w-4 h-4 text-amber-500 flex-shrink-0" />
-        <div>
-          <p className="text-sm font-semibold text-amber-800">Waiting: Stripe business verification — real payments blocked</p>
-          <p className="text-xs text-amber-700 mt-0.5">Requires SRL CUI from Registrul Comerțului. Once approved: submit business details + IBAN in Stripe Dashboard → payments go live. Also pending: Stripe Tax / VAT configuration (after CUI).</p>
-        </div>
-      </div>
-
-      <SubHeading><ShieldCheck className="w-4 h-4" /> Web Launch Requirements</SubHeading>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
-        <div>
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Payments &amp; Core Flow</p>
-          <ul className="space-y-3">
-            <ChecklistItem
-              text="Complete Stripe business verification"
-              detail="Requires SRL CUI from Registrul Comerțului. In Stripe dashboard: add business details, representative ID, and Romanian IBAN for payouts."
-            />
-            <ChecklistItem
-              text="Swap sandbox keys for live Stripe keys and re-run seed script"
-              detail="Replace STRIPE_SECRET_KEY, STRIPE_PUBLISHABLE_KEY, and STRIPE_WEBHOOK_SECRET in Replit secrets with live values. Then run: node scripts/seed-stripe-products.mjs to create products in the live account."
-            />
-            <ChecklistItem
-              text="Test the full payment flow with a real card"
-              detail="Free → Pro upgrade, both monthly and annual. Confirm Pro features unlock immediately after payment."
-            />
-            <ChecklistItem
-              text="Test the complete new-user journey end to end"
-              detail="Land on homepage → take assessment → view results → upgrade to Pro → confirm all Pro features work. Do this as a fresh incognito user."
-            />
-            <ChecklistItem
-              text="Admin login tested in production"
-              detail="Sign in to the admin panel at /admin using your separate username/password (not Clerk)."
-            />
-          </ul>
-        </div>
-        <div>
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Legal &amp; Discoverability</p>
-          <ul className="space-y-3">
-            <ChecklistItem
-              text="Privacy Policy page live"
-              detail="Required by EU GDPR (Romania-based). Must be linked in the site footer. Cover: data collected, storage, Clerk auth, Stripe billing, Resend email."
-            />
-            <ChecklistItem
-              text="Terms of Service page live"
-              detail="Protects you and sets user expectations. Link from footer and sign-up flow."
-            />
-            <ChecklistItem
-              text="Cookie / GDPR consent notice implemented"
-              detail="A simple banner on first visit is sufficient. Required for EU users by default."
-            />
-            <ChecklistItem
-              text="OpenGraph preview verified"
-              detail="Paste resilium-platform.com into https://opengraph.xyz — confirm the social card shows the correct image, title, and description."
-            />
-            <ChecklistItem
-              text="Transactional emails tested"
-              detail="Trigger at least one welcome email and one report delivery via Resend. Confirm they land in inbox (not spam)."
-            />
-          </ul>
-        </div>
-      </div>
-
-      {/* Collapsible mobile section */}
-      <div className="border border-slate-200 rounded-xl overflow-hidden mt-6">
-        <button
-          type="button"
-          onClick={() => setMobileOpen(o => !o)}
-          className="w-full flex items-center gap-3 px-4 py-3 bg-slate-50 hover:bg-slate-100 transition-colors text-left"
-        >
-          <Smartphone className="w-4 h-4 text-slate-400 flex-shrink-0" />
-          <div className="flex-1">
-            <span className="text-sm font-semibold text-gray-700">Mobile App Tasks</span>
-            <span className="ml-2 text-xs text-gray-400 font-normal">— not required for web launch</span>
-          </div>
-          {mobileOpen
-            ? <ChevronDown className="w-4 h-4 text-slate-400 flex-shrink-0" />
-            : <ChevronRight className="w-4 h-4 text-slate-400 flex-shrink-0" />}
-        </button>
-        {mobileOpen && (
-          <div className="px-4 py-4 border-t border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Immediate (Any Time)</p>
-              <ul className="space-y-3">
-                <ChecklistItem
-                  text="Enable Facebook OAuth in Clerk"
-                  detail="Clerk Dashboard → Configure → Social Connections → Facebook → Enable. Required before Facebook sign-in works in the mobile app."
-                />
-                <ChecklistItem
-                  text="Test mobile web app on your Android device"
-                  detail="Scan the QR code from the Account tab. Run through the full flow in Chrome on Android. This is the fastest quality check you can do."
-                />
-              </ul>
-            </div>
-            <div>
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">When You Have Real User Demand</p>
-              <ul className="space-y-3">
-                <ChecklistItem
-                  text="Create a Google Play developer account ($25 one-time)"
-                  detail="Submit the Android app. Your own Android device means you can test the native experience yourself — a real advantage."
-                />
-                <ChecklistItem
-                  text="Set up Google Play Billing for Pro subscriptions"
-                  detail="Required for in-app purchases on Android. Google takes 15–30% commission."
-                />
-                <ChecklistItem
-                  text="Create an Apple Developer account ($99/year)"
-                  detail="Required for App Store and TestFlight. Only pursue this when iOS demand is clear."
-                />
-                <ChecklistItem
-                  text="Set up RevenueCat for iOS in-app purchases"
-                  detail="Handles Apple's IAP receipts. Needed before Pro subscriptions work natively on iOS."
-                />
-              </ul>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Post-Launch Monitoring & Security */}
-      <SubHeading><Globe className="w-4 h-4" /> Post-Launch Monitoring (First 30 Days)</SubHeading>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
-        <div>
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Operations</p>
-          <ul className="space-y-3">
-            <ChecklistItem
-              text="Verify first Pro renewal webhook fired correctly"
-              detail="Check Stripe Dashboard → Developers → Webhooks. Confirm invoice.payment_succeeded was received and the renewal confirmation email was sent."
-            />
-            <ChecklistItem
-              text="Review Sentry weekly for new error patterns"
-              detail="Even one week of real users will surface edge cases. Filter by 'new issues' since launch date."
-            />
-            <ChecklistItem
-              text="Check Clerk Dashboard for first real signups"
-              detail="Look for any bot/spam sign-up patterns. Review the 'Users' tab in Clerk production dashboard."
-            />
-            <ChecklistItem
-              text="Monitor assessment completion rate (target: >50% of starts)"
-              detail="Check the admin analytics dashboard. If drop-off is high, check which step loses users."
-            />
-            <ChecklistItem
-              text="Monitor free → Pro conversion (target: >5% at 90 days)"
-              detail="Track via Stripe Dashboard MRR growth vs. Clerk user count."
-            />
-          </ul>
-        </div>
-        <div>
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Growth &amp; Discovery</p>
-          <ul className="space-y-3">
-            <ChecklistItem
-              text="Set up web analytics (Plausible recommended — GDPR-friendly)"
-              detail="Add Plausible script to index.html. No cookie consent needed for Plausible — it's cookieless by design. Gives you visitor → assessment → upgrade funnel visibility."
-            />
-            <ChecklistItem
-              text="Verify OpenGraph preview on social"
-              detail="Paste resilium-platform.com into https://opengraph.xyz — confirm the social card shows correct image, title, and description before sharing anywhere."
-            />
-            <ChecklistItem
-              text="Submit sitemap.xml to Google Search Console"
-              detail="Create /public/sitemap.xml covering /, /pricing, /about. Then add property in Google Search Console and submit the sitemap URL."
-            />
-            <ChecklistItem
-              text="Run monthly dependency security audit"
-              detail="Schedule for first Monday of each month. Checks for newly disclosed vulnerabilities in Clerk, Drizzle, Vite, and other packages."
-            />
-            <ChecklistItem
-              text="Configure Stripe Tax for VAT collection"
-              detail="Required once SRL CUI arrives. Enable Stripe Tax in the Dashboard → Tax settings, select Romania as the origin, then add EU VAT rules."
-            />
-          </ul>
-        </div>
-      </div>
     </div>
   );
 }
@@ -1195,22 +1009,6 @@ export function MarketingPageContent() {
           {openSections.has("master-checklist") && (
             <div className="border-t border-slate-200">
               <MasterChecklistSection />
-            </div>
-          )}
-        </div>
-
-        {/* Launch Readiness */}
-        <div className="bg-white/90 rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <SectionHeader
-            icon={ShieldCheck}
-            label="Detail — Before You Launch"
-            title="Pre-Launch Readiness Detail"
-            isOpen={openSections.has("launch-readiness")}
-            onToggle={() => toggle("launch-readiness")}
-          />
-          {openSections.has("launch-readiness") && (
-            <div className="border-t border-slate-200">
-              <LaunchReadinessSection />
             </div>
           )}
         </div>
