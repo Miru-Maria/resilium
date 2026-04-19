@@ -4,6 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
 
+    <!-- Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://clerk.resilium-platform.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://img.clerk.com https://resilium-platform.com; connect-src 'self' https://clerk.resilium-platform.com wss://clerk.resilium-platform.com https://*.clerk.com https://o4511187075923968.ingest.de.sentry.io; frame-src https://clerk.resilium-platform.com https://*.clerk.accounts.dev; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self';" />
+
     <!-- Primary meta — per-page titles/descriptions/canonicals are set by React via react-helmet-async -->
     <title>Resilium — Know Your Readiness. Build Your Resilience.</title>
     <meta name="description" content="Resilium gives you an objective resilience score across 6 dimensions — financial, health, skills, mobility, psychological, and resources — plus a personalized action plan. Free assessment in under 5 minutes." />
@@ -34,12 +37,10 @@
     <link rel="icon" type="image/png" href="/logo.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
-    <!-- Async font loading — Inter (body) + Playfair Display (coaching page headings) -->
+    <!-- Fonts — Inter (body) + Playfair Display (coaching page headings) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" media="print" onload="this.media='all'">
-    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap"></noscript>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap">
 
     <!-- Structured data — WebSite + Organization (visible to all crawlers immediately) -->
     <script type="application/ld+json">
@@ -81,7 +82,7 @@
     </script>
 
   <!-- Redirect legacy replit.app domain to canonical domain -->
-  <script>if(location.hostname==='resilium-ai.replit.app'){location.replace('https://resilium-platform.com'+location.pathname+location.search+location.hash);}</script>
+  <script src="/redirect.js"></script>
   </head>
   <body>
     <div id="root"></div>

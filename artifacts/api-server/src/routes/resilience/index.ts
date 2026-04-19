@@ -61,7 +61,8 @@ const assessRateLimit = rateLimit({
   max: 5,
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => getUserId(req as Request) ?? req.ip ?? "anonymous",
+  validate: { xForwardedForHeader: false },
+  keyGenerator: (req) => getUserId(req as Request) ?? "anonymous",
   message: {
     error: "RATE_LIMITED",
     message: "You've run 5 assessments this hour. Please wait before starting another.",
