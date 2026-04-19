@@ -49,6 +49,7 @@ import DemoPage from "@/pages/demo";
 import ScenariosPage from "@/pages/scenarios";
 import PlanPage from "@/pages/plan";
 import { AnnouncementBanner } from "@/components/announcement-banner";
+import { CookieNotice } from "@/components/cookie-notice";
 
 // Clerk publishable key — injected at build time from VITE_CLERK_PUBLISHABLE_KEY / CLERK_PUBLISHABLE_KEY
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY as string | undefined;
@@ -287,6 +288,7 @@ function Router() {
       <Route component={NotFound} />
       </Switch>
       </div>
+      <CookieNotice />
     </>
   );
 }

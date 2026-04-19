@@ -4,7 +4,7 @@ import {
   Rocket, MessageSquare, BarChart2, ChevronDown, ChevronRight,
   CheckSquare, Square, Calendar, Target, FileText,
   Newspaper, Globe, Search, BookOpen, TrendingUp, Megaphone, Map,
-  Smartphone, ShieldCheck, Clock
+  Smartphone, ShieldCheck, Clock, CheckCircle2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -146,15 +146,15 @@ function LaunchReadinessSection() {
     <div className="px-6 pb-8 space-y-1">
 
       <InfoBox>
-        <strong>Stripe business verification is the single gate between you and live payments.</strong> Sandbox checkout is fully working and tested. Once your SRL CUI arrives, complete business verification in Stripe, swap the live keys, and you're taking real payments.
+        <strong>Stripe is live.</strong> Real payments are active on <span className="font-mono">resilium-platform.com</span>. Monthly ($9) and annual ($79) plans are configured. EU SCA/3DS is enabled. The next milestone is completing SRL registration in Romania and configuring Stripe Tax for VAT collection.
       </InfoBox>
 
       {/* Stripe status callout */}
-      <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-2">
-        <Clock className="w-4 h-4 text-amber-500 flex-shrink-0" />
+      <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3 mb-2">
+        <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
         <div>
-          <p className="text-sm font-semibold text-amber-800">Waiting: Stripe business verification</p>
-          <p className="text-xs text-amber-700 mt-0.5">Requires SRL CUI from Registrul Comerțului. Sandbox payments are live and tested on <span className="font-mono">resilium-platform.com</span>.</p>
+          <p className="text-sm font-semibold text-emerald-800">Live: Stripe payments active — real cards accepted</p>
+          <p className="text-xs text-emerald-700 mt-0.5">Monthly ($9/mo) · Annual ($79/yr) · EU SCA/3DS enabled · Webhooks configured · Manage Subscription (customer portal) active. Pending: Stripe Tax / VAT (after SRL CUI).</p>
         </div>
       </div>
 
@@ -266,6 +266,61 @@ function LaunchReadinessSection() {
             </div>
           </div>
         )}
+      </div>
+
+      {/* Post-Launch Monitoring & Security */}
+      <SubHeading><Globe className="w-4 h-4" /> Post-Launch Monitoring (First 30 Days)</SubHeading>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+        <div>
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Operations</p>
+          <ul className="space-y-3">
+            <ChecklistItem
+              text="Verify first Pro renewal webhook fired correctly"
+              detail="Check Stripe Dashboard → Developers → Webhooks. Confirm invoice.payment_succeeded was received and the renewal confirmation email was sent."
+            />
+            <ChecklistItem
+              text="Review Sentry weekly for new error patterns"
+              detail="Even one week of real users will surface edge cases. Filter by 'new issues' since launch date."
+            />
+            <ChecklistItem
+              text="Check Clerk Dashboard for first real signups"
+              detail="Look for any bot/spam sign-up patterns. Review the 'Users' tab in Clerk production dashboard."
+            />
+            <ChecklistItem
+              text="Monitor assessment completion rate (target: >50% of starts)"
+              detail="Check the admin analytics dashboard. If drop-off is high, check which step loses users."
+            />
+            <ChecklistItem
+              text="Monitor free → Pro conversion (target: >5% at 90 days)"
+              detail="Track via Stripe Dashboard MRR growth vs. Clerk user count."
+            />
+          </ul>
+        </div>
+        <div>
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Growth &amp; Discovery</p>
+          <ul className="space-y-3">
+            <ChecklistItem
+              text="Set up web analytics (Plausible recommended — GDPR-friendly)"
+              detail="Add Plausible script to index.html. No cookie consent needed for Plausible — it's cookieless by design. Gives you visitor → assessment → upgrade funnel visibility."
+            />
+            <ChecklistItem
+              text="Verify OpenGraph preview on social"
+              detail="Paste resilium-platform.com into https://opengraph.xyz — confirm the social card shows correct image, title, and description before sharing anywhere."
+            />
+            <ChecklistItem
+              text="Submit sitemap.xml to Google Search Console"
+              detail="Create /public/sitemap.xml covering /, /pricing, /about. Then add property in Google Search Console and submit the sitemap URL."
+            />
+            <ChecklistItem
+              text="Run monthly dependency security audit"
+              detail="Schedule for first Monday of each month. Checks for newly disclosed vulnerabilities in Clerk, Drizzle, Vite, and other packages."
+            />
+            <ChecklistItem
+              text="Configure Stripe Tax for VAT collection"
+              detail="Required once SRL CUI arrives. Enable Stripe Tax in the Dashboard → Tax settings, select Romania as the origin, then add EU VAT rules."
+            />
+          </ul>
+        </div>
       </div>
     </div>
   );
