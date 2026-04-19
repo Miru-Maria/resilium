@@ -362,24 +362,16 @@ function MasterChecklistSection() {
         />
       </ul>
 
-      {/* ── Mobile — later ───────────────────────────────────────────────── */}
-      <CategoryHeading icon={Smartphone}> Mobile — When You Have Real User Demand</CategoryHeading>
+      {/* ── Mobile — post-launch ─────────────────────────────────────────── */}
+      <CategoryHeading icon={Smartphone}> Mobile — Post-Launch (When Web Has Traction)</CategoryHeading>
       <ul className="space-y-3">
         <ChecklistItem
           text="Enable Facebook OAuth in Clerk"
           detail="Clerk Dashboard → Configure → Social Connections → Facebook. Required for Facebook sign-in in the mobile app."
         />
         <ChecklistItem
-          text="Test mobile web app on your Android device"
-          detail="Scan the QR code from the Account tab. Run through the full flow in Chrome on Android. This is the fastest quality check you can do."
-        />
-        <ChecklistItem
-          text="Create a Google Play developer account ($25 one-time)"
-          detail="Only when Android demand is clear. Lets you publish the native app and use Play Billing for subscriptions."
-        />
-        <ChecklistItem
-          text="Create an Apple Developer account ($99/year)"
-          detail="Only when iOS demand is clear. Required for App Store and TestFlight distribution."
+          text="iOS App Store submission — see Mobile Launch Checklist in Platform Assessment"
+          detail="Full iOS submission checklist (Apple Developer account, screenshots, App Store Connect listing, EAS build, RevenueCat IAP, TestFlight) is tracked in the Platform Assessment doc under Mobile Launch."
         />
       </ul>
     </div>
