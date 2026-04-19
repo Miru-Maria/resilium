@@ -4,13 +4,20 @@ import { db, uxTestRunsTable, uxTestResultsTable, resilienceReportsTable } from 
 import { eq, desc } from "drizzle-orm";
 import { PERSONAS } from "./personas.js";
 import { runUxTestSimulation, type ProgressEvent } from "./simulation.js";
-import { verifyAdminToken } from "../../../middlewares/adminAuth.js";
+import { verifyAdminToken, ADMIN_SESSION_COOKIE } from "../../../middlewares/adminAuth.js";
 
 const router: IRouter = Router();
 
-function requireAdmin(req: Request, res: Response): boolean {
+function extractToken(req: Request): string | null {
+  const cookie = req.cookies?.[ADMIN_SESSION_COOKIE];
+  if (typeof cookie === "string" && cookie) return cookie;
   const authHeader = req.headers["authorization"];
-  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
+  if (authHeader?.startsWith("Bearer ")) return authHeader.slice(7);
+  return null;
+}
+
+function requireAdmin(req: Request, res: Response): boolean {
+  const token = extractToken(req);
   if (token && verifyAdminToken(token)) return true;
   res.status(401).json({ error: "Unauthorized" });
   return false;
@@ -205,12 +212,8 @@ router.post("/runs/:runId/cancel", async (req: Request, res: Response) => {
 });
 
 router.get("/runs/:runId/stream", (req: Request, res: Response) => {
-  // SSE can't send custom headers, so we accept token as query param too
-  const authHeader = req.headers["authorization"];
-  const bearerToken = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
-  const queryToken = req.query["token"] as string | undefined;
-  const token = bearerToken ?? queryToken ?? null;
-
+  // SSE: cookies are sent automatically by same-origin EventSource; bearer header accepted as fallback
+  const token = extractToken(req);
   if (!token || !verifyAdminToken(token)) {
     res.status(401).end();
     return;

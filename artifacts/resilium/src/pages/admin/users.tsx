@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { AdminLayout, adminAuthHeaders, getAdminToken } from "./layout";
+import { AdminLayout, adminAuthHeaders } from "./layout";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, Users, CalendarDays, BookOpen, AlertTriangle, Copy, Check } from "lucide-react";
 
@@ -58,12 +58,10 @@ function CopyId({ id }: { id: string }) {
 }
 
 export default function AdminUsersPage() {
-  const adminToken = getAdminToken();
   const { data, isLoading, error } = useQuery({
     queryKey: ["adminUsers"],
     queryFn: fetchUsers,
     staleTime: 60 * 1000,
-    enabled: !!adminToken,
   });
 
   return (

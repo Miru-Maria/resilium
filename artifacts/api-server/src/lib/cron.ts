@@ -2,6 +2,7 @@ import cron from "node-cron";
 import { db, subscriptionsTable, reportFeedbackTable, resilienceReportsTable, usersTable, emailDripQueueTable } from "@workspace/db";
 import { and, desc, eq, gte, inArray, isNull, lte, sql } from "drizzle-orm";
 import { sendAdminDigest, sendErrorAlert, sendReassessmentReminder, sendUserWeeklyDigest, sendE2eAssessmentReport, sendSiteAuditReport, sendDripDay2Email, sendDripDay5Email, sendDripDay9Email, sendDripDay14Email, type E2eCheckResult } from "./email.js";
+import { runDatabaseBackup } from "./backup.js";
 import { sendPushNotificationsToUsers } from "./push.js";
 import { logger } from "./logger.js";
 import { createClerkClient } from "@clerk/express";
@@ -640,5 +641,10 @@ export function startCron(): void {
     runDripProcessor().catch(() => {});
   }, { timezone: "UTC" });
 
-  logger.info("Cron jobs scheduled (admin digest: Mon 07:00, user digest: Sun 18:00, 7d reminders: daily 09:00, 30d reminders: Mon 08:00, e2e test: Wed 06:00, site audit: Sun 07:00, drip: hourly :15 UTC)");
+  // Every day at 02:30 UTC — full database backup to object storage (keeps last 7 days)
+  cron.schedule("30 2 * * *", () => {
+    runDatabaseBackup().catch(() => {});
+  }, { timezone: "UTC" });
+
+  logger.info("Cron jobs scheduled (admin digest: Mon 07:00, user digest: Sun 18:00, 7d reminders: daily 09:00, 30d reminders: Mon 08:00, e2e test: Wed 06:00, site audit: Sun 07:00, drip: hourly :15, db-backup: daily 02:30 UTC)");
 }

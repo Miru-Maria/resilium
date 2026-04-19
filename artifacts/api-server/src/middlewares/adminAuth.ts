@@ -4,6 +4,8 @@ import type { Request, Response, NextFunction } from "express";
 const TOKEN_TTL_MS = 24 * 60 * 60 * 1000;
 const RECOVERY_TTL_MS = 15 * 60 * 1000;
 
+export const ADMIN_SESSION_COOKIE = "admin_sess";
+
 function signToken(payload: string): string {
   const secret = process.env["SESSION_SECRET"] ?? "";
   return crypto.createHmac("sha256", secret).update(payload).digest("hex");
@@ -30,16 +32,28 @@ export function verifyAdminToken(token: string): boolean {
   }
 }
 
-export function requireAdminSession(req: Request, res: Response, next: NextFunction): void {
+function extractToken(req: Request): string | null {
+  // Primary: httpOnly cookie (XSS-safe)
+  const cookieToken = req.cookies?.[ADMIN_SESSION_COOKIE];
+  if (typeof cookieToken === "string" && cookieToken) return cookieToken;
+  // Fallback: Authorization Bearer header (backward compat while old tokens expire)
   const authHeader = req.headers["authorization"];
-  if (authHeader?.startsWith("Bearer ")) {
-    const token = authHeader.slice(7);
-    if (verifyAdminToken(token)) {
-      next();
-      return;
-    }
+  if (authHeader?.startsWith("Bearer ")) return authHeader.slice(7);
+  return null;
+}
+
+export function requireAdminSession(req: Request, res: Response, next: NextFunction): void {
+  const token = extractToken(req);
+  if (token && verifyAdminToken(token)) {
+    next();
+    return;
   }
   res.status(401).json({ error: "UNAUTHORIZED", message: "Admin authentication required." });
+}
+
+export function isAdminAuthenticated(req: Request): boolean {
+  const token = extractToken(req);
+  return !!(token && verifyAdminToken(token));
 }
 
 // ── Password hashing (scrypt, Node built-in) ─────────────────────────────────

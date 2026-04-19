@@ -15,13 +15,14 @@ interface AdminLayoutProps {
   activeSection?: "dashboard" | "testimonials" | "mobile" | "gdpr" | "consent" | "ux-testing" | "users" | "announcements" | "marketing" | "security" | "monitoring" | "documents" | "analytics";
 }
 
+/** @deprecated Token is now stored in an httpOnly cookie — no longer readable from JS. */
 export function getAdminToken(): string | null {
-  return localStorage.getItem("admin_token");
+  return null;
 }
 
+/** Returns empty headers — admin session is carried via httpOnly cookie automatically. */
 export function adminAuthHeaders(): Record<string, string> {
-  const token = getAdminToken();
-  return token ? { Authorization: `Bearer ${token}` } : {};
+  return {};
 }
 
 const DOC_ITEMS = [
@@ -46,19 +47,12 @@ export function AdminLayout({ children, activeSection }: AdminLayoutProps) {
   const activeDoc = new URLSearchParams(search).get("doc") ?? "marketing-strategy";
 
   useEffect(() => {
-    const token = getAdminToken();
-    if (!token) {
-      navigate("/admin/login");
-      setChecking(false);
-      return;
-    }
-    fetch("/api/admin/session", { headers: { Authorization: `Bearer ${token}` } })
+    fetch("/api/admin/session", { credentials: "include" })
       .then((r) => r.json())
       .then((data) => {
         if (data.authenticated) {
           setAuthed(true);
         } else {
-          localStorage.removeItem("admin_token");
           navigate("/admin/login");
         }
       })
@@ -67,8 +61,7 @@ export function AdminLayout({ children, activeSection }: AdminLayoutProps) {
   }, []);
 
   async function handleLogout() {
-    localStorage.removeItem("admin_token");
-    await fetch("/api/admin/logout", { method: "POST" });
+    await fetch("/api/admin/logout", { method: "POST", credentials: "include" });
     navigate("/admin/login");
   }
 

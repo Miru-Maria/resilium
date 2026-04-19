@@ -1,0 +1,5 @@
+Contact: mailto:security@resilium-platform.com
+Expires: 2027-01-01T00:00:00.000Z
+Preferred-Languages: en, ro
+Policy: https://resilium-platform.com/privacy
+Acknowledgments: https://resilium-platform.com/security

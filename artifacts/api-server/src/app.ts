@@ -2,6 +2,7 @@ import * as Sentry from "@sentry/node";
 import express, { type Express, type Request, type Response, type NextFunction } from "express";
 import cors from "cors";
 import helmet from "helmet";
+import cookieParser from "cookie-parser";
 import { clerkMiddleware } from "@clerk/express";
 import pinoHttp from "pino-http";
 import router from "./routes";
@@ -69,6 +70,9 @@ app.use(
 app.use("/api/stripe/webhook", express.raw({ type: "*/*" }));
 app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true, limit: "1mb" }));
+
+// ── Cookie parsing (for httpOnly admin session cookie) ───────────────────────
+app.use(cookieParser());
 
 // ── Clerk authentication ─────────────────────────────────────────────────────
 const CLERK_JWT_KEY = `-----BEGIN PUBLIC KEY-----

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { AdminLayout, adminAuthHeaders, getAdminToken } from "./layout";
+import { AdminLayout, adminAuthHeaders } from "./layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   BarChart,
@@ -30,9 +30,7 @@ export default function AdminMobilePage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const token = getAdminToken();
-    if (!token) { setError("Not authenticated"); setLoading(false); return; }
-    fetch("/api/admin/analytics/mobile", { headers: adminAuthHeaders() })
+    fetch("/api/admin/analytics/mobile", { credentials: "include" })
       .then((r) => {
         if (!r.ok) throw new Error("Failed to load");
         return r.json();

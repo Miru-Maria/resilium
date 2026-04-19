@@ -36,8 +36,7 @@ export default function AdminLoginPage() {
         body: JSON.stringify({ username, password }),
       });
       const data = await res.json().catch(() => ({}));
-      if (res.ok && data.token) {
-        localStorage.setItem("admin_token", data.token);
+      if (res.ok) {
         setLocation("/admin/dashboard");
       } else {
         setError(data.message ?? "Invalid credentials. Please try again.");
@@ -77,8 +76,7 @@ export default function AdminLoginPage() {
         body: JSON.stringify({ code: recoveryCode.trim() }),
       });
       const data = await res.json().catch(() => ({}));
-      if (res.ok && data.token) {
-        localStorage.setItem("admin_token", data.token);
+      if (res.ok) {
         setLocation("/admin/dashboard");
       } else {
         setRecoveryError(data.message ?? "Invalid or expired code.");

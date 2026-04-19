@@ -1,5 +1,5 @@
 import { useParams, Link, useLocation } from "wouter";
-import { AdminLayout, getAdminToken } from "./layout";
+import { AdminLayout } from "./layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -33,10 +33,8 @@ interface RunReport {
   results: PersonaResult[];
 }
 
-function authH(): Record<string, string> { const t = localStorage.getItem("admin_token"); return t ? { Authorization: `Bearer ${t}` } : {}; }
-
 async function fetchRunReport(runId: string): Promise<RunReport> {
-  const res = await fetch(`/api/admin/ux-test/runs/${runId}`, { headers: authH() });
+  const res = await fetch(`/api/admin/ux-test/runs/${runId}`, { credentials: "include" });
   if (res.status === 404) throw new Error("NOT_FOUND");
   if (res.status === 401) throw new Error("UNAUTHORIZED");
   if (!res.ok) throw new Error("FETCH_ERROR");
@@ -140,12 +138,10 @@ function generateMarkdown(report: RunReport): string {
 export default function UxTestReportPage() {
   const { runId } = useParams<{ runId: string }>();
   const [, navigate] = useLocation();
-  const adminToken = getAdminToken();
-
   const { data: report, isLoading, error } = useQuery({
     queryKey: ["ux-run-report", runId],
     queryFn: () => fetchRunReport(runId!),
-    enabled: !!adminToken && !!runId,
+    enabled: !!runId,
     refetchInterval: (query) => {
       const data = query.state.data;
       return data?.status === "running" ? 5000 : false;

@@ -136,12 +136,11 @@ export default function AdminDashboard() {
     const load = async () => {
       try {
         const [analyticsRes, mobileRes, coachingRes] = await Promise.all([
-          fetch(`${BASE}/api/admin/analytics`, { headers: adminAuthHeaders() }),
-          fetch(`${BASE}/api/admin/analytics/mobile`, { headers: adminAuthHeaders() }),
-          fetch(`${BASE}/api/admin/coaching-stats`, { headers: adminAuthHeaders() }),
+          fetch(`${BASE}/api/admin/analytics`, { credentials: "include" }),
+          fetch(`${BASE}/api/admin/analytics/mobile`, { credentials: "include" }),
+          fetch(`${BASE}/api/admin/coaching-stats`, { credentials: "include" }),
         ]);
         if (analyticsRes.status === 401) {
-          localStorage.removeItem("admin_token");
           setLocation("/admin/login");
           return;
         }

@@ -21,7 +21,7 @@ import {
   AlertCircle, RefreshCw, Trash2, Ban
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { AdminLayout, getAdminToken } from "./layout";
+import { AdminLayout } from "./layout";
 
 interface PersonaMeta {
   key: string;
@@ -45,37 +45,30 @@ interface PersonaProgress {
   error?: string;
 }
 
-function getToken() { return localStorage.getItem("admin_token"); }
-function authH(): Record<string, string> { const t = getToken(); return t ? { Authorization: `Bearer ${t}` } : {}; }
-
 async function fetchPersonas(): Promise<{ personas: PersonaMeta[] }> {
-  const res = await fetch("/api/admin/ux-test/personas", { headers: authH() });
+  const res = await fetch("/api/admin/ux-test/personas", { credentials: "include" });
   if (!res.ok) throw new Error(`Failed to fetch personas (${res.status})`);
   return res.json();
 }
 
 async function fetchRuns(): Promise<{ runs: RunSummary[] }> {
-  const res = await fetch("/api/admin/ux-test/runs", { headers: authH() });
+  const res = await fetch("/api/admin/ux-test/runs", { credentials: "include" });
   if (!res.ok) throw new Error(`Failed to fetch runs (${res.status})`);
   return res.json();
 }
 
 async function deleteRun(runId: string): Promise<void> {
-  const token = getToken();
-  if (!token) throw new Error("Admin authentication required");
   const res = await fetch(`/api/admin/ux-test/runs/${runId}`, {
     method: "DELETE",
-    headers: { Authorization: `Bearer ${token}` },
+    credentials: "include",
   });
   if (!res.ok) throw new Error("Failed to delete run");
 }
 
 async function cancelRun(runId: string): Promise<void> {
-  const token = getToken();
-  if (!token) throw new Error("Admin authentication required");
   const res = await fetch(`/api/admin/ux-test/runs/${runId}/cancel`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${token}` },
+    credentials: "include",
   });
   if (!res.ok) throw new Error("Failed to cancel run");
 }
@@ -95,7 +88,6 @@ function getRatingLabel(rating: number) {
 }
 
 export default function UxTestingPage() {
-  const adminToken = getAdminToken();
   const queryClient = useQueryClient();
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
   const [isRunning, setIsRunning] = useState(false);
@@ -114,7 +106,6 @@ export default function UxTestingPage() {
   } = useQuery({
     queryKey: ["ux-personas"],
     queryFn: fetchPersonas,
-    enabled: !!adminToken,
     retry: 1,
   });
 
@@ -126,7 +117,6 @@ export default function UxTestingPage() {
   } = useQuery({
     queryKey: ["ux-runs"],
     queryFn: fetchRuns,
-    enabled: !!adminToken,
     retry: 1,
   });
 
@@ -162,7 +152,7 @@ export default function UxTestingPage() {
 
   async function pollRunStatus(runId: string) {
     try {
-      const res = await fetch(`/api/admin/ux-test/runs/${runId}`, { headers: authH() });
+      const res = await fetch(`/api/admin/ux-test/runs/${runId}`, { credentials: "include" });
       if (!res.ok) return;
       const data = await res.json() as {
         status: string;
@@ -211,10 +201,6 @@ export default function UxTestingPage() {
   }
 
   async function startRun() {
-    if (!adminToken) {
-      setRunError("Admin authentication required. Please log in.");
-      return;
-    }
     if (selectedKeys.size === 0) return;
     setIsRunning(true);
     setRunComplete(false);
@@ -232,7 +218,8 @@ export default function UxTestingPage() {
     try {
       const res = await fetch("/api/admin/ux-test/run", {
         method: "POST",
-        headers: { "Content-Type": "application/json", ...authH() },
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ personaKeys: Array.from(selectedKeys) }),
       });
 
@@ -243,8 +230,7 @@ export default function UxTestingPage() {
       const { runId } = await res.json() as { runId: string };
       setActiveRunId(runId);
 
-      const token = getToken();
-      const streamUrl = `/api/admin/ux-test/runs/${runId}/stream${token ? `?token=${encodeURIComponent(token)}` : ""}`;
+      const streamUrl = `/api/admin/ux-test/runs/${runId}/stream`;
       const es = new EventSource(streamUrl);
       eventSourceRef.current = es;
 

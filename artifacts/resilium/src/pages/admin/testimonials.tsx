@@ -8,9 +8,6 @@ import { AdminLayout } from "./layout";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
-function getAdminToken() {
-  return localStorage.getItem("admin_token") ?? "";
-}
 
 interface Testimonial {
   id: number;
@@ -22,7 +19,6 @@ interface Testimonial {
 }
 
 export default function AdminTestimonialsPage() {
-  const adminToken = getAdminToken();
   const { toast } = useToast();
   const qc = useQueryClient();
   const [filter, setFilter] = useState<"all" | "pending" | "approved">("pending");
@@ -30,24 +26,18 @@ export default function AdminTestimonialsPage() {
   const { data, isLoading, isError } = useQuery({
     queryKey: ["admin-testimonials"],
     queryFn: async () => {
-      const res = await fetch(`${BASE}/api/admin/testimonials`, {
-        headers: { Authorization: `Bearer ${getAdminToken()}` },
-      });
+      const res = await fetch(`${BASE}/api/admin/testimonials`, { credentials: "include" });
       if (!res.ok) throw new Error("Failed to fetch");
       return res.json() as Promise<{ testimonials: Testimonial[] }>;
     },
-    enabled: !!adminToken,
   });
 
   const mutation = useMutation({
     mutationFn: async ({ id, isPublished }: { id: number; isPublished: boolean }) => {
-      if (!adminToken) throw new Error("Not authenticated");
       const res = await fetch(`${BASE}/api/admin/testimonials/${id}`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${getAdminToken()}`,
-        },
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ isPublished }),
       });
       if (!res.ok) throw new Error("Failed to update");

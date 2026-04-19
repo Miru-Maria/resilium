@@ -6,6 +6,7 @@ import { desc, eq, count, max, and, isNotNull, gte, lte, ilike, or } from "drizz
 import {
   requireAdminSession, generateAdminToken, verifyAdminToken,
   hashPassword, verifyPassword, generateRecoveryCode, consumeRecoveryCode,
+  isAdminAuthenticated, ADMIN_SESSION_COOKIE,
 } from "../../middlewares/adminAuth.js";
 import rateLimit from "express-rate-limit";
 import uxTestRouter from "./ux-test/index.js";
@@ -64,20 +65,26 @@ router.post("/login", adminLoginRateLimit, async (req, res) => {
 
   if (passwordOk) {
     const token = generateAdminToken();
-    res.json({ success: true, token });
+    res.cookie(ADMIN_SESSION_COOKIE, token, {
+      httpOnly: true,
+      secure: process.env["NODE_ENV"] !== "development",
+      sameSite: "lax",
+      maxAge: 24 * 60 * 60 * 1000,
+      path: "/",
+    });
+    res.json({ success: true });
   } else {
     res.status(401).json({ error: "INVALID_CREDENTIALS", message: "Invalid username or password." });
   }
 });
 
 router.post("/logout", (req, res) => {
+  res.clearCookie(ADMIN_SESSION_COOKIE, { path: "/" });
   res.json({ success: true });
 });
 
 router.get("/session", (req, res) => {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
-  res.json({ authenticated: token ? verifyAdminToken(token) : false });
+  res.json({ authenticated: isAdminAuthenticated(req) });
 });
 
 // Request a recovery code — generates an 8-char code logged to the server console (valid 15 min)
@@ -96,7 +103,14 @@ router.post("/verify-recovery", (req, res) => {
     return;
   }
   const token = generateAdminToken();
-  res.json({ success: true, token });
+  res.cookie(ADMIN_SESSION_COOKIE, token, {
+    httpOnly: true,
+    secure: process.env["NODE_ENV"] !== "development",
+    sameSite: "lax",
+    maxAge: 24 * 60 * 60 * 1000,
+    path: "/",
+  });
+  res.json({ success: true });
 });
 
 // Change admin password (requires active session) — stores bcrypt hash in DB
