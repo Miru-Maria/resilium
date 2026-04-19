@@ -8,7 +8,159 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type SectionKey = "master-checklist" | "launch-readiness" | "product-hunt" | "reddit" | "research-report";
+type SectionKey = "master-checklist" | "launch-readiness" | "mobile-launch" | "product-hunt" | "reddit" | "research-report";
+
+/* ─── MOBILE LAUNCH CHECKLIST ─────────────────────────────── */
+
+const MOBILE_STORE_KEY = "resilium_launch_checklist_v1";
+
+type TagType = "Blocker" | "Needed" | "Verify" | "Decide" | "Future";
+interface LaunchItem { id: string; label: string; note: string; tag: TagType; }
+interface LaunchGroup { id: string; label: string; items: LaunchItem[]; }
+
+const LAUNCH_GROUPS: LaunchGroup[] = [
+  {
+    id: "ios-prep",
+    label: "🍎 iOS App Store — Preparation",
+    items: [
+      { id: "ios-apple-dev", label: "Apple Developer account ($99/year) active and in good standing", note: "Required to submit any app to the App Store. Enroll at developer.apple.com if not done. Account must be a paid individual or organisation account — free accounts cannot submit.", tag: "Blocker" },
+      { id: "ios-banking", label: "Banking and tax information completed in App Store Connect", note: "Required before Apple will process any in-app purchase revenue. Go to App Store Connect → Agreements, Tax, and Banking → complete all three sections. Takes 1–3 business days to verify.", tag: "Blocker" },
+      { id: "ios-screenshots", label: "App Store screenshots captured (6.9\" and 6.1\" required)", note: "Use Xcode Simulator or a real iPhone. Minimum required: 6.9\" (iPhone 16 Pro Max) and 6.1\" (iPhone 16). Showcase: Score reveal screen, AI Companion chat, Crisis Guides, dimension breakdown. Use tools like Rottenwood or Previewed to add device frames and captions.", tag: "Blocker" },
+      { id: "ios-listing", label: "App Store Connect listing created", note: "App name, subtitle (≤30 chars), description, keywords (≤100 chars), primary category, support URL, privacy policy URL (use resilium-platform.com/privacy)", tag: "Blocker" },
+      { id: "ios-age-rating", label: "Age rating questionnaire completed in App Store Connect", note: "Health & Fitness / Lifestyle apps typically receive 4+ rating. Answer questionnaire in App Store Connect under the app listing.", tag: "Needed" },
+      { id: "ios-eas-build", label: "Distribution build signed via EAS Build", note: "Run: eas build --platform ios --profile production. Requires Apple Developer account + distribution certificate + provisioning profile (EAS can generate these).", tag: "Blocker" },
+    ],
+  },
+  {
+    id: "ios-iap",
+    label: "💳 iOS App Store — In-App Purchases",
+    items: [
+      { id: "ios-revenuecat-account", label: "RevenueCat account created and linked to App Store Connect", note: "App Store requires Apple billing for any subscription sold through the app. RevenueCat is the recommended integration layer. Free tier available at revenuecat.com", tag: "Blocker" },
+      { id: "ios-iap-product", label: "Pro subscription product created in App Store Connect", note: "Create both Monthly and Annual auto-renewable subscription products. Link them to RevenueCat offerings. Requires banking/tax info in App Store Connect first.", tag: "Blocker" },
+      { id: "ios-revenuecat-sdk", label: "RevenueCat SDK wired into the mobile app", note: "Install react-native-purchases. Initialize with your RevenueCat API key. Hook into useProStatus() context so Pro features gate correctly on iOS.", tag: "Needed" },
+      { id: "ios-paywall-screen", label: "iOS paywall screen built in the mobile app", note: "Separate from the Stripe web flow — Apple requires their own billing for in-app purchases. Must present the subscription options using native purchase APIs via RevenueCat.", tag: "Needed" },
+      { id: "ios-sandbox-test", label: "Sandbox purchase + restore tested on a physical iPhone", note: "Create a Sandbox Tester account in App Store Connect. Test purchase, subscription renewal, and 'Restore Purchases' flow end-to-end on a real device.", tag: "Verify" },
+    ],
+  },
+  {
+    id: "ios-submit",
+    label: "🚀 iOS App Store — Submission",
+    items: [
+      { id: "ios-testflight", label: "TestFlight build uploaded and tested on real iPhone", note: "Run through the full app on a real device via TestFlight before App Store submission. Invite at least one external tester. Check all 14 assessment steps, report generation, and Pro gating.", tag: "Verify" },
+      { id: "ios-app-store-submit", label: "App Store review submission sent", note: "Submit for review in App Store Connect. Apple's review typically takes 24–48 hours. First submission often takes longer. Have app privacy details and export compliance ready.", tag: "Needed" },
+    ],
+  },
+  {
+    id: "mobile",
+    label: "📱 Mobile App Testing",
+    items: [
+      { id: "mobile-iphone-physical", label: "Tested on a physical iPhone (Expo Go or TestFlight)", note: "Scan the Expo QR code with the Camera app on iOS, or install via TestFlight. Simulators are not sufficient — touch targets, fonts, and animations can differ on device.", tag: "Blocker" },
+      { id: "mobile-assessment-full", label: "Full assessment flow completed on mobile", note: "Run through all 14 assessment steps on iPhone. Confirm navigation, keyboard behavior, and form interactions feel smooth on a small screen.", tag: "Verify" },
+      { id: "mobile-step-render", label: "All 14 assessment steps render correctly on small screen", note: "Pay special attention to Step 8 (chronic condition severity buttons), Step 12 (risk profile grid), and Step 13 (Community & Social Capital — card layout).", tag: "Verify" },
+      { id: "mobile-ai-report", label: "AI report generation works end-to-end on mobile", note: "Complete the assessment and confirm the 'Generate Report' button triggers the async job, the loading state displays correctly, and the results page loads with real data.", tag: "Verify" },
+      { id: "mobile-pro-gating", label: "Pro gating on mobile works with graceful fallback", note: "If RevenueCat is not yet wired, confirm Pro-gated features degrade gracefully (show upgrade prompt, not crash).", tag: "Verify" },
+    ],
+  },
+];
+
+const MOBILE_TOTAL = LAUNCH_GROUPS.reduce((sum, g) => sum + g.items.length, 0);
+
+function loadMobileChecked(): Set<string> {
+  try { return new Set(JSON.parse(localStorage.getItem(MOBILE_STORE_KEY) || "[]")); }
+  catch { return new Set(); }
+}
+function saveMobileChecked(s: Set<string>) {
+  try { localStorage.setItem(MOBILE_STORE_KEY, JSON.stringify([...s])); } catch {}
+}
+
+function TagBadge({ tag }: { tag: TagType }) {
+  const map: Record<TagType, string> = {
+    Blocker: "bg-red-100 text-red-700 border border-red-200",
+    Needed: "bg-amber-100 text-amber-700 border border-amber-200",
+    Verify: "bg-blue-100 text-blue-700 border border-blue-200",
+    Decide: "bg-purple-100 text-purple-700 border border-purple-200",
+    Future: "bg-gray-100 text-gray-500 border border-gray-200",
+  };
+  return (
+    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap flex-shrink-0 ${map[tag]}`}>{tag}</span>
+  );
+}
+
+function MobileLaunchChecklistSection() {
+  const [checked, setChecked] = useState<Set<string>>(loadMobileChecked);
+
+  const toggle = (id: string) => {
+    setChecked(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      saveMobileChecked(next);
+      return next;
+    });
+  };
+
+  const done = checked.size;
+  const pct = MOBILE_TOTAL ? (done / MOBILE_TOTAL) * 100 : 0;
+
+  return (
+    <div className="px-6 py-6 space-y-6">
+      <div className="bg-slate-50 rounded-xl border border-slate-200 p-4">
+        <div className="flex items-baseline justify-between mb-3">
+          <p className="text-sm font-bold text-gray-900">Overall Progress</p>
+          <p className="text-sm text-gray-500">{done} / {MOBILE_TOTAL} completed</p>
+        </div>
+        <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
+          <div
+            className="h-2.5 rounded-full transition-all duration-300"
+            style={{ width: `${pct.toFixed(1)}%`, background: "linear-gradient(90deg, #E08040, #34D399)" }}
+          />
+        </div>
+        <p className="text-xs text-gray-400 mt-2">Click any item to mark it complete. Progress saves automatically in your browser.</p>
+      </div>
+
+      <div className="flex flex-wrap gap-2 text-xs">
+        {(["Blocker", "Needed", "Verify", "Decide", "Future"] as TagType[]).map(t => (
+          <TagBadge key={t} tag={t} />
+        ))}
+        <span className="text-gray-400 text-xs ml-1 self-center">— tag legend</span>
+      </div>
+
+      {LAUNCH_GROUPS.map(group => {
+        const groupDone = group.items.filter(i => checked.has(i.id)).length;
+        return (
+          <div key={group.id} className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 bg-gray-50/60">
+              <p className="text-sm font-bold text-gray-900">{group.label}</p>
+              <span className="text-xs font-semibold text-gray-400 bg-white border border-gray-200 px-2 py-0.5 rounded-full">
+                {groupDone}/{group.items.length}
+              </span>
+            </div>
+            <ul className="divide-y divide-gray-50">
+              {group.items.map(item => {
+                const isChecked = checked.has(item.id);
+                return (
+                  <li
+                    key={item.id}
+                    onClick={() => toggle(item.id)}
+                    className={`flex items-start gap-3 px-5 py-3.5 cursor-pointer select-none transition-colors hover:bg-gray-50 ${isChecked ? "opacity-55" : ""}`}
+                  >
+                    <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-colors ${isChecked ? "bg-emerald-500 border-emerald-500" : "border-gray-300 bg-white"}`}>
+                      {isChecked && <span className="text-white text-xs font-bold">✓</span>}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-sm font-medium leading-snug ${isChecked ? "line-through text-gray-400" : "text-gray-900"}`}>{item.label}</p>
+                      <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{item.note}</p>
+                    </div>
+                    <TagBadge tag={item.tag} />
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 function SectionHeader({
   icon: Icon,
@@ -1059,6 +1211,22 @@ export function MarketingPageContent() {
           {openSections.has("launch-readiness") && (
             <div className="border-t border-slate-200">
               <LaunchReadinessSection />
+            </div>
+          )}
+        </div>
+
+        {/* Mobile Launch Checklist */}
+        <div className="bg-white/90 rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <SectionHeader
+            icon={Smartphone}
+            label="iOS App Store — When Ready"
+            title="Mobile Launch Checklist"
+            isOpen={openSections.has("mobile-launch")}
+            onToggle={() => toggle("mobile-launch")}
+          />
+          {openSections.has("mobile-launch") && (
+            <div className="border-t border-slate-200">
+              <MobileLaunchChecklistSection />
             </div>
           )}
         </div>
