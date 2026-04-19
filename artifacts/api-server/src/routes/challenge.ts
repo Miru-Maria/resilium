@@ -101,7 +101,7 @@ router.post("/api/challenge/complete/:day", challengeLimiter, requireAuth(), asy
 
     const [updated] = await db
       .update(challengeStateTable)
-      .set({ completedDays: JSON.stringify(completedDays) })
+      .set({ completedDays: JSON.stringify(completedDays), updatedAt: new Date() })
       .where(eq(challengeStateTable.userId, userId))
       .returning();
 
@@ -139,7 +139,7 @@ router.delete("/api/challenge/complete/:day", challengeLimiter, requireAuth(), a
 
     const [updated] = await db
       .update(challengeStateTable)
-      .set({ completedDays: JSON.stringify(filtered) })
+      .set({ completedDays: JSON.stringify(filtered), updatedAt: new Date() })
       .where(eq(challengeStateTable.userId, userId))
       .returning();
 

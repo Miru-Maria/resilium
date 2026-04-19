@@ -72,7 +72,7 @@ import { guides, getEssentialGuides, getGuidesByLocation, getGuidesByDimension, 
 import { saveToCache, loadFromCache, plansListCacheKey } from "@/lib/offline-cache";
 import { DailyTipCard } from "@/components/daily-tip-card";
 import { AchievementBadges } from "@/components/achievement-badges";
-import { allDimsAssessedFromPlan } from "@/lib/badges";
+import { allDimsAssessedFromPlan } from "@/lib/badge-criteria";
 import { ChallengeCard } from "@/components/challenge-card";
 import {
   AlertDialog,
@@ -1940,13 +1940,19 @@ function CompanionChat() {
     (async () => {
       try {
         const res = await fetch("/api/companion/history", { credentials: "include" });
-        if (!res.ok) throw new Error("fetch failed");
+        if (!res.ok) {
+          // Server/auth error — not offline. Fall back to cache silently.
+          const cached = localStorage.getItem(COMPANION_CACHE_KEY);
+          if (cached) setMessages(JSON.parse(cached));
+          return;
+        }
         const data = await res.json();
         const msgs: CompanionMessage[] = data.messages || [];
         setMessages(msgs);
         localStorage.setItem(COMPANION_CACHE_KEY, JSON.stringify(msgs));
       } catch {
-        setIsOffline(true);
+        // Only a genuine network failure (fetch throws) reaches here
+        if (!navigator.onLine) setIsOffline(true);
         const cached = localStorage.getItem(COMPANION_CACHE_KEY);
         if (cached) setMessages(JSON.parse(cached));
       } finally {

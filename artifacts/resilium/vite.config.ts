@@ -66,8 +66,7 @@ export default defineConfig({
         navigateFallbackDenylist: [/^\/api/],
       },
       devOptions: {
-        enabled: true,
-        type: "module",
+        enabled: false,
       },
     }),
     ...(process.env.NODE_ENV !== "production" &&
