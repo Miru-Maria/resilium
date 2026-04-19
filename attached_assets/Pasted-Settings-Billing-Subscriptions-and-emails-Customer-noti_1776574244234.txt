@@ -1,0 +1,159 @@
+Settings
+Billing
+Subscriptions and emails
+Customer notifications and recurring payments management.
+Email notifications and customer management
+Configure customer notifications and how they manage their accounts. Learn more
+Customer emails
+
+Send a reminder email 7 days before a trial ends
+
+
+Send emails about upcoming renewals
+
+
+Send emails about expiring cards
+
+
+Send emails when card payments fail
+
+
+Send emails when bank debit payments fail
+
+
+Cancel
+Save
+Manage free trial messaging
+Use these settings to help your business comply with card network requirements for free trials. Learn more
+Statement descriptor
+
+Add a one-time “trial over” message to the statement descriptor
+This differentiates the first card transaction after a free trial to comply with regulatory requirements. Set a shortened descriptor in 
+Account settings
+ to avoid truncation.
+
+Cancel
+
+Save
+Prevent failed payments
+Configure whether you'd like to notify customers to keep their payment information up to date.
+Upcoming renewal events
+Create an event for upcoming invoices 
+
+7 days
+ before a subscription renews.
+
+Cancel
+
+Save
+Manage failed payments for subscriptions
+Configure the steps to take when a customer payment fails.
+
+Card payments
+
+Retry up to 
+
+8 times
+ within 
+
+2 weeks
+
+
+Bank debit payments
+
+Up to 2 retry attempts. 
+Learn more
+
+Subscription status
+If all retries for a payment fail,
+
+cancel the subscription
+Invoice status
+If all retries for a payment fail,
+
+leave the invoice past-due
+
+Cancel
+
+Save
+Manage disputed payments
+Configure the steps you'd like to take when a dispute is opened on a recurring card payment.
+Subscription status
+If a dispute is opened,
+
+leave the subscription past-due
+
+Cancel
+
+Save
+Manage payments that require confirmation
+Configure how you'd like to handle payments that require confirmation, like 3D Secure and Boleto.
+Enable 3D Secure
+
+Request 3D Secure for Billing payments that match 
+Radar rules
+We recommend enabling this if your integration can 
+handle 3D Secure
+.
+Customer emails
+
+Send a Stripe-hosted link for customers to confirm their payments when required
+
+Subscription status
+If a recurring payment is incomplete for
+
+15 days
+
+cancel the subscription
+Invoice status
+If a payment is incomplete for
+
+15 days
+
+leave the invoice as-is
+
+Cancel
+
+Save
+Manage invoices sent to customers
+Automations available
+Configure how you'd like to handle invoices sent to your customer to pay manually.
+Customer emails
+
+Send finalized invoices and credit notes to customers
+
+Send reminders if a recurring invoice hasn't been paid
+Subscription status
+If an invoice is past due by
+
+60 days
+
+leave the subscription past-due
+Invoice status
+If an invoice is past due by
+
+60 days
+
+leave the invoice past-due
+
+Cancel
+
+Save
+Pause payment collection for all existing subscriptions
+Use to pause all existing subscriptions. Learn more
+To help you test your integration with confidence, changes won’t affect your subscriptions in live mode.
+Pause all payment collection
+Note: You can always pause new subscriptions on an individual basis or by updating this setting.
+
+Set up
+Default billing mode
+Flexible billing mode introduces new billing behaviors and features to subscriptions. Compare billing modes
+Dashboard billing mode
+Affects subscription editor and Payment Links and pricing tables generated on Dashboard
+Dashboard billing mode
+
+Flexible and hide classic
+API billing mode
+You can specify a billing mode in your integration. Otherwise, the API version determines the billing mode for subscriptions you create through the API.
+Integrations using 2025-09-30.clover or later use flexible billing mode.
+How to find your API version
