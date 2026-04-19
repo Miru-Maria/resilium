@@ -68,3 +68,13 @@ export const checkinLimiter = rateLimit({
   keyGenerator: userKey,
   message: { error: "RATE_LIMITED", message: "Too many check-ins. Please try again later." },
 });
+
+export const challengeLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  validate: userKeyValidate,
+  keyGenerator: userKey,
+  message: { error: "RATE_LIMITED", message: "Too many challenge actions. Please try again later." },
+});

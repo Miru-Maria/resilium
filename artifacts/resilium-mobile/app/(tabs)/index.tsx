@@ -28,6 +28,7 @@ import { useAuth } from "@/context/auth";
 import { useColors } from "@/context/theme";
 import { ColorsType } from "@/constants/colors";
 import { computeBadgeCount, allDimsAssessedFromPlan } from "@/utils/badge-criteria";
+import { useProStatus } from "@/context/proStatus";
 
 const { width: SCREEN_W } = Dimensions.get("window");
 
@@ -85,6 +86,7 @@ function CompanionScrollContent({
   getAuthHeaders: () => Promise<Record<string, string>>;
   bottomPad: number;
 }) {
+  const { isPro } = useProStatus();
   const [score, setScore] = useState<number | null>(null);
   const [latestReportId, setLatestReportId] = useState<string | null>(null);
   const [streak, setStreak] = useState(0);
@@ -177,7 +179,7 @@ function CompanionScrollContent({
               allDimsAssessed: allDimsAssessedFromPlan(latest),
               streak: streakRaw,
               completedDaysCount,
-              isPro: false,
+              isPro,
             }));
           }
         }

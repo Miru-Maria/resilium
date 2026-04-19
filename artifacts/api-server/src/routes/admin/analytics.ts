@@ -186,6 +186,8 @@ router.get("/users", async (req, res) => {
         SELECT c.user_id FROM conversations c
           JOIN messages m ON m.conversation_id = c.id
           WHERE m.created_at >= ${thirtyDaysAgo}
+        UNION
+        SELECT user_id FROM challenge_state WHERE started_at >= ${thirtyDaysAgo}
       ) active_users
     `);
     const activeUsers30d = Number((activeUsersResult.rows[0] as { count: number } | undefined)?.count ?? 0);

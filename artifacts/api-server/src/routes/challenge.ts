@@ -2,6 +2,7 @@ import { Router } from "express";
 import { requireAuth, getAuth } from "@clerk/express";
 import { db, challengeStateTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
+import { challengeLimiter } from "../lib/rate-limiters";
 
 const router = Router();
 
@@ -29,7 +30,7 @@ router.get("/api/challenge", requireAuth(), async (req, res): Promise<void> => {
   }
 });
 
-router.post("/api/challenge/start", requireAuth(), async (req, res): Promise<void> => {
+router.post("/api/challenge/start", challengeLimiter, requireAuth(), async (req, res): Promise<void> => {
   try {
     const userId = getAuth(req).userId;
     if (!userId) { res.status(401).json({ error: "Unauthorized" }); return; }
@@ -74,7 +75,7 @@ router.post("/api/challenge/start", requireAuth(), async (req, res): Promise<voi
   }
 });
 
-router.post("/api/challenge/complete/:day", requireAuth(), async (req, res): Promise<void> => {
+router.post("/api/challenge/complete/:day", challengeLimiter, requireAuth(), async (req, res): Promise<void> => {
   try {
     const userId = getAuth(req).userId;
     if (!userId) { res.status(401).json({ error: "Unauthorized" }); return; }
@@ -115,7 +116,7 @@ router.post("/api/challenge/complete/:day", requireAuth(), async (req, res): Pro
   }
 });
 
-router.delete("/api/challenge/complete/:day", requireAuth(), async (req, res): Promise<void> => {
+router.delete("/api/challenge/complete/:day", challengeLimiter, requireAuth(), async (req, res): Promise<void> => {
   try {
     const userId = getAuth(req).userId;
     if (!userId) { res.status(401).json({ error: "Unauthorized" }); return; }

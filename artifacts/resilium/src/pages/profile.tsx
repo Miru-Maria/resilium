@@ -729,7 +729,7 @@ function OverviewTab({ plans }: { plans: PlanSummary[] }) {
         planCount={plans.length}
         streak={streak}
         isPro={isPro}
-        allDimsAssessed={plans.length > 0 && allDimsAssessedFromPlan(plans[plans.length - 1])}
+        allDimsAssessed={plans.length > 0 && allDimsAssessedFromPlan(plans[plans.length - 1] as unknown as Record<string, unknown>)}
         completedDaysCount={completedDaysCount}
       />
 
