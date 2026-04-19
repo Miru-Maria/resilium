@@ -28,6 +28,7 @@ import { useAuth } from "@/context/auth";
 import { useColors } from "@/context/theme";
 import { ColorsType } from "@/constants/colors";
 import { computeBadgeCount, allDimsAssessedFromPlan } from "@/utils/badge-criteria";
+import { getDailyTip, getLowestDim, DIM_LABELS, type DimKey } from "@/utils/tips-bank";
 import { useProStatus } from "@/context/proStatus";
 
 const { width: SCREEN_W } = Dimensions.get("window");
@@ -65,16 +66,6 @@ function AnimatedOrb({
   );
 }
 
-const MOTIVATIONS = [
-  "One action today. One gap closed permanently.",
-  "Preparedness isn't paranoia — it's wisdom.",
-  "The best time to prepare was yesterday. The next best time is now.",
-  "Your future self is counting on the decisions you make today.",
-  "Small consistent actions build durable resilience.",
-  "Every task you complete is a vulnerability you've eliminated.",
-  "Resilience isn't a destination — it's a daily practice.",
-];
-
 function CompanionScrollContent({
   user,
   colors,
@@ -99,8 +90,7 @@ function CompanionScrollContent({
   } | null>(null);
   const [badgeCount, setBadgeCount] = useState(0);
   const [engagementLoaded, setEngagementLoaded] = useState(false);
-
-  const motivation = MOTIVATIONS[new Date().getDay() % MOTIVATIONS.length];
+  const [lowestDim, setLowestDim] = useState<DimKey>("psychological");
 
   useEffect(() => {
     const h = new Date().getHours();
@@ -132,9 +122,19 @@ function CompanionScrollContent({
         const data = await res.json();
         const reports: any[] = data.reports ?? [];
         if (reports.length > 0) {
-          const latest = reports[0];
+          const latest = reports[reports.length - 1];
           setScore(Math.round(latest.score?.overall ?? 0));
           setLatestReportId(latest.reportId);
+          if (latest.score) {
+            setLowestDim(getLowestDim({
+              financial: latest.score.financial,
+              health: latest.score.health,
+              skills: latest.score.skills,
+              mobility: latest.score.mobility,
+              psychological: latest.score.psychological,
+              resources: latest.score.resources,
+            }));
+          }
         }
       } catch { setScoreFetchError(true); }
     })();
@@ -363,10 +363,26 @@ function CompanionScrollContent({
         ))}
       </View>
 
-      {/* Motivational quote */}
-      <View style={{ backgroundColor: colors.primaryMuted, borderRadius: 16, padding: 18, borderWidth: 1, borderColor: colors.primaryBorder }}>
-        <Text style={{ fontFamily: "Inter_400Regular", fontSize: 13, color: colors.primary, fontStyle: "italic", lineHeight: 20 }}>"{motivation}"</Text>
-      </View>
+      {/* Daily tip */}
+      {(() => {
+        const tip = getDailyTip(lowestDim);
+        const dimLabel = DIM_LABELS[lowestDim];
+        return (
+          <View style={{ backgroundColor: colors.surface, borderRadius: 16, padding: 18, borderWidth: 1, borderColor: colors.border, gap: 10 }}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+              <Text style={{ fontFamily: "Inter_700Bold", fontSize: 10, color: colors.textMuted, letterSpacing: 1, textTransform: "uppercase" }}>Today's Tip</Text>
+              <View style={{ backgroundColor: colors.primaryMuted, borderRadius: 20, paddingHorizontal: 8, paddingVertical: 3, borderWidth: 1, borderColor: colors.primaryBorder }}>
+                <Text style={{ fontFamily: "Inter_600SemiBold", fontSize: 10, color: colors.primary }}>{dimLabel}</Text>
+              </View>
+            </View>
+            <Text style={{ fontFamily: "Inter_600SemiBold", fontSize: 13, color: colors.text, lineHeight: 20 }}>{tip.text}</Text>
+            <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 6 }}>
+              <Text style={{ fontFamily: "Inter_700Bold", fontSize: 12, color: colors.primary, marginTop: 1 }}>→</Text>
+              <Text style={{ fontFamily: "Inter_400Regular", fontSize: 12, color: colors.textMuted, lineHeight: 18, flex: 1 }}>{tip.action}</Text>
+            </View>
+          </View>
+        );
+      })()}
 
       {/* Footer links */}
       <View style={{ flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 8, marginTop: 8 }}>

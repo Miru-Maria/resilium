@@ -104,6 +104,10 @@ export default function PricingPage() {
   const isAnnual = billing === "annual";
 
   const handleUpgrade = async () => {
+    if (!navigator.onLine) {
+      alert("You're offline right now. An internet connection is required to upgrade to Pro. Please reconnect and try again.");
+      return;
+    }
     if (!isAuthenticated) {
       login();
       return;
