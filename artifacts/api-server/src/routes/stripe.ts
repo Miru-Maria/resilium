@@ -6,7 +6,7 @@ import { getUncachableStripeClient } from "../stripeClient.js";
 import { db, usersTable, subscriptionsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { logger } from "../lib/logger.js";
-import { sendProUpgradeEmail, sendPaymentFailedEmail, sendCancellationEmail } from "../lib/email.js";
+import { sendProUpgradeEmail, sendPaymentFailedEmail, sendCancellationEmail, sendPaymentSucceededEmail } from "../lib/email.js";
 import { stripeCheckoutLimiter, stripePortalLimiter } from "../lib/rate-limiters.js";
 
 const checkoutSchema = z.object({
@@ -101,6 +101,38 @@ async function handleStripeEvent(event: any) {
       }
     } catch (err) {
       logger.error({ err }, "Failed to send payment_failed email");
+    }
+    return;
+  }
+
+  if (type === "invoice.payment_succeeded") {
+    const invoice = event.data.object;
+    // Skip the first payment — the welcome email already covers that
+    if (invoice.billing_reason === "subscription_create") return;
+    const customerId: string = invoice.customer;
+    try {
+      const stripe = await getUncachableStripeClient();
+      const customer = await stripe.customers.retrieve(customerId);
+      if (customer.deleted) return;
+      const userId: string | undefined = (customer as any).metadata?.userId;
+      if (!userId) return;
+      const userRows = await db.select({ email: usersTable.email, firstName: usersTable.firstName })
+        .from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+      if (userRows[0]?.email) {
+        const nextPeriodEnd = invoice.lines?.data?.[0]?.period?.end
+          ? new Date(invoice.lines.data[0].period.end * 1000)
+          : null;
+        sendPaymentSucceededEmail({
+          email: userRows[0].email,
+          firstName: userRows[0].firstName,
+          amountPaid: invoice.amount_paid ?? 0,
+          currency: invoice.currency ?? "usd",
+          nextPeriodEnd,
+          userId,
+        }).catch(() => {});
+      }
+    } catch (err) {
+      logger.error({ err }, "Failed to send payment_succeeded email");
     }
     return;
   }
