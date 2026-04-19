@@ -10,7 +10,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@clerk/express": "^2.1.4",
+    "@clerk/express": "^2.1.5",
     "@opentelemetry/api": "^1.9.1",
     "@sentry/node": "^10.47.0",
     "@workspace/api-zod": "workspace:*",
