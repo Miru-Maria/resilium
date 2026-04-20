@@ -447,7 +447,7 @@ function MasterChecklistSection() {
       <CategoryHeading icon={BarChart2}> Research Report</CategoryHeading>
       <ul className="space-y-3">
         <ChecklistItem
-          text="Distribute Typeform survey to Resilium users and target Reddit communities"
+          text="Distribute Google Forms survey to Resilium users and target Reddit communities"
           detail="Target: 500+ valid responses as minimum for publishable research. Full distribution plan is in the Research section below."
         />
         <ChecklistItem
@@ -905,8 +905,8 @@ function ResearchReportSection() {
             <p className="text-gray-600 text-xs">Ask all Resilium users who complete a report to opt into the research survey. Target: 500+ responses from actual assessment-takers.</p>
           </div>
           <div className="p-3 rounded-lg bg-white border border-slate-200">
-            <p className="font-semibold text-gray-900 mb-1">Channel 2: Typeform</p>
-            <p className="text-gray-600 text-xs">A standalone Typeform survey distributed via Reddit, Substack, and email. Target: 500+ additional responses from broader public.</p>
+            <p className="font-semibold text-gray-900 mb-1">Channel 2: Google Forms</p>
+            <p className="text-gray-600 text-xs">A standalone Google Forms survey distributed via Reddit, Substack, and email. Free, unlimited responses, data exports directly to Google Sheets. Target: 500+ additional responses from broader public.</p>
           </div>
           <div className="p-3 rounded-lg bg-white border border-slate-200">
             <p className="font-semibold text-gray-900 mb-1">Target N</p>
@@ -1010,10 +1010,10 @@ Resilium | resilium-platform.com`}
         headers={["Milestone", "Target Date", "Owner", "Notes"]}
         rows={[
           ["Finalise survey instrument", "Week 1", "Founder", "Use question set above; test with 5 people before launch"],
-          ["Launch Typeform survey", "Week 2", "Founder", "Embed link on Resilium post-assessment screen; share in Reddit communities"],
+          ["Launch Google Forms survey", "Week 2", "Founder", "Embed link on Resilium post-assessment screen; share in Reddit communities"],
           ["In-product survey activation", "Week 2", "Dev", "Add opt-in prompt on results page for existing users"],
           ["Data collection period", "Weeks 2–6", "—", "Target: 1,000 responses minimum. Chase if below 500 by Week 4."],
-          ["Data cleaning & analysis", "Weeks 7–8", "Founder + tool", "Export Typeform + in-product data. Clean, cross-tab, compute summary stats."],
+          ["Data cleaning & analysis", "Weeks 7–8", "Founder + tool", "Export Google Forms + in-product data to Google Sheets. Clean, cross-tab, compute summary stats."],
           ["Report writing", "Weeks 8–9", "Founder", "Follow section structure above. Draft all charts and copy."],
           ["Design & layout", "Week 10", "Designer / Founder", "PDF + web-embeddable HTML version. Key stats as shareable graphics."],
           ["Pre-launch press outreach (embargo)", "Week 10", "Founder", "Send embargo pack to top 5 publications 5 days before publication"],
