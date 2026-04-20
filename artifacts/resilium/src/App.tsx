@@ -50,6 +50,7 @@ import ScenariosPage from "@/pages/scenarios";
 import PlanPage from "@/pages/plan";
 import { AnnouncementBanner } from "@/components/announcement-banner";
 import { CookieNotice } from "@/components/cookie-notice";
+import { NoIndexPage } from "@/components/page-seo";
 
 // Clerk publishable key — injected at build time from VITE_CLERK_PUBLISHABLE_KEY / CLERK_PUBLISHABLE_KEY
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY as string | undefined;
@@ -114,6 +115,7 @@ function ClerkAuthBridge() {
 function SignInPage() {
   return (
     <div style={{ display: "flex", justifyContent: "center", padding: "4rem 1rem", minHeight: "60vh", alignItems: "center" }}>
+      <NoIndexPage />
       <SignIn routing="path" path={`${basePath}/sign-in`} signUpUrl={`${basePath}/sign-up`} />
     </div>
   );
@@ -122,6 +124,7 @@ function SignInPage() {
 function SignUpPage() {
   return (
     <div style={{ display: "flex", justifyContent: "center", padding: "4rem 1rem", minHeight: "60vh", alignItems: "center" }}>
+      <NoIndexPage />
       <SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in`} />
     </div>
   );
