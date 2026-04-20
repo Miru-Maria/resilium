@@ -12,7 +12,7 @@ type SectionKey = "master-checklist" | "mobile-launch" | "product-hunt" | "reddi
 
 /* ─── MOBILE LAUNCH CHECKLIST ─────────────────────────────── */
 
-const MOBILE_STORE_KEY = "resilium_launch_checklist_v1";
+const MOBILE_STORE_KEY = "resilium_launch_checklist_v2";
 
 type TagType = "Blocker" | "Needed" | "Verify" | "Decide" | "Future";
 interface LaunchItem { id: string; label: string; note: string; tag: TagType; }
