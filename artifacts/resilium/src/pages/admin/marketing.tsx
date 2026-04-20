@@ -314,9 +314,9 @@ function MasterChecklistSection() {
           text="sitemap.xml submitted to Google Search Console"
           detail="Sitemap submitted and indexed. Site property active in Google Search Console."
         />
-        <ChecklistItem
-          text="Run monthly dependency security audit"
-          detail="Schedule for first Monday of each month. Checks for newly disclosed vulnerabilities in Clerk, Drizzle, Vite, and other packages."
+        <CompletedItem
+          text="Monthly dependency security audit — automated"
+          detail="Cron job runs on the 1st of every month at 09:00 UTC. Runs pnpm audit across the full monorepo and emails a colour-coded report to the admin address (critical/high/moderate/low counts + advisory links). Can also be triggered manually from the admin security panel."
         />
         <ChecklistItem
           text="Monitor assessment completion rate (target: >50% of starts)"

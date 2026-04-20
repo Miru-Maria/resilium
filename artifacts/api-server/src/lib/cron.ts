@@ -1,11 +1,15 @@
 import cron from "node-cron";
+import { exec } from "child_process";
+import { promisify } from "util";
 import { db, subscriptionsTable, reportFeedbackTable, resilienceReportsTable, usersTable, emailDripQueueTable } from "@workspace/db";
 import { and, desc, eq, gte, inArray, isNull, lte, sql } from "drizzle-orm";
-import { sendAdminDigest, sendErrorAlert, sendReassessmentReminder, sendUserWeeklyDigest, sendE2eAssessmentReport, sendSiteAuditReport, sendDripDay2Email, sendDripDay5Email, sendDripDay9Email, sendDripDay14Email, type E2eCheckResult } from "./email.js";
+import { sendAdminDigest, sendErrorAlert, sendReassessmentReminder, sendUserWeeklyDigest, sendE2eAssessmentReport, sendSiteAuditReport, sendDripDay2Email, sendDripDay5Email, sendDripDay9Email, sendDripDay14Email, sendDependencyAuditEmail, type E2eCheckResult } from "./email.js";
 import { runDatabaseBackup } from "./backup.js";
 import { sendPushNotificationsToUsers } from "./push.js";
 import { logger } from "./logger.js";
 import { createClerkClient } from "@clerk/express";
+
+const execAsync = promisify(exec);
 
 const APP_URL = process.env["APP_URL"] ?? "https://resilium-platform.com";
 
@@ -603,6 +607,49 @@ async function runDripProcessor() {
   }
 }
 
+// ─── Monthly dependency security audit ───────────────────────────────────────
+
+const WORKSPACE_ROOT = process.env["WORKSPACE_ROOT"] ?? "/home/runner/workspace";
+
+export async function runDependencyAudit(): Promise<void> {
+  const startMs = Date.now();
+  logger.info({ workspaceRoot: WORKSPACE_ROOT }, "Running monthly dependency security audit");
+
+  let stdout = "";
+  let exitCode = 0;
+
+  try {
+    const result = await execAsync("pnpm audit --json", {
+      cwd: WORKSPACE_ROOT,
+      timeout: 90_000,
+    });
+    stdout = result.stdout;
+  } catch (err: any) {
+    // pnpm audit exits non-zero when vulnerabilities are found — this is expected
+    stdout = err.stdout ?? "";
+    exitCode = typeof err.code === "number" ? err.code : 1;
+  }
+
+  let parsed: any = null;
+  try { parsed = JSON.parse(stdout); } catch { /* raw output only */ }
+
+  // pnpm audit JSON: { advisories: {}, metadata: { vulnerabilities: {} } }
+  // Newer pnpm may use auditAdvisories key
+  const vulnerabilities = parsed?.metadata?.vulnerabilities ?? null;
+  const advisories: Record<string, any> = parsed?.advisories ?? parsed?.auditAdvisories ?? {};
+
+  const durationMs = Date.now() - startMs;
+  logger.info({ vulnerabilities, exitCode, durationMs }, "Monthly dependency audit complete");
+
+  await sendDependencyAuditEmail({
+    vulnerabilities,
+    advisories,
+    rawOutput: stdout.slice(0, 5000),
+    exitCode,
+    durationMs,
+  }).catch(err => logger.error({ err }, "Failed to send dependency audit email"));
+}
+
 // ─── Start cron ───────────────────────────────────────────────────────────────
 
 export function startCron(): void {
@@ -646,5 +693,10 @@ export function startCron(): void {
     runDatabaseBackup().catch(() => {});
   }, { timezone: "UTC" });
 
-  logger.info("Cron jobs scheduled (admin digest: Mon 07:00, user digest: Sun 18:00, 7d reminders: daily 09:00, 30d reminders: Mon 08:00, e2e test: Wed 06:00, site audit: Sun 07:00, drip: hourly :15, db-backup: daily 02:30 UTC)");
+  // 1st of every month at 09:00 UTC — dependency security audit email
+  cron.schedule("0 9 1 * *", () => {
+    runDependencyAudit().catch(() => {});
+  }, { timezone: "UTC" });
+
+  logger.info("Cron jobs scheduled (admin digest: Mon 07:00, user digest: Sun 18:00, 7d reminders: daily 09:00, 30d reminders: Mon 08:00, e2e test: Wed 06:00, site audit: Sun 07:00, drip: hourly :15, db-backup: daily 02:30, dep-audit: 1st of month 09:00 UTC)");
 }

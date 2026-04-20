@@ -480,6 +480,105 @@ export async function sendDripDay14Email(opts: {
   await send({ to: opts.email, subject: `Two weeks on — your resilience score is still ${opts.scoreOverall}/100`, html, text, headers: listHeader });
 }
 
+// ─── Monthly Dependency Security Audit ───────────────────────────────────────
+
+export async function sendDependencyAuditEmail(opts: {
+  vulnerabilities: { info: number; low: number; moderate: number; high: number; critical: number; total: number } | null;
+  advisories: Record<string, { module_name: string; severity: string; title: string; url: string; findings?: unknown[] }>;
+  rawOutput: string;
+  exitCode: number;
+  durationMs: number;
+}): Promise<void> {
+  const { vulnerabilities, advisories, exitCode, durationMs } = opts;
+  const now = new Date();
+  const monthLabel = now.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+
+  const critical = vulnerabilities?.critical ?? 0;
+  const high = vulnerabilities?.high ?? 0;
+  const moderate = vulnerabilities?.moderate ?? 0;
+  const low = vulnerabilities?.low ?? 0;
+  const info = vulnerabilities?.info ?? 0;
+  const total = vulnerabilities?.total ?? (critical + high + moderate + low + info);
+
+  const statusIcon = critical > 0 ? "🔴" : high > 0 ? "🟠" : total > 0 ? "🟡" : "🟢";
+  const statusLabel = critical > 0 ? "CRITICAL ISSUES FOUND" : high > 0 ? "HIGH SEVERITY FOUND" : total > 0 ? "VULNERABILITIES FOUND" : "ALL CLEAR";
+  const headerBg = critical > 0 ? "#7f1d1d" : high > 0 ? "#7c2d12" : total > 0 ? "#713f12" : "#14532d";
+
+  // List critical + high advisories in the email body
+  const flaggedAdvisories = Object.values(advisories).filter(a => a.severity === "critical" || a.severity === "high");
+
+  const advisoriesHtml = flaggedAdvisories.length > 0
+    ? flaggedAdvisories.map(a => `
+        <tr><td style="padding:10px 12px;background:#1a2235;border-radius:8px;margin-bottom:6px;display:block;">
+          <span style="color:${a.severity === "critical" ? "#f87171" : "#fb923c"};font-size:11px;font-weight:700;text-transform:uppercase;">${a.severity}</span>
+          <strong style="color:#EAD9BE;display:block;margin:3px 0;font-size:13px;">${a.module_name}</strong>
+          <span style="color:#b8a99a;font-size:12px;">${a.title}</span><br>
+          <a href="${a.url}" style="color:#7a6a5a;font-size:11px;">${a.url}</a>
+        </td></tr><tr><td style="height:6px;"></td></tr>`).join("")
+    : "";
+
+  const advisoriesText = flaggedAdvisories.length > 0
+    ? "\n\nCritical / High Advisories:\n" + flaggedAdvisories.map(a =>
+        `  [${a.severity.toUpperCase()}] ${a.module_name} — ${a.title}\n  ${a.url}`
+      ).join("\n\n")
+    : "";
+
+  const subject = `${statusIcon} Resilium Dependency Audit — ${monthLabel} — ${total === 0 ? "No issues" : `${total} vulnerabilit${total === 1 ? "y" : "ies"}`}`;
+
+  const text = [
+    `Resilium Monthly Dependency Security Audit`,
+    `Generated: ${now.toUTCString()}`,
+    `Duration: ${(durationMs / 1000).toFixed(1)}s`,
+    `Exit code: ${exitCode}`,
+    ``,
+    `Summary:`,
+    `  Critical: ${critical}`,
+    `  High:     ${high}`,
+    `  Moderate: ${moderate}`,
+    `  Low:      ${low}`,
+    `  Info:     ${info}`,
+    `  Total:    ${total}`,
+    advisoriesText,
+    ``,
+    total > 0
+      ? `Action required: run "pnpm audit --fix" to auto-remediate where possible, then review remaining issues manually.`
+      : `No action required. All dependencies are clean.`,
+    ``,
+    `Admin panel: ${APP_URL}/admin`,
+  ].join("\n");
+
+  const html = `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0D1225;font-family:'Helvetica Neue',Arial,sans-serif;color:#EAD9BE;">
+<table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:40px 20px;">
+<table width="560" cellpadding="0" cellspacing="0" style="background:#131929;border-radius:16px;overflow:hidden;">
+  <tr><td style="background:${headerBg};padding:20px 32px;">
+    <h1 style="margin:0;color:#fff;font-size:18px;font-weight:800;">${statusIcon} Dependency Audit — ${statusLabel}</h1>
+    <p style="margin:4px 0 0;color:rgba(255,255,255,0.7);font-size:12px;">${monthLabel} · ${now.toUTCString()}</p>
+  </td></tr>
+  <tr><td style="padding:28px 32px;">
+    <table cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:24px;border-collapse:separate;border-spacing:6px 0;">
+      <tr>
+        <td style="text-align:center;"><div style="background:#1a2235;border-radius:8px;padding:14px 8px;border:1px solid ${critical > 0 ? "#f87171" : "#2a3245"};"><span style="color:${critical > 0 ? "#f87171" : "#4a5568"};font-size:22px;font-weight:800;">${critical}</span><br><span style="color:#7a6a5a;font-size:10px;display:block;margin-top:2px;">Critical</span></div></td>
+        <td style="text-align:center;"><div style="background:#1a2235;border-radius:8px;padding:14px 8px;border:1px solid ${high > 0 ? "#fb923c" : "#2a3245"};"><span style="color:${high > 0 ? "#fb923c" : "#4a5568"};font-size:22px;font-weight:800;">${high}</span><br><span style="color:#7a6a5a;font-size:10px;display:block;margin-top:2px;">High</span></div></td>
+        <td style="text-align:center;"><div style="background:#1a2235;border-radius:8px;padding:14px 8px;border:1px solid ${moderate > 0 ? "#fbbf24" : "#2a3245"};"><span style="color:${moderate > 0 ? "#fbbf24" : "#4a5568"};font-size:22px;font-weight:800;">${moderate}</span><br><span style="color:#7a6a5a;font-size:10px;display:block;margin-top:2px;">Moderate</span></div></td>
+        <td style="text-align:center;"><div style="background:#1a2235;border-radius:8px;padding:14px 8px;border:1px solid #2a3245;"><span style="color:#6b7280;font-size:22px;font-weight:800;">${low}</span><br><span style="color:#7a6a5a;font-size:10px;display:block;margin-top:2px;">Low</span></div></td>
+        <td style="text-align:center;"><div style="background:#1a2235;border-radius:8px;padding:14px 8px;border:1px solid #2a3245;"><span style="color:#6b7280;font-size:22px;font-weight:800;">${info}</span><br><span style="color:#7a6a5a;font-size:10px;display:block;margin-top:2px;">Info</span></div></td>
+      </tr>
+    </table>
+    ${advisoriesHtml ? `<p style="margin:0 0 12px;color:#EAD9BE;font-size:13px;font-weight:700;">Critical &amp; High Advisories</p><table cellpadding="0" cellspacing="0" width="100%">${advisoriesHtml}</table>` : ""}
+    <div style="background:${total === 0 ? "#14532d" : "#1a1a1a"};border-radius:10px;padding:16px 20px;margin:${advisoriesHtml ? "20px" : "0"} 0 24px;border:1px solid ${total === 0 ? "#166534" : "#2a3245"};">
+      <p style="margin:0;color:${total === 0 ? "#86efac" : "#b8a99a"};font-size:13px;line-height:1.6;">
+        ${total === 0
+          ? "✅ All dependencies are clean. No action required."
+          : `⚠️ ${total} vulnerabilit${total === 1 ? "y" : "ies"} found. Run <code style="background:#2a3245;padding:1px 5px;border-radius:3px;">pnpm audit --fix</code> to auto-remediate where possible, then review remaining advisories manually.`}
+      </p>
+    </div>
+    <a href="${APP_URL}/admin" style="display:inline-block;background:#E08040;color:#0D1225;font-weight:700;font-size:13px;padding:10px 20px;border-radius:8px;text-decoration:none;">Open Admin Panel →</a>
+  </td></tr>
+</table></td></tr></table></body></html>`;
+
+  await send({ to: ADMIN_TO, subject, text, html });
+}
+
 // ─── Health Check Summary ─────────────────────────────────────────────────────
 export async function sendHealthCheckSummary(opts: {
   overallStatus: "pass" | "fail";

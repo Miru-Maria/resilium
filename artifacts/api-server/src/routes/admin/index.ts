@@ -13,7 +13,7 @@ import uxTestRouter from "./ux-test/index.js";
 import adminGdprRouter from "./gdpr.js";
 import adminAnalyticsRouter from "./analytics.js";
 import adminAnnouncementsRouter from "./announcements.js";
-import { getCoachingClickCount } from "../../lib/cron.js";
+import { getCoachingClickCount, runDependencyAudit } from "../../lib/cron.js";
 import { logger } from "../../lib/logger.js";
 import { sendWelcomeEmail, sendProUpgradeEmail, sendReassessmentReminder, sendUserWeeklyDigest } from "../../lib/email.js";
 import { runDatabaseBackup, listBackups } from "../../lib/backup.js";
@@ -592,6 +592,17 @@ router.get("/backups", requireAdminSession, async (_req, res) => {
   } catch (err) {
     logger.error({ err }, "Failed to list backups");
     res.status(500).json({ error: "INTERNAL_ERROR", message: "Failed to list backups." });
+  }
+});
+
+router.post("/dependency-audit/trigger", requireAdminSession, async (req, res) => {
+  try {
+    await auditLog("dependency_audit_triggered", { source: "manual" }, req);
+    runDependencyAudit().catch(e => logger.error({ e }, "Manual dependency audit failed"));
+    res.json({ success: true, message: "Dependency audit started — results will arrive by email in ~30 seconds." });
+  } catch (err) {
+    logger.error({ err }, "Failed to trigger dependency audit");
+    res.status(500).json({ error: "INTERNAL_ERROR", message: "Failed to start dependency audit." });
   }
 });
 
