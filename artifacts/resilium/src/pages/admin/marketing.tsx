@@ -306,13 +306,13 @@ function MasterChecklistSection() {
           text="Set up web analytics (Plausible recommended — GDPR-friendly)"
           detail="Add Plausible script to index.html. No cookie consent required — it's cookieless by design. Gives you visitor → assessment → upgrade funnel visibility."
         />
-        <ChecklistItem
-          text="Verify OpenGraph preview on social"
-          detail="Paste resilium-platform.com into https://opengraph.xyz — confirm the social card shows the correct image, title, and description before sharing anywhere."
+        <CompletedItem
+          text="OpenGraph preview verified"
+          detail="resilium-platform.com confirmed rendering correctly on opengraph.xyz — correct image, title, and description. April 2026."
         />
-        <ChecklistItem
-          text="Submit sitemap.xml to Google Search Console"
-          detail="Create /public/sitemap.xml covering /, /pricing, /about. Add property in Google Search Console and submit the sitemap URL."
+        <CompletedItem
+          text="sitemap.xml submitted to Google Search Console"
+          detail="Sitemap submitted and indexed. Site property active in Google Search Console."
         />
         <ChecklistItem
           text="Run monthly dependency security audit"
