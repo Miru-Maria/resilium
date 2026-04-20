@@ -355,9 +355,9 @@ function MasterChecklistSection() {
           text="GDPR data collection consent flow with audit log"
           detail="Full consent page at /consent. Consent entries logged to database per GDPR Art. 6(1)(a)."
         />
-        <ChecklistItem
-          text="Verify Resend domain SPF/DKIM records are confirmed"
-          detail="In Resend dashboard, confirm that resilium-platform.com shows as verified with correct SPF and DKIM DNS records. Prevents emails landing in spam."
+        <CompletedItem
+          text="Resend domain SPF/DKIM records verified"
+          detail="resilium-platform.com confirmed as DNS verified and Domain verified in Resend dashboard (Apr 7, 2026). Email deliverability is secure."
         />
         <ChecklistItem
           text="Publish GDPR contact email address"
