@@ -101,3 +101,15 @@ id = "j0wWLzGhWJ7SnujlAlkVS"
 uri = "file://attached_assets/generated_images/resilium-linkedin-banner-v2.jpg"
 type = "image"
 title = "Resilium LinkedIn Banner — with tagline"
+
+[[outputs]]
+id = "7ALSo__WvRtJPmduBjTeB"
+uri = "file://artifacts/resilium/public/stripe-icon.png"
+type = "image"
+title = "Stripe Icon (256×256)"
+
+[[outputs]]
+id = "VAqZkDOlRwrXETKB2iFr8"
+uri = "file://artifacts/resilium/public/stripe-logo.png"
+type = "image"
+title = "Stripe Logo (334×334)"
