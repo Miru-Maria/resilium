@@ -378,6 +378,75 @@ router.post("/stripe/portal", stripePortalLimiter, async (req, res) => {
   }
 });
 
+// Sync subscription from Stripe — recovers state if webhook was missed
+router.post("/stripe/sync", async (req, res) => {
+  const auth = getAuth(req);
+  const userId = (auth?.sessionClaims?.userId as string | undefined) || auth?.userId;
+  if (!userId) return res.status(401).json({ error: "Unauthenticated" });
+
+  try {
+    const stripe = await getUncachableStripeClient();
+
+    // Find customer(s) with this userId in metadata
+    const customers = await stripe.customers.search({
+      query: `metadata['userId']:'${userId}'`,
+      limit: 5,
+    });
+
+    if (customers.data.length === 0) {
+      return res.json({ synced: false, message: "No Stripe customer found for this account" });
+    }
+
+    // Use the most recently created customer
+    const customer = customers.data[0];
+    const customerId = customer.id;
+
+    // Get active subscriptions for this customer
+    const subs = await stripe.subscriptions.list({ customer: customerId, status: "all", limit: 5 });
+    const activeSub = subs.data.find(s => s.status === "active" || s.status === "trialing") ?? subs.data[0];
+
+    if (!activeSub) {
+      return res.json({ synced: false, message: "No subscription found for this customer" });
+    }
+
+    const rawStatus = activeSub.status;
+    const resolvedStatus: "active" | "past_due" | "cancelled" =
+      rawStatus === "active" || rawStatus === "trialing" ? "active" :
+      rawStatus === "past_due" ? "past_due" :
+      "cancelled";
+
+    const currentPeriodEnd = (activeSub as any).current_period_end
+      ? new Date((activeSub as any).current_period_end * 1000)
+      : undefined;
+
+    const existing = await db.select().from(subscriptionsTable).where(eq(subscriptionsTable.userId, userId)).limit(1);
+    if (existing.length > 0) {
+      await db.update(subscriptionsTable).set({
+        stripeCustomerId: customerId,
+        stripeSubscriptionId: activeSub.id,
+        status: resolvedStatus,
+        currentPeriodEnd: currentPeriodEnd ?? existing[0].currentPeriodEnd,
+        updatedAt: new Date(),
+      }).where(eq(subscriptionsTable.userId, userId));
+    } else {
+      await db.insert(subscriptionsTable).values({
+        userId,
+        stripeSubscriptionId: activeSub.id,
+        stripeCustomerId: customerId,
+        status: resolvedStatus,
+        currentPeriodEnd,
+        planName: "Pro",
+      });
+    }
+
+    logger.info({ userId, customerId, status: resolvedStatus }, "Subscription synced from Stripe");
+    return res.json({ synced: true, status: resolvedStatus });
+  } catch (err: any) {
+    logger.error({ err }, "Failed to sync subscription from Stripe");
+    return res.status(500).json({ error: "Failed to sync subscription" });
+  }
+});
+
 // One-time donation checkout (no auth required)
 const donationSchema = z.object({
   amount: z.number().int().min(100).max(100000).optional().default(500), // cents, default $5

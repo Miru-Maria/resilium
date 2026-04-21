@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { motion } from "framer-motion";
 import { CheckCircle2, Zap, ShieldCheck, BarChart2, RefreshCw, Lock, ArrowRight, Sparkles, XCircle, ChevronDown } from "lucide-react";
@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { SiteFooter } from "@/components/site-footer";
 import { PageSEO } from "@/components/page-seo";
 import { useAuth, useClerk } from "@clerk/react";
+import { useQueryClient } from "@tanstack/react-query";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -101,8 +102,28 @@ export default function PricingPage() {
   const login = () => openSignIn({});
   const [loading, setLoading] = useState(false);
   const [billing, setBilling] = useState<BillingPeriod>("monthly");
+  const queryClient = useQueryClient();
 
   const isAnnual = billing === "annual";
+  const isSuccess = new URLSearchParams(window.location.search).get("success") === "1";
+
+  // Auto-sync subscription status after returning from Stripe checkout
+  useEffect(() => {
+    if (!isSuccess || !isSignedIn) return;
+    (async () => {
+      try {
+        const token = await getToken();
+        await fetch(`${BASE}/api/stripe/sync`, {
+          method: "POST",
+          credentials: "include",
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        queryClient.invalidateQueries({ queryKey: ["subscription-status"] });
+      } catch {
+        // Non-fatal — webhook will eventually sync it
+      }
+    })();
+  }, [isSuccess, isSignedIn]);
 
   const handleUpgrade = async () => {
     if (!navigator.onLine) {
@@ -137,8 +158,6 @@ export default function PricingPage() {
       setLoading(false);
     }
   };
-
-  const isSuccess = new URLSearchParams(window.location.search).get("success") === "1";
 
   return (
     <div className="min-h-screen flex flex-col">

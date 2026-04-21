@@ -67,6 +67,7 @@ import {
   MessageSquare,
   Lock,
   BookMarked,
+  RefreshCw,
 } from "lucide-react";
 import { guides, getEssentialGuides, getGuidesByLocation, getGuidesByDimension, type Guide } from "@/data/guides";
 import { saveToCache, loadFromCache, plansListCacheKey } from "@/lib/offline-cache";
@@ -199,25 +200,32 @@ const PRIORITY_STYLES: Record<string, { bg: string; text: string; label: string 
   low:      { bg: "bg-gray-100",      text: "text-gray-500",   label: "Low" },
 };
 
-async function fetchMyPlans(): Promise<{ plans: PlanSummary[] }> {
-  const res = await fetch("/api/users/me/plans", { credentials: "include" });
+async function authFetch(url: string, token: string | null, init?: RequestInit): Promise<Response> {
+  return fetch(url, {
+    ...init,
+    credentials: "include",
+    headers: {
+      ...(init?.headers as Record<string, string> | undefined),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  });
+}
+
+async function fetchMyPlans(token: string | null): Promise<{ plans: PlanSummary[] }> {
+  const res = await authFetch("/api/users/me/plans", token);
   if (!res.ok) throw new Error("Failed to fetch plans");
   return res.json();
 }
 
-async function deletePlan(reportId: string): Promise<void> {
-  const res = await fetch(`/api/users/me/plans/${reportId}`, {
-    method: "DELETE",
-    credentials: "include",
-  });
+async function deletePlan(reportId: string, token: string | null): Promise<void> {
+  const res = await authFetch(`/api/users/me/plans/${reportId}`, token, { method: "DELETE" });
   if (!res.ok) throw new Error("Failed to delete plan");
 }
 
-async function comparePlans(reportIdA: string, reportIdB: string): Promise<CompareResult> {
-  const res = await fetch("/api/users/me/plans/compare", {
+async function comparePlans(reportIdA: string, reportIdB: string, token: string | null): Promise<CompareResult> {
+  const res = await authFetch("/api/users/me/plans/compare", token, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    credentials: "include",
     body: JSON.stringify({ reportIdA, reportIdB }),
   });
   if (!res.ok) throw new Error("Failed to compare plans");
@@ -268,10 +276,13 @@ const SCORE_DIMS: { key: keyof ScoreMap; label: string }[] = [
 function CompareModal({
   open, onClose, reportIdA, reportIdB,
 }: { open: boolean; onClose: () => void; reportIdA: string; reportIdB: string }) {
-  const { isLoaded, isSignedIn } = useAuth();
+  const { isLoaded, isSignedIn, getToken } = useAuth();
   const { data, isLoading, error } = useQuery<CompareResult>({
     queryKey: ["compare", reportIdA, reportIdB],
-    queryFn: () => comparePlans(reportIdA, reportIdB),
+    queryFn: async () => {
+      const token = await getToken();
+      return comparePlans(reportIdA, reportIdB, token);
+    },
     enabled: !!isLoaded && !!isSignedIn && open && !!reportIdA && !!reportIdB,
     staleTime: 5 * 60 * 1000,
   });
@@ -445,12 +456,13 @@ const PRIORITY_ORDER: Record<string, number> = { critical: 0, high: 1, medium: 2
 
 // ─── Overview Tab ────────────────────────────────────────────────────────────
 function OverviewTab({ plans }: { plans: PlanSummary[] }) {
-  const { isLoaded, isSignedIn } = useAuth();
+  const { isLoaded, isSignedIn, getToken } = useAuth();
 
   const { data: checklistFocusData } = useQuery({
     queryKey: ["latestChecklist"],
     queryFn: async () => {
-      const res = await fetch("/api/users/me/latest-checklist", { credentials: "include" });
+      const token = await getToken();
+      const res = await authFetch("/api/users/me/latest-checklist", token);
       if (!res.ok) return null;
       return res.json();
     },
@@ -461,7 +473,8 @@ function OverviewTab({ plans }: { plans: PlanSummary[] }) {
   const { data: focusProgress } = useQuery<ProgressItem[]>({
     queryKey: ["checklistProgress", checklistFocusData?.reportId],
     queryFn: async () => {
-      const res = await fetch(`/api/resilience/reports/${checklistFocusData?.reportId}/checklists`, { credentials: "include" });
+      const token = await getToken();
+      const res = await authFetch(`/api/resilience/reports/${checklistFocusData?.reportId}/checklists`, token);
       if (!res.ok) return [];
       const json = await res.json();
       return json.progress ?? [];
@@ -786,7 +799,7 @@ const GOAL_ICONS: Record<string, string> = {
 };
 
 function ChecklistTab() {
-  const { isLoaded, isSignedIn } = useAuth();
+  const { isLoaded, isSignedIn, getToken } = useAuth();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
@@ -801,7 +814,8 @@ function ChecklistTab() {
   }>({
     queryKey: ["latestChecklist"],
     queryFn: async () => {
-      const res = await fetch("/api/users/me/latest-checklist", { credentials: "include" });
+      const token = await getToken();
+      const res = await authFetch("/api/users/me/latest-checklist", token);
       if (!res.ok) throw new Error("Failed to fetch checklist");
       return res.json();
     },
@@ -813,7 +827,8 @@ function ChecklistTab() {
   const { data: progressData, isLoading: progressLoading } = useQuery<ProgressItem[]>({
     queryKey: ["checklistProgress", reportId],
     queryFn: async () => {
-      const res = await fetch(`/api/resilience/reports/${reportId}/checklists`, { credentials: "include" });
+      const token = await getToken();
+      const res = await authFetch(`/api/resilience/reports/${reportId}/checklists`, token);
       if (!res.ok) throw new Error("Failed to fetch progress");
       const json = await res.json();
       return json.progress ?? [];
@@ -823,10 +838,10 @@ function ChecklistTab() {
 
   const toggleMutation = useMutation({
     mutationFn: async ({ area, itemId, completed }: { area: string; itemId: string; completed: boolean }) => {
-      const res = await fetch(`/api/resilience/reports/${reportId}/checklists/${area}/${itemId}`, {
+      const token = await getToken();
+      const res = await authFetch(`/api/resilience/reports/${reportId}/checklists/${area}/${itemId}`, token, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify({ completed }),
       });
       if (!res.ok) throw new Error("Failed to update");
@@ -1027,13 +1042,33 @@ function AccountTab({ user, plans, onAllPlansDeleted }: {
   const { user: clerkUser } = useUser();
   const { getToken } = useAuth();
 
-  const { data: subStatus } = useSubscriptionStatus();
+  const { data: subStatus, refetch: refetchSub } = useSubscriptionStatus();
   const [, navigate] = useLocation();
   const [deleteAllOpen, setDeleteAllOpen] = useState(false);
   const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [portalLoading, setPortalLoading] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+
+  const handleSyncSubscription = async () => {
+    setSyncing(true);
+    try {
+      const token = await getToken();
+      const resp = await authFetch("/api/stripe/sync", token, { method: "POST" });
+      const data = await resp.json();
+      if (data.synced) {
+        toast({ title: "Subscription synced", description: "Your Pro status has been restored." });
+        await refetchSub();
+      } else {
+        toast({ title: "No active subscription found", description: "If you just paid, please wait a moment and try again.", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Sync failed", description: "Please try again.", variant: "destructive" });
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   const reminderKey = "resilium_reminder_days";
   const [reminderDays, setReminderDays] = useState<number | null>(() => {
@@ -1060,7 +1095,8 @@ function AccountTab({ user, plans, onAllPlansDeleted }: {
   const handleExport = async () => {
     setExporting(true);
     try {
-      const res = await fetch("/api/users/me/export", { credentials: "include" });
+      const token = await getToken();
+      const res = await authFetch("/api/users/me/export", token);
       if (!res.ok) throw new Error("Failed");
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
@@ -1106,7 +1142,8 @@ function AccountTab({ user, plans, onAllPlansDeleted }: {
   const handleDeleteAllPlans = async () => {
     setDeleting(true);
     try {
-      const res = await fetch("/api/users/me/plans", { method: "DELETE", credentials: "include" });
+      const token = await getToken();
+      const res = await authFetch("/api/users/me/plans", token, { method: "DELETE" });
       if (!res.ok) throw new Error("Failed");
       toast({ title: "All plans deleted", description: "Your resilience history has been cleared." });
       setDeleteAllOpen(false);
@@ -1121,7 +1158,8 @@ function AccountTab({ user, plans, onAllPlansDeleted }: {
   const handleDeleteAccount = async () => {
     setDeleting(true);
     try {
-      const res = await fetch("/api/users/me", { method: "DELETE", credentials: "include" });
+      const token = await getToken();
+      const res = await authFetch("/api/users/me", token, { method: "DELETE" });
       if (!res.ok) throw new Error("Failed");
       toast({ title: "Account deleted", description: "All your Resilium data has been removed." });
       navigate("/");
@@ -1226,9 +1264,21 @@ function AccountTab({ user, plans, onAllPlansDeleted }: {
                   <p className="text-xs text-muted-foreground">Upgrade for score history, scenario stress-tests, and more</p>
                 </div>
               </div>
-              <Link href="/pricing">
-                <Button size="sm" className="rounded-full flex-shrink-0">Upgrade</Button>
-              </Link>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="text-xs h-7 px-2 text-muted-foreground hover:text-foreground rounded-full"
+                  onClick={handleSyncSubscription}
+                  disabled={syncing}
+                  title="Already paid? Click to refresh your subscription status"
+                >
+                  {syncing ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
+                </Button>
+                <Link href="/pricing">
+                  <Button size="sm" className="rounded-full">Upgrade</Button>
+                </Link>
+              </div>
             </div>
           )}
         </CardContent>
@@ -1423,10 +1473,13 @@ const DIM_COLORS: Record<string, string> = {
 };
 
 function ScoreHistorySection() {
-  const { isLoaded, isSignedIn } = useAuth();
+  const { isLoaded, isSignedIn, getToken } = useAuth();
   const { data, isLoading } = useQuery<{ snapshots: ScoreSnapshot[]; isPro: boolean }>({
     queryKey: ["scoreHistory"],
-    queryFn: () => fetch("/api/users/me/score-history", { credentials: "include" }).then(r => r.json()),
+    queryFn: async () => {
+      const token = await getToken();
+      return authFetch("/api/users/me/score-history", token).then(r => r.json());
+    },
     staleTime: 60_000,
     enabled: !!isLoaded && !!isSignedIn,
   });
@@ -1617,9 +1670,13 @@ function PlansTab({ plans, onDelete }: { plans: PlanSummary[]; onDelete: (id: st
   const [compareOpen, setCompareOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { getToken } = useAuth();
 
   const deleteMutation = useMutation({
-    mutationFn: (reportId: string) => fetch(`/api/users/me/plans/${reportId}`, { method: "DELETE", credentials: "include" }).then(r => { if (!r.ok) throw new Error(); }),
+    mutationFn: async (reportId: string) => {
+      const token = await getToken();
+      return authFetch(`/api/users/me/plans/${reportId}`, token, { method: "DELETE" }).then(r => { if (!r.ok) throw new Error(); });
+    },
     onSuccess: (_d, reportId) => {
       queryClient.invalidateQueries({ queryKey: ["myPlans"] });
       queryClient.invalidateQueries({ queryKey: ["latestChecklist"] });
@@ -1965,6 +2022,7 @@ function CompanionChat() {
   const [loading, setLoading] = useState(true);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const { toast } = useToast();
+  const { getToken } = useAuth();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -1978,7 +2036,8 @@ function CompanionChat() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch("/api/companion/history", { credentials: "include" });
+        const token = await getToken();
+        const res = await authFetch("/api/companion/history", token);
         if (!res.ok) {
           // Server/auth error — not offline. Fall back to cache silently.
           const cached = localStorage.getItem(COMPANION_CACHE_KEY);
@@ -2017,10 +2076,10 @@ function CompanionChat() {
     const updated = [...messages, userMsg];
     setMessages(updated);
     try {
-      const res = await fetch("/api/companion/chat", {
+      const token = await getToken();
+      const res = await authFetch("/api/companion/chat", token, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify({ message: text }),
       });
       if (!res.ok) throw new Error("send failed");
@@ -2447,7 +2506,7 @@ class TabErrorBoundary extends React.Component<
 // ─── Main Page ───────────────────────────────────────────────────────────────
 export default function ProfilePage() {
   const { user } = useUser();
-  const { isSignedIn, isLoaded } = useAuth();
+  const { isSignedIn, isLoaded, getToken } = useAuth();
   const { openSignIn, signOut } = useClerk();
   const [authTimedOut, setAuthTimedOut] = useState(false);
   useEffect(() => {
@@ -2472,7 +2531,10 @@ export default function ProfilePage() {
 
   const { data, isLoading: plansLoading, isError: plansError } = useQuery({
     queryKey: ["myPlans"],
-    queryFn: fetchMyPlans,
+    queryFn: async () => {
+      const token = await getToken();
+      return fetchMyPlans(token);
+    },
     enabled: !!isLoaded && isAuthenticated,
     placeholderData: cachedPlansEntry?.data ?? undefined,
   });
