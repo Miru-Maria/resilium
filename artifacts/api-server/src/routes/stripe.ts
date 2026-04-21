@@ -284,13 +284,29 @@ router.post("/stripe/checkout", stripeCheckoutLimiter, async (req, res) => {
       return res.status(500).json({ error: `No ${interval}ly price found for Resilium Pro.` });
     }
 
-    // Get or create customer
+    // Get or create customer — handles stale test-mode IDs
     const userRows = await db.select({ email: usersTable.email, firstName: usersTable.firstName })
       .from(usersTable).where(eq(usersTable.id, userId)).limit(1);
     const email = userRows[0]?.email ?? undefined;
 
     const existing = await db.select().from(subscriptionsTable).where(eq(subscriptionsTable.userId, userId)).limit(1);
     let customerId = existing[0]?.stripeCustomerId ?? undefined;
+
+    if (customerId) {
+      // Verify the stored customer actually exists in the current Stripe environment
+      try {
+        await stripe.customers.retrieve(customerId);
+      } catch (custErr: any) {
+        if (custErr?.code === "resource_missing") {
+          logger.warn({ userId, customerId }, "Stored Stripe customer not found (stale test-mode ID?), creating a new one");
+          customerId = undefined;
+          // Clear the stale subscription row so we start fresh
+          await db.delete(subscriptionsTable).where(eq(subscriptionsTable.userId, userId));
+        } else {
+          throw custErr;
+        }
+      }
+    }
 
     if (!customerId) {
       const customer = await stripe.customers.create({
@@ -333,6 +349,18 @@ router.post("/stripe/portal", stripePortalLimiter, async (req, res) => {
     const existing = await db.select().from(subscriptionsTable).where(eq(subscriptionsTable.userId, userId)).limit(1);
     const customerId = existing[0]?.stripeCustomerId;
     if (!customerId) return res.status(404).json({ error: "No subscription found" });
+
+    // Verify the customer still exists in this Stripe environment
+    try {
+      await stripe.customers.retrieve(customerId);
+    } catch (custErr: any) {
+      if (custErr?.code === "resource_missing") {
+        logger.warn({ userId, customerId }, "Stale Stripe customer ID in portal request — clearing subscription row");
+        await db.delete(subscriptionsTable).where(eq(subscriptionsTable.userId, userId));
+        return res.status(404).json({ error: "No active subscription found. Please subscribe first." });
+      }
+      throw custErr;
+    }
 
     const baseUrl = process.env.REPLIT_DEPLOYMENT === "1"
       ? "https://resilium-platform.com"
