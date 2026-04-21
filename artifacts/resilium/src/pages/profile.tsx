@@ -1025,6 +1025,7 @@ function AccountTab({ user, plans, onAllPlansDeleted }: {
   const { toast } = useToast();
   const { openUserProfile } = useClerk();
   const { user: clerkUser } = useUser();
+  const { getToken } = useAuth();
 
   const { data: subStatus } = useSubscriptionStatus();
   const [, navigate] = useLocation();
@@ -1083,7 +1084,12 @@ function AccountTab({ user, plans, onAllPlansDeleted }: {
     }
     setPortalLoading(true);
     try {
-      const resp = await fetch("/api/stripe/portal", { method: "POST", credentials: "include" });
+      const token = await getToken();
+      const resp = await fetch("/api/stripe/portal", {
+        method: "POST",
+        credentials: "include",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
       const data = await resp.json();
       if (data.url) {
         window.location.href = data.url;

@@ -12,12 +12,16 @@ export interface SubscriptionStatus {
 }
 
 export function useSubscriptionStatus() {
-  const { isLoaded, isSignedIn } = useAuth();
+  const { isLoaded, isSignedIn, getToken } = useAuth();
 
   return useQuery<SubscriptionStatus | null>({
     queryKey: ["subscription-status"],
     queryFn: async () => {
-      const r = await fetch(`${BASE}/api/subscription/status`, { credentials: "include" });
+      const token = await getToken();
+      const r = await fetch(`${BASE}/api/subscription/status`, {
+        credentials: "include",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
       if (!r.ok) return null;
       return r.json() as Promise<SubscriptionStatus>;
     },

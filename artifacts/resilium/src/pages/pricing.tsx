@@ -9,6 +9,7 @@ import { useAuth, useClerk } from "@clerk/react";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
+
 const FREE_FEATURES = [
   "3 lifetime assessments",
   "Full resilience score — all 6 dimensions",
@@ -94,7 +95,7 @@ type BillingPeriod = "monthly" | "annual";
 
 export default function PricingPage() {
   const [, setLocation] = useLocation();
-  const { isSignedIn } = useAuth();
+  const { isSignedIn, getToken } = useAuth();
   const { openSignIn } = useClerk();
   const isAuthenticated = !!isSignedIn;
   const login = () => openSignIn({});
@@ -114,9 +115,13 @@ export default function PricingPage() {
     }
     setLoading(true);
     try {
+      const token = await getToken();
       const resp = await fetch(`${BASE}/api/stripe/checkout`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         credentials: "include",
         body: JSON.stringify({ billingPeriod: billing }),
       });
