@@ -1065,7 +1065,7 @@ function AccountTab({ user, plans, onAllPlansDeleted }: {
           data.status === "cancelled" ? "Your subscription has been cancelled." :
           data.status === "past_due" ? "Your subscription is past due — please update your payment method." :
           "Your Pro status has been restored.";
-        toast({ title: "Subscription synced", description: msg });
+        toast({ title: "Subscription synced", description: msg, variant: "success" });
         await refetchSub();
       } else {
         toast({ title: "No active subscription found", description: "If you just paid, please wait a moment and try again.", variant: "destructive" });
