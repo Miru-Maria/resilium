@@ -43,6 +43,7 @@ export function AdminLayout({ children, activeSection }: AdminLayoutProps) {
   const search = useSearch();
   const [checking, setChecking] = useState(true);
   const [authed, setAuthed] = useState(false);
+  const [docsOpen, setDocsOpen] = useState(true);
 
   const activeDoc = new URLSearchParams(search).get("doc") ?? "marketing-strategy";
 
@@ -90,7 +91,6 @@ export function AdminLayout({ children, activeSection }: AdminLayoutProps) {
   ];
 
   const isDocuments = activeSection === "documents";
-  const [docsOpen, setDocsOpen] = useState(true);
 
   return (
     <div className="min-h-screen bg-muted/30 flex">
