@@ -90,6 +90,7 @@ export function AdminLayout({ children, activeSection }: AdminLayoutProps) {
   ];
 
   const isDocuments = activeSection === "documents";
+  const [docsOpen, setDocsOpen] = useState(true);
 
   return (
     <div className="min-h-screen bg-muted/30 flex">
@@ -121,22 +122,24 @@ export function AdminLayout({ children, activeSection }: AdminLayoutProps) {
 
           {/* Documents with inline submenu */}
           <div>
-            <Link href="/admin/documents">
-              <span
-                className={cn(
-                  "flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium cursor-pointer transition-colors",
-                  isDocuments
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                )}
-              >
-                <FolderLock className="w-4 h-4" />
-                <span className="flex-1">Documents</span>
-                <ChevronDown className={cn("w-3 h-3 transition-transform", isDocuments && "rotate-180")} />
-              </span>
-            </Link>
+            <span
+              className={cn(
+                "flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium cursor-pointer transition-colors",
+                isDocuments
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground",
+              )}
+              onClick={() => {
+                if (!isDocuments) navigate("/admin/documents");
+                setDocsOpen(o => !o);
+              }}
+            >
+              <FolderLock className="w-4 h-4" />
+              <span className="flex-1">Documents</span>
+              <ChevronDown className={cn("w-3 h-3 transition-transform", docsOpen && "rotate-180")} />
+            </span>
 
-            {isDocuments && (
+            {docsOpen && (
               <div className="mt-1 ml-3 pl-3 border-l border-gray-200 space-y-0.5">
                 {DOC_ITEMS.map(({ key, label, icon: Icon }) => (
                   <button
