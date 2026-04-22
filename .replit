@@ -32,6 +32,7 @@ channel = "stable-25_05"
 [userenv]
 
 [userenv.shared]
+DRIP_EMAILS_ENABLED = "true"
 
 [[ports]]
 localPort = 8080
