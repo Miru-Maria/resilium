@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Business Cards — Miruna Cristiana Paun</title>
+  <title>Business Card — Miruna Cristiana Paun</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -15,37 +16,32 @@
       flex-direction: column;
       align-items: center;
       padding: 48px 24px;
-      gap: 48px;
+      gap: 32px;
       min-height: 100vh;
-    }
-
-    h2 {
-      font-family: 'Inter', sans-serif;
-      font-size: 11px;
-      font-weight: 500;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: #888;
-      margin-bottom: 16px;
-      text-align: center;
-    }
-
-    .card-group {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
     }
 
     .card-row {
       display: flex;
-      gap: 32px;
+      gap: 40px;
       flex-wrap: wrap;
       justify-content: center;
     }
 
-    /* === Business card base === */
-    /* Standard size: 3.5in × 2in = 336px × 192px at 96dpi */
+    .card-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-label {
+      font-size: 9px;
+      color: #aaa;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    /* 3.5" × 2" at 96dpi = 336 × 192px */
     .card {
       width: 336px;
       height: 192px;
@@ -53,287 +49,192 @@
       overflow: hidden;
       position: relative;
       flex-shrink: 0;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.18), 0 1px 4px rgba(0,0,0,0.1);
+      box-shadow: 0 6px 28px rgba(0,0,0,0.22), 0 1px 4px rgba(0,0,0,0.12);
     }
 
-    /* ===================================
-       CARD 1 — Resilium Branded (Front)
-       ================================== */
-    .resilium-front {
+    /* ============================================
+       FRONT — Thunderstorm background
+       ============================================ */
+    .front {
       background: #0D1225;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: 22px 24px 18px;
     }
 
-    .resilium-front .accent-line {
+    .front .storm-bg {
+      position: absolute;
+      inset: 0;
+      background-image: url('hero-problem.png');
+      background-size: cover;
+      background-position: center top;
+      opacity: 0.2;
+      mix-blend-mode: luminosity;
+    }
+
+    .front .overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        135deg,
+        rgba(13,18,37,0.72) 0%,
+        rgba(13,18,37,0.38) 50%,
+        rgba(13,18,37,0.78) 100%
+      );
+    }
+
+    .front .accent-line {
       position: absolute;
       top: 0; left: 0; right: 0;
-      height: 3px;
+      height: 2.5px;
       background: linear-gradient(90deg, #E08040, #c96a28);
+      z-index: 2;
     }
 
-    .resilium-front .logo-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .resilium-front .logo-icon {
-      width: 28px;
-      height: 28px;
-    }
-
-    .resilium-front .logo-name {
-      font-family: 'Playfair Display', serif;
-      font-size: 17px;
-      font-weight: 700;
-      color: #EAD9BE;
-      letter-spacing: 0.01em;
-    }
-
-    .resilium-front .tagline {
-      font-size: 7.5px;
-      font-weight: 400;
-      color: #E08040;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      margin-top: 2px;
-      margin-left: 36px;
-    }
-
-    .resilium-front .name-block {
-      margin-top: auto;
-    }
-
-    .resilium-front .name {
-      font-family: 'Playfair Display', serif;
-      font-size: 14px;
-      font-weight: 700;
-      color: #EAD9BE;
-      line-height: 1.2;
-    }
-
-    .resilium-front .title {
-      font-size: 8px;
-      font-weight: 500;
-      color: #E08040;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      margin-top: 4px;
-    }
-
-    .resilium-front .divider {
-      width: 28px;
-      height: 1px;
-      background: #E08040;
-      opacity: 0.5;
-      margin: 8px 0;
-    }
-
-    .resilium-front .contact-row {
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-    }
-
-    .resilium-front .contact-item {
-      font-size: 7.5px;
-      color: rgba(234,217,190,0.7);
-      letter-spacing: 0.03em;
-    }
-
-    .resilium-front .contact-item span {
-      color: rgba(234,217,190,0.4);
-      margin-right: 5px;
-    }
-
-    /* Decorative corner element */
-    .resilium-front::after {
-      content: '';
-      position: absolute;
-      bottom: -30px;
-      right: -30px;
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(224,128,64,0.12) 0%, transparent 70%);
-      pointer-events: none;
-    }
-
-    /* ===================================
-       CARD 1 — Resilium Branded (Back)
-       ================================== */
-    .resilium-back {
-      background: #E08040;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-
-    .resilium-back .back-logo {
-      font-family: 'Playfair Display', serif;
-      font-size: 26px;
-      font-weight: 700;
-      color: #0D1225;
-      letter-spacing: 0.02em;
-    }
-
-    .resilium-back .back-tagline {
-      font-size: 8px;
-      font-weight: 500;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: rgba(13,18,37,0.65);
-    }
-
-    .resilium-back .back-divider {
-      width: 32px;
-      height: 1px;
-      background: rgba(13,18,37,0.3);
-    }
-
-    .resilium-back .back-url {
-      font-size: 8px;
-      font-weight: 500;
-      color: rgba(13,18,37,0.7);
-      letter-spacing: 0.05em;
-    }
-
-    /* ===================================
-       CARD 2 — Neutral (Front)
-       ================================== */
-    .neutral-front {
-      background: #ffffff;
+    .front .content {
+      position: relative;
+      z-index: 2;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      padding: 22px 24px 18px;
-      border: 1px solid #e8e8e8;
+      height: 100%;
+      padding: 20px 22px 18px;
     }
 
-    .neutral-front .n-top {
+    .front .top-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .front .logo-img {
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+      filter: drop-shadow(0 0 8px rgba(224,128,64,0.45));
+    }
+
+    .front .brand-block {
       display: flex;
       flex-direction: column;
       gap: 2px;
     }
 
-    .neutral-front .n-name {
+    .front .brand-name {
       font-family: 'Playfair Display', serif;
-      font-size: 15px;
+      font-size: 19px;
       font-weight: 700;
-      color: #1a1a2e;
+      color: #EAD9BE;
+      line-height: 1;
+      letter-spacing: 0.02em;
+    }
+
+    .front .brand-sub {
+      font-size: 6.5px;
+      font-weight: 500;
+      color: #E08040;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .front .bottom-block {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .front .name {
+      font-family: 'Playfair Display', serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: #EAD9BE;
       line-height: 1.2;
     }
 
-    .neutral-front .n-title {
+    .front .title {
       font-size: 7.5px;
       font-weight: 500;
-      color: #888;
+      color: #E08040;
       letter-spacing: 0.1em;
       text-transform: uppercase;
-      margin-top: 4px;
     }
 
-    .neutral-front .n-divider {
-      width: 24px;
-      height: 1.5px;
-      background: #1a1a2e;
-      opacity: 0.15;
-      margin: 10px 0;
+    .front .tagline {
+      font-size: 6.5px;
+      font-weight: 300;
+      color: rgba(234,217,190,0.45);
+      letter-spacing: 0.07em;
+      font-style: italic;
+      margin-top: 2px;
     }
 
-    .neutral-front .n-contact {
-      display: flex;
-      flex-direction: column;
-      gap: 3.5px;
-    }
-
-    .neutral-front .n-contact-item {
-      font-size: 7.5px;
-      color: #555;
-      letter-spacing: 0.02em;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .neutral-front .n-contact-item .dot {
-      width: 3px;
-      height: 3px;
-      border-radius: 50%;
-      background: #999;
-      flex-shrink: 0;
-    }
-
-    .neutral-front .n-bottom-accent {
-      position: absolute;
-      bottom: 0; left: 0;
-      width: 48px;
-      height: 3px;
-      background: #1a1a2e;
-    }
-
-    /* ===================================
-       CARD 2 — Neutral (Back)
-       ================================== */
-    .neutral-back {
-      background: #1a1a2e;
+    /* ============================================
+       BACK — Orange with tagline, email + QR
+       ============================================ */
+    .back {
+      background: #E08040;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 10px;
+      gap: 5px;
+      padding: 16px;
     }
 
-    .neutral-back .nb-initials {
+    .back .back-logo {
       font-family: 'Playfair Display', serif;
-      font-size: 36px;
+      font-size: 23px;
       font-weight: 700;
-      color: rgba(255,255,255,0.08);
-      line-height: 1;
-      letter-spacing: 0.05em;
-      position: absolute;
-    }
-
-    .neutral-back .nb-name {
-      font-family: 'Playfair Display', serif;
-      font-size: 15px;
-      font-weight: 700;
-      color: #fff;
+      color: #0D1225;
       letter-spacing: 0.02em;
-      position: relative;
-      z-index: 1;
+      line-height: 1;
     }
 
-    .neutral-back .nb-divider {
-      width: 24px;
+    .back .back-divider {
+      width: 28px;
       height: 1px;
-      background: rgba(255,255,255,0.2);
-      position: relative;
-      z-index: 1;
+      background: rgba(13,18,37,0.22);
+      margin: 2px 0;
     }
 
-    .neutral-back .nb-url {
+    .back .back-tagline {
+      font-size: 6.5px;
+      font-weight: 500;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: rgba(13,18,37,0.58);
+    }
+
+    .back .back-email {
       font-size: 7.5px;
-      font-weight: 400;
-      color: rgba(255,255,255,0.5);
-      letter-spacing: 0.08em;
-      position: relative;
-      z-index: 1;
+      font-weight: 500;
+      color: rgba(13,18,37,0.72);
+      letter-spacing: 0.04em;
+      margin-top: 1px;
     }
 
-    /* ===================================
-       Print styles
-       ================================== */
+    .back .qr-wrap {
+      margin-top: 5px;
+      background: #fff;
+      border-radius: 4px;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .back .qr-wrap canvas,
+    .back .qr-wrap img {
+      display: block;
+      width: 48px !important;
+      height: 48px !important;
+    }
+
+    /* ============================================
+       Print
+       ============================================ */
     .print-btn {
       font-family: 'Inter', sans-serif;
       font-size: 13px;
       font-weight: 500;
-      background: #1a1a2e;
+      background: #0D1225;
       color: #fff;
       border: none;
       border-radius: 6px;
@@ -341,8 +242,7 @@
       cursor: pointer;
       letter-spacing: 0.03em;
     }
-
-    .print-btn:hover { background: #2a2a4e; }
+    .print-btn:hover { background: #1a2440; }
 
     .note {
       font-size: 11px;
@@ -353,21 +253,13 @@
     }
 
     @media print {
-      body {
-        background: white;
-        padding: 0;
-        gap: 0;
-      }
-
-      .print-btn, .note, h2, .card-label { display: none; }
-
-      .card-group { page-break-after: always; }
+      body { background: white; padding: 0; gap: 0; }
+      .print-btn, .note, .card-label { display: none; }
       .card-row { gap: 8mm; justify-content: flex-start; padding: 8mm; }
-
       .card {
         width: 88.9mm;
         height: 50.8mm;
-        border-radius: 4px;
+        border-radius: 3px;
         box-shadow: none;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
@@ -379,100 +271,61 @@
 
   <button class="print-btn" onclick="window.print()">Print / Save as PDF</button>
 
-  <!-- RESILIUM BRANDED -->
-  <div class="card-group">
-    <h2>Option 1 — Resilium Branded</h2>
-    <div class="card-row">
+  <div class="card-row">
 
-      <!-- Front -->
-      <div>
-        <div style="font-size:9px;color:#aaa;text-align:center;margin-bottom:6px;letter-spacing:0.08em;text-transform:uppercase;">Front</div>
-        <div class="card resilium-front">
-          <div class="accent-line"></div>
-
-          <div>
-            <div class="logo-row">
-              <!-- Resilium icon (simplified SVG) -->
-              <svg class="logo-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="16" cy="16" r="14" stroke="#E08040" stroke-width="1.5" fill="none" opacity="0.4"/>
-                <path d="M10 20 L16 10 L22 20" stroke="#E08040" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                <circle cx="16" cy="20" r="2" fill="#E08040"/>
-              </svg>
-              <span class="logo-name">Resilium</span>
+    <!-- FRONT -->
+    <div class="card-wrap">
+      <div class="card-label">Front</div>
+      <div class="card front">
+        <div class="storm-bg"></div>
+        <div class="overlay"></div>
+        <div class="accent-line"></div>
+        <div class="content">
+          <div class="top-row">
+            <img class="logo-img" src="resilium-logo-v2.png" alt="Resilium logo" />
+            <div class="brand-block">
+              <div class="brand-name">Resilium</div>
+              <div class="brand-sub">Personal Resilience Platform</div>
             </div>
-            <div class="tagline">Personal Resilience Platform</div>
           </div>
-
-          <div class="name-block">
+          <div class="bottom-block">
             <div class="name">Miruna Cristiana Paun</div>
             <div class="title">Founder &amp; CEO</div>
-            <div class="divider"></div>
-            <div class="contact-row">
-              <div class="contact-item"><span>✉</span>contact_resilium@pm.me</div>
-              <div class="contact-item"><span>🌐</span>resilium-platform.com</div>
-            </div>
+            <div class="tagline">Resilience — Measured. Strengthened.</div>
           </div>
         </div>
       </div>
-
-      <!-- Back -->
-      <div>
-        <div style="font-size:9px;color:#aaa;text-align:center;margin-bottom:6px;letter-spacing:0.08em;text-transform:uppercase;">Back</div>
-        <div class="card resilium-back">
-          <div class="back-logo">Resilium</div>
-          <div class="back-divider"></div>
-          <div class="back-tagline">Resilience — Measured. Strengthened.</div>
-          <div class="back-url">resilium-platform.com</div>
-        </div>
-      </div>
-
     </div>
-  </div>
 
-  <!-- NEUTRAL -->
-  <div class="card-group">
-    <h2>Option 2 — Neutral / Professional</h2>
-    <div class="card-row">
-
-      <!-- Front -->
-      <div>
-        <div style="font-size:9px;color:#aaa;text-align:center;margin-bottom:6px;letter-spacing:0.08em;text-transform:uppercase;">Front</div>
-        <div class="card neutral-front">
-          <div class="n-top">
-            <div class="n-name">Miruna Cristiana<br/>Paun</div>
-            <div class="n-title">Founder &amp; CEO, Resilium</div>
-          </div>
-
-          <div class="n-contact">
-            <div class="n-contact-item">
-              <span class="dot"></span>contact_resilium@pm.me
-            </div>
-            <div class="n-contact-item">
-              <span class="dot"></span>resilium-platform.com
-            </div>
-          </div>
-
-          <div class="n-bottom-accent"></div>
-        </div>
+    <!-- BACK -->
+    <div class="card-wrap">
+      <div class="card-label">Back</div>
+      <div class="card back">
+        <div class="back-logo">Resilium</div>
+        <div class="back-divider"></div>
+        <div class="back-tagline">Resilience — Measured. Strengthened.</div>
+        <div class="back-email">contact_resilium@pm.me</div>
+        <div class="qr-wrap" id="qr-container"></div>
       </div>
-
-      <!-- Back -->
-      <div>
-        <div style="font-size:9px;color:#aaa;text-align:center;margin-bottom:6px;letter-spacing:0.08em;text-transform:uppercase;">Back</div>
-        <div class="card neutral-back">
-          <div class="nb-initials">MCP</div>
-          <div class="nb-name">Miruna Cristiana Paun</div>
-          <div class="nb-divider"></div>
-          <div class="nb-url">resilium-platform.com</div>
-        </div>
-      </div>
-
     </div>
+
   </div>
 
   <p class="note">
-    Click "Print / Save as PDF" to export. In the print dialog, select "Save as PDF" and set margins to None for best results. Standard business card size: 3.5" × 2".
+    Click <strong>Print / Save as PDF</strong> → set margins to <strong>None</strong> and tick <strong>Background graphics</strong> so the storm image and colours print correctly.
+    Standard card size: 3.5&Prime; &times; 2&Prime;.
   </p>
+
+  <script>
+    new QRCode(document.getElementById("qr-container"), {
+      text: "https://resilium-platform.com",
+      width: 48,
+      height: 48,
+      colorDark: "#0D1225",
+      colorLight: "#ffffff",
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  </script>
 
 </body>
 </html>
