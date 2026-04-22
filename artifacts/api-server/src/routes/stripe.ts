@@ -410,7 +410,9 @@ router.post("/stripe/sync", async (req, res) => {
     }
 
     const rawStatus = activeSub.status;
-    const resolvedStatus: "active" | "past_due" | "cancelled" =
+    const cancelAtPeriodEnd: boolean = (activeSub as any).cancel_at_period_end ?? false;
+    const resolvedStatus =
+      cancelAtPeriodEnd ? "cancel_scheduled" :
       rawStatus === "active" || rawStatus === "trialing" ? "active" :
       rawStatus === "past_due" ? "past_due" :
       "cancelled";
@@ -439,8 +441,8 @@ router.post("/stripe/sync", async (req, res) => {
       });
     }
 
-    logger.info({ userId, customerId, status: resolvedStatus }, "Subscription synced from Stripe");
-    return res.json({ synced: true, status: resolvedStatus });
+    logger.info({ userId, customerId, status: resolvedStatus, cancelAtPeriodEnd }, "Subscription synced from Stripe");
+    return res.json({ synced: true, status: resolvedStatus, cancelAtPeriodEnd });
   } catch (err: any) {
     logger.error({ err }, "Failed to sync subscription from Stripe");
     return res.status(500).json({ error: "Failed to sync subscription" });

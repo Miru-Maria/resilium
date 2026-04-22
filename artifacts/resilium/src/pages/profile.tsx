@@ -1060,7 +1060,12 @@ function AccountTab({ user, plans, onAllPlansDeleted }: {
       const resp = await authFetch("/api/stripe/sync", token, { method: "POST" });
       const data = await resp.json();
       if (data.synced) {
-        toast({ title: "Subscription synced", description: "Your Pro status has been restored." });
+        const msg =
+          data.status === "cancel_scheduled" ? "Your subscription is active and cancels at the end of the billing period." :
+          data.status === "cancelled" ? "Your subscription has been cancelled." :
+          data.status === "past_due" ? "Your subscription is past due — please update your payment method." :
+          "Your Pro status has been restored.";
+        toast({ title: "Subscription synced", description: msg });
         await refetchSub();
       } else {
         toast({ title: "No active subscription found", description: "If you just paid, please wait a moment and try again.", variant: "destructive" });
