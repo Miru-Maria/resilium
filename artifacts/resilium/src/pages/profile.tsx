@@ -68,6 +68,7 @@ import {
   Lock,
   BookMarked,
   RefreshCw,
+  Settings,
 } from "lucide-react";
 import { guides, getEssentialGuides, getGuidesByLocation, getGuidesByDimension, type Guide } from "@/data/guides";
 import { saveToCache, loadFromCache, plansListCacheKey } from "@/lib/offline-cache";
@@ -75,6 +76,7 @@ import { DailyTipCard } from "@/components/daily-tip-card";
 import { AchievementBadges } from "@/components/achievement-badges";
 import { allDimsAssessedFromPlan } from "@/lib/badge-criteria";
 import { ChallengeCard } from "@/components/challenge-card";
+import { QRCodeSVG } from "qrcode.react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -1244,12 +1246,16 @@ function AccountTab({ user, plans, onAllPlansDeleted }: {
                 <Badge className="bg-primary/15 text-primary border-primary/20 rounded-full text-xs font-bold">Pro</Badge>
                 <Button
                   size="sm"
-                  variant="ghost"
-                  className="text-xs h-7 px-2 text-muted-foreground hover:text-foreground rounded-full"
+                  variant="outline"
+                  className="text-xs h-8 px-3 rounded-full border-primary/30 text-primary hover:bg-primary/10 hover:border-primary/50 gap-1.5"
                   onClick={handleManageSubscription}
                   disabled={portalLoading}
                 >
-                  {portalLoading ? "Opening…" : "Manage subscription"}
+                  {portalLoading ? (
+                    <><Loader2 className="w-3 h-3 animate-spin" /> Opening…</>
+                  ) : (
+                    <><Settings className="w-3 h-3" /> Manage subscription</>
+                  )}
                 </Button>
               </div>
             </div>
@@ -1299,12 +1305,12 @@ function AccountTab({ user, plans, onAllPlansDeleted }: {
             {/* QR code */}
             <div className="flex-shrink-0 flex flex-col items-center gap-1.5">
               <div className="rounded-xl border border-border/60 bg-white p-2 shadow-sm">
-                <img
-                  src="https://api.qrserver.com/v1/create-qr-code/?size=108x108&data=https%3A%2F%2Fresilium-platform.com%2Fresilium-mobile%2F&margin=2&color=1e293b"
-                  alt="QR code for Resilium mobile app"
-                  width={108}
-                  height={108}
-                  className="rounded"
+                <QRCodeSVG
+                  value="https://resilium-platform.com/resilium-mobile/"
+                  size={108}
+                  fgColor="#1e293b"
+                  bgColor="#ffffff"
+                  level="M"
                 />
               </div>
               <p className="text-[10px] text-muted-foreground text-center">Scan to open on phone</p>
