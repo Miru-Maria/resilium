@@ -303,8 +303,8 @@ function MasterChecklistSection() {
       <CategoryHeading icon={Globe}> Technical &amp; Monitoring</CategoryHeading>
       <ul className="space-y-3">
         <ChecklistItem
-          text="Set up web analytics (Plausible recommended — GDPR-friendly)"
-          detail="Add Plausible script to index.html. No cookie consent required — it's cookieless by design. Gives you visitor → assessment → upgrade funnel visibility."
+          text="Set up web analytics (Umami — GDPR-friendly, free)"
+          detail="Umami script added to index.html. No cookie consent required — it's cookieless by design. EU data region selected. Gives you visitor → assessment → upgrade funnel visibility."
         />
         <CompletedItem
           text="OpenGraph preview verified"
