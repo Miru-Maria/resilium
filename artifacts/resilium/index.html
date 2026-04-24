@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
 
     <!-- Content Security Policy -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://clerk.resilium-platform.com https://plausible.io; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://img.clerk.com https://resilium-platform.com; connect-src 'self' https://clerk.resilium-platform.com wss://clerk.resilium-platform.com https://*.clerk.com https://o4511187075923968.ingest.de.sentry.io https://plausible.io; frame-src https://clerk.resilium-platform.com https://*.clerk.accounts.dev; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self';" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://clerk.resilium-platform.com https://cloud.umami.is; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://img.clerk.com https://resilium-platform.com; connect-src 'self' https://clerk.resilium-platform.com wss://clerk.resilium-platform.com https://*.clerk.com https://o4511187075923968.ingest.de.sentry.io https://cloud.umami.is; frame-src https://clerk.resilium-platform.com https://*.clerk.accounts.dev; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self';" />
 
     <!-- Primary meta — per-page titles/descriptions/canonicals are set by React via react-helmet-async -->
     <title>Resilium — Know Your Readiness. Build Your Resilience.</title>
@@ -83,8 +83,8 @@
   <!-- Redirect legacy replit.app domain to canonical domain -->
   <script src="/redirect.js"></script>
 
-  <!-- Plausible Analytics — cookieless, GDPR-friendly, no consent banner needed -->
-  <script defer data-domain="resilium-platform.com" src="https://plausible.io/js/script.js"></script>
+  <!-- Umami Analytics — cookieless, GDPR-friendly, no consent banner needed -->
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="c5f820b3-31df-42c7-9c67-2d669117f9b6"></script>
   </head>
   <body>
     <div id="root"></div>
