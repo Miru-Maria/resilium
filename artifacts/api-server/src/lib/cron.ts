@@ -220,17 +220,18 @@ async function runUserWeeklyDigest() {
                user_id,
                id          AS report_id,
                score_overall,
+               action_plan,
                created_at
         FROM   resilience_reports
         WHERE  user_id IS NOT NULL
           AND  created_at >= ${sinceDate}
         ORDER  BY user_id, created_at DESC
       )
-      SELECT user_id, report_id, score_overall
+      SELECT user_id, report_id, score_overall, action_plan
       FROM   latest
     `);
 
-    const rawRows = rows.rows as Array<{ user_id: string; report_id: string; score_overall: number }>;
+    const rawRows = rows.rows as Array<{ user_id: string; report_id: string; score_overall: number; action_plan: unknown }>;
     logger.info({ count: rawRows.length }, "User weekly digest candidates");
     if (rawRows.length === 0) return;
 
@@ -240,17 +241,27 @@ async function runUserWeeklyDigest() {
     ];
     const eligibleRows = rawRows.filter(r => !optedOut.has(r.user_id));
 
+    const priorityOrder: Record<string, number> = { high: 0, medium: 1, low: 2 };
+
     for (const row of eligibleRows) {
       try {
         const clerkUser = await clerkClient.users.getUser(row.user_id);
         const email = clerkUser.emailAddresses[0]?.emailAddress;
         if (!email) continue;
+
+        const actionPlan = row.action_plan as { shortTerm?: Array<{ title: string; description: string; priority: string }> } | null;
+        const topAction = actionPlan?.shortTerm
+          ?.slice()
+          .sort((a, b) => (priorityOrder[a.priority] ?? 3) - (priorityOrder[b.priority] ?? 3))
+          [0];
+
         await sendUserWeeklyDigest({
           email,
           firstName: clerkUser.firstName ?? null,
           lastScore: Math.round(row.score_overall),
           reportId: row.report_id,
           userId: row.user_id,
+          topAction: topAction ? { title: topAction.title, description: topAction.description } : undefined,
         }).catch(() => {});
       } catch {
         // User may have been deleted from Clerk — skip

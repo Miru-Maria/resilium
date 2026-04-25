@@ -352,6 +352,18 @@ export default function PlanPage() {
       .catch(() => {});
   }, [isAuthenticated]);
 
+  const FREE_BREAKDOWN_KEY = "resilium_breakdown_free_v1";
+  const FREE_BREAKDOWN_TOTAL = 3;
+  const [freeBreakdownsLeft, setFreeBreakdownsLeft] = useState<number>(() => {
+    try {
+      const stored = localStorage.getItem(FREE_BREAKDOWN_KEY);
+      if (stored === null) return FREE_BREAKDOWN_TOTAL;
+      return Math.max(0, parseInt(stored, 10));
+    } catch {
+      return FREE_BREAKDOWN_TOTAL;
+    }
+  });
+
   // ── Offline caching ───────────────────────────────────────────────────────────
   const [offlinePlan, setOfflinePlan] = useState<any>(null);
   const [isOfflineMode, setIsOfflineMode] = useState(false);
@@ -447,12 +459,17 @@ export default function PlanPage() {
       if (!res.ok) throw new Error("Failed");
       const data = await res.json() as { steps: string[] };
       setExpandedSteps(prev => ({ ...prev, [key]: data.steps }));
+      if (!isPro) {
+        const next = Math.max(0, freeBreakdownsLeft - 1);
+        setFreeBreakdownsLeft(next);
+        try { localStorage.setItem(FREE_BREAKDOWN_KEY, String(next)); } catch {}
+      }
     } catch {
       setExpandedSteps(prev => ({ ...prev, [key]: [] }));
     } finally {
       setLoadingSteps(prev => ({ ...prev, [key]: false }));
     }
-  }, [reportId, expandedSteps, loadingSteps]);
+  }, [reportId, expandedSteps, loadingSteps, isPro, freeBreakdownsLeft, FREE_BREAKDOWN_KEY]);
 
   const handleMarkdownExport = useCallback(() => {
     if (!report) return;
@@ -1078,7 +1095,7 @@ export default function PlanPage() {
                                       {/* Action row: AI steps + coaching */}
                                       <div className={cn("px-4 pb-3 flex items-center flex-wrap gap-2", completed && "opacity-40 pointer-events-none")}>
                                         {/* Break it down */}
-                                        {isPro ? (
+                                        {isPro || freeBreakdownsLeft > 0 ? (
                                           <button
                                             type="button"
                                             onClick={() => fetchGuidedSteps(area, item)}
@@ -1092,6 +1109,11 @@ export default function PlanPage() {
                                             {isLoadingExpand ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
                                             {isLoadingExpand ? "Generating steps…" : isExpanded ? "Hide steps" : "Break it down"}
                                             {!isLoadingExpand && (isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />)}
+                                            {!isPro && !isLoadingExpand && !isExpanded && (
+                                              <span className="ml-0.5 bg-amber-100 text-amber-700 text-[10px] font-bold rounded-full px-1.5 py-0.5 leading-none">
+                                                {freeBreakdownsLeft} free
+                                              </span>
+                                            )}
                                           </button>
                                         ) : (
                                           <Link href="/pricing">
