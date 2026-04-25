@@ -92,6 +92,11 @@ KzTQxlJD2Z6s9ja9FBMfaZWME82Z+xpMDRvT/wSZgZ4rvETfTjEytYP48WNpKrPU
 cQIDAQAB
 -----END PUBLIC KEY-----`;
 
+if (!process.env["CLERK_SECRET_KEY"]) {
+  logger.error("FATAL: CLERK_SECRET_KEY is not set. Auth middleware will fail. Check your environment secrets.");
+  process.exit(1);
+}
+
 app.use(clerkMiddleware({
   publishableKey: process.env["CLERK_PUBLISHABLE_KEY"] || "pk_live_Y2xlcmsucmVzaWxpdW0tcGxhdGZvcm0uY29tJA",
   secretKey: process.env["CLERK_SECRET_KEY"],
