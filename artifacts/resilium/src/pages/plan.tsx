@@ -337,6 +337,9 @@ export default function PlanPage() {
 
   const report = fetchedReport ?? offlinePlan;
 
+  // ── Habit progressive disclosure ─────────────────────────────────────────────
+  const [habitsExpanded, setHabitsExpanded] = useState(false);
+
   // ── Streak tracking ──────────────────────────────────────────────────────────
   const [streak, setStreak] = useState(0);
   useEffect(() => {
@@ -519,6 +522,20 @@ export default function PlanPage() {
     midTerm?: Array<{ title: string; description: string; priority: string; category: string }>;
     longTerm?: Array<{ title: string; description: string; priority: string; category: string }>;
   } | undefined;
+
+  const PRIORITY_ORDER: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 };
+  const top3Items = allItems
+    .filter(({ area, item }) => !progressMap[`${area}::${item.id}`])
+    .sort((a, b) => (PRIORITY_ORDER[a.item.priority] ?? 3) - (PRIORITY_ORDER[b.item.priority] ?? 3))
+    .slice(0, 3);
+
+  const dailyHabits = (report as any).dailyHabits as Array<{ habit: string; frequency: string; category: string }> | undefined;
+
+  const FREQ_CONFIG: Record<string, { label: string; className: string }> = {
+    daily: { label: "Daily", className: "bg-primary/10 text-primary border-primary/20" },
+    weekly: { label: "Weekly", className: "bg-amber-500/10 text-amber-700 border-amber-500/20" },
+    monthly: { label: "Monthly", className: "bg-sky-500/10 text-sky-700 border-sky-500/20" },
+  };
 
   const scenarioSimulations = (report as any).scenarioSimulations as Array<{
     scenario: string;
@@ -758,6 +775,74 @@ export default function PlanPage() {
           )}
         </section>
 
+        {/* TOP 3 THIS WEEK */}
+        {top3Items.length > 0 && (
+          <section>
+            <div className="bg-card rounded-3xl border border-primary/25 p-6 shadow-lg shadow-black/5 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
+              <div className="relative">
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="w-6 h-6 rounded-xl bg-primary/15 flex items-center justify-center">
+                    <Target className="w-3.5 h-3.5 text-primary" />
+                  </div>
+                  <p className="text-xs font-bold uppercase tracking-widest text-primary">Start here</p>
+                </div>
+                <h2 className="font-display font-bold text-xl mb-4">Your top {top3Items.length} this week</h2>
+                <div className="space-y-2.5">
+                  {top3Items.map(({ area, item }) => {
+                    const key = `${area}::${item.id}`;
+                    const completed = progressMap[key] ?? false;
+                    const priorityConfig = PRIORITY_CONFIG[item.priority as keyof typeof PRIORITY_CONFIG] ?? PRIORITY_CONFIG.medium;
+                    const AreaIcon = AREA_ICONS[area] ?? Shield;
+                    const areaColor = AREA_COLORS[area] ?? "text-primary bg-primary/10";
+                    return (
+                      <div
+                        key={item.id}
+                        onClick={() => handleChecklistToggle(area, item.id, completed)}
+                        className={cn(
+                          "flex items-start gap-3 p-4 rounded-2xl border cursor-pointer transition-all select-none",
+                          completed
+                            ? "border-emerald-300 bg-emerald-50/60 dark:bg-emerald-900/10 dark:border-emerald-800/50 opacity-70"
+                            : "border-slate-200 bg-white/90 hover:border-primary/30 hover:bg-primary/5"
+                        )}
+                      >
+                        <div className={cn(
+                          "w-5 h-5 rounded-full border-2 flex-shrink-0 mt-0.5 flex items-center justify-center transition-all",
+                          completed ? "border-emerald-500 bg-emerald-500" : "border-muted-foreground/50"
+                        )}>
+                          {completed && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
+                            <span className={cn("text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border", priorityConfig.className)}>
+                              {priorityConfig.label}
+                            </span>
+                            <div className={cn("w-4 h-4 rounded-md flex items-center justify-center flex-shrink-0", areaColor)}>
+                              <AreaIcon className="w-2.5 h-2.5" />
+                            </div>
+                            <span className="text-[10px] text-muted-foreground">{AREA_LABELS[area] ?? area}</span>
+                          </div>
+                          <p className={cn("font-semibold text-sm leading-snug", completed ? "line-through text-muted-foreground" : "text-foreground")}>
+                            {item.title}
+                          </p>
+                        </div>
+                        {completed && (
+                          <span className="flex-shrink-0 text-[10px] font-bold uppercase tracking-wider text-emerald-600 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-2 py-0.5">
+                            Done
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                <p className="text-[11px] text-muted-foreground mt-4 leading-relaxed">
+                  Tap any item to mark it done. Your progress syncs across devices.
+                </p>
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* THREE HORIZON SECTIONS */}
         <section className="space-y-4">
           <Accordion type="multiple" defaultValue={["short"]} className="space-y-4">
@@ -868,8 +953,10 @@ export default function PlanPage() {
                                     <div
                                       key={item.id}
                                       className={cn(
-                                        "rounded-2xl border bg-white/90 transition-all overflow-hidden shadow-sm",
-                                        completed ? "border-emerald-300 bg-emerald-50/40" : "border-slate-200"
+                                        "rounded-2xl border transition-all overflow-hidden shadow-sm",
+                                        completed
+                                          ? "border-emerald-300/80 bg-emerald-50/70 dark:bg-emerald-900/10 dark:border-emerald-800/40"
+                                          : "border-slate-200 bg-white/90"
                                       )}
                                     >
                                       {/* Main item row */}
@@ -885,9 +972,15 @@ export default function PlanPage() {
                                         </div>
                                         <div className="flex-1 min-w-0">
                                           <div className="flex flex-wrap items-center gap-1.5 mb-1">
-                                            <span className={cn("text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border", priorityConfig.className)}>
-                                              {priorityConfig.label}
-                                            </span>
+                                            {completed ? (
+                                              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border bg-emerald-500/15 text-emerald-700 border-emerald-500/25">
+                                                ✓ Done
+                                              </span>
+                                            ) : (
+                                              <span className={cn("text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border", priorityConfig.className)}>
+                                                {priorityConfig.label}
+                                              </span>
+                                            )}
                                             <span className={cn(
                                               "text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full",
                                               item.pathway === "growth" ? "bg-emerald-500/15 text-emerald-700" : "bg-amber-500/15 text-amber-700"
@@ -895,15 +988,15 @@ export default function PlanPage() {
                                               {item.pathway === "growth" ? "Growth" : "Foundation"}
                                             </span>
                                           </div>
-                                          <h4 className={cn("font-bold text-sm leading-snug text-gray-900", completed && "line-through text-gray-400")}>
+                                          <h4 className={cn("font-bold text-sm leading-snug", completed ? "line-through text-gray-400" : "text-gray-900")}>
                                             {item.title}
                                           </h4>
-                                          <p className="text-gray-500 text-xs mt-0.5 leading-relaxed">{item.description}</p>
+                                          <p className={cn("text-xs mt-0.5 leading-relaxed", completed ? "text-gray-400" : "text-gray-500")}>{item.description}</p>
                                         </div>
                                       </div>
 
                                       {/* Action row: AI steps + coaching */}
-                                      <div className="px-4 pb-3 flex items-center flex-wrap gap-2">
+                                      <div className={cn("px-4 pb-3 flex items-center flex-wrap gap-2", completed && "opacity-40 pointer-events-none")}>
                                         {/* Break it down */}
                                         {isPro ? (
                                           <button
@@ -1022,6 +1115,79 @@ export default function PlanPage() {
             })}
           </Accordion>
         </section>
+
+        {/* DAILY HABITS */}
+        {dailyHabits && dailyHabits.length > 0 && (
+          <section>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-9 h-9 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <Activity className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="font-display font-bold text-2xl">Daily Habits</h2>
+                <p className="text-muted-foreground text-sm">
+                  Start with the first two this week. Add more when they feel natural.
+                </p>
+              </div>
+            </div>
+            <div className="bg-card rounded-3xl border border-border shadow-lg shadow-black/5 overflow-hidden">
+              <div className="divide-y divide-border/60">
+                {(habitsExpanded ? dailyHabits : dailyHabits.slice(0, 2)).map((habit, i) => {
+                  const freqConfig = FREQ_CONFIG[habit.frequency] ?? FREQ_CONFIG["daily"];
+                  const isFirst2 = i < 2;
+                  return (
+                    <div
+                      key={i}
+                      className={cn("flex items-start gap-4 px-5 py-4 transition-colors", isFirst2 && "bg-primary/5")}
+                    >
+                      <div className={cn(
+                        "w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 font-bold text-sm",
+                        isFirst2 ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
+                      )}>
+                        {i + 1}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium leading-snug text-foreground">{habit.habit}</p>
+                        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                          <span className={cn("text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border", freqConfig.className)}>
+                            {freqConfig.label}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground">{habit.category}</span>
+                        </div>
+                      </div>
+                      {isFirst2 && (
+                        <span className="flex-shrink-0 text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 border border-primary/20 rounded-full px-2 py-0.5 mt-0.5">
+                          This week
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              {dailyHabits.length > 2 && (
+                <div className="px-5 py-3.5 border-t border-border bg-muted/20">
+                  <button
+                    type="button"
+                    onClick={() => setHabitsExpanded(e => !e)}
+                    className="flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors"
+                  >
+                    {habitsExpanded ? (
+                      <>
+                        <ChevronUp className="w-4 h-4" />
+                        Show fewer habits
+                      </>
+                    ) : (
+                      <>
+                        <ChevronDown className="w-4 h-4" />
+                        See all {dailyHabits.length} habits
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
 
         {/* STRESS TEST SCENARIOS */}
         <section>
