@@ -11,7 +11,7 @@ import { PLAN_LIMIT } from "../users.js";
 import rateLimit from "express-rate-limit";
 import scenariosRouter from "./scenarios.js";
 import guidedStepsRouter from "./guided-steps.js";
-import { sendWelcomeEmail, sendDripDay0Email } from "../../lib/email.js";
+import { sendWelcomeEmail, sendDripDay0Email, sendMilestoneEmail } from "../../lib/email.js";
 
 function normalizeCountry(location: string): string | null {
   if (!location || !location.trim()) return null;
@@ -639,6 +639,36 @@ router.patch("/reports/:reportId/checklists/:area/:itemId", async (req, res) => 
       completed,
       completedAt: completedAt?.toISOString() ?? null,
     });
+
+    // Fire milestone email asynchronously — never blocks the response
+    if (completed) {
+      (async () => {
+        try {
+          const [countRow] = await db
+            .select({ total: count() })
+            .from(checklistProgressTable)
+            .innerJoin(resilienceReportsTable, eq(checklistProgressTable.reportId, resilienceReportsTable.reportId))
+            .where(and(eq(resilienceReportsTable.userId, userId), eq(checklistProgressTable.completed, true)));
+          const totalCompleted = countRow?.total ?? 0;
+          if ([1, 5, 10].includes(Number(totalCompleted))) {
+            const [userRow] = await db
+              .select({ email: usersTable.email, firstName: usersTable.firstName, emailOptOut: usersTable.emailOptOut })
+              .from(usersTable)
+              .where(eq(usersTable.id, userId))
+              .limit(1);
+            if (userRow?.email && !userRow.emailOptOut) {
+              await sendMilestoneEmail({
+                email: userRow.email,
+                firstName: userRow.firstName,
+                milestoneCount: Number(totalCompleted),
+                reportId,
+                userId,
+              });
+            }
+          }
+        } catch {}
+      })();
+    }
   } catch (err) {
     req.log.error({ err }, "Error updating checklist item");
     res.status(500).json({ error: "INTERNAL_ERROR", message: "Failed to update checklist item." });

@@ -95,7 +95,7 @@ export default function Slide3Solution() {
               className="text-[1.4vw] font-light leading-relaxed"
               style={{ color: "#8A7A6A", fontFamily: "Inter, sans-serif" }}
             >
-              Daily coaching tips, streak tracking, achievement badges, and a 30-day resilience challenge weighted to your weakest areas. Pro users unlock scenario simulations, AI Companion, and offline plan access.
+              Daily coaching tips, streak tracking, achievement badges, and a 30-day challenge weighted to your weakest areas. Action plan surfaces "One thing right now" — the single most impactful task from your weakest area. Completion milestone emails fire at 1, 5, and 10 actions done. Invite your household to take their own assessment and build resilience together. Pro users unlock scenario simulations, AI Companion, and offline plan access.
             </div>
           </div>
         </div>

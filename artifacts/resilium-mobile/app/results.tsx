@@ -361,6 +361,26 @@ export default function ResultsScreen() {
   const scoreColor = report.score.overall >= 70 ? colors.success : report.score.overall >= 40 ? colors.warning : colors.danger;
   const scoreLabel = report.score.overall >= 70 ? "Highly Resilient" : report.score.overall >= 40 ? "Moderately Prepared" : "Critically Vulnerable";
 
+  const getAreaScore = (areaKey: string): number => {
+    const a = areaKey.toLowerCase();
+    if (a.includes("financial")) return report.score.financial;
+    if (a.includes("health")) return report.score.health;
+    if (a.includes("skill")) return report.score.skills;
+    if (a.includes("mobil")) return report.score.mobility;
+    if (a.includes("psych") || a.includes("mental")) return report.score.psychological;
+    return report.score.resources;
+  };
+  const checklistsByArea = report.checklistsByArea ?? {};
+  const areasByWeakest = Object.keys(checklistsByArea).sort((a, b) => getAreaScore(a) - getAreaScore(b));
+  let oneThingNow: { area: string; item: ChecklistItem } | null = null;
+  for (const area of areasByWeakest) {
+    const uncompleted = (checklistsByArea[area] ?? []).filter(item => !checklistProgress[`${area}::${item.id}`]);
+    if (uncompleted.length > 0) {
+      oneThingNow = { area, item: uncompleted[0] };
+      break;
+    }
+  }
+
   return (
     <View style={[styles.container, { paddingTop: topPad }]}>
       <View style={styles.topBar}>
@@ -618,6 +638,27 @@ export default function ResultsScreen() {
           </View>
         )}
 
+        {oneThingNow && (
+          <View style={styles.sectionCard}>
+            <View style={styles.sectionHeader}>
+              <Feather name="zap" size={16} color={colors.primary} />
+              <Text style={styles.sectionTitle}>One thing right now</Text>
+            </View>
+            <Text style={styles.otrnArea}>{oneThingNow.area}</Text>
+            <Text style={styles.otrnTitle}>{oneThingNow.item.title}</Text>
+            {oneThingNow.item.description ? (
+              <Text style={styles.otrnDesc}>{oneThingNow.item.description}</Text>
+            ) : null}
+            <Pressable
+              style={({ pressed }) => [styles.otrnButton, pressed && { opacity: 0.8 }]}
+              onPress={() => { Haptics.selectionAsync(); handleChecklistToggle(oneThingNow!.area, oneThingNow!.item.id); }}
+            >
+              <Feather name="check" size={14} color="#0D1225" />
+              <Text style={styles.otrnButtonText}>Mark as done</Text>
+            </Pressable>
+          </View>
+        )}
+
         {report.checklistsByArea && Object.keys(report.checklistsByArea).length > 0 && (
           <View style={styles.sectionCard}>
             <View style={styles.sectionHeader}>
@@ -656,6 +697,30 @@ export default function ResultsScreen() {
             })}
           </View>
         )}
+
+        {/* HOUSEHOLD INVITE */}
+        <View style={styles.sectionCard}>
+          <View style={styles.sectionHeader}>
+            <Feather name="users" size={16} color={colors.primary} />
+            <Text style={styles.sectionTitle}>Invite your household</Text>
+          </View>
+          <Text style={styles.inviteBody}>
+            Your resilience only goes as far as the people around you. Invite a family member or partner to take their own assessment — it takes about 10 minutes.
+          </Text>
+          <Pressable
+            style={({ pressed }) => [styles.inviteButton, pressed && { opacity: 0.8 }]}
+            onPress={() => {
+              Haptics.selectionAsync();
+              Share.share({
+                message: `I just took the Resilium resilience assessment and scored ${Math.round(report.score.overall)}/100. It takes about 10 minutes and shows exactly where your gaps are — worth doing. Take yours: https://resilium-platform.com`,
+                title: "Take the Resilium Resilience Assessment",
+              });
+            }}
+          >
+            <Feather name="share-2" size={14} color={colors.primary} />
+            <Text style={styles.inviteButtonText}>Share with household</Text>
+          </Pressable>
+        </View>
 
         <View style={styles.feedbackCard}>
           {feedbackSubmitted ? (
@@ -1645,5 +1710,38 @@ const createStyles = (colors: ColorsType) => StyleSheet.create({
   pushDismissText: {
     fontFamily: "Inter_500Medium",
     fontSize: 14, color: colors.textMuted,
+  },
+  otrnArea: {
+    fontFamily: "Inter_600SemiBold", fontSize: 11, color: colors.textMuted,
+    textTransform: "uppercase", letterSpacing: 1, marginBottom: 4,
+  },
+  otrnTitle: {
+    fontFamily: "PlusJakartaSans_700Bold", fontSize: 17, color: colors.text,
+    marginBottom: 8, lineHeight: 23,
+  },
+  otrnDesc: {
+    fontFamily: "Inter_400Regular", fontSize: 13, color: colors.textMuted,
+    lineHeight: 20, marginBottom: 16,
+  },
+  otrnButton: {
+    flexDirection: "row" as const, alignItems: "center" as const, gap: 6,
+    backgroundColor: colors.primary, paddingHorizontal: 16, paddingVertical: 10,
+    borderRadius: 20, alignSelf: "flex-start" as const,
+  },
+  otrnButtonText: {
+    fontFamily: "Inter_600SemiBold", fontSize: 13, color: "#0D1225",
+  },
+  inviteBody: {
+    fontFamily: "Inter_400Regular", fontSize: 13, color: colors.textMuted,
+    lineHeight: 20, marginBottom: 16,
+  },
+  inviteButton: {
+    flexDirection: "row" as const, alignItems: "center" as const, gap: 6,
+    borderWidth: 1, borderColor: colors.primary,
+    paddingHorizontal: 16, paddingVertical: 10,
+    borderRadius: 20, alignSelf: "flex-start" as const,
+  },
+  inviteButtonText: {
+    fontFamily: "Inter_600SemiBold", fontSize: 13, color: colors.primary,
   },
 });

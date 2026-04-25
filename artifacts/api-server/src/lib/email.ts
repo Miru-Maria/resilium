@@ -606,3 +606,51 @@ export async function sendHealthCheckSummary(opts: {
   const html = `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0D1225;font-family:'Helvetica Neue',Arial,sans-serif;color:#EAD9BE;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:40px 20px;"><table width="560" cellpadding="0" cellspacing="0" style="background:#131929;border-radius:16px;overflow:hidden;"><tr><td style="background:${opts.overallStatus === "pass" ? "#166534" : "#7f1d1d"};padding:20px 32px;"><h1 style="margin:0;color:#fff;font-size:18px;font-weight:800;">${icon} Health Check · ${opts.passCount}/${opts.passCount + opts.failCount} Passing</h1><p style="margin:6px 0 0;color:rgba(255,255,255,0.7);font-size:12px;">${new Date().toUTCString()} · Triggered by: ${opts.triggeredBy}</p></td></tr><tr><td style="padding:24px 32px;"><p style="margin:0;"><a href="${APP_URL}/admin" style="color:#E08040;font-size:13px;">Open Admin Panel →</a></p></td></tr></table></td></tr></table></body></html>`;
   await send({ to: ADMIN_TO, subject, text, html });
 }
+
+// ─── Action Milestone Email ───────────────────────────────────────────────────
+
+export async function sendMilestoneEmail(opts: {
+  email: string;
+  firstName?: string | null;
+  milestoneCount: number;
+  reportId: string;
+  userId?: string;
+}): Promise<void> {
+  if (!opts.email) return;
+  const name = opts.firstName ?? "there";
+  const planUrl = `${APP_URL}/plan/${opts.reportId}`;
+  const unsubHtml = opts.userId ? unsubscribeFooterHtml(opts.userId) : "";
+  const unsubText = opts.userId ? unsubscribeFooterText(opts.userId) : "";
+  const listHeader = opts.userId
+    ? { "List-Unsubscribe": buildListUnsubscribeHeader(opts.userId), "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" }
+    : undefined;
+
+  const milestones: Record<number, { subject: string; headline: string; body: string; accent: string }> = {
+    1: {
+      subject: `First one done, ${name}`,
+      headline: "First action complete. ✓",
+      body: "The first completed action is the most important one — not because it closes the biggest gap, but because it proves you're someone who follows through. That matters more than any single item on the list.",
+      accent: "#22d3ee",
+    },
+    5: {
+      subject: `5 actions down, ${name} — you're building real momentum`,
+      headline: "5 actions complete.",
+      body: "Five completed actions means five gaps that can no longer catch you off guard. Resilience isn't built in one session — it's built exactly like this: one step, then another.",
+      accent: "#f59e0b",
+    },
+    10: {
+      subject: `10 actions complete, ${name} — your resilience is measurably stronger`,
+      headline: "10 actions complete.",
+      body: "Ten completed actions puts you measurably ahead of most people — not because they don't care, but because most never take the first step. You did, ten times over. The gap between where you started and where you are now is real and permanent.",
+      accent: "#E08040",
+    },
+  };
+
+  const m = milestones[opts.milestoneCount];
+  if (!m) return;
+
+  const text = `Hi ${name},\n\n${m.headline}\n\n${m.body}\n\nKeep going:\n${planUrl}\n\n— Cristiana at Resilium${unsubText}`;
+  const html = `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0D1225;font-family:'Helvetica Neue',Arial,sans-serif;color:#EAD9BE;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:40px 20px;"><table width="560" cellpadding="0" cellspacing="0" style="background:#131929;border-radius:16px;overflow:hidden;"><tr><td style="background:#E08040;padding:20px 32px;"><h1 style="margin:0;color:#0D1225;font-size:20px;font-weight:800;">Resilium</h1></td></tr><tr><td style="padding:32px;"><div style="text-align:center;margin:0 0 28px;"><span style="font-size:52px;font-weight:800;color:${m.accent};">${opts.milestoneCount}</span><span style="font-size:24px;color:#8A7A6A;font-weight:400;"> action${opts.milestoneCount !== 1 ? "s" : ""} done</span></div><h2 style="margin:0 0 16px;color:#EAD9BE;font-size:22px;font-weight:700;text-align:center;">${m.headline}</h2><p style="margin:0 0 28px;color:#b8a99a;font-size:15px;line-height:1.7;text-align:center;">${m.body}</p><a href="${planUrl}" style="display:block;background:#E08040;color:#0D1225;font-weight:700;font-size:15px;padding:15px 28px;border-radius:10px;text-decoration:none;text-align:center;">Keep going →</a><p style="margin:28px 0 0;color:#4a3a2a;font-size:12px;text-align:center;">— Cristiana at Resilium</p>${unsubHtml}</td></tr></table></td></tr></table></body></html>`;
+
+  await send({ to: opts.email, subject: m.subject, html, text, headers: listHeader });
+}

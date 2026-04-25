@@ -16,6 +16,7 @@ import {
   Sparkles, Lock, Heart, ExternalLink, Target, ArrowRight,
   TrendingUp, Clock, Star, Activity, Brain, Shield, BookOpen,
   Globe, Zap, DollarSign, Stethoscope, MapPin, Award, ChevronRight,
+  UserPlus, Copy,
 } from "lucide-react";
 import { ResilientIcon } from "@/components/resilient-icon";
 import { SiteFooter } from "@/components/site-footer";
@@ -388,6 +389,7 @@ export default function PlanPage() {
 
   // ── Habit progressive disclosure ─────────────────────────────────────────────
   const [habitsExpanded, setHabitsExpanded] = useState(false);
+  const [inviteCopied, setInviteCopied] = useState(false);
 
   // ── Streak tracking ──────────────────────────────────────────────────────────
   const [streak, setStreak] = useState(0);
@@ -470,6 +472,24 @@ export default function PlanPage() {
       setLoadingSteps(prev => ({ ...prev, [key]: false }));
     }
   }, [reportId, expandedSteps, loadingSteps, isPro, freeBreakdownsLeft, FREE_BREAKDOWN_KEY]);
+
+  const overallScore = Math.round((report as any)?.score?.overall ?? 0);
+  const handleInvite = useCallback(async () => {
+    const msg = `I just took the Resilium resilience assessment and scored ${overallScore}/100. It takes about 10 minutes and shows exactly where your gaps are — worth doing. Take yours: https://resilium-platform.com`;
+    if (typeof navigator !== "undefined" && (navigator as any).share) {
+      try {
+        await (navigator as any).share({ title: "Take the Resilium Resilience Assessment", text: msg });
+        return;
+      } catch {}
+    }
+    try {
+      await navigator.clipboard.writeText(msg);
+      setInviteCopied(true);
+      setTimeout(() => setInviteCopied(false), 3000);
+    } catch {
+      toast({ title: "Could not copy", description: "Please copy the invite link manually." });
+    }
+  }, [overallScore, toast]);
 
   const handleMarkdownExport = useCallback(() => {
     if (!report) return;
@@ -586,6 +606,30 @@ export default function PlanPage() {
     .filter(({ area, item }) => !progressMap[`${area}::${item.id}`])
     .sort((a, b) => (PRIORITY_ORDER[a.item.priority] ?? 3) - (PRIORITY_ORDER[b.item.priority] ?? 3))
     .slice(0, 3);
+
+  const reportScore = (report as any).score as Record<string, number> | undefined;
+  const getAreaScore = (areaKey: string): number => {
+    if (!reportScore) return 50;
+    const a = areaKey.toLowerCase();
+    if (a.includes("financial")) return reportScore.financial ?? 100;
+    if (a.includes("health")) return reportScore.health ?? 100;
+    if (a.includes("skill")) return reportScore.skills ?? 100;
+    if (a.includes("mobil")) return reportScore.mobility ?? 100;
+    if (a.includes("psych") || a.includes("mental")) return reportScore.psychological ?? 100;
+    if (a.includes("resource") || a.includes("emergency") || a.includes("social") || a.includes("community")) return reportScore.resources ?? 100;
+    return 50;
+  };
+  const areasByWeakest = Object.keys(checklistsByArea).sort((a, b) => getAreaScore(a) - getAreaScore(b));
+  let oneThingNow: { area: string; item: ChecklistItem } | null = null;
+  for (const area of areasByWeakest) {
+    const uncompleted = (checklistsByArea[area] ?? [])
+      .filter(item => !progressMap[`${area}::${item.id}`])
+      .sort((a, b) => (PRIORITY_ORDER[a.priority] ?? 3) - (PRIORITY_ORDER[b.priority] ?? 3));
+    if (uncompleted.length > 0) {
+      oneThingNow = { area, item: uncompleted[0] };
+      break;
+    }
+  }
 
   const dailyHabits = (report as any).dailyHabits as Array<{ habit: string; frequency: string; category: string }> | undefined;
 
@@ -867,6 +911,34 @@ export default function PlanPage() {
                     <ExternalLink className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0 mt-1 opacity-0 group-hover:opacity-60 transition-opacity" />
                   </a>
                 ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* ONE THING RIGHT NOW */}
+        {oneThingNow && totalDone < totalItems && (
+          <section>
+            <div className="bg-card rounded-3xl border border-primary/30 p-6 shadow-lg shadow-black/5 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
+              <div className="relative">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Zap className="w-4 h-4 text-primary" />
+                  </div>
+                  <p className="text-[11px] font-bold uppercase tracking-widest text-primary">One thing right now</p>
+                </div>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">{oneThingNow.area}</p>
+                <h3 className="font-display font-bold text-lg text-foreground mb-2 leading-snug">{oneThingNow.item.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-4">{oneThingNow.item.description}</p>
+                <button
+                  type="button"
+                  onClick={() => handleChecklistToggle(oneThingNow!.area, oneThingNow!.item.id, false)}
+                  className="flex items-center gap-2 text-sm font-semibold rounded-full px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                >
+                  <Check className="w-4 h-4" />
+                  Mark as done
+                </button>
               </div>
             </div>
           </section>
@@ -1401,6 +1473,30 @@ export default function PlanPage() {
               </div>
             </div>
           )}
+        </section>
+
+        {/* HOUSEHOLD INVITE */}
+        <section className="rounded-3xl border border-border bg-card p-6 md:p-8">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <UserPlus className="w-6 h-6 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-1">Invite your household</p>
+              <h3 className="font-display font-bold text-lg mb-2">Resilience is stronger together</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+                Your resilience only goes as far as the people around you. Invite your partner, a family member, or a close friend to take their own assessment — knowing where they stand changes what "prepared" actually means.
+              </p>
+              <button
+                type="button"
+                onClick={handleInvite}
+                className="flex items-center gap-2 text-sm font-semibold rounded-full px-4 py-2 border border-primary/40 text-primary hover:bg-primary/5 transition-colors"
+              >
+                {inviteCopied ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
+                <span className={inviteCopied ? "text-green-600" : ""}>{inviteCopied ? "Message copied!" : "Copy invite message"}</span>
+              </button>
+            </div>
+          </div>
         </section>
 
         {/* COACHING CALLOUT — score-aware, only surfaces when relevant */}
