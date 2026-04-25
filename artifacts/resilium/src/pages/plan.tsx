@@ -210,6 +210,43 @@ function getAreaResources(location: string | undefined): Record<string, Resource
   return AREA_RESOURCES_GLOBAL;
 }
 
+type CommunityResource = { title: string; desc: string; url: string; badge: string; icon: string };
+
+const COMMUNITY_RESOURCES_US: CommunityResource[] = [
+  { title: "211 — Local Help Finder", desc: "Free 24/7 helpline and directory connecting you to food, housing, utilities, and health assistance anywhere in the US. Call, text, or search online.", url: "https://www.211.org", badge: "Free · 24/7", icon: "📞" },
+  { title: "Benefits.gov", desc: "Official US government tool to find federal benefit programs you may qualify for — SNAP, Medicaid, WIC, housing, utilities help, and more.", url: "https://www.benefits.gov", badge: "Gov · Free", icon: "🏛️" },
+  { title: "Feeding America — Food Bank Finder", desc: "Find your nearest food bank or pantry. Most food banks serve anyone in need — no proof of income required.", url: "https://www.feedingamerica.org/find-your-local-foodbank", badge: "Non-Profit · Free", icon: "🥫" },
+  { title: "HRSA Health Center Finder", desc: "Find federally funded health centers near you offering free or sliding-scale medical, dental, and mental health care.", url: "https://findahealthcenter.hrsa.gov", badge: "Gov · Low-Cost", icon: "🏥" },
+  { title: "NAMI — Mental Health Support", desc: "Free mental health information, peer support, and crisis referrals. Call or text 988, or reach NAMI directly at 1-800-950-6264.", url: "https://www.nami.org/help", badge: "Free · Confidential", icon: "🧠" },
+];
+
+const COMMUNITY_RESOURCES_RO: CommunityResource[] = [
+  { title: "ANOFM — Șomaj și Venituri Minime", desc: "Indemnizații de șomaj, venit minim garantat și programe de recalificare profesională — Agenția Națională pentru Ocuparea Forței de Muncă.", url: "https://www.anofm.ro", badge: "Gov · Gratuit", icon: "📋" },
+  { title: "MMSS — Asistență Socială", desc: "Alocații, ajutoare sociale, ajutor pentru încălzire și prestații familiale de la Ministerul Muncii și Solidarității Sociale.", url: "https://www.mmss.gov.ro", badge: "Gov · Gratuit", icon: "🏛️" },
+  { title: "Caritas România", desc: "Ajutor alimentar, servicii sociale și sprijin pentru familii vulnerabile și persoane în situații de criză din toată România.", url: "https://www.caritas.ro", badge: "ONG · Gratuit", icon: "🤝" },
+  { title: "DGASPC — Asistență Socială Județeană", desc: "Servicii pentru persoane cu dizabilități, vârstnici și familii în dificultate — disponibile prin Direcția de Asistență Socială din fiecare județ.", url: "https://mmss.gov.ro/domenii/asistenta-sociala/", badge: "Gov · Gratuit", icon: "🏥" },
+  { title: "Linia de Criză ALIAT", desc: "Sprijin psihologic gratuit și confidențial: 0800 800 20 20 (luni–vineri, 8:00–20:00). Fără cost, fără programare.", url: "https://aliat.org.ro", badge: "Gratuit · Confidențial", icon: "🧠" },
+];
+
+const COMMUNITY_RESOURCES_GLOBAL: CommunityResource[] = [
+  { title: "UNHCR — Support for Displaced People", desc: "UN Refugee Agency assistance, legal protection, and connection to local support services for refugees and displaced people worldwide.", url: "https://www.unhcr.org/help", badge: "Intl · Free", icon: "🌍" },
+  { title: "Red Cross / Red Crescent — Local Chapter", desc: "Emergency relief, food, and community support. Find your nearest local chapter through the ICRC's global directory.", url: "https://www.icrc.org/en/where-we-work", badge: "Non-Profit · Free", icon: "🏥" },
+  { title: "Idealist — Local NGOs & Community Aid", desc: "Directory of local nonprofits and community organizations providing direct assistance — search by city or country.", url: "https://www.idealist.org", badge: "Directory · Free", icon: "🤝" },
+  { title: "WHO Mental Health Resources", desc: "Free mental health guidance, self-care tools, and referral resources from the World Health Organization.", url: "https://www.who.int/teams/mental-health-and-substance-use/consumer-network", badge: "Intl · Free", icon: "🧠" },
+];
+
+function getCommunityResources(location: string | undefined): CommunityResource[] {
+  if (!location) return COMMUNITY_RESOURCES_GLOBAL;
+  const loc = location.toLowerCase();
+  if (loc.includes("romania") || loc.includes("bucurești") || loc.includes("bucharest") || loc.includes("cluj") || loc.includes("timișoara") || loc.includes("iași") || loc.includes("brașov") || loc.includes("constanța")) {
+    return COMMUNITY_RESOURCES_RO;
+  }
+  if (loc.includes("united states") || loc.includes("usa") || loc.includes("u.s.") || loc.includes(", ca") || loc.includes(", ny") || loc.includes(", tx") || loc.includes(", fl") || loc.includes(", wa") || loc.includes(", co") || loc.includes(", il") || loc.includes(", ga") || loc.includes(", az") || loc.includes(", nc") || loc.includes(", oh") || loc.includes(", mi")) {
+    return COMMUNITY_RESOURCES_US;
+  }
+  return COMMUNITY_RESOURCES_GLOBAL;
+}
+
 const ONBOARDING_STEPS = [
   {
     icon: "🎯",
@@ -485,6 +522,10 @@ export default function PlanPage() {
   const goalIcon = primaryGoal ? (GOAL_ICONS[primaryGoal] ?? "⚡") : "⚡";
   const reportLocation = (report as any)?.input?.location as string | undefined;
   const AREA_RESOURCES = getAreaResources(reportLocation);
+  const communityResources = getCommunityResources(reportLocation);
+  const showCommunitySupport =
+    (report.score?.financial != null && report.score.financial < 40) ||
+    (report.score?.overall != null && report.score.overall < 40);
 
   const isHouseholdPlan = report.householdMode === "household";
   const hc = report.input.householdComposition;
@@ -774,6 +815,45 @@ export default function PlanPage() {
             </div>
           )}
         </section>
+
+        {/* COMMUNITY SUPPORT RESOURCES */}
+        {showCommunitySupport && communityResources.length > 0 && (
+          <section>
+            <div className="rounded-3xl border border-sky-500/25 bg-sky-500/5 p-6 shadow-lg shadow-black/5">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-6 h-6 rounded-xl bg-sky-500/15 flex items-center justify-center">
+                  <Heart className="w-3.5 h-3.5 text-sky-600" />
+                </div>
+                <p className="text-xs font-bold uppercase tracking-widest text-sky-600">Support available now</p>
+              </div>
+              <h2 className="font-display font-bold text-xl mb-1">Community support resources</h2>
+              <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
+                Based on your situation, these programs may help right now — before tackling the longer-term plan. All are free or low-cost.
+              </p>
+              <div className="space-y-2.5">
+                {communityResources.map((r, i) => (
+                  <a
+                    key={i}
+                    href={r.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-start gap-3 p-4 rounded-2xl border border-slate-200 bg-white/90 hover:border-sky-400/40 hover:bg-sky-50/50 transition-all no-underline group"
+                  >
+                    <span className="text-xl flex-shrink-0 mt-0.5">{r.icon}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                        <span className="font-semibold text-sm text-foreground group-hover:text-sky-700 transition-colors">{r.title}</span>
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-700 border border-sky-500/20">{r.badge}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground leading-relaxed">{r.desc}</p>
+                    </div>
+                    <ExternalLink className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0 mt-1 opacity-0 group-hover:opacity-60 transition-opacity" />
+                  </a>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* TOP 3 THIS WEEK */}
         {top3Items.length > 0 && (

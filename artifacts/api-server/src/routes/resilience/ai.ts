@@ -344,8 +344,18 @@ Requirements:
 
 LANGUAGE RULES — strictly enforce in all narrative text:
 - Never write raw score labels like "your resources score," "skills score of 20," "low financial score," etc. Instead refer to what the dimension means: "your emergency supply depth," "your practical skill set," "your financial buffer," etc.
-- Never use jargon shorthand like "pipeline sprint," "cyber hardening sprint," "no-infrastructure kit," "skills stack," or similar corporate/tech phrases. Use plain everyday language instead.
-- Write at an accessible reading level. Avoid unexplained acronyms. Aim to be understood by any adult regardless of education level.
+- Never use jargon shorthand. Specific banned terms and their plain replacements:
+  • "cash runway" → "months of expenses you have saved"
+  • "72-hour leave fast kit" → "emergency bag" or "go-bag"
+  • "cyber hardening" → "protecting your online accounts and data"
+  • "resilience portfolio" → "your set of preparations"
+  • "pipeline sprint" → omit entirely, rephrase as a plain action
+  • "skills stack" → "the skills you have"
+  • "financial runway" → "how long your savings can cover your expenses"
+  • "income diversification sprint" → "adding a second income source"
+  • "no-infrastructure kit" → "supplies that work without electricity or internet"
+  • Any other compound corporate/tech phrase → rephrase as a plain spoken instruction
+- Write at an accessible reading level. Every sentence should be understood by any adult regardless of education, background, or familiarity with emergency planning. Avoid unexplained acronyms.
 
 EMPATHY RULES — apply to riskProfileSummary and action plan framing:
 - Always acknowledge at least one genuine strength before discussing vulnerabilities.
@@ -353,10 +363,16 @@ EMPATHY RULES — apply to riskProfileSummary and action plan framing:
 - If income is unstable or savings < 2 months: validate the psychological difficulty of financial uncertainty before recommending financial steps.
 - If health is poor or mobility is low OR the user has a chronic condition: do not recommend self-directed physical tasks. Suggest assisted, digital, or community-based alternatives.
 - If the psychological score is below 45: begin the riskProfileSummary by recognizing resilience shown under difficulty — lead with what is working, not what is missing.
-- If the user's location or risk concerns suggest recent immigration or displacement: do not assume full access to government services or stable legal status. Prioritize NGO and community organization resources.
+- If the user's location or risk concerns suggest recent immigration or displacement: do not assume full access to government services or stable legal status. Prioritize NGO and community organization resources over government portals.
 - For high-stress profiles (single parents, students with debt, low-income renters): validate stress and time constraints explicitly before listing actions. Frame actions as "one at a time" rather than a comprehensive program.
 - If the user has strong specific skills (medical, military, technical, languages): explicitly name these as resilience assets in the summary — they are often undersold by users themselves.
 - If the user lives with family or friends: acknowledge this as a genuine resilience asset — shared housing can mean shared resources, mutual support, and lower individual cost burden. Do not frame it as a vulnerability unless combined with other clear risk factors.
+
+BUDGET-TIER REQUIREMENTS — apply when financial score < 35 OR savings < 2 months with unstable income:
+- Every action item in shortTerm and midTerm MUST end with a practical starter step that costs nothing or under $20. Use the phrase "If your budget is tight right now:" followed by the minimal version of the action.
+- Example format: "...build a 30-day emergency supply. If your budget is tight right now: start by adding two extra cans of food and one gallon of water each time you shop — no single large purchase needed."
+- Never present financial actions as all-or-nothing. Always show the smallest viable step.
+- If an action genuinely has no free or low-cost path, skip that action and replace it with one that does.
 
 CULTURAL FRAMING — mental resilience and social strength:
 - When discussing mental resilience strengths, frame them in BOTH individual AND community/collective terms. E.g., instead of "you have good personal coping skills", also reference "your ability to lean on and give support to those around you" where relevant.
@@ -365,8 +381,11 @@ CULTURAL FRAMING — mental resilience and social strength:
 - For users in collectivist-leaning cultural contexts (suggested by location such as sub-Saharan Africa, South/Southeast Asia, Eastern Europe, Latin America, Middle East): apply extra weight to community-based recommendations and community support strategies in the action plan and checklist.
 
 COMMUNITY RESOURCES — apply when relevant:
-- For users with low mobility, low income, or likely language barriers: include at least 2 resources in recommendedResources that are accessible without physical travel or significant cost (phone hotlines, online portals, community organizations, government benefit finders).
-- For users in financial hardship (savings < 2 months and unstable income): include at least one resource for emergency financial assistance, food security, or housing support relevant to their location.
+- For users with low mobility, low income, or likely language barriers: include at least 3 resources in recommendedResources that are accessible without physical travel or significant cost (phone hotlines, online portals, community organizations, government benefit finders).
+- For users in financial hardship (savings < 2 months and unstable income): the FIRST recommendedResource must be a local emergency financial assistance, food security, or housing support resource relevant to their exact location.
+- For users with an overall score below 40: at least half the recommendedResources must be free community programs, NGOs, or government assistance — not paid courses or tools.
+- For users who are elderly (age bracket 60+) with low mobility: include at least one resource specifically for elderly support services (meals delivery, local area agency on aging, assisted living support hotlines).
+- For users who are likely immigrants or non-citizens (suggested by location or risk concerns about displacement/immigration): include UNHCR, local refugee support NGOs, or immigrant community organizations as the first recommendedResource.
 
 Return ONLY the JSON, no additional text.`;
 
