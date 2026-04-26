@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Component, type ErrorInfo, type ReactNode } from "react";
 import { useLocation, useSearch, Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -9,6 +9,47 @@ import {
   Star, BarChart2, FileText, LayoutTemplate, Radar, Rocket,
   BookOpen, Code2, Layers, Palette, ChevronDown,
 } from "lucide-react";
+
+// ── Admin Error Boundary ─────────────────────────────────────────────────────
+interface AdminErrorBoundaryState { error: Error | null }
+
+class AdminErrorBoundary extends Component<{ children: ReactNode }, AdminErrorBoundaryState> {
+  constructor(props: { children: ReactNode }) {
+    super(props);
+    this.state = { error: null };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { error };
+  }
+
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    console.error("[AdminErrorBoundary]", error, info.componentStack);
+  }
+
+  render() {
+    if (this.state.error) {
+      return (
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 p-8 text-center">
+          <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center">
+            <span className="text-destructive text-2xl font-bold">!</span>
+          </div>
+          <h2 className="font-display font-bold text-xl text-foreground">Something went wrong</h2>
+          <p className="text-muted-foreground text-sm max-w-md">
+            {this.state.error.message ?? "An unexpected error occurred in this section."}
+          </p>
+          <button
+            className="text-sm text-primary hover:underline"
+            onClick={() => { this.setState({ error: null }); window.location.reload(); }}
+          >
+            Reload page
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -169,7 +210,9 @@ export function AdminLayout({ children, activeSection }: AdminLayoutProps) {
           </Button>
         </div>
       </aside>
-      <main className="flex-1 overflow-auto">{children}</main>
+      <main className="flex-1 overflow-auto">
+        <AdminErrorBoundary>{children}</AdminErrorBoundary>
+      </main>
     </div>
   );
 }
