@@ -1,7 +1,7 @@
 # Resilium: Personal Resilience Intelligence Platform
 ## Marketing & Distribution Strategy Whitepaper
 
-**Version 1.1 — April 2026**
+**Version 1.2 — April 2026**
 
 ---
 
@@ -10,6 +10,8 @@
 Resilium is a full-stack personal resilience planning platform that helps individuals assess, understand, and strengthen their readiness to handle life's disruptions — from job loss and health crises to natural disasters and major relocations.
 
 This document outlines Resilium's go-to-market strategy, target audience segmentation, channel mix, pricing rationale, and growth flywheel. The goal is a $1M ARR run rate within 18 months of public launch, achieved through a freemium funnel, B2B2C partnerships, and a content-led SEO moat.
+
+**Current status (April 2026):** Web platform live at `resilium-platform.com`. Blog live at `resilium-platform.com/blog` with 10 seeded posts and a full admin CMS. iOS mobile app built and in pre-submission testing. Public launch milestone achieved.
 
 ---
 
@@ -92,13 +94,13 @@ Our initial SAM is ~$1.5B combining wellness and direct-to-consumer. We are not 
 ### Conversion Levers
 
 1. **Score wall** — The free report shows "What's holding you back" but locks the prioritized action items behind Pro.
-2. **"One thing right now" card** — After receiving their report, every user sees a single prominent action card surfacing their highest-priority action item. The simplicity drives first engagement and demonstrates plan value before any paywall.
-3. **Partner / family invite card** — Results page prompts users to share their report with a household member. Household planning is a natural Pro upsell ("build a plan for both of you").
+2. **"One thing right now" card** *(live)* — After receiving their report, every user sees a single prominent action card surfacing their highest-priority action item. The simplicity drives first engagement and demonstrates plan value before any paywall.
+3. **Partner / family invite card** *(live)* — Results page prompts users to share their report with a household member. Household planning is a natural Pro upsell ("build a plan for both of you").
 4. **Scenario gate** — "Run Scenario Stress-Test" is surfaced prominently in results; clicking triggers a Pro upgrade prompt with a preview of the output.
 5. **Guides gate** — Crisis Guides are visible as a tab with a Pro badge; free users see a locked preview listing guide categories, then a prompt to upgrade.
 6. **Plan save limit** — On the third save attempt, a paywall appears showing the history feature.
 7. **Email drip** — After free assessment, users receive a 5-email sequence over 14 days (Day 0: report summary, Day 2: "your #1 weakness", Day 5: scenario preview, Day 9: Pro feature walkthrough, Day 14: limited-time discount).
-8. **Milestone emails** — Triggered emails fire automatically at behavioral milestones (first completed assessment, 7-day check-in streak, 30-day anniversary, first Pro upgrade) via the daily drip processor cron (00:15 UTC).
+8. **Milestone emails** *(live)* — Triggered emails fire automatically at behavioral milestones (first completed assessment, 7-day check-in streak, 30-day anniversary, first Pro upgrade) via the daily drip processor cron (00:15 UTC).
 
 ### Target Funnel Metrics (Year 1)
 
@@ -138,7 +140,21 @@ High-intent keywords have low competition and high buyer intent in this space:
 
 Each article ends with an inline CTA to take the free assessment. Because Resilium generates unique, data-driven content from real user assessments, it has a compounding data moat that generic content cannot replicate.
 
-**Timeline:** 3 blog posts/week for 6 months = 72 long-form articles. Target 15,000 organic monthly visitors by Month 9.
+**Blog platform status:** Live at `resilium-platform.com/blog` as of April 2026. 10 posts seeded at launch. Full admin CMS available at `/admin/blog` — posts can be written, scheduled, and published without touching code. The scheduler auto-publishes any post whose publish date has arrived, enabling batch writing and drip-scheduling weeks in advance.
+
+**Publishing timeline by phase:**
+
+| Phase | Frequency | Posts/Month | Cumulative at Month 6 |
+|---|---|---|---|
+| Phase 1 — Solo founder (now → Month 3) | 1 post/week | ~4 | ~24 |
+| Phase 2 — With contracted writer (Month 3+) | 3 posts/week | ~12 | ~60 |
+
+*Phase 1 prioritizes consistency over volume. One post per week published without gaps outperforms burst publishing. The scheduling system makes it practical to write in batches and release steadily.*
+
+**Organic traffic targets (revised for Phase 1 pace):**
+- Month 3: 1,000 organic visitors/month
+- Month 6: 5,000 organic visitors/month
+- Month 9: 12,000 organic visitors/month (assumes Phase 2 in effect by Month 3)
 
 ### 4.2 Social & Creator Partnerships (Secondary — 25%)
 
@@ -170,6 +186,8 @@ Target blended CAC < $18 for free users, < $65 for Pro conversions (LTV > $96 at
 ## 5. Mobile Distribution (iOS App Store)
 
 Resilium ships a native iOS app (web-only mode also available via the mobile web experience). Android is not in scope for the initial launch.
+
+**Current status (April 2026):** iOS app fully built and running. App Store submission is the next milestone — pending EAS production build and App Store listing creation. Target submission: Q2/Q3 2026.
 
 ### iOS App Store
 
@@ -212,7 +230,7 @@ Daily check-ins create an additional daily engagement layer between assessments,
 
 ### Email Lifecycle (All Users — Drip Processor)
 
-**Milestone-triggered emails** (fires on behavioral event via daily drip cron at 00:15 UTC):
+**Milestone-triggered emails** *(live — fires on behavioral event via daily drip cron at 00:15 UTC):*
 - **First assessment completed:** Welcome + score summary with "one thing to do right now"
 - **7-day check-in streak:** Encouragement + streak badge; Pro upsell for free users
 - **30-day anniversary:** Progress recap + reassessment nudge
@@ -234,14 +252,16 @@ Daily check-ins create an additional daily engagement layer between assessments,
 
 ## 8. Success Metrics & Milestones
 
-| Milestone | Target Date | KPI |
-|---|---|---|
-| Public launch (web) | Q2 2026 | 500 assessments in first week |
-| App Store launch | Q3 2026 | 1,000 installs in first month |
-| $10K MRR | Q3 2026 | ~1,110 Pro subscribers |
-| First B2B pilot | Q4 2026 | 1 company, 50+ seats |
-| $50K MRR | Q1 2027 | ~5,560 Pro subscribers or equiv. mix |
-| $1M ARR | Q4 2027 | ~9,250 subscribers + B2B |
+| Milestone | Target Date | KPI | Status |
+|---|---|---|---|
+| Public launch (web) | Q2 2026 | 500 assessments in first week | ✅ Launched |
+| Blog live with CMS | Q2 2026 | 10+ posts seeded, admin editor operational | ✅ Done |
+| App Store submission | Q2–Q3 2026 | iOS app submitted for review | 🔄 In progress |
+| App Store launch | Q3 2026 | 1,000 installs in first month | ⏳ Pending |
+| $10K MRR | Q3 2026 | ~1,110 Pro subscribers | ⏳ Pending |
+| First B2B pilot | Q4 2026 | 1 company, 50+ seats | ⏳ Pending |
+| $50K MRR | Q1 2027 | ~5,560 Pro subscribers or equiv. mix | ⏳ Pending |
+| $1M ARR | Q4 2027 | ~9,250 subscribers + B2B | ⏳ Pending |
 
 ---
 
@@ -253,12 +273,14 @@ Daily check-ins create an additional daily engagement layer between assessments,
 | FEMA preparedness guides | Disaster-focused, no scoring | Holistic 6-dimension framework including mental + financial |
 | Credit Karma / Mint | Financial snapshot only | Full resilience including psychological, social, practical dimensions |
 | Calm / Headspace | Mental health only | Actionable readiness across all life dimensions |
+| ReadyScore | Score-based preparedness, no paywall | AI plan, mobile app, psychological dimension, Pro subscription, email lifecycle |
 
 Resilium's defensible moat:
 
 1. **Proprietary dataset** — as assessments accumulate, percentile benchmarks become more meaningful and harder to replicate
 2. **AI scenario engine** — personalized what-if modeling at individual level is technically complex and requires tightly integrated scoring + LLM pipeline
 3. **Cross-dimension correlation** — insight like "your financial cushion partially offsets your low social support" is unique to Resilium's integrated model
+4. **Content compounding** — the blog at `resilium-platform.com/blog` is building topical authority that compounds over time; no competitor has invested in long-form SEO content at this depth
 
 ---
 
@@ -276,14 +298,18 @@ Resilium's defensible moat:
 
 At $1M ARR (Month 18), the business reaches payback on this investment assuming 80% gross margins (SaaS + AI model costs).
 
+*Note: Content/SEO budget assumes Phase 2 contracted writing from Month 3. Phase 1 (solo founder writing) has near-zero content cost.*
+
 ---
 
 ## Conclusion
 
 Resilium addresses a genuine, underserved need at the intersection of personal finance, mental health, and practical preparedness. The freemium model, content-led acquisition, and B2B expansion path create three compounding growth engines that reinforce each other. The AI-powered score + scenario engine provides a defensible technical moat that competitors cannot quickly replicate.
 
-The immediate priority is driving free assessment volume through SEO and creator partnerships, optimizing the free → Pro conversion funnel, and closing the first B2B pilot to validate enterprise pricing. With disciplined execution on this plan, $1M ARR is achievable within 18 months of public launch.
+As of April 2026, the web platform is live, the blog is operational with a full scheduling and drafting system, and the iOS app is awaiting App Store submission. The immediate priorities are: driving the first organic traffic through consistent weekly blog publishing, submitting the iOS app, and closing the first B2B pilot to validate enterprise pricing.
 
 ---
 
 *Resilium — Know your readiness. Own your future.*
+
+*v1.2 — Updated April 2026. Changes: blog platform live (Section 4.1 + Section 8), Phase 1/2 publishing frequency split, mobile app status updated, milestone table updated with current status, ReadyScore added to competitive table.*
