@@ -13,6 +13,7 @@ import uxTestRouter from "./ux-test/index.js";
 import adminGdprRouter from "./gdpr.js";
 import adminAnalyticsRouter from "./analytics.js";
 import adminAnnouncementsRouter from "./announcements.js";
+import adminBlogRouter from "./blog.js";
 import { getCoachingClickCount, runDependencyAudit } from "../../lib/cron.js";
 import { logger } from "../../lib/logger.js";
 import { sendWelcomeEmail, sendProUpgradeEmail, sendReassessmentReminder, sendUserWeeklyDigest } from "../../lib/email.js";
@@ -623,5 +624,6 @@ router.use("/ux-test", uxTestRouter);
 router.use("/gdpr", adminGdprRouter);
 router.use("/analytics", adminAnalyticsRouter);
 router.use("/announcements", adminAnnouncementsRouter);
+router.use("/blog", adminBlogRouter);
 
 export default router;

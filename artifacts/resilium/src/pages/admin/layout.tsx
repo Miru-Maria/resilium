@@ -7,7 +7,7 @@ import {
   Loader2, LayoutDashboard, Smartphone, Shield, LogOut,
   FlaskConical, Users, Megaphone, KeyRound, Activity, FolderLock,
   Star, BarChart2, FileText, LayoutTemplate, Radar, Rocket,
-  BookOpen, Code2, Layers, Palette, ChevronDown,
+  BookOpen, Code2, Layers, Palette, ChevronDown, Newspaper,
 } from "lucide-react";
 
 // ── Admin Error Boundary ─────────────────────────────────────────────────────
@@ -53,7 +53,7 @@ class AdminErrorBoundary extends Component<{ children: ReactNode }, AdminErrorBo
 
 interface AdminLayoutProps {
   children: React.ReactNode;
-  activeSection?: "dashboard" | "testimonials" | "mobile" | "gdpr" | "consent" | "ux-testing" | "users" | "announcements" | "marketing" | "security" | "monitoring" | "documents" | "analytics";
+  activeSection?: "dashboard" | "testimonials" | "mobile" | "gdpr" | "consent" | "ux-testing" | "users" | "announcements" | "marketing" | "security" | "monitoring" | "documents" | "analytics" | "blog";
 }
 
 /** @deprecated Token is now stored in an httpOnly cookie — no longer readable from JS. */
@@ -157,6 +157,7 @@ export function AdminLayout({ children, activeSection }: AdminLayoutProps) {
     { href: "/admin/ux-testing",   label: "AI UX Tester", icon: FlaskConical,    key: "ux-testing" },
     { href: "/admin/security",     label: "Security",     icon: KeyRound,        key: "security" },
     { href: "/admin/monitoring",   label: "Sentry",       icon: Activity,        key: "monitoring" },
+    { href: "/admin/blog",         label: "Blog Posts",   icon: Newspaper,       key: "blog" },
   ];
 
   const isDocuments = activeSection === "documents";

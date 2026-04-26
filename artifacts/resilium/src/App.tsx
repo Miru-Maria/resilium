@@ -46,6 +46,9 @@ import ConsentPage from "@/pages/consent";
 import CoachingPage from "@/pages/coaching";
 import DemoPage from "@/pages/demo";
 
+import BlogPage from "@/pages/blog";
+import BlogPostPage from "@/pages/blog-post";
+import AdminBlogPage from "@/pages/admin/blog";
 import ScenariosPage from "@/pages/scenarios";
 import PlanPage from "@/pages/plan";
 import { AnnouncementBanner } from "@/components/announcement-banner";
@@ -184,6 +187,7 @@ function GlobalNav() {
         </Link>
 
         <div className="hidden md:flex items-center gap-5">
+          <Link href="/blog" className="text-sm text-muted-foreground hover:text-primary transition-colors">Blog</Link>
           <Link href="/about" className="text-sm text-muted-foreground hover:text-primary transition-colors">About</Link>
           <Link href="/demo" className="text-sm text-muted-foreground hover:text-primary transition-colors">Demo</Link>
           <Link href="/pricing" className="text-sm text-muted-foreground hover:text-primary transition-colors">Pricing</Link>
@@ -243,6 +247,7 @@ function GlobalNav() {
 
       {mobileOpen && (
         <div className="md:hidden border-t border-border/40 bg-background/98 px-6 py-3 flex flex-col gap-1">
+          <Link href="/blog" onClick={() => setMobileOpen(false)} className="text-sm text-muted-foreground hover:text-primary transition-colors py-2 block">Blog</Link>
           <Link href="/about" onClick={() => setMobileOpen(false)} className="text-sm text-muted-foreground hover:text-primary transition-colors py-2 block">About</Link>
           <Link href="/demo" onClick={() => setMobileOpen(false)} className="text-sm text-muted-foreground hover:text-primary transition-colors py-2 block">Demo</Link>
           <Link href="/pricing" onClick={() => setMobileOpen(false)} className="text-sm text-muted-foreground hover:text-primary transition-colors py-2 block">Pricing</Link>
@@ -304,6 +309,9 @@ function Router() {
       <Route path="/admin/security" component={AdminSecurityPage} />
       <Route path="/admin/monitoring" component={AdminMonitoringPage} />
       <Route path="/admin/analytics" component={AdminAnalyticsPage} />
+      <Route path="/admin/blog" component={AdminBlogPage} />
+      <Route path="/blog" component={BlogPage} />
+      <Route path="/blog/:slug" component={BlogPostPage} />
       <Route path="/coaching" component={CoachingPage} />
       <Route path="/demo" component={DemoPage} />
       <Route path="/scenarios/:reportId" component={ScenariosPage} />

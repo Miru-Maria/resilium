@@ -15,6 +15,7 @@ import emailRouter from "./email.js";
 import companionRouter from "./companion.js";
 import checkinsRouter from "./checkins.js";
 import challengeRouter from "./challenge.js";
+import blogRouter from "./blog.js";
 
 const router: IRouter = Router();
 
@@ -34,5 +35,6 @@ router.use(emailRouter);
 router.use(companionRouter);
 router.use(checkinsRouter);
 router.use(challengeRouter);
+router.use("/", blogRouter);
 
 export default router;
