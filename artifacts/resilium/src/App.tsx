@@ -336,6 +336,7 @@ function ClerkProviderWithRoutes() {
       publishableKey={clerkPubKey ?? ""}
       routerPush={(to) => setLocation(stripBase(to))}
       routerReplace={(to) => setLocation(stripBase(to), { replace: true })}
+      appearance={hideFacebookAppearance}
     >
       <ClerkAuthBridge />
       <QueryClientProvider client={queryClient}>
