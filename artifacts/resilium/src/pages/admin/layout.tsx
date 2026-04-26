@@ -79,30 +79,58 @@ const DOC_ITEMS = [
   { key: "content-strategy",      label: "Content Strategy",      icon: Megaphone },
 ];
 
+// ── Session cache ─────────────────────────────────────────────────────────────
+// Persists across admin page navigations for 5 minutes so we only hit
+// /api/admin/session once per session window instead of on every mount.
+const SESSION_TTL_MS = 5 * 60 * 1000;
+const _sessionCache = { authed: false, expiresAt: 0 };
+
+function invalidateSessionCache() {
+  _sessionCache.authed = false;
+  _sessionCache.expiresAt = 0;
+}
+
 export function AdminLayout({ children, activeSection }: AdminLayoutProps) {
   const [, navigate] = useLocation();
   const search = useSearch();
-  const [checking, setChecking] = useState(true);
-  const [authed, setAuthed] = useState(false);
+  const [checking, setChecking] = useState(() => _sessionCache.expiresAt <= Date.now());
+  const [authed, setAuthed] = useState(() => _sessionCache.expiresAt > Date.now() && _sessionCache.authed);
   const [docsOpen, setDocsOpen] = useState(true);
 
   const activeDoc = new URLSearchParams(search).get("doc") ?? "marketing-strategy";
 
   useEffect(() => {
+    // Skip the network round-trip if the cache is still warm.
+    if (_sessionCache.expiresAt > Date.now()) {
+      if (_sessionCache.authed) {
+        setAuthed(true);
+        setChecking(false);
+      } else {
+        navigate("/admin/login");
+      }
+      return;
+    }
+
     fetch("/api/admin/session", { credentials: "include" })
       .then((r) => r.json())
       .then((data) => {
+        _sessionCache.authed = !!data.authenticated;
+        _sessionCache.expiresAt = Date.now() + SESSION_TTL_MS;
         if (data.authenticated) {
           setAuthed(true);
         } else {
           navigate("/admin/login");
         }
       })
-      .catch(() => navigate("/admin/login"))
+      .catch(() => {
+        invalidateSessionCache();
+        navigate("/admin/login");
+      })
       .finally(() => setChecking(false));
   }, []);
 
   async function handleLogout() {
+    invalidateSessionCache();
     await fetch("/api/admin/logout", { method: "POST", credentials: "include" });
     navigate("/admin/login");
   }
