@@ -115,18 +115,11 @@ function ClerkAuthBridge() {
   return null;
 }
 
-// TODO: Remove this appearance override once Facebook app review is approved
-const hideFacebookAppearance = {
-  elements: {
-    socialButtonsBlockButton__facebook: { display: "none" },
-  },
-};
-
 function SignInPage() {
   return (
     <div style={{ display: "flex", justifyContent: "center", padding: "4rem 1rem", minHeight: "60vh", alignItems: "center" }}>
       <NoIndexPage />
-      <SignIn routing="path" path={`${basePath}/sign-in`} signUpUrl={`${basePath}/sign-up`} appearance={hideFacebookAppearance} />
+      <SignIn routing="path" path={`${basePath}/sign-in`} signUpUrl={`${basePath}/sign-up`} />
     </div>
   );
 }
@@ -135,7 +128,7 @@ function SignUpPage() {
   return (
     <div style={{ display: "flex", justifyContent: "center", padding: "4rem 1rem", minHeight: "60vh", alignItems: "center" }}>
       <NoIndexPage />
-      <SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in`} appearance={hideFacebookAppearance} />
+      <SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in`} />
     </div>
   );
 }
