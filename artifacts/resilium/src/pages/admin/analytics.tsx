@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { AdminLayout } from "./layout";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -7,8 +7,98 @@ import {
 } from "recharts";
 import {
   Users, TrendingUp, Award, Activity, Loader2, AlertTriangle, Target, Zap,
+  BarChart2, ExternalLink, Settings2, Maximize2, Minimize2,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+const UMAMI_SHARE_URL = import.meta.env.VITE_UMAMI_SHARE_URL as string | undefined;
+const UMAMI_WEBSITE_ID = "c5f820b3-31df-42c7-9c67-2d669117f9b6";
+
+function UmamiSection() {
+  const [expanded, setExpanded] = useState(false);
+
+  if (!UMAMI_SHARE_URL) {
+    return (
+      <Card className="border-none shadow-md">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-display flex items-center gap-2">
+            <BarChart2 className="w-4 h-4 text-primary" /> Traffic Analytics — Umami
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="rounded-xl bg-muted/40 border border-dashed border-muted-foreground/20 p-6 space-y-4">
+            <div className="flex items-start gap-3">
+              <Settings2 className="w-5 h-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+              <div className="space-y-1">
+                <p className="text-sm font-semibold">One-time setup required</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Your Umami tracking is already live (website ID <code className="bg-muted px-1 py-0.5 rounded text-[11px]">{UMAMI_WEBSITE_ID}</code>).
+                  To embed the dashboard here, generate a public share URL from your Umami account and add it as an environment variable.
+                </p>
+              </div>
+            </div>
+            <div className="bg-background rounded-lg border p-4 space-y-3 text-xs">
+              <p className="font-semibold text-muted-foreground uppercase tracking-wider text-[10px]">Setup steps</p>
+              <ol className="space-y-2 text-sm text-foreground/80 list-none">
+                {[
+                  <>Log into <a href="https://cloud.umami.is" target="_blank" rel="noreferrer" className="text-primary underline underline-offset-2 inline-flex items-center gap-1">cloud.umami.is <ExternalLink className="w-3 h-3" /></a> and open your Resilium website.</>,
+                  <>Go to <strong>Settings</strong> → <strong>Share URL</strong> and toggle it on.</>,
+                  <>Copy the generated share URL (looks like <code className="bg-muted px-1 py-0.5 rounded">https://cloud.umami.is/share/…/resilium-platform.com</code>).</>,
+                  <>In Replit, add a new secret: <code className="bg-muted px-1 py-0.5 rounded">VITE_UMAMI_SHARE_URL</code> with that URL as the value.</>,
+                  <>Restart the web workflow — the dashboard will appear here automatically.</>,
+                ].map((step, i) => (
+                  <li key={i} className="flex items-start gap-3">
+                    <span className="flex-shrink-0 w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-bold flex items-center justify-center mt-0.5">{i + 1}</span>
+                    <span>{step}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="border-none shadow-md">
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-sm font-display flex items-center gap-2">
+            <BarChart2 className="w-4 h-4 text-primary" /> Traffic Analytics — Umami
+          </CardTitle>
+          <div className="flex items-center gap-2">
+            <a
+              href={UMAMI_SHARE_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1 transition-colors"
+            >
+              Open full view <ExternalLink className="w-3 h-3" />
+            </a>
+            <button
+              onClick={() => setExpanded((e) => !e)}
+              className="text-muted-foreground hover:text-primary transition-colors p-1 rounded"
+              title={expanded ? "Collapse" : "Expand"}
+            >
+              {expanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+            </button>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="p-0 pb-1">
+        <iframe
+          src={UMAMI_SHARE_URL}
+          className="w-full rounded-b-xl border-0 transition-all duration-300"
+          style={{ height: expanded ? "900px" : "520px" }}
+          title="Umami Analytics Dashboard"
+          loading="lazy"
+          sandbox="allow-scripts allow-same-origin allow-forms"
+        />
+      </CardContent>
+    </Card>
+  );
+}
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -81,13 +171,27 @@ export default function AdminAnalyticsPage() {
 
   return (
     <AdminLayout activeSection="analytics">
-      <div className="p-6 max-w-6xl mx-auto space-y-6">
-        <div className="flex items-center gap-3 mb-6">
+      <div className="p-6 max-w-6xl mx-auto space-y-8">
+        <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
             <Activity className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <h1 className="text-xl font-bold">User Analytics</h1>
+            <h1 className="text-xl font-bold">Analytics</h1>
+            <p className="text-sm text-muted-foreground">Traffic, signups, engagement, and conversion</p>
+          </div>
+        </div>
+
+        {/* Umami traffic analytics */}
+        <UmamiSection />
+
+        {/* User analytics header */}
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-orange-50 flex items-center justify-center">
+            <Users className="w-5 h-5 text-orange-500" />
+          </div>
+          <div>
+            <h2 className="text-base font-bold">User Analytics</h2>
             <p className="text-sm text-muted-foreground">Signups, engagement, and conversion — last 12 months</p>
           </div>
         </div>
