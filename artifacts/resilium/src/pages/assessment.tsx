@@ -798,11 +798,22 @@ export default function AssessmentPage() {
   useSubmitAssessment(); // keep hook registration; direct fetch used in handleSubmit
 
   // ── Draft persistence ─────────────────────────────────────────────────────
-  // Load saved draft once Clerk identity is resolved
+  // Load saved draft once Clerk identity is resolved.
+  // If a signed-in user has no userId draft, migrate the anon draft so
+  // progress isn't lost when someone signs in mid-assessment.
   useEffect(() => {
     if (!draftKey) return; // wait until Clerk resolves the user
     try {
-      const raw = localStorage.getItem(draftKey);
+      let raw = localStorage.getItem(draftKey);
+      if (!raw && user?.id) {
+        const anonKey = `${DRAFT_KEY_BASE}_anon`;
+        const anonRaw = localStorage.getItem(anonKey);
+        if (anonRaw) {
+          localStorage.setItem(draftKey, anonRaw);
+          localStorage.removeItem(anonKey);
+          raw = anonRaw;
+        }
+      }
       if (raw) {
         const saved = JSON.parse(raw);
         const savedAt = saved?.savedAt ? new Date(saved.savedAt).getTime() : 0;

@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ResilientIcon } from "@/components/resilient-icon";
-import { LogIn } from "lucide-react";
+import { LogIn, Menu, X } from "lucide-react";
 
 import LandingPage from "@/pages/landing";
 import AssessmentPage from "@/pages/assessment";
@@ -157,12 +157,15 @@ function GlobalNav() {
   const { user } = useUser();
   const { openSignIn, signOut } = useClerk();
   const [authTimedOut, setAuthTimedOut] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     if (isLoaded) return;
     const t = setTimeout(() => setAuthTimedOut(true), 500);
     return () => clearTimeout(t);
   }, [isLoaded]);
+
+  useEffect(() => { setMobileOpen(false); }, [location]);
 
   if (location.startsWith("/admin") || location === "/coaching") return null;
 
@@ -171,8 +174,8 @@ function GlobalNav() {
   const initials = [user?.firstName?.[0], user?.lastName?.[0]].filter(Boolean).join("").toUpperCase() || "?";
 
   return (
-    <header className="fixed top-0 left-0 right-0 h-14 z-[100] bg-background/95 backdrop-blur-sm border-b border-border/40 flex items-center">
-      <div className="w-full px-6 flex items-center justify-between">
+    <header className="fixed top-0 left-0 right-0 z-[100] bg-background/95 backdrop-blur-sm border-b border-border/40">
+      <div className="h-14 w-full px-6 flex items-center justify-between">
         <Link href="/">
           <span className="flex items-center gap-2 cursor-pointer">
             <ResilientIcon className="w-6 h-6" />
@@ -187,6 +190,13 @@ function GlobalNav() {
         </div>
 
         <div className="flex items-center gap-2">
+          <button
+            className="md:hidden flex items-center justify-center w-8 h-8 text-muted-foreground hover:text-foreground transition-colors"
+            onClick={() => setMobileOpen(o => !o)}
+            aria-label="Toggle menu"
+          >
+            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
           {!showAuth ? (
             <div className="w-24 h-8 rounded-full bg-muted/50 animate-pulse" />
           ) : isSignedIn && user ? (
@@ -230,6 +240,14 @@ function GlobalNav() {
           )}
         </div>
       </div>
+
+      {mobileOpen && (
+        <div className="md:hidden border-t border-border/40 bg-background/98 px-6 py-3 flex flex-col gap-1">
+          <Link href="/about" onClick={() => setMobileOpen(false)} className="text-sm text-muted-foreground hover:text-primary transition-colors py-2 block">About</Link>
+          <Link href="/demo" onClick={() => setMobileOpen(false)} className="text-sm text-muted-foreground hover:text-primary transition-colors py-2 block">Demo</Link>
+          <Link href="/pricing" onClick={() => setMobileOpen(false)} className="text-sm text-muted-foreground hover:text-primary transition-colors py-2 block">Pricing</Link>
+        </div>
+      )}
     </header>
   );
 }

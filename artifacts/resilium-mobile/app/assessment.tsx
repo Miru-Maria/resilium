@@ -410,7 +410,7 @@ export default function AssessmentScreen() {
   return (
     <View style={[styles.container, { paddingTop: topPad }]}>
       <View style={styles.topBar}>
-        <Pressable onPress={handleBack} style={styles.backBtn} hitSlop={12} testID="back-btn">
+        <Pressable onPress={handleBack} style={styles.backBtn} hitSlop={12}>
           <Feather name={step === 0 && mrSubStep === 0 ? "x" : "arrow-left"} size={20} color={colors.textSecondary} />
         </Pressable>
         <Text style={styles.stepCounter}>{stepLabel}</Text>
@@ -471,7 +471,6 @@ export default function AssessmentScreen() {
                   autoFocus
                   returnKeyType="next"
                   onSubmitEditing={isValid() ? handleNext : undefined}
-                  testID="location-input"
                 />
                 <Pressable
                   onPress={handleUseMyLocation}
@@ -919,7 +918,6 @@ export default function AssessmentScreen() {
           style={({ pressed }) => [styles.nextBtn, !isValid() && styles.nextBtnDisabled, pressed && styles.nextBtnPressed]}
           onPress={handleNext}
           disabled={!isValid()}
-          testID="next-btn"
         >
           <Text style={styles.nextBtnText}>
             {step === TOTAL_STEPS - 1

@@ -384,14 +384,14 @@ export default function ResultsScreen() {
   return (
     <View style={[styles.container, { paddingTop: topPad }]}>
       <View style={styles.topBar}>
-        <Pressable onPress={() => router.push("/")} style={styles.homeBtn} hitSlop={12}>
+        <Pressable onPress={() => router.replace("/")} style={styles.homeBtn} hitSlop={12}>
           <Feather name="home" size={18} color={colors.textSecondary} />
         </Pressable>
         <View style={styles.topBarCenter}>
           <Feather name="shield" size={16} color={colors.primary} />
           <Text style={styles.topBarTitle}>Your Report</Text>
         </View>
-        <Pressable onPress={handleShare} style={styles.shareBtn} hitSlop={12} testID="share-btn">
+        <Pressable onPress={handleShare} style={styles.shareBtn} hitSlop={12}>
           <Feather name={copied ? "check" : "share-2"} size={18} color={copied ? colors.success : colors.textSecondary} />
         </Pressable>
       </View>

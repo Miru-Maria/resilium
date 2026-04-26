@@ -14,7 +14,7 @@ import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 
 const COACHING_URL = "https://healing-through-understanding.replit.app/contact";
-const TRACK_URL = "https://resilium-platform.com/api/coaching/track";
+const TRACK_URL = `https://${process.env.EXPO_PUBLIC_DOMAIN}/api/coaching/track`;
 
 const WARM = {
   bg: "#F5EDE0",
