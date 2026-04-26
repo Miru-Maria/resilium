@@ -551,6 +551,8 @@ const ADMIN_DOCS: Record<string, string> = {
   "platform-assessment": "text/html; charset=utf-8",
   "marketing-strategy": "text/plain; charset=utf-8",
   "competitor-monitoring": "text/plain; charset=utf-8",
+  "competitive-analysis": "text/plain; charset=utf-8",
+  "content-strategy": "text/plain; charset=utf-8",
 };
 
 router.get("/docs/:name", requireAdminSession, (req, res) => {

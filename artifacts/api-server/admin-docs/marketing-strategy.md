@@ -81,20 +81,24 @@ Our initial SAM is ~$1.5B combining wellness and direct-to-consumer. We are not 
 ### Pro Tier ($9/month or $79/year)
 
 - Unlimited plan saves and history
-- AI Companion (GPT-5 powered personalized guidance, chat interface)
-- AI Plan (90-day structured action roadmap)
+- AI Companion (GPT-4.1-mini powered personalized guidance, chat interface grounded in user's latest scores)
+- AI Plan (90-day structured action roadmap with AI sub-steps)
 - Scenario stress-testing (job loss, health crisis, relocation, natural disaster)
-- Crisis Guides — step-by-step offline-capable emergency protocols
+- Crisis Guides — 10 step-by-step offline-capable emergency protocols (financial, health, shelter, water, food, communications, evacuation, documents, mental health, community)
+- Score trend history — track resilience score changes over time across all 6 dimensions
 - Priority re-assessment reminders and trend tracking
 - Markdown export of full report + action plan (importable into Notion, Obsidian, Evernote)
 
 ### Conversion Levers
 
 1. **Score wall** — The free report shows "What's holding you back" but locks the prioritized action items behind Pro.
-2. **Scenario gate** — "Run Scenario Stress-Test" is surfaced prominently in results; clicking triggers a Pro upgrade prompt with a preview of the output.
-3. **Guides gate** — Crisis Guides are visible as a tab with a Pro badge; free users see a locked preview listing guide categories, then a prompt to upgrade.
-4. **Plan save limit** — On the third save attempt, a paywall appears showing the history feature.
-5. **Email drip** — After free assessment, users receive a 5-email sequence over 14 days (Day 0: report summary, Day 2: "your #1 weakness", Day 5: scenario preview, Day 9: Pro feature walkthrough, Day 14: limited-time discount).
+2. **"One thing right now" card** — After receiving their report, every user sees a single prominent action card surfacing their highest-priority action item. The simplicity drives first engagement and demonstrates plan value before any paywall.
+3. **Partner / family invite card** — Results page prompts users to share their report with a household member. Household planning is a natural Pro upsell ("build a plan for both of you").
+4. **Scenario gate** — "Run Scenario Stress-Test" is surfaced prominently in results; clicking triggers a Pro upgrade prompt with a preview of the output.
+5. **Guides gate** — Crisis Guides are visible as a tab with a Pro badge; free users see a locked preview listing guide categories, then a prompt to upgrade.
+6. **Plan save limit** — On the third save attempt, a paywall appears showing the history feature.
+7. **Email drip** — After free assessment, users receive a 5-email sequence over 14 days (Day 0: report summary, Day 2: "your #1 weakness", Day 5: scenario preview, Day 9: Pro feature walkthrough, Day 14: limited-time discount).
+8. **Milestone emails** — Triggered emails fire automatically at behavioral milestones (first completed assessment, 7-day check-in streak, 30-day anniversary, first Pro upgrade) via the daily drip processor cron (00:15 UTC).
 
 ### Target Funnel Metrics (Year 1)
 
@@ -206,13 +210,25 @@ The natural lifecycle is quarterly — resilience scores change as life circumst
 
 Daily check-ins create an additional daily engagement layer between assessments, building habit loops and streak-based retention.
 
-### Email Lifecycle (Pro Users)
+### Email Lifecycle (All Users — Drip Processor)
 
-- **Week 1:** "Your AI Plan — week 1 checklist" (action items from their plan)
-- **Month 1:** "You're 30 days in — here's your progress" (checklist completion summary)
-- **Month 3:** "Time to retake your assessment — things may have changed"
-- **Month 6:** "Your 6-month resilience journey" (PDF summary, shareable)
-- **Annual renewal:** 30-day and 7-day renewal reminders; churn-saver offer (1 month free)
+**Milestone-triggered emails** (fires on behavioral event via daily drip cron at 00:15 UTC):
+- **First assessment completed:** Welcome + score summary with "one thing to do right now"
+- **7-day check-in streak:** Encouragement + streak badge; Pro upsell for free users
+- **30-day anniversary:** Progress recap + reassessment nudge
+- **First Pro upgrade:** Onboarding confirmation + Pro features walkthrough
+
+**Time-based re-engagement** (cron-driven):
+- **Day 2 after sign-up (no assessment):** Gentle nudge — "Your resilience score is waiting"
+- **Day 7 (free, no conversion):** Highlight top 3 vulnerabilities from report; Pro upsell
+- **Day 14:** Limited-time offer for Pro annual plan
+
+**Pro User Lifecycle:**
+- **Week 1:** "Your action plan — week 1 priorities"
+- **Month 1:** "30 days in — here's your checklist progress"
+- **Month 3:** "Time to retake — things may have changed"
+- **Month 6:** "Your 6-month resilience journey" (summary, shareable)
+- **Annual renewal:** 30-day and 7-day reminders; churn-saver offer (1 month free)
 
 ---
 
