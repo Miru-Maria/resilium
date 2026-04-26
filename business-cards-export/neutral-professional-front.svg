@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="88.9mm" height="50.8mm" viewBox="0 0 1050 600">
+  <defs>
+    <clipPath id="card">
+      <rect width="1050" height="600" rx="24"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#card)">
+    <!-- Background — white -->
+    <rect width="1050" height="600" fill="#ffffff"/>
+    <!-- Card border -->
+    <rect width="1050" height="600" rx="24" fill="none" stroke="#e8e8e8" stroke-width="2"/>
+
+    <!-- ── Top section: Name & Title ── -->
+
+    <!-- Name line 1 -->
+    <text x="75" y="130"
+          font-family="'Playfair Display', Georgia, 'Times New Roman', serif"
+          font-size="50" font-weight="700" fill="#1a1a2e">Miruna Cristiana</text>
+
+    <!-- Name line 2 -->
+    <text x="75" y="182"
+          font-family="'Playfair Display', Georgia, 'Times New Roman', serif"
+          font-size="50" font-weight="700" fill="#1a1a2e">Paun</text>
+
+    <!-- Title -->
+    <text x="75" y="222"
+          font-family="'Inter', 'Helvetica Neue', Arial, sans-serif"
+          font-size="22" font-weight="500" fill="#888888" letter-spacing="3.5">FOUNDER &amp; CEO, RESILIUM</text>
+
+    <!-- Subtle horizontal rule -->
+    <rect x="75" y="250" width="75" height="2.5" fill="#1a1a2e" opacity="0.15"/>
+
+    <!-- ── Bottom section: Contact ── -->
+
+    <!-- Dot • Email -->
+    <circle cx="75" cy="370" r="5" fill="#999999"/>
+    <text x="92" y="377"
+          font-family="'Inter', 'Helvetica Neue', Arial, sans-serif"
+          font-size="23" fill="#555555">contact_resilium@pm.me</text>
+
+    <!-- Dot • Website -->
+    <circle cx="75" cy="416" r="5" fill="#999999"/>
+    <text x="92" y="423"
+          font-family="'Inter', 'Helvetica Neue', Arial, sans-serif"
+          font-size="23" fill="#555555">resilium-platform.com</text>
+
+    <!-- Bottom accent bar -->
+    <rect x="0" y="577" width="150" height="23" fill="#1a1a2e" rx="0"/>
+    <rect x="0" y="566" width="150" height="34" fill="#1a1a2e"/>
+  </g>
+</svg>

@@ -113,3 +113,51 @@ id = "VAqZkDOlRwrXETKB2iFr8"
 uri = "file://artifacts/resilium/public/stripe-logo.png"
 type = "image"
 title = "Stripe Logo — Final (400×420)"
+
+[[outputs]]
+id = "u5TrHmmu69FpDFcWZ_8TA"
+uri = "file://business-cards-export/resilium-branded-front.svg"
+type = "image"
+title = "Option 1 — Resilium Branded · Front (SVG)"
+
+[[outputs]]
+id = "ItZQtj-zTt9SQQSuzy4yr"
+uri = "file://business-cards-export/resilium-branded-back.svg"
+type = "image"
+title = "Option 1 — Resilium Branded · Back (SVG)"
+
+[[outputs]]
+id = "GTAq2VqnoPMjf6j4D8gya"
+uri = "file://business-cards-export/neutral-professional-front.svg"
+type = "image"
+title = "Option 2 — Neutral Professional · Front (SVG)"
+
+[[outputs]]
+id = "X4tjcjuiY6R3K5fLg7JRN"
+uri = "file://business-cards-export/neutral-professional-back.svg"
+type = "image"
+title = "Option 2 — Neutral Professional · Back (SVG)"
+
+[[outputs]]
+id = "mzCNeSM6uPDpwz_4tkhfw"
+uri = "file://business-cards-export/resilium-branded-front.png"
+type = "image"
+title = "Option 1 — Resilium Branded · Front (PNG 300 DPI)"
+
+[[outputs]]
+id = "8kT3XrwR61ZdIk0YHfIZ4"
+uri = "file://business-cards-export/resilium-branded-back.png"
+type = "image"
+title = "Option 1 — Resilium Branded · Back (PNG 300 DPI)"
+
+[[outputs]]
+id = "KZP_1VJdVbCa_5hfygd97"
+uri = "file://business-cards-export/neutral-professional-front.png"
+type = "image"
+title = "Option 2 — Neutral Professional · Front (PNG 300 DPI)"
+
+[[outputs]]
+id = "PKpOetSEDwtt2OT2ANVmI"
+uri = "file://business-cards-export/neutral-professional-back.png"
+type = "image"
+title = "Option 2 — Neutral Professional · Back (PNG 300 DPI)"
