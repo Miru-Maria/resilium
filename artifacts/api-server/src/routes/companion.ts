@@ -210,6 +210,10 @@ Use this data to provide specific, personalized guidance. Reference their actual
       content: message.trim(),
     });
 
+    const userCity = latestReport?.location
+      ? latestReport.location.split(",")[0]?.trim()
+      : null;
+
     const systemPrompt = `You are the Resilium AI Companion — a warm, expert resilience coach embedded in the Resilium personal resilience platform. Your role is to provide personalized guidance, practical advice, and genuine motivation to help users prepare for and survive any crisis.
 
 ${userContext}
@@ -218,7 +222,7 @@ Your approach:
 - Be specific and practical — never generic. Use the user's actual scores and situation.
 - Cover four domains: planning (what to do), resources (what to acquire/build), help (who and where to turn to), and motivation (keeping going when it's hard).
 - Be honest without being alarmist. Name gaps clearly but frame them as solvable.
-- Reference real resources, organizations, and strategies appropriate to the user's location and situation.
+- When mentioning resources or where to get help, go beyond national organizations — name specific city-level or regional programs, helplines, community centers, local NGOs, or municipal services available in ${userCity ?? "the user's location"} whenever possible. Always make clear these are suggestions to verify, not guaranteed listings.
 - Keep responses focused and actionable — aim for 150–300 words unless the question requires more depth.
 - You can discuss crisis scenarios, emotional resilience, practical skills, financial preparedness, community building, and survival psychology.
 - You are not a therapist or financial advisor — recommend professional help when the situation clearly calls for it.
@@ -253,6 +257,79 @@ Your approach:
   } catch (err) {
     logger.error({ err }, "Companion chat error");
     return res.status(500).json({ error: "Failed to process message" });
+  }
+});
+
+const localResourcesRateLimit = rateLimit({
+  windowMs: 5 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  validate: { xForwardedForHeader: false },
+  keyGenerator: (req) => {
+    const auth = getAuth(req as Request);
+    return (auth?.sessionClaims?.userId as string | undefined) || auth?.userId || "anon";
+  },
+  message: { error: "RATE_LIMITED", message: "Too many requests. Please wait a moment." },
+});
+
+router.get("/companion/local-resources", localResourcesRateLimit, async (req: Request, res: Response) => {
+  const userId = getUserId(req);
+  if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+  try {
+    const isPro = await checkIsPro(userId);
+    if (!isPro) return res.status(403).json({ error: "Pro subscription required" });
+
+    const [latestReport] = await db
+      .select({ location: resilienceReportsTable.location })
+      .from(resilienceReportsTable)
+      .where(eq(resilienceReportsTable.userId, userId))
+      .orderBy(desc(resilienceReportsTable.createdAt))
+      .limit(1);
+
+    if (!latestReport?.location) {
+      return res.json({ suggestions: [], location: null });
+    }
+
+    const location = latestReport.location;
+    const city = location.split(",")[0]?.trim() ?? location;
+
+    const completion = await openai.chat.completions.create({
+      model: MINI_MODEL,
+      messages: [
+        {
+          role: "system",
+          content: `You are a resilience resource expert. Given a location, suggest 3 specific local or regional organizations, helplines, or programs that help people in crisis or building resilience. Prioritize city-level resources over national ones when you know of them. Your response must be valid JSON with this exact shape: {"suggestions":[{"title":"...","desc":"...","type":"gov|ngo|helpline|community"}]}. Keep each desc under 110 characters. Do not include URLs — names and descriptions only.`,
+        },
+        {
+          role: "user",
+          content: `Location: ${location}\n\nSuggest 3 local or regional resilience resources for someone here. Mix types: e.g., one financial/employment, one mental health or crisis line, one community or emergency preparedness. Focus on ${city}-specific or at least regional programs when possible.`,
+        },
+      ],
+      max_tokens: 350,
+      temperature: 0.4,
+      response_format: { type: "json_object" },
+    });
+
+    const raw = completion.choices[0]?.message?.content ?? "{}";
+    let suggestions: Array<{ title: string; desc: string; type: string }> = [];
+    try {
+      const parsed = JSON.parse(raw);
+      const arr = Array.isArray(parsed) ? parsed : (parsed.suggestions ?? parsed.resources ?? []);
+      suggestions = arr.slice(0, 3).map((s: Record<string, string>) => ({
+        title: String(s.title ?? ""),
+        desc: String(s.desc ?? s.description ?? ""),
+        type: String(s.type ?? "community"),
+      }));
+    } catch {
+      suggestions = [];
+    }
+
+    return res.json({ suggestions, location, city });
+  } catch (err) {
+    logger.error({ err }, "Local resources error");
+    return res.status(500).json({ error: "Failed to fetch local resources" });
   }
 });
 

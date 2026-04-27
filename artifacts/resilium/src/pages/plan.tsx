@@ -312,11 +312,89 @@ function OnboardingModal({ onDone }: { onDone: () => void }) {
   );
 }
 
+type LocalSuggestion = { title: string; desc: string; type: string };
+const LOCAL_TYPE_ICONS: Record<string, string> = {
+  gov: "🏛️", ngo: "🤝", helpline: "📞", community: "🏘️",
+};
+
+function LocalAISuggestions({ location, isAuthenticated, getToken }: {
+  location: string;
+  isAuthenticated: boolean;
+  getToken: () => Promise<string | null>;
+}) {
+  const [suggestions, setSuggestions] = useState<LocalSuggestion[]>([]);
+  const [city, setCity] = useState<string>("");
+  const [loading, setLoading] = useState(false);
+  const city0 = location.split(",")[0]?.trim() ?? location;
+  const cacheKey = `resilium_local_res_${location}`;
+
+  useEffect(() => {
+    if (!isAuthenticated || !location) return;
+    const cached = sessionStorage.getItem(cacheKey);
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        if (parsed.suggestions?.length) { setSuggestions(parsed.suggestions); setCity(parsed.city ?? city0); return; }
+      } catch {}
+    }
+    setLoading(true);
+    (async () => {
+      try {
+        const token = await getToken();
+        const res = await fetch(`${BASE}/api/companion/local-resources`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        if (!res.ok) return;
+        const json = await res.json();
+        if (json.suggestions?.length) {
+          setSuggestions(json.suggestions);
+          setCity(json.city ?? city0);
+          sessionStorage.setItem(cacheKey, JSON.stringify(json));
+        }
+      } catch { /* silently skip */ } finally {
+        setLoading(false);
+      }
+    })();
+  }, [isAuthenticated, location]);
+
+  if (loading) {
+    return (
+      <div className="mt-5 pt-5 border-t border-sky-500/20 flex items-center gap-2 text-xs text-muted-foreground">
+        <Loader2 className="w-3 h-3 animate-spin text-sky-400" />
+        Finding local suggestions for {city0}…
+      </div>
+    );
+  }
+  if (!suggestions.length) return null;
+  return (
+    <div className="mt-5 pt-5 border-t border-sky-500/20">
+      <div className="flex items-center gap-2 mb-3">
+        <MapPin className="w-3.5 h-3.5 text-sky-400 flex-shrink-0" />
+        <p className="text-xs font-bold uppercase tracking-widest text-sky-400">Local suggestions for {city}</p>
+      </div>
+      <div className="space-y-2">
+        {suggestions.map((s, i) => (
+          <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-sky-500/5 border border-sky-500/15">
+            <span className="text-base flex-shrink-0 mt-0.5">{LOCAL_TYPE_ICONS[s.type] ?? "📍"}</span>
+            <div>
+              <p className="text-sm font-semibold text-foreground">{s.title}</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">{s.desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+      <p className="text-[10px] text-muted-foreground mt-3 leading-relaxed">
+        AI-suggested — verify each resource before contacting. Ask your AI Companion for more detail.
+      </p>
+    </div>
+  );
+}
+
 export default function PlanPage() {
   const [, params] = useRoute("/plan/:reportId");
   const reportId = params?.reportId || "";
   const { toast } = useToast();
-  const { isSignedIn } = useAuth();
+  const { isSignedIn, getToken } = useAuth();
   const { openSignIn } = useClerk();
   const isAuthenticated = !!isSignedIn;
 
@@ -1488,6 +1566,13 @@ export default function PlanPage() {
                   </a>
                 ))}
               </div>
+              {reportLocation && (
+                <LocalAISuggestions
+                  location={reportLocation}
+                  isAuthenticated={isAuthenticated}
+                  getToken={getToken}
+                />
+              )}
             </div>
           </section>
         )}

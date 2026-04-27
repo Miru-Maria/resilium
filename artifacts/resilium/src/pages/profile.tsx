@@ -2161,8 +2161,8 @@ function CompanionChat() {
 
   const suggestedPrompts = [
     "What should I focus on improving first?",
+    "What local organizations or services near me can help right now?",
     "How can I build a stronger financial safety net?",
-    "What would happen to my resilience if I lost my job?",
     "What practical skills should I learn this year?",
   ];
 
