@@ -1,13 +1,13 @@
 import React from "react";
 
-const TODAY = "April 2026";
+const TODAY = "April 27, 2026";
 
 /* ─── AUDIT DATA ─────────────────────────────────────────── */
 
 const WEB_AUDIT = [
   { area: "Landing page", status: "good", note: "Animated neural canvas, live testimonials from DB, trust signals all present" },
   { area: "14-Step assessment", status: "strong", note: "Well-sequenced, draft saving, bilingual (EN/RO), progress bar, location detection; chronic condition sub-questions captured when user selects Yes" },
-  { area: "Results page", status: "strong", note: "Score radar, risk profile card, action plan, feedback, social share modal (X/Facebook/Reddit/Instagram), Markdown export, goal reminder banner" },
+  { area: "Results page", status: "strong", note: "Score radar, risk profile card, action plan, feedback, social share modal (X/Facebook/Reddit/Instagram), Markdown export, goal reminder banner; coaching callout card surfaces when psychological or health score < 70; household invite card with Web Share API + clipboard fallback" },
   { area: "Plan page", status: "strong", note: "AI-generated action plan with DB-backed checklist progress tracking; goal reminder banner; Markdown export button; 'One thing right now' card (first uncompleted item from weakest score area); completion milestone emails at 1/5/10 actions; household invite card with Web Share API + clipboard fallback; 3 free 'Break it down' AI-step tries for free users with amber badge counter; Pro users unlimited" },
   { area: "Scenarios page", status: "good", note: "Stress test simulations with impact ratings and immediate steps" },
   { area: "Coaching page", status: "functional", note: "Phoenix brand, warm design, Playfair serif headings, correct for its purpose" },
@@ -30,7 +30,7 @@ const MOBILE_AUDIT = [
   { area: "Check-in tab", status: "good", note: "5-dimension daily self-rating, local streak persistence via AsyncStorage" },
   { area: "Account / data tab", status: "good", note: "GDPR export, deletion, subscription status, sign out" },
   { area: "Assessment", status: "good", note: "Full flow matching the web version" },
-  { area: "Results", status: "good", note: "Score breakdown, action plan, dimension interpretation" },
+  { area: "Results", status: "strong", note: "Score breakdown, action plan, dimension interpretation; 'One thing right now' card (first uncompleted item from weakest area); household invite card with share + clipboard fallback — at full parity with web" },
   { area: "Coaching page", status: "good", note: "Matches web structure — score context cards, About Cristiana, full CTA sections" },
   { area: "AI Companion tab", status: "good", note: "DB-backed chat with user's latest scores as context; gpt-4.1-mini; AsyncStorage offline cache; free users see upgrade CTA" },
   { area: "Guides tab", status: "good", note: "10 crisis guides bundled offline; location-aware guide ordering; AsyncStorage download tracking" },
@@ -186,6 +186,10 @@ const DONE_ITEMS = [
   "Markdown export on Results page and Plan page",
   "Full autonomous e2e audit completed (April 11, 2026) — all routes verified",
   "Product-wide content audit — 'AI-powered' language replaced with 'structured'/'personalized'",
+  "Mobile results page parity — 'One thing right now' card and household invite card added at full feature parity with web",
+  "Coaching callout on results page — score-aware card surfaces when psychological or health score < 70, links to /coaching",
+  "Household invite card on results page — share button (Web Share API + clipboard fallback) alongside plan page invite",
+  "Full platform audit completed (April 27, 2026) — all client-facing flows verified clean, one routing bug fixed (Markdown lock button)",
 ];
 
 /* ─── HELPERS ────────────────────────────────────────────── */
@@ -241,9 +245,9 @@ export default function PlatformAssessmentDoc() {
           <p className="text-gray-400 text-sm mb-6 max-w-xl leading-relaxed">An honest, unvarnished evaluation of what's been built, how the market might receive it, and a precise checklist of what's done versus what remains.</p>
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
             {[
-              { val: "~65,000", label: "Lines of Source Code" },
+              { val: "~55,000", label: "Lines of Source Code" },
               { val: "3", label: "Platforms (Web · Mobile · Admin)" },
-              { val: "April 2026", label: "Assessment Date" },
+              { val: "Apr 27, 2026", label: "Assessment Date" },
               { val: "Production", label: "Status: Live ●" },
               { val: "Security", label: "Hardened" },
             ].map(s => (
@@ -384,7 +388,7 @@ export default function PlatformAssessmentDoc() {
         <section id="done">
           <h2 className="text-2xl font-bold text-gray-900 mb-1">What's Done</h2>
           <div className="w-10 h-1 bg-[#E08040] rounded mb-6" />
-          <p className="text-sm text-gray-500 mb-4">{DONE_ITEMS.length} completed items — verified end-to-end on resilium-platform.com as of April 2026.</p>
+          <p className="text-sm text-gray-500 mb-4">{DONE_ITEMS.length} completed items — verified end-to-end on resilium-platform.com as of April 27, 2026.</p>
           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 max-h-96 overflow-y-auto">
             <ul className="space-y-1.5">
               {DONE_ITEMS.map((item, i) => (
@@ -398,7 +402,7 @@ export default function PlatformAssessmentDoc() {
         </section>
 
         <div className="text-center py-4 border-t border-gray-200">
-          <p className="text-xs text-gray-400 italic">Generated by Resilium · April 2026 · resilium-platform.com · Confidential internal document</p>
+          <p className="text-xs text-gray-400 italic">Generated by Resilium · April 27, 2026 · resilium-platform.com · Confidential internal document</p>
         </div>
 
       </div>
