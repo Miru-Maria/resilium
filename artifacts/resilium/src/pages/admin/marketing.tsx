@@ -247,6 +247,57 @@ function CategoryHeading({ icon: Icon, children }: { icon?: React.ElementType; c
   );
 }
 
+const CATEGORY_COLLAPSED_KEY = "resilium_master_checklist_collapsed_v1";
+
+function CollapsibleCategory({
+  icon: Icon,
+  id,
+  label,
+  children,
+}: {
+  icon?: React.ElementType;
+  id: string;
+  label: string;
+  children: React.ReactNode;
+}) {
+  const [collapsed, setCollapsed] = useState(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem(CATEGORY_COLLAPSED_KEY) ?? "{}");
+      return !!stored[id];
+    } catch { return false; }
+  });
+
+  const toggle = () => {
+    setCollapsed(prev => {
+      const next = !prev;
+      try {
+        const stored = JSON.parse(localStorage.getItem(CATEGORY_COLLAPSED_KEY) ?? "{}");
+        stored[id] = next;
+        localStorage.setItem(CATEGORY_COLLAPSED_KEY, JSON.stringify(stored));
+      } catch {}
+      return next;
+    });
+  };
+
+  return (
+    <div>
+      <button
+        onClick={toggle}
+        className="flex items-center gap-2 mt-8 mb-3 w-full text-left group"
+      >
+        {Icon && <Icon className="w-3.5 h-3.5 text-primary flex-shrink-0" />}
+        <span className="text-xs font-bold uppercase tracking-widest text-primary">{label}</span>
+        <div className="flex-1 h-px bg-primary/20" />
+        {collapsed
+          ? <ChevronRight className="w-3.5 h-3.5 text-primary/50 flex-shrink-0" />
+          : <ChevronDown  className="w-3.5 h-3.5 text-primary/50 flex-shrink-0" />
+        }
+      </button>
+      {!collapsed && <ul className="space-y-3">{children}</ul>}
+    </div>
+  );
+}
+
 function MasterChecklistSection() {
   return (
     <div className="px-6 pb-8">
@@ -263,8 +314,7 @@ function MasterChecklistSection() {
       </div>
 
       {/* ── Business & Payments ──────────────────────────────────────────── */}
-      <CategoryHeading icon={Target}> Business &amp; Payments</CategoryHeading>
-      <ul className="space-y-3">
+      <CollapsibleCategory icon={Target} id="business" label="Business & Payments">
         <CompletedItem
           text="Register SRL with Registrul Comerțului"
           detail="CUI obtained — prerequisite for Stripe verification and legal invoicing. ✓ Done."
@@ -293,11 +343,10 @@ function MasterChecklistSection() {
           text="Verify first Pro renewal webhook fired correctly"
           detail="Check Stripe Dashboard → Developers → Webhooks after the first subscription renewal cycle. Confirm invoice.payment_succeeded was received and the renewal email was sent."
         />
-      </ul>
+      </CollapsibleCategory>
 
       {/* ── Technical & Monitoring ───────────────────────────────────────── */}
-      <CategoryHeading icon={Globe}> Technical &amp; Monitoring</CategoryHeading>
-      <ul className="space-y-3">
+      <CollapsibleCategory icon={Globe} id="technical" label="Technical & Monitoring">
         <ChecklistItem
           text="Set up web analytics (Umami — GDPR-friendly, free)"
           detail="Umami script added to index.html. No cookie consent required — it's cookieless by design. EU data region selected. Gives you visitor → assessment → upgrade funnel visibility."
@@ -330,11 +379,10 @@ function MasterChecklistSection() {
           text="Check Clerk Dashboard for first real signups"
           detail="Look for any bot/spam sign-up patterns. Review the 'Users' tab in Clerk production dashboard."
         />
-      </ul>
+      </CollapsibleCategory>
 
       {/* ── Legal & Compliance ───────────────────────────────────────────── */}
-      <CategoryHeading icon={ShieldCheck}> Legal &amp; Compliance</CategoryHeading>
-      <ul className="space-y-3">
+      <CollapsibleCategory icon={ShieldCheck} id="legal" label="Legal & Compliance">
         <CompletedItem
           text="Privacy Policy page live"
           detail="Live at /privacy since March 24, 2026."
@@ -359,11 +407,10 @@ function MasterChecklistSection() {
           text="Publish GDPR contact email address"
           detail="Add a GDPR/data subject requests email address to the Privacy Policy and contact page. Required for Art. 17 deletion and Art. 15 access requests."
         />
-      </ul>
+      </CollapsibleCategory>
 
       {/* ── Product Hunt Launch ───────────────────────────────────────────── */}
-      <CategoryHeading icon={Rocket}> Product Hunt Launch</CategoryHeading>
-      <ul className="space-y-3">
+      <CollapsibleCategory icon={Rocket} id="product-hunt" label="Product Hunt Launch">
         <ChecklistItem
           text="Confirm your Product Hunt hunter"
           detail="Ask someone with PH followers and a history of successful hunts to post for you. A hunter with 500+ followers measurably improves Day 1 performance."
@@ -408,11 +455,10 @@ function MasterChecklistSection() {
           text="Write 24-hour retrospective post (Medium or Substack)"
           detail="Generates backlinks, SEO, and personal brand. Publish ~T+24h with honest numbers: upvotes, signups, conversions, lessons."
         />
-      </ul>
+      </CollapsibleCategory>
 
       {/* ── Reddit & Content ──────────────────────────────────────────────── */}
-      <CategoryHeading icon={MessageSquare}> Reddit &amp; Content</CategoryHeading>
-      <ul className="space-y-3">
+      <CollapsibleCategory icon={MessageSquare} id="reddit" label="Reddit & Content">
         <ChecklistItem
           text="Week 1 — 5–8 substantive comments/day in r/preppers, r/personalfinance, r/anxiety"
           detail="No links, no product mentions. Genuine, helpful answers only. You're building karma and credibility. Post timing: 8–10 AM or 6–9 PM ET."
@@ -437,11 +483,10 @@ function MasterChecklistSection() {
           text="Email a personal T+24h founder note to everyone who signed up on launch day"
           detail="Plain text. One sentence on what you're building and why. Ask one question: 'What made you sign up?' Builds early community."
         />
-      </ul>
+      </CollapsibleCategory>
 
       {/* ── Research Report ───────────────────────────────────────────────── */}
-      <CategoryHeading icon={BarChart2}> Research Report</CategoryHeading>
-      <ul className="space-y-3">
+      <CollapsibleCategory icon={BarChart2} id="research" label="Research Report">
         <ChecklistItem
           text="Distribute Google Forms survey to Resilium users and target Reddit communities"
           detail="Target: 500+ valid responses as minimum for publishable research. Full distribution plan is in the Research section below."
@@ -458,11 +503,10 @@ function MasterChecklistSection() {
           text="Pitch the report to 5 journalists in personal finance, preparedness, and wellness"
           detail="Target beats: personal finance editors at major outlets, preparedness/prepping writers, mental health and wellness journalists. Use data as the hook."
         />
-      </ul>
+      </CollapsibleCategory>
 
       {/* ── Pre-Launch Production Verification ───────────────────────────── */}
-      <CategoryHeading icon={CheckCircle2}> Pre-Launch Production Verification</CategoryHeading>
-      <ul className="space-y-3">
+      <CollapsibleCategory icon={CheckCircle2} id="pre-launch" label="Pre-Launch Production Verification">
         <ChecklistItem
           text="Sign up + sign in flow works end-to-end on production (Clerk)"
           detail="Test new email account creation, email verification, sign in, and sign out on resilium-platform.com. Clerk authentication only works on the production domain."
@@ -499,11 +543,10 @@ function MasterChecklistSection() {
           text="Email delivery confirmed working in production"
           detail="Trigger a welcome or digest email and confirm it arrives. Check Resend dashboard for delivery confirmation. Verify SPF/DKIM records are confirmed in Resend."
         />
-      </ul>
+      </CollapsibleCategory>
 
       {/* ── Future / Nice-to-Have ─────────────────────────────────────────── */}
-      <CategoryHeading icon={Clock}> Future / Nice-to-Have</CategoryHeading>
-      <ul className="space-y-3">
+      <CollapsibleCategory icon={Clock} id="future" label="Future / Nice-to-Have">
         <ChecklistItem
           text="Complete Sentry Express server-side instrumentation"
           detail="The Sentry SDK is imported but Express is not fully instrumented. Add the --import flag to the Node startup command in production to capture all server-side errors."
@@ -516,11 +559,10 @@ function MasterChecklistSection() {
           text="App Store rating prompt after first resilience plan generated"
           detail="Trigger StoreReview.requestReview() (from expo-store-review) after a user successfully generates their first plan. Best time to ask for a review."
         />
-      </ul>
+      </CollapsibleCategory>
 
       {/* ── Mobile — post-launch ─────────────────────────────────────────── */}
-      <CategoryHeading icon={Smartphone}> Mobile — Post-Launch (When Web Has Traction)</CategoryHeading>
-      <ul className="space-y-3">
+      <CollapsibleCategory icon={Smartphone} id="mobile" label="Mobile — Post-Launch (When Web Has Traction)">
         <ChecklistItem
           text="Enable Facebook OAuth in Clerk"
           detail="Clerk Dashboard → Configure → Social Connections → Facebook. Required for Facebook sign-in in the mobile app."
@@ -529,7 +571,7 @@ function MasterChecklistSection() {
           text="iOS App Store submission — see Mobile Launch Checklist section on this page"
           detail="Full iOS submission checklist (Apple Developer account, screenshots, App Store Connect listing, EAS build, RevenueCat IAP, TestFlight) is in the Mobile Launch Checklist section below."
         />
-      </ul>
+      </CollapsibleCategory>
     </div>
   );
 }
