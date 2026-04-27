@@ -120,6 +120,20 @@
   }
 }
 
+/* ─── Clerk modal: force Google button to match Continue button width ──────── */
+.cl-socialButtonsBlock {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+}
+
+.cl-socialButtonsBlockButton,
+.cl-socialButtonsBlockButton__google {
+  width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
 /* ─── Print / PDF Export ─────────────────────────────────────── */
 @media print {
   * {
