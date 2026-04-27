@@ -61,7 +61,7 @@ resilium/
 | Animation | Framer Motion | 12.x |
 | Charts | Recharts | 2.x |
 | Icons | Lucide React | — |
-| Payments | Paddle.js v2 (overlay checkout) | — |
+| Payments | Stripe (payment intents + webhooks) | — |
 
 ### 2.3 Mobile
 
@@ -325,7 +325,7 @@ Authentication is handled by **Clerk**. The API server verifies Clerk JWTs using
 | Method | Endpoint | Auth | Description |
 |---|---|---|---|
 | `GET` | `/subscription/status` | Required | Returns `{ isPro, status, currentPeriodEnd }` |
-| `POST` | `/webhooks/paddle` | Signature | Receive Paddle subscription lifecycle events |
+| `POST` | `/webhooks/stripe` | Signature | Receive Paddle subscription lifecycle events |
 
 **Webhook events handled:**
 - `subscription.activated` → set status `active`
@@ -333,7 +333,7 @@ Authentication is handled by **Clerk**. The API server verifies Clerk JWTs using
 - `subscription.cancelled` → set status `cancelled`
 - `subscription.past_due` → set status `past_due`
 
-**Signature verification:** HMAC-SHA256 over `{timestamp}:{rawBody}` using `PADDLE_WEBHOOK_SECRET`.
+**Signature verification:** HMAC-SHA256 over `{timestamp}:{rawBody}` using `STRIPE_WEBHOOK_SECRET`.
 
 ### 4.6 GDPR
 
@@ -587,10 +587,10 @@ Admin routes use a cookie-based session:
 
 ```typescript
 const signed = `${timestamp}:${rawBody}`;
-const expected = createHmac("sha256", PADDLE_WEBHOOK_SECRET)
+const expected = createHmac("sha256", STRIPE_WEBHOOK_SECRET)
   .update(signed)
   .digest("hex");
-assert(expected === h1); // from Paddle-Signature header
+assert(expected === h1); // from Stripe-Signature header
 ```
 
 Raw request body is captured before JSON parsing to ensure signature integrity.
@@ -816,10 +816,10 @@ Resilium is deployed on Replit's managed cloud infrastructure:
 | `VITE_CLERK_PUBLISHABLE_KEY` | Web frontend | Yes | Clerk publishable key for React SDK |
 | `ADMIN_USERNAME` | API server | Yes | Admin panel credentials |
 | `ADMIN_PASSWORD` | API server | Yes | Admin panel credentials |
-| `PADDLE_WEBHOOK_SECRET` | API server | For payments | Webhook HMAC verification |
-| `VITE_PADDLE_CLIENT_TOKEN` | Web frontend | For payments | Paddle.js initialisation token |
-| `VITE_PADDLE_PRICE_ID` | Web frontend | For payments | Monthly Pro subscription price ID |
-| `VITE_PADDLE_PRICE_ID_ANNUAL` | Web frontend | For payments | Annual Pro subscription price ID |
+| `STRIPE_WEBHOOK_SECRET` | API server | For payments | Webhook HMAC verification |
+| `STRIPE_PUBLISHABLE_KEY` | Web frontend | For payments | Stripe.js initialisation token |
+| `STRIPE_PRICE_ID` | Web frontend | For payments | Monthly Pro subscription price ID |
+| `STRIPE_PRICE_ID` | Web frontend | For payments | Annual Pro subscription price ID |
 | `VITE_PADDLE_DONATION_PRICE_ID` | Web frontend | No | Donation price ID |
 | `RESEND_API_KEY` | API server | For email | Resend email delivery API key |
 | `AI_INTEGRATIONS_OPENAI_BASE_URL` | API server | Yes | Auto-provisioned by Replit AI Integrations |

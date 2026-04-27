@@ -60,7 +60,7 @@
     "@react-native-community/slider": "^5.2.0",
     "expo-auth-session": "~7.0.10",
     "expo-clipboard": "^8.0.8",
-    "expo-crypto": "^15.0.8",
+    "expo-crypto": "~15.0.8",
     "expo-notifications": "0.32.16",
     "expo-secure-store": "~15.0.8",
     "expo-sharing": "^14.0.8",

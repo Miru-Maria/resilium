@@ -171,7 +171,7 @@ Resilium operates on a freemium subscription model:
 
 **Free Tier:** Two complete assessments with full AI-generated reports. Designed to demonstrate the platform's full value before monetisation is requested.
 
-**Pro (£9/month or £79/year via Paddle):** Unlimited assessments, longitudinal progress tracking with trend visualisation, scenario stress-test suite (4 scenarios), plan comparison with AI analysis, AI Companion conversational guidance, daily coaching tip cards, achievement badges, 30-day resilience challenge, offline plan access, and priority support.
+**Pro (£9/month or £79/year via Stripe):** Unlimited assessments, longitudinal progress tracking with trend visualisation, scenario stress-test suite (4 scenarios), plan comparison with AI analysis, AI Companion conversational guidance, daily coaching tip cards, achievement badges, 30-day resilience challenge, offline plan access, and priority support.
 
 **Donation option:** A one-time donation is available on the results page for users who wish to support the platform without committing to a subscription.
 
@@ -248,7 +248,7 @@ Resilium's long-term vision is to become the global standard for individual and 
 
 ## 8. Conclusion
 
-Resilium represents a significant and currently unaddressed opportunity in the personal wellbeing technology space. The platform is fully built, live, and operational — serving users on web and mobile with a production-grade assessment engine, secure data handling, and a clear monetisation path via Paddle subscription billing.
+Resilium represents a significant and currently unaddressed opportunity in the personal wellbeing technology space. The platform is fully built, live, and operational — serving users on web and mobile with a production-grade assessment engine, secure data handling, and a clear monetisation path via Stripe subscription billing.
 
 The convergence of rising systemic risk, growing individual awareness of personal vulnerability, and the maturation of large language model technology has created a precise window for a platform like Resilium to define and own a new category.
 

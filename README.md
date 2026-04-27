@@ -44,7 +44,7 @@ Resilium is a full-stack personal resilience planning platform. Users complete a
 
 ### Freemium & Payments
 - **2 free assessments** for anonymous and free-tier users (paywall counter visible in assessment header)
-- **Pro subscriptions** via Paddle — unlocks unlimited reports, scenario simulations, AI Companion, daily tips, challenge, offline cache
+- **Pro subscriptions** via Stripe — unlocks unlimited reports, scenario simulations, AI Companion, daily tips, challenge, offline cache
 - Donation option on results page
 
 ### User Experience
@@ -92,7 +92,7 @@ Resilium is a full-stack personal resilience planning platform. Users complete a
 | Database | PostgreSQL 16, Drizzle ORM |
 | AI | OpenAI gpt-5.4 (reports) / gpt-4.1-mini (AI Companion) via Replit AI Integrations |
 | Auth | Clerk (JWT-based; web + mobile) |
-| Payments | Paddle (subscriptions + donations, HMAC-verified webhooks) |
+| Payments | Stripe (subscriptions, HMAC-verified webhooks) |
 | Error monitoring | Sentry (web, mobile, API) |
 | Email | Resend (welcome email, weekly digest) |
 | Monorepo | pnpm workspaces, TypeScript 5.9 |
@@ -210,7 +210,7 @@ resilium/
 | Method | Path | Description |
 |---|---|---|
 | `GET` | `/api/users/me/subscription` | Returns `{isPro, status, currentPeriodEnd}` |
-| `POST` | `/api/webhooks/paddle` | Paddle webhook handler |
+| `POST` | `/api/webhooks/stripe` | Stripe webhook handler |
 
 ### User
 
@@ -264,7 +264,7 @@ pnpm install
 | `VITE_CLERK_PUBLISHABLE_KEY` | Clerk publishable key (frontend) |
 | `ADMIN_USERNAME` | Admin dashboard login username |
 | `ADMIN_PASSWORD` | Admin dashboard login password |
-| `PADDLE_WEBHOOK_SECRET` | Paddle webhook verification secret |
+| `STRIPE_WEBHOOK_SECRET` | Stripe webhook verification secret |
 | `RESEND_API_KEY` | Resend API key for email delivery |
 | `AI_INTEGRATIONS_OPENAI_BASE_URL` | Auto-provisioned by Replit AI Integrations |
 | `AI_INTEGRATIONS_OPENAI_API_KEY` | Auto-provisioned by Replit AI Integrations |
