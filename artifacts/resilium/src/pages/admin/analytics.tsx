@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { AdminLayout } from "./layout";
+import { AdminLayout, adminAuthHeaders } from "./layout";
 import { useQuery } from "@tanstack/react-query";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
