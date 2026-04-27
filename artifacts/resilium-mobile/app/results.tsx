@@ -33,6 +33,21 @@ const PUSH_PROMPTED_KEY = "resilium_push_prompted_v1";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
+const HABIT_AREA_CONFIG: Record<string, { color: string; bg: string }> = {
+  financial:     { color: "#D97706", bg: "#FEF3C7" },
+  health:        { color: "#059669", bg: "#D1FAE5" },
+  skills:        { color: "#7C3AED", bg: "#EDE9FE" },
+  mobility:      { color: "#EA580C", bg: "#FFEDD5" },
+  psychological: { color: "#DB2777", bg: "#FCE7F3" },
+  resources:     { color: "#0284C7", bg: "#E0F2FE" },
+};
+
+const HABIT_FREQ_CONFIG: Record<string, { color: string; bg: string; label: string }> = {
+  daily:   { color: "#059669", bg: "#D1FAE5", label: "Daily" },
+  weekly:  { color: "#D97706", bg: "#FEF3C7", label: "Weekly" },
+  monthly: { color: "#0284C7", bg: "#E0F2FE", label: "Monthly" },
+};
+
 type ScoreObj = {
   overall: number;
   financial: number;
@@ -564,20 +579,48 @@ export default function ResultsScreen() {
           ))}
         </View>
 
-        <View style={[styles.sectionCard, { backgroundColor: colors.primaryMuted, borderColor: colors.primaryBorder }]}>
+        <View style={styles.sectionCard}>
           <View style={styles.sectionHeader}>
             <Feather name="sun" size={16} color={colors.primary} />
-            <Text style={[styles.sectionTitle, { color: colors.primary }]}>Daily Habits</Text>
+            <Text style={styles.sectionTitle}>Daily Habits</Text>
           </View>
-          {report.dailyHabits.map((h, i) => (
-            <View key={i} style={[styles.habitItem, i < report.dailyHabits.length - 1 && styles.habitItemBorder]}>
-              <Feather name="check" size={14} color={colors.primary} />
-              <View style={{ flex: 1 }}>
-                <Text style={styles.habitText}>{h.habit}</Text>
-                <Text style={styles.habitFreq}>{h.frequency} · {h.category}</Text>
-              </View>
-            </View>
-          ))}
+          <Text style={{ fontFamily: "Inter_400Regular", fontSize: 12, color: colors.textMuted, marginBottom: 12, lineHeight: 17 }}>
+            AI-recommended habits based on your results. Build one at a time.
+          </Text>
+          <View style={{ gap: 8 }}>
+            {report.dailyHabits.map((h, i) => {
+              const cat = (h.category ?? "").toLowerCase();
+              const ac = HABIT_AREA_CONFIG[cat] ?? { color: "#6B7280", bg: "#F3F4F6" };
+              const fc = HABIT_FREQ_CONFIG[(h.frequency ?? "").toLowerCase()] ?? HABIT_FREQ_CONFIG.daily;
+              const isTop2 = i < 2;
+              return (
+                <View
+                  key={i}
+                  style={{ flexDirection: "row", alignItems: "flex-start", gap: 12, backgroundColor: isTop2 ? "#F9FAFB" : "#FFFFFF", borderRadius: 14, padding: 14, borderWidth: 1, borderColor: "#E5E7EB" }}
+                >
+                  <View style={{ width: 32, height: 32, borderRadius: 10, backgroundColor: isTop2 ? colors.primaryMuted : "#F3F4F6", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <Text style={{ fontFamily: "Inter_700Bold", fontSize: 13, color: isTop2 ? colors.primary : colors.textMuted }}>{i + 1}</Text>
+                  </View>
+                  <View style={{ flex: 1, gap: 6 }}>
+                    <Text style={{ fontFamily: "Inter_500Medium", fontSize: 14, color: "#111827", lineHeight: 20 }}>{h.habit}</Text>
+                    <View style={{ flexDirection: "row", gap: 6, flexWrap: "wrap" }}>
+                      <View style={{ backgroundColor: fc.bg, borderRadius: 6, paddingHorizontal: 7, paddingVertical: 3 }}>
+                        <Text style={{ fontFamily: "Inter_700Bold", fontSize: 10, color: fc.color, textTransform: "uppercase", letterSpacing: 0.5 }}>{fc.label}</Text>
+                      </View>
+                      <View style={{ backgroundColor: ac.bg, borderRadius: 6, paddingHorizontal: 7, paddingVertical: 3 }}>
+                        <Text style={{ fontFamily: "Inter_700Bold", fontSize: 10, color: ac.color, textTransform: "capitalize", letterSpacing: 0.5 }}>{h.category}</Text>
+                      </View>
+                      {isTop2 && (
+                        <View style={{ backgroundColor: colors.primaryMuted, borderRadius: 6, paddingHorizontal: 7, paddingVertical: 3, borderWidth: 1, borderColor: colors.primaryBorder }}>
+                          <Text style={{ fontFamily: "Inter_700Bold", fontSize: 10, color: colors.primary, textTransform: "uppercase", letterSpacing: 0.5 }}>This week</Text>
+                        </View>
+                      )}
+                    </View>
+                  </View>
+                </View>
+              );
+            })}
+          </View>
         </View>
 
         {/* Recommended Resources */}

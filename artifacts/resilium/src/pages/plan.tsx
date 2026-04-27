@@ -715,6 +715,15 @@ export default function PlanPage() {
     monthly: { label: "Monthly", className: "bg-sky-500/10 text-sky-700 border-sky-500/20" },
   };
 
+  const HABIT_CATEGORY_CHIP: Record<string, string> = {
+    financial:     "bg-amber-500/10 text-amber-700 border-amber-500/20",
+    health:        "bg-emerald-500/10 text-emerald-700 border-emerald-500/20",
+    skills:        "bg-violet-500/10 text-violet-700 border-violet-500/20",
+    mobility:      "bg-orange-500/10 text-orange-700 border-orange-500/20",
+    psychological: "bg-pink-500/10 text-pink-700 border-pink-500/20",
+    resources:     "bg-sky-500/10 text-sky-700 border-sky-500/20",
+  };
+
   const scenarioSimulations = (report as any).scenarioSimulations as Array<{
     scenario: string;
     impact: string;
@@ -1095,7 +1104,9 @@ export default function PlanPage() {
                           <span className={cn("text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border", freqConfig.className)}>
                             {freqConfig.label}
                           </span>
-                          <span className="text-[10px] text-muted-foreground">{habit.category}</span>
+                          <span className={cn("text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border", HABIT_CATEGORY_CHIP[(habit.category ?? "").toLowerCase()] ?? "bg-muted text-muted-foreground border-border")}>
+                            {habit.category}
+                          </span>
                         </div>
                       </div>
                       {isFirst2 && (
