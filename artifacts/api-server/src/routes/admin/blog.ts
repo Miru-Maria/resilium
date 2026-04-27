@@ -83,7 +83,8 @@ router.put("/:id", async (req, res) => {
       readingTimeMin, body, ogImage, status, publishedAt,
     } = req.body ?? {};
 
-    const updates: Record<string, unknown> = { updatedAt: new Date() };
+    type BlogUpdate = Partial<typeof blogPostsTable.$inferInsert>;
+    const updates: BlogUpdate = { updatedAt: new Date() };
     if (slug) updates.slug = String(slug).trim();
     if (title) updates.title = String(title).trim();
     if (description) updates.description = String(description).trim();
@@ -96,7 +97,7 @@ router.put("/:id", async (req, res) => {
     if (status === "draft" || status === "published") updates.status = status;
     if (publishedAt) updates.publishedAt = new Date(publishedAt);
 
-    const [row] = await db.update(blogPostsTable).set(updates as any).where(eq(blogPostsTable.id, id)).returning();
+    const [row] = await db.update(blogPostsTable).set(updates).where(eq(blogPostsTable.id, id)).returning();
     if (!row) { res.status(404).json({ error: "Not found" }); return; }
     res.json({ post: row });
   } catch (err: unknown) {
