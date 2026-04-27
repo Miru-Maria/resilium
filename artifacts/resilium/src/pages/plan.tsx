@@ -915,21 +915,26 @@ export default function PlanPage() {
 
             {/* TOP 3 THIS WEEK */}
             {top3Items.length > 0 && (
-              <div className="bg-card rounded-3xl border border-primary/25 p-6 shadow-lg shadow-black/5 relative overflow-hidden flex flex-col">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
-                <div className="relative flex flex-col flex-1">
+              <div className="bg-zinc-50 rounded-3xl border border-slate-200 p-6 shadow-lg shadow-black/5 flex flex-col">
+                <div className="flex flex-col flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <div className="w-6 h-6 rounded-xl bg-primary/15 flex items-center justify-center">
                       <Target className="w-3.5 h-3.5 text-primary" />
                     </div>
                     <p className="text-xs font-bold uppercase tracking-widest text-primary">Start here</p>
                   </div>
-                  <h2 className="font-display font-bold text-xl mb-4">Your top {top3Items.length} this week</h2>
+                  <h2 className="font-display font-bold text-xl mb-4 text-gray-900">Your top {top3Items.length} this week</h2>
                   <div className="space-y-2.5 flex-1">
                     {top3Items.map(({ area, item }) => {
                       const key = `${area}::${item.id}`;
                       const completed = progressMap[key] ?? false;
-                      const priorityConfig = PRIORITY_CONFIG[item.priority as keyof typeof PRIORITY_CONFIG] ?? PRIORITY_CONFIG.medium;
+                      const top3PriorityConfig: Record<string, { label: string; className: string }> = {
+                        critical: { label: "Critical", className: "bg-red-100 text-red-700 border-red-300" },
+                        high: { label: "High", className: "bg-amber-100 text-amber-700 border-amber-300" },
+                        medium: { label: "Medium", className: "bg-sky-100 text-sky-700 border-sky-300" },
+                        low: { label: "Low", className: "bg-orange-50 text-orange-700 border-orange-200" },
+                      };
+                      const priorityConfig = top3PriorityConfig[item.priority] ?? top3PriorityConfig.medium;
                       const AreaIcon = AREA_ICONS[area] ?? Shield;
                       const areaColor = AREA_COLORS[area] ?? "text-primary bg-primary/10";
                       return (
@@ -939,13 +944,13 @@ export default function PlanPage() {
                           className={cn(
                             "flex items-start gap-3 p-4 rounded-2xl border cursor-pointer transition-all select-none",
                             completed
-                              ? "border-emerald-300 bg-emerald-50/60 dark:bg-emerald-900/10 dark:border-emerald-800/50 opacity-70"
-                              : "border-slate-200 bg-white/90 hover:border-primary/30 hover:bg-primary/5"
+                              ? "border-emerald-300 bg-emerald-50 opacity-70"
+                              : "border-slate-200 bg-white hover:border-primary/40 hover:bg-orange-50/40"
                           )}
                         >
                           <div className={cn(
                             "w-5 h-5 rounded-full border-2 flex-shrink-0 mt-0.5 flex items-center justify-center transition-all",
-                            completed ? "border-emerald-500 bg-emerald-500" : "border-muted-foreground/50"
+                            completed ? "border-emerald-500 bg-emerald-500" : "border-gray-300"
                           )}>
                             {completed && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
                           </div>
@@ -957,9 +962,9 @@ export default function PlanPage() {
                               <div className={cn("w-4 h-4 rounded-md flex items-center justify-center flex-shrink-0", areaColor)}>
                                 <AreaIcon className="w-2.5 h-2.5" />
                               </div>
-                              <span className="text-[10px] text-muted-foreground">{AREA_LABELS[area] ?? area}</span>
+                              <span className="text-[10px] text-gray-500">{AREA_LABELS[area] ?? area}</span>
                             </div>
-                            <p className={cn("font-semibold text-sm leading-snug", completed ? "line-through text-emerald-600/60 decoration-emerald-600/40" : "text-foreground")}>
+                            <p className={cn("font-semibold text-sm leading-snug", completed ? "line-through text-emerald-600/60 decoration-emerald-600/40" : "text-gray-900")}>
                               {item.title}
                             </p>
                           </div>
@@ -972,7 +977,7 @@ export default function PlanPage() {
                       );
                     })}
                   </div>
-                  <p className="text-[11px] text-muted-foreground mt-4 leading-relaxed">
+                  <p className="text-[11px] text-gray-400 mt-4 leading-relaxed">
                     Tap any item to mark it done. Your progress syncs across devices.
                   </p>
                 </div>
@@ -1471,7 +1476,8 @@ export default function PlanPage() {
                     href={r.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-start gap-3 p-4 rounded-2xl border border-border/50 bg-card/60 hover:border-sky-400/30 hover:bg-sky-500/8 transition-all no-underline group"
+                    onClick={(e) => { e.stopPropagation(); window.open(r.url, "_blank", "noopener,noreferrer"); e.preventDefault(); }}
+                    className="flex items-start gap-3 p-4 rounded-2xl border border-border/50 bg-card/60 hover:border-sky-400/30 hover:bg-sky-500/8 transition-all no-underline group cursor-pointer"
                   >
                     <span className="text-xl flex-shrink-0 mt-0.5">{r.icon}</span>
                     <div className="flex-1 min-w-0">
