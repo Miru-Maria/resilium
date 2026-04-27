@@ -1018,16 +1018,11 @@ export default function PlanPage() {
                   </div>
                   <h2 className="font-display font-bold text-xl mb-4 text-gray-900">Your top {top3Items.length} this week</h2>
                   <div className="space-y-2.5 flex-1">
-                    {top3Items.map(({ area, item }) => {
+                    {top3Items.map(({ area, item }, i) => {
                       const key = `${area}::${item.id}`;
                       const completed = progressMap[key] ?? false;
-                      const top3PriorityConfig: Record<string, { label: string; className: string }> = {
-                        critical: { label: "Critical", className: "bg-red-100 text-red-700 border-red-300" },
-                        high: { label: "High", className: "bg-amber-100 text-amber-700 border-amber-300" },
-                        medium: { label: "Medium", className: "bg-sky-100 text-sky-700 border-sky-300" },
-                        low: { label: "Low", className: "bg-orange-50 text-orange-700 border-orange-200" },
-                      };
-                      const priorityConfig = top3PriorityConfig[item.priority] ?? top3PriorityConfig.medium;
+                      const AreaIcon = AREA_ICONS[area] ?? Target;
+                      const areaColorClass = AREA_COLORS[area] ?? "text-muted-foreground bg-muted/30";
                       return (
                         <div
                           key={item.id}
@@ -1050,10 +1045,11 @@ export default function PlanPage() {
                               {item.title}
                             </p>
                             <div className="flex items-center gap-1.5 flex-wrap">
-                              <span className={cn("text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border", priorityConfig.className)}>
-                                {priorityConfig.label}
-                              </span>
                               <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border bg-gray-100 text-gray-500 border-gray-200">
+                                #{i + 1}
+                              </span>
+                              <span className={cn("inline-flex items-center gap-1 text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border", areaColorClass)}>
+                                <AreaIcon className="w-2.5 h-2.5" />
                                 {AREA_LABELS[area] ?? area}
                               </span>
                             </div>
