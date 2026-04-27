@@ -2,7 +2,7 @@ import React from "react";
 import { SiteFooter } from "@/components/site-footer";
 import { PageSEO } from "@/components/page-seo";
 
-const LAST_UPDATED = "March 24, 2026";
+const LAST_UPDATED = "April 27, 2026";
 const CONTACT_EMAIL = "contact_resilium@pm.me";
 
 export default function PrivacyPage() {
@@ -51,7 +51,10 @@ export default function PrivacyPage() {
             <li>Preferred currency (USD, EUR, or RON) for contextual advice</li>
           </ul>
           <p>
-            Resilium does not collect your name, email address, government ID, precise address, or financial account details as part of the assessment. Technical data such as browser type, device type, and IP address may be collected for security and performance purposes.
+            If you create an account or sign in, your email address (and optionally your name) is collected via our authentication provider (Clerk) solely to identify your account and send you service-related communications such as subscription confirmations.
+          </p>
+          <p>
+            Resilium does not collect government ID, precise address, or financial account details. Technical data such as browser type, device type, and IP address may be collected for security and performance purposes.
           </p>
         </Section>
 
@@ -90,6 +93,9 @@ export default function PrivacyPage() {
           <p>Data may be shared with carefully vetted sub-processors who help operate the service, including:</p>
           <ul className="list-disc pl-6 space-y-1">
             <li><strong>Cloud infrastructure providers</strong> (hosting and database services)</li>
+            <li><strong>Clerk</strong> — authentication and account management</li>
+            <li><strong>Stripe</strong> — payment processing for Pro subscriptions</li>
+            <li><strong>Resend</strong> — transactional email delivery</li>
             <li><strong>AI model providers</strong> used to generate report content (data is transmitted securely and not used to train third-party models)</li>
           </ul>
           <p>

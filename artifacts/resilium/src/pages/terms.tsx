@@ -100,7 +100,7 @@ export default function TermsPage() {
             To the fullest extent permitted by applicable law, Resilium and its operator shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of or inability to use the service.
           </p>
           <p>
-            Resilium's total liability to you for any claim arising out of or relating to these Terms shall not exceed the amount you paid for the service in the 12 months preceding the claim, or £100 (GBP), whichever is greater.
+            Resilium's total liability to you for any claim arising out of or relating to these Terms shall not exceed the amount you paid for the service in the 12 months preceding the claim, or €100 (EUR), whichever is greater.
           </p>
         </Section>
 

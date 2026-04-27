@@ -877,44 +877,6 @@ export default function PlanPage() {
           )}
         </section>
 
-        {/* COMMUNITY SUPPORT RESOURCES */}
-        {showCommunitySupport && communityResources.length > 0 && (
-          <section>
-            <div className="rounded-3xl border border-sky-500/25 bg-sky-500/5 p-6 shadow-lg shadow-black/5">
-              <div className="flex items-center gap-2 mb-1">
-                <div className="w-6 h-6 rounded-xl bg-sky-500/15 flex items-center justify-center">
-                  <Heart className="w-3.5 h-3.5 text-sky-600" />
-                </div>
-                <p className="text-xs font-bold uppercase tracking-widest text-sky-600">Support available now</p>
-              </div>
-              <h2 className="font-display font-bold text-xl mb-1">Community support resources</h2>
-              <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
-                Based on your situation, these programs may help right now — before tackling the longer-term plan. All are free or low-cost.
-              </p>
-              <div className="space-y-2.5">
-                {communityResources.map((r, i) => (
-                  <a
-                    key={i}
-                    href={r.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-start gap-3 p-4 rounded-2xl border border-slate-200 bg-white/90 hover:border-sky-400/40 hover:bg-sky-50/50 transition-all no-underline group"
-                  >
-                    <span className="text-xl flex-shrink-0 mt-0.5">{r.icon}</span>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                        <span className="font-semibold text-sm text-foreground group-hover:text-sky-700 transition-colors">{r.title}</span>
-                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-700 border border-sky-500/20">{r.badge}</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground leading-relaxed">{r.desc}</p>
-                    </div>
-                    <ExternalLink className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0 mt-1 opacity-0 group-hover:opacity-60 transition-opacity" />
-                  </a>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
 
         {/* ONE THING RIGHT NOW */}
         {oneThingNow && totalDone < totalItems && (
@@ -1539,6 +1501,45 @@ export default function PlanPage() {
             </section>
           );
         })()}
+
+        {/* COMMUNITY SUPPORT RESOURCES */}
+        {showCommunitySupport && communityResources.length > 0 && (
+          <section>
+            <div className="rounded-3xl border border-sky-500/20 bg-sky-500/5 p-6 shadow-lg shadow-black/5">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-6 h-6 rounded-xl bg-sky-500/15 flex items-center justify-center">
+                  <Heart className="w-3.5 h-3.5 text-sky-400" />
+                </div>
+                <p className="text-xs font-bold uppercase tracking-widest text-sky-400">Support available now</p>
+              </div>
+              <h2 className="font-display font-bold text-xl mb-1 text-foreground">Community support resources</h2>
+              <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
+                Based on your situation, these programs may help right now — before tackling the longer-term plan. All are free or low-cost.
+              </p>
+              <div className="space-y-2.5">
+                {communityResources.map((r, i) => (
+                  <a
+                    key={i}
+                    href={r.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-start gap-3 p-4 rounded-2xl border border-border/50 bg-card/60 hover:border-sky-400/30 hover:bg-sky-500/8 transition-all no-underline group"
+                  >
+                    <span className="text-xl flex-shrink-0 mt-0.5">{r.icon}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                        <span className="font-semibold text-sm text-foreground group-hover:text-sky-400 transition-colors">{r.title}</span>
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-sky-500/15 text-sky-400 border border-sky-500/25">{r.badge}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground leading-relaxed">{r.desc}</p>
+                    </div>
+                    <ExternalLink className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0 mt-1 opacity-0 group-hover:opacity-60 transition-opacity" />
+                  </a>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* BACK TO REPORT */}
         <section className="pb-4 text-center">
