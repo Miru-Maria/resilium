@@ -9,7 +9,7 @@ import { logger } from "../lib/logger.js";
 import { sendProUpgradeEmail, sendPaymentFailedEmail, sendCancellationEmail, sendPaymentSucceededEmail } from "../lib/email.js";
 import { stripeCheckoutLimiter, stripePortalLimiter, stripeDonationLimiter } from "../lib/rate-limiters.js";
 
-async function resolveUserEmail(userId: string): Promise<{ email: string | null; firstName: string | null }> {
+async function resolveUserEmail(userId: string, stripeCustomerId?: string): Promise<{ email: string | null; firstName: string | null }> {
   try {
     const rows = await db
       .select({ email: usersTable.email, firstName: usersTable.firstName })
@@ -27,12 +27,29 @@ async function resolveUserEmail(userId: string): Promise<{ email: string | null;
     const clerk = createClerkClient({ secretKey: process.env["CLERK_SECRET_KEY"] });
     const clerkUser = await clerk.users.getUser(userId);
     const email = clerkUser.emailAddresses[0]?.emailAddress ?? null;
-    if (email) logger.info({ userId }, "Resolved user email via Clerk fallback");
-    return { email, firstName: clerkUser.firstName ?? null };
+    if (email) {
+      logger.info({ userId }, "Resolved user email via Clerk fallback");
+      return { email, firstName: clerkUser.firstName ?? null };
+    }
   } catch (err) {
-    logger.warn({ err, userId }, "Clerk fallback for user email also failed");
-    return { email: null, firstName: null };
+    logger.warn({ err, userId }, "Clerk fallback for user email also failed — trying Stripe customer");
   }
+
+  if (stripeCustomerId) {
+    try {
+      const stripe = await getUncachableStripeClient();
+      const customer = await stripe.customers.retrieve(stripeCustomerId);
+      if (!customer.deleted && customer.email) {
+        logger.info({ userId, stripeCustomerId }, "Resolved user email via Stripe customer fallback");
+        const firstName = customer.name ? customer.name.split(" ")[0] : null;
+        return { email: customer.email, firstName };
+      }
+    } catch (err) {
+      logger.warn({ err, userId, stripeCustomerId }, "Stripe customer fallback for user email also failed");
+    }
+  }
+
+  return { email: null, firstName: null };
 }
 
 const checkoutSchema = z.object({
@@ -127,7 +144,7 @@ async function handleStripeEvent(event: any) {
       if (customer.deleted) return;
       const userId: string | undefined = (customer as any).metadata?.userId;
       if (!userId) return;
-      const { email, firstName } = await resolveUserEmail(userId);
+      const { email, firstName } = await resolveUserEmail(userId, customerId);
       const sub = await db.select({ currentPeriodEnd: subscriptionsTable.currentPeriodEnd })
         .from(subscriptionsTable).where(eq(subscriptionsTable.userId, userId)).limit(1);
       if (email) {
@@ -157,7 +174,7 @@ async function handleStripeEvent(event: any) {
       if (customer.deleted) return;
       const userId: string | undefined = (customer as any).metadata?.userId;
       if (!userId) return;
-      const { email, firstName } = await resolveUserEmail(userId);
+      const { email, firstName } = await resolveUserEmail(userId, customerId);
       if (email) {
         const nextPeriodEnd = invoice.lines?.data?.[0]?.period?.end
           ? new Date(invoice.lines.data[0].period.end * 1000)
@@ -259,7 +276,7 @@ async function upsertSubscription(
       event.data.previous_attributes.status !== "active");
 
   if (resolvedStatus === "active" && isNewActivation) {
-    const { email, firstName } = await resolveUserEmail(userId);
+    const { email, firstName } = await resolveUserEmail(userId, stripeCustomerId);
     if (email) {
       sendProUpgradeEmail({
         email,
@@ -273,7 +290,7 @@ async function upsertSubscription(
   }
 
   if (resolvedStatus === "cancelled" && event.type === "customer.subscription.deleted") {
-    const { email, firstName } = await resolveUserEmail(userId);
+    const { email, firstName } = await resolveUserEmail(userId, stripeCustomerId);
     if (email) {
       sendCancellationEmail({
         email,
