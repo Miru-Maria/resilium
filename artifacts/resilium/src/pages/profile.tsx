@@ -1044,24 +1044,27 @@ function ChecklistTab() {
                   return (
                     <div
                       key={item.id}
-                      className={`flex gap-3 p-4 rounded-xl border transition-colors shadow-sm ${isChecked ? "bg-emerald-50 border-emerald-300 opacity-70" : "bg-white/90 border-slate-200"}`}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => toggleMutation.mutate({ area, itemId: item.id, completed: !isChecked })}
+                      onKeyDown={(e) => { if (e.key === " " || e.key === "Enter") { e.preventDefault(); toggleMutation.mutate({ area, itemId: item.id, completed: !isChecked }); } }}
+                      className={`flex gap-3 p-4 rounded-xl border transition-colors shadow-sm cursor-pointer select-none active:scale-[0.99] ${isChecked ? "bg-emerald-50 border-emerald-300 opacity-70" : "bg-white/90 border-slate-200 hover:border-slate-300 hover:bg-slate-50/60"}`}
                     >
                       <Checkbox
-                        id={key}
                         checked={isChecked}
-                        onCheckedChange={(checked) => {
-                          toggleMutation.mutate({ area, itemId: item.id, completed: !!checked });
-                        }}
-                        className="mt-0.5 flex-shrink-0"
+                        onCheckedChange={() => {}}
+                        onClick={(e) => e.stopPropagation()}
+                        className="mt-0.5 flex-shrink-0 pointer-events-none"
+                        aria-hidden="true"
+                        tabIndex={-1}
                       />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start gap-2 flex-wrap">
-                          <label
-                            htmlFor={key}
-                            className={`text-sm font-medium cursor-pointer leading-snug ${isChecked ? "line-through text-emerald-600/60 decoration-emerald-600/40" : "text-gray-900"}`}
+                          <span
+                            className={`text-sm font-medium leading-snug ${isChecked ? "line-through text-emerald-600/60 decoration-emerald-600/40" : "text-gray-900"}`}
                           >
                             {item.title}
-                          </label>
+                          </span>
                           <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase flex-shrink-0 ${ps.bg} ${ps.text}`}>
                             {ps.label}
                           </span>
