@@ -935,8 +935,6 @@ export default function PlanPage() {
                         low: { label: "Low", className: "bg-orange-50 text-orange-700 border-orange-200" },
                       };
                       const priorityConfig = top3PriorityConfig[item.priority] ?? top3PriorityConfig.medium;
-                      const AreaIcon = AREA_ICONS[area] ?? Shield;
-                      const areaColor = AREA_COLORS[area] ?? "text-primary bg-primary/10";
                       return (
                         <div
                           key={item.id}
@@ -955,18 +953,17 @@ export default function PlanPage() {
                             {completed && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
+                            <p className={cn("font-semibold text-sm leading-snug mb-1.5", completed ? "line-through text-emerald-600/60 decoration-emerald-600/40" : "text-gray-900")}>
+                              {item.title}
+                            </p>
+                            <div className="flex items-center gap-1.5 flex-wrap">
                               <span className={cn("text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border", priorityConfig.className)}>
                                 {priorityConfig.label}
                               </span>
-                              <div className={cn("w-4 h-4 rounded-md flex items-center justify-center flex-shrink-0", areaColor)}>
-                                <AreaIcon className="w-2.5 h-2.5" />
-                              </div>
-                              <span className="text-[10px] text-gray-500">{AREA_LABELS[area] ?? area}</span>
+                              <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border bg-gray-100 text-gray-500 border-gray-200">
+                                {AREA_LABELS[area] ?? area}
+                              </span>
                             </div>
-                            <p className={cn("font-semibold text-sm leading-snug", completed ? "line-through text-emerald-600/60 decoration-emerald-600/40" : "text-gray-900")}>
-                              {item.title}
-                            </p>
                           </div>
                           {completed && (
                             <span className="flex-shrink-0 text-[10px] font-bold uppercase tracking-wider text-emerald-600 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-2 py-0.5">
@@ -996,7 +993,7 @@ export default function PlanPage() {
               <div>
                 <h2 className="font-display font-bold text-2xl">Daily Habits</h2>
                 <p className="text-muted-foreground text-sm">
-                  Start with the first two this week. Add more when they feel natural.
+                  AI-recommended habits based on your results. Build them one at a time — consistency beats quantity.
                 </p>
               </div>
             </div>
