@@ -60,7 +60,7 @@ function GuideCard({
   const styles2 = useMemo(() => createStyles(colors), [colors]);
 
   return (
-    <View style={[styles2.card, { borderColor: colors.border }]}>
+    <View style={[styles2.card, { borderColor: colors.border, backgroundColor: "#FFFFFF" }]}>
       <Pressable onPress={toggle} style={styles2.cardHeader}>
         <View style={{ flex: 1 }}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 6 }}>
@@ -73,19 +73,35 @@ function GuideCard({
           </View>
           <Text style={[styles2.cardTitle, { color: colors.text }]}>{guide.title}</Text>
           {!expanded && (
-            <Text style={[styles2.cardSummary, { color: colors.textSecondary }]} numberOfLines={2}>{guide.summary}</Text>
+            <>
+              <Text style={[styles2.cardSummary, { color: colors.textSecondary }]} numberOfLines={2}>{guide.summary}</Text>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginTop: 8 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                  <Feather name="clock" size={11} color={colors.textMuted} />
+                  <Text style={{ fontFamily: "Inter_400Regular", fontSize: 11, color: colors.textMuted }}>{guide.readingTime} read</Text>
+                </View>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                  <Feather name="wifi-off" size={11} color={colors.success} />
+                  <Text style={{ fontFamily: "Inter_400Regular", fontSize: 11, color: colors.success }}>Offline</Text>
+                </View>
+              </View>
+            </>
           )}
         </View>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
           <Pressable
             onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onToggleSave(guide.id); }}
             hitSlop={12}
           >
-            <Feather
-              name={saved ? "bookmark" : "bookmark"}
-              size={17}
-              color={saved ? colors.primary : colors.textMuted}
-            />
+            <View style={{
+              width: 32, height: 32, borderRadius: 8,
+              backgroundColor: saved ? colors.primaryMuted : "transparent",
+              borderWidth: saved ? 1 : 0,
+              borderColor: saved ? colors.primaryBorder : "transparent",
+              alignItems: "center", justifyContent: "center",
+            }}>
+              <Feather name="bookmark" size={15} color={saved ? colors.primary : colors.textMuted} />
+            </View>
           </Pressable>
           <Feather name={expanded ? "chevron-up" : "chevron-down"} size={18} color={colors.textMuted} />
         </View>

@@ -2429,7 +2429,16 @@ function GuideCard({ guide }: { guide: Guide }) {
                 Essential
               </span>
             )}
-            <span className="text-xs text-muted-foreground">{guide.readingTime}</span>
+            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Clock className="w-3 h-3" />
+              {guide.readingTime}
+            </span>
+            {downloaded && (
+              <span className="flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                <Download className="w-3 h-3" />
+                Saved offline
+              </span>
+            )}
           </div>
           <p className="font-semibold text-foreground">{guide.title}</p>
           {!open && <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{guide.summary}</p>}
