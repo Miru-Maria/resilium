@@ -198,6 +198,15 @@ const AREA_ICONS: Record<string, React.ReactNode> = {
   resources: <Shield className="w-4 h-4" />,
 };
 
+const AREA_STYLES: Record<string, { iconBg: string; iconText: string; border: string }> = {
+  financial:     { iconBg: "bg-amber-100",   iconText: "text-amber-600",   border: "border-l-amber-400" },
+  health:        { iconBg: "bg-emerald-100", iconText: "text-emerald-600", border: "border-l-emerald-400" },
+  skills:        { iconBg: "bg-violet-100",  iconText: "text-violet-600",  border: "border-l-violet-400" },
+  mobility:      { iconBg: "bg-orange-100",  iconText: "text-orange-600",  border: "border-l-orange-400" },
+  psychological: { iconBg: "bg-pink-100",    iconText: "text-pink-600",    border: "border-l-pink-400" },
+  resources:     { iconBg: "bg-sky-100",     iconText: "text-sky-600",     border: "border-l-sky-400" },
+};
+
 const PRIORITY_STYLES: Record<string, { bg: string; text: string; label: string }> = {
   critical: { bg: "bg-red-500/20",    text: "text-red-600",    label: "Critical" },
   high:     { bg: "bg-amber-500/15",  text: "text-amber-700",  label: "High" },
@@ -994,8 +1003,10 @@ function ChecklistTab() {
         const pct = items.length > 0 ? Math.round((done / items.length) * 100) : 0;
         const isCollapsed = collapsed[area] ?? false;
 
+        const areaStyle = AREA_STYLES[area] ?? { iconBg: "bg-primary/10", iconText: "text-primary", border: "border-l-primary" };
+
         return (
-          <Card key={area} className="border-none shadow-md overflow-hidden">
+          <Card key={area} className={`border-l-4 ${areaStyle.border} shadow-md overflow-hidden`}>
             <button
               className="w-full text-left"
               onClick={() => setCollapsed((prev) => ({ ...prev, [area]: !isCollapsed }))}
@@ -1003,7 +1014,7 @@ function ChecklistTab() {
               <CardHeader className="pb-3 pt-4 px-5">
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                    <div className={`w-8 h-8 rounded-xl ${areaStyle.iconBg} flex items-center justify-center ${areaStyle.iconText}`}>
                       {AREA_ICONS[area] ?? <Shield className="w-4 h-4" />}
                     </div>
                     <div>
