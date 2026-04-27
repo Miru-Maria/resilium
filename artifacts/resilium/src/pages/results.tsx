@@ -695,9 +695,11 @@ function ResultsPageInner() {
               <Download className="w-4 h-4 mr-2" /> Markdown
             </Button>
           ) : (
-            <Button variant="outline" size="sm" onClick={() => window.location.href = "/pricing"} className="rounded-full opacity-60">
-              <Lock className="w-3.5 h-3.5 mr-2" /> Markdown
-            </Button>
+            <Link href="/pricing">
+              <Button variant="outline" size="sm" className="rounded-full opacity-60">
+                <Lock className="w-3.5 h-3.5 mr-2" /> Markdown
+              </Button>
+            </Link>
           )}
           </div>
         </div>
