@@ -127,17 +127,18 @@ async function handleStripeEvent(event: any) {
       if (customer.deleted) return;
       const userId: string | undefined = (customer as any).metadata?.userId;
       if (!userId) return;
-      const userRows = await db.select({ email: usersTable.email, firstName: usersTable.firstName })
-        .from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+      const { email, firstName } = await resolveUserEmail(userId);
       const sub = await db.select({ currentPeriodEnd: subscriptionsTable.currentPeriodEnd })
         .from(subscriptionsTable).where(eq(subscriptionsTable.userId, userId)).limit(1);
-      if (userRows[0]?.email) {
+      if (email) {
         sendPaymentFailedEmail({
-          email: userRows[0].email,
-          firstName: userRows[0].firstName,
+          email,
+          firstName,
           periodEnd: sub[0]?.currentPeriodEnd ?? null,
           userId,
-        }).catch(() => {});
+        }).catch((err) => logger.warn({ err, userId }, "sendPaymentFailedEmail failed"));
+      } else {
+        logger.warn({ userId }, "Payment-failed email skipped — could not resolve user email");
       }
     } catch (err) {
       logger.error({ err }, "Failed to send payment_failed email");
@@ -156,20 +157,21 @@ async function handleStripeEvent(event: any) {
       if (customer.deleted) return;
       const userId: string | undefined = (customer as any).metadata?.userId;
       if (!userId) return;
-      const userRows = await db.select({ email: usersTable.email, firstName: usersTable.firstName })
-        .from(usersTable).where(eq(usersTable.id, userId)).limit(1);
-      if (userRows[0]?.email) {
+      const { email, firstName } = await resolveUserEmail(userId);
+      if (email) {
         const nextPeriodEnd = invoice.lines?.data?.[0]?.period?.end
           ? new Date(invoice.lines.data[0].period.end * 1000)
           : null;
         sendPaymentSucceededEmail({
-          email: userRows[0].email,
-          firstName: userRows[0].firstName,
+          email,
+          firstName,
           amountPaid: invoice.amount_paid ?? 0,
           currency: invoice.currency ?? "usd",
           nextPeriodEnd,
           userId,
-        }).catch(() => {});
+        }).catch((err) => logger.warn({ err, userId }, "sendPaymentSucceededEmail failed"));
+      } else {
+        logger.warn({ userId }, "Payment-succeeded email skipped — could not resolve user email");
       }
     } catch (err) {
       logger.error({ err }, "Failed to send payment_succeeded email");
@@ -249,7 +251,14 @@ async function upsertSubscription(
 
   logger.info({ userId, status: resolvedStatus, event: event.type }, "Subscription updated via Stripe webhook");
 
-  if (resolvedStatus === "active" && (event.type === "checkout.session.completed" || event.type === "customer.subscription.created")) {
+  const isNewActivation =
+    event.type === "checkout.session.completed" ||
+    event.type === "customer.subscription.created" ||
+    (event.type === "customer.subscription.updated" &&
+      event.data?.previous_attributes?.status != null &&
+      event.data.previous_attributes.status !== "active");
+
+  if (resolvedStatus === "active" && isNewActivation) {
     const { email, firstName } = await resolveUserEmail(userId);
     if (email) {
       sendProUpgradeEmail({
@@ -257,7 +266,7 @@ async function upsertSubscription(
         firstName,
         periodEnd: currentPeriodEnd ?? null,
       }).catch((err) => logger.warn({ err, userId }, "sendProUpgradeEmail failed"));
-      logger.info({ userId, email }, "Pro upgrade email queued");
+      logger.info({ userId, email, event: event.type }, "Pro upgrade email queued");
     } else {
       logger.warn({ userId }, "Pro upgrade email skipped — could not resolve user email");
     }
