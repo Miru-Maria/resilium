@@ -35,14 +35,26 @@ const { width: SCREEN_W } = Dimensions.get("window");
 
 type ChecklistItem = { id: string; title: string; description?: string; priority: string };
 
-const AREA_CONFIG: Record<string, { color: string; bg: string; label: string }> = {
-  financial:     { color: "#D97706", bg: "#FEF3C7", label: "Financial" },
-  health:        { color: "#059669", bg: "#D1FAE5", label: "Health" },
-  skills:        { color: "#7C3AED", bg: "#EDE9FE", label: "Skills" },
-  mobility:      { color: "#EA580C", bg: "#FFEDD5", label: "Mobility" },
-  psychological: { color: "#DB2777", bg: "#FCE7F3", label: "Psychological" },
-  resources:     { color: "#0284C7", bg: "#E0F2FE", label: "Resources" },
+type AreaCfg = { color: string; bg: string; label: string; icon: string };
+const AREA_CONFIG: Record<string, AreaCfg> = {
+  financial:     { color: "#D97706", bg: "#FEF3C7", label: "Financial",     icon: "dollar-sign" },
+  health:        { color: "#059669", bg: "#D1FAE5", label: "Health",        icon: "heart" },
+  skills:        { color: "#7C3AED", bg: "#EDE9FE", label: "Skills",        icon: "tool" },
+  mobility:      { color: "#EA580C", bg: "#FFEDD5", label: "Mobility",      icon: "truck" },
+  psychological: { color: "#DB2777", bg: "#FCE7F3", label: "Psychological", icon: "smile" },
+  resources:     { color: "#0284C7", bg: "#E0F2FE", label: "Resources",     icon: "package" },
+  social:        { color: "#0891B2", bg: "#CFFAFE", label: "Social",        icon: "users" },
+  socialcapital: { color: "#0891B2", bg: "#CFFAFE", label: "Social",        icon: "users" },
 };
+
+function resolveAreaCfg(area: string): AreaCfg {
+  const key = area.toLowerCase().replace(/[_\s-]/g, "");
+  return (
+    AREA_CONFIG[key] ??
+    AREA_CONFIG[area.toLowerCase()] ??
+    { color: "#6B7280", bg: "#F3F4F6", label: area, icon: "circle" }
+  );
+}
 
 const PRIORITY_CONFIG: Record<string, { color: string; bg: string }> = {
   critical: { color: "#DC2626", bg: "#FEE2E2" },
@@ -449,7 +461,7 @@ function CompanionScrollContent({
           <Text style={{ fontFamily: "Inter_700Bold", fontSize: 18, color: "#111827", letterSpacing: -0.4, marginBottom: 14 }}>Your top 3 this week</Text>
           <View style={{ gap: 10 }}>
             {topItems.map(({ area, item }) => {
-              const ac = AREA_CONFIG[area.toLowerCase()] ?? { color: "#6B7280", bg: "#F3F4F6", label: area };
+              const ac = resolveAreaCfg(area);
               const pc = PRIORITY_CONFIG[item.priority] ?? PRIORITY_CONFIG.low;
               return (
                 <Pressable
@@ -469,7 +481,8 @@ function CompanionScrollContent({
                       <View style={{ backgroundColor: pc.bg, borderRadius: 6, paddingHorizontal: 7, paddingVertical: 3 }}>
                         <Text style={{ fontFamily: "Inter_700Bold", fontSize: 10, color: pc.color, textTransform: "uppercase", letterSpacing: 0.5 }}>{item.priority}</Text>
                       </View>
-                      <View style={{ backgroundColor: ac.bg, borderRadius: 6, paddingHorizontal: 7, paddingVertical: 3 }}>
+                      <View style={{ flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: ac.bg, borderRadius: 6, paddingHorizontal: 7, paddingVertical: 3 }}>
+                        <Feather name={ac.icon as any} size={9} color={ac.color} />
                         <Text style={{ fontFamily: "Inter_700Bold", fontSize: 10, color: ac.color, textTransform: "uppercase", letterSpacing: 0.5 }}>{ac.label}</Text>
                       </View>
                     </View>

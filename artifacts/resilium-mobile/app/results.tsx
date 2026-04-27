@@ -40,6 +40,9 @@ const HABIT_AREA_CONFIG: Record<string, { color: string; bg: string }> = {
   mobility:      { color: "#EA580C", bg: "#FFEDD5" },
   psychological: { color: "#DB2777", bg: "#FCE7F3" },
   resources:     { color: "#0284C7", bg: "#E0F2FE" },
+  social:        { color: "#0891B2", bg: "#CFFAFE" },
+  socialcapital: { color: "#0891B2", bg: "#CFFAFE" },
+  mental:        { color: "#DB2777", bg: "#FCE7F3" },
 };
 
 const HABIT_FREQ_CONFIG: Record<string, { color: string; bg: string; label: string }> = {
@@ -203,6 +206,7 @@ export default function ResultsScreen() {
   const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
   const [sharingScorecard, setSharingScorecard] = useState(false);
   const [showPushPrompt, setShowPushPrompt] = useState(false);
+  const [checkedHabits, setCheckedHabits] = useState<Record<number, boolean>>({});
   const scorecardRef = useRef<ViewShot | null>(null);
 
   const colors = useColors();
@@ -589,35 +593,57 @@ export default function ResultsScreen() {
           </Text>
           <View style={{ gap: 8 }}>
             {report.dailyHabits.map((h, i) => {
-              const cat = (h.category ?? "").toLowerCase();
-              const ac = HABIT_AREA_CONFIG[cat] ?? { color: "#6B7280", bg: "#F3F4F6" };
+              const catKey = (h.category ?? "").toLowerCase().replace(/[_\s-]/g, "");
+              const ac = HABIT_AREA_CONFIG[catKey] ?? HABIT_AREA_CONFIG[(h.category ?? "").toLowerCase()] ?? { color: "#6B7280", bg: "#F3F4F6" };
               const fc = HABIT_FREQ_CONFIG[(h.frequency ?? "").toLowerCase()] ?? HABIT_FREQ_CONFIG.daily;
               const isTop2 = i < 2;
+              const isDone = !!checkedHabits[i];
               return (
-                <View
+                <Pressable
                   key={i}
-                  style={{ flexDirection: "row", alignItems: "flex-start", gap: 12, backgroundColor: isTop2 ? "#F9FAFB" : "#FFFFFF", borderRadius: 14, padding: 14, borderWidth: 1, borderColor: "#E5E7EB" }}
+                  onPress={() => {
+                    Haptics.selectionAsync();
+                    setCheckedHabits(prev => ({ ...prev, [i]: !prev[i] }));
+                  }}
+                  style={({ pressed }) => [{
+                    flexDirection: "row", alignItems: "flex-start", gap: 12,
+                    backgroundColor: isDone ? "#F0FDF4" : (isTop2 ? "#F9FAFB" : "#FFFFFF"),
+                    borderRadius: 14, padding: 14,
+                    borderWidth: 1, borderColor: isDone ? "#BBF7D0" : "#E5E7EB",
+                    opacity: pressed ? 0.8 : 1,
+                  }]}
                 >
-                  <View style={{ width: 32, height: 32, borderRadius: 10, backgroundColor: isTop2 ? colors.primaryMuted : "#F3F4F6", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <Text style={{ fontFamily: "Inter_700Bold", fontSize: 13, color: isTop2 ? colors.primary : colors.textMuted }}>{i + 1}</Text>
+                  <View style={{
+                    width: 26, height: 26, borderRadius: 13, marginTop: 1, flexShrink: 0,
+                    alignItems: "center", justifyContent: "center",
+                    backgroundColor: isDone ? "#16A34A" : (isTop2 ? colors.primaryMuted : "#F3F4F6"),
+                    borderWidth: isDone ? 0 : 2,
+                    borderColor: isDone ? "transparent" : (isTop2 ? colors.primary : "#D1D5DB"),
+                  }}>
+                    {isDone
+                      ? <Feather name="check" size={14} color="#fff" />
+                      : <Text style={{ fontFamily: "Inter_700Bold", fontSize: 11, color: isTop2 ? colors.primary : colors.textMuted }}>{i + 1}</Text>
+                    }
                   </View>
                   <View style={{ flex: 1, gap: 6 }}>
-                    <Text style={{ fontFamily: "Inter_500Medium", fontSize: 14, color: "#111827", lineHeight: 20 }}>{h.habit}</Text>
-                    <View style={{ flexDirection: "row", gap: 6, flexWrap: "wrap" }}>
-                      <View style={{ backgroundColor: fc.bg, borderRadius: 6, paddingHorizontal: 7, paddingVertical: 3 }}>
-                        <Text style={{ fontFamily: "Inter_700Bold", fontSize: 10, color: fc.color, textTransform: "uppercase", letterSpacing: 0.5 }}>{fc.label}</Text>
-                      </View>
-                      <View style={{ backgroundColor: ac.bg, borderRadius: 6, paddingHorizontal: 7, paddingVertical: 3 }}>
-                        <Text style={{ fontFamily: "Inter_700Bold", fontSize: 10, color: ac.color, textTransform: "capitalize", letterSpacing: 0.5 }}>{h.category}</Text>
-                      </View>
-                      {isTop2 && (
-                        <View style={{ backgroundColor: colors.primaryMuted, borderRadius: 6, paddingHorizontal: 7, paddingVertical: 3, borderWidth: 1, borderColor: colors.primaryBorder }}>
-                          <Text style={{ fontFamily: "Inter_700Bold", fontSize: 10, color: colors.primary, textTransform: "uppercase", letterSpacing: 0.5 }}>This week</Text>
+                    <Text style={{ fontFamily: "Inter_500Medium", fontSize: 14, color: isDone ? "#6B7280" : "#111827", lineHeight: 20, textDecorationLine: isDone ? "line-through" : "none" }}>{h.habit}</Text>
+                    {!isDone && (
+                      <View style={{ flexDirection: "row", gap: 6, flexWrap: "wrap" }}>
+                        <View style={{ backgroundColor: fc.bg, borderRadius: 6, paddingHorizontal: 7, paddingVertical: 3 }}>
+                          <Text style={{ fontFamily: "Inter_700Bold", fontSize: 10, color: fc.color, textTransform: "uppercase", letterSpacing: 0.5 }}>{fc.label}</Text>
                         </View>
-                      )}
-                    </View>
+                        <View style={{ flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: ac.bg, borderRadius: 6, paddingHorizontal: 7, paddingVertical: 3 }}>
+                          <Text style={{ fontFamily: "Inter_700Bold", fontSize: 10, color: ac.color, textTransform: "capitalize", letterSpacing: 0.5 }}>{h.category}</Text>
+                        </View>
+                        {isTop2 && (
+                          <View style={{ backgroundColor: colors.primaryMuted, borderRadius: 6, paddingHorizontal: 7, paddingVertical: 3, borderWidth: 1, borderColor: colors.primaryBorder }}>
+                            <Text style={{ fontFamily: "Inter_700Bold", fontSize: 10, color: colors.primary, textTransform: "uppercase", letterSpacing: 0.5 }}>This week</Text>
+                          </View>
+                        )}
+                      </View>
+                    )}
                   </View>
-                </View>
+                </Pressable>
               );
             })}
           </View>
