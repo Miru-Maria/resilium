@@ -741,7 +741,7 @@ function OverviewTab({ plans }: { plans: PlanSummary[] }) {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 pb-4">
-              {topItems.map(({ area, item }) => {
+              {topItems.map(({ area, item }, i) => {
                 const as = AREA_STYLES[area] ?? AREA_STYLES.financial;
                 const areaIcon = AREA_ICONS[area as DimKey];
                 return (
@@ -752,9 +752,8 @@ function OverviewTab({ plans }: { plans: PlanSummary[] }) {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm text-slate-800 font-semibold leading-snug mb-1">{item.title}</p>
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-md capitalize ${as.iconBg} ${as.iconText}`}>
-                          {areaIcon && React.cloneElement(areaIcon as React.ReactElement, { className: "w-2.5 h-2.5" })}
-                          {DIM_LABELS[area as DimKey] ?? area}
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-black/10 text-slate-700">
+                          #{i + 1}
                         </span>
                         <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md capitalize ${priorityColors[item.priority] ?? priorityColors.low}`}>
                           {item.priority}
