@@ -974,6 +974,79 @@ export default function PlanPage() {
           </section>
         )}
 
+        {/* DAILY HABITS */}
+        {dailyHabits && dailyHabits.length > 0 && (
+          <section>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-9 h-9 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <Activity className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="font-display font-bold text-2xl">Daily Habits</h2>
+                <p className="text-muted-foreground text-sm">
+                  Start with the first two this week. Add more when they feel natural.
+                </p>
+              </div>
+            </div>
+            <div className="bg-card rounded-3xl border border-border shadow-lg shadow-black/5 overflow-hidden">
+              <div className="divide-y divide-border/60">
+                {(habitsExpanded ? dailyHabits : dailyHabits.slice(0, 2)).map((habit, i) => {
+                  const freqConfig = FREQ_CONFIG[habit.frequency] ?? FREQ_CONFIG["daily"];
+                  const isFirst2 = i < 2;
+                  return (
+                    <div
+                      key={i}
+                      className={cn("flex items-start gap-4 px-5 py-4 transition-colors", isFirst2 && "bg-primary/5")}
+                    >
+                      <div className={cn(
+                        "w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 font-bold text-sm",
+                        isFirst2 ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
+                      )}>
+                        {i + 1}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium leading-snug text-foreground">{habit.habit}</p>
+                        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                          <span className={cn("text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border", freqConfig.className)}>
+                            {freqConfig.label}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground">{habit.category}</span>
+                        </div>
+                      </div>
+                      {isFirst2 && (
+                        <span className="flex-shrink-0 text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 border border-primary/20 rounded-full px-2 py-0.5 mt-0.5">
+                          This week
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              {dailyHabits.length > 2 && (
+                <div className="px-5 py-3.5 border-t border-border bg-muted/20">
+                  <button
+                    type="button"
+                    onClick={() => setHabitsExpanded(e => !e)}
+                    className="flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors"
+                  >
+                    {habitsExpanded ? (
+                      <>
+                        <ChevronUp className="w-4 h-4" />
+                        Show fewer habits
+                      </>
+                    ) : (
+                      <>
+                        <ChevronDown className="w-4 h-4" />
+                        See all {dailyHabits.length} habits
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
         {/* THREE HORIZON SECTIONS */}
         <section className="space-y-4">
           <Accordion type="multiple" defaultValue={["short"]} className="space-y-4">
@@ -1252,79 +1325,6 @@ export default function PlanPage() {
           </Accordion>
         </section>
 
-        {/* DAILY HABITS */}
-        {dailyHabits && dailyHabits.length > 0 && (
-          <section>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-9 h-9 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <Activity className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <h2 className="font-display font-bold text-2xl">Daily Habits</h2>
-                <p className="text-muted-foreground text-sm">
-                  Start with the first two this week. Add more when they feel natural.
-                </p>
-              </div>
-            </div>
-            <div className="bg-card rounded-3xl border border-border shadow-lg shadow-black/5 overflow-hidden">
-              <div className="divide-y divide-border/60">
-                {(habitsExpanded ? dailyHabits : dailyHabits.slice(0, 2)).map((habit, i) => {
-                  const freqConfig = FREQ_CONFIG[habit.frequency] ?? FREQ_CONFIG["daily"];
-                  const isFirst2 = i < 2;
-                  return (
-                    <div
-                      key={i}
-                      className={cn("flex items-start gap-4 px-5 py-4 transition-colors", isFirst2 && "bg-primary/5")}
-                    >
-                      <div className={cn(
-                        "w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 font-bold text-sm",
-                        isFirst2 ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
-                      )}>
-                        {i + 1}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium leading-snug text-foreground">{habit.habit}</p>
-                        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                          <span className={cn("text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border", freqConfig.className)}>
-                            {freqConfig.label}
-                          </span>
-                          <span className="text-[10px] text-muted-foreground">{habit.category}</span>
-                        </div>
-                      </div>
-                      {isFirst2 && (
-                        <span className="flex-shrink-0 text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 border border-primary/20 rounded-full px-2 py-0.5 mt-0.5">
-                          This week
-                        </span>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-              {dailyHabits.length > 2 && (
-                <div className="px-5 py-3.5 border-t border-border bg-muted/20">
-                  <button
-                    type="button"
-                    onClick={() => setHabitsExpanded(e => !e)}
-                    className="flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors"
-                  >
-                    {habitsExpanded ? (
-                      <>
-                        <ChevronUp className="w-4 h-4" />
-                        Show fewer habits
-                      </>
-                    ) : (
-                      <>
-                        <ChevronDown className="w-4 h-4" />
-                        See all {dailyHabits.length} habits
-                      </>
-                    )}
-                  </button>
-                </div>
-              )}
-            </div>
-          </section>
-        )}
-
         {/* STRESS TEST SCENARIOS */}
         <section>
           <div className="flex items-center gap-3 mb-4">
@@ -1488,7 +1488,7 @@ export default function PlanPage() {
                     <span className={cn("text-3xl font-bold font-display", scoreColor)}>{lowestScore}</span>
                     <span className="text-sm text-muted-foreground">/100 — {dimensionName}</span>
                   </div>
-                  <p className="text-muted-foreground text-sm leading-relaxed mb-4 max-w-xl">
+                  <p className="text-muted-foreground text-sm leading-relaxed mb-4">
                     {contextLine} Cristiana Paun at Phoenix Insight Coaching works directly from your Resilium profile. The first call is free, no commitment.
                   </p>
                   <Link href="/coaching">
