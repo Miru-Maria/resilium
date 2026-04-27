@@ -566,7 +566,8 @@ router.get("/docs/:name", requireAdminSession, (req, res) => {
   const adminDocsDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "admin-docs");
   const filePath = path.resolve(adminDocsDir, `${name}.${ext}`);
   res.setHeader("Content-Type", ADMIN_DOCS[name]!);
-  res.sendFile(filePath, (err) => {
+  res.setHeader("Cache-Control", "no-store");
+  res.sendFile(filePath, { etag: false, lastModified: false }, (err) => {
     if (err) {
       logger.error({ err, name }, "Failed to serve admin doc");
       if (!res.headersSent) res.status(500).json({ error: "INTERNAL_ERROR" });
