@@ -33,6 +33,33 @@ import { useProStatus } from "@/context/proStatus";
 
 const { width: SCREEN_W } = Dimensions.get("window");
 
+type ChecklistItem = { id: string; title: string; description?: string; priority: string };
+
+const AREA_CONFIG: Record<string, { color: string; bg: string; label: string }> = {
+  financial:     { color: "#D97706", bg: "#FEF3C7", label: "Financial" },
+  health:        { color: "#059669", bg: "#D1FAE5", label: "Health" },
+  skills:        { color: "#7C3AED", bg: "#EDE9FE", label: "Skills" },
+  mobility:      { color: "#EA580C", bg: "#FFEDD5", label: "Mobility" },
+  psychological: { color: "#DB2777", bg: "#FCE7F3", label: "Psychological" },
+  resources:     { color: "#0284C7", bg: "#E0F2FE", label: "Resources" },
+};
+
+const PRIORITY_CONFIG: Record<string, { color: string; bg: string }> = {
+  critical: { color: "#DC2626", bg: "#FEE2E2" },
+  high:     { color: "#D97706", bg: "#FEF3C7" },
+  medium:   { color: "#0284C7", bg: "#E0F2FE" },
+  low:      { color: "#6B7280", bg: "#F3F4F6" },
+};
+
+const DIM_TIP_CONFIG: Record<DimKey, { leftBorder: string; badgeBg: string; badgeText: string; badgeBorder: string; accentColor: string }> = {
+  financial:     { leftBorder: "#F59E0B", badgeBg: "#FEF3C7", badgeText: "#92400E", badgeBorder: "#FDE68A", accentColor: "#D97706" },
+  health:        { leftBorder: "#10B981", badgeBg: "#D1FAE5", badgeText: "#065F46", badgeBorder: "#A7F3D0", accentColor: "#059669" },
+  skills:        { leftBorder: "#8B5CF6", badgeBg: "#EDE9FE", badgeText: "#5B21B6", badgeBorder: "#DDD6FE", accentColor: "#7C3AED" },
+  mobility:      { leftBorder: "#F97316", badgeBg: "#FFEDD5", badgeText: "#9A3412", badgeBorder: "#FED7AA", accentColor: "#EA580C" },
+  psychological: { leftBorder: "#EC4899", badgeBg: "#FCE7F3", badgeText: "#9D174D", badgeBorder: "#FBCFE8", accentColor: "#DB2777" },
+  resources:     { leftBorder: "#0EA5E9", badgeBg: "#E0F2FE", badgeText: "#075985", badgeBorder: "#BAE6FD", accentColor: "#0284C7" },
+};
+
 function AnimatedOrb({
   style,
   color,
@@ -91,6 +118,9 @@ function CompanionScrollContent({
   const [badgeCount, setBadgeCount] = useState(0);
   const [engagementLoaded, setEngagementLoaded] = useState(false);
   const [lowestDim, setLowestDim] = useState<DimKey>("psychological");
+  const [topItems, setTopItems] = useState<Array<{area: string; item: ChecklistItem}>>([]);
+  const [itemsDone, setItemsDone] = useState<Record<string, boolean>>({});
+  const [topItemsReportId, setTopItemsReportId] = useState<string | null>(null);
 
   useEffect(() => {
     const h = new Date().getHours();
@@ -135,6 +165,34 @@ function CompanionScrollContent({
               resources: latest.score.resources,
             }));
           }
+          // Fetch checklist items for "Your top 3 this week"
+          try {
+            const rId = latest.reportId;
+            const [reportRes, progressRes] = await Promise.all([
+              fetch(`https://${domain}/api/resilience/reports/${rId}`, { headers }),
+              fetch(`https://${domain}/api/resilience/reports/${rId}/checklists`, { headers }),
+            ]);
+            let progress: Record<string, boolean> = {};
+            if (progressRes.ok) {
+              const pd = await progressRes.json();
+              progress = pd.progress ?? {};
+              setItemsDone(progress);
+            }
+            if (reportRes.ok) {
+              const fullReport = await reportRes.json();
+              const byArea: Record<string, ChecklistItem[]> = fullReport.checklistsByArea ?? {};
+              const PORDER: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 };
+              const allItems: Array<{area: string; item: ChecklistItem}> = [];
+              for (const [area, items] of Object.entries(byArea)) {
+                for (const item of items as ChecklistItem[]) {
+                  if (!progress[`${area}::${item.id}`]) allItems.push({ area, item });
+                }
+              }
+              allItems.sort((a, b) => (PORDER[a.item.priority] ?? 3) - (PORDER[b.item.priority] ?? 3));
+              setTopItems(allItems.slice(0, 3));
+              setTopItemsReportId(rId);
+            }
+          } catch {}
         }
       } catch { setScoreFetchError(true); }
     })();
@@ -196,6 +254,23 @@ function CompanionScrollContent({
   const ratingLabel = score === null
     ? (scoreFetchError ? "Couldn't load score" : "Loading...")
     : score >= 70 ? "Highly Resilient" : score >= 40 ? "Moderately Prepared" : "Critically Vulnerable";
+
+  const handleToggle = async (area: string, itemId: string) => {
+    if (!topItemsReportId) return;
+    Haptics.selectionAsync();
+    const key = `${area}::${itemId}`;
+    const nowDone = !itemsDone[key];
+    setItemsDone(prev => ({ ...prev, [key]: nowDone }));
+    if (nowDone) setTopItems(prev => prev.filter(i => !(i.area === area && i.item.id === itemId)));
+    try {
+      const headers = await getAuthHeaders();
+      await fetch(`https://${process.env.EXPO_PUBLIC_DOMAIN}/api/resilience/reports/${topItemsReportId}/checklists/${area}/${itemId}`, {
+        method: "PATCH",
+        headers: { ...headers, "Content-Type": "application/json" },
+        body: JSON.stringify({ completed: nowDone }),
+      });
+    } catch {}
+  };
 
   return (
     <View style={{ paddingBottom: bottomPad + 40, gap: 18, paddingTop: 28 }}>
@@ -363,22 +438,69 @@ function CompanionScrollContent({
         ))}
       </View>
 
+      {/* Your top 3 this week */}
+      {topItems.length > 0 && (
+        <View style={{ backgroundColor: "#FFFFFF", borderRadius: 20, padding: 20, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8, elevation: 3 }}>
+          <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 6 }}>
+            <View style={{ backgroundColor: "rgba(224,128,64,0.15)", borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3, borderWidth: 1, borderColor: "rgba(224,128,64,0.3)" }}>
+              <Text style={{ fontFamily: "Inter_700Bold", fontSize: 9, color: colors.primary, letterSpacing: 1, textTransform: "uppercase" }}>Start Here</Text>
+            </View>
+          </View>
+          <Text style={{ fontFamily: "Inter_700Bold", fontSize: 18, color: "#111827", letterSpacing: -0.4, marginBottom: 14 }}>Your top 3 this week</Text>
+          <View style={{ gap: 10 }}>
+            {topItems.map(({ area, item }) => {
+              const ac = AREA_CONFIG[area.toLowerCase()] ?? { color: "#6B7280", bg: "#F3F4F6", label: area };
+              const pc = PRIORITY_CONFIG[item.priority] ?? PRIORITY_CONFIG.low;
+              return (
+                <Pressable
+                  key={item.id}
+                  onPress={() => handleToggle(area, item.id)}
+                  style={({ pressed }) => [{
+                    flexDirection: "row", alignItems: "flex-start", gap: 12,
+                    backgroundColor: "#F9FAFB", borderRadius: 14, padding: 14,
+                    borderWidth: 1, borderColor: "#E5E7EB",
+                    opacity: pressed ? 0.8 : 1,
+                  }]}
+                >
+                  <View style={{ width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: "#D1D5DB", marginTop: 1, flexShrink: 0 }} />
+                  <View style={{ flex: 1, gap: 6 }}>
+                    <Text style={{ fontFamily: "Inter_600SemiBold", fontSize: 14, color: "#111827", lineHeight: 20 }}>{item.title}</Text>
+                    <View style={{ flexDirection: "row", gap: 6, flexWrap: "wrap" }}>
+                      <View style={{ backgroundColor: pc.bg, borderRadius: 6, paddingHorizontal: 7, paddingVertical: 3 }}>
+                        <Text style={{ fontFamily: "Inter_700Bold", fontSize: 10, color: pc.color, textTransform: "uppercase", letterSpacing: 0.5 }}>{item.priority}</Text>
+                      </View>
+                      <View style={{ backgroundColor: ac.bg, borderRadius: 6, paddingHorizontal: 7, paddingVertical: 3 }}>
+                        <Text style={{ fontFamily: "Inter_700Bold", fontSize: 10, color: ac.color, textTransform: "uppercase", letterSpacing: 0.5 }}>{ac.label}</Text>
+                      </View>
+                    </View>
+                  </View>
+                </Pressable>
+              );
+            })}
+          </View>
+          <Text style={{ fontFamily: "Inter_400Regular", fontSize: 11, color: "#9CA3AF", marginTop: 12, textAlign: "center" }}>
+            Tap any item to mark it done. Your progress syncs across devices.
+          </Text>
+        </View>
+      )}
+
       {/* Daily tip */}
       {(() => {
         const tip = getDailyTip(lowestDim);
         const dimLabel = DIM_LABELS[lowestDim];
+        const tc = DIM_TIP_CONFIG[lowestDim];
         return (
-          <View style={{ backgroundColor: colors.surface, borderRadius: 16, padding: 18, borderWidth: 1, borderColor: colors.border, gap: 10 }}>
+          <View style={{ backgroundColor: "#FFFFFF", borderRadius: 16, borderWidth: 1, borderColor: "#E5E7EB", borderLeftWidth: 4, borderLeftColor: tc.leftBorder, padding: 18, gap: 10, shadowColor: "#000", shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4, elevation: 2 }}>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-              <Text style={{ fontFamily: "Inter_700Bold", fontSize: 10, color: colors.textMuted, letterSpacing: 1, textTransform: "uppercase" }}>Today's Tip</Text>
-              <View style={{ backgroundColor: colors.primaryMuted, borderRadius: 20, paddingHorizontal: 8, paddingVertical: 3, borderWidth: 1, borderColor: colors.primaryBorder }}>
-                <Text style={{ fontFamily: "Inter_600SemiBold", fontSize: 10, color: colors.primary }}>{dimLabel}</Text>
+              <Text style={{ fontFamily: "Inter_700Bold", fontSize: 10, color: "#9CA3AF", letterSpacing: 1, textTransform: "uppercase" }}>Today's Tip</Text>
+              <View style={{ backgroundColor: tc.badgeBg, borderRadius: 20, paddingHorizontal: 8, paddingVertical: 3, borderWidth: 1, borderColor: tc.badgeBorder }}>
+                <Text style={{ fontFamily: "Inter_600SemiBold", fontSize: 10, color: tc.badgeText }}>{dimLabel}</Text>
               </View>
             </View>
-            <Text style={{ fontFamily: "Inter_600SemiBold", fontSize: 13, color: colors.text, lineHeight: 20 }}>{tip.text}</Text>
-            <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 6 }}>
-              <Text style={{ fontFamily: "Inter_700Bold", fontSize: 12, color: colors.primary, marginTop: 1 }}>→</Text>
-              <Text style={{ fontFamily: "Inter_400Regular", fontSize: 12, color: colors.textMuted, lineHeight: 18, flex: 1 }}>{tip.action}</Text>
+            <Text style={{ fontFamily: "Inter_600SemiBold", fontSize: 14, color: "#111827", lineHeight: 22 }}>{tip.text}</Text>
+            <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 8, backgroundColor: "#F9FAFB", borderRadius: 10, padding: 10 }}>
+              <Text style={{ fontFamily: "Inter_700Bold", fontSize: 14, color: tc.accentColor }}>→</Text>
+              <Text style={{ fontFamily: "Inter_400Regular", fontSize: 12, color: "#4B5563", lineHeight: 18, flex: 1 }}>{tip.action}</Text>
             </View>
           </View>
         );

@@ -426,29 +426,51 @@ export default function MyDataScreen() {
                   {earned.length}/{badges.length} earned
                 </Text>
               </View>
-              <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-                {earned.map(badge => {
-                  const c = BADGE_COLORS[badge.colorKey] ?? BADGE_COLORS.amber;
-                  return (
+              {earned.length > 0 && (
+                <View style={{ gap: 8 }}>
+                  <Text style={{ fontFamily: "Inter_700Bold", fontSize: 11, color: colors.textMuted, letterSpacing: 0.8, textTransform: "uppercase" }}>Earned</Text>
+                  {earned.map(badge => {
+                    const c = BADGE_COLORS[badge.colorKey] ?? BADGE_COLORS.amber;
+                    return (
+                      <View
+                        key={badge.id}
+                        style={{ flexDirection: "row", alignItems: "center", gap: 14, backgroundColor: c.bg, borderRadius: 14, borderWidth: 1, borderColor: c.border, padding: 14 }}
+                      >
+                        <View style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: "#FFFFFF", alignItems: "center", justifyContent: "center", shadowColor: c.text, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.15, shadowRadius: 4, elevation: 2 }}>
+                          <Feather name={badge.iconName} size={22} color={c.text} />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                          <Text style={{ fontFamily: "Inter_700Bold", fontSize: 14, color: c.text }}>{badge.label}</Text>
+                          {badge.description ? (
+                            <Text style={{ fontFamily: "Inter_400Regular", fontSize: 12, color: c.text, opacity: 0.75, marginTop: 2, lineHeight: 17 }}>{badge.description}</Text>
+                          ) : null}
+                        </View>
+                      </View>
+                    );
+                  })}
+                </View>
+              )}
+              {locked.length > 0 && (
+                <View style={{ gap: 8, marginTop: earned.length > 0 ? 12 : 0 }}>
+                  <Text style={{ fontFamily: "Inter_700Bold", fontSize: 11, color: colors.textMuted, letterSpacing: 0.8, textTransform: "uppercase" }}>Locked</Text>
+                  {locked.map(badge => (
                     <View
                       key={badge.id}
-                      style={{ flexDirection: "row", alignItems: "center", gap: 5, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20, borderWidth: 1, backgroundColor: c.bg, borderColor: c.border }}
+                      style={{ flexDirection: "row", alignItems: "center", gap: 14, backgroundColor: colors.surface, borderRadius: 14, borderWidth: 1, borderColor: colors.border, padding: 14, opacity: 0.5 }}
                     >
-                      <Feather name={badge.iconName} size={12} color={c.text} />
-                      <Text style={{ fontFamily: "Inter_600SemiBold", fontSize: 11, color: c.text }}>{badge.label}</Text>
+                      <View style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: colors.background, alignItems: "center", justifyContent: "center" }}>
+                        <Feather name="lock" size={20} color={colors.textMuted} />
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={{ fontFamily: "Inter_600SemiBold", fontSize: 14, color: colors.textMuted }}>{badge.label}</Text>
+                        {badge.description ? (
+                          <Text style={{ fontFamily: "Inter_400Regular", fontSize: 12, color: colors.textMuted, marginTop: 2, lineHeight: 17 }}>{badge.description}</Text>
+                        ) : null}
+                      </View>
                     </View>
-                  );
-                })}
-                {locked.map(badge => (
-                  <View
-                    key={badge.id}
-                    style={{ flexDirection: "row", alignItems: "center", gap: 5, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20, borderWidth: 1, backgroundColor: colors.surface, borderColor: colors.border, opacity: 0.45 }}
-                  >
-                    <Feather name={badge.iconName} size={12} color={colors.textMuted} />
-                    <Text style={{ fontFamily: "Inter_400Regular", fontSize: 11, color: colors.textMuted }}>{badge.label}</Text>
-                  </View>
-                ))}
-              </View>
+                  ))}
+                </View>
+              )}
             </View>
           );
         })()}
