@@ -258,7 +258,7 @@ function MasterChecklistSection() {
         <Clock className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
         <div>
           <p className="text-sm font-semibold text-amber-800">Stripe is configured but real payments are blocked</p>
-          <p className="text-xs text-amber-700 mt-0.5">Requires SRL CUI from Registrul Comerțului. Once approved: submit business details + Romanian IBAN in Stripe Dashboard → swap to live keys → payments go live. Stripe Tax / VAT configuration follows after CUI.</p>
+          <p className="text-xs text-amber-700 mt-0.5">Requires SRL CUI from Registrul Comerțului. Once approved: submit business details + Romanian IBAN in Stripe Dashboard → swap to live keys → payments go live.</p>
         </div>
       </div>
 
@@ -276,10 +276,6 @@ function MasterChecklistSection() {
         <ChecklistItem
           text="Swap Stripe keys to live mode once verification is approved"
           detail="Replace STRIPE_SECRET_KEY, STRIPE_PUBLISHABLE_KEY, and STRIPE_WEBHOOK_SECRET in Replit Secrets with live values. Then run the seed script to create products in the live account."
-        />
-        <ChecklistItem
-          text="Configure Stripe Tax for VAT collection"
-          detail="Enable in Stripe Dashboard → Tax. Select Romania as origin, add EU VAT rules. Required before charging EU customers as a business."
         />
         <ChecklistItem
           text="Enable the post-assessment email drip sequence"
