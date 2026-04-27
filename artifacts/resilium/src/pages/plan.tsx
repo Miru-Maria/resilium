@@ -138,7 +138,7 @@ const AREA_RESOURCES_RO: Record<string, ResourceEntry[]> = {
   ],
   health: [
     { title: "Casa Națională de Asigurări de Sănătate (CNAS)", desc: "Drepturi, asigurări și servicii medicale în sistemul național de sănătate.", url: "https://www.cnas.ro", badge: "Gov · Gratuit" },
-    { title: "DSP — Direcțiile de Sănătate Publică", desc: "Pregătire pentru urgențe de sănătate publică și ghiduri locale de sănătate.", url: "https://www.dsp.ro", badge: "Gov · Gratuit" },
+    { title: "Ministerul Sănătății", desc: "Ghiduri oficiale de sănătate publică, pregătire pentru urgențe medicale și resurse locale de sănătate.", url: "https://www.ms.ro", badge: "Gov · Gratuit" },
     { title: "Federația Română de Prim Ajutor", desc: "Cursuri de prim ajutor și pregătire pentru situații de urgență.", url: "https://www.frpa.ro", badge: "ONG · Cursuri" },
   ],
   skills: [
@@ -162,7 +162,7 @@ const AREA_RESOURCES_RO: Record<string, ResourceEntry[]> = {
     { title: "Ro-Alert — Sistemul de Avertizare", desc: "Sistemul național de alertare în caz de dezastre și situații de urgență.", url: "https://www.sts.ro/ro/ro-alert", badge: "Gov · Gratuit" },
   ],
   socialCapital: [
-    { title: "VoluntariatRomania.ro", desc: "Găsește oportunități de voluntariat și proiecte de construire comunitară din toată România.", url: "https://www.voluntariatsibiu.ro", badge: "Comunitate" },
+    { title: "Voluntariat.ro", desc: "Găsește oportunități de voluntariat și proiecte de construire comunitară din toată România.", url: "https://www.voluntariat.ro", badge: "Comunitate" },
     { title: "Federația Organizațiilor Cetățenești", desc: "Rețea de ONG-uri și organizații civice pentru reziliență comunitară.", url: "https://fonpc.ro", badge: "ONG" },
     { title: "Nextdoor România", desc: "Conectează-te cu vecinii și comunitatea locală pentru ajutor reciproc și reziliență.", url: "https://nextdoor.com", badge: "Comunitate" },
   ],
@@ -223,9 +223,9 @@ const COMMUNITY_RESOURCES_US: CommunityResource[] = [
 
 const COMMUNITY_RESOURCES_RO: CommunityResource[] = [
   { title: "ANOFM — Șomaj și Venituri Minime", desc: "Indemnizații de șomaj, venit minim garantat și programe de recalificare profesională — Agenția Națională pentru Ocuparea Forței de Muncă.", url: "https://www.anofm.ro", badge: "Gov · Gratuit", icon: "📋" },
-  { title: "MMSS — Asistență Socială", desc: "Alocații, ajutoare sociale, ajutor pentru încălzire și prestații familiale de la Ministerul Muncii și Solidarității Sociale.", url: "https://www.mmss.gov.ro", badge: "Gov · Gratuit", icon: "🏛️" },
+  { title: "MMSS — Asistență Socială", desc: "Alocații, ajutoare sociale, ajutor pentru încălzire și prestații familiale de la Ministerul Muncii și Solidarității Sociale.", url: "https://muncii.gov.ro", badge: "Gov · Gratuit", icon: "🏛️" },
   { title: "Caritas România", desc: "Ajutor alimentar, servicii sociale și sprijin pentru familii vulnerabile și persoane în situații de criză din toată România.", url: "https://www.caritas.ro", badge: "ONG · Gratuit", icon: "🤝" },
-  { title: "DGASPC — Asistență Socială Județeană", desc: "Servicii pentru persoane cu dizabilități, vârstnici și familii în dificultate — disponibile prin Direcția de Asistență Socială din fiecare județ.", url: "https://mmss.gov.ro/domenii/asistenta-sociala/", badge: "Gov · Gratuit", icon: "🏥" },
+  { title: "ANPIS — Plăți și Inspecție Socială", desc: "Prestații sociale, alocații, ajutoare și inspecție socială — Agenția Națională pentru Plăți și Inspecție Socială.", url: "https://www.anpis.ro", badge: "Gov · Gratuit", icon: "🏥" },
   { title: "Linia de Criză ALIAT", desc: "Sprijin psihologic gratuit și confidențial: 0800 800 20 20 (luni–vineri, 8:00–20:00). Fără cost, fără programare.", url: "https://aliat.org.ro", badge: "Gratuit · Confidențial", icon: "🧠" },
 ];
 
