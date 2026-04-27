@@ -959,7 +959,7 @@ export default function PlanPage() {
                               </div>
                               <span className="text-[10px] text-muted-foreground">{AREA_LABELS[area] ?? area}</span>
                             </div>
-                            <p className={cn("font-semibold text-sm leading-snug", completed ? "line-through text-muted-foreground" : "text-foreground")}>
+                            <p className={cn("font-semibold text-sm leading-snug", completed ? "line-through text-emerald-600/60 decoration-emerald-600/40" : "text-foreground")}>
                               {item.title}
                             </p>
                           </div>
@@ -1204,10 +1204,10 @@ export default function PlanPage() {
                                               {item.pathway === "growth" ? "Growth" : "Foundation"}
                                             </span>
                                           </div>
-                                          <h4 className={cn("font-bold text-sm leading-snug", completed ? "line-through text-gray-400" : "text-gray-900")}>
+                                          <h4 className={cn("font-bold text-sm leading-snug", completed ? "line-through text-emerald-600/60 decoration-emerald-600/40" : "text-foreground")}>
                                             {item.title}
                                           </h4>
-                                          <p className={cn("text-xs mt-0.5 leading-relaxed", completed ? "text-gray-400" : "text-gray-500")}>{item.description}</p>
+                                          <p className={cn("text-xs mt-0.5 leading-relaxed", completed ? "text-muted-foreground/60" : "text-muted-foreground")}>{item.description}</p>
                                         </div>
                                       </div>
 

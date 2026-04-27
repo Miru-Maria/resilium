@@ -1,5 +1,5 @@
 import React from "react";
-import { Award, Flame, Star, Zap, BookOpen, Trophy } from "lucide-react";
+import { Award, Flame, Star, Zap, BookOpen, Trophy, Lock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { computeBadgeCriteria, type BadgeCriteriaInput } from "@/lib/badge-criteria";
 
@@ -56,9 +56,9 @@ export function AchievementBadges({ planCount, streak, isPro, allDimsAssessed, c
             <div
               key={badge.id}
               title={`Locked: ${badge.description}`}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border text-xs font-medium text-muted-foreground/50 bg-muted/20 opacity-50 cursor-default select-none"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-dashed border-border/70 text-xs font-medium text-muted-foreground/70 bg-muted/30 cursor-default select-none"
             >
-              {ICON_MAP[badge.iconName]}
+              <Lock className="w-3 h-3 opacity-60" />
               {badge.label}
             </div>
           ))}
