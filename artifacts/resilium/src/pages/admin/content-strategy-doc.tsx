@@ -1,5 +1,38 @@
 const DATE = "April 2026";
 
+const BLOG_PHASES = [
+  {
+    phase: "Phase 1",
+    label: "Solo Launch",
+    status: "Live",
+    statusColor: "#10b981",
+    cadence: "1 post / week",
+    owner: "Founder-led",
+    goal: "Establish topical authority, get indexed, test what resonates",
+    topics: ["Dimension deep-dives", "\"What does a good score mean?\" explainers", "Resilience myths debunked", "Personal finance + preparedness crossovers"],
+    notes: "Each post targets a long-tail keyword. Minimum 1,000 words. Include structured data (FAQ schema). Internal-link to the assessment CTA.",
+  },
+  {
+    phase: "Phase 2",
+    label: "Scale Up",
+    status: "Planned",
+    statusColor: "#6366f1",
+    cadence: "3 posts / week",
+    owner: "Founder + 1 writer",
+    goal: "Compound organic traffic, build backlink targets, own SERPs for resilience scoring",
+    topics: ["Pillar pages (1 per dimension)", "Comparison posts (\"Resilium vs. generic preparedness checklists\")", "Data-driven posts (citing our own aggregate stats)", "Guest expert perspectives"],
+    notes: "Hire a writer with SEO + personal finance background. Founder reviews all drafts for brand voice. Target DA 30+ backlinks through data posts and expert quotes.",
+  },
+];
+
+const BLOG_KW_CLUSTERS = [
+  { cluster: "Resilience scoring", examples: ["personal resilience score", "how to measure resilience", "resilience assessment tool"], intent: "Commercial" },
+  { cluster: "Emergency preparedness", examples: ["household emergency preparedness", "how prepared am I for a crisis", "family preparedness checklist"], intent: "Informational" },
+  { cluster: "Financial readiness", examples: ["financial resilience meaning", "emergency fund how much", "financial preparedness 2026"], intent: "Informational" },
+  { cluster: "Dimension-specific", examples: ["psychological resilience definition", "skill transferability career", "household mobility planning"], intent: "Informational" },
+  { cluster: "Brand + product", examples: ["Resilium review", "Resilium platform", "resilience app"], intent: "Navigational" },
+];
+
 const PILLARS = [
   {
     num: "01",
@@ -91,8 +124,139 @@ export default function ContentStrategyDoc() {
       <div className="rounded-2xl overflow-hidden shadow-sm border border-gray-200">
         <div className="px-8 py-7" style={{ background: "#0D1225" }}>
           <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: "#E08040" }}>Content Strategy</p>
-          <h1 className="text-3xl font-bold text-white font-display mb-1">Resilium LinkedIn Strategy</h1>
-          <p className="text-sm" style={{ color: "#8A7A6A" }}>Version 1.0 · {DATE} · Brand-first · LinkedIn only</p>
+          <h1 className="text-3xl font-bold text-white font-display mb-1">Resilium Content & SEO Strategy</h1>
+          <p className="text-sm" style={{ color: "#8A7A6A" }}>Version 1.1 · {DATE} · Blog Platform + LinkedIn · Organic-first</p>
+        </div>
+      </div>
+
+      {/* Blog Platform & SEO */}
+      <div className="rounded-2xl bg-white border border-gray-200 shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+          <div>
+            <h2 className="text-base font-bold text-gray-900">Blog Platform & SEO</h2>
+            <p className="text-xs text-gray-400 mt-0.5">Live at <span className="font-mono text-gray-600">resilium-platform.com/blog</span> · Admin workflow in /admin/blog</p>
+          </div>
+          <span className="text-xs font-semibold px-2.5 py-1 rounded-full text-white" style={{ background: "#10b981" }}>Live</span>
+        </div>
+
+        {/* Quick stats */}
+        <div className="px-6 pt-5 pb-2 grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[
+            { label: "Blog status", value: "Live", note: "Published & indexed" },
+            { label: "Phase 1 cadence", value: "1×/week", note: "Founder-led, solo" },
+            { label: "Phase 2 cadence", value: "3×/week", note: "With writer (planned)" },
+            { label: "Admin route", value: "/admin/blog", note: "Draft · schedule · publish" },
+          ].map(({ label, value, note }) => (
+            <div key={label} className="rounded-xl p-4" style={{ background: "#F7F7FA" }}>
+              <p className="text-xs text-gray-400 mb-1">{label}</p>
+              <p className="text-sm font-bold text-gray-900">{value}</p>
+              <p className="text-xs text-gray-400 mt-0.5">{note}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Phase cards */}
+        <div className="p-6 pt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+          {BLOG_PHASES.map((p) => (
+            <div key={p.phase} className="rounded-xl border border-gray-200 overflow-hidden">
+              <div className="px-5 py-3 border-b border-gray-100 flex items-center justify-between" style={{ background: "#F7F7FA" }}>
+                <div>
+                  <span className="text-xs font-bold text-gray-900">{p.phase} — {p.label}</span>
+                  <span className="ml-2 text-xs text-gray-400">{p.cadence} · {p.owner}</span>
+                </div>
+                <span className="text-xs font-semibold px-2 py-0.5 rounded-full text-white" style={{ background: p.statusColor }}>{p.status}</span>
+              </div>
+              <div className="p-5">
+                <p className="text-xs font-semibold mb-1" style={{ color: "#E08040" }}>Goal</p>
+                <p className="text-sm text-gray-700 mb-3">{p.goal}</p>
+                <p className="text-xs font-semibold mb-2" style={{ color: "#E08040" }}>Content types</p>
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {p.topics.map((t) => (
+                    <span key={t} className="text-xs px-2.5 py-1 rounded-full bg-gray-100 text-gray-600">{t}</span>
+                  ))}
+                </div>
+                <p className="text-xs text-gray-400 italic leading-relaxed">{p.notes}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Admin workflow callout */}
+        <div className="px-6 pb-5">
+          <div className="rounded-xl border border-indigo-100 p-4" style={{ background: "#F5F5FF" }}>
+            <p className="text-xs font-semibold text-indigo-700 mb-2">Admin Publishing Workflow</p>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs text-gray-700">
+              {[
+                { step: "1", label: "Draft", desc: "Write in /admin/blog → New Post. Save as Draft. Set SEO title + meta desc before saving." },
+                { step: "2", label: "Schedule", desc: "Set publish date/time. Posts auto-publish at the scheduled time — no manual action needed." },
+                { step: "3", label: "Publish", desc: "Publish immediately or confirm scheduled. Blog list shows Published / Draft / Scheduled status." },
+                { step: "4", label: "Promote", desc: "After publish: LinkedIn post (same day), internal link from related posts, update sitemap." },
+              ].map(({ step, label, desc }) => (
+                <div key={step} className="flex gap-3">
+                  <div className="w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center text-white text-xs font-black mt-0.5" style={{ background: "#6366f1" }}>{step}</div>
+                  <div>
+                    <p className="font-semibold text-gray-900 mb-0.5">{label}</p>
+                    <p className="text-gray-500 leading-relaxed">{desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* SEO Keyword Clusters */}
+      <div className="rounded-2xl bg-white border border-gray-200 shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-100">
+          <h2 className="text-base font-bold text-gray-900">SEO Keyword Clusters</h2>
+          <p className="text-xs text-gray-400 mt-1">One article per cluster minimum. Each article should target 1 primary keyword + 2–3 supporting terms. Use long-tail variants in H2/H3 headers.</p>
+        </div>
+        <div className="p-6">
+          <div className="rounded-xl overflow-hidden border border-gray-100">
+            <div className="grid grid-cols-12 px-4 py-2 border-b border-gray-100 bg-gray-50">
+              <span className="col-span-3 text-xs font-semibold text-gray-500">Cluster</span>
+              <span className="col-span-7 text-xs font-semibold text-gray-500">Target Keywords</span>
+              <span className="col-span-2 text-xs font-semibold text-gray-500">Intent</span>
+            </div>
+            {BLOG_KW_CLUSTERS.map(({ cluster, examples, intent }) => (
+              <div key={cluster} className="grid grid-cols-12 px-4 py-3 border-b border-gray-50 last:border-b-0 hover:bg-gray-50 items-start">
+                <span className="col-span-3 text-xs font-bold text-gray-900 pt-0.5">{cluster}</span>
+                <div className="col-span-7 flex flex-wrap gap-1.5">
+                  {examples.map((ex) => (
+                    <span key={ex} className="text-xs font-mono px-2 py-0.5 rounded bg-gray-100 text-gray-600">{ex}</span>
+                  ))}
+                </div>
+                <span className="col-span-2 text-xs pt-0.5" style={{ color: intent === "Commercial" ? "#E08040" : intent === "Navigational" ? "#6366f1" : "#10b981" }}>{intent}</span>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 rounded-xl border border-amber-100 p-4" style={{ background: "#FEF7F0" }}>
+            <p className="text-xs font-semibold mb-1" style={{ color: "#E08040" }}>Technical SEO checklist (per post)</p>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2">
+              {[
+                "Primary keyword in H1 + first 100 words",
+                "Meta title ≤ 60 chars, meta desc ≤ 155 chars",
+                "At least 1 internal link to assessment CTA",
+                "FAQ schema markup on definition posts",
+                "Open Graph image (1200×630) set",
+                "Canonical URL confirmed before publishing",
+              ].map((item) => (
+                <div key={item} className="flex items-start gap-2">
+                  <span className="text-green-500 flex-shrink-0 mt-0.5">✓</span>
+                  <span className="text-xs text-gray-600">{item}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ─── LINKEDIN SECTION BREAK ─── */}
+      <div className="rounded-2xl overflow-hidden shadow-sm border border-gray-200">
+        <div className="px-8 py-5" style={{ background: "#0D1225" }}>
+          <p className="text-xs font-semibold tracking-widest uppercase mb-1" style={{ color: "#E08040" }}>Part 2</p>
+          <h2 className="text-2xl font-bold text-white font-display">LinkedIn Strategy</h2>
+          <p className="text-sm mt-1" style={{ color: "#8A7A6A" }}>Brand-first · 3–4 posts/week · Authority building</p>
         </div>
       </div>
 

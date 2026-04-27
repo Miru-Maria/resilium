@@ -22,11 +22,14 @@ const FUNNEL = [
 ];
 
 const CONVERSION_LEVERS = [
-  { n: 1, name: "Score wall", detail: "Free report shows 'What's holding you back' but locks the prioritized action items behind Pro." },
-  { n: 2, name: "Scenario gate", detail: "'Run Scenario Stress-Test' surfaced prominently in results — clicking triggers a Pro upgrade prompt with a preview of the output." },
-  { n: 3, name: "Guides gate", detail: "Crisis Guides visible as a tab with a Pro badge; free users see a locked preview listing categories, then an upgrade prompt." },
-  { n: 4, name: "Plan save limit", detail: "On the 3rd save attempt, a paywall appears showing the history feature." },
-  { n: 5, name: "Email drip", detail: "5-email sequence over 14 days: Day 0 report summary → Day 2 '#1 weakness' → Day 5 scenario preview → Day 9 Pro walkthrough → Day 14 limited-time discount." },
+  { n: 1, name: "Score wall", detail: "Free report shows 'What's holding you back' but locks the prioritized action items behind Pro.", live: false },
+  { n: 2, name: '"One thing right now" card', detail: "After receiving their report, every user sees a single prominent action card surfacing their highest-priority action item. Drives first engagement and demonstrates plan value before any paywall.", live: true },
+  { n: 3, name: "Partner / family invite card", detail: "Results page prompts users to share their report with a household member. Household planning is a natural Pro upsell — 'build a plan for both of you'.", live: true },
+  { n: 4, name: "Scenario gate", detail: "'Run Scenario Stress-Test' surfaced prominently in results — clicking triggers a Pro upgrade prompt with a preview of the output.", live: false },
+  { n: 5, name: "Guides gate", detail: "Crisis Guides visible as a tab with a Pro badge; free users see a locked preview listing categories, then an upgrade prompt.", live: false },
+  { n: 6, name: "Plan save limit", detail: "On the 3rd save attempt, a paywall appears showing the history feature.", live: false },
+  { n: 7, name: "Email drip", detail: "5-email sequence over 14 days: Day 0 report summary → Day 2 '#1 weakness' → Day 5 scenario preview → Day 9 Pro walkthrough → Day 14 limited-time discount.", live: false },
+  { n: 8, name: "Milestone emails", detail: "Triggered emails fire automatically at behavioral milestones: first assessment completed, 7-day check-in streak, 30-day anniversary, first Pro upgrade. Runs via daily cron at 00:15 UTC.", live: true },
 ];
 
 const CHANNELS = [
@@ -38,7 +41,8 @@ const CHANNELS = [
     bullets: [
       "High-intent, low-competition keywords: 'personal resilience plan' (2.9K/mo, KD 18), 'resilience score assessment' (880, KD 14), 'job loss financial plan' (3.2K, KD 31)",
       "4 content pillars: scenario deep-dives, dimension explainers, score-based hooks, proprietary data stories",
-      "Target: 3 blog posts/week × 6 months = 72 articles → 15K organic visitors/month by Month 9",
+      "Blog live at resilium-platform.com/blog — 10 seeded posts, full admin CMS, date-based auto-publish scheduler built and operational",
+      "Phase 1 (solo founder, now): 1 post/week. Phase 2 (with contracted writer, Month 3+): 3 posts/week → ~60 articles by Month 6 → 12K organic visitors/month by Month 9",
       "Compounding data moat: real assessment data generates unique content no generic site can replicate",
       "Full tactical playbook (Reddit, Product Hunt, community seeding) → GTM Plan tab",
     ],
@@ -90,12 +94,14 @@ const KEYWORDS = [
 ];
 
 const MILESTONES = [
-  { milestone: "Public launch (web)", target: "Q2 2026", kpi: "500 assessments in first week" },
-  { milestone: "App Store launch", target: "Q3 2026", kpi: "1,000 installs in first month" },
-  { milestone: "$10K MRR", target: "Q3 2026", kpi: "~1,110 Pro subscribers" },
-  { milestone: "First B2B pilot", target: "Q4 2026", kpi: "1 company, 50+ seats" },
-  { milestone: "$50K MRR", target: "Q1 2027", kpi: "~5,560 Pro subscribers or equiv. mix" },
-  { milestone: "$1M ARR", target: "Q4 2027", kpi: "~9,250 subscribers + B2B" },
+  { milestone: "Public launch (web)", target: "Q2 2026", kpi: "500 assessments in first week", status: "✅" },
+  { milestone: "Blog live with admin CMS", target: "Q2 2026", kpi: "10+ posts seeded, scheduler, draft system", status: "✅" },
+  { milestone: "App Store submission", target: "Q2–Q3 2026", kpi: "iOS app submitted for review", status: "🔄" },
+  { milestone: "App Store launch", target: "Q3 2026", kpi: "1,000 installs in first month", status: "⏳" },
+  { milestone: "$10K MRR", target: "Q3 2026", kpi: "~1,110 Pro subscribers", status: "⏳" },
+  { milestone: "First B2B pilot", target: "Q4 2026", kpi: "1 company, 50+ seats", status: "⏳" },
+  { milestone: "$50K MRR", target: "Q1 2027", kpi: "~5,560 Pro subscribers or equiv. mix", status: "⏳" },
+  { milestone: "$1M ARR", target: "Q4 2027", kpi: "~9,250 subscribers + B2B", status: "⏳" },
 ];
 
 const BUDGET = [
@@ -158,7 +164,7 @@ export default function MarketingStrategyDoc() {
         {/* Executive Summary */}
         <section id="executive-summary">
           <div className="bg-[#0D1225] rounded-2xl p-8 mb-8">
-            <p className="text-[#EAD9BE] text-xs uppercase tracking-widest mb-2">Version 1.1 — April 2026</p>
+            <p className="text-[#EAD9BE] text-xs uppercase tracking-widest mb-2">Version 1.2 — April 2026</p>
             <h1 className="text-3xl font-bold text-white mb-2">Marketing & Distribution Strategy</h1>
             <p className="text-gray-400 text-sm mb-5">$1M ARR within 18 months of public launch via freemium funnel, B2B2C partnerships, and a content-led SEO moat.</p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -288,15 +294,18 @@ export default function MarketingStrategyDoc() {
 
             {/* Conversion levers */}
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
-              <p className="text-sm font-bold text-gray-900 mb-4">5 Conversion Levers</p>
+              <p className="text-sm font-bold text-gray-900 mb-4">8 Conversion Levers</p>
               <div className="space-y-3">
                 {CONVERSION_LEVERS.map((l) => (
                   <div key={l.n} className="flex gap-3 items-start">
                     <div className="w-5 h-5 rounded-full bg-[#E08040]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
                       <span className="text-[#E08040] text-xs font-bold">{l.n}</span>
                     </div>
-                    <div>
-                      <span className="text-xs font-bold text-gray-900">{l.name}: </span>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                        <span className="text-xs font-bold text-gray-900">{l.name}</span>
+                        {l.live && <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700">Live</span>}
+                      </div>
                       <span className="text-xs text-gray-600 leading-relaxed">{l.detail}</span>
                     </div>
                   </div>
@@ -460,14 +469,16 @@ export default function MarketingStrategyDoc() {
                   <th className="text-left px-4 py-3 font-semibold text-sm">Milestone</th>
                   <th className="text-left px-4 py-3 font-semibold text-sm">Target Date</th>
                   <th className="text-left px-4 py-3 font-semibold text-sm">KPI</th>
+                  <th className="text-center px-4 py-3 font-semibold text-sm">Status</th>
                 </tr>
               </thead>
               <tbody>
                 {MILESTONES.map((m, i) => (
-                  <tr key={i} className={`border-b border-gray-100 ${i % 2 === 0 ? "bg-white" : "bg-gray-50/50"}`}>
+                  <tr key={i} className={`border-b border-gray-100 ${m.status === "✅" ? "bg-emerald-50/60" : i % 2 === 0 ? "bg-white" : "bg-gray-50/50"}`}>
                     <td className="px-4 py-3 text-gray-900 font-medium text-xs">{m.milestone}</td>
                     <td className="px-4 py-3 text-[#E08040] font-bold text-xs whitespace-nowrap">{m.target}</td>
                     <td className="px-4 py-3 text-gray-600 text-xs">{m.kpi}</td>
+                    <td className="px-4 py-3 text-center text-sm">{m.status}</td>
                   </tr>
                 ))}
               </tbody>
