@@ -187,10 +187,10 @@ function GlobalNav() {
         </Link>
 
         <div className="hidden md:flex items-center gap-5">
-          <Link href="/blog" className="text-sm text-muted-foreground hover:text-primary transition-colors">Blog</Link>
           <Link href="/about" className="text-sm text-muted-foreground hover:text-primary transition-colors">About</Link>
           <Link href="/demo" className="text-sm text-muted-foreground hover:text-primary transition-colors">Demo</Link>
           <Link href="/pricing" className="text-sm text-muted-foreground hover:text-primary transition-colors">Pricing</Link>
+          <Link href="/blog" className="text-sm text-muted-foreground hover:text-primary transition-colors">Blog</Link>
         </div>
 
         <div className="flex items-center gap-2">
@@ -247,10 +247,10 @@ function GlobalNav() {
 
       {mobileOpen && (
         <div className="md:hidden border-t border-border/40 bg-background/98 px-6 py-3 flex flex-col gap-1">
-          <Link href="/blog" onClick={() => setMobileOpen(false)} className="text-sm text-muted-foreground hover:text-primary transition-colors py-2 block">Blog</Link>
           <Link href="/about" onClick={() => setMobileOpen(false)} className="text-sm text-muted-foreground hover:text-primary transition-colors py-2 block">About</Link>
           <Link href="/demo" onClick={() => setMobileOpen(false)} className="text-sm text-muted-foreground hover:text-primary transition-colors py-2 block">Demo</Link>
           <Link href="/pricing" onClick={() => setMobileOpen(false)} className="text-sm text-muted-foreground hover:text-primary transition-colors py-2 block">Pricing</Link>
+          <Link href="/blog" onClick={() => setMobileOpen(false)} className="text-sm text-muted-foreground hover:text-primary transition-colors py-2 block">Blog</Link>
         </div>
       )}
     </header>

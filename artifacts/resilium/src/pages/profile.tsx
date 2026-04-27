@@ -1248,7 +1248,6 @@ function AccountTab({ user, plans, onAllPlansDeleted }: {
                 </div>
               </div>
               <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                <Badge className="bg-primary/15 text-primary border-primary/20 rounded-full text-xs font-bold">Pro</Badge>
                 <Button
                   size="sm"
                   variant="outline"
@@ -2519,6 +2518,8 @@ export default function ProfilePage() {
   const { user } = useUser();
   const { isSignedIn, isLoaded, getToken } = useAuth();
   const { openSignIn, signOut } = useClerk();
+  const { data: pageSubStatus } = useSubscriptionStatus();
+  const isPagePro = pageSubStatus?.isPro ?? false;
   const [authTimedOut, setAuthTimedOut] = useState(false);
   useEffect(() => {
     if (isLoaded) return;
@@ -2645,7 +2646,9 @@ export default function ProfilePage() {
               </TabsTrigger>
               <TabsTrigger value="guides" className="rounded-lg gap-1.5 text-sm">
                 <BookOpen className="w-3.5 h-3.5" /> Guides
-                <span className="ml-0.5 text-[9px] font-bold uppercase tracking-wider text-primary/70 bg-primary/10 px-1.5 py-0.5 rounded-full">Pro</span>
+                {!isPagePro && (
+                  <span className="ml-0.5 text-[9px] font-bold uppercase tracking-wider text-primary/70 bg-primary/10 px-1.5 py-0.5 rounded-full">Pro</span>
+                )}
               </TabsTrigger>
             </TabsList>
 
