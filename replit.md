@@ -1,6 +1,6 @@
 # Overview
 
-Resilium is a personal resilience planning platform designed to help users assess their preparedness for life's challenges. It provides a 10-step assessment, including a detailed Mental Resilience deep-dive, to generate an AI-powered Resilience Report. This report includes a personalized score (0–100), identifies vulnerabilities, proposes an action plan, simulates crisis scenarios, and suggests daily habits. The platform supports GDPR-compliant data management and offers a full admin dashboard for analytics, AI UX testing, consent management, and user administration. It operates on a freemium model, offering two free assessments, with Pro subscriptions available via Stripe for advanced features like scenario stress-tests and AI sub-steps.
+Resilium is a personal resilience planning platform designed to help users assess their preparedness for life's challenges. It provides a 14-step assessment, including a 10-question Mental Resilience deep-dive, to generate an AI-powered Resilience Report. This report includes a personalized score (0–100), identifies vulnerabilities, proposes an action plan, simulates crisis scenarios, and suggests daily habits. The platform supports GDPR-compliant data management and offers a full admin dashboard for analytics, AI UX testing, consent management, and user administration. It operates on a freemium model, offering two free assessments, with Pro subscriptions available via Stripe for advanced features like scenario stress-tests and AI sub-steps.
 
 # User Preferences
 

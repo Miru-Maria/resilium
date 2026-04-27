@@ -685,11 +685,11 @@ function OverviewTab({ plans }: { plans: PlanSummary[] }) {
 
       {/* Plan Page Preview */}
       <Link href={`/plan/${latest.reportId}`}>
-        <div className="relative overflow-hidden rounded-2xl border border-primary/20 shadow-md hover:border-primary/50 hover:shadow-lg transition-all cursor-pointer group">
+        <div className="relative overflow-hidden rounded-2xl border border-primary/20 shadow-md hover:border-primary/50 hover:shadow-lg transition-all cursor-pointer group h-44">
           <img
             src={planPreviewImg}
             alt="Your resilience plan — one thing right now and your top 3 this week"
-            className="w-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
+            className="w-full h-full object-cover object-top group-hover:scale-[1.02] transition-transform duration-300"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent rounded-2xl" />
           <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">

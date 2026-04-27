@@ -1610,8 +1610,8 @@ export default function PlanPage() {
         {/* BACK TO REPORT */}
         <section className="pb-4 text-center">
           <Link href={`/results/${reportId}`}>
-            <Button variant="ghost" className="rounded-full text-muted-foreground gap-2">
-              ← Back to full assessment report
+            <Button variant="outline" className="rounded-full gap-2 border-border/60 hover:border-primary/40 transition-colors">
+              <span>←</span> Back to full assessment report
             </Button>
           </Link>
         </section>
