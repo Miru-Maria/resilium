@@ -102,11 +102,11 @@ type ResourceEntry = { title: string; desc: string; url: string; badge: string }
 const AREA_RESOURCES_US: Record<string, ResourceEntry[]> = {
   financial: [
     { title: "Consumer Financial Protection Bureau", desc: "Free budgeting tools and financial guides from the U.S. government.", url: "https://www.consumerfinance.gov", badge: "Gov · Free" },
-    { title: "FEMA Financial Preparedness", desc: "Build financial resilience for emergencies and unexpected events.", url: "https://www.fema.gov/emergency-managers/individuals-communities/prepare-financially", badge: "Gov · Free" },
+    { title: "FEMA Financial Preparedness", desc: "Build financial resilience for emergencies and unexpected events.", url: "https://www.ready.gov/financial-preparedness", badge: "Gov · Free" },
   ],
   health: [
     { title: "HealthCare.gov", desc: "Find health insurance options and enrollment periods in the U.S.", url: "https://www.healthcare.gov", badge: "Gov · Free" },
-    { title: "CDC Emergency Preparedness", desc: "Health and medical preparedness resources for individuals and families.", url: "https://www.cdc.gov/niosh/topics/emres/", badge: "Gov · Free" },
+    { title: "CDC Emergency Preparedness", desc: "Health and medical preparedness resources for individuals and families.", url: "https://www.cdc.gov/emergency", badge: "Gov · Free" },
   ],
   skills: [
     { title: "Coursera (Resilience & Adaptability)", desc: "University-certified courses on resilience, leadership, and crisis skills.", url: "https://www.coursera.org/search?query=resilience", badge: "Courses" },
@@ -134,32 +134,32 @@ const AREA_RESOURCES_RO: Record<string, ResourceEntry[]> = {
   financial: [
     { title: "ANAF — Agenția Națională de Administrare Fiscală", desc: "Obligații fiscale, ghiduri de conformitate și instrumente de planificare financiară.", url: "https://www.anaf.ro", badge: "Gov · Gratuit" },
     { title: "ASF România — Educație Financiară", desc: "Resurse de educație financiară de la Autoritatea de Supraveghere Financiară.", url: "https://www.asfromania.ro/consumatori/educatie-financiara", badge: "Gov · Gratuit" },
-    { title: "Rețeaua Rurală Națională — Granturi", desc: "Fonduri europene pentru proiecte de reziliență comunitară și economică.", url: "https://www.rndr.ro", badge: "Fonduri EU" },
+    { title: "AFIR — Fonduri Europene pentru Investiții Rurale", desc: "Fonduri europene pentru proiecte agricole, rurale și de reziliență economică prin PNDR.", url: "https://www.afir.ro", badge: "Fonduri EU" },
   ],
   health: [
-    { title: "Casa Națională de Asigurări de Sănătate (CNAS)", desc: "Drepturi, asigurări și servicii medicale în sistemul național de sănătate.", url: "https://www.cnas.ro", badge: "Gov · Gratuit" },
+    { title: "OMS — Urgențe și Sănătate Globală", desc: "Resurse OMS pentru pregătire în urgențe de sănătate, ghiduri de auto-îngrijire și sănătate globală.", url: "https://www.who.int/emergencies/overview", badge: "Intl · Gratuit" },
     { title: "Ministerul Sănătății", desc: "Ghiduri oficiale de sănătate publică, pregătire pentru urgențe medicale și resurse locale de sănătate.", url: "https://www.ms.ro", badge: "Gov · Gratuit" },
-    { title: "Federația Română de Prim Ajutor", desc: "Cursuri de prim ajutor și pregătire pentru situații de urgență.", url: "https://www.frpa.ro", badge: "ONG · Cursuri" },
+    { title: "IFRC — Primul Ajutor", desc: "Cursuri de prim ajutor și pregătire pentru situații de urgență de la Federația Internațională de Cruce Roșie.", url: "https://www.ifrc.org", badge: "Intl · Cursuri" },
   ],
   skills: [
     { title: "Coursera (Reziliență & Adaptabilitate)", desc: "Cursuri certificate de universități de top despre reziliență, leadership și gestionarea crizelor.", url: "https://www.coursera.org/search?query=resilience", badge: "Cursuri" },
     { title: "LinkedIn Learning", desc: "Abilități practice pentru reconversie profesională și reziliență profesională.", url: "https://www.linkedin.com/learning", badge: "Skills" },
-    { title: "e-România — Servicii Digitale", desc: "Portal guvernamental pentru servicii publice digitale și automatizare.", url: "https://www.e-guvernare.ro", badge: "Gov · Gratuit" },
+    { title: "Gov.ro — Portalul Guvernului României", desc: "Portal oficial al Guvernului României cu resurse, servicii publice și informații administrative.", url: "https://www.gov.ro", badge: "Gov · Gratuit" },
   ],
   mobility: [
-    { title: "MAE — Sfaturi de Călătorie", desc: "Avertizări și sfaturi oficiale ale Ministerului Afacerilor Externe pentru călătorii în străinătate.", url: "https://www.mae.ro/travel-conditions", badge: "Gov · Gratuit" },
+    { title: "Europa.eu — Călătorii și Intrare în UE", desc: "Avertizări și informații oficiale ale UE privind condițiile de intrare, vize și călătorii în străinătate.", url: "https://europa.eu/youreurope/citizens/travel/entry-exit/index_en.htm", badge: "EU · Gratuit" },
     { title: "Numbeo — Calitatea Vieții în România", desc: "Compară costul vieții, siguranța și calitatea vieții în orașe din România și din lume.", url: "https://www.numbeo.com/quality-of-life/country_result.jsp?country=Romania", badge: "Instrument Gratuit" },
     { title: "Schengen Info — Vize & Mobilitate", desc: "Ghid complet despre drepturile de mobilitate în spațiul Schengen și UE.", url: "https://www.schengenvisainfo.com", badge: "Ghid" },
   ],
   psychological: [
-    { title: "Asociația pentru Sănătate Mintală România", desc: "Sprijin pentru sănătate mintală, resurse de auto-evaluare și suport comunitar.", url: "https://www.asocialromana.ro", badge: "ONG" },
+    { title: "OMS — Sănătate Mintală", desc: "Ghiduri OMS pentru sănătate mintală, resurse de auto-îngrijire și sprijin comunitar.", url: "https://www.who.int/health-topics/mental-health", badge: "Intl · Gratuit" },
     { title: "Mindfulness-Based Stress Reduction (MBSR)", desc: "Program de 8 săptămâni bazat pe dovezi pentru gestionarea stresului și reziliență psihologică.", url: "https://www.umassmed.edu/cfm/mindfulness-based-programs/mbsr-courses/", badge: "Program" },
-    { title: "Pagina de Psihologie", desc: "Resurse de psihologie, articole și ghiduri de sănătate mintală în limba română.", url: "https://www.paginadepsihologie.ro", badge: "Resurse" },
+    { title: "Colegiul Psihologilor din România", desc: "Corpul profesional oficial al psihologilor din România — găsești psihologi acreditați și resurse de sănătate mintală.", url: "https://www.copsi.ro", badge: "Oficial · Resurse" },
   ],
   resources: [
-    { title: "IGSU — Inspectoratul General pentru Situații de Urgență", desc: "Ghid oficial de pregătire pentru urgențe, dezastre naturale și situații de criză în România.", url: "https://www.igsu.ro/informatii-publice/pregatirea-populatiei", badge: "Gov · Gratuit" },
+    { title: "IGSU — Inspectoratul General pentru Situații de Urgență", desc: "Ghid oficial de pregătire pentru urgențe, dezastre naturale și situații de criză în România.", url: "https://www.igsu.ro", badge: "Gov · Gratuit" },
     { title: "Crucea Roșie Română", desc: "Cursuri de prim ajutor, pregătire pentru dezastre și rețea de răspuns în situații de urgență.", url: "https://www.crucearosie.ro", badge: "ONG" },
-    { title: "Ro-Alert — Sistemul de Avertizare", desc: "Sistemul național de alertare în caz de dezastre și situații de urgență.", url: "https://www.sts.ro/ro/ro-alert", badge: "Gov · Gratuit" },
+    { title: "MAI — Departamentul pentru Situații de Urgență", desc: "Ministerul Afacerilor Interne: informații despre sistemul de alertare și gestionarea situațiilor de urgență.", url: "https://www.mai.gov.ro", badge: "Gov · Gratuit" },
   ],
   socialCapital: [
     { title: "Voluntariat.ro", desc: "Găsește oportunități de voluntariat și proiecte de construire comunitară din toată România.", url: "https://www.voluntariat.ro", badge: "Comunitate" },
@@ -174,7 +174,7 @@ const AREA_RESOURCES_GLOBAL: Record<string, ResourceEntry[]> = {
     { title: "Numbeo — Cost of Living", desc: "Compare cost of living, prices, and quality of life across 500+ cities worldwide.", url: "https://www.numbeo.com/cost-of-living/", badge: "Free Tool" },
   ],
   health: [
-    { title: "WHO — Emergency Preparedness", desc: "World Health Organization health emergency preparedness resources.", url: "https://www.who.int/health-topics/emergency-preparedness", badge: "Intl · Free" },
+    { title: "WHO — Health Emergencies", desc: "World Health Organization health emergency resources, situation reports, and preparedness guides.", url: "https://www.who.int/emergencies/overview", badge: "Intl · Free" },
     { title: "Mental Health First Aid (International)", desc: "Learn to identify and respond to mental health crises in any context.", url: "https://www.mentalhealthfirstaid.org/international/", badge: "Course" },
   ],
   skills: [
@@ -190,7 +190,7 @@ const AREA_RESOURCES_GLOBAL: Record<string, ResourceEntry[]> = {
     { title: "Headspace", desc: "Guided meditation and mindfulness to build psychological resilience.", url: "https://www.headspace.com", badge: "App" },
   ],
   resources: [
-    { title: "UN OCHA — Emergency Preparedness", desc: "United Nations emergency preparedness guidelines and international crisis resources.", url: "https://www.unocha.org/themes/emergency-response", badge: "Intl · Free" },
+    { title: "UN OCHA — Humanitarian Response", desc: "United Nations Office for the Coordination of Humanitarian Affairs — international crisis coordination and preparedness resources.", url: "https://www.unocha.org", badge: "Intl · Free" },
     { title: "IFRC — Red Cross Network", desc: "International Red Cross and Red Crescent first aid, disaster preparedness, and response.", url: "https://www.ifrc.org", badge: "Non-Profit" },
   ],
   socialCapital: [
@@ -230,10 +230,10 @@ const COMMUNITY_RESOURCES_RO: CommunityResource[] = [
 ];
 
 const COMMUNITY_RESOURCES_GLOBAL: CommunityResource[] = [
-  { title: "UNHCR — Support for Displaced People", desc: "UN Refugee Agency assistance, legal protection, and connection to local support services for refugees and displaced people worldwide.", url: "https://www.unhcr.org/help", badge: "Intl · Free", icon: "🌍" },
+  { title: "UNHCR — Support for Displaced People", desc: "UN Refugee Agency assistance, legal protection, and connection to local support services for refugees and displaced people worldwide.", url: "https://www.unhcr.org", badge: "Intl · Free", icon: "🌍" },
   { title: "Red Cross / Red Crescent — Local Chapter", desc: "Emergency relief, food, and community support. Find your nearest local chapter through the ICRC's global directory.", url: "https://www.icrc.org/en/where-we-work", badge: "Non-Profit · Free", icon: "🏥" },
   { title: "Idealist — Local NGOs & Community Aid", desc: "Directory of local nonprofits and community organizations providing direct assistance — search by city or country.", url: "https://www.idealist.org", badge: "Directory · Free", icon: "🤝" },
-  { title: "WHO Mental Health Resources", desc: "Free mental health guidance, self-care tools, and referral resources from the World Health Organization.", url: "https://www.who.int/teams/mental-health-and-substance-use/consumer-network", badge: "Intl · Free", icon: "🧠" },
+  { title: "WHO Mental Health Resources", desc: "Free mental health guidance, self-care tools, and referral resources from the World Health Organization.", url: "https://www.who.int/health-topics/mental-health", badge: "Intl · Free", icon: "🧠" },
 ];
 
 function getCommunityResources(location: string | undefined): CommunityResource[] {
