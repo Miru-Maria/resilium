@@ -684,7 +684,7 @@ function OverviewTab({ plans }: { plans: PlanSummary[] }) {
       )}
 
       {/* Plan Page Preview */}
-      <Link href={`/plan/${latest.reportId}`}>
+      <Link href={`/plan/${latest.reportId}`} className="block">
         <div className="relative overflow-hidden rounded-2xl border border-primary/20 shadow-md hover:border-primary/50 hover:shadow-lg transition-all cursor-pointer group h-44">
           <img
             src={planPreviewImg}

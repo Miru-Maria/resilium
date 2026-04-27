@@ -279,6 +279,10 @@ export default function DemoPage() {
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
   const [showShare, setShowShare] = useState(false);
 
+  const onlySection = new URLSearchParams(window.location.search).get("only");
+  const sectionStyle = (id?: string): React.CSSProperties | undefined =>
+    onlySection ? (onlySection !== id ? { display: "none" } : undefined) : undefined;
+
   const toggleItem = (key: string) =>
     setCheckedItems(prev => {
       const next = new Set(prev);
@@ -359,7 +363,7 @@ export default function DemoPage() {
       <main className="max-w-6xl mx-auto px-6 pt-10 space-y-10">
 
         {/* GOAL BADGE — shows the new step 14 feature */}
-        <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex items-center gap-3 flex-wrap" style={sectionStyle()}>
           <div className="flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-2">
             <span className="text-lg">{SAMPLE_GOAL.emoji}</span>
             <div>
@@ -377,7 +381,7 @@ export default function DemoPage() {
         </div>
 
         {/* HERO SCORES */}
-        <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <section id="scores" style={sectionStyle("scores")} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <Card className="lg:col-span-1 border-none shadow-xl shadow-black/5 bg-gradient-to-b from-card to-muted/20 flex flex-col items-center justify-center p-8 text-center">
             <h2 className="font-display font-bold text-xl mb-8 text-foreground">Overall Readiness</h2>
             <CircularProgress value={SAMPLE_SCORE.overall} size={220} strokeWidth={16} colorClass={getScoreColor(SAMPLE_SCORE.overall)} />
@@ -417,7 +421,7 @@ export default function DemoPage() {
         </section>
 
         {/* MENTAL RESILIENCE PROFILE */}
-        <section className="bg-card rounded-3xl p-6 md:p-8 shadow-lg shadow-black/5 border border-border">
+        <section id="mental" style={sectionStyle("mental")} className="bg-card rounded-3xl p-6 md:p-8 shadow-lg shadow-black/5 border border-border">
           <div className="flex items-center gap-3 mb-6">
             <Brain className="w-6 h-6 text-primary" />
             <h2 className="font-display font-bold text-2xl">Mental Resilience Profile</h2>
@@ -456,7 +460,7 @@ export default function DemoPage() {
         </section>
 
         {/* CRITICAL VULNERABILITIES */}
-        <section>
+        <section style={sectionStyle()}>
           <div className="flex items-center gap-3 mb-6">
             <AlertTriangle className="w-6 h-6 text-destructive" />
             <h2 className="font-display font-bold text-2xl">Critical Vulnerabilities</h2>
@@ -474,7 +478,7 @@ export default function DemoPage() {
         </section>
 
         {/* NEXT ACTION SPOTLIGHT */}
-        {(() => {
+        {!onlySection && (() => {
           const nextItem = Object.entries(SAMPLE_CHECKLIST)
             .flatMap(([area, items]) => items.map(i => ({ area, ...i })))
             .filter(i => !checkedItems.has(`${i.area}::${i.id}`))
@@ -510,7 +514,7 @@ export default function DemoPage() {
         })()}
 
         {/* ACTION CHECKLISTS */}
-        <section className="bg-card rounded-3xl p-6 md:p-8 shadow-lg shadow-black/5 border border-border">
+        <section id="checklists" style={sectionStyle("checklists")} className="bg-card rounded-3xl p-6 md:p-8 shadow-lg shadow-black/5 border border-border">
           <div className="flex items-center gap-3 mb-2">
             <CheckCircle className="w-6 h-6 text-emerald-600" />
             <h2 className="font-display font-bold text-2xl">Action Checklists</h2>
@@ -646,7 +650,7 @@ export default function DemoPage() {
         </section>
 
         {/* ACTION PLAN */}
-        <section className="bg-card rounded-3xl p-6 md:p-8 shadow-lg shadow-black/5 border border-border">
+        <section style={sectionStyle()} className="bg-card rounded-3xl p-6 md:p-8 shadow-lg shadow-black/5 border border-border">
           <div className="flex items-center gap-3 mb-6">
             <TrendingUp className="w-6 h-6 text-emerald-600" />
             <h2 className="font-display font-bold text-2xl">Strategic Action Plan</h2>
@@ -686,7 +690,7 @@ export default function DemoPage() {
         </section>
 
         {/* SCENARIO SIMULATIONS */}
-        <section>
+        <section id="scenarios" style={sectionStyle("scenarios")}>
           <div className="flex items-center gap-3 mb-2">
             <Activity className="w-6 h-6 text-primary" />
             <h2 className="font-display font-bold text-2xl">Stress Test Scenarios</h2>
@@ -722,7 +726,7 @@ export default function DemoPage() {
         </section>
 
         {/* PRO TEASERS */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <section id="pro-features" style={sectionStyle("pro-features")} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <ProTeaser
             title="Step-by-step Guidance"
             description="Click 'Break it down' on any checklist item and get 4–7 concrete, location-specific sub-steps tailored to your full profile and goal."
@@ -746,7 +750,7 @@ export default function DemoPage() {
         </section>
 
         {/* PROGRESS MILESTONES */}
-        <section className="bg-card rounded-3xl p-6 md:p-8 shadow-lg shadow-black/5 border border-border">
+        <section style={sectionStyle()} className="bg-card rounded-3xl p-6 md:p-8 shadow-lg shadow-black/5 border border-border">
           <div className="flex items-center gap-3 mb-6">
             <Award className="w-6 h-6 text-amber-500" />
             <h2 className="font-display font-bold text-2xl">Progress Milestones</h2>
@@ -774,7 +778,7 @@ export default function DemoPage() {
         </section>
 
         {/* FINAL CTA */}
-        <section className="rounded-3xl bg-primary/10 border border-primary/20 p-8 md:p-12 text-center space-y-5">
+        <section style={sectionStyle()} className="rounded-3xl bg-primary/10 border border-primary/20 p-8 md:p-12 text-center space-y-5">
           <div className="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center mx-auto">
             <Zap className="w-6 h-6 text-primary" />
           </div>
