@@ -1,7 +1,7 @@
 import { Router, type Request, type Response } from "express";
 import { getAuth } from "@clerk/express";
-import { db, conversations, messages, subscriptionsTable, resilienceReportsTable } from "@workspace/db";
-import { eq, desc, and } from "drizzle-orm";
+import { db, conversations, messages, subscriptionsTable, resilienceReportsTable, checklistProgressTable } from "@workspace/db";
+import { eq, desc } from "drizzle-orm";
 import { openai } from "@workspace/integrations-openai-ai-server";
 import { MINI_MODEL } from "../lib/models.js";
 import rateLimit from "express-rate-limit";
@@ -105,6 +105,7 @@ router.post("/companion/chat", chatRateLimit, async (req: Request, res: Response
 
     const [latestReport] = await db
       .select({
+        reportId: resilienceReportsTable.reportId,
         location: resilienceReportsTable.location,
         scoreOverall: resilienceReportsTable.scoreOverall,
         scoreFinancial: resilienceReportsTable.scoreFinancial,
@@ -118,6 +119,7 @@ router.post("/companion/chat", chatRateLimit, async (req: Request, res: Response
         savingsMonths: resilienceReportsTable.savingsMonths,
         healthStatus: resilienceReportsTable.healthStatus,
         primaryGoal: resilienceReportsTable.primaryGoal,
+        checklistsByArea: resilienceReportsTable.checklistsByArea,
       })
       .from(resilienceReportsTable)
       .where(eq(resilienceReportsTable.userId, userId))
@@ -129,6 +131,48 @@ router.post("/companion/chat", chatRateLimit, async (req: Request, res: Response
       const riskList = Array.isArray(latestReport.riskConcerns)
         ? (latestReport.riskConcerns as string[]).join(", ")
         : String(latestReport.riskConcerns || "unknown");
+
+      // Build checklist progress summary
+      let checklistContext = "";
+      const checklistsByArea = (latestReport.checklistsByArea ?? {}) as Record<string, Array<{ id: string; title: string; priority: string }>>;
+      const areaNames: Record<string, string> = {
+        financial: "Financial", health: "Health", skills: "Skills",
+        mobility: "Mobility", psychological: "Psychological", resources: "Emergency Resources",
+        socialCapital: "Social Capital",
+      };
+
+      const progressRows = await db
+        .select({ area: checklistProgressTable.area, itemId: checklistProgressTable.itemId, completed: checklistProgressTable.completed })
+        .from(checklistProgressTable)
+        .where(eq(checklistProgressTable.reportId, latestReport.reportId));
+
+      const completedSet = new Set(progressRows.filter(p => p.completed).map(p => `${p.area}:${p.itemId}`));
+
+      const areaSummaries: string[] = [];
+      let totalItems = 0;
+      let totalCompleted = 0;
+
+      for (const [area, items] of Object.entries(checklistsByArea)) {
+        if (!items?.length) continue;
+        const completed = items.filter(i => completedSet.has(`${area}:${i.id}`));
+        const pending = items.filter(i => !completedSet.has(`${area}:${i.id}`));
+        totalItems += items.length;
+        totalCompleted += completed.length;
+        const pendingHighPriority = pending
+          .filter(i => i.priority === "critical" || i.priority === "high")
+          .slice(0, 2)
+          .map(i => `"${i.title}"`)
+          .join(", ");
+        areaSummaries.push(
+          `  - ${areaNames[area] ?? area}: ${completed.length}/${items.length} done${pendingHighPriority ? ` | Next up: ${pendingHighPriority}` : ""}`
+        );
+      }
+
+      if (totalItems > 0) {
+        checklistContext = `\nAction plan checklist progress (${totalCompleted}/${totalItems} tasks completed overall):
+${areaSummaries.join("\n")}
+Use this to understand what the user has already done and what remains. Reference specific pending tasks when relevant.`;
+      }
 
       userContext = `The user's latest Resilium resilience assessment shows:
 - Location: ${latestReport.location}
@@ -144,8 +188,8 @@ router.post("/companion/chat", chatRateLimit, async (req: Request, res: Response
 - Health status: ${latestReport.healthStatus}
 - Primary risk concerns: ${riskList}
 ${latestReport.primaryGoal ? `- Primary goal: ${latestReport.primaryGoal}` : ""}
-
-Use this data to provide specific, personalized guidance. Reference their actual scores when relevant.`;
+${checklistContext}
+Use this data to provide specific, personalized guidance. Reference their actual scores and checklist progress when relevant.`;
     }
 
     const history = await db

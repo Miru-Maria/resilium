@@ -723,24 +723,24 @@ function OverviewTab({ plans }: { plans: PlanSummary[] }) {
         if (topItems.length === 0) return null;
         const priorityColors: Record<string, string> = {
           critical: "text-destructive border-destructive/30 bg-destructive/5",
-          high: "text-amber-700 border-amber-300 bg-amber-50",
-          medium: "text-blue-700 border-blue-200 bg-blue-50",
-          low: "text-muted-foreground border-border bg-muted/30",
+          high: "text-primary-foreground border-primary-foreground/30 bg-primary-foreground/15",
+          medium: "text-primary-foreground border-primary-foreground/30 bg-primary-foreground/15",
+          low: "text-primary-foreground/70 border-primary-foreground/20 bg-primary-foreground/10",
         };
         return (
-          <Card className="border-none shadow-md">
+          <Card className="border-none shadow-md bg-primary">
             <CardHeader className="pb-2">
-              <CardTitle className="text-base font-display flex items-center gap-2">
-                <Target className="w-4 h-4 text-primary" /> This Week's Focus
+              <CardTitle className="text-base font-display flex items-center gap-2 text-primary-foreground">
+                <Target className="w-4 h-4 text-primary-foreground" /> This Week's Focus
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-1 pb-4">
               {topItems.map(({ area, item }) => (
-                <div key={item.id} className="flex items-start gap-3 py-2 border-b border-border/20 last:border-0">
-                  <div className="w-4 h-4 rounded-full border-2 border-primary/30 flex-shrink-0 mt-0.5" />
+                <div key={item.id} className="flex items-start gap-3 py-2 border-b border-primary-foreground/20 last:border-0">
+                  <div className="w-4 h-4 rounded-full border-2 border-primary-foreground/40 flex-shrink-0 mt-0.5" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-foreground leading-snug">{item.title}</p>
-                    <span className="text-xs text-muted-foreground capitalize">{DIM_LABELS[area as DimKey] ?? area}</span>
+                    <p className="text-sm text-primary-foreground font-medium leading-snug">{item.title}</p>
+                    <span className="text-xs text-primary-foreground/60 capitalize">{DIM_LABELS[area as DimKey] ?? area}</span>
                   </div>
                   <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border capitalize flex-shrink-0 ${priorityColors[item.priority] ?? priorityColors.low}`}>
                     {item.priority}
@@ -749,7 +749,7 @@ function OverviewTab({ plans }: { plans: PlanSummary[] }) {
               ))}
               <div className="pt-2">
                 <Link href="/profile?tab=checklist">
-                  <button type="button" className="text-xs font-medium text-primary hover:underline flex items-center gap-1">
+                  <button type="button" className="text-xs font-semibold text-primary-foreground hover:text-primary-foreground/80 flex items-center gap-1">
                     See all checklist items <ChevronRight className="w-3 h-3" />
                   </button>
                 </Link>
