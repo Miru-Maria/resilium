@@ -225,7 +225,7 @@ const COMMUNITY_RESOURCES_RO: CommunityResource[] = [
   { title: "ANOFM — Șomaj și Venituri Minime", desc: "Indemnizații de șomaj, venit minim garantat și programe de recalificare profesională — Agenția Națională pentru Ocuparea Forței de Muncă.", url: "https://www.anofm.ro", badge: "Gov · Gratuit", icon: "📋" },
   { title: "Crucea Roșie Română — Ajutor de Urgență", desc: "Ajutor alimentar, sprijin în crize și servicii sociale pentru familii vulnerabile și persoane în dificultate din toată România.", url: "https://www.crucearosie.ro", badge: "ONG · Gratuit", icon: "🏥" },
   { title: "eJobs România — Oportunități de Angajare", desc: "Cele mai multe locuri de muncă din România — caută joburi, trimite CV-ul și reconstruiește-ți veniturile cât mai repede.", url: "https://www.ejobs.ro", badge: "Gratuit", icon: "💼" },
-  { title: "ALIAT — Linia de Criză Psihologică", desc: "Sprijin psihologic gratuit și confidențial: 0800 800 20 20 (luni–vineri, 8:00–20:00). Fără programare, fără cost.", url: "https://www.aliat.ro", badge: "Gratuit · Confidențial", icon: "🧠" },
+  { title: "DepreHUB — Sprijin Psihologic 24/7", desc: "Linie gratuită de suport emoțional disponibilă non-stop: anxietate, depresie, criză. Psihologi și voluntari instruiți, complet confidențial.", url: "https://deprehub.ro/obtine-suport/helpline/", badge: "Gratuit · 24/7", icon: "🧠" },
   { title: "Fondul Social European — Programe pentru România", desc: "Programe UE de formare profesională, reconversie și sprijin pentru angajare finanțate prin Fondul Social European.", url: "https://ec.europa.eu/social/main.jsp?catId=1094&langId=ro", badge: "UE · Gratuit", icon: "🌍" },
 ];
 
