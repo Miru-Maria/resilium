@@ -166,10 +166,10 @@ title = "Option 2 — Neutral Professional · Back (PNG 300 DPI)"
 id = "eU1ddqc5zDz6aIix49Qtx"
 uri = "file://trade-secret-EN.docx"
 type = "word_document"
-title = "Trade Secret Notice — English (2026)"
+title = "Trade Secret Notice — English"
 
 [[outputs]]
 id = "ZnMMDj36br75LJrVFpNkA"
 uri = "file://trade-secret-RO.docx"
 type = "word_document"
-title = "Notificare Secret Comercial — Română (2026)"
+title = "Notificare Secret Comercial — Română"
