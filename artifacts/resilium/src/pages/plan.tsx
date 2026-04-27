@@ -739,8 +739,9 @@ export default function PlanPage() {
                 View Report
               </Button>
             </Link>
-            <Link href="/profile">
-              <Button variant="outline" size="sm" className="rounded-full gap-1.5 print:hidden">
+            <span className="w-px h-4 bg-border/60 mx-1 flex-shrink-0" aria-hidden="true" />
+            <Link href="/profile?tab=plans">
+              <Button variant="ghost" size="sm" className="rounded-full text-muted-foreground hover:text-foreground gap-1.5 print:hidden">
                 My Plans
               </Button>
             </Link>
