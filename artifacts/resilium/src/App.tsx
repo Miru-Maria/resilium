@@ -63,8 +63,12 @@ const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
 const hideFacebookAppearance = {
   elements: {
     socialButtonsBlockButton__facebook: { display: "none" },
-    socialButtonsBlock: { display: "flex", flexDirection: "column" as const },
-    socialButtonsBlockButton: { width: "100%" },
+    socialButtonsIconButton__facebook: { display: "none" },
+    socialButtonsBlock: { display: "flex", flexDirection: "column" as const, width: "100%" },
+    socialButtonsBlockButton: { width: "100%", minWidth: "200px" },
+    socialButtonsBlockButton__google: { width: "100%", minWidth: "200px" },
+    socialButtonsIconButton: { width: "100%", minWidth: "200px" },
+    socialButtonsIconButton__google: { width: "100%", minWidth: "200px" },
   },
 };
 
