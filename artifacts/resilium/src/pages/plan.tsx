@@ -638,9 +638,7 @@ export default function PlanPage() {
   const reportLocation = (report as any)?.input?.location as string | undefined;
   const AREA_RESOURCES = getAreaResources(reportLocation);
   const communityResources = getCommunityResources(reportLocation);
-  const showCommunitySupport =
-    (report.score?.financial != null && report.score.financial < 40) ||
-    (report.score?.overall != null && report.score.overall < 40);
+  const showCommunitySupport = true;
 
   const isHouseholdPlan = report.householdMode === "household";
   const hc = report.input.householdComposition;
