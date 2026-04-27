@@ -223,28 +223,6 @@ export default function AssessmentScreen() {
   const topPad = insets.top;
   const bottomPad = insets.bottom;
 
-  if (isSignedIn) {
-    return (
-      <View style={{ flex: 1, backgroundColor: colors.background, alignItems: "center", justifyContent: "center", padding: 32, paddingTop: topPad }}>
-        <View style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: colors.primaryMuted, alignItems: "center", justifyContent: "center", marginBottom: 20 }}>
-          <Feather name="monitor" size={28} color={colors.primary} />
-        </View>
-        <Text style={{ fontFamily: "Inter_700Bold", fontSize: 22, color: colors.text, textAlign: "center", letterSpacing: -0.5, marginBottom: 12 }}>
-          Take Your Assessment on the Web
-        </Text>
-        <Text style={{ fontFamily: "Inter_400Regular", fontSize: 15, color: colors.textSecondary, textAlign: "center", lineHeight: 22, marginBottom: 28 }}>
-          The full resilience assessment is available on the Resilium website. Visit resilium-platform.com on your browser to take or retake your assessment.
-        </Text>
-        <Pressable
-          onPress={() => router.back()}
-          style={({ pressed }) => [{ backgroundColor: colors.surface, borderRadius: 24, paddingVertical: 14, paddingHorizontal: 28, borderWidth: 1, borderColor: colors.border, opacity: pressed ? 0.7 : 1 }]}
-        >
-          <Text style={{ fontFamily: "Inter_600SemiBold", fontSize: 15, color: colors.text }}>Go Back</Text>
-        </Pressable>
-      </View>
-    );
-  }
-
   const FREE_LIMIT = 3;
 
   const animateProgress = (nextStep: number, subOffset = 0) => {

@@ -252,12 +252,19 @@ function GlobalNav() {
       </div>
 
       {mobileOpen && (
-        <div className="md:hidden border-t border-border/40 bg-background/98 px-6 py-3 flex flex-col gap-1">
-          <Link href="/about" onClick={() => setMobileOpen(false)} className="text-sm text-muted-foreground hover:text-primary transition-colors py-2 block">About</Link>
-          <Link href="/demo" onClick={() => setMobileOpen(false)} className="text-sm text-muted-foreground hover:text-primary transition-colors py-2 block">Demo</Link>
-          <Link href="/pricing" onClick={() => setMobileOpen(false)} className="text-sm text-muted-foreground hover:text-primary transition-colors py-2 block">Pricing</Link>
-          <Link href="/blog" onClick={() => setMobileOpen(false)} className="text-sm text-muted-foreground hover:text-primary transition-colors py-2 block">Blog</Link>
-        </div>
+        <>
+          <div
+            className="md:hidden fixed inset-0 top-14 bg-black/40 backdrop-blur-sm z-[90]"
+            onClick={() => setMobileOpen(false)}
+            aria-hidden="true"
+          />
+          <div className="md:hidden relative z-[95] border-t border-border/40 bg-background/98 px-6 py-3 flex flex-col gap-1">
+            <Link href="/about" onClick={() => setMobileOpen(false)} className="text-sm text-muted-foreground hover:text-primary transition-colors py-2 block">About</Link>
+            <Link href="/demo" onClick={() => setMobileOpen(false)} className="text-sm text-muted-foreground hover:text-primary transition-colors py-2 block">Demo</Link>
+            <Link href="/pricing" onClick={() => setMobileOpen(false)} className="text-sm text-muted-foreground hover:text-primary transition-colors py-2 block">Pricing</Link>
+            <Link href="/blog" onClick={() => setMobileOpen(false)} className="text-sm text-muted-foreground hover:text-primary transition-colors py-2 block">Blog</Link>
+          </div>
+        </>
       )}
     </header>
   );

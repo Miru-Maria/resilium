@@ -6,7 +6,7 @@ import { jsPDF } from "jspdf";
    Sources: direct homepage fetches (curl), product page analysis,
    App Store listings, and web searches. All claims traceable to [n].
 ───────────────────────────────────────────────────────────── */
-const TODAY = "April 2026";
+const TODAY = new Date().toLocaleString("en-US", { month: "long", year: "numeric" });
 
 const POSITIONING = {
   for: "Anxiety-prepared American adults (28–44)",

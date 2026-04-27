@@ -88,8 +88,24 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen name="companion" options={{ href: null }} />
-      <Tabs.Screen name="guides" options={{ href: null }} />
+      <Tabs.Screen
+        name="companion"
+        options={{
+          title: "Companion",
+          tabBarIcon: ({ color, size }) => (
+            <TabBarIcon name="message-circle" color={color} size={size - 2} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="guides"
+        options={{
+          title: "Guides",
+          tabBarIcon: ({ color, size }) => (
+            <TabBarIcon name="book-open" color={color} size={size - 2} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }
