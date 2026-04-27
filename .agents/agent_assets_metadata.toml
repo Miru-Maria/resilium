@@ -173,3 +173,15 @@ id = "ZnMMDj36br75LJrVFpNkA"
 uri = "file://trade-secret-RO.docx"
 type = "word_document"
 title = "Notificare Secret Comercial — Română"
+
+[[outputs]]
+id = "sOkKQOS8SxgSwMhOQsekt"
+uri = "file://artifacts/resilium/public/resilium-trade-secret-EN-v2.docx"
+type = "word_document"
+title = "Trade Secret Notice — English (fresh)"
+
+[[outputs]]
+id = "vWCOIJtmhXLdGelT5dTYh"
+uri = "file://artifacts/resilium/public/resilium-trade-secret-RO-v2.docx"
+type = "word_document"
+title = "Notificare Secret Comercial — Română (fresh)"
