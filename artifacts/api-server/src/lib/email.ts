@@ -196,15 +196,17 @@ export async function sendPaymentFailedEmail(opts: { email: string; firstName?: 
 
 // ─── Cancellation Confirmation Email ──────────────────────────────────────────
 
-export async function sendCancellationEmail(opts: { email: string; firstName?: string | null; periodEnd?: Date | null; userId?: string }) {
+export async function sendCancellationEmail(opts: { email: string; firstName?: string | null; periodEnd?: Date | null; userId?: string; immediate?: boolean }) {
   if (!opts.email) return;
   const name = opts.firstName ?? "there";
   const accessUntil = opts.periodEnd
     ? opts.periodEnd.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
     : null;
-  const accessLine = accessUntil
-    ? `You keep full Pro access until ${accessUntil} — nothing changes before then.`
-    : "Your Pro access will remain active through the end of your current billing period.";
+  const accessLine = opts.immediate
+    ? "Your Pro access has ended immediately."
+    : accessUntil
+      ? `You keep full Pro access until ${accessUntil} — nothing changes before then.`
+      : "Your Pro access will remain active through the end of your current billing period.";
   const unsubHtml = opts.userId ? unsubscribeFooterHtml(opts.userId) : "";
   const unsubText = opts.userId ? unsubscribeFooterText(opts.userId) : "";
   const listHeader = opts.userId ? { "List-Unsubscribe": buildListUnsubscribeHeader(opts.userId), "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" } : undefined;

@@ -292,11 +292,13 @@ async function upsertSubscription(
   if (resolvedStatus === "cancelled" && event.type === "customer.subscription.deleted") {
     const { email, firstName } = await resolveUserEmail(userId, stripeCustomerId);
     if (email) {
+      const immediate = !cancelAtPeriodEnd;
       sendCancellationEmail({
         email,
         firstName,
-        periodEnd: currentPeriodEnd ?? null,
+        periodEnd: immediate ? null : (currentPeriodEnd ?? null),
         userId,
+        immediate,
       }).catch((err) => logger.warn({ err, userId }, "sendCancellationEmail failed"));
     } else {
       logger.warn({ userId }, "Cancellation email skipped — could not resolve user email");
