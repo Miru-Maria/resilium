@@ -746,14 +746,15 @@ function OverviewTab({ plans }: { plans: PlanSummary[] }) {
                 const areaIcon = AREA_ICONS[area as DimKey];
                 return (
                   <div key={item.id} className="flex items-start gap-3 p-3 rounded-xl bg-white/90 border border-white/30 shadow-sm">
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${as.iconBg} ${as.iconText}`}>
-                      {areaIcon}
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 font-bold text-sm ${as.iconBg} ${as.iconText}`}>
+                      #{i + 1}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm text-slate-800 font-semibold leading-snug mb-1">{item.title}</p>
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-black/10 text-slate-700">
-                          #{i + 1}
+                        <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-md capitalize ${as.iconBg} ${as.iconText}`}>
+                          {areaIcon && React.cloneElement(areaIcon as React.ReactElement, { className: "w-2.5 h-2.5" })}
+                          {DIM_LABELS[area as DimKey] ?? area}
                         </span>
                         <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md capitalize ${priorityColors[item.priority] ?? priorityColors.low}`}>
                           {item.priority}
