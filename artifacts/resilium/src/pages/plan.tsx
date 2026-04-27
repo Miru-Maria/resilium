@@ -878,101 +878,107 @@ export default function PlanPage() {
         </section>
 
 
-        {/* ONE THING RIGHT NOW */}
-        {oneThingNow && totalDone < totalItems && (
-          <section>
-            <div className="bg-card rounded-3xl border border-primary/30 p-6 shadow-lg shadow-black/5 relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
-              <div className="relative">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
-                    <Zap className="w-4 h-4 text-primary" />
+        {/* ONE THING RIGHT NOW + TOP 3 THIS WEEK — side by side */}
+        {(oneThingNow && totalDone < totalItems) || top3Items.length > 0 ? (
+          <div className={cn(
+            "grid gap-4",
+            oneThingNow && totalDone < totalItems && top3Items.length > 0
+              ? "grid-cols-1 md:grid-cols-2"
+              : "grid-cols-1"
+          )}>
+            {/* ONE THING RIGHT NOW */}
+            {oneThingNow && totalDone < totalItems && (
+              <div className="bg-card rounded-3xl border border-primary/30 p-6 shadow-lg shadow-black/5 relative overflow-hidden flex flex-col">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
+                <div className="relative flex flex-col flex-1">
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
+                      <Zap className="w-4 h-4 text-primary" />
+                    </div>
+                    <p className="text-[11px] font-bold uppercase tracking-widest text-primary">One thing right now</p>
                   </div>
-                  <p className="text-[11px] font-bold uppercase tracking-widest text-primary">One thing right now</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">{oneThingNow.area}</p>
+                  <h3 className="font-display font-bold text-lg text-foreground mb-2 leading-snug">{oneThingNow.item.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed mb-4 flex-1">{oneThingNow.item.description}</p>
+                  <button
+                    type="button"
+                    onClick={() => handleChecklistToggle(oneThingNow!.area, oneThingNow!.item.id, false)}
+                    className="flex items-center gap-2 text-sm font-semibold rounded-full px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors w-fit"
+                  >
+                    <Check className="w-4 h-4" />
+                    Mark as done
+                  </button>
                 </div>
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">{oneThingNow.area}</p>
-                <h3 className="font-display font-bold text-lg text-foreground mb-2 leading-snug">{oneThingNow.item.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed mb-4">{oneThingNow.item.description}</p>
-                <button
-                  type="button"
-                  onClick={() => handleChecklistToggle(oneThingNow!.area, oneThingNow!.item.id, false)}
-                  className="flex items-center gap-2 text-sm font-semibold rounded-full px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-                >
-                  <Check className="w-4 h-4" />
-                  Mark as done
-                </button>
               </div>
-            </div>
-          </section>
-        )}
+            )}
 
-        {/* TOP 3 THIS WEEK */}
-        {top3Items.length > 0 && (
-          <section>
-            <div className="bg-card rounded-3xl border border-primary/25 p-6 shadow-lg shadow-black/5 relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
-              <div className="relative">
-                <div className="flex items-center gap-2 mb-1">
-                  <div className="w-6 h-6 rounded-xl bg-primary/15 flex items-center justify-center">
-                    <Target className="w-3.5 h-3.5 text-primary" />
+            {/* TOP 3 THIS WEEK */}
+            {top3Items.length > 0 && (
+              <div className="bg-card rounded-3xl border border-primary/25 p-6 shadow-lg shadow-black/5 relative overflow-hidden flex flex-col">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
+                <div className="relative flex flex-col flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-6 h-6 rounded-xl bg-primary/15 flex items-center justify-center">
+                      <Target className="w-3.5 h-3.5 text-primary" />
+                    </div>
+                    <p className="text-xs font-bold uppercase tracking-widest text-primary">Start here</p>
                   </div>
-                  <p className="text-xs font-bold uppercase tracking-widest text-primary">Start here</p>
-                </div>
-                <h2 className="font-display font-bold text-xl mb-4">Your top {top3Items.length} this week</h2>
-                <div className="space-y-2.5">
-                  {top3Items.map(({ area, item }) => {
-                    const key = `${area}::${item.id}`;
-                    const completed = progressMap[key] ?? false;
-                    const priorityConfig = PRIORITY_CONFIG[item.priority as keyof typeof PRIORITY_CONFIG] ?? PRIORITY_CONFIG.medium;
-                    const AreaIcon = AREA_ICONS[area] ?? Shield;
-                    const areaColor = AREA_COLORS[area] ?? "text-primary bg-primary/10";
-                    return (
-                      <div
-                        key={item.id}
-                        onClick={() => handleChecklistToggle(area, item.id, completed)}
-                        className={cn(
-                          "flex items-start gap-3 p-4 rounded-2xl border cursor-pointer transition-all select-none",
-                          completed
-                            ? "border-emerald-300 bg-emerald-50/60 dark:bg-emerald-900/10 dark:border-emerald-800/50 opacity-70"
-                            : "border-slate-200 bg-white/90 hover:border-primary/30 hover:bg-primary/5"
-                        )}
-                      >
-                        <div className={cn(
-                          "w-5 h-5 rounded-full border-2 flex-shrink-0 mt-0.5 flex items-center justify-center transition-all",
-                          completed ? "border-emerald-500 bg-emerald-500" : "border-muted-foreground/50"
-                        )}>
-                          {completed && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
-                            <span className={cn("text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border", priorityConfig.className)}>
-                              {priorityConfig.label}
-                            </span>
-                            <div className={cn("w-4 h-4 rounded-md flex items-center justify-center flex-shrink-0", areaColor)}>
-                              <AreaIcon className="w-2.5 h-2.5" />
-                            </div>
-                            <span className="text-[10px] text-muted-foreground">{AREA_LABELS[area] ?? area}</span>
+                  <h2 className="font-display font-bold text-xl mb-4">Your top {top3Items.length} this week</h2>
+                  <div className="space-y-2.5 flex-1">
+                    {top3Items.map(({ area, item }) => {
+                      const key = `${area}::${item.id}`;
+                      const completed = progressMap[key] ?? false;
+                      const priorityConfig = PRIORITY_CONFIG[item.priority as keyof typeof PRIORITY_CONFIG] ?? PRIORITY_CONFIG.medium;
+                      const AreaIcon = AREA_ICONS[area] ?? Shield;
+                      const areaColor = AREA_COLORS[area] ?? "text-primary bg-primary/10";
+                      return (
+                        <div
+                          key={item.id}
+                          onClick={() => handleChecklistToggle(area, item.id, completed)}
+                          className={cn(
+                            "flex items-start gap-3 p-4 rounded-2xl border cursor-pointer transition-all select-none",
+                            completed
+                              ? "border-emerald-300 bg-emerald-50/60 dark:bg-emerald-900/10 dark:border-emerald-800/50 opacity-70"
+                              : "border-slate-200 bg-white/90 hover:border-primary/30 hover:bg-primary/5"
+                          )}
+                        >
+                          <div className={cn(
+                            "w-5 h-5 rounded-full border-2 flex-shrink-0 mt-0.5 flex items-center justify-center transition-all",
+                            completed ? "border-emerald-500 bg-emerald-500" : "border-muted-foreground/50"
+                          )}>
+                            {completed && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
                           </div>
-                          <p className={cn("font-semibold text-sm leading-snug", completed ? "line-through text-muted-foreground" : "text-foreground")}>
-                            {item.title}
-                          </p>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
+                              <span className={cn("text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border", priorityConfig.className)}>
+                                {priorityConfig.label}
+                              </span>
+                              <div className={cn("w-4 h-4 rounded-md flex items-center justify-center flex-shrink-0", areaColor)}>
+                                <AreaIcon className="w-2.5 h-2.5" />
+                              </div>
+                              <span className="text-[10px] text-muted-foreground">{AREA_LABELS[area] ?? area}</span>
+                            </div>
+                            <p className={cn("font-semibold text-sm leading-snug", completed ? "line-through text-muted-foreground" : "text-foreground")}>
+                              {item.title}
+                            </p>
+                          </div>
+                          {completed && (
+                            <span className="flex-shrink-0 text-[10px] font-bold uppercase tracking-wider text-emerald-600 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-2 py-0.5">
+                              Done
+                            </span>
+                          )}
                         </div>
-                        {completed && (
-                          <span className="flex-shrink-0 text-[10px] font-bold uppercase tracking-wider text-emerald-600 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-2 py-0.5">
-                            Done
-                          </span>
-                        )}
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
+                  <p className="text-[11px] text-muted-foreground mt-4 leading-relaxed">
+                    Tap any item to mark it done. Your progress syncs across devices.
+                  </p>
                 </div>
-                <p className="text-[11px] text-muted-foreground mt-4 leading-relaxed">
-                  Tap any item to mark it done. Your progress syncs across devices.
-                </p>
               </div>
-            </div>
-          </section>
-        )}
+            )}
+          </div>
+        ) : null}
 
         {/* DAILY HABITS */}
         {dailyHabits && dailyHabits.length > 0 && (
@@ -1049,7 +1055,7 @@ export default function PlanPage() {
 
         {/* THREE HORIZON SECTIONS */}
         <section className="space-y-4">
-          <Accordion type="multiple" defaultValue={["short"]} className="space-y-4">
+          <Accordion type="multiple" defaultValue={[]} className="space-y-4">
             {horizons.map(horizon => {
               const doneInHorizon = horizon.items.filter(({ area, item }) => progressMap[`${area}::${item.id}`]).length;
               const Icon = horizon.icon;
@@ -1437,46 +1443,6 @@ export default function PlanPage() {
           )}
         </section>
 
-        {/* COACHING CALLOUT — score-aware, only surfaces when relevant */}
-        {(() => {
-          const psychScore = Math.round((report as any).score?.psychological ?? 100);
-          const healthScore = Math.round((report as any).score?.health ?? 100);
-          const lowestScore = Math.min(psychScore, healthScore);
-          if (lowestScore >= 70) return null;
-          const isPsych = psychScore <= healthScore;
-          const dimensionName = isPsych ? "Psychological Resilience" : "Health Continuity";
-          const contextLine = isPsych
-            ? `Your Psychological Resilience scored ${psychScore}/100. Progress here is less linear than logistics — habits of mind, stress tolerance, and adaptive thinking develop differently than stockpiling supplies or building savings. Most people find a thinking partner makes the difference.`
-            : `Your Health Continuity scored ${healthScore}/100. Planning around health risks is personal and often requires guidance that a checklist can't fully replace — especially when chronic conditions, dependents, or healthcare access are in the picture.`;
-          const scoreColor = lowestScore < 40 ? "text-destructive" : lowestScore < 55 ? "text-amber-600" : "text-foreground";
-          return (
-            <section className="rounded-3xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 to-orange-500/10 p-6 md:p-8">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center flex-shrink-0">
-                  <Heart className="w-6 h-6 text-amber-600" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-amber-600 mb-1">Optional — Phoenix Insight Coaching</p>
-                  <h3 className="font-display font-bold text-lg mb-2">
-                    Your {dimensionName} is where a real person helps most.
-                  </h3>
-                  <div className="flex items-baseline gap-2 mb-3">
-                    <span className={cn("text-3xl font-bold font-display", scoreColor)}>{lowestScore}</span>
-                    <span className="text-sm text-muted-foreground">/100 — {dimensionName}</span>
-                  </div>
-                  <p className="text-muted-foreground text-sm leading-relaxed mb-4">
-                    {contextLine} Cristiana Paun at Phoenix Insight Coaching works directly from your Resilium profile. The first call is free, no commitment.
-                  </p>
-                  <Link href="/coaching">
-                    <Button className="rounded-full gap-2 bg-amber-600 hover:bg-amber-700 text-white shadow-md shadow-amber-600/20">
-                      <Heart className="w-4 h-4" /> Learn About Coaching
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-            </section>
-          );
-        })()}
 
         {/* COMMUNITY SUPPORT RESOURCES */}
         {showCommunitySupport && communityResources.length > 0 && (
