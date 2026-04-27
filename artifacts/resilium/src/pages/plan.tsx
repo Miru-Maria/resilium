@@ -1084,6 +1084,11 @@ export default function PlanPage() {
                           )}
                         </div>
                         <p className="text-sm text-muted-foreground mt-0.5">{horizon.sublabel}</p>
+                        {horizon.items.length > 0 && (
+                          <p className="text-xs text-muted-foreground/60 mt-1">
+                            {horizon.items.length} action{horizon.items.length !== 1 ? "s" : ""} · {doneInHorizon} completed — tap to expand
+                          </p>
+                        )}
                       </div>
                     </div>
                   </AccordionTrigger>

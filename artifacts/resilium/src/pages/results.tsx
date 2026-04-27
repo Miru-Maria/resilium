@@ -907,13 +907,13 @@ function ResultsPageInner() {
           const psychScore = Math.round(report.score.psychological ?? 100);
           const healthScore = Math.round(report.score.health ?? 100);
           const lowestScore = Math.min(psychScore, healthScore);
-          if (lowestScore >= 70) return null;
+          if (lowestScore >= 40) return null;
           const isPsych = psychScore <= healthScore;
           const dimensionName = isPsych ? "Psychological Resilience" : "Health Continuity";
           const contextLine = isPsych
             ? `Your Psychological Resilience scored ${psychScore}/100. Progress here is less linear than logistics — habits of mind, stress tolerance, and adaptive thinking develop differently than stockpiling supplies or building savings. Most people find a thinking partner makes the difference.`
             : `Your Health Continuity scored ${healthScore}/100. Planning around health risks is personal and often requires guidance that a checklist can't fully replace — especially when chronic conditions, dependents, or healthcare access are in the picture.`;
-          const scoreColor = lowestScore < 40 ? "text-destructive" : lowestScore < 55 ? "text-amber-600" : "text-foreground";
+          const scoreColor = lowestScore < 25 ? "text-destructive" : "text-amber-600";
           return (
             <section className="rounded-3xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 to-orange-500/10 p-6 md:p-8 print:hidden">
               <div className="flex items-start gap-4">
@@ -942,6 +942,11 @@ function ResultsPageInner() {
             </section>
           );
         })()}
+
+        {/* TRANSITION — bridges score overview to detail sections */}
+        <div className="px-1">
+          <p className="text-muted-foreground text-sm leading-relaxed">Here's what your scores reveal about your specific situation.</p>
+        </div>
 
         {/* TOP VULNERABILITIES */}
         <section>

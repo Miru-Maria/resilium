@@ -254,36 +254,36 @@ function MasterChecklistSection() {
         Every action item across all channels in one flat list. Check items off as you complete them — progress saves automatically. Open the sections below for detailed copy templates, Reddit strategy, and research report guidance.
       </p>
 
-      <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-6">
-        <Clock className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
+      <div className="flex items-start gap-3 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3 mb-6">
+        <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
         <div>
-          <p className="text-sm font-semibold text-amber-800">Stripe is configured but real payments are blocked</p>
-          <p className="text-xs text-amber-700 mt-0.5">Requires SRL CUI from Registrul Comerțului. Once approved: submit business details + Romanian IBAN in Stripe Dashboard → swap to live keys → payments go live.</p>
+          <p className="text-sm font-semibold text-emerald-800">Stripe is live — real payments enabled</p>
+          <p className="text-xs text-emerald-700 mt-0.5">SRL verified, live keys set, both plans tested. Payment infrastructure is production-ready.</p>
         </div>
       </div>
 
       {/* ── Business & Payments ──────────────────────────────────────────── */}
       <CategoryHeading icon={Target}> Business &amp; Payments</CategoryHeading>
       <ul className="space-y-3">
-        <ChecklistItem
+        <CompletedItem
           text="Register SRL with Registrul Comerțului"
-          detail="This is the prerequisite for everything below. Obtain your CUI (tax ID) — required for Stripe business verification, VAT configuration, and legal invoicing."
+          detail="CUI obtained — prerequisite for Stripe verification and legal invoicing. ✓ Done."
         />
-        <ChecklistItem
+        <CompletedItem
           text="Complete Stripe business verification"
-          detail="In Stripe Dashboard: add business details, representative identity, and Romanian IBAN for payouts. Requires SRL CUI."
+          detail="Business details, representative identity, and Romanian IBAN submitted and approved. ✓ April 21–22, 2026."
         />
-        <ChecklistItem
+        <CompletedItem
           text="Swap Stripe keys to live mode once verification is approved"
-          detail="Replace STRIPE_SECRET_KEY, STRIPE_PUBLISHABLE_KEY, and STRIPE_WEBHOOK_SECRET in Replit Secrets with live values. Then run the seed script to create products in the live account."
+          detail="Live STRIPE_SECRET_KEY, STRIPE_PUBLISHABLE_KEY, and STRIPE_WEBHOOK_SECRET set in Replit Secrets. ✓ Done."
         />
-        <ChecklistItem
+        <CompletedItem
           text="Enable the post-assessment email drip sequence"
-          detail="Set DRIP_EMAILS_ENABLED=true in Replit Secrets. Sends 5 targeted emails (Days 0, 2, 5, 9, 14) to free users after each assessment to drive Pro upgrades. Activate once the payment system is live."
+          detail="DRIP_EMAILS_ENABLED=true set in Replit Secrets. 5-email sequence active. ✓ Done."
         />
-        <ChecklistItem
+        <CompletedItem
           text="Test full payment flow with a real card"
-          detail="Test both monthly ($9) and annual ($79) plans. Confirm Pro features unlock immediately after payment, and that the customer portal lets users manage/cancel."
+          detail="Both monthly ($9) and annual ($79) plans tested. Pro features unlock confirmed. Portal and refund flow tested. ✓ Done."
         />
         <ChecklistItem
           text="Test the complete new-user journey end to end"
