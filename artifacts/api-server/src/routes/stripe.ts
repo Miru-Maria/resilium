@@ -1,6 +1,6 @@
 import Stripe from "stripe";
 import { Router } from "express";
-import { getAuth } from "@clerk/express";
+import { getAuth, createClerkClient } from "@clerk/express";
 import { z } from "zod";
 import { getUncachableStripeClient } from "../stripeClient.js";
 import { db, usersTable, subscriptionsTable, emailDripQueueTable } from "@workspace/db";
@@ -8,6 +8,32 @@ import { eq, and, isNull } from "drizzle-orm";
 import { logger } from "../lib/logger.js";
 import { sendProUpgradeEmail, sendPaymentFailedEmail, sendCancellationEmail, sendPaymentSucceededEmail } from "../lib/email.js";
 import { stripeCheckoutLimiter, stripePortalLimiter, stripeDonationLimiter } from "../lib/rate-limiters.js";
+
+async function resolveUserEmail(userId: string): Promise<{ email: string | null; firstName: string | null }> {
+  try {
+    const rows = await db
+      .select({ email: usersTable.email, firstName: usersTable.firstName })
+      .from(usersTable)
+      .where(eq(usersTable.id, userId))
+      .limit(1);
+    if (rows[0]?.email) {
+      return { email: rows[0].email, firstName: rows[0].firstName ?? null };
+    }
+  } catch (err) {
+    logger.warn({ err, userId }, "DB lookup for user email failed — trying Clerk");
+  }
+
+  try {
+    const clerk = createClerkClient({ secretKey: process.env["CLERK_SECRET_KEY"] });
+    const clerkUser = await clerk.users.getUser(userId);
+    const email = clerkUser.emailAddresses[0]?.emailAddress ?? null;
+    if (email) logger.info({ userId }, "Resolved user email via Clerk fallback");
+    return { email, firstName: clerkUser.firstName ?? null };
+  } catch (err) {
+    logger.warn({ err, userId }, "Clerk fallback for user email also failed");
+    return { email: null, firstName: null };
+  }
+}
 
 const checkoutSchema = z.object({
   billingPeriod: z.enum(["monthly", "annual"]),
@@ -224,32 +250,31 @@ async function upsertSubscription(
   logger.info({ userId, status: resolvedStatus, event: event.type }, "Subscription updated via Stripe webhook");
 
   if (resolvedStatus === "active" && (event.type === "checkout.session.completed" || event.type === "customer.subscription.created")) {
-    try {
-      const userRows = await db.select({ email: usersTable.email, firstName: usersTable.firstName })
-        .from(usersTable).where(eq(usersTable.id, userId)).limit(1);
-      if (userRows[0]?.email) {
-        sendProUpgradeEmail({
-          email: userRows[0].email,
-          firstName: userRows[0].firstName,
-          periodEnd: currentPeriodEnd ?? null,
-        }).catch(() => {});
-      }
-    } catch { /* non-fatal */ }
+    const { email, firstName } = await resolveUserEmail(userId);
+    if (email) {
+      sendProUpgradeEmail({
+        email,
+        firstName,
+        periodEnd: currentPeriodEnd ?? null,
+      }).catch((err) => logger.warn({ err, userId }, "sendProUpgradeEmail failed"));
+      logger.info({ userId, email }, "Pro upgrade email queued");
+    } else {
+      logger.warn({ userId }, "Pro upgrade email skipped — could not resolve user email");
+    }
   }
 
   if (resolvedStatus === "cancelled" && event.type === "customer.subscription.deleted") {
-    try {
-      const userRows = await db.select({ email: usersTable.email, firstName: usersTable.firstName })
-        .from(usersTable).where(eq(usersTable.id, userId)).limit(1);
-      if (userRows[0]?.email) {
-        sendCancellationEmail({
-          email: userRows[0].email,
-          firstName: userRows[0].firstName,
-          periodEnd: currentPeriodEnd ?? null,
-          userId,
-        }).catch(() => {});
-      }
-    } catch { /* non-fatal */ }
+    const { email, firstName } = await resolveUserEmail(userId);
+    if (email) {
+      sendCancellationEmail({
+        email,
+        firstName,
+        periodEnd: currentPeriodEnd ?? null,
+        userId,
+      }).catch((err) => logger.warn({ err, userId }, "sendCancellationEmail failed"));
+    } else {
+      logger.warn({ userId }, "Cancellation email skipped — could not resolve user email");
+    }
   }
 }
 
