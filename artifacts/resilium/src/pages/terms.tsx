@@ -166,7 +166,7 @@ export default function TermsPage() {
             All content, methodology, scoring algorithms, action plans, checklist frameworks, software, design, and branding associated with Resilium are the exclusive intellectual property of the operator and are protected under applicable copyright, trade secret, and intellectual property laws.
           </p>
           <p>
-            &copy; 2024–{new Date().getFullYear()} Resilium. All rights reserved. No part of this platform, its methodology, or its content may be reproduced, distributed, reverse-engineered, or used to create derivative works without express written permission from the operator.
+            &copy; {new Date().getFullYear()} Resilium. All rights reserved. No part of this platform, its methodology, or its content may be reproduced, distributed, reverse-engineered, or used to create derivative works without express written permission from the operator.
           </p>
           <p>
             To report a copyright infringement (DMCA notice) or request a license, contact: <a href={`mailto:${CONTACT_EMAIL}`} className="underline hover:text-primary">{CONTACT_EMAIL}</a>
