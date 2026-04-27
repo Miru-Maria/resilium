@@ -69,6 +69,9 @@ import {
   BookMarked,
   RefreshCw,
   Settings,
+  UserPlus,
+  Copy,
+  Check,
 } from "lucide-react";
 import { guides, getEssentialGuides, getGuidesByLocation, getGuidesByDimension, type Guide } from "@/data/guides";
 import { saveToCache, loadFromCache, plansListCacheKey } from "@/lib/offline-cache";
@@ -502,6 +505,8 @@ function OverviewTab({ plans }: { plans: PlanSummary[] }) {
   const completedDaysCount = challengeData?.completedDays?.length ?? 0;
 
   const [streak, setStreak] = useState(0);
+  const [inviteCopied, setInviteCopied] = useState(false);
+  const { toast } = useToast();
   useEffect(() => {
     try {
       const raw = localStorage.getItem("resilium_streak_v1");
@@ -538,6 +543,21 @@ function OverviewTab({ plans }: { plans: PlanSummary[] }) {
 
   const daysSinceLast = Math.floor((Date.now() - new Date(latest.createdAt).getTime()) / (1000 * 60 * 60 * 24));
   const firstDate = new Date(first.createdAt).toLocaleDateString(undefined, { month: "long", year: "numeric" });
+
+  const handleInvite = useCallback(async () => {
+    const score = Math.round(latest.scoreOverall);
+    const msg = `I just took the Resilium resilience assessment and scored ${score}/100. It takes about 10 minutes and shows exactly where your gaps are — worth doing. Take yours: https://resilium-platform.com`;
+    if (typeof navigator !== "undefined" && (navigator as any).share) {
+      try { await (navigator as any).share({ title: "Take the Resilium Resilience Assessment", text: msg }); return; } catch {}
+    }
+    try {
+      await navigator.clipboard.writeText(msg);
+      setInviteCopied(true);
+      setTimeout(() => setInviteCopied(false), 3000);
+    } catch {
+      toast({ title: "Could not copy", description: "Please copy the invite link manually." });
+    }
+  }, [latest, toast]);
 
   // Derive most-improved and consistently-lowest dims (needs 2+ plans)
   let mostImprovedDim: DimKey | null = null;
@@ -776,6 +796,30 @@ function OverviewTab({ plans }: { plans: PlanSummary[] }) {
           </Link>
         </div>
       )}
+
+      {/* HOUSEHOLD INVITE */}
+      <div className="rounded-3xl border border-border bg-card p-5">
+        <div className="flex items-start gap-4">
+          <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+            <UserPlus className="w-5 h-5 text-primary" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-1">Invite your household</p>
+            <h3 className="font-display font-bold text-base mb-1">Resilience is stronger together</h3>
+            <p className="text-xs text-muted-foreground leading-relaxed mb-3">
+              Invite your partner, a family member, or a close friend to take their own assessment — knowing where they stand changes what "prepared" actually means.
+            </p>
+            <button
+              type="button"
+              onClick={handleInvite}
+              className="flex items-center gap-2 text-xs font-semibold rounded-full px-3.5 py-1.5 border border-primary/40 text-primary hover:bg-primary/5 transition-colors"
+            >
+              {inviteCopied ? <Check className="w-3.5 h-3.5 text-green-600" /> : <Copy className="w-3.5 h-3.5" />}
+              <span className={inviteCopied ? "text-green-600" : ""}>{inviteCopied ? "Message copied!" : "Copy invite message"}</span>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

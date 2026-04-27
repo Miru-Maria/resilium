@@ -1437,30 +1437,6 @@ export default function PlanPage() {
           )}
         </section>
 
-        {/* HOUSEHOLD INVITE */}
-        <section className="rounded-3xl border border-border bg-card p-6 md:p-8">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-              <UserPlus className="w-6 h-6 text-primary" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-1">Invite your household</p>
-              <h3 className="font-display font-bold text-lg mb-2">Resilience is stronger together</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-                Your resilience only goes as far as the people around you. Invite your partner, a family member, or a close friend to take their own assessment — knowing where they stand changes what "prepared" actually means.
-              </p>
-              <button
-                type="button"
-                onClick={handleInvite}
-                className="flex items-center gap-2 text-sm font-semibold rounded-full px-4 py-2 border border-primary/40 text-primary hover:bg-primary/5 transition-colors"
-              >
-                {inviteCopied ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
-                <span className={inviteCopied ? "text-green-600" : ""}>{inviteCopied ? "Message copied!" : "Copy invite message"}</span>
-              </button>
-            </div>
-          </div>
-        </section>
-
         {/* COACHING CALLOUT — score-aware, only surfaces when relevant */}
         {(() => {
           const psychScore = Math.round((report as any).score?.psychological ?? 100);

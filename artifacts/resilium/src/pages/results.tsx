@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { Progress } from "@/components/ui/progress";
-import { Loader2, Download, Share2, AlertTriangle, Check, CheckCircle, RefreshCcw, Activity, User, LogIn, Brain, TrendingUp, Award, Star, ExternalLink, Heart, BookOpen, ShieldCheck, Zap, Package, Globe, MapPin, Lock, Mail, Sparkles, ChevronDown, ChevronUp, DollarSign, Wrench, Navigation, Home, Users, Target } from "lucide-react";
+import { Loader2, Download, Share2, AlertTriangle, Check, CheckCircle, RefreshCcw, Activity, User, LogIn, Brain, TrendingUp, Award, Star, ExternalLink, Heart, BookOpen, ShieldCheck, Zap, Package, Globe, MapPin, Lock, Mail, Sparkles, ChevronDown, ChevronUp, DollarSign, Wrench, Navigation, Home, Users, Target, UserPlus, Copy } from "lucide-react";
 import { ResilientIcon } from "@/components/resilient-icon";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
@@ -427,6 +427,24 @@ function ResultsPageInner() {
   // Declared here (before all early returns) to satisfy React's Rules of Hooks
   const [showShareModal, setShowShareModal] = useState(false);
   const [isDonating, setIsDonating] = useState(false);
+  const [inviteCopied, setInviteCopied] = useState(false);
+
+  const handleInvite = useCallback(async () => {
+    const score = report ? Math.round(report.score.overall) : null;
+    const msg = score !== null
+      ? `I just took the Resilium resilience assessment and scored ${score}/100. It takes about 10 minutes and shows exactly where your gaps are — worth doing. Take yours: https://resilium-platform.com`
+      : `I just took the Resilium resilience assessment. It takes about 10 minutes and shows exactly where your gaps are — worth doing: https://resilium-platform.com`;
+    if (typeof navigator !== "undefined" && (navigator as any).share) {
+      try { await (navigator as any).share({ title: "Take the Resilium Resilience Assessment", text: msg }); return; } catch {}
+    }
+    try {
+      await navigator.clipboard.writeText(msg);
+      setInviteCopied(true);
+      setTimeout(() => setInviteCopied(false), 3000);
+    } catch {
+      toast({ title: "Could not copy", description: "Please copy the invite link manually." });
+    }
+  }, [report, toast]);
   const donated = new URLSearchParams(window.location.search).get("donated") === "1";
 
   const handleDonate = async () => {
@@ -1309,6 +1327,30 @@ function ResultsPageInner() {
             )}
           </section>
         )}
+
+        {/* HOUSEHOLD INVITE */}
+        <section className="rounded-3xl border border-border bg-card p-6 md:p-8 print:hidden">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <UserPlus className="w-6 h-6 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-1">Invite your household</p>
+              <h3 className="font-display font-bold text-lg mb-2">Resilience is stronger together</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+                Your resilience only goes as far as the people around you. Invite your partner, a family member, or a close friend to take their own assessment — knowing where they stand changes what "prepared" actually means.
+              </p>
+              <button
+                type="button"
+                onClick={handleInvite}
+                className="flex items-center gap-2 text-sm font-semibold rounded-full px-4 py-2 border border-primary/40 text-primary hover:bg-primary/5 transition-colors"
+              >
+                {inviteCopied ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
+                <span className={inviteCopied ? "text-green-600" : ""}>{inviteCopied ? "Message copied!" : "Copy invite message"}</span>
+              </button>
+            </div>
+          </div>
+        </section>
 
         {/* RETAKE ASSESSMENT */}
         <section className="flex justify-center print:hidden">
