@@ -1,36 +1,18 @@
-export type BlogPillar = "assessment" | "dimensions" | "scenarios" | "data" | "how-to";
+import { db, blogPostsTable } from "@workspace/db";
+import { count } from "drizzle-orm";
+import { logger } from "./logger.js";
 
-export interface BlogPost {
-  slug: string;
-  title: string;
-  description: string;
-  pillar: BlogPillar;
-  pillarLabel: string;
-  targetKeyword: string;
-  publishedAt: string;
-  readingTimeMin: number;
-  body: string[];
-}
-
-export const PILLAR_LABELS: Record<BlogPillar, string> = {
-  assessment: "Resilience Assessment",
-  dimensions: "Dimension Deep-Dive",
-  scenarios: "Scenario Planning",
-  data: "Data & Research",
-  "how-to": "How-To Guide",
-};
-
-export const BLOG_POSTS: BlogPost[] = [
+const SEED_POSTS = [
   {
     slug: "what-is-personal-resilience",
     title: "What Is Personal Resilience — and Why Measuring It Changes Everything",
-    description:
-      "Personal resilience is more than just 'bouncing back'. Discover the six dimensions that determine how well you'll handle adversity — and why scoring yourself is the first step to real preparedness.",
+    description: "Personal resilience is more than just 'bouncing back'. Discover the six dimensions that determine how well you'll handle adversity — and why scoring yourself is the first step to real preparedness.",
     pillar: "assessment",
-    pillarLabel: PILLAR_LABELS["assessment"],
+    pillarLabel: "Resilience Assessment",
     targetKeyword: "personal resilience",
-    publishedAt: "2026-04-01",
+    publishedAt: new Date("2026-04-01T08:00:00Z"),
     readingTimeMin: 6,
+    status: "published",
     body: [
       "Most people think resilience is a personality trait — something you either have or you don't. The research says otherwise.",
       "Decades of academic work on resilience, from the Connor-Davidson Resilience Scale to FEMA's Individual Preparedness Framework, all point to the same conclusion: resilience is measurable, multidimensional, and buildable. You don't need to be born tough. You need to be *prepared*.",
@@ -56,13 +38,13 @@ export const BLOG_POSTS: BlogPost[] = [
   {
     slug: "financial-resilience-explained",
     title: "Financial Resilience Explained: The One Number Your Advisor Never Tells You",
-    description:
-      "Your net worth doesn't measure your financial resilience. The metric that matters in a crisis is runway — and most people have far less than they think.",
+    description: "Your net worth doesn't measure your financial resilience. The metric that matters in a crisis is runway — and most people have far less than they think.",
     pillar: "dimensions",
-    pillarLabel: PILLAR_LABELS["dimensions"],
+    pillarLabel: "Dimension Deep-Dive",
     targetKeyword: "financial resilience",
-    publishedAt: "2026-04-03",
+    publishedAt: new Date("2026-04-03T08:00:00Z"),
     readingTimeMin: 8,
+    status: "published",
     body: [
       "Financial advisors talk about net worth, investment allocation, and retirement projections. These are useful metrics for building wealth over time. But in a crisis — a job loss, a health emergency, a sudden expense — they tell you almost nothing useful.",
       "The metric that matters when things go wrong is *runway*: how many months you could survive without income.",
@@ -89,13 +71,13 @@ export const BLOG_POSTS: BlogPost[] = [
   {
     slug: "job-loss-emergency-plan",
     title: "Job Loss Emergency Plan: What to Do in the First 7 Days",
-    description:
-      "Losing a job is disorienting. Having a plan eliminates the paralysis. Here's the exact sequence of actions that protect your financial resilience in the first week.",
+    description: "Losing a job is disorienting. Having a plan eliminates the paralysis. Here's the exact sequence of actions that protect your financial resilience in the first week.",
     pillar: "scenarios",
-    pillarLabel: PILLAR_LABELS["scenarios"],
+    pillarLabel: "Scenario Planning",
     targetKeyword: "job loss financial plan",
-    publishedAt: "2026-04-07",
+    publishedAt: new Date("2026-04-07T08:00:00Z"),
     readingTimeMin: 7,
+    status: "published",
     body: [
       "Job loss is one of the most common and disorienting financial crises a person faces. The disorientation is partly emotional — your identity and routine are disrupted overnight. But it's also cognitive: there are dozens of decisions to make immediately, and the pressure to make them correctly is high.",
       "The people who navigate job loss best are almost always the people who made those decisions *before* the event happened. Not because they predicted it, but because they had a plan.",
@@ -121,13 +103,13 @@ export const BLOG_POSTS: BlogPost[] = [
   {
     slug: "6-dimensions-of-personal-resilience",
     title: "The 6 Dimensions of Personal Resilience (and How to Score Them)",
-    description:
-      "Resilience isn't one thing — it's six. Understanding each dimension shows you exactly where you're strong, where you're vulnerable, and what to do about it.",
+    description: "Resilience isn't one thing — it's six. Understanding each dimension shows you exactly where you're strong, where you're vulnerable, and what to do about it.",
     pillar: "assessment",
-    pillarLabel: PILLAR_LABELS["assessment"],
+    pillarLabel: "Resilience Assessment",
     targetKeyword: "resilience dimensions",
-    publishedAt: "2026-04-09",
+    publishedAt: new Date("2026-04-09T08:00:00Z"),
     readingTimeMin: 9,
+    status: "published",
     body: [
       "The most common misconception about resilience is that it's a single trait — a general toughness that either runs through you or doesn't. The research doesn't support this. What the research supports is a six-factor model: distinct domains of preparedness that can be measured independently, improved independently, and combined into a meaningful overall picture.",
       "Understanding your profile across these six dimensions is more valuable than any single composite number, because it tells you *where* to act.",
@@ -159,13 +141,13 @@ export const BLOG_POSTS: BlogPost[] = [
   {
     slug: "psychological-resilience-10-questions",
     title: "Psychological Resilience: The 10 Questions That Reveal How You'll Handle Adversity",
-    description:
-      "Validated clinical scales distilled into a clear framework. These are the questions that predict how you'll perform under pressure — and what you can do to improve your score.",
+    description: "Validated clinical scales distilled into a clear framework. These are the questions that predict how you'll perform under pressure — and what you can do to improve your score.",
     pillar: "dimensions",
-    pillarLabel: PILLAR_LABELS["dimensions"],
+    pillarLabel: "Dimension Deep-Dive",
     targetKeyword: "psychological resilience",
-    publishedAt: "2026-04-11",
+    publishedAt: new Date("2026-04-11T08:00:00Z"),
     readingTimeMin: 7,
+    status: "published",
     body: [
       "Psychological resilience is the dimension most people feel they either have or don't. It's framed culturally as a personality trait — 'she's just resilient,' as though it arrived at birth.",
       "The science disagrees, emphatically.",
@@ -198,13 +180,13 @@ export const BLOG_POSTS: BlogPost[] = [
   {
     slug: "10-documents-you-need-before-crisis",
     title: "The 10 Documents You Need to Have Ready Before a Crisis",
-    description:
-      "When an emergency happens, you don't have time to find your insurance policy. These are the documents that matter most — and how to organize them so they're actually available when you need them.",
+    description: "When an emergency happens, you don't have time to find your insurance policy. These are the documents that matter most — and how to organize them so they're actually available when you need them.",
     pillar: "how-to",
-    pillarLabel: PILLAR_LABELS["how-to"],
+    pillarLabel: "How-To Guide",
     targetKeyword: "emergency document checklist",
-    publishedAt: "2026-04-14",
+    publishedAt: new Date("2026-04-14T08:00:00Z"),
     readingTimeMin: 6,
+    status: "published",
     body: [
       "In most emergencies, the first thing people reach for is their phone. The second thing — often an hour later, when the adrenaline has cleared — is paperwork. And that's when many people discover that they don't know where it is, can't access it, or never had it at all.",
       "Document preparedness is one of the lowest-effort, highest-impact resilience investments available. It takes two or three hours once and saves enormous time and stress when it matters most.",
@@ -231,13 +213,13 @@ export const BLOG_POSTS: BlogPost[] = [
   {
     slug: "what-happens-if-you-lose-your-job-tomorrow",
     title: "What Happens to Your Finances If You Lose Your Job Tomorrow?",
-    description:
-      "Most people have never run the numbers. Walk through a realistic scenario analysis — and find out whether your financial resilience score matches what you think it is.",
+    description: "Most people have never run the numbers. Walk through a realistic scenario analysis — and find out whether your financial resilience score matches what you think it is.",
     pillar: "scenarios",
-    pillarLabel: PILLAR_LABELS["scenarios"],
+    pillarLabel: "Scenario Planning",
     targetKeyword: "job loss scenario",
-    publishedAt: "2026-04-16",
+    publishedAt: new Date("2026-04-16T08:00:00Z"),
     readingTimeMin: 8,
+    status: "published",
     body: [
       "Imagine it's a Tuesday. You get a message from your manager asking for a call. By noon, you're no longer employed.",
       "This isn't a scare scenario. It's a common one. Job loss affects millions of workers every year across every industry and income level. The question isn't whether it could happen to you — the question is what happens to your finances when it does.",
@@ -250,25 +232,25 @@ export const BLOG_POSTS: BlogPost[] = [
       "For someone earning $80,000/year ($6,667/month), unemployment might pay $2,200–$3,000/month depending on their state. If monthly expenses are $4,500, the monthly deficit is $1,500–$2,300. Over a 12-week search, that's $4,500–$6,900 of reserves consumed.",
       "## The Scenario Analysis",
       "Running a job loss scenario for your specific situation requires four inputs: your accessible liquid reserves, your fixed monthly obligations, your expected unemployment benefit amount (calculable from your state's unemployment website), and a realistic estimate of your job search duration.",
-      "Your break-even date — the date when your reserves run out — is the number that matters. If it's more than six months away, you're financially resilient for a typical job loss scenario. If it's less than three months away, you're in a situation where urgency is appropriate.",
-      "## What High-Resilience Looks Like",
-      "People with high financial resilience scores tend to show three patterns in job loss scenarios. First, they have at least six months of accessible reserves. Second, they have at least one other income stream — freelance income, investment income, a working spouse or partner — that provides partial coverage during the gap. Third, they have flexible expenses: they can meaningfully reduce spending without touching essential obligations.",
-      "Together, these three factors extend the runway by 50–100% compared to someone with the same salary but no reserves, no income diversity, and high fixed obligations.",
-      "## The Planning Use Case",
-      "You don't have to wait for a job loss to run this scenario. In fact, running it when your employment is stable is the most valuable time — because you can actually act on what you find.",
-      "If this scenario reveals that your break-even date is 45 days from now, you know exactly what to work on. That knowledge is worth more than any generic savings advice.",
+      "If your reserves divided by your monthly deficit is greater than your expected search duration, you're financially resilient for this scenario. If it's not, you've identified a specific gap — and a specific target for improvement.",
+      "## Why Most People Don't Do This",
+      "The analysis above takes about 20 minutes. Most people haven't done it. The research on why is consistent: we systematically avoid thinking about negative scenarios, particularly ones that feel both serious and possible.",
+      "This is understandable. It's also costly. The people who navigate job loss best are overwhelmingly the people who ran the scenario before it happened — not because they're more pessimistic, but because they converted a vague anxiety into a specific plan.",
+      "## What to Do with the Answer",
+      "If you run the scenario and find that you're resilient — your reserves would cover a realistic job search — you can stop worrying and start building. Add the next month of reserves. Diversify one income stream. Invest in a skill that would accelerate your next job search.",
+      "If you run the scenario and find a gap, you've done something valuable: you've converted a vague threat into a specific target. The gap has a number. Numbers can be closed.",
     ],
   },
   {
     slug: "geographic-resilience-where-you-live",
     title: "Geographic Resilience: Why Where You Live Is a Risk Variable, Not a Given",
-    description:
-      "Your address determines more of your resilience profile than most people realize. Here's how to think about location as a preparedness variable — and what you can do about it.",
+    description: "Your address determines more of your resilience profile than most people realize. Here's how to think about location as a preparedness variable — and what you can do about it.",
     pillar: "dimensions",
-    pillarLabel: PILLAR_LABELS["dimensions"],
+    pillarLabel: "Dimension Deep-Dive",
     targetKeyword: "geographic resilience",
-    publishedAt: "2026-04-18",
+    publishedAt: new Date("2026-04-18T08:00:00Z"),
     readingTimeMin: 6,
+    status: "published",
     body: [
       "When people think about personal resilience, they typically think about savings accounts, job skills, and mental health. Geography rarely enters the conversation. This is a mistake.",
       "Where you live determines your natural disaster exposure, your cost of living (which directly affects your financial runway), your access to healthcare and support infrastructure, and critically — how easily you could leave if you needed to.",
@@ -290,13 +272,13 @@ export const BLOG_POSTS: BlogPost[] = [
   {
     slug: "how-to-build-3-month-emergency-fund",
     title: "How to Build a 3-Month Emergency Fund (Even If You're Barely Saving Now)",
-    description:
-      "Three months of accessible reserves is the most impactful financial resilience goal most people can achieve. Here's a practical framework that works even on a tight budget.",
+    description: "Three months of accessible reserves is the most impactful financial resilience goal most people can achieve. Here's a practical framework that works even on a tight budget.",
     pillar: "how-to",
-    pillarLabel: PILLAR_LABELS["how-to"],
+    pillarLabel: "How-To Guide",
     targetKeyword: "how to build emergency fund",
-    publishedAt: "2026-04-21",
+    publishedAt: new Date("2026-04-21T08:00:00Z"),
     readingTimeMin: 7,
+    status: "published",
     body: [
       "A three-month emergency fund is not an aspirational goal reserved for people with high incomes. It's a baseline safety net that is achievable on nearly any stable income — and it's the single most impactful financial resilience investment most people can make.",
       "The reason it matters so much: without a buffer, every unexpected expense is a crisis. A $600 car repair becomes a credit card balance that takes months to pay off. A job loss becomes an immediate emergency rather than a manageable transition. The buffer is what converts crises into problems, and problems into manageable situations.",
@@ -323,13 +305,13 @@ export const BLOG_POSTS: BlogPost[] = [
   {
     slug: "good-resilience-score-interpretation",
     title: "What's a Good Resilience Score? Here's How to Interpret Yours",
-    description:
-      "A number without context isn't useful. Here's how Resilium scores are structured, what different score ranges mean, and how to use your result to prioritize your next steps.",
+    description: "A number without context isn't useful. Here's how Resilium scores are structured, what different score ranges mean, and how to use your result to prioritize your next steps.",
     pillar: "assessment",
-    pillarLabel: PILLAR_LABELS["assessment"],
+    pillarLabel: "Resilience Assessment",
     targetKeyword: "good resilience score",
-    publishedAt: "2026-04-23",
+    publishedAt: new Date("2026-04-23T08:00:00Z"),
     readingTimeMin: 5,
+    status: "published",
     body: [
       "Getting a resilience score is the beginning of the process, not the end. The number matters — but what matters more is what you do with it.",
       "Here's how to read yours.",
@@ -351,3 +333,33 @@ export const BLOG_POSTS: BlogPost[] = [
     ],
   },
 ];
+
+export async function seedBlogPostsIfEmpty(): Promise<void> {
+  try {
+    const [{ value: postCount }] = await db.select({ value: count() }).from(blogPostsTable);
+    if (Number(postCount) > 0) {
+      logger.info({ count: postCount }, "Blog posts already seeded — skipping");
+      return;
+    }
+
+    await db.insert(blogPostsTable).values(
+      SEED_POSTS.map((p) => ({
+        slug: p.slug,
+        title: p.title,
+        description: p.description,
+        pillar: p.pillar,
+        pillarLabel: p.pillarLabel,
+        targetKeyword: p.targetKeyword,
+        publishedAt: p.publishedAt,
+        readingTimeMin: p.readingTimeMin,
+        body: p.body,
+        ogImage: null,
+        status: p.status,
+      }))
+    );
+
+    logger.info({ count: SEED_POSTS.length }, "Blog posts seeded successfully");
+  } catch (err) {
+    logger.error({ err }, "Failed to seed blog posts");
+  }
+}

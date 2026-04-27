@@ -2,6 +2,7 @@ import app from "./app";
 import { logger } from "./lib/logger";
 import { db, resilienceReportsTable } from "@workspace/db";
 import { isNull, lt, and } from "drizzle-orm";
+import { seedBlogPostsIfEmpty } from "./lib/blog-seed.js";
 
 async function cleanupAnonymousReports() {
   try {
@@ -17,6 +18,8 @@ async function cleanupAnonymousReports() {
 
 cleanupAnonymousReports();
 setInterval(cleanupAnonymousReports, 24 * 60 * 60 * 1000);
+
+seedBlogPostsIfEmpty();
 
 const rawPort = process.env["PORT"];
 
