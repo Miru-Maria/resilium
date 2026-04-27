@@ -1120,22 +1120,6 @@ export function MarketingPageContent() {
           )}
         </div>
 
-        {/* Mobile Launch Checklist */}
-        <div className="bg-white/90 rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <SectionHeader
-            icon={Smartphone}
-            label="iOS App Store — When Ready"
-            title="Mobile Launch Checklist"
-            isOpen={openSections.has("mobile-launch")}
-            onToggle={() => toggle("mobile-launch")}
-          />
-          {openSections.has("mobile-launch") && (
-            <div className="border-t border-slate-200">
-              <MobileLaunchChecklistSection />
-            </div>
-          )}
-        </div>
-
         {/* Product Hunt */}
         <div className="bg-white/90 rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
           <SectionHeader
@@ -1180,6 +1164,22 @@ export function MarketingPageContent() {
           {openSections.has("research-report") && (
             <div className="border-t border-slate-200">
               <ResearchReportSection />
+            </div>
+          )}
+        </div>
+
+        {/* Mobile Launch Checklist — last, collapsed by default */}
+        <div className="bg-white/90 rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <SectionHeader
+            icon={Smartphone}
+            label="iOS App Store — When Ready"
+            title="Mobile Launch Checklist"
+            isOpen={openSections.has("mobile-launch")}
+            onToggle={() => toggle("mobile-launch")}
+          />
+          {openSections.has("mobile-launch") && (
+            <div className="border-t border-slate-200">
+              <MobileLaunchChecklistSection />
             </div>
           )}
         </div>
