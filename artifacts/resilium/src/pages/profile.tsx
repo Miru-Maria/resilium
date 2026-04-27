@@ -1033,7 +1033,7 @@ function ChecklistTab() {
                   return (
                     <div
                       key={item.id}
-                      className={`flex gap-3 p-4 rounded-xl border transition-colors shadow-sm ${isChecked ? "bg-emerald-50/40 border-emerald-300 opacity-80" : "bg-white/90 border-slate-200"}`}
+                      className={`flex gap-3 p-4 rounded-xl border transition-colors shadow-sm ${isChecked ? "bg-emerald-50 border-emerald-300 opacity-70" : "bg-white/90 border-slate-200"}`}
                     >
                       <Checkbox
                         id={key}
@@ -1047,7 +1047,7 @@ function ChecklistTab() {
                         <div className="flex items-start gap-2 flex-wrap">
                           <label
                             htmlFor={key}
-                            className={`text-sm font-medium cursor-pointer leading-snug ${isChecked ? "line-through text-gray-400" : "text-gray-900"}`}
+                            className={`text-sm font-medium cursor-pointer leading-snug ${isChecked ? "line-through text-emerald-600/60 decoration-emerald-600/40" : "text-gray-900"}`}
                           >
                             {item.title}
                           </label>
