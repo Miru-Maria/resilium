@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
+import planPreviewImg from "@assets/image_1777324687166.png";
 import { Link, useLocation, useSearch } from "wouter";
 import { SiteFooter } from "@/components/site-footer";
 import { NoIndexPage } from "@/components/page-seo";
@@ -466,36 +467,9 @@ function CompareModal({
   );
 }
 
-const PRIORITY_ORDER: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 };
-
 // ─── Overview Tab ────────────────────────────────────────────────────────────
 function OverviewTab({ plans }: { plans: PlanSummary[] }) {
-  const { isLoaded, isSignedIn, getToken } = useAuth();
-
-  const { data: checklistFocusData } = useQuery({
-    queryKey: ["latestChecklist"],
-    queryFn: async () => {
-      const token = await getToken();
-      const res = await authFetch("/api/users/me/latest-checklist", token);
-      if (!res.ok) return null;
-      return res.json();
-    },
-    enabled: !!isLoaded && !!isSignedIn && plans.length > 0,
-    staleTime: 60_000,
-  });
-
-  const { data: focusProgress } = useQuery<ProgressItem[]>({
-    queryKey: ["checklistProgress", checklistFocusData?.reportId],
-    queryFn: async () => {
-      const token = await getToken();
-      const res = await authFetch(`/api/resilience/reports/${checklistFocusData?.reportId}/checklists`, token);
-      if (!res.ok) return [];
-      const json = await res.json();
-      return json.progress ?? [];
-    },
-    enabled: !!isLoaded && !!isSignedIn && !!checklistFocusData?.reportId,
-    staleTime: 60_000,
-  });
+  const { isLoaded, isSignedIn } = useAuth();
 
   const { data: subStatus } = useSubscriptionStatus();
 
@@ -709,72 +683,26 @@ function OverviewTab({ plans }: { plans: PlanSummary[] }) {
         </Card>
       )}
 
-      {/* This Week's Focus */}
-      {(() => {
-        if (!checklistFocusData?.checklistsByArea || !checklistFocusData?.reportId) return null;
-        const progressMap: Record<string, boolean> = {};
-        for (const item of focusProgress ?? []) {
-          progressMap[`${item.area}:${item.itemId}`] = item.completed;
-        }
-        const focusItems: Array<{ area: string; item: ChecklistItem }> = [];
-        for (const area of ["financial", "health", "skills", "mobility", "psychological", "resources"]) {
-          for (const item of checklistFocusData.checklistsByArea[area] ?? []) {
-            if (!progressMap[`${area}:${item.id}`]) {
-              focusItems.push({ area, item });
-            }
-          }
-        }
-        focusItems.sort((a, b) => (PRIORITY_ORDER[a.item.priority] ?? 3) - (PRIORITY_ORDER[b.item.priority] ?? 3));
-        const topItems = focusItems.slice(0, 3);
-        if (topItems.length === 0) return null;
-        const priorityColors: Record<string, string> = {
-          critical: "text-red-600 bg-red-50",
-          high:     "text-amber-700 bg-amber-50",
-          medium:   "text-sky-700 bg-sky-50",
-          low:      "text-gray-500 bg-gray-100",
-        };
-        return (
-          <Card className="border-none shadow-md bg-primary">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base font-display flex items-center gap-2 text-primary-foreground">
-                <Target className="w-4 h-4 text-primary-foreground" /> This Week's Focus
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 pb-4">
-              {topItems.map(({ area, item }, i) => {
-                const as = AREA_STYLES[area] ?? AREA_STYLES.financial;
-                const areaIcon = AREA_ICONS[area as DimKey];
-                return (
-                  <div key={item.id} className="flex items-start gap-3 p-3 rounded-xl bg-white/90 border border-white/30 shadow-sm">
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 font-bold text-sm ${as.iconBg} ${as.iconText}`}>
-                      #{i + 1}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm text-slate-800 font-semibold leading-snug mb-1">{item.title}</p>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-md capitalize ${as.iconBg} ${as.iconText}`}>
-                          {areaIcon && React.cloneElement(areaIcon as React.ReactElement, { className: "w-2.5 h-2.5" })}
-                          {DIM_LABELS[area as DimKey] ?? area}
-                        </span>
-                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md capitalize ${priorityColors[item.priority] ?? priorityColors.low}`}>
-                          {item.priority}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-              <div className="pt-2">
-                <Link href="/profile?tab=checklist">
-                  <button type="button" className="text-xs font-semibold text-primary-foreground hover:text-primary-foreground/80 flex items-center gap-1">
-                    See all checklist items <ChevronRight className="w-3 h-3" />
-                  </button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-        );
-      })()}
+      {/* Plan Page Preview */}
+      <Link href={`/plan/${latest.reportId}`}>
+        <div className="relative overflow-hidden rounded-2xl border border-primary/20 shadow-md hover:border-primary/50 hover:shadow-lg transition-all cursor-pointer group">
+          <img
+            src={planPreviewImg}
+            alt="Your resilience plan — one thing right now and your top 3 this week"
+            className="w-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent rounded-2xl" />
+          <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
+            <div>
+              <p className="text-white font-bold text-sm leading-tight">View Your Plan</p>
+              <p className="text-white/70 text-xs mt-0.5">One thing right now · Your top 3 this week</p>
+            </div>
+            <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
+              <ChevronRight className="w-4 h-4 text-white" />
+            </div>
+          </div>
+        </div>
+      </Link>
 
       {/* Achievements */}
       <AchievementBadges
