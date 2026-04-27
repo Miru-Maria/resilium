@@ -2646,9 +2646,6 @@ export default function ProfilePage() {
               </TabsTrigger>
               <TabsTrigger value="guides" className="rounded-lg gap-1.5 text-sm">
                 <BookOpen className="w-3.5 h-3.5" /> Guides
-                {!isPagePro && (
-                  <span className="ml-0.5 text-[9px] font-bold uppercase tracking-wider text-primary/70 bg-primary/10 px-1.5 py-0.5 rounded-full">Pro</span>
-                )}
               </TabsTrigger>
             </TabsList>
 
