@@ -467,6 +467,7 @@ export default function PlanPage() {
 
   // ── Habit progressive disclosure ─────────────────────────────────────────────
   const [habitsExpanded, setHabitsExpanded] = useState(false);
+  const [checkedHabits, setCheckedHabits] = useState<Record<number, boolean>>({});
   const [inviteCopied, setInviteCopied] = useState(false);
 
   // ── Streak tracking ──────────────────────────────────────────────────────────
@@ -722,7 +723,14 @@ export default function PlanPage() {
     mobility:      "bg-orange-500/10 text-orange-700 border-orange-500/20",
     psychological: "bg-pink-500/10 text-pink-700 border-pink-500/20",
     resources:     "bg-sky-500/10 text-sky-700 border-sky-500/20",
+    social:        "bg-teal-500/10 text-teal-700 border-teal-500/20",
+    socialcapital: "bg-teal-500/10 text-teal-700 border-teal-500/20",
+    mental:        "bg-pink-500/10 text-pink-700 border-pink-500/20",
   };
+  const resolveHabitChip = (cat: string) =>
+    HABIT_CATEGORY_CHIP[cat.toLowerCase().replace(/[_\s-]/g, "")] ??
+    HABIT_CATEGORY_CHIP[cat.toLowerCase()] ??
+    "bg-muted text-muted-foreground border-border";
 
   const scenarioSimulations = (report as any).scenarioSimulations as Array<{
     scenario: string;
@@ -1087,34 +1095,51 @@ export default function PlanPage() {
                 {(habitsExpanded ? dailyHabits : dailyHabits.slice(0, 2)).map((habit, i) => {
                   const freqConfig = FREQ_CONFIG[habit.frequency] ?? FREQ_CONFIG["daily"];
                   const isFirst2 = i < 2;
+                  const isDone = !!checkedHabits[i];
                   return (
-                    <div
+                    <button
                       key={i}
-                      className={cn("flex items-start gap-4 px-5 py-4 transition-colors", isFirst2 && "bg-primary/5")}
+                      type="button"
+                      onClick={() => setCheckedHabits(prev => ({ ...prev, [i]: !prev[i] }))}
+                      className={cn(
+                        "w-full flex items-start gap-4 px-5 py-4 text-left transition-colors hover:bg-muted/20 cursor-pointer",
+                        isDone ? "bg-green-500/5" : (isFirst2 && "bg-primary/5")
+                      )}
                     >
                       <div className={cn(
-                        "w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 font-bold text-sm",
-                        isFirst2 ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
+                        "w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 font-bold text-sm transition-colors",
+                        isDone
+                          ? "bg-green-500/20 text-green-600"
+                          : isFirst2 ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
                       )}>
-                        {i + 1}
+                        {isDone ? <Check className="w-4 h-4" /> : i + 1}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium leading-snug text-foreground">{habit.habit}</p>
-                        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                          <span className={cn("text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border", freqConfig.className)}>
-                            {freqConfig.label}
-                          </span>
-                          <span className={cn("text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border", HABIT_CATEGORY_CHIP[(habit.category ?? "").toLowerCase()] ?? "bg-muted text-muted-foreground border-border")}>
-                            {habit.category}
-                          </span>
-                        </div>
+                        <p className={cn("text-sm font-medium leading-snug transition-colors", isDone ? "line-through text-muted-foreground" : "text-foreground")}>
+                          {habit.habit}
+                        </p>
+                        {!isDone && (
+                          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                            <span className={cn("text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border", freqConfig.className)}>
+                              {freqConfig.label}
+                            </span>
+                            <span className={cn("text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border", resolveHabitChip(habit.category ?? ""))}>
+                              {habit.category}
+                            </span>
+                          </div>
+                        )}
                       </div>
-                      {isFirst2 && (
+                      {isFirst2 && !isDone && (
                         <span className="flex-shrink-0 text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 border border-primary/20 rounded-full px-2 py-0.5 mt-0.5">
                           This week
                         </span>
                       )}
-                    </div>
+                      {isDone && (
+                        <span className="flex-shrink-0 text-[10px] font-bold uppercase tracking-wider text-green-600 bg-green-500/10 border border-green-500/20 rounded-full px-2 py-0.5 mt-0.5">
+                          Done
+                        </span>
+                      )}
+                    </button>
                   );
                 })}
               </div>
