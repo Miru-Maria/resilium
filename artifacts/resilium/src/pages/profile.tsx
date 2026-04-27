@@ -556,9 +556,6 @@ function OverviewTab({ plans }: { plans: PlanSummary[] }) {
   const handleInvite = useCallback(async () => {
     const score = Math.round(latest.scoreOverall);
     const msg = `I just took the Resilium resilience assessment and scored ${score}/100. It takes about 10 minutes and shows exactly where your gaps are — worth doing. Take yours: https://resilium-platform.com`;
-    if (typeof navigator !== "undefined" && (navigator as any).share) {
-      try { await (navigator as any).share({ title: "Take the Resilium Resilience Assessment", text: msg }); return; } catch {}
-    }
     try {
       await navigator.clipboard.writeText(msg);
       setInviteCopied(true);
