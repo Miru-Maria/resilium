@@ -927,6 +927,7 @@ export default function LandingPage() {
                 {
                   icon: <BookOpen className="w-5 h-5 text-primary" />,
                   title: "Crisis Guides",
+                  badge: "Pro",
                   desc: "15 practical, location-relevant guides for financial crisis, job loss, power outages, flooding, medical emergencies, digital security, and more — readable offline.",
                 },
                 {
