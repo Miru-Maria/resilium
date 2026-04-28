@@ -3,7 +3,7 @@ import { Link, useRoute } from "wouter";
 import { SiteFooter } from "@/components/site-footer";
 import { PageSEO } from "@/components/page-seo";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight, Clock, Loader2, AlertTriangle, Link2, Check } from "lucide-react";
+import { ArrowLeft, ArrowRight, Clock, Loader2, AlertTriangle, Link2, Check, ExternalLink, BookOpen } from "lucide-react";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { Helmet } from "react-helmet-async";
@@ -198,6 +198,94 @@ function ShareBar({ post }: { post: BlogPost }) {
   );
 }
 
+const DATA_RESEARCH_SOURCES = [
+  {
+    title: "Connor-Davidson Resilience Scale (CD-RISC)",
+    authors: "Connor, K. M., & Davidson, J. R. T.",
+    year: "2003",
+    publication: "Depression and Anxiety, 18(2), 76–82",
+    url: "https://scholar.google.com/scholar?q=Connor+Davidson+Resilience+Scale+CD-RISC+2003",
+  },
+  {
+    title: "The Brief Resilience Scale (BRS)",
+    authors: "Smith, B. W., et al.",
+    year: "2008",
+    publication: "International Journal of Behavioral Medicine, 15(3), 194–200",
+    url: "https://scholar.google.com/scholar?q=Brief+Resilience+Scale+Smith+2008+International+Journal+Behavioral+Medicine",
+  },
+  {
+    title: "Salutogenesis: Unraveling the Mystery of Health",
+    authors: "Antonovsky, A.",
+    year: "1987",
+    publication: "Jossey-Bass",
+    url: "https://scholar.google.com/scholar?q=Antonovsky+Unraveling+Mystery+Health+Salutogenesis+1987",
+  },
+  {
+    title: "The Social Ecology of Resilience",
+    authors: "Ungar, M. (Ed.)",
+    year: "2011",
+    publication: "Springer",
+    url: "https://scholar.google.com/scholar?q=Ungar+Social+Ecology+Resilience+2011+Springer",
+  },
+  {
+    title: "Individual and Household Preparedness Framework",
+    authors: "U.S. Federal Emergency Management Agency (FEMA)",
+    year: "2020",
+    publication: "Ready.gov",
+    url: "https://www.ready.gov/",
+  },
+  {
+    title: "Future of Jobs Report",
+    authors: "World Economic Forum",
+    year: "2023",
+    publication: "World Economic Forum, Geneva",
+    url: "https://www.weforum.org/publications/the-future-of-jobs-report-2023/",
+  },
+];
+
+function DataResearchSources() {
+  return (
+    <div className="my-10 rounded-2xl border border-border/60 bg-card/20 overflow-hidden">
+      <div className="flex items-center gap-2.5 px-5 py-4 border-b border-border/60 bg-card/30">
+        <BookOpen className="w-4 h-4 text-primary flex-shrink-0" />
+        <h3 className="text-sm font-semibold text-foreground">Sources & Methodology</h3>
+        <span className="text-xs text-muted-foreground ml-auto">
+          Resilium's scoring is grounded in peer-reviewed research
+        </span>
+      </div>
+      <ul className="divide-y divide-border/40">
+        {DATA_RESEARCH_SOURCES.map((src) => (
+          <li key={src.title} className="flex items-start justify-between gap-4 px-5 py-3.5">
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-foreground leading-snug">{src.title}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {src.authors} · <span className="italic">{src.publication}</span> · {src.year}
+              </p>
+            </div>
+            <a
+              href={src.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`View source: ${src.title}`}
+              className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/70 transition-colors shrink-0 mt-0.5"
+            >
+              View <ExternalLink className="w-3 h-3" />
+            </a>
+          </li>
+        ))}
+      </ul>
+      <div className="px-5 py-3 border-t border-border/40 bg-card/10">
+        <p className="text-xs text-muted-foreground">
+          Full methodology and context for each source:{" "}
+          <Link href="/about" className="text-primary hover:text-primary/80 underline underline-offset-2">
+            About Resilium →
+          </Link>
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function renderBody(body: string[]) {
   const elements: React.ReactNode[] = [];
 
@@ -354,6 +442,8 @@ export default function BlogPostPage() {
             </motion.div>
 
             <ShareBar post={post} />
+
+            {post.pillar === "data" && <DataResearchSources />}
 
             <AssessmentCTA variant="footer" />
 
