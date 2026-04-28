@@ -661,6 +661,40 @@ function ProductHuntSection() {
         Productivity · Health & Fitness · Quantified Self
       </CopyBlock>
 
+      <SubHeading><Megaphone className="w-4 h-4" /> PH Shoutouts</SubHeading>
+
+      <InfoBox>
+        Product Hunt recommends 3 shoutouts, but more is fine. Each answer lives as a founder review on that product's page with a link back to Resilium — extra visibility beyond launch day.
+      </InfoBox>
+
+      <CopyBlock label="Clerk — why over Auth0 / Supabase Auth / Firebase">
+        Clerk was the only auth solution that worked seamlessly across both our React web app and Expo mobile app without duplicating logic. The prebuilt components saved weeks of work, and the production dashboard gives us exactly the user visibility we need.
+      </CopyBlock>
+
+      <CopyBlock label="Stripe — why over Paddle / LemonSqueezy">
+        Stripe's billing API handles our annual/monthly subscription logic cleanly, and the webhook reliability is critical when we're gating Pro features. We looked at Paddle for its VAT handling, but Stripe's documentation and ecosystem depth won out.
+      </CopyBlock>
+
+      <CopyBlock label="Resend — why over SendGrid / Mailgun / Postmark">
+        Resend's API is the cleanest we've used — it took under an hour to integrate transactional emails for welcome messages and upgrade confirmations. Deliverability has been excellent since day one, with zero configuration headaches.
+      </CopyBlock>
+
+      <CopyBlock label="Replit — why over local dev + separate hosting">
+        Replit let us build, preview, and deploy the entire full-stack platform — web, mobile backend, and database — from a single environment. No local setup friction, no context switching between tools. For a solo founder, that's a significant force multiplier.
+      </CopyBlock>
+
+      <CopyBlock label="Expo — why over React Native CLI / Flutter">
+        Expo gave us a production-ready iOS and Android app that shares logic with our web platform. Over-the-air updates mean we can ship fixes without waiting for App Store review cycles, which matters a lot in the early launch phase.
+      </CopyBlock>
+
+      <CopyBlock label="GitHub — why over GitLab / Bitbucket">
+        GitHub has been our version control backbone from day one. The integration with Replit and the ability to manage the codebase, track changes, and roll back safely gave us the confidence to iterate fast without breaking production.
+      </CopyBlock>
+
+      <CopyBlock label="OpenAI — why over Anthropic / Gemini / open-source models">
+        OpenAI's API powers our AI Companion and personalized action plan generation. The quality of contextual reasoning — grounding advice in a user's specific score rather than giving generic output — was noticeably stronger than alternatives we tested.
+      </CopyBlock>
+
       <CopyBlock label="Tagline (max 60 chars)">
         Know exactly where you stand before disruption finds you.
       </CopyBlock>
