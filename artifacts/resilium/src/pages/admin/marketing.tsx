@@ -657,6 +657,10 @@ function ProductHuntSection() {
         Resilium – Score Your Preparedness
       </CopyBlock>
 
+      <CopyBlock label="PH Tags (pick 3)">
+        Productivity · Health & Fitness · Quantified Self
+      </CopyBlock>
+
       <CopyBlock label="Tagline (max 60 chars)">
         Know exactly where you stand before disruption finds you.
       </CopyBlock>
