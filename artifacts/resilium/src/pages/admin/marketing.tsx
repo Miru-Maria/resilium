@@ -653,8 +653,8 @@ function ProductHuntSection() {
 
       <SubHeading><Megaphone className="w-4 h-4" /> Core Copy</SubHeading>
 
-      <CopyBlock label="Headline (max 60 chars)">
-        Resilium — Your Personal Resilience Profile
+      <CopyBlock label="PH Launch Name (max 40 chars)">
+        Resilium – Score Your Preparedness
       </CopyBlock>
 
       <CopyBlock label="Tagline (max 60 chars)">
