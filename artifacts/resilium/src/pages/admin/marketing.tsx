@@ -412,8 +412,8 @@ function MasterChecklistSection() {
       {/* ── Product Hunt Launch ───────────────────────────────────────────── */}
       <CollapsibleCategory icon={Rocket} id="product-hunt" label="Product Hunt Launch">
         <ChecklistItem
-          text="Confirm your Product Hunt hunter"
-          detail="Ask someone with PH followers and a history of successful hunts to post for you. A hunter with 500+ followers measurably improves Day 1 performance."
+          text="Confirm you are both the hunter and maker on the listing"
+          detail="You are self-hunting — you will post the product yourself. Make sure your Product Hunt profile is complete, has a photo, and shows prior activity before launch day."
         />
         <ChecklistItem
           text="Prepare Product Hunt gallery — 7 images + thumbnail at 1270×760 px"
@@ -436,8 +436,8 @@ function MasterChecklistSection() {
           detail="r/preppers, r/personalfinance, r/selfimprovement. Post the launch link with a personal note — not just the URL."
         />
         <ChecklistItem
-          text="Prepare Twitter/X launch thread"
-          detail="7-tweet thread covering: what Resilium does, the problem it solves, one compelling data point, how it works (3 steps), and the PH link."
+          text="Prepare LinkedIn launch post"
+          detail="Write a personal post covering: what Resilium does, the problem it solves, one compelling data point, how it works (3 steps), and the PH link. LinkedIn posts with a story angle outperform plain link shares."
         />
         <ChecklistItem
           text="Go live on Product Hunt at 12:01 AM Pacific Time (Tuesday–Thursday)"
@@ -759,13 +759,13 @@ The assessment is free and anonymous — no email required. Takes about 12 minut
         <div>
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Before Launch (T−7 to T−1 days)</p>
           <ul className="space-y-3">
-            <ChecklistItem text="Confirm your hunter — ask someone with Product Hunt followers and history" />
+            <ChecklistItem text="Confirm you are self-hunting — complete your PH profile before launch" />
             <ChecklistItem text="Prepare the full gallery: 7 images, thumbnail, logo (all 1270×760 px)" />
             <ChecklistItem text="Finalise all copy: headline, tagline, short + long description" />
             <ChecklistItem text="Draft the first comment in advance — post it within 2 minutes of launch" />
             <ChecklistItem text="Notify your personal network (email/WhatsApp) to vote at launch time" />
             <ChecklistItem text="Schedule community posts in r/preppers, r/personalfinance, r/selfimprovement for day-of" />
-            <ChecklistItem text="Prepare a short Twitter/X thread summarising the product story" />
+            <ChecklistItem text="Prepare a LinkedIn post summarising the product story" />
           </ul>
         </div>
         <div>
@@ -774,7 +774,7 @@ The assessment is free and anonymous — no email required. Takes about 12 minut
             <ChecklistItem text="Go live at 12:01 AM Pacific Time (reset hour)" detail="Earlier is better — more hours to accumulate votes." />
             <ChecklistItem text="Post the first comment immediately after launch" />
             <ChecklistItem text="Share the launch link in every relevant Slack/Discord community you're in" />
-            <ChecklistItem text="Post Twitter/X thread tagging Product Hunt" />
+            <ChecklistItem text="Post LinkedIn launch post tagging Product Hunt" />
             <ChecklistItem text="Respond to every comment within 30 minutes throughout launch day" />
             <ChecklistItem text="Monitor upvote velocity — if slow, re-engage community channels at T+4 h and T+8 h" />
             <ChecklistItem text="Cross-post to LinkedIn with the 'know your resilience gaps before disruption hits' frame" />
@@ -788,7 +788,7 @@ The assessment is free and anonymous — no email required. Takes about 12 minut
         rows={[
           ["T+2 h", "Reply to all PH comments with depth — no copy-paste responses", "Boost comment thread, signal authenticity"],
           ["T+6 h", "Post to r/preppers and r/personalfinance (not promotional — share finding)", "Drive organic signups"],
-          ["T+12 h", "Post a 'behind the scenes' thread on Twitter/X — why you built it", "Warm audience expansion"],
+          ["T+12 h", "Post a 'behind the scenes' LinkedIn post — why you built it", "Warm audience expansion"],
           ["T+24 h", "Email everyone who took the assessment that day with a personal note from the founder", "Conversion and loyalty"],
           ["T+30 h", "Compile top 5 community questions into a brief FAQ post on PH discussion", "Keep discussion alive"],
           ["T+36 h", "DM any PH makers who upvoted and ask for honest feedback", "Network building"],
@@ -1095,7 +1095,7 @@ Resilium | resilium-platform.com`}
           ["Pre-launch press outreach (embargo)", "Week 10", "Founder", "Send embargo pack to top 5 publications 5 days before publication"],
           ["Public launch — report publication", "Week 11", "Founder", "Publish on Resilium website. Post to all channels simultaneously."],
           ["Press follow-up", "Weeks 11–12", "Founder", "Follow up with all pitches. Answer journalist queries. Share data cuts."],
-          ["Community amplification", "Weeks 11–13", "Founder", "Post findings threads on Reddit, LinkedIn, Twitter. Engage comments."],
+          ["Community amplification", "Weeks 11–13", "Founder", "Post findings threads on Reddit and LinkedIn. Engage comments."],
         ]}
       />
     </div>
