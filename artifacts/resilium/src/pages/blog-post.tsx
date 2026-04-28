@@ -115,7 +115,6 @@ function AssessmentCTA({ variant = "inline" }: { variant?: "inline" | "footer" }
 
 function renderBody(body: string[]) {
   const elements: React.ReactNode[] = [];
-  let ctaCount = 0;
 
   body.forEach((block, idx) => {
     if (block.startsWith("## ")) {
@@ -127,10 +126,6 @@ function renderBody(body: string[]) {
           {block.slice(3)}
         </h2>
       );
-      ctaCount++;
-      if (ctaCount % 2 === 0) {
-        elements.push(<AssessmentCTA key={`cta-${idx}`} />);
-      }
       return;
     }
 
