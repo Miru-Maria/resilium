@@ -115,7 +115,7 @@ const MEDIA_CITATIONS = [
     author: "Francine Russo",
     piece: "The Science of Bouncing Back",
     year: "2016",
-    url: "https://time.com/4126276/science-of-resilience/",
+    url: null,
     paywalled: false,
     quote: "Researchers studying trauma survivors found the same pattern everywhere: the people who recovered fastest weren't the ones who tried hardest — they were the ones who knew where their strengths actually were.",
     context: "TIME's reporting on resilience science has consistently found that self-awareness of one's actual vulnerabilities — not wishful thinking about them — is the primary predictor of recovery from disruption. This is precisely why Resilium scores you honestly across six dimensions rather than offering generic affirmations.",
@@ -125,7 +125,7 @@ const MEDIA_CITATIONS = [
     author: "The Economist Intelligence Unit",
     piece: "Resilience in an Age of Uncertainty",
     year: "2022",
-    url: "https://www.economist.com/special-report/2022/04/23/resilience-has-become-fashionable",
+    url: null,
     paywalled: true,
     quote: "The pandemic made visible what resilience researchers had argued for decades: that individuals and institutions that had invested in preparation absorbed shocks that others did not survive. The gap between the prepared and the unprepared widened dramatically.",
     context: "The Economist's post-pandemic analysis documented the real-world cost of unpreparedness at the individual and household level. The data showed that financial runway, social support networks, and skill transferability were the three variables that most strongly predicted household stability through 2020–2021.",
@@ -135,7 +135,7 @@ const MEDIA_CITATIONS = [
     author: "Nicolas Cole",
     piece: "Why Resilience Has Become the Most Important Skill of the 21st Century",
     year: "2020",
-    url: "https://www.forbes.com/sites/nicolascole1/2020/04/09/why-resilience-has-become-the-most-important-skill-of-the-21st-century/",
+    url: null,
     paywalled: false,
     quote: "The world doesn't need more information about resilience. It needs a practical way to measure it, build it, and track it over time — and most people have no idea where to even start.",
     context: "Forbes identified the same gap Resilium was built to close: the tools for measuring and actively building personal resilience at the individual level simply didn't exist. Generic self-help content, expensive consultants, or vague wellness apps are not the same as a structured, honest, action-oriented resilience plan.",
@@ -361,14 +361,16 @@ export default function AboutPage() {
                       <span className="text-xs font-semibold text-muted-foreground bg-muted/40 px-2 py-0.5 rounded-full">
                         "{citation.piece}", {citation.year}
                       </span>
-                      <a
-                        href={citation.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80 transition-colors"
-                      >
-                        Read the article <ExternalLink className="w-3 h-3" />
-                      </a>
+                      {citation.url && (
+                        <a
+                          href={citation.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80 transition-colors"
+                        >
+                          Read the article <ExternalLink className="w-3 h-3" />
+                        </a>
+                      )}
                       {citation.paywalled && (
                         <span className="text-xs text-muted-foreground/60 italic">· may require subscription</span>
                       )}
