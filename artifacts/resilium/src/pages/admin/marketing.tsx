@@ -405,7 +405,7 @@ function MasterChecklistSection() {
         />
         <CompletedItem
           text="Publish GDPR contact email address"
-          detail="Done. hello@resilium-platform.com is referenced in the Privacy Policy, unsubscribe flow, and email footer across the platform."
+          detail="Done. contact_resilium@pm.me is published in Privacy Policy, Terms of Service, Refund Policy, About page, and structured data in index.html."
         />
       </CollapsibleCategory>
 

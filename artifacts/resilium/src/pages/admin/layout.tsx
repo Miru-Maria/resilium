@@ -53,7 +53,7 @@ class AdminErrorBoundary extends Component<{ children: ReactNode }, AdminErrorBo
 
 interface AdminLayoutProps {
   children: React.ReactNode;
-  activeSection?: "dashboard" | "testimonials" | "mobile" | "gdpr" | "consent" | "ux-testing" | "users" | "announcements" | "marketing" | "security" | "monitoring" | "documents" | "analytics" | "blog";
+  activeSection?: "dashboard" | "testimonials" | "mobile" | "gdpr" | "consent" | "ux-testing" | "users" | "announcements" | "marketing" | "security" | "monitoring" | "documents" | "analytics" | "blog" | "post-launch";
 }
 
 /** @deprecated Token is now stored in an httpOnly cookie — no longer readable from JS. */
@@ -158,6 +158,7 @@ export function AdminLayout({ children, activeSection }: AdminLayoutProps) {
     { href: "/admin/security",     label: "Security",     icon: KeyRound,        key: "security" },
     { href: "/admin/monitoring",   label: "Sentry",       icon: Activity,        key: "monitoring" },
     { href: "/admin/blog",         label: "Blog Posts",   icon: Newspaper,       key: "blog" },
+    { href: "/admin/post-launch",  label: "Post-Launch",  icon: Rocket,          key: "post-launch" },
   ];
 
   const isDocuments = activeSection === "documents";
