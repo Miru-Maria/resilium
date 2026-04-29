@@ -53,7 +53,7 @@ function CollapsibleCategory({
         {Icon && <Icon className="w-3.5 h-3.5 text-primary flex-shrink-0" />}
         <span className="text-xs font-bold uppercase tracking-widest text-primary">{label}</span>
         {badge && (
-          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200 whitespace-nowrap">
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/20 text-primary border border-primary/30 whitespace-nowrap">
             {badge}
           </span>
         )}
@@ -79,15 +79,27 @@ function ChecklistItem({ text, detail }: { text: string; detail?: string }) {
     try { localStorage.setItem(storageKey, next ? "1" : "0"); } catch {}
   };
   return (
-    <li className="flex items-start gap-3 cursor-pointer group" onClick={toggle}>
-      {checked ? (
-        <CheckSquare className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-      ) : (
-        <Square className="w-4 h-4 text-slate-400 flex-shrink-0 mt-0.5 group-hover:text-slate-600 transition-colors" />
-      )}
-      <div>
-        <span className={cn("text-sm", checked ? "line-through text-gray-400" : "text-gray-900")}>{text}</span>
-        {detail && <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{detail}</p>}
+    <li
+      className="flex items-start gap-3 cursor-pointer group select-none"
+      onClick={toggle}
+    >
+      <div className="flex-shrink-0 mt-0.5">
+        {checked ? (
+          <CheckSquare className="w-4 h-4 text-primary" />
+        ) : (
+          <Square className="w-4 h-4 text-muted-foreground/50 group-hover:text-muted-foreground transition-colors" />
+        )}
+      </div>
+      <div className="min-w-0">
+        <span className={cn(
+          "text-sm leading-snug",
+          checked ? "line-through text-muted-foreground/50" : "text-foreground"
+        )}>
+          {text}
+        </span>
+        {detail && (
+          <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{detail}</p>
+        )}
       </div>
     </li>
   );
@@ -95,11 +107,15 @@ function ChecklistItem({ text, detail }: { text: string; detail?: string }) {
 
 function CompletedItem({ text, detail }: { text: string; detail?: string }) {
   return (
-    <li className="flex items-start gap-3 opacity-60">
-      <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
-      <div>
-        <span className="text-sm line-through text-gray-500">{text}</span>
-        {detail && <p className="text-xs text-gray-400 mt-0.5 leading-relaxed">{detail}</p>}
+    <li className="flex items-start gap-3 opacity-50">
+      <div className="flex-shrink-0 mt-0.5">
+        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+      </div>
+      <div className="min-w-0">
+        <span className="text-sm line-through text-muted-foreground leading-snug">{text}</span>
+        {detail && (
+          <p className="text-xs text-muted-foreground/70 mt-1 leading-relaxed">{detail}</p>
+        )}
       </div>
     </li>
   );
@@ -107,9 +123,9 @@ function CompletedItem({ text, detail }: { text: string; detail?: string }) {
 
 function InfoBox({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex items-start gap-3 bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 mb-4">
-      <AlertTriangle className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" />
-      <p className="text-sm text-blue-800 leading-relaxed">{children}</p>
+    <div className="flex items-start gap-3 bg-blue-950/40 border border-blue-800/50 rounded-xl px-4 py-3 mb-4">
+      <AlertTriangle className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
+      <p className="text-sm text-blue-300 leading-relaxed">{children}</p>
     </div>
   );
 }
@@ -134,7 +150,7 @@ function QuickLinks() {
           href={href}
           target="_blank"
           rel="noreferrer"
-          className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-primary/10 hover:text-primary text-slate-700 border border-slate-200 transition-colors"
+          className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg bg-card border border-border text-muted-foreground hover:text-primary hover:border-primary/40 transition-colors"
         >
           <Icon className="w-3 h-3" />
           {label}
@@ -152,11 +168,11 @@ export default function PostLaunchPage() {
       <div className="max-w-3xl mx-auto px-6 py-8">
 
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
             <Rocket className="w-6 h-6 text-primary" />
             Post-Launch Tasks
           </h1>
-          <p className="text-sm text-gray-500 mt-1 leading-relaxed">
+          <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
             Your daily and weekly checklist after Product Hunt launch. Click any item to mark it done — progress saves automatically in your browser.
           </p>
         </div>
