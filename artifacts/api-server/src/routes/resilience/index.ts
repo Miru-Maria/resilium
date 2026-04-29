@@ -212,7 +212,7 @@ router.post("/assess", assessRateLimit, async (req, res) => {
           await db.insert(usersTable).values({ id: userId }).onConflictDoNothing();
         }
 
-        await db.insert(resilienceReportsTable).values({
+        const reportRow = {
           reportId,
           sessionId: input.sessionId ?? null,
           userId: userId ?? null,
@@ -260,7 +260,26 @@ router.post("/assess", assessRateLimit, async (req, res) => {
           householdMode: input.householdMode ?? null,
           householdComposition: input.householdComposition ?? null,
           createdAt: now,
-        });
+        };
+
+        // Retry once on connection-level failures (can occur after long AI generation
+        // if the pool connection was silently dropped by the network layer).
+        try {
+          await db.insert(resilienceReportsTable).values(reportRow);
+        } catch (insertErr: any) {
+          const code = insertErr?.cause?.code ?? insertErr?.code ?? "";
+          const isConnErr = /ECONNRESET|EPIPE|ENOTCONN|57P01|08|connection/i.test(
+            String(code) + String(insertErr?.message ?? "")
+          );
+          req.log.warn(
+            { jobId, causeCode: insertErr?.cause?.code, causeMsg: insertErr?.cause?.message, isConnErr },
+            "Report INSERT failed on first attempt — retrying"
+          );
+          if (!isConnErr) throw insertErr;
+          // Wait briefly and retry with a fresh pool connection
+          await new Promise(r => setTimeout(r, 500));
+          await db.insert(resilienceReportsTable).values(reportRow);
+        }
 
         // Fire welcome email on first authenticated plan (fire-and-forget)
         if (userId && typeof planCount === "number" && planCount === 0) {
@@ -348,11 +367,15 @@ router.post("/assess", assessRateLimit, async (req, res) => {
         reportJobs.set(jobId, { status: "complete", createdAt: Date.now(), reportId });
         req.log.info({ jobId, reportId }, "Background report generation complete");
       } catch (err: any) {
-        // Log the underlying cause (actual PostgreSQL error) separately so it is
-        // never truncated by the outer JSON stringification of `err`.
+        // Log the underlying cause (actual PostgreSQL error) in its own entry FIRST
+        // so it is never buried/truncated after the giant SQL errMsg below.
         const cause = err?.cause;
         req.log.error(
-          { jobId, errMsg: err?.message, causeMsg: cause?.message, causeCode: cause?.code, causeDetail: cause?.detail },
+          { jobId, causeCode: cause?.code, causeMsg: cause?.message, causeDetail: cause?.detail },
+          "Report generation error cause"
+        );
+        req.log.error(
+          { jobId, errMsg: err?.message?.slice(0, 800) },
           "Background report generation failed"
         );
         reportJobs.set(jobId, { status: "failed", createdAt: Date.now(), error: "Failed to generate report. Please try again." });

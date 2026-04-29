@@ -13,8 +13,10 @@ if (!process.env.DATABASE_URL) {
 export const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   max: 10,
-  idleTimeoutMillis: 30_000,
-  connectionTimeoutMillis: 5_000,
+  idleTimeoutMillis: 120_000,
+  connectionTimeoutMillis: 10_000,
+  keepAlive: true,
+  keepAliveInitialDelayMillis: 15_000,
 });
 
 // Swallow idle-client errors emitted when the server terminates a connection
