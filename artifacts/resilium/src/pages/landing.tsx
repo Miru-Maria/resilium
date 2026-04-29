@@ -84,7 +84,7 @@ function TestimonialsSection() {
     <section className="w-full py-20 px-6 bg-card/40 border-y border-border/60">
       <div className="max-w-5xl mx-auto">
         {/* Trust bar — always visible */}
-        <div className="flex flex-wrap items-center justify-center gap-6 md:gap-10 mb-14">
+        <div className="flex flex-wrap items-center justify-center gap-6 md:gap-10 mb-6">
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-0.5">
               {[1,2,3,4,5].map(s => (
@@ -104,6 +104,23 @@ function TestimonialsSection() {
             <CheckCircle2 className="w-4 h-4 text-primary" />
             <span>GDPR compliant · No credit card required</span>
           </div>
+        </div>
+
+        {/* Product Hunt badge */}
+        <div className="flex justify-center mb-14">
+          <a
+            href="https://www.producthunt.com/products/resilium-score-your-preparedness/reviews/new?utm_source=badge-product_review&utm_medium=badge&utm_source=badge-resilium&#0045;score&#0045;your&#0045;preparedness"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img
+              src="https://api.producthunt.com/widgets/embed-image/v1/product_review.svg?product_id=1214726&theme=dark"
+              alt="Resilium – Score Your Preparedness | Product Hunt"
+              style={{ width: 250, height: 54 }}
+              width="250"
+              height="54"
+            />
+          </a>
         </div>
 
         {testimonials.length > 0 && (
