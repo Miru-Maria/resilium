@@ -106,8 +106,8 @@ function TestimonialsSection() {
           </div>
         </div>
 
-        {/* Product Hunt badge */}
-        <div className="flex justify-center mb-14">
+        {/* Launch badges */}
+        <div className="flex flex-wrap items-center justify-center gap-4 mb-14">
           <a
             href="https://www.producthunt.com/products/resilium-score-your-preparedness/reviews/new?utm_source=badge-product_review&utm_medium=badge&utm_source=badge-resilium&#0045;score&#0045;your&#0045;preparedness"
             target="_blank"
@@ -118,6 +118,18 @@ function TestimonialsSection() {
               alt="Resilium – Score Your Preparedness | Product Hunt"
               style={{ width: 250, height: 54 }}
               width="250"
+              height="54"
+            />
+          </a>
+          <a
+            href="https://www.shipit.buzz/products/resilium-score-your-preparedness?ref=badge"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img
+              src="https://www.shipit.buzz/api/products/resilium-score-your-preparedness/badge?theme=dark"
+              alt="Featured on Shipit"
+              style={{ height: 54 }}
               height="54"
             />
           </a>
