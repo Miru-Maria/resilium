@@ -185,3 +185,33 @@ id = "vWCOIJtmhXLdGelT5dTYh"
 uri = "file://artifacts/resilium/public/resilium-trade-secret-RO-v2.docx"
 type = "word_document"
 title = "Notificare Secret Comercial — Română (fresh)"
+
+[[outputs]]
+id = "ZZbRMVkXOcpVJ8ruPwY5q"
+uri = "file://artifacts/resilium/public/opengraph.jpg"
+type = "image"
+title = "Social Banner — 1280×720 (best for collaborations)"
+
+[[outputs]]
+id = "VosNJQ7gi7QXVU2fHVrEw"
+uri = "file://artifacts/resilium/public/resilium-logo-v2.png"
+type = "image"
+title = "Resilium Logo v2 — 331×334"
+
+[[outputs]]
+id = "UNFDXnAcDROZBGqjZV1eM"
+uri = "file://artifacts/resilium/public/logo.png"
+type = "image"
+title = "App Icon — 512×512"
+
+[[outputs]]
+id = "o2AsYsDLVql7K5LB7u89o"
+uri = "file://artifacts/resilium/public/brain-logo.png"
+type = "image"
+title = "Brain Logo — 256×194"
+
+[[outputs]]
+id = "S84ULmwGYGNe-cKpkDhRE"
+uri = "file://artifacts/resilium/public/favicon.svg"
+type = "image"
+title = "Logo SVG — scalable (vector)"
