@@ -454,13 +454,16 @@ Resilium | resilium-platform.com`;
       {/* Stats + generator */}
       <div>
         <p className="text-xs font-bold uppercase tracking-widest text-primary mb-3">Weekly Update Generator</p>
-        <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 mb-4">
+        <div className="p-4 rounded-xl border border-slate-300 bg-slate-100 mb-4">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-xs font-semibold text-gray-700">Live numbers from the database</p>
+            <p className="text-xs font-bold text-gray-900">Live numbers from the database</p>
             {loadingStats && <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />}
           </div>
           {statsErr && (
-            <p className="text-xs text-red-500 mb-2">Could not load stats — you may need to re-authenticate.</p>
+            <div className="flex items-start gap-2 bg-red-50 border border-red-300 rounded-lg px-3 py-2 mb-3">
+              <AlertCircle className="w-3.5 h-3.5 text-red-600 flex-shrink-0 mt-0.5" />
+              <p className="text-xs text-red-700 font-medium">Could not load stats — log out and back into admin to refresh your session, then reload this page.</p>
+            </div>
           )}
           {stats && (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
@@ -470,24 +473,24 @@ Resilium | resilium-platform.com`;
                 { label: "Active subscribers", value: stats.active_subs },
                 { label: "Plan views this week", value: stats.plan_views_7d },
               ].map(s => (
-                <div key={s.label} className="bg-white rounded-lg border border-slate-200 p-3 text-center">
+                <div key={s.label} className="bg-white rounded-lg border border-slate-300 p-3 text-center">
                   <p className="text-xl font-bold text-gray-900">{s.value}</p>
-                  <p className="text-[10px] text-gray-500 leading-tight mt-0.5">{s.label}</p>
-                  {s.note && <p className="text-[9px] text-amber-600 mt-0.5">{s.note}</p>}
+                  <p className="text-[10px] text-gray-600 leading-tight mt-0.5">{s.label}</p>
+                  {s.note && <p className="text-[9px] text-amber-700 font-medium mt-0.5">{s.note}</p>}
                 </div>
               ))}
             </div>
           )}
-          <div className="flex items-center gap-2">
-            <label className="text-xs text-gray-600 whitespace-nowrap">Clerk signup count:</label>
+          <div className="flex items-center gap-3 flex-wrap">
+            <label className="text-xs font-semibold text-gray-800 whitespace-nowrap">Clerk signup count:</label>
             <input
               type="number"
               placeholder="e.g. 52"
               value={clerkUsers}
               onChange={e => setClerkUsers(e.target.value)}
-              className="flex-1 max-w-[120px] px-2 py-1 text-xs border border-slate-300 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-primary"
+              className="max-w-[120px] px-2 py-1.5 text-sm font-medium border-2 border-slate-400 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
             />
-            <span className="text-[10px] text-gray-400">Check your Clerk dashboard and enter it here</span>
+            <span className="text-xs text-gray-600">Check your Clerk dashboard and enter it here — the generated posts will use this number.</span>
           </div>
         </div>
         <div className="space-y-4">
