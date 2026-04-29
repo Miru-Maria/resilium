@@ -621,6 +621,27 @@ router.post("/backups/trigger", requireAdminSession, async (req, res) => {
   }
 });
 
+// ── Growth stats snapshot ─────────────────────────────────────────────────────
+
+router.get("/stats", requireAdminSession, async (_req, res) => {
+  try {
+    const [row] = await db.execute(sql`
+      SELECT
+        (SELECT COUNT(*)::int FROM users)                                                        AS total_users,
+        (SELECT COUNT(*)::int FROM users WHERE created_at >= NOW() - INTERVAL '7 days')         AS users_7d,
+        (SELECT COUNT(*)::int FROM resilience_reports)                                          AS total_reports,
+        (SELECT COUNT(*)::int FROM resilience_reports WHERE created_at >= NOW() - INTERVAL '7 days') AS reports_7d,
+        (SELECT COUNT(*)::int FROM subscriptions WHERE status = 'active')                       AS active_subs,
+        (SELECT COUNT(*)::int FROM subscriptions WHERE status = 'active' AND created_at >= NOW() - INTERVAL '7 days') AS subs_7d,
+        (SELECT COUNT(*)::int FROM plan_views WHERE viewed_at >= NOW() - INTERVAL '7 days')    AS plan_views_7d
+    `);
+    res.json(row ?? {});
+  } catch (err) {
+    logger.error({ err }, "Failed to fetch admin stats");
+    res.status(500).json({ error: "INTERNAL_ERROR" });
+  }
+});
+
 // ── Health check results & triggers ──────────────────────────────────────────
 
 router.get("/health-checks", requireAdminSession, (_req, res) => {

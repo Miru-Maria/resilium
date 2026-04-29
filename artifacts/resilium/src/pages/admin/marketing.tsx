@@ -1,14 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AdminLayout } from "./layout";
 import {
   Rocket, MessageSquare, BarChart2, ChevronDown, ChevronRight,
   CheckSquare, Square, Calendar, Target, FileText,
   Newspaper, Globe, Search, BookOpen, TrendingUp, Megaphone, Map,
-  Smartphone, ShieldCheck, Clock, CheckCircle2
+  Smartphone, ShieldCheck, Clock, CheckCircle2, Zap, Copy, RefreshCw,
+  Loader2, Heart, AlertCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type SectionKey = "master-checklist" | "mobile-launch" | "product-hunt" | "reddit" | "research-report";
+const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+type SectionKey = "growth-guide" | "master-checklist" | "mobile-launch" | "product-hunt" | "reddit" | "research-report";
 
 /* ─── MOBILE LAUNCH CHECKLIST ─────────────────────────────── */
 
@@ -243,6 +246,290 @@ function CategoryHeading({ icon: Icon, children }: { icon?: React.ElementType; c
       {Icon && <Icon className="w-3.5 h-3.5 text-primary flex-shrink-0" />}
       <span className="text-xs font-bold uppercase tracking-widest text-primary">{children}</span>
       <div className="flex-1 h-px bg-primary/20" />
+    </div>
+  );
+}
+
+// ── Growth Guide ─────────────────────────────────────────────────────────────
+
+interface GrowthStats {
+  total_users: number; users_7d: number;
+  total_reports: number; reports_7d: number;
+  active_subs: number; subs_7d: number;
+  plan_views_7d: number;
+}
+
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  const copy = () => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+  return (
+    <button
+      onClick={copy}
+      className="flex items-center gap-1 text-xs text-primary hover:underline flex-shrink-0"
+    >
+      <Copy className="w-3 h-3" />
+      {copied ? "Copied!" : "Copy"}
+    </button>
+  );
+}
+
+function PostBox({ label, text }: { label: string; text: string }) {
+  return (
+    <div className="rounded-xl border border-slate-200 overflow-hidden">
+      <div className="flex items-center justify-between px-4 py-2 bg-slate-50 border-b border-slate-200">
+        <span className="text-xs font-semibold text-gray-600">{label}</span>
+        <CopyButton text={text} />
+      </div>
+      <pre className="text-xs text-gray-800 p-4 whitespace-pre-wrap leading-relaxed font-sans">{text}</pre>
+    </div>
+  );
+}
+
+function GrowthGuideSection() {
+  const [stats, setStats] = useState<GrowthStats | null>(null);
+  const [loadingStats, setLoadingStats] = useState(true);
+  const [statsErr, setStatsErr] = useState(false);
+  const [clerkUsers, setClerkUsers] = useState("");
+
+  useEffect(() => {
+    fetch(`${BASE}/api/admin/stats`, { credentials: "include" })
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(d => { setStats(d); setStatsErr(false); })
+      .catch(() => setStatsErr(true))
+      .finally(() => setLoadingStats(false));
+  }, []);
+
+  const now = new Date();
+  const weekNum = Math.ceil(((now.getTime() - new Date(now.getFullYear(), 0, 1).getTime()) / 86400000 + new Date(now.getFullYear(), 0, 1).getDay() + 1) / 7);
+
+  function ihPost() {
+    const signups = clerkUsers.trim() ? parseInt(clerkUsers) : (stats?.total_users ?? "?");
+    const reports = stats?.reports_7d ?? "?";
+    const subs = stats?.active_subs ?? 0;
+    const days = Math.floor((now.getTime() - new Date("2026-04-29").getTime()) / 86400000);
+    return `Week ${weekNum} update — Resilium (Day ${days + 1} since launch)
+
+Honest numbers this week:
+- Signups: ${signups} total (source: Clerk)
+- Reports generated this week: ${reports}
+- Paid subscribers: ${subs}
+
+What I'm focused on:
+[1–2 sentences about what you're working on or what you learned this week]
+
+The product: resilium-platform.com — a scored assessment across 6 dimensions of personal resilience (finances, health, skills, mobility, social capital, resources), with an AI-generated action plan.
+
+Built solo, launched April 29, 2026. Happy to answer questions.`;
+  }
+
+  function linkedinPost() {
+    const days = Math.floor((now.getTime() - new Date("2026-04-29").getTime()) / 86400000);
+    return `Day ${days + 1} building Resilium in public.
+
+[One honest observation from this week — a number, a user comment, something you noticed]
+
+The thing I keep coming back to: most people don't know their weak spots until something forces the question. That's what the assessment is designed to surface — before you need to already know the answer.
+
+resilium-platform.com
+
+[Add 2–3 relevant hashtags: #buildinpublic #solofounder #preparedness]`;
+  }
+
+  function newsletterPitch() {
+    return `Subject: Personal resilience tool for your audience — free to try, no pitch
+
+Hi [Name],
+
+I recently launched Resilium — a structured personal resilience assessment that scores people across six dimensions: finances, health, practical skills, mobility, social capital, and emergency resources.
+
+It's free to take (about 15 minutes), produces a scored report and prioritized action plan, and doesn't require an email address to get results.
+
+I thought it might resonate with your readers because [tailor: "your audience thinks seriously about financial preparedness" / "you cover practical self-improvement tools" / etc.].
+
+If you'd like to try it before considering whether to mention it: resilium-platform.com
+
+No expectation of coverage — just thought it was worth sharing with someone whose audience it might genuinely help.
+
+Cristiana
+Resilium | resilium-platform.com`;
+  }
+
+  return (
+    <div className="px-6 pb-8 space-y-8">
+
+      {/* Empathy note */}
+      <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+        <Heart className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
+        <div>
+          <p className="text-sm font-semibold text-amber-900">You don't have to love this part.</p>
+          <p className="text-xs text-amber-800 mt-0.5 leading-relaxed">
+            Most people who build good products dislike promoting them. That's normal and it's not a character flaw.
+            This section is designed for someone who wants to show up consistently without it consuming their life.
+            The goal is a 30-minute weekly routine — not a second job.
+          </p>
+        </div>
+      </div>
+
+      {/* What's already automated */}
+      <div>
+        <p className="text-xs font-bold uppercase tracking-widest text-primary mb-3">What's Already Running Without You</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {[
+            { label: "Email drip sequence", detail: "5 emails sent automatically after every completed assessment — day 1, 3, 7, 14, 30. Nurtures free users toward Pro without you doing anything.", status: "live" },
+            { label: "Daily health checks", detail: "Full E2E assessment test at 06:00 UTC and site audit at 07:00 UTC, every day. You only get an email if something breaks.", status: "live" },
+            { label: "Dependency security audit", detail: "Runs on the 1st of every month. Emails you a colour-coded report. You don't have to remember to check.", status: "live" },
+            { label: "Admin digest email", detail: "Weekly summary of key metrics sent to your inbox every Monday at 07:00 UTC.", status: "live" },
+          ].map(item => (
+            <div key={item.label} className="flex items-start gap-3 p-3 rounded-xl border border-slate-200 bg-white">
+              <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-medium text-gray-900">{item.label}</p>
+                <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{item.detail}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        <p className="text-xs text-gray-500 mt-3 flex items-start gap-2">
+          <AlertCircle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-amber-500" />
+          <span>What can't be automated: posting to social media on your behalf. Platforms ban accounts that use bots, and fake engagement is detectable and counterproductive. The templates below are designed to make the manual part as fast as possible.</span>
+        </p>
+      </div>
+
+      {/* Weekly routine */}
+      <div>
+        <p className="text-xs font-bold uppercase tracking-widest text-primary mb-3">Your Minimum Weekly Routine (30 minutes)</p>
+        <div className="space-y-3">
+          {[
+            {
+              time: "10 min", day: "Any day", title: "Post one honest update on Indie Hackers",
+              detail: "Use the generator below to pull real numbers and produce ready-to-post copy. Paste it. Done. The IH community actively reads weekly updates from solo founders — this compounds over months.",
+            },
+            {
+              time: "10 min", day: "Wednesday or Thursday", title: "Post one personal observation on LinkedIn",
+              detail: "Not a product announcement — one genuine thing you noticed, learned, or found surprising this week. First-person, 3–5 short paragraphs. The template below has the structure.",
+            },
+            {
+              time: "10 min", day: "Whenever you have time", title: "Answer one question where Resilium is genuinely relevant",
+              detail: "On Quora, Reddit (as a commenter, not a self-promoter), or a Facebook group. Search for 'how do I know if I'm prepared' or 'financial resilience' or 'emergency fund not enough'. Answer the question properly, mention Resilium only if it's directly relevant and only at the end.",
+            },
+          ].map((item, i) => (
+            <div key={i} className="flex gap-4 p-4 rounded-xl border border-slate-200 bg-white">
+              <div className="flex-shrink-0 text-center">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-1">
+                  <Clock className="w-4 h-4 text-primary" />
+                </div>
+                <span className="text-[10px] font-bold text-primary">{item.time}</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <p className="text-sm font-semibold text-gray-900">{item.title}</p>
+                  <span className="text-[10px] bg-slate-100 text-gray-500 px-2 py-0.5 rounded-full">{item.day}</span>
+                </div>
+                <p className="text-xs text-gray-600 leading-relaxed">{item.detail}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Monthly action */}
+      <div>
+        <p className="text-xs font-bold uppercase tracking-widest text-primary mb-3">Once a Month (20 minutes)</p>
+        <div className="p-4 rounded-xl border border-slate-200 bg-white">
+          <p className="text-sm font-semibold text-gray-900 mb-1">Reach out to 3 newsletters or blogs</p>
+          <p className="text-xs text-gray-600 leading-relaxed mb-2">
+            Find newsletters in the preparedness, personal finance, or self-improvement space. Send the email template below — short, no pitch, just "here's a thing your readers might find useful." 
+            Target Substack newsletters with 1,000–20,000 subscribers, not major publications. Smaller newsletters actually read their inbox.
+            One mention in a well-matched newsletter is worth more than a month of social posting.
+          </p>
+          <p className="text-xs text-gray-500">How to find them: search Substack for "emergency preparedness" or "financial resilience". Check who writes about preparedness on LinkedIn. Look at the publication list in the Research Report section below.</p>
+        </div>
+      </div>
+
+      {/* Stats + generator */}
+      <div>
+        <p className="text-xs font-bold uppercase tracking-widest text-primary mb-3">Weekly Update Generator</p>
+        <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 mb-4">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-xs font-semibold text-gray-700">Live numbers from the database</p>
+            {loadingStats && <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />}
+          </div>
+          {statsErr && (
+            <p className="text-xs text-red-500 mb-2">Could not load stats — you may need to re-authenticate.</p>
+          )}
+          {stats && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+              {[
+                { label: "Total DB users", value: stats.total_users, note: "Check Clerk for full signup count" },
+                { label: "Reports this week", value: stats.reports_7d },
+                { label: "Active subscribers", value: stats.active_subs },
+                { label: "Plan views this week", value: stats.plan_views_7d },
+              ].map(s => (
+                <div key={s.label} className="bg-white rounded-lg border border-slate-200 p-3 text-center">
+                  <p className="text-xl font-bold text-gray-900">{s.value}</p>
+                  <p className="text-[10px] text-gray-500 leading-tight mt-0.5">{s.label}</p>
+                  {s.note && <p className="text-[9px] text-amber-600 mt-0.5">{s.note}</p>}
+                </div>
+              ))}
+            </div>
+          )}
+          <div className="flex items-center gap-2">
+            <label className="text-xs text-gray-600 whitespace-nowrap">Clerk signup count:</label>
+            <input
+              type="number"
+              placeholder="e.g. 52"
+              value={clerkUsers}
+              onChange={e => setClerkUsers(e.target.value)}
+              className="flex-1 max-w-[120px] px-2 py-1 text-xs border border-slate-300 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-primary"
+            />
+            <span className="text-[10px] text-gray-400">Check your Clerk dashboard and enter it here</span>
+          </div>
+        </div>
+        <div className="space-y-4">
+          <PostBox label="Indie Hackers weekly update" text={ihPost()} />
+          <PostBox label="LinkedIn personal post" text={linkedinPost()} />
+          <PostBox label="Newsletter outreach email" text={newsletterPitch()} />
+        </div>
+      </div>
+
+      {/* What not to do */}
+      <div>
+        <p className="text-xs font-bold uppercase tracking-widest text-primary mb-3">What Not to Do</p>
+        <div className="space-y-2">
+          {[
+            { label: "Paid link placements (KrispiTech etc.)", detail: "Paying for do-follow links violates Google's guidelines and can result in a manual penalty. Any site offering this for $29–$299 is not worth your time or money." },
+            { label: "Automated social posting bots", detail: "Against the ToS of every major platform. Accounts get banned. Even if they don't, automated content is detectable and performs poorly. Platforms actively suppress it." },
+            { label: "Mass DM campaigns", detail: "Against ToS on LinkedIn and Twitter/X. Gets your account flagged and damages your reputation with the exact people you're trying to reach." },
+            { label: "Promoters from India offering 'viral posts'", detail: "These are engagement pods — fake activity that doesn't convert. Your money is better kept in your pocket." },
+            { label: "Posting too often", detail: "One quality post per week per platform outperforms daily low-quality posts. Consistency over volume. The goal is to still be doing this in 6 months, not to burn out in 6 weeks." },
+          ].map(item => (
+            <div key={item.label} className="flex items-start gap-3 p-3 rounded-xl border border-red-100 bg-red-50/50">
+              <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-medium text-red-900">{item.label}</p>
+                <p className="text-xs text-red-700 mt-0.5 leading-relaxed">{item.detail}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Longer term */}
+      <div>
+        <p className="text-xs font-bold uppercase tracking-widest text-primary mb-3">When You Have More Time (Month 2+)</p>
+        <div className="space-y-2 text-sm text-gray-700 leading-relaxed">
+          <p>• <strong>Write one blog post on the Resilium blog</strong> — use the Blog Posts section in the admin to publish it. Target long-tail search terms like "how to measure personal preparedness" or "financial resilience score." One good post keeps working for you forever; a tweet lasts 48 hours.</p>
+          <p>• <strong>Run the research survey</strong> — the "State of Personal Resilience 2026" plan in this page gives you everything you need. 500 responses + real data = press coverage you can't buy.</p>
+          <p>• <strong>Ask your first paying users what tipped them</strong> — a one-line email: "What made you decide to upgrade?" The answers will tell you more than any analytics dashboard. Use them in your copy.</p>
+          <p>• <strong>Build Reddit karma slowly</strong> — the 4-week Reddit plan in this page is the right approach. Don't shortcut it. When it works, it's the highest-quality traffic you'll get.</p>
+        </div>
+      </div>
+
     </div>
   );
 }
@@ -1232,7 +1519,7 @@ Resilium | resilium-platform.com`}
 
 const OPEN_KEY = "admin_mkt::open_sections";
 
-const DEFAULT_OPEN = new Set<SectionKey>(["master-checklist"]);
+const DEFAULT_OPEN = new Set<SectionKey>(["growth-guide"]);
 
 export function MarketingPageContent() {
   const [openSections, setOpenSections] = useState<Set<SectionKey>>(() => {
@@ -1270,7 +1557,24 @@ export function MarketingPageContent() {
       </div>
 
       <div className="space-y-4">
-        {/* Master Checklist — default open */}
+
+        {/* Post-launch growth guide — default open */}
+        <div className="bg-white/90 rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <SectionHeader
+            icon={TrendingUp}
+            label="Post-Launch — Start Here"
+            title="Your Simple Weekly Promotion Routine"
+            isOpen={openSections.has("growth-guide")}
+            onToggle={() => toggle("growth-guide")}
+          />
+          {openSections.has("growth-guide") && (
+            <div className="border-t border-slate-200">
+              <GrowthGuideSection />
+            </div>
+          )}
+        </div>
+
+        {/* Master Checklist */}
         <div className="bg-white/90 rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
           <SectionHeader
             icon={CheckSquare}
