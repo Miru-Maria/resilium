@@ -134,6 +134,12 @@
   box-sizing: border-box !important;
 }
 
+/* ── Hide Facebook OAuth button in Clerk modals until FB app review is approved ── */
+.cl-socialButtonsBlockButton[data-provider="facebook"],
+.cl-socialButtonsIconButton[data-provider="facebook"] {
+  display: none !important;
+}
+
 /* ─── Print / PDF Export ─────────────────────────────────────── */
 @media print {
   * {

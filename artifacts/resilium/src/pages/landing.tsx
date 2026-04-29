@@ -612,15 +612,15 @@ export default function LandingPage() {
               Resilium assesses your real vulnerability across 6 dimensions — finances, health, skills, mobility, psychology, and resources — then gives you a living action plan you actually work through. Not a one-time report. A companion that grows with you.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
-              <Link href="/consent">
-                <Button size="lg" className="rounded-full h-16 px-10 text-lg font-semibold shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/30 hover:-translate-y-1 transition-all duration-300">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4 w-full sm:w-auto">
+              <Link href="/consent" className="w-full sm:w-auto">
+                <Button size="lg" className="w-full sm:w-auto rounded-full h-16 px-10 text-lg font-semibold shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/30 hover:-translate-y-1 transition-all duration-300">
                   Build My Resilience Plan
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </Link>
-              <Link href="/demo">
-                <Button size="lg" variant="outline" className="rounded-full h-16 px-10 text-lg font-semibold border-border/60 hover:border-primary/40 hover:-translate-y-0.5 transition-all duration-300">
+              <Link href="/demo" className="w-full sm:w-auto">
+                <Button size="lg" variant="outline" className="w-full sm:w-auto rounded-full h-16 px-10 text-lg font-semibold border-border/60 hover:border-primary/40 hover:-translate-y-0.5 transition-all duration-300">
                   See a Demo
                 </Button>
               </Link>
