@@ -14,7 +14,7 @@ import adminGdprRouter from "./gdpr.js";
 import adminAnalyticsRouter from "./analytics.js";
 import adminAnnouncementsRouter from "./announcements.js";
 import adminBlogRouter from "./blog.js";
-import { getCoachingClickCount, runDependencyAudit } from "../../lib/cron.js";
+import { getCoachingClickCount, runDependencyAudit, getLastHealthCheckResults, runE2eAssessmentTest, runSiteAudit } from "../../lib/cron.js";
 import { logger } from "../../lib/logger.js";
 import { sendWelcomeEmail, sendProUpgradeEmail, sendReassessmentReminder, sendUserWeeklyDigest } from "../../lib/email.js";
 import { runDatabaseBackup, listBackups } from "../../lib/backup.js";
@@ -618,6 +618,44 @@ router.post("/backups/trigger", requireAdminSession, async (req, res) => {
   } catch (err) {
     logger.error({ err }, "Failed to trigger backup");
     res.status(500).json({ error: "INTERNAL_ERROR", message: "Failed to trigger backup." });
+  }
+});
+
+// ── Health check results & triggers ──────────────────────────────────────────
+
+router.get("/health-checks", requireAdminSession, (_req, res) => {
+  res.json(getLastHealthCheckResults());
+});
+
+router.post("/health-checks/trigger-e2e", requireAdminSession, async (req, res) => {
+  try {
+    const { e2eRunning } = getLastHealthCheckResults();
+    if (e2eRunning) {
+      res.status(409).json({ error: "ALREADY_RUNNING", message: "E2E test is already running. Wait for it to finish." });
+      return;
+    }
+    await auditLog("health_check_e2e_triggered", { source: "manual" }, req);
+    runE2eAssessmentTest().catch(e => logger.error({ e }, "Manual E2E assessment test failed"));
+    res.json({ success: true, message: "Full assessment E2E test started — takes 2–4 minutes. Refresh the panel to see results." });
+  } catch (err) {
+    logger.error({ err }, "Failed to trigger E2E test");
+    res.status(500).json({ error: "INTERNAL_ERROR", message: "Failed to start E2E test." });
+  }
+});
+
+router.post("/health-checks/trigger-site", requireAdminSession, async (req, res) => {
+  try {
+    const { siteRunning } = getLastHealthCheckResults();
+    if (siteRunning) {
+      res.status(409).json({ error: "ALREADY_RUNNING", message: "Site audit is already running." });
+      return;
+    }
+    await auditLog("health_check_site_triggered", { source: "manual" }, req);
+    runSiteAudit().catch(e => logger.error({ e }, "Manual site audit failed"));
+    res.json({ success: true, message: "Site audit started — takes ~30 seconds. Refresh the panel to see results." });
+  } catch (err) {
+    logger.error({ err }, "Failed to trigger site audit");
+    res.status(500).json({ error: "INTERNAL_ERROR", message: "Failed to start site audit." });
   }
 });
 

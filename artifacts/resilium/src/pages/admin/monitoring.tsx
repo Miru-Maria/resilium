@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { AdminLayout } from "./layout";
-import { AlertTriangle, Activity, Globe, Smartphone, Server, ExternalLink, Settings, BarChart2, RefreshCw, Zap, Eye } from "lucide-react";
+import { AlertTriangle, Activity, Globe, Smartphone, Server, ExternalLink, Settings, BarChart2, RefreshCw, Zap, Eye, CheckCircle2, XCircle, Clock, ShieldCheck, Play, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 type SentryUrlStyle = "subdomain" | "path" | "unknown";
 
@@ -103,6 +105,179 @@ const PROJECTS = [
 ];
 
 
+// ── Health Check Panel ────────────────────────────────────────────────────────
+
+interface CheckResult { name: string; passed: boolean; durationMs: number; detail?: string }
+interface HealthRun { kind: "e2e" | "site"; ranAt: string; passed: boolean; totalMs: number; checks: CheckResult[] }
+interface HealthData { e2e: HealthRun | null; site: HealthRun | null; e2eRunning: boolean; siteRunning: boolean }
+
+function ago(iso: string) {
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(diff / 60_000);
+  if (m < 1) return "just now";
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return `${Math.floor(h / 24)}d ago`;
+}
+
+function RunPanel({ run, label }: { run: HealthRun; label: string }) {
+  return (
+    <div className="rounded-xl border bg-card p-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          {run.passed
+            ? <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+            : <XCircle className="w-4 h-4 text-destructive flex-shrink-0" />}
+          <span className="text-sm font-semibold">{label}</span>
+        </div>
+        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{ago(run.ranAt)}</span>
+          <span>{(run.totalMs / 1000).toFixed(1)}s total</span>
+        </div>
+      </div>
+      <ul className="space-y-1.5">
+        {run.checks.map((c, i) => (
+          <li key={i} className="flex items-start gap-2 text-xs">
+            {c.passed
+              ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0 mt-0.5" />
+              : <XCircle className="w-3.5 h-3.5 text-destructive flex-shrink-0 mt-0.5" />}
+            <div className="min-w-0">
+              <span style={{ color: c.passed ? "#EAD9BE" : "hsl(0 65% 65%)" }}>{c.name}</span>
+              {c.detail && <span className="text-muted-foreground ml-1">— {c.detail}</span>}
+              <span className="text-muted-foreground ml-1">({c.durationMs}ms)</span>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function HealthCheckPanel() {
+  const [data, setData] = useState<HealthData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [triggering, setTriggering] = useState<"e2e" | "site" | null>(null);
+  const [msg, setMsg] = useState<string | null>(null);
+
+  const fetch_ = useCallback(async () => {
+    try {
+      const r = await fetch(`${BASE}/api/admin/health-checks`, { credentials: "include" });
+      if (r.ok) setData(await r.json());
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetch_();
+    const id = setInterval(fetch_, 10_000);
+    return () => clearInterval(id);
+  }, [fetch_]);
+
+  async function trigger(kind: "e2e" | "site") {
+    setTriggering(kind);
+    setMsg(null);
+    try {
+      const r = await fetch(`${BASE}/api/admin/health-checks/trigger-${kind}`, { method: "POST", credentials: "include" });
+      const json = await r.json();
+      setMsg(json.message ?? (r.ok ? "Started." : "Failed to start."));
+      if (r.ok) setTimeout(fetch_, 3_000);
+    } catch {
+      setMsg("Network error — check console.");
+    } finally {
+      setTriggering(null);
+    }
+  }
+
+  const anyRunning = data?.e2eRunning || data?.siteRunning;
+
+  return (
+    <div className="mb-8 rounded-xl border bg-card p-5">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <ShieldCheck className="w-4 h-4 text-primary" />
+          <span className="text-sm font-semibold">Assessment Health Checks</span>
+          {anyRunning && <span className="text-xs text-amber-400 flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin" />Running…</span>}
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm" variant="outline"
+            onClick={() => { setLoading(true); fetch_(); }}
+            disabled={loading}
+            className="h-7 text-xs gap-1"
+          >
+            <RefreshCw className={`w-3 h-3 ${loading ? "animate-spin" : ""}`} />
+            Refresh
+          </Button>
+          <Button
+            size="sm" variant="outline"
+            onClick={() => trigger("site")}
+            disabled={!!triggering || data?.siteRunning}
+            className="h-7 text-xs gap-1"
+          >
+            {triggering === "site" || data?.siteRunning
+              ? <Loader2 className="w-3 h-3 animate-spin" />
+              : <Play className="w-3 h-3" />}
+            Site Audit
+          </Button>
+          <Button
+            size="sm"
+            onClick={() => trigger("e2e")}
+            disabled={!!triggering || data?.e2eRunning}
+            className="h-7 text-xs gap-1"
+          >
+            {triggering === "e2e" || data?.e2eRunning
+              ? <Loader2 className="w-3 h-3 animate-spin" />
+              : <Zap className="w-3 h-3" />}
+            Full E2E Test
+          </Button>
+        </div>
+      </div>
+
+      {msg && (
+        <div className="mb-3 px-3 py-2 rounded-lg bg-blue-950/40 border border-blue-800/50 text-xs text-blue-300">{msg}</div>
+      )}
+
+      <p className="text-xs text-muted-foreground mb-4">
+        The full E2E test submits a real assessment, waits for AI generation, retrieves the report and checklists, then deletes the test data.
+        Takes 2–4 minutes. Runs automatically every day at 06:00 UTC. Site audit runs at 07:00 UTC.
+        You'll receive an email at contact_resilium@pm.me only on failure (or weekly on Wed/Sun to confirm all-clear).
+      </p>
+
+      {loading && !data && (
+        <div className="flex items-center justify-center py-8 text-muted-foreground">
+          <Loader2 className="w-5 h-5 animate-spin mr-2" />
+          <span className="text-sm">Loading last results…</span>
+        </div>
+      )}
+
+      {data && (
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+          {data.e2e
+            ? <RunPanel run={data.e2e} label="Full Assessment E2E" />
+            : (
+              <div className="rounded-xl border border-dashed bg-muted/20 p-4 flex items-center justify-center text-sm text-muted-foreground">
+                No E2E result yet — runs daily at 06:00 UTC or click "Full E2E Test" above.
+              </div>
+            )
+          }
+          {data.site
+            ? <RunPanel run={data.site} label="Site Functionality Audit" />
+            : (
+              <div className="rounded-xl border border-dashed bg-muted/20 p-4 flex items-center justify-center text-sm text-muted-foreground">
+                No site audit result yet — runs daily at 07:00 UTC or click "Site Audit" above.
+              </div>
+            )
+          }
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 export default function MonitoringPage() {
   const [orgInput, setOrgInput] = useState("");
   const [editing, setEditing] = useState(false);
@@ -146,6 +321,9 @@ export default function MonitoringPage() {
             </div>
           </div>
         </div>
+
+        {/* Health check panel */}
+        <HealthCheckPanel />
 
         {/* Sentry URL setup */}
         <div className="mb-8 rounded-xl border bg-card p-5">

@@ -67,6 +67,27 @@ export function getCoachingClickCount(): number {
   return coachingClickCount;
 }
 
+// ─── Health check result store ────────────────────────────────────────────────
+
+export interface HealthCheckRun {
+  kind: "e2e" | "site";
+  ranAt: string;           // ISO timestamp
+  passed: boolean;
+  totalMs: number;
+  checks: E2eCheckResult[];
+}
+
+let lastE2eResult: HealthCheckRun | null = null;
+let lastSiteResult: HealthCheckRun | null = null;
+let e2eRunning = false;
+let siteRunning = false;
+
+export function getLastHealthCheckResults(): { e2e: HealthCheckRun | null; site: HealthCheckRun | null; e2eRunning: boolean; siteRunning: boolean } {
+  return { e2e: lastE2eResult, site: lastSiteResult, e2eRunning, siteRunning };
+}
+
+export { runE2eAssessmentTest, runSiteAudit };
+
 // ─── Opt-out helpers ──────────────────────────────────────────────────────────
 
 async function getOptedOutUserIds(): Promise<Set<string>> {
@@ -315,14 +336,16 @@ async function runWeeklyDigest() {
   }
 }
 
-// ─── Wednesday e2e assessment test ───────────────────────────────────────────
+// ─── Daily e2e assessment test ────────────────────────────────────────────────
 
 async function runE2eAssessmentTest() {
+  if (e2eRunning) { logger.warn("E2e test already running — skipping"); return; }
+  e2eRunning = true;
   const startMs = Date.now();
   const checks: E2eCheckResult[] = [];
   let testReportId: string | undefined;
 
-  logger.info("Running Wednesday e2e assessment test");
+  logger.info("Running daily e2e assessment test");
 
   // Check 1: API health check
   {
@@ -456,20 +479,29 @@ async function runE2eAssessmentTest() {
 
   const passed = checks.every(c => c.passed);
   const totalMs = Date.now() - startMs;
-  logger.info({ passed, checks: checks.map(c => ({ name: c.name, passed: c.passed })), totalMs }, "Wednesday e2e assessment test complete");
+  logger.info({ passed, checks: checks.map(c => ({ name: c.name, passed: c.passed })), totalMs }, "Daily e2e assessment test complete");
 
-  await sendE2eAssessmentReport({ passed, checks, totalMs, reportId: testReportId }).catch(err =>
-    logger.error({ err }, "Failed to send e2e assessment report email")
-  );
+  lastE2eResult = { kind: "e2e", ranAt: new Date().toISOString(), passed, totalMs, checks };
+  e2eRunning = false;
+
+  // Only email on failure (or once a week on Wednesday to confirm it's still passing)
+  const isWednesday = new Date().getDay() === 3;
+  if (!passed || isWednesday) {
+    await sendE2eAssessmentReport({ passed, checks, totalMs, reportId: testReportId }).catch(err =>
+      logger.error({ err }, "Failed to send e2e assessment report email")
+    );
+  }
 }
 
 // ─── Sunday site-wide functionality audit ────────────────────────────────────
 
 async function runSiteAudit() {
+  if (siteRunning) { logger.warn("Site audit already running — skipping"); return; }
+  siteRunning = true;
   const startMs = Date.now();
   const checks: E2eCheckResult[] = [];
 
-  logger.info("Running Sunday site-wide functionality audit");
+  logger.info("Running daily site-wide functionality audit");
 
   const endpoints: Array<{ name: string; url: string; expectedStatus?: number }> = [
     { name: "API health (/api/health)", url: `${APP_URL}/api/health` },
@@ -531,11 +563,18 @@ async function runSiteAudit() {
 
   const passed = checks.every(c => c.passed);
   const totalMs = Date.now() - startMs;
-  logger.info({ passed, checks: checks.map(c => ({ name: c.name, passed: c.passed })), totalMs }, "Sunday site audit complete");
+  logger.info({ passed, checks: checks.map(c => ({ name: c.name, passed: c.passed })), totalMs }, "Daily site audit complete");
 
-  await sendSiteAuditReport({ passed, checks, totalMs }).catch(err =>
-    logger.error({ err }, "Failed to send site audit email")
-  );
+  lastSiteResult = { kind: "site", ranAt: new Date().toISOString(), passed, totalMs, checks };
+  siteRunning = false;
+
+  // Only email on failure (or once a week on Sunday to confirm it's still passing)
+  const isSunday = new Date().getDay() === 0;
+  if (!passed || isSunday) {
+    await sendSiteAuditReport({ passed, checks, totalMs }).catch(err =>
+      logger.error({ err }, "Failed to send site audit email")
+    );
+  }
 }
 
 // ─── Post-assessment drip email processor ────────────────────────────────────
@@ -684,13 +723,13 @@ export function startCron(): void {
     runUserWeeklyDigest().catch(() => {});
   }, { timezone: "UTC" });
 
-  // Every Wednesday at 06:00 UTC — e2e assessment smoke test
-  cron.schedule("0 6 * * 3", () => {
+  // Every day at 06:00 UTC — e2e assessment smoke test (emails only on failure or Wednesday)
+  cron.schedule("0 6 * * *", () => {
     runE2eAssessmentTest().catch(() => {});
   }, { timezone: "UTC" });
 
-  // Every Sunday at 07:00 UTC — site-wide functionality audit
-  cron.schedule("0 7 * * 0", () => {
+  // Every day at 07:00 UTC — site-wide functionality audit (emails only on failure or Sunday)
+  cron.schedule("0 7 * * *", () => {
     runSiteAudit().catch(() => {});
   }, { timezone: "UTC" });
 
@@ -709,5 +748,5 @@ export function startCron(): void {
     runDependencyAudit().catch(() => {});
   }, { timezone: "UTC" });
 
-  logger.info("Cron jobs scheduled (admin digest: Mon 07:00, user digest: Sun 18:00, 7d reminders: daily 09:00, 30d reminders: Mon 08:00, e2e test: Wed 06:00, site audit: Sun 07:00, drip: hourly :15, db-backup: daily 02:30, dep-audit: 1st of month 09:00 UTC)");
+  logger.info("Cron jobs scheduled (admin digest: Mon 07:00, user digest: Sun 18:00, 7d reminders: daily 09:00, 30d reminders: Mon 08:00, e2e test: daily 06:00, site audit: daily 07:00, drip: hourly :15, db-backup: daily 02:30, dep-audit: 1st of month 09:00 UTC)");
 }
