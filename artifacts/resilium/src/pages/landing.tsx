@@ -125,11 +125,12 @@ function TestimonialsSection() {
             href="https://www.shipit.buzz/products/resilium-score-your-preparedness?ref=badge"
             target="_blank"
             rel="noopener noreferrer"
+            style={{ display: "inline-flex", alignItems: "center", height: 54, overflow: "hidden", borderRadius: 12 }}
           >
             <img
               src="https://www.shipit.buzz/api/products/resilium-score-your-preparedness/badge?theme=dark"
               alt="Featured on Shipit"
-              style={{ height: 54 }}
+              style={{ height: 54, display: "block" }}
               height="54"
             />
           </a>
