@@ -157,13 +157,21 @@ function RunPanel({ run, label }: { run: HealthRun; label: string }) {
 function HealthCheckPanel() {
   const [data, setData] = useState<HealthData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [fetchErr, setFetchErr] = useState<string | null>(null);
   const [triggering, setTriggering] = useState<"e2e" | "site" | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
 
   const fetch_ = useCallback(async () => {
     try {
       const r = await fetch(`${BASE}/api/admin/health-checks`, { credentials: "include" });
-      if (r.ok) setData(await r.json());
+      if (r.ok) {
+        setData(await r.json());
+        setFetchErr(null);
+      } else {
+        setFetchErr(`Server returned ${r.status} — you may need to re-authenticate.`);
+      }
+    } catch (e) {
+      setFetchErr("Network error — could not reach the API.");
     } finally {
       setLoading(false);
     }
@@ -245,16 +253,23 @@ function HealthCheckPanel() {
         You'll receive an email at contact_resilium@pm.me only on failure (or weekly on Wed/Sun to confirm all-clear).
       </p>
 
-      {loading && !data && (
+      {loading && !data && !fetchErr && (
         <div className="flex items-center justify-center py-8 text-muted-foreground">
           <Loader2 className="w-5 h-5 animate-spin mr-2" />
           <span className="text-sm">Loading last results…</span>
         </div>
       )}
 
-      {data && (
+      {fetchErr && (
+        <div className="mb-3 px-3 py-2 rounded-lg bg-red-950/40 border border-red-800/50 text-xs text-red-300 flex items-center gap-2">
+          <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
+          {fetchErr}
+        </div>
+      )}
+
+      {(!loading || data) && !fetchErr && (
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-          {data.e2e
+          {data?.e2e
             ? <RunPanel run={data.e2e} label="Full Assessment E2E" />
             : (
               <div className="rounded-xl border border-dashed bg-muted/20 p-4 flex items-center justify-center text-sm text-muted-foreground">
@@ -262,7 +277,7 @@ function HealthCheckPanel() {
               </div>
             )
           }
-          {data.site
+          {data?.site
             ? <RunPanel run={data.site} label="Site Functionality Audit" />
             : (
               <div className="rounded-xl border border-dashed bg-muted/20 p-4 flex items-center justify-center text-sm text-muted-foreground">
