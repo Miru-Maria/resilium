@@ -347,9 +347,9 @@ function MasterChecklistSection() {
 
       {/* ── Technical & Monitoring ───────────────────────────────────────── */}
       <CollapsibleCategory icon={Globe} id="technical" label="Technical & Monitoring">
-        <ChecklistItem
+        <CompletedItem
           text="Set up web analytics (Umami — GDPR-friendly, free)"
-          detail="Umami script added to index.html. No cookie consent required — it's cookieless by design. EU data region selected. Gives you visitor → assessment → upgrade funnel visibility."
+          detail="Live. Script in index.html with website ID c5f820b3-31df-42c7-9c67-2d669117f9b6. Also whitelisted in Content Security Policy. Cookieless, EU region."
         />
         <CompletedItem
           text="OpenGraph preview verified"
@@ -403,9 +403,9 @@ function MasterChecklistSection() {
           text="Resend domain SPF/DKIM records verified"
           detail="resilium-platform.com confirmed as DNS verified and Domain verified in Resend dashboard (Apr 7, 2026). Email deliverability is secure."
         />
-        <ChecklistItem
+        <CompletedItem
           text="Publish GDPR contact email address"
-          detail="Add a GDPR/data subject requests email address to the Privacy Policy and contact page. Required for Art. 17 deletion and Art. 15 access requests."
+          detail="Done. hello@resilium-platform.com is referenced in the Privacy Policy, unsubscribe flow, and email footer across the platform."
         />
       </CollapsibleCategory>
 
@@ -475,9 +475,9 @@ function MasterChecklistSection() {
           text="Week 4 — Post 'I built this' in r/preppers and r/selfimprovement"
           detail="Full post templates are in the Reddit section below. Authentic story of why you built it. Lead with the problem, not the product."
         />
-        <ChecklistItem
+        <CompletedItem
           text="Write first 3 SEO articles — target: 'personal resilience plan', 'emergency preparedness checklist', 'resilience score assessment'"
-          detail="2,000–3,000 words each. Original research angle wherever possible. Internal link to /assess and /pricing from each article."
+          detail="Done and exceeded — 11 blog posts live in the platform. Continue publishing to build domain authority and long-tail SEO coverage."
         />
         <ChecklistItem
           text="Email a personal T+24h founder note to everyone who signed up on launch day"
