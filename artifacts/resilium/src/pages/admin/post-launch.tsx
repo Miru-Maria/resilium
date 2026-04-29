@@ -91,10 +91,13 @@ function ChecklistItem({ text, detail }: { text: string; detail?: string }) {
         )}
       </div>
       <div className="min-w-0">
-        <span className={cn(
-          "text-sm leading-snug",
-          checked ? "line-through text-muted-foreground/50" : "text-foreground"
-        )}>
+        <span
+          className="text-sm leading-snug"
+          style={{
+            color: checked ? "hsl(225 15% 55% / 0.5)" : "#EAD9BE",
+            textDecoration: checked ? "line-through" : "none",
+          }}
+        >
           {text}
         </span>
         {detail && (
@@ -112,7 +115,12 @@ function CompletedItem({ text, detail }: { text: string; detail?: string }) {
         <CheckCircle2 className="w-4 h-4 text-emerald-400" />
       </div>
       <div className="min-w-0">
-        <span className="text-sm line-through text-muted-foreground leading-snug">{text}</span>
+        <span
+          className="text-sm leading-snug"
+          style={{ color: "hsl(225 15% 55% / 0.6)", textDecoration: "line-through" }}
+        >
+          {text}
+        </span>
         {detail && (
           <p className="text-xs text-muted-foreground/70 mt-1 leading-relaxed">{detail}</p>
         )}
