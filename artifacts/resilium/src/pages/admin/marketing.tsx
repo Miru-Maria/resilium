@@ -433,7 +433,7 @@ function MasterChecklistSection() {
         />
         <ChecklistItem
           text="Schedule community posts for PH launch day"
-          detail="r/preppers, r/personalfinance, r/selfimprovement. Post the launch link with a personal note — not just the URL."
+          detail="Reddit is saved for later — new account karma restrictions blocked launch day posts. LinkedIn (personal + company) and Facebook are the launch day social channels. Full Reddit copy is in the Reddit section below, ready for when the account has karma."
         />
         <ChecklistItem
           text="Prepare LinkedIn launch post"
@@ -695,6 +695,55 @@ function ProductHuntSection() {
         OpenAI's API powers my AI Companion and personalized action plan generation. The quality of contextual reasoning — grounding advice in a user's specific score rather than giving generic output — was noticeably stronger than alternatives I tested.
       </CopyBlock>
 
+      <SubHeading><MessageSquare className="w-4 h-4" /> Launch Day Social Posts</SubHeading>
+
+      <InfoBox>
+        Ready-to-paste copy for LinkedIn and Facebook. Post LinkedIn personal first — it gets the most reach. LinkedIn company page and Facebook can follow within the hour. Use the UTM links below so you can track clicks per channel.
+      </InfoBox>
+
+      <CopyBlock label="LinkedIn — Personal Page (post this first)">
+        {`I built Resilium because I couldn't find a tool that told me honestly where I stood.
+
+Not a generic checklist. Not a quiz with feel-good results. Something that actually scored my financial runway, my physical readiness, my support networks — and told me what to fix first.
+
+So I built it.
+
+Today Resilium is live on Product Hunt. It takes 10–15 minutes, gives you a score across 6 resilience dimensions, and hands you a prioritized action plan you can start on immediately.
+
+If you've ever wondered how prepared you actually are — this is the honest answer.
+
+I'd love your support today 👇
+https://www.producthunt.com/products/resilium-score-your-preparedness?utm_source=linkedin&utm_medium=social`}
+      </CopyBlock>
+
+      <CopyBlock label="LinkedIn — Company Page">
+        {`Most people won't know how exposed they are until a job loss, a health crisis, or a supply shock forces the question.
+
+Resilium gives you the answer before that happens.
+
+Today we launched on Product Hunt: a scored resilience profile across 6 life dimensions — finances, health, skills, mobility, psychology, and emergency resources — with a prioritized action plan built around your specific gaps.
+
+No generic advice. No wellness platitudes. An honest score and a clear path to improve it.
+
+→ Support the launch: https://www.producthunt.com/products/resilium-score-your-preparedness?utm_source=linkedin&utm_medium=social`}
+      </CopyBlock>
+
+      <CopyBlock label="Facebook — Personal Page">
+        {`Something I've been quietly working on for a long time is live today, and I wanted to share it with the people who actually know me.
+
+It's called Resilium. It's a tool that gives you an honest score of how prepared you actually are — across your finances, your health, your support networks, your skills, and more.
+
+I built it because I kept asking myself: if something went seriously wrong tomorrow — job loss, a health crisis, something unexpected — how would I actually hold up? And I couldn't find anything that gave me a real, structured answer.
+
+So I built it.
+
+It takes about 10–15 minutes, it's free to try, and it doesn't sugarcoat anything — which is exactly the point.
+
+Today it's launching on Product Hunt, and an upvote from you would genuinely mean the world to me 💙
+
+👉 https://www.producthunt.com/products/resilium-score-your-preparedness?utm_source=facebook&utm_medium=social`}
+      </CopyBlock>
+
       <CopyBlock label="Tagline (max 60 chars)">
         Know exactly where you stand before disruption finds you.
       </CopyBlock>
@@ -764,8 +813,8 @@ The assessment is free and anonymous — no email required. Takes about 12 minut
             <ChecklistItem text="Finalise all copy: headline, tagline, short + long description" />
             <ChecklistItem text="Draft the first comment in advance — post it within 2 minutes of launch" />
             <ChecklistItem text="Notify your personal network (email/WhatsApp) to vote at launch time" />
-            <ChecklistItem text="Schedule community posts in r/preppers, r/personalfinance, r/selfimprovement for day-of" />
-            <ChecklistItem text="Prepare a LinkedIn post summarising the product story" />
+            <ChecklistItem text="Prepare LinkedIn (personal + company) and Facebook posts — copy in Social Posts section below" />
+            <ChecklistItem text="Note: Reddit posts saved for later — copy ready in Reddit section once account has karma" />
           </ul>
         </div>
         <div>
@@ -774,10 +823,10 @@ The assessment is free and anonymous — no email required. Takes about 12 minut
             <ChecklistItem text="Go live at 12:01 AM Pacific Time (reset hour)" detail="Earlier is better — more hours to accumulate votes." />
             <ChecklistItem text="Post the first comment immediately after launch" />
             <ChecklistItem text="Share the launch link in every relevant Slack/Discord community you're in" />
-            <ChecklistItem text="Post LinkedIn launch post tagging Product Hunt" />
+            <ChecklistItem text="Post LinkedIn launch post (personal + company page) tagging Product Hunt" />
+            <ChecklistItem text="Post Facebook personal page launch post" />
             <ChecklistItem text="Respond to every comment within 30 minutes throughout launch day" />
-            <ChecklistItem text="Monitor upvote velocity — if slow, re-engage community channels at T+4 h and T+8 h" />
-            <ChecklistItem text="Cross-post to LinkedIn with the 'know your resilience gaps before disruption hits' frame" />
+            <ChecklistItem text="Monitor upvote velocity — if slow, re-engage LinkedIn and personal network at T+4 h and T+8 h" />
           </ul>
         </div>
       </div>
@@ -787,7 +836,7 @@ The assessment is free and anonymous — no email required. Takes about 12 minut
         headers={["Timing", "Action", "Goal"]}
         rows={[
           ["T+2 h", "Reply to all PH comments with depth — no copy-paste responses", "Boost comment thread, signal authenticity"],
-          ["T+6 h", "Post to r/preppers and r/personalfinance (not promotional — share finding)", "Drive organic signups"],
+          ["T+6 h", "Post to r/preppers and r/personalfinance once account has karma — copy ready in Reddit section", "Drive organic signups"],
           ["T+12 h", "Post a 'behind the scenes' LinkedIn post — why you built it", "Warm audience expansion"],
           ["T+24 h", "Email everyone who took the assessment that day with a personal note from the founder", "Conversion and loyalty"],
           ["T+30 h", "Compile top 5 community questions into a brief FAQ post on PH discussion", "Keep discussion alive"],
@@ -802,6 +851,85 @@ The assessment is free and anonymous — no email required. Takes about 12 minut
 function RedditSection() {
   return (
     <div className="px-6 pb-8 space-y-1">
+
+      <SubHeading><Rocket className="w-4 h-4" /> Launch Day Posts — Saved for When Account Has Karma</SubHeading>
+
+      <InfoBox>
+        Reddit account (u/BasketMission6685) blocked launch day posting — too new, zero karma. All post copy is saved here and ready to go once the account builds enough reputation. Target: 100+ comment karma in r/preppers and r/personalfinance before posting links. Estimated time: 1–2 weeks of genuine commenting. See the karma-building guide below.
+      </InfoBox>
+
+      <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-4">
+        <p className="text-xs font-semibold text-amber-800 mb-2">Communities blocked at launch (save for later)</p>
+        <ul className="text-xs text-amber-700 space-y-1">
+          <li>• <strong>r/selfimprovement</strong> — account too new (30 days min) + needs comment karma</li>
+          <li>• <strong>r/Entrepreneur</strong> — requires established reputation + comment karma</li>
+          <li>• <strong>r/EntrepreneurRideAlong</strong> — no self-promotion or links allowed</li>
+          <li>• <strong>r/SideProject</strong> — post was auto-removed by spam filter (zero karma account)</li>
+        </ul>
+      </div>
+
+      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Reddit UTM Link (use in all posts)</p>
+      <div className="bg-slate-100 rounded-xl p-3 border border-slate-200 font-mono text-xs text-gray-700 mb-4 break-all">
+        https://www.producthunt.com/products/resilium-score-your-preparedness?utm_source=reddit&utm_medium=social&utm_campaign=ph-launch
+      </div>
+
+      <CopyBlock label="r/preppers — Post Copy (ready to paste)">
+        {`Title: I built a tool that scores your actual preparedness across 6 dimensions — curious what this community thinks
+
+I've been working on something I think this community will either love or tear apart constructively, and honestly both would be useful.
+
+It's called Resilium. It's a free assessment that scores your preparedness across financial runway, physical health, skills and self-sufficiency, mobility, psychological resilience, and emergency resources — then gives you a prioritized action plan based on where your actual gaps are.
+
+No generic checklists. It weights your answers against each other and tells you what to fix first given your specific situation.
+
+Takes 10–15 minutes: [paste UTM link above]
+
+Genuinely curious what gaps the tool surfaces for people in this community — you're probably better prepared than average, which makes you a useful test case.`}
+      </CopyBlock>
+
+      <CopyBlock label="r/personalfinance — Post Copy (ready to paste)">
+        {`Title: Built a free tool that scores your financial resilience alongside 5 other preparedness dimensions — feedback welcome
+
+One of the things I kept noticing when thinking about financial preparedness is that financial runway alone doesn't tell the full story. Someone with 6 months of savings but poor health, no transferable skills, and no support network is more exposed than their bank balance suggests.
+
+So I built Resilium — it scores you across financial resilience plus 5 other dimensions, weights them together into a single score, and gives you a prioritized action plan.
+
+The financial dimension covers: emergency fund runway, income stream diversity, debt exposure, and insurance coverage.
+
+It's free and takes about 10–15 minutes: [paste UTM link above]
+
+Happy to answer questions about the methodology if anyone's curious.`}
+      </CopyBlock>
+
+      <CopyBlock label="r/SideProject — Post Copy (retry when karma allows)">
+        {`Title: I built a personal resilience scoring platform solo — web app, mobile app, and API. Launching on Product Hunt today
+
+What I built: Resilium — a tool that gives you an honest score of how prepared you actually are across 6 life dimensions: finances, health, skills, mobility, psychology, and emergency resources. It ends with a prioritized action plan based on your specific gaps.
+
+Why I built it: I kept asking myself how I'd actually hold up if something went seriously wrong — job loss, a health crisis, an unexpected disruption. Nothing out there gave me a real, structured answer. So I built one.
+
+The stack: React + Vite (web), Expo (mobile), Express API, PostgreSQL, Clerk for auth, Stripe for payments. Built entirely solo and bootstrapped.
+
+Where it is today: Live, paying customers, launching on Product Hunt right now.
+
+Would genuinely appreciate any feedback or an upvote if you find it useful 👇
+
+[paste UTM link above]`}
+      </CopyBlock>
+
+      <CopyBlock label="r/selfimprovement — Post Copy (when account meets age + karma requirements)">
+        {`Title: How prepared are you actually? I built a scored assessment to answer that honestly
+
+Most self-improvement content tells you to "build resilience" without ever defining what that means or how to measure it.
+
+I got frustrated with that and built something different: a 10–15 minute assessment that gives you an actual score across 6 dimensions of personal resilience — finances, health, skills, mobility, psychology, and emergency resources — and a prioritized action plan based on where you specifically fall short.
+
+The goal isn't to alarm anyone. It's to replace vague anxiety about "what if" with a clear picture of where you stand and what to do about it.
+
+Free to try: [paste UTM link above]`}
+      </CopyBlock>
+
+      <SubHeading><BookOpen className="w-4 h-4" /> Long-Term Reddit Strategy — Start Here</SubHeading>
 
       <InfoBox>
         Reddit rewards genuine participation. The rule here is: give value first, mention Resilium second (if at all). Never post a link in your first comment in a subreddit.
