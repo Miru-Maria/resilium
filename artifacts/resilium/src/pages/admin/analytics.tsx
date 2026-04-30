@@ -87,6 +87,12 @@ function UmamiSection() {
         </div>
       </CardHeader>
       <CardContent className="p-0 pb-1">
+        <div className="px-4 pb-2">
+          <p className="text-[11px] text-muted-foreground bg-muted/40 rounded-lg px-3 py-1.5 flex items-center gap-1.5">
+            <Download className="w-3 h-3 flex-shrink-0 opacity-50" />
+            The Download button inside the embed is blocked by browser security — use the paste tool below to export table data as CSV.
+          </p>
+        </div>
         <iframe
           src={UMAMI_SHARE_URL}
           className="w-full rounded-b-xl border-0 transition-all duration-300"
@@ -208,18 +214,18 @@ function UmamiExportSection() {
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm font-display flex items-center gap-2">
-            <Download className="w-4 h-4 text-primary" /> Export Umami Data as CSV
+            <Download className="w-4 h-4 text-primary" /> Export Table as CSV
           </CardTitle>
         </div>
         <p className="text-xs text-muted-foreground mt-1">
-          In Umami, select and copy any table (exit pages, top pages, etc.) and paste it here to download as CSV.
+          Select and copy any table from the embed above (click into the table, then Ctrl+A / Cmd+A and Ctrl+C), then paste below to download as CSV.
         </p>
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="relative">
           <textarea
             className="w-full h-36 px-3 py-2.5 text-xs rounded-xl border bg-muted/30 font-mono resize-y focus:outline-none focus:ring-2 focus:ring-primary text-foreground"
-            placeholder={"Paste Umami table data here (copy from the Umami dashboard)…\n\nExample:\n/           35    56    172\n/profile     9    22    144"}
+            placeholder={"Paste table data from the embed above…\n\nExample:\n/           35    56    172\n/profile     9    22    144"}
             value={raw}
             onChange={e => setRaw(e.target.value)}
           />
