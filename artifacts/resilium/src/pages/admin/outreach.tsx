@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import AdminLayout from "./layout";
+import { AdminLayout } from "./layout";
 import { Mail, Send, CheckCircle, XCircle, AlertCircle, Loader2, Building2, User, Pencil } from "lucide-react";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");

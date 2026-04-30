@@ -14,7 +14,7 @@ import {
   AlertTriangle, Check, CheckCircle, Activity, Brain, TrendingUp, Award,
   ExternalLink, ArrowRight, Eye, Zap, Lock, Sparkles, ChevronDown, ChevronUp, Target,
   DollarSign, Wrench, Navigation, Package, Users, Share2, Download,
-  Twitter, Facebook, Copy, X,
+  Twitter, Facebook, Copy, X, Info,
 } from "lucide-react";
 
 /* ──────────────────────────────────────────
@@ -162,6 +162,16 @@ const AREA_ICONS: Record<string, React.ReactNode> = {
   psychological: <Brain className="w-4 h-4 text-rose-400" />,
   resources: <Package className="w-4 h-4 text-orange-400" />,
   socialCapital: <Users className="w-4 h-4 text-teal-500" />,
+};
+
+const DIMENSION_DESCRIPTIONS: Record<string, string> = {
+  financial: "Emergency funds, income stability, debt exposure, and financial runway under disruption.",
+  health: "Medical access, medication supply, physical readiness, and healthcare independence.",
+  skills: "Marketable abilities, adaptability, practical know-how, and income diversification potential.",
+  mobility: "Travel documents, evacuation plans, geographic flexibility, and relocation readiness.",
+  psychological: "Stress tolerance, adaptability, mindset, emotional regulation, and social support.",
+  resources: "Food, water, supplies, housing security, and access to community mutual aid.",
+  socialCapital: "Network depth, trusted relationships, community ties, and access to informal help.",
 };
 
 const PRIORITY_CONFIG = {
@@ -362,6 +372,51 @@ export default function DemoPage() {
 
       <main className="max-w-6xl mx-auto px-6 pt-10 space-y-10">
 
+        {/* HOW IT WORKS EXPLAINER */}
+        <Accordion type="single" collapsible className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
+          <AccordionItem value="how" className="border-none">
+            <AccordionTrigger className="px-5 py-4 hover:no-underline [&>svg]:hidden">
+              <div className="flex items-center gap-2.5 text-sm font-semibold">
+                <Info className="w-4 h-4 text-primary flex-shrink-0" />
+                How Resilium works — what are you looking at?
+                <ChevronDown className="w-4 h-4 text-muted-foreground ml-auto transition-transform duration-200 group-data-[state=open]:rotate-180" />
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-5 pb-5">
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  This is a live demo showing a fictional profile ("Alex"). Your real report is generated from a
+                  structured 5-minute assessment — no guessing, no AI hallucination. Every score is calculated from
+                  your actual answers.
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+                  {[
+                    { icon: <Eye className="w-4 h-4 text-primary" />, title: "Assess", body: "Answer 20–25 targeted questions about your finances, health, skills, and preparedness." },
+                    { icon: <TrendingUp className="w-4 h-4 text-amber-500" />, title: "Score", body: "Each answer feeds a weighted model. You get a score out of 100 across 6 dimensions." },
+                    { icon: <Zap className="w-4 h-4 text-emerald-500" />, title: "Act", body: "A prioritized 90-day checklist surfaces your highest-leverage improvements first." },
+                  ].map(s => (
+                    <div key={s.title} className="flex flex-col gap-1.5 bg-muted/30 rounded-xl p-3">
+                      <div className="flex items-center gap-1.5 font-semibold">{s.icon}{s.title}</div>
+                      <p className="text-muted-foreground text-xs leading-relaxed">{s.body}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1">
+                  {Object.entries(DIMENSION_DESCRIPTIONS).map(([key, desc]) => (
+                    <div key={key} className="flex gap-2 text-xs rounded-xl border border-border/60 p-2.5">
+                      <span className="flex-shrink-0 mt-0.5">{AREA_ICONS[key]}</span>
+                      <div>
+                        <div className="font-semibold text-foreground mb-0.5">{AREA_LABELS[key]}</div>
+                        <div className="text-muted-foreground leading-relaxed">{desc}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+
         {/* GOAL BADGE — shows the new step 14 feature */}
         <div className="flex items-center gap-3 flex-wrap" style={sectionStyle()}>
           <div className="flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-2">
@@ -538,7 +593,7 @@ export default function DemoPage() {
               {sortedAreas.map(area => {
                 const comp = areaCompletion(area);
                 return (
-                  <TabsTrigger key={area} value={area} className="rounded-xl text-xs sm:text-sm data-[state=active]:shadow-sm flex items-center gap-1.5">
+                  <TabsTrigger key={area} value={area} title={DIMENSION_DESCRIPTIONS[area]} className="rounded-xl text-xs sm:text-sm data-[state=active]:shadow-sm flex items-center gap-1.5">
                     {AREA_ICONS[area]}
                     {AREA_LABELS[area] ?? area}
                     <span className={cn(

@@ -3,7 +3,6 @@ import { computeBadgeCount, allDimsAssessedFromPlan } from "@/lib/badge-criteria
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSubscriptionStatus } from "@/hooks/use-subscription-status";
 import { Link } from "wouter";
-import { OnboardingModal } from "@/components/onboarding-modal";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
@@ -612,7 +611,6 @@ export default function LandingPage() {
         <AnimatedBackground />
       </div>
 
-      <OnboardingModal />
       {/* PWA install prompt banner */}
       <PwaInstallBanner />
       {/* Smart banner — onboarding for new users, re-engagement for returning users */}

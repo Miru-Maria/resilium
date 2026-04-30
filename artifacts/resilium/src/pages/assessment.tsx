@@ -721,13 +721,28 @@ export default function AssessmentPage() {
     return () => clearTimeout(timer);
   }, [isLoaded]);
 
-  // GDPR gate: redirect to /consent if user arrived without going through the consent page
-  useEffect(() => {
-    const consented = sessionStorage.getItem("resilium_consent_given");
-    if (!consented) {
-      setLocation("/consent");
+  // GDPR gate: inline — no redirect
+  const [consentGiven, setConsentGiven] = useState<boolean>(
+    () => !!sessionStorage.getItem("resilium_consent_given")
+  );
+
+  const handleInlineConsent = async () => {
+    let sessionId = localStorage.getItem("resilium_session_id");
+    if (!sessionId) {
+      sessionId = crypto.randomUUID?.() ?? Math.random().toString(36).slice(2) + Date.now().toString(36);
+      localStorage.setItem("resilium_session_id", sessionId);
     }
-  }, []);
+    try {
+      const BASE_URL = import.meta.env.BASE_URL.replace(/\/$/, "");
+      await fetch(`${BASE_URL}/api/gdpr/consent`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId, platform: "web", consentVersion: "1.0" }),
+      });
+    } catch { /* non-blocking */ }
+    sessionStorage.setItem("resilium_consent_given", "1");
+    setConsentGiven(true);
+  };
   const authLoading = !isLoaded && !authTimedOut;
   const isAuthenticated = !!isSignedIn;
   // Per-user draft key — null until Clerk has resolved identity
@@ -1236,6 +1251,48 @@ export default function AssessmentPage() {
           <Button variant="outline" className="rounded-full" onClick={() => setSubmitError(null)}>
             {t.tryAgain}
           </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Inline GDPR consent gate ─────────────────────────────────────────────────
+  if (!consentGiven) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-6">
+        <div className="w-full max-w-md">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <ShieldCheck className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold">Before we begin</h2>
+              <p className="text-xs text-muted-foreground">Your data is protected under GDPR</p>
+            </div>
+          </div>
+
+          <div className="bg-card border border-border rounded-2xl p-5 mb-4 space-y-3 text-sm text-muted-foreground leading-relaxed">
+            <p>This assessment collects information about your financial situation, health, skills, housing, and location to generate your personal resilience score and action plan.</p>
+            <p>Your data is <strong className="text-foreground">never sold</strong>, retained for 12 months, and you can export or delete it at any time from your profile.</p>
+            <Link href="/privacy" className="inline-flex items-center gap-1 text-primary text-xs underline underline-offset-2 hover:opacity-80">
+              Read the full Privacy Policy <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
+
+          <Button
+            size="lg"
+            className="w-full rounded-full font-bold gap-2 mb-3"
+            onClick={handleInlineConsent}
+          >
+            <CheckCircle2 className="w-4 h-4" />
+            I understand — start the assessment
+          </Button>
+
+          <Link href="/">
+            <Button variant="ghost" className="w-full rounded-full text-muted-foreground">
+              Go back
+            </Button>
+          </Link>
         </div>
       </div>
     );
