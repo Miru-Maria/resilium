@@ -393,7 +393,7 @@ function SignedInBanner() {
                 View Your Plan <ArrowRight className="ml-1 w-3 h-3" />
               </Button>
             </Link>
-            <Link href="/consent">
+            <Link href="/assess">
               <Button size="sm" variant="outline" className="rounded-full text-xs font-semibold hidden sm:flex">
                 Reassess
               </Button>
@@ -509,7 +509,7 @@ function SignedInBanner() {
           <p className="text-xs text-muted-foreground mt-0.5">Your free resilience assessment takes 10–15 minutes. Get your score, your gaps, and a personalized action plan.</p>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
-          <Link href="/consent">
+          <Link href="/assess">
             <Button size="sm" className="rounded-full text-xs font-semibold" onClick={dismissOnboard}>
               Start Assessment <ArrowRight className="ml-1 w-3 h-3" />
             </Button>
@@ -641,7 +641,7 @@ export default function LandingPage() {
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4 w-full sm:w-auto">
-              <Link href="/consent" className="w-full sm:w-auto">
+              <Link href="/assess" className="w-full sm:w-auto">
                 <Button size="lg" className="w-full sm:w-auto rounded-full h-16 px-10 text-lg font-semibold shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/30 hover:-translate-y-1 transition-all duration-300">
                   Build My Resilience Plan
                   <ArrowRight className="ml-2 w-5 h-5" />
@@ -982,7 +982,7 @@ export default function LandingPage() {
           <div className="max-w-2xl mx-auto text-center">
             <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">Ready to find out where you stand?</h2>
             <p className="text-muted-foreground mb-8">Takes 10–15 minutes to complete.</p>
-            <Link href="/consent">
+            <Link href="/assess">
               <Button size="lg" className="rounded-full h-14 px-10 text-base font-semibold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-1 transition-all duration-300">
                 Start the Assessment
                 <ChevronRight className="ml-1 w-5 h-5" />

@@ -253,7 +253,7 @@ export default function BlogPage() {
                   minutes and gives you a scored breakdown across all six
                   dimensions.
                 </p>
-                <Link href="/consent">
+                <Link href="/assess">
                   <Button size="lg" className="rounded-full gap-2">
                     Take the free assessment <ArrowRight className="w-4 h-4" />
                   </Button>

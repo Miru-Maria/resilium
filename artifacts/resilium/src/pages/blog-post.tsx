@@ -86,7 +86,7 @@ function AssessmentCTA({ variant = "inline" }: { variant?: "inline" | "footer" }
         <p className="text-muted-foreground mb-6 max-w-md mx-auto">
           An 8-minute free assessment gives you a scored breakdown across all six resilience dimensions — with a personalized action plan.
         </p>
-        <Link href="/consent">
+        <Link href="/assess">
           <Button size="lg" className="rounded-full gap-2">
             Take the free assessment <ArrowRight className="w-4 h-4" />
           </Button>
@@ -104,7 +104,7 @@ function AssessmentCTA({ variant = "inline" }: { variant?: "inline" | "footer" }
           The free Resilium assessment takes 8 minutes and gives you a full breakdown across all six dimensions.
         </p>
       </div>
-      <Link href="/consent">
+      <Link href="/assess">
         <Button size="sm" className="rounded-full gap-1.5 shrink-0">
           Take the assessment <ArrowRight className="w-3.5 h-3.5" />
         </Button>

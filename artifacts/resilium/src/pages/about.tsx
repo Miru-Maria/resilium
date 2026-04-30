@@ -450,7 +450,7 @@ export default function AboutPage() {
             Questions, feedback, or partnership inquiries can be sent directly to the inbox below. Responses are personal, not automated.
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
-            <Link href="/consent">
+            <Link href="/assess">
               <Button size="lg" className="rounded-full px-8 gap-2 h-12">
                 Build My Resilience Plan <ArrowRight className="w-4 h-4" />
               </Button>

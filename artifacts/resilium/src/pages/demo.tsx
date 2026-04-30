@@ -208,7 +208,7 @@ function DemoBanner() {
           {" "}— Fictional demo profile (Alex M., 34). Your real plan reflects your situation.
         </p>
       </div>
-      <Link href="/consent" className="flex-shrink-0 self-start sm:self-auto">
+      <Link href="/assess" className="flex-shrink-0 self-start sm:self-auto">
         <Button size="sm" className="rounded-full gap-1.5">
           Build My Plan <ArrowRight className="w-3.5 h-3.5" />
         </Button>
@@ -843,7 +843,7 @@ export default function DemoPage() {
             your health, your skills. It takes 10–15 minutes and requires no personal information.
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
-            <Link href="/consent">
+            <Link href="/assess">
               <Button size="lg" className="rounded-full px-8 gap-2 h-12">
                 Build My Resilience Plan <ArrowRight className="w-4 h-4" />
               </Button>

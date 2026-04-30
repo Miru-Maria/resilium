@@ -334,8 +334,8 @@ function Router() {
       <Route path="/scenarios/:reportId" component={ScenariosPage} />
       <Route path="/plan/:reportId" component={PlanPage} />
       <Route path="/assessment" component={() => <RedirectTo to="/assess" />} />
-      <Route path="/start" component={() => <RedirectTo to="/consent" />} />
-      <Route path="/quiz" component={() => <RedirectTo to="/consent" />} />
+      <Route path="/start" component={() => <RedirectTo to="/assess" />} />
+      <Route path="/quiz" component={() => <RedirectTo to="/assess" />} />
       <Route path="/sign-in/*?" component={SignInPage} />
       <Route path="/sign-up/*?" component={SignUpPage} />
       <Route component={NotFound} />
