@@ -1063,7 +1063,7 @@ export default function AssessmentPage() {
       case 7: return formData.skills.length > 0;
       case 11: return !!formData.emergencySupplyTier;
       case 12: return formData.riskConcerns.length > 0;
-      case 14: return !!formData.primaryGoal;
+      case 14: return !!formData.primaryGoal && consentGiven;
       default: return true;
     }
   };
@@ -1251,48 +1251,6 @@ export default function AssessmentPage() {
           <Button variant="outline" className="rounded-full" onClick={() => setSubmitError(null)}>
             {t.tryAgain}
           </Button>
-        </div>
-      </div>
-    );
-  }
-
-  // ── Inline GDPR consent gate ─────────────────────────────────────────────────
-  if (!consentGiven) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-6">
-        <div className="w-full max-w-md">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-              <ShieldCheck className="w-5 h-5 text-primary" />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold">Before we begin</h2>
-              <p className="text-xs text-muted-foreground">Your data is protected under GDPR</p>
-            </div>
-          </div>
-
-          <div className="bg-card border border-border rounded-2xl p-5 mb-4 space-y-3 text-sm text-muted-foreground leading-relaxed">
-            <p>This assessment collects information about your financial situation, health, skills, housing, and location to generate your personal resilience score and action plan.</p>
-            <p>Your data is <strong className="text-foreground">never sold</strong>, retained for 12 months, and you can export or delete it at any time from your profile.</p>
-            <Link href="/privacy" className="inline-flex items-center gap-1 text-primary text-xs underline underline-offset-2 hover:opacity-80">
-              Read the full Privacy Policy <ArrowRight className="w-3 h-3" />
-            </Link>
-          </div>
-
-          <Button
-            size="lg"
-            className="w-full rounded-full font-bold gap-2 mb-3"
-            onClick={handleInlineConsent}
-          >
-            <CheckCircle2 className="w-4 h-4" />
-            I understand — start the assessment
-          </Button>
-
-          <Link href="/">
-            <Button variant="ghost" className="w-full rounded-full text-muted-foreground">
-              Go back
-            </Button>
-          </Link>
         </div>
       </div>
     );
@@ -2294,6 +2252,34 @@ export default function AssessmentPage() {
                     />
                     <p className="text-xs text-muted-foreground mt-1 text-right">{(formData.successVision ?? "").length}/500</p>
                   </div>
+
+                  {/* GDPR consent — required before submit */}
+                  <button
+                    type="button"
+                    onClick={handleInlineConsent}
+                    className={`w-full flex items-start gap-3 rounded-xl border p-4 text-left transition-all ${
+                      consentGiven
+                        ? "border-primary/40 bg-primary/5"
+                        : "border-border hover:border-primary/30"
+                    }`}
+                  >
+                    <div className={`mt-0.5 w-5 h-5 rounded flex-shrink-0 flex items-center justify-center border-2 transition-all ${
+                      consentGiven ? "border-primary bg-primary" : "border-muted-foreground/40"
+                    }`}>
+                      {consentGiven && <CheckCircle2 className="w-3.5 h-3.5 text-primary-foreground" />}
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-foreground leading-snug">
+                        I understand this assessment processes personal health and financial data under GDPR Article 9.
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Data is never sold and is retained for 12 months.{" "}
+                        <Link href="/privacy" className="underline underline-offset-2 text-primary hover:opacity-80" onClick={e => e.stopPropagation()}>
+                          Privacy Policy
+                        </Link>
+                      </p>
+                    </div>
+                  </button>
                 </div>
               )}
 
