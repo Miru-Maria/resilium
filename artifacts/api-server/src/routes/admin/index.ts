@@ -474,7 +474,11 @@ router.post("/send-test-email", requireAdminSession, async (req, res) => {
 
 // ─── Founder Outreach Bulk Sender ────────────────────────────────────────────
 router.post("/send-founder-outreach", requireAdminSession, async (req, res) => {
-  const { recipients } = req.body as { recipients?: { name?: string; email: string }[] };
+  const { recipients, customSubject, customBody } = req.body as {
+    recipients?: { name?: string; email: string }[];
+    customSubject?: string;
+    customBody?: string;
+  };
   if (!Array.isArray(recipients) || recipients.length === 0) {
     res.status(400).json({ error: "recipients must be a non-empty array" });
     return;
@@ -490,7 +494,17 @@ router.post("/send-founder-outreach", requireAdminSession, async (req, res) => {
       continue;
     }
     try {
-      await sendFounderOutreachEmail({ email: r.email.trim(), firstName: r.name?.trim() || null });
+      if (customSubject || customBody) {
+        // Use custom content — substitute [Name] with actual first name
+        await sendFounderOutreachEmail({
+          email: r.email.trim(),
+          firstName: r.name?.trim() || null,
+          customSubject: customSubject?.trim() || undefined,
+          customBody: customBody?.trim() || undefined,
+        });
+      } else {
+        await sendFounderOutreachEmail({ email: r.email.trim(), firstName: r.name?.trim() || null });
+      }
       results.push({ email: r.email, status: "sent" });
     } catch (err) {
       results.push({ email: r.email, status: "failed", error: String(err) });

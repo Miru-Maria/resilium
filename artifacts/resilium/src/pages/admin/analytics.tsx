@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { AdminLayout, adminAuthHeaders } from "./layout";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -7,7 +7,7 @@ import {
 } from "recharts";
 import {
   Users, TrendingUp, Award, Activity, Loader2, AlertTriangle, Target, Zap,
-  BarChart2, ExternalLink, Settings2, Maximize2, Minimize2,
+  BarChart2, ExternalLink, Settings2, Maximize2, Minimize2, Download, ClipboardPaste,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -157,6 +157,117 @@ const DIM_COLORS: Record<string, string> = {
   Resources: "#14b8a6",
 };
 
+// ─── Paste-to-CSV Export Tool ─────────────────────────────────────────────────
+function UmamiExportSection() {
+  const [raw, setRaw] = useState("");
+
+  type Row = { page: string; visitors: string; visits: string; views: string };
+
+  const parsed: Row[] = useMemo(() => {
+    if (!raw.trim()) return [];
+    const lines = raw.trim().split("\n").filter(Boolean);
+    const rows: Row[] = [];
+    for (const line of lines) {
+      // Split by tab or 2+ spaces
+      const cols = line.split(/\t|  +/).map(c => c.trim()).filter(Boolean);
+      if (cols.length < 2) continue;
+      // Detect header row
+      if (/^(exit\s*page|page|url)/i.test(cols[0])) continue;
+      const [page, ...rest] = cols;
+      const nums = rest.filter(c => /^\d+$/.test(c));
+      rows.push({
+        page: page ?? "",
+        visitors: nums[0] ?? "",
+        visits: nums[1] ?? "",
+        views: nums[2] ?? "",
+      });
+    }
+    return rows;
+  }, [raw]);
+
+  function downloadCSV() {
+    if (!parsed.length) return;
+    const header = "Page,Visitors,Visits,Views";
+    const lines = parsed.map(r =>
+      [r.page, r.visitors, r.visits, r.views]
+        .map(v => `"${v.replace(/"/g, '""')}"`)
+        .join(",")
+    );
+    const csv = [header, ...lines].join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `umami-export-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  return (
+    <Card className="border-none shadow-md">
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-sm font-display flex items-center gap-2">
+            <Download className="w-4 h-4 text-primary" /> Export Umami Data as CSV
+          </CardTitle>
+        </div>
+        <p className="text-xs text-muted-foreground mt-1">
+          In Umami, select and copy any table (exit pages, top pages, etc.) and paste it here to download as CSV.
+        </p>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <div className="relative">
+          <textarea
+            className="w-full h-36 px-3 py-2.5 text-xs rounded-xl border bg-muted/30 font-mono resize-y focus:outline-none focus:ring-2 focus:ring-primary text-foreground"
+            placeholder={"Paste Umami table data here (copy from the Umami dashboard)…\n\nExample:\n/           35    56    172\n/profile     9    22    144"}
+            value={raw}
+            onChange={e => setRaw(e.target.value)}
+          />
+          {!raw && (
+            <div className="absolute top-3 right-3 pointer-events-none">
+              <ClipboardPaste className="w-4 h-4 text-muted-foreground/40" />
+            </div>
+          )}
+        </div>
+        {parsed.length > 0 && (
+          <>
+            <div className="rounded-xl border overflow-hidden">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="bg-muted/40 border-b">
+                    <th className="px-3 py-2 text-left font-semibold text-muted-foreground">Page</th>
+                    <th className="px-3 py-2 text-right font-semibold text-muted-foreground">Visitors</th>
+                    <th className="px-3 py-2 text-right font-semibold text-muted-foreground">Visits</th>
+                    <th className="px-3 py-2 text-right font-semibold text-muted-foreground">Views</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {parsed.map((r, i) => (
+                    <tr key={i} className="hover:bg-muted/20">
+                      <td className="px-3 py-1.5 font-mono text-primary">{r.page}</td>
+                      <td className="px-3 py-1.5 text-right">{r.visitors}</td>
+                      <td className="px-3 py-1.5 text-right">{r.visits}</td>
+                      <td className="px-3 py-1.5 text-right">{r.views}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <button
+              onClick={downloadCSV}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-opacity hover:opacity-90"
+              style={{ background: "#E08040", color: "#0D1225" }}
+            >
+              <Download className="w-4 h-4" />
+              Download {parsed.length} rows as CSV
+            </button>
+          </>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function AdminAnalyticsPage() {
   const { data, isLoading, error } = useQuery({
     queryKey: ["adminUserAnalytics"],
@@ -184,6 +295,7 @@ export default function AdminAnalyticsPage() {
 
         {/* Umami traffic analytics */}
         <UmamiSection />
+        <UmamiExportSection />
 
         {/* User analytics header */}
         <div className="flex items-center gap-3">

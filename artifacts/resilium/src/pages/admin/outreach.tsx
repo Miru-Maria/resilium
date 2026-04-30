@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import AdminLayout from "./layout";
-import { Mail, Send, CheckCircle, XCircle, AlertCircle, ChevronDown, ChevronUp, Loader2, Building2, User } from "lucide-react";
+import { Mail, Send, CheckCircle, XCircle, AlertCircle, Loader2, Building2, User, Pencil } from "lucide-react";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -51,7 +51,8 @@ function parseRecipients(raw: string): Recipient[] {
   return out;
 }
 
-const EMAIL_PREVIEW = `Hi [Name],
+const DEFAULT_SUBJECT = "One question from the founder of Resilium";
+const DEFAULT_BODY = `Hi [Name],
 
 You signed up for Resilium yesterday — thank you for being there on day one.
 
@@ -72,7 +73,8 @@ Resilium`;
 
 export default function AdminOutreachPage() {
   const [raw, setRaw] = useState("");
-  const [showPreview, setShowPreview] = useState(false);
+  const [emailSubject, setEmailSubject] = useState(DEFAULT_SUBJECT);
+  const [emailBody, setEmailBody] = useState(DEFAULT_BODY);
   const [sending, setSending] = useState(false);
   const [results, setResults] = useState<SendResult[] | null>(null);
   const [confirmed, setConfirmed] = useState(false);
@@ -100,7 +102,11 @@ export default function AdminOutreachPage() {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ recipients: recipients.map(r => ({ name: r.name, email: r.email })) }),
+        body: JSON.stringify({
+          recipients: recipients.map(r => ({ name: r.name, email: r.email })),
+          customSubject: emailSubject.trim() || DEFAULT_SUBJECT,
+          customBody: emailBody.trim() || DEFAULT_BODY,
+        }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -136,24 +142,39 @@ export default function AdminOutreachPage() {
           </p>
         </div>
 
-        {/* Email preview */}
-        <div className="mb-6 rounded-xl border border-white/10 bg-white/5 overflow-hidden">
+        {/* Editable email content */}
+        <div className="mb-6 space-y-3">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-xs font-bold uppercase tracking-widest text-primary">Email Content</span>
+            <Pencil className="w-3 h-3 text-primary" />
+            <span className="text-xs" style={{ color: "#8A7A6A" }}>— edit freely, use [Name] where the first name should go</span>
+          </div>
+          <div>
+            <label className="text-xs font-semibold block mb-1" style={{ color: "#8A7A6A" }}>Subject line</label>
+            <input
+              type="text"
+              value={emailSubject}
+              onChange={e => setEmailSubject(e.target.value)}
+              className="w-full px-3 py-2.5 text-sm rounded-xl border border-white/10 bg-white/5 focus:outline-none focus:ring-2 focus:ring-primary"
+              style={{ color: "#EAD9BE" }}
+            />
+          </div>
+          <div>
+            <label className="text-xs font-semibold block mb-1" style={{ color: "#8A7A6A" }}>Body</label>
+            <textarea
+              value={emailBody}
+              onChange={e => setEmailBody(e.target.value)}
+              className="w-full h-72 px-3 py-2.5 text-sm rounded-xl border border-white/10 bg-white/5 font-mono resize-y focus:outline-none focus:ring-2 focus:ring-primary leading-relaxed"
+              style={{ color: "#EAD9BE" }}
+            />
+          </div>
           <button
-            className="w-full flex items-center justify-between px-4 py-3 text-left"
-            onClick={() => setShowPreview(v => !v)}
+            className="text-xs underline underline-offset-2"
+            style={{ color: "#8A7A6A" }}
+            onClick={() => { setEmailSubject(DEFAULT_SUBJECT); setEmailBody(DEFAULT_BODY); }}
           >
-            <span className="text-xs font-bold uppercase tracking-widest text-primary">Email Preview</span>
-            {showPreview ? <ChevronUp className="w-4 h-4 text-primary" /> : <ChevronDown className="w-4 h-4 text-primary" />}
+            Reset to default
           </button>
-          {showPreview && (
-            <div className="px-4 pb-4">
-              <div className="bg-white rounded-lg border border-slate-200 p-5">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">Subject</p>
-                <p className="text-sm font-semibold text-gray-900 mb-4">One question from the founder of Resilium</p>
-                <pre className="text-sm text-gray-700 font-sans leading-relaxed whitespace-pre-wrap">{EMAIL_PREVIEW}</pre>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Paste input */}

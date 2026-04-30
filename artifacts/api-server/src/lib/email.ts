@@ -175,12 +175,17 @@ export async function sendUserWeeklyDigest(opts: {
 
 // ─── Founder Outreach Email ───────────────────────────────────────────────────
 
-export async function sendFounderOutreachEmail(opts: { email: string; firstName?: string | null }) {
+export async function sendFounderOutreachEmail(opts: {
+  email: string;
+  firstName?: string | null;
+  customSubject?: string;
+  customBody?: string;
+}) {
   if (!opts.email) return;
   const name = opts.firstName?.trim() || null;
-  const greeting = name ? `Hi ${name},` : "Hi,";
-  const subject = "One question from the founder of Resilium";
-  const text = `${greeting}
+
+  const defaultSubject = "One question from the founder of Resilium";
+  const defaultBody = `Hi [Name],
 
 You signed up for Resilium yesterday — thank you for being there on day one.
 
@@ -199,7 +204,18 @@ Thank you for being here.
 — Miruna
 Resilium`;
 
-  const html = `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f5f5f3;font-family:'Helvetica Neue',Arial,sans-serif;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:40px 20px;"><table width="540" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;border:1px solid #e5e5e5;overflow:hidden;"><tr><td style="padding:32px 36px 0;"><p style="margin:0 0 6px;font-family:Georgia,serif;font-size:11px;color:#999;letter-spacing:2px;text-transform:uppercase;">Resilium — Founder Note</p><hr style="border:none;border-top:1px solid #eee;margin:0 0 28px;"/></td></tr><tr><td style="padding:0 36px 36px;"><p style="margin:0 0 20px;font-size:15px;color:#1a1a1a;line-height:1.7;">${greeting}</p><p style="margin:0 0 20px;font-size:15px;color:#1a1a1a;line-height:1.7;">You signed up for Resilium yesterday — thank you for being there on day one.</p><p style="margin:0 0 20px;font-size:15px;color:#1a1a1a;line-height:1.7;">I'm Miruna, the person who built it. I wanted to reach out personally while everything is still fresh.</p><p style="margin:0 0 20px;font-size:16px;font-weight:600;color:#1a1a1a;line-height:1.7;">One question: What made you sign up?</p><p style="margin:0 0 20px;font-size:15px;color:#444;line-height:1.7;">You don't have to answer. But if something about the idea resonated — or if you had a concern — I read every reply. It genuinely helps me understand what I'm building for.</p><p style="margin:0 0 20px;font-size:15px;color:#444;line-height:1.7;">If you haven't taken the assessment yet, it takes about 10 minutes. You'll get a real, prioritized action plan — not a quiz result, but a ranked set of actions based on exactly where your gaps are.</p><table cellpadding="0" cellspacing="0" style="margin:24px 0;"><tr><td style="background:#E08040;border-radius:8px;"><a href="${APP_URL}" style="display:inline-block;color:#0D1225;font-weight:700;font-size:14px;padding:13px 26px;text-decoration:none;">Take your assessment →</a></td></tr></table><p style="margin:32px 0 0;font-size:14px;color:#888;line-height:1.7;">— Miruna<br>Resilium</p></td></tr></table></td></tr></table></body></html>`;
+  const subject = opts.customSubject || defaultSubject;
+  // Replace [Name] with actual first name, or "there" as fallback
+  const rawBody = (opts.customBody || defaultBody).replace(/\[Name\]/g, name || "there");
+  const text = rawBody;
+
+  // Render body paragraphs as simple HTML — each double-newline becomes a <p>
+  const bodyHtml = rawBody
+    .split(/\n\n+/)
+    .map(para => `<p style="margin:0 0 20px;font-size:15px;color:#1a1a1a;line-height:1.7;">${para.replace(/\n/g, "<br/>")}</p>`)
+    .join("");
+
+  const html = `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f5f5f3;font-family:'Helvetica Neue',Arial,sans-serif;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:40px 20px;"><table width="540" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;border:1px solid #e5e5e5;overflow:hidden;"><tr><td style="padding:32px 36px 0;"><p style="margin:0 0 6px;font-family:Georgia,serif;font-size:11px;color:#999;letter-spacing:2px;text-transform:uppercase;">Resilium — Founder Note</p><hr style="border:none;border-top:1px solid #eee;margin:0 0 28px;"/></td></tr><tr><td style="padding:0 36px 36px;">${bodyHtml}</td></tr></table></td></tr></table></body></html>`;
 
   await send({ to: opts.email, subject, text, html });
 }
