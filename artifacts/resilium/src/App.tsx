@@ -43,6 +43,7 @@ import AdminMonitoringPage from "@/pages/admin/monitoring";
 import AdminDocumentsPage from "@/pages/admin/documents";
 import AdminAnalyticsPage from "@/pages/admin/analytics";
 import AdminPostLaunchPage from "@/pages/admin/post-launch";
+import AdminOutreachPage from "@/pages/admin/outreach";
 import ConsentPage from "@/pages/consent";
 import CoachingPage from "@/pages/coaching";
 import DemoPage from "@/pages/demo";
@@ -324,6 +325,7 @@ function Router() {
       <Route path="/admin/monitoring" component={AdminMonitoringPage} />
       <Route path="/admin/analytics" component={AdminAnalyticsPage} />
       <Route path="/admin/post-launch" component={AdminPostLaunchPage} />
+      <Route path="/admin/outreach" component={AdminOutreachPage} />
       <Route path="/admin/blog" component={AdminBlogPage} />
       <Route path="/blog" component={BlogPage} />
       <Route path="/blog/:slug" component={BlogPostPage} />

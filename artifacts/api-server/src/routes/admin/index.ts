@@ -16,7 +16,7 @@ import adminAnnouncementsRouter from "./announcements.js";
 import adminBlogRouter from "./blog.js";
 import { getCoachingClickCount, runDependencyAudit, getLastHealthCheckResults, runE2eAssessmentTest, runSiteAudit } from "../../lib/cron.js";
 import { logger } from "../../lib/logger.js";
-import { sendWelcomeEmail, sendProUpgradeEmail, sendReassessmentReminder, sendUserWeeklyDigest } from "../../lib/email.js";
+import { sendWelcomeEmail, sendProUpgradeEmail, sendReassessmentReminder, sendUserWeeklyDigest, sendFounderOutreachEmail } from "../../lib/email.js";
 import { runDatabaseBackup, listBackups } from "../../lib/backup.js";
 
 async function auditLog(action: string, details: Record<string, unknown>, req: Request): Promise<void> {
@@ -470,6 +470,38 @@ router.post("/send-test-email", requireAdminSession, async (req, res) => {
     logger.error({ err }, "Failed to send test email");
     res.status(500).json({ error: "Failed to send test email" });
   }
+});
+
+// ─── Founder Outreach Bulk Sender ────────────────────────────────────────────
+router.post("/send-founder-outreach", requireAdminSession, async (req, res) => {
+  const { recipients } = req.body as { recipients?: { name?: string; email: string }[] };
+  if (!Array.isArray(recipients) || recipients.length === 0) {
+    res.status(400).json({ error: "recipients must be a non-empty array" });
+    return;
+  }
+  if (recipients.length > 200) {
+    res.status(400).json({ error: "Maximum 200 recipients per batch" });
+    return;
+  }
+  const results: { email: string; status: "sent" | "failed"; error?: string }[] = [];
+  for (const r of recipients) {
+    if (!r.email || !r.email.includes("@")) {
+      results.push({ email: r.email ?? "(missing)", status: "failed", error: "Invalid email" });
+      continue;
+    }
+    try {
+      await sendFounderOutreachEmail({ email: r.email.trim(), firstName: r.name?.trim() || null });
+      results.push({ email: r.email, status: "sent" });
+    } catch (err) {
+      results.push({ email: r.email, status: "failed", error: String(err) });
+    }
+    // Small delay to stay within Resend rate limits
+    await new Promise(resolve => setTimeout(resolve, 80));
+  }
+  const sent = results.filter(r => r.status === "sent").length;
+  const failed = results.filter(r => r.status === "failed").length;
+  await auditLog("founder_outreach_sent", { sent, failed, total: recipients.length }, req);
+  res.json({ sent, failed, results });
 });
 
 // Paginated reports endpoint

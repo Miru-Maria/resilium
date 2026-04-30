@@ -7,7 +7,7 @@ import {
   Loader2, LayoutDashboard, Smartphone, Shield, LogOut,
   FlaskConical, Users, Megaphone, KeyRound, Activity, FolderLock,
   Star, BarChart2, FileText, LayoutTemplate, Radar, Rocket,
-  BookOpen, Code2, Layers, Palette, ChevronDown, Newspaper,
+  BookOpen, Code2, Layers, Palette, ChevronDown, Newspaper, Mail,
 } from "lucide-react";
 
 // ── Admin Error Boundary ─────────────────────────────────────────────────────
@@ -159,6 +159,7 @@ export function AdminLayout({ children, activeSection }: AdminLayoutProps) {
     { href: "/admin/monitoring",   label: "Sentry",       icon: Activity,        key: "monitoring" },
     { href: "/admin/blog",         label: "Blog Posts",   icon: Newspaper,       key: "blog" },
     { href: "/admin/post-launch",  label: "Post-Launch",  icon: Rocket,          key: "post-launch" },
+    { href: "/admin/outreach",     label: "Outreach",     icon: Mail,            key: "outreach" },
   ];
 
   const isDocuments = activeSection === "documents";
