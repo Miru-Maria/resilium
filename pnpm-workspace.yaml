@@ -42,6 +42,25 @@ onlyBuiltDependencies:
   - unrs-resolver
 
 overrides:
+  # Security patches for vulnerable transitive dependencies
+  '@clerk/shared': '>=4.8.3'
+  '@clerk/backend': '>=3.2.14'
+  '@clerk/clerk-js': '>=6.7.5'
+  'drizzle-orm': '>=0.45.2'
+  'serialize-javascript': '>=7.0.3'
+  'node-forge': '>=1.4.0'
+  'path-to-regexp': '>=8.4.0'
+  '@xmldom/xmldom': '>=0.8.13'
+  'vite': '>=7.3.2'
+  'yaml': '>=2.8.3'
+  'follow-redirects': '>=1.16.0'
+  'dompurify': '>=3.4.0'
+  'brace-expansion': '>=3.0.0'
+  # picomatch path-specific fixes (two separate version families)
+  'micromatch>picomatch': '2.3.2'
+  'tinyglobby>picomatch': '4.0.4'
+  '@rollup/pluginutils>picomatch': '2.3.2'
+  # esbuild alias
   '@esbuild-kit/esm-loader': npm:tsx@^4.21.0
   '@expo/ngrok-bin>@expo/ngrok-bin-darwin-arm64': '-'
   '@expo/ngrok-bin>@expo/ngrok-bin-darwin-x64': '-'
