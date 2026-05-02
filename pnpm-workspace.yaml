@@ -60,6 +60,7 @@ overrides:
   'micromatch>picomatch': '2.3.2'
   'tinyglobby>picomatch': '4.0.4'
   '@rollup/pluginutils>picomatch': '2.3.2'
+  'jest-util>picomatch': '2.3.2'
   # esbuild alias
   '@esbuild-kit/esm-loader': npm:tsx@^4.21.0
   '@expo/ngrok-bin>@expo/ngrok-bin-darwin-arm64': '-'
