@@ -16,6 +16,7 @@ import companionRouter from "./companion.js";
 import checkinsRouter from "./checkins.js";
 import challengeRouter from "./challenge.js";
 import blogRouter from "./blog.js";
+import referralRouter from "./referral.js";
 
 const router: IRouter = Router();
 
@@ -36,5 +37,6 @@ router.use(companionRouter);
 router.use(checkinsRouter);
 router.use(challengeRouter);
 router.use("/", blogRouter);
+router.use("/referral", referralRouter);
 
 export default router;

@@ -31,3 +31,5 @@ export * from "./challenge";
 export * from "./drip";
 export * from "./admin-audit-log";
 export * from "./blog";
+export * from "./referrals";
+export * from "./broadcasts";

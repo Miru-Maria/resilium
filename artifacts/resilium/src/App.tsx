@@ -51,6 +51,7 @@ import DemoPage from "@/pages/demo";
 import BlogPage from "@/pages/blog";
 import BlogPostPage from "@/pages/blog-post";
 import AdminBlogPage from "@/pages/admin/blog";
+import AdminGrowthPage from "@/pages/admin/growth";
 import ScenariosPage from "@/pages/scenarios";
 import PlanPage from "@/pages/plan";
 import { AnnouncementBanner } from "@/components/announcement-banner";
@@ -127,6 +128,38 @@ function ClerkAuthBridge() {
     });
     return () => setAuthTokenGetter(null);
   }, [getToken]);
+  return null;
+}
+
+const BASE_URL = import.meta.env.BASE_URL.replace(/\/$/, "");
+const REF_STORAGE_KEY = "resilium_ref_code";
+
+function ReferralCapture() {
+  const { user } = useUser();
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get("ref");
+    if (ref && ref.trim()) {
+      localStorage.setItem(REF_STORAGE_KEY, ref.trim().toUpperCase());
+    }
+  }, []);
+
+  const claimedRef = useRef(false);
+  useEffect(() => {
+    if (!user || claimedRef.current) return;
+    const code = localStorage.getItem(REF_STORAGE_KEY);
+    if (!code) return;
+    claimedRef.current = true;
+    fetch(`${BASE_URL}/api/referral/claim`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ code }),
+    })
+      .then(() => localStorage.removeItem(REF_STORAGE_KEY))
+      .catch(() => { claimedRef.current = false; });
+  }, [user]);
+
   return null;
 }
 
@@ -327,6 +360,7 @@ function Router() {
       <Route path="/admin/post-launch" component={AdminPostLaunchPage} />
       <Route path="/admin/outreach" component={AdminOutreachPage} />
       <Route path="/admin/blog" component={AdminBlogPage} />
+      <Route path="/admin/growth" component={AdminGrowthPage} />
       <Route path="/blog" component={BlogPage} />
       <Route path="/blog/:slug" component={BlogPostPage} />
       <Route path="/coaching" component={CoachingPage} />
@@ -356,6 +390,7 @@ function ClerkProviderWithRoutes() {
       appearance={hideFacebookAppearance}
     >
       <ClerkAuthBridge />
+      <ReferralCapture />
       <QueryClientProvider client={queryClient}>
         <ClerkQueryClientCacheInvalidator />
         <TooltipProvider>

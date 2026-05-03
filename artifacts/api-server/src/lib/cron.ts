@@ -3,7 +3,7 @@ import { exec } from "child_process";
 import { promisify } from "util";
 import { db, subscriptionsTable, reportFeedbackTable, resilienceReportsTable, usersTable, emailDripQueueTable } from "@workspace/db";
 import { and, desc, eq, gte, inArray, isNull, lte, sql } from "drizzle-orm";
-import { sendAdminDigest, sendErrorAlert, sendReassessmentReminder, sendUserWeeklyDigest, sendE2eAssessmentReport, sendSiteAuditReport, sendDripDay2Email, sendDripDay5Email, sendDripDay9Email, sendDripDay14Email, sendDependencyAuditEmail, type E2eCheckResult } from "./email.js";
+import { sendAdminDigest, sendErrorAlert, sendReassessmentReminder, sendUserWeeklyDigest, sendE2eAssessmentReport, sendSiteAuditReport, sendDripDay2Email, sendDripDay5Email, sendDripDay9Email, sendDripDay14Email, sendDependencyAuditEmail, sendBlogDraftReadyEmail, type E2eCheckResult } from "./email.js";
 import { runDatabaseBackup } from "./backup.js";
 import { sendPushNotificationsToUsers } from "./push.js";
 import { logger } from "./logger.js";
@@ -577,6 +577,26 @@ async function runSiteAudit() {
   }
 }
 
+// ─── Weekly blog post auto-generation ────────────────────────────────────────
+
+async function runBlogAutoGeneration() {
+  try {
+    logger.info("Running weekly blog post auto-generation");
+    const { generateBlogPost } = await import("../routes/admin/blog.js");
+    const { db, blogPostsTable } = await import("@workspace/db");
+    const post = await generateBlogPost();
+    await db.insert(blogPostsTable).values({
+      ...post,
+      status: "draft",
+      publishedAt: new Date(),
+    });
+    await sendBlogDraftReadyEmail({ title: post.title, slug: post.slug, keyword: post.targetKeyword, pillar: post.pillarLabel });
+    logger.info({ title: post.title }, "Blog post auto-generated and saved as draft");
+  } catch (err) {
+    logger.error({ err }, "Blog auto-generation failed");
+  }
+}
+
 // ─── Post-assessment drip email processor ────────────────────────────────────
 
 async function runDripProcessor() {
@@ -748,5 +768,10 @@ export function startCron(): void {
     runDependencyAudit().catch(() => {});
   }, { timezone: "UTC" });
 
-  logger.info("Cron jobs scheduled (admin digest: Mon 07:00, user digest: Sun 18:00, 7d reminders: daily 09:00, 30d reminders: Mon 08:00, e2e test: daily 06:00, site audit: daily 07:00, drip: hourly :15, db-backup: daily 02:30, dep-audit: 1st of month 09:00 UTC)");
+  // Every Monday at 08:00 UTC — auto-generate a blog post draft
+  cron.schedule("0 8 * * 1", () => {
+    runBlogAutoGeneration().catch(() => {});
+  }, { timezone: "UTC" });
+
+  logger.info("Cron jobs scheduled (admin digest: Mon 07:00, user digest: Sun 18:00, 7d reminders: daily 09:00, 30d reminders: Mon 08:00, e2e test: daily 06:00, site audit: daily 07:00, drip: hourly :15, db-backup: daily 02:30, dep-audit: 1st of month 09:00 UTC, blog-gen: Mon 08:00 UTC)");
 }

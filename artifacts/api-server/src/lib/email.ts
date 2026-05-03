@@ -161,7 +161,7 @@ export async function sendUserWeeklyDigest(opts: {
     ? `\n\nThis week's focus:\n${opts.topAction.title}\n${opts.topAction.description}\n`
     : "";
 
-  const text = `Hi ${name},\n\nHere's your weekly Resilium check-in.\n\nCurrent resilience score: ${opts.lastScore}/100 (${scoreLabel})\n${topActionText}\n"${encouragement}"\n\nOpen your action plan and tick off this one task this week — small actions compound:\n${planUrl}\n\n— Cristiana at Resilium${unsubText}`;
+  const text = `Hi ${name},\n\nHere's your weekly Resilium check-in.\n\nCurrent resilience score: ${opts.lastScore}/100 (${scoreLabel})\n${topActionText}\n"${encouragement}"\n\nOpen your action plan and tick off this one task this week — small actions compound:\n${planUrl}\n\nKnow someone who'd benefit from Resilium? Share it with a friend:\n${APP_URL}\n\n— Cristiana at Resilium${unsubText}`;
 
   const topActionHtml = opts.topAction
     ? `<div style="background:#1e2d40;border-left:3px solid #E08040;border-radius:0 8px 8px 0;padding:16px 20px;margin:0 0 24px;"><span style="color:#E08040;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:8px;">This week&#39;s focus</span><p style="margin:0 0 6px;color:#EAD9BE;font-size:15px;font-weight:600;line-height:1.4;">${opts.topAction.title}</p><p style="margin:0;color:#b8a99a;font-size:13px;line-height:1.6;">${opts.topAction.description}</p></div>`
@@ -169,7 +169,10 @@ export async function sendUserWeeklyDigest(opts: {
 
   const html = `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0D1225;font-family:'Helvetica Neue',Arial,sans-serif;color:#EAD9BE;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:40px 20px;"><table width="560" cellpadding="0" cellspacing="0" style="background:#131929;border-radius:16px;overflow:hidden;"><tr><td style="background:#E08040;padding:20px 32px;display:flex;align-items:center;justify-content:space-between;"><h1 style="margin:0;color:#0D1225;font-size:20px;font-weight:800;display:inline;">Resilium</h1><span style="color:rgba(13,18,37,0.65);font-size:12px;margin-left:12px;">Weekly Check-In · ${new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span></td></tr><tr><td style="padding:32px;"><h2 style="margin:0 0 6px;color:#EAD9BE;font-size:18px;font-weight:700;">Hey ${name} 👋</h2><p style="margin:0 0 24px;color:#b8a99a;font-size:14px;line-height:1.6;">Your weekly resilience update is here.</p><div style="background:#1a2235;border-radius:12px;padding:20px;margin:0 0 24px;text-align:center;border:1px solid #2a3245;"><span style="color:#8A7A6A;font-size:11px;display:block;margin-bottom:8px;text-transform:uppercase;letter-spacing:1.5px;">Resilience Score</span><span style="color:${scoreColor};font-size:48px;font-weight:800;line-height:1;">${opts.lastScore}</span><span style="color:#8A7A6A;font-size:22px;font-weight:400;">/100</span><span style="display:block;color:#8A7A6A;font-size:13px;margin-top:6px;font-weight:500;">${scoreLabel}</span></div>${topActionHtml}<p style="margin:0 0 20px;color:#8A7A6A;font-size:13px;font-style:italic;line-height:1.7;padding:0 4px;">"${encouragement}"</p><p style="margin:0 0 24px;color:#b8a99a;font-size:14px;line-height:1.6;">Open your action plan and tick off this one task this week. Every completed action is a gap permanently closed.</p><a href="${planUrl}" style="display:block;background:#E08040;color:#0D1225;font-weight:700;font-size:15px;padding:15px 28px;border-radius:10px;text-decoration:none;text-align:center;letter-spacing:-0.2px;">Open My Action Plan →</a><p style="margin:28px 0 0;color:#4a3a2a;font-size:12px;line-height:1.6;text-align:center;">To unsubscribe, reply to this email.<br>— Cristiana at Resilium</p></td></tr></table></td></tr></table></body></html>`;
 
-  const htmlWithUnsub = html.replace("</body>", `${unsubHtml}</body>`);
+  const referralHtml = `<div style="background:#1a2235;border-radius:10px;padding:16px 20px;margin:24px 0 0;border:1px solid #2a3245;text-align:center;"><p style="margin:0 0 8px;color:#8A7A6A;font-size:11px;text-transform:uppercase;letter-spacing:1px;">Know someone who'd benefit?</p><p style="margin:0 0 12px;color:#b8a99a;font-size:13px;line-height:1.6;">Share Resilium with a friend. Help them understand their preparedness gaps before a crisis hits.</p><a href="${APP_URL}" style="display:inline-block;background:#1e2d40;color:#E08040;font-weight:600;font-size:13px;padding:10px 20px;border-radius:8px;text-decoration:none;border:1px solid #E08040;">Share Resilium →</a></div>`;
+
+  const htmlWithReferral = html.replace("</td></tr></table></td></tr></table></body></html>", `${referralHtml}</td></tr></table></td></tr></table></body></html>`);
+  const htmlWithUnsub = htmlWithReferral.replace("</body>", `${unsubHtml}</body>`);
   await send({ to: opts.email, subject: `Your weekly resilience check-in, ${name}`, html: htmlWithUnsub, text, headers: listHeader });
 }
 
@@ -702,4 +705,55 @@ export async function sendMilestoneEmail(opts: {
   const html = `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0D1225;font-family:'Helvetica Neue',Arial,sans-serif;color:#EAD9BE;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:40px 20px;"><table width="560" cellpadding="0" cellspacing="0" style="background:#131929;border-radius:16px;overflow:hidden;"><tr><td style="background:#E08040;padding:20px 32px;"><h1 style="margin:0;color:#0D1225;font-size:20px;font-weight:800;">Resilium</h1></td></tr><tr><td style="padding:32px;"><div style="text-align:center;margin:0 0 28px;"><span style="font-size:52px;font-weight:800;color:${m.accent};">${opts.milestoneCount}</span><span style="font-size:24px;color:#8A7A6A;font-weight:400;"> action${opts.milestoneCount !== 1 ? "s" : ""} done</span></div><h2 style="margin:0 0 16px;color:#EAD9BE;font-size:22px;font-weight:700;text-align:center;">${m.headline}</h2><p style="margin:0 0 28px;color:#b8a99a;font-size:15px;line-height:1.7;text-align:center;">${m.body}</p><a href="${planUrl}" style="display:block;background:#E08040;color:#0D1225;font-weight:700;font-size:15px;padding:15px 28px;border-radius:10px;text-decoration:none;text-align:center;">Keep going →</a><p style="margin:28px 0 0;color:#4a3a2a;font-size:12px;text-align:center;">— Cristiana at Resilium</p>${unsubHtml}</td></tr></table></td></tr></table></body></html>`;
 
   await send({ to: opts.email, subject: m.subject, html, text, headers: listHeader });
+}
+
+// ─── Broadcast Campaign Email ─────────────────────────────────────────────────
+
+export async function sendBroadcastEmail(opts: {
+  to: string;
+  subject: string;
+  body: string;
+  firstName?: string | null;
+  userId?: string;
+}): Promise<void> {
+  if (!opts.to) return;
+  const name = opts.firstName ?? "there";
+  const bodyWithName = opts.body.replace(/\[Name\]/g, name);
+  const unsubHtml = opts.userId ? unsubscribeFooterHtml(opts.userId) : "";
+  const unsubText = opts.userId ? unsubscribeFooterText(opts.userId) : "";
+  const listHeader = opts.userId
+    ? { "List-Unsubscribe": buildListUnsubscribeHeader(opts.userId), "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" }
+    : undefined;
+
+  const bodyHtml = bodyWithName
+    .split(/\n\n+/)
+    .map(para => {
+      const trimmed = para.trim();
+      if (!trimmed) return "";
+      if (trimmed.startsWith("→ ") || trimmed.startsWith("• ")) {
+        return `<p style="margin:0 0 12px;color:#b8a99a;font-size:14px;line-height:1.7;padding-left:16px;border-left:2px solid #E08040;">${trimmed.replace(/^[→•]\s*/, "")}</p>`;
+      }
+      return `<p style="margin:0 0 16px;color:#b8a99a;font-size:14px;line-height:1.7;">${trimmed.replace(/\n/g, "<br>")}</p>`;
+    })
+    .join("");
+
+  const html = `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0D1225;font-family:'Helvetica Neue',Arial,sans-serif;color:#EAD9BE;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:40px 20px;"><table width="560" cellpadding="0" cellspacing="0" style="background:#131929;border-radius:16px;overflow:hidden;"><tr><td style="background:#E08040;padding:20px 32px;"><h1 style="margin:0;color:#0D1225;font-size:20px;font-weight:800;">Resilium</h1></td></tr><tr><td style="padding:32px;">${bodyHtml}<a href="${APP_URL}" style="display:inline-block;background:#E08040;color:#0D1225;font-weight:700;font-size:14px;padding:12px 24px;border-radius:8px;text-decoration:none;margin-top:8px;">Open Resilium →</a>${unsubHtml}</td></tr></table></td></tr></table></body></html>`;
+  const text = `${bodyWithName}\n\n${APP_URL}${unsubText}`;
+
+  await send({ to: opts.to, subject: opts.subject, html, text, headers: listHeader });
+}
+
+// ─── Blog Draft Ready (admin notification) ────────────────────────────────────
+
+export async function sendBlogDraftReadyEmail(opts: {
+  title: string;
+  slug: string;
+  keyword: string;
+  pillar: string;
+}): Promise<void> {
+  const adminUrl = `${APP_URL}/admin/blog`;
+  const subject = `📝 New blog draft ready: "${opts.title}"`;
+  const text = `A new blog post draft was auto-generated by the weekly content engine.\n\nTitle: ${opts.title}\nKeyword: ${opts.keyword}\nPillar: ${opts.pillar}\n\nReview and publish it here:\n${adminUrl}`;
+  const html = `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0D1225;font-family:'Helvetica Neue',Arial,sans-serif;color:#EAD9BE;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:40px 20px;"><table width="560" cellpadding="0" cellspacing="0" style="background:#131929;border-radius:16px;overflow:hidden;"><tr><td style="background:#E08040;padding:20px 32px;"><h1 style="margin:0;color:#0D1225;font-size:20px;font-weight:800;">Resilium · Content Engine</h1></td></tr><tr><td style="padding:32px;"><h2 style="margin:0 0 16px;color:#EAD9BE;font-size:18px;font-weight:700;">📝 New blog draft ready</h2><div style="background:#1a2235;border-radius:10px;padding:20px;margin-bottom:24px;border:1px solid #2a3245;"><p style="margin:0 0 8px;color:#8A7A6A;font-size:11px;text-transform:uppercase;letter-spacing:1px;">Title</p><p style="margin:0 0 16px;color:#EAD9BE;font-size:16px;font-weight:600;">${opts.title}</p><p style="margin:0 0 4px;color:#8A7A6A;font-size:11px;text-transform:uppercase;letter-spacing:1px;">Target Keyword</p><p style="margin:0 0 16px;color:#b8a99a;font-size:14px;">${opts.keyword}</p><p style="margin:0 0 4px;color:#8A7A6A;font-size:11px;text-transform:uppercase;letter-spacing:1px;">Pillar</p><p style="margin:0;color:#b8a99a;font-size:14px;">${opts.pillar}</p></div><p style="margin:0 0 20px;color:#b8a99a;font-size:14px;line-height:1.6;">The post is saved as a <strong style="color:#EAD9BE;">draft</strong>. Review it, make any edits, and publish when ready.</p><a href="${adminUrl}" style="display:inline-block;background:#E08040;color:#0D1225;font-weight:700;font-size:14px;padding:12px 24px;border-radius:8px;text-decoration:none;">Review &amp; Publish →</a></td></tr></table></td></tr></table></body></html>`;
+  await send({ to: ADMIN_TO, subject, html, text });
 }
