@@ -97,7 +97,7 @@ export function AdminLayout({ children, activeSection }: AdminLayoutProps) {
   const [authed, setAuthed] = useState(() => _sessionCache.expiresAt > Date.now() && _sessionCache.authed);
   const [docsOpen, setDocsOpen] = useState(true);
 
-  const activeDoc = new URLSearchParams(search).get("doc") ?? "marketing-strategy";
+  const activeDoc = new URLSearchParams(search).get("doc");
 
   useEffect(() => {
     // Skip the network round-trip if the cache is still warm.
