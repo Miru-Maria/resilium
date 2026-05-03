@@ -31,10 +31,15 @@ async function buildAll() {
     // - uses native modules and loads them dynamically (e.g. sharp)
     // - use path traversal to read files (e.g. @google-cloud/secret-manager loads sibling .proto files)
     external: [
-      // express must be external so that Sentry's OpenTelemetry hooks have the
-      // opportunity to wrap it. Keeping it bundled causes the OTel patch to fire
-      // too late, but the warning is a known ESM+bundler limitation — error
-      // capture still works correctly. Externalising also sheds ~1mb of bundle.
+      // Sentry must be external so that --import @sentry/node/import registers
+      // its ESM hooks against the same module instance that instrument.mjs
+      // calls Sentry.init() on. Bundling Sentry creates two separate instances:
+      // the hook targets the npm copy, but init() runs on the inlined copy,
+      // so Express never gets instrumented. Externalising also sheds ~1.7mb.
+      "@sentry/node",
+      "@sentry/core",
+      // express must be external for the same reason — Sentry's OTel hooks must
+      // wrap it at load time; bundling would inline it past the hook window.
       "express",
       "*.node",
       "sharp",

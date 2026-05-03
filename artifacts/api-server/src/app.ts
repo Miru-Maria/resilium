@@ -30,12 +30,15 @@ app.use(
 );
 
 // ── CORS — restrict to known origins ────────────────────────────────────────
-const ALLOWED_ORIGINS = [
+const ALLOWED_ORIGINS: (string | RegExp)[] = [
   "https://resilium-platform.com",
+  /^https?:\/\/localhost(:\d+)?$/,
   /^https:\/\/.*\.resilium-platform\.com$/,
   /^https:\/\/.*\.replit\.app$/,
   /^https:\/\/.*\.repl\.co$/,
   /^https:\/\/.*\.replit\.dev$/,
+  /^https:\/\/.*\.kirk\.replit\.dev$/,
+  /^exp:\/\//,
 ];
 
 app.use(
@@ -47,6 +50,7 @@ app.use(
         typeof o === "string" ? o === origin : o.test(origin),
       );
       if (allowed) return callback(null, true);
+      logger.warn({ origin }, "CORS: blocked request from unlisted origin");
       return callback(new Error("Not allowed by CORS"));
     },
   }),
