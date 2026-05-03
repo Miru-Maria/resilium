@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
-import { db, blogPostsTable } from "@workspace/db";
-import { eq, desc } from "drizzle-orm";
+import { db, blogPostsTable, blogKeywordsTable } from "@workspace/db";
+import { eq, desc, isNull, asc } from "drizzle-orm";
 import { requireAdminSession } from "../../middlewares/adminAuth.js";
 import { openai } from "@workspace/integrations-openai-ai-server";
 import { MINI_MODEL } from "../../lib/models.js";
@@ -126,6 +126,48 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+// ─── Keyword queue CRUD routes ────────────────────────────────────────────────
+
+router.get("/keywords", async (_req, res) => {
+  try {
+    const rows = await db.select().from(blogKeywordsTable).orderBy(asc(blogKeywordsTable.priority), asc(blogKeywordsTable.createdAt));
+    res.json({ keywords: rows });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch keywords" });
+  }
+});
+
+router.post("/keywords", async (req, res) => {
+  try {
+    const { keyword, pillar, pillarLabel, priority } = req.body as {
+      keyword?: string; pillar?: string; pillarLabel?: string; priority?: number;
+    };
+    if (!keyword?.trim()) { res.status(400).json({ error: "keyword is required" }); return; }
+    const [row] = await db.insert(blogKeywordsTable).values({
+      keyword: keyword.trim(),
+      pillar: pillar?.trim() ?? "financial",
+      pillarLabel: pillarLabel?.trim() ?? "Financial Resilience",
+      priority: typeof priority === "number" ? priority : 5,
+    }).returning();
+    res.status(201).json({ keyword: row });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to add keyword" });
+  }
+});
+
+router.delete("/keywords/:id", async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) { res.status(400).json({ error: "Invalid id" }); return; }
+    await db.delete(blogKeywordsTable).where(eq(blogKeywordsTable.id, id));
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to delete keyword" });
+  }
+});
+
+// ─── Keyword pool (fallback when DB queue is empty) ───────────────────────────
+
 const KEYWORD_POOL = [
   { keyword: "emergency fund how much", pillar: "financial", pillarLabel: "Financial Resilience" },
   { keyword: "personal resilience score", pillar: "financial", pillarLabel: "Financial Resilience" },
@@ -143,6 +185,25 @@ const KEYWORD_POOL = [
   { keyword: "emergency housing options", pillar: "mobility", pillarLabel: "Mobility & Relocation" },
   { keyword: "how to build community resilience", pillar: "social-capital", pillarLabel: "Social Capital" },
 ];
+
+export async function pickNextKeyword(): Promise<{ keyword: string; pillar: string; pillarLabel: string; id?: number } | null> {
+  try {
+    const [row] = await db
+      .select()
+      .from(blogKeywordsTable)
+      .where(isNull(blogKeywordsTable.usedAt))
+      .orderBy(asc(blogKeywordsTable.priority), asc(blogKeywordsTable.createdAt))
+      .limit(1);
+    if (row) return { keyword: row.keyword, pillar: row.pillar, pillarLabel: row.pillarLabel, id: row.id };
+  } catch { /* fall through to pool */ }
+  return null;
+}
+
+export async function markKeywordUsed(id: number): Promise<void> {
+  try {
+    await db.update(blogKeywordsTable).set({ usedAt: new Date() }).where(eq(blogKeywordsTable.id, id));
+  } catch { /* non-fatal */ }
+}
 
 export async function generateBlogPost(keyword?: string, pillar?: string, pillarLabel?: string): Promise<{
   slug: string; title: string; description: string; pillar: string; pillarLabel: string;

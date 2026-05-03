@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { AdminLayout } from "./layout";
 import {
-  Loader2, RefreshCw, Send, Users, Mail, TrendingUp, GitBranch,
-  CheckCircle, XCircle, Clock, AlertCircle, Sparkles, Megaphone,
-  ChevronDown, ChevronUp, Play, Plus,
+  Loader2, RefreshCw, Send, Mail, TrendingUp, GitBranch,
+  CheckCircle, XCircle, Clock, Sparkles, Megaphone,
+  Plus, Search, Trash2, ExternalLink, Target, Key,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -16,6 +16,16 @@ const TEXT = "#EAD9BE";
 const MUTED = "#b8a99a";
 const AMBER = "#E08040";
 const DIM = "#8A7A6A";
+
+const PILLAR_OPTIONS = [
+  { value: "financial", label: "Financial Resilience" },
+  { value: "skills", label: "Skills & Career" },
+  { value: "mobility", label: "Mobility & Relocation" },
+  { value: "resources", label: "Emergency Resources" },
+  { value: "psychological", label: "Mental Resilience" },
+  { value: "health", label: "Health Resilience" },
+  { value: "social-capital", label: "Social Capital" },
+];
 
 type DripStats = {
   total: number; sent: number; cancelled: number; pending: number;
@@ -31,6 +41,18 @@ type ReferralStats = {
 type Campaign = {
   id: number; name: string; subject: string; body: string; segment: string;
   status: string; sentCount: number; failedCount: number; sentAt: string | null; createdAt: string;
+};
+
+type BlogKeyword = {
+  id: number; keyword: string; pillar: string; pillarLabel: string; priority: number;
+  usedAt: string | null; createdAt: string;
+};
+
+type Opportunity = {
+  id: number; source: string; url: string; title: string; body: string | null;
+  subreddit: string | null; upvotes: number | null; commentCount: number | null;
+  draftReply: string | null; relevanceScore: number | null;
+  emailedAt: string | null; createdAt: string;
 };
 
 const SEGMENT_LABELS: Record<string, string> = {
@@ -80,6 +102,17 @@ export default function AdminGrowthPage() {
   const [blogGenerating, setBlogGenerating] = useState(false);
   const [blogResult, setBlogResult] = useState<{ title: string; slug: string } | null>(null);
   const [blogError, setBlogError] = useState<string | null>(null);
+  const [keywords, setKeywords] = useState<BlogKeyword[]>([]);
+  const [kwLoading, setKwLoading] = useState(true);
+  const [newKw, setNewKw] = useState({ keyword: "", pillar: "financial", pillarLabel: "Financial Resilience" });
+  const [kwAdding, setKwAdding] = useState(false);
+  const [showKwForm, setShowKwForm] = useState(false);
+
+  const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
+  const [oppLoading, setOppLoading] = useState(true);
+  const [oppScanning, setOppScanning] = useState(false);
+  const [oppScanResult, setOppScanResult] = useState<{ found: number; saved: number } | null>(null);
+  const [expandedOpp, setExpandedOpp] = useState<number | null>(null);
 
   const [newCamp, setNewCamp] = useState({ name: "", subject: "", body: "", segment: "free", sendNow: false });
   const [campSegmentCount, setCampSegmentCount] = useState<number | null>(null);
@@ -108,7 +141,23 @@ export default function AdminGrowthPage() {
     } finally { setCampLoading(false); }
   }, []);
 
-  useEffect(() => { loadDrip(); loadReferrals(); loadCampaigns(); }, []);
+  const loadKeywords = useCallback(async () => {
+    try {
+      const r = await fetch(`${BASE}/api/admin/blog/keywords`, { credentials: "include" });
+      if (r.ok) { const d = await r.json(); setKeywords(d.keywords ?? []); }
+    } finally { setKwLoading(false); }
+  }, []);
+
+  const loadOpportunities = useCallback(async () => {
+    try {
+      const r = await fetch(`${BASE}/api/admin/opportunities`, { credentials: "include" });
+      if (r.ok) { const d = await r.json(); setOpportunities(d.opportunities ?? []); }
+    } finally { setOppLoading(false); }
+  }, []);
+
+  useEffect(() => {
+    loadDrip(); loadReferrals(); loadCampaigns(); loadKeywords(); loadOpportunities();
+  }, []);
 
   async function syncDrip() {
     setDripSyncing(true); setDripSyncResult(null);
@@ -132,7 +181,39 @@ export default function AdminGrowthPage() {
       const d = await r.json();
       if (!r.ok) { setBlogError(d.error ?? "Generation failed"); return; }
       setBlogResult({ title: d.post?.title ?? "Draft", slug: d.post?.slug ?? "" });
+      loadKeywords();
     } finally { setBlogGenerating(false); }
+  }
+
+  async function addKeyword() {
+    if (!newKw.keyword.trim()) return;
+    setKwAdding(true);
+    try {
+      const r = await fetch(`${BASE}/api/admin/blog/keywords`, {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newKw),
+      });
+      if (r.ok) {
+        setNewKw({ keyword: "", pillar: "financial", pillarLabel: "Financial Resilience" });
+        setShowKwForm(false);
+        loadKeywords();
+      }
+    } finally { setKwAdding(false); }
+  }
+
+  async function deleteKeyword(id: number) {
+    await fetch(`${BASE}/api/admin/blog/keywords/${id}`, { method: "DELETE", credentials: "include" });
+    setKeywords(prev => prev.filter(k => k.id !== id));
+  }
+
+  async function scanOpportunities() {
+    setOppScanning(true); setOppScanResult(null);
+    try {
+      const r = await fetch(`${BASE}/api/admin/opportunities/scan`, { method: "POST", credentials: "include" });
+      const d = await r.json();
+      if (r.ok) { setOppScanResult(d); loadOpportunities(); }
+    } finally { setOppScanning(false); }
   }
 
   async function previewSegmentCount(segment: string) {
@@ -180,8 +261,212 @@ export default function AdminGrowthPage() {
       <div style={{ padding: "32px 40px", color: TEXT, minHeight: "100vh" }}>
         <div style={{ marginBottom: 32 }}>
           <h1 style={{ margin: 0, fontSize: 26, fontWeight: 800, color: TEXT }}>Growth Automation</h1>
-          <p style={{ margin: "8px 0 0", color: MUTED, fontSize: 14 }}>Drip sequences, referrals, broadcasts, and content generation — all in one place.</p>
+          <p style={{ margin: "8px 0 0", color: MUTED, fontSize: 14 }}>Drip sequences, referrals, content generation, Reddit opportunities, and broadcast campaigns — all in one place.</p>
         </div>
+
+        {/* ── REDDIT OPPORTUNITIES ────────────────────────── */}
+        <section style={{ background: SECTION_BG, borderRadius: 14, border: `1px solid ${BORDER}`, padding: "24px 28px", marginBottom: 24 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+            <Target size={18} color={AMBER} />
+            <h2 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: TEXT }}>Reddit Reply Opportunities</h2>
+            <button
+              onClick={scanOpportunities}
+              disabled={oppScanning}
+              style={{ marginLeft: "auto", background: AMBER, color: "#0D1225", border: "none", borderRadius: 8, padding: "8px 16px", fontWeight: 700, fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, opacity: oppScanning ? 0.7 : 1 }}
+            >
+              {oppScanning ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
+              {oppScanning ? "Scanning…" : "Scan Now"}
+            </button>
+          </div>
+          <p style={{ margin: "0 0 16px", color: MUTED, fontSize: 13 }}>
+            Every day at 10:00 UTC, Resilium scans r/preppers, r/personalfinance, r/digitalnomad, r/expats, r/FIRE, and more for relevant threads. AI scores each thread and writes a draft reply — you just personalize and post.
+          </p>
+
+          {oppScanResult && (
+            <div style={{ background: CARD_BG, borderRadius: 10, padding: "12px 16px", border: `1px solid ${BORDER}`, marginBottom: 16, fontSize: 13 }}>
+              <CheckCircle size={13} color="#22c55e" style={{ display: "inline", marginRight: 6 }} />
+              <span style={{ color: MUTED }}>Scan complete — found <strong style={{ color: TEXT }}>{oppScanResult.found}</strong> threads, saved <strong style={{ color: "#22c55e" }}>{oppScanResult.saved}</strong> new opportunities.</span>
+            </div>
+          )}
+
+          {oppLoading ? (
+            <div style={{ display: "flex", alignItems: "center", gap: 8, color: MUTED }}><Loader2 size={16} className="animate-spin" /> Loading…</div>
+          ) : opportunities.length === 0 ? (
+            <div style={{ background: CARD_BG, borderRadius: 10, padding: "20px 24px", border: `1px solid ${BORDER}`, textAlign: "center" }}>
+              <p style={{ margin: 0, color: MUTED, fontSize: 14 }}>No opportunities yet. Click "Scan Now" to fetch today's Reddit threads.</p>
+            </div>
+          ) : (
+            <div>
+              <div style={{ color: DIM, fontSize: 11, textTransform: "uppercase", letterSpacing: 1, marginBottom: 12 }}>
+                {opportunities.length} thread{opportunities.length !== 1 ? "s" : ""} found (last 30 days)
+              </div>
+              {opportunities.map(opp => (
+                <div key={opp.id} style={{ background: CARD_BG, borderRadius: 10, border: `1px solid ${BORDER}`, marginBottom: 10, overflow: "hidden" }}>
+                  <div
+                    onClick={() => setExpandedOpp(expandedOpp === opp.id ? null : opp.id)}
+                    style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 16px", cursor: "pointer" }}
+                  >
+                    <span style={{ background: AMBER, color: "#0D1225", fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 4, textTransform: "uppercase", whiteSpace: "nowrap" }}>
+                      r/{opp.subreddit ?? opp.source}
+                    </span>
+                    <span style={{ color: opp.relevanceScore && opp.relevanceScore >= 8 ? "#22c55e" : AMBER, fontSize: 12, fontWeight: 700, whiteSpace: "nowrap" }}>
+                      {opp.relevanceScore}/10
+                    </span>
+                    <span style={{ color: TEXT, fontSize: 13, fontWeight: 600, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {opp.title}
+                    </span>
+                    {opp.emailedAt && <span style={{ color: DIM, fontSize: 11, whiteSpace: "nowrap" }}>✓ emailed</span>}
+                    <span style={{ color: DIM, fontSize: 11, whiteSpace: "nowrap" }}>↑{opp.upvotes ?? 0}</span>
+                    <a
+                      href={opp.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={e => e.stopPropagation()}
+                      style={{ color: AMBER, display: "flex" }}
+                    >
+                      <ExternalLink size={14} />
+                    </a>
+                  </div>
+                  {expandedOpp === opp.id && (
+                    <div style={{ padding: "0 16px 16px", borderTop: `1px solid ${BORDER}` }}>
+                      {opp.body && (
+                        <div style={{ marginTop: 12, marginBottom: 12, color: MUTED, fontSize: 12, lineHeight: 1.6, fontStyle: "italic", borderLeft: `2px solid ${BORDER}`, paddingLeft: 10 }}>
+                          "{opp.body.slice(0, 300)}{opp.body.length > 300 ? "…" : ""}"
+                        </div>
+                      )}
+                      <div style={{ color: DIM, fontSize: 11, textTransform: "uppercase", letterSpacing: 1, marginBottom: 8, marginTop: 12 }}>Draft Reply</div>
+                      <div style={{ background: "#0D1225", borderRadius: 8, padding: "12px 14px", border: `1px solid ${BORDER}`, color: MUTED, fontSize: 13, lineHeight: 1.7, whiteSpace: "pre-wrap", fontFamily: "inherit" }}>
+                        {opp.draftReply}
+                      </div>
+                      <div style={{ marginTop: 10, color: DIM, fontSize: 11 }}>
+                        Always personalize before posting. Genuine helpful replies only — never paste verbatim.
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* ── BLOG AUTO-GENERATION ───────────────────────── */}
+        <section style={{ background: SECTION_BG, borderRadius: 14, border: `1px solid ${BORDER}`, padding: "24px 28px", marginBottom: 24 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+            <Sparkles size={18} color={AMBER} />
+            <h2 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: TEXT }}>AI Blog Content Engine</h2>
+          </div>
+          <p style={{ margin: "0 0 20px", color: MUTED, fontSize: 13 }}>
+            Every Monday at 08:00 UTC, a blog post draft is auto-generated using the next keyword from your queue (falls back to the built-in pool if the queue is empty). You can also trigger generation manually.
+          </p>
+
+          {/* Keyword Queue */}
+          <div style={{ background: CARD_BG, borderRadius: 10, border: `1px solid ${BORDER}`, padding: "16px 20px", marginBottom: 20 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+              <Key size={14} color={AMBER} />
+              <span style={{ color: TEXT, fontSize: 14, fontWeight: 700 }}>Keyword Queue</span>
+              <span style={{ color: DIM, fontSize: 12, marginLeft: 4 }}>
+                ({keywords.filter(k => !k.usedAt).length} pending, {keywords.filter(k => k.usedAt).length} used)
+              </span>
+              <button
+                onClick={() => setShowKwForm(v => !v)}
+                style={{ marginLeft: "auto", background: "none", border: `1px solid ${BORDER}`, borderRadius: 6, padding: "4px 10px", color: AMBER, fontSize: 12, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}
+              >
+                <Plus size={12} /> Add keyword
+              </button>
+            </div>
+
+            {showKwForm && (
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 180px", gap: 8, marginBottom: 14, alignItems: "end" }}>
+                <div>
+                  <label style={{ display: "block", color: DIM, fontSize: 11, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>Keyword</label>
+                  <input
+                    value={newKw.keyword}
+                    onChange={e => setNewKw(p => ({ ...p, keyword: e.target.value }))}
+                    placeholder="financial resilience score"
+                    onKeyDown={e => e.key === "Enter" && addKeyword()}
+                    style={{ width: "100%", background: "#0D1225", border: `1px solid ${BORDER}`, borderRadius: 8, padding: "8px 12px", color: TEXT, fontSize: 13, boxSizing: "border-box" }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: "block", color: DIM, fontSize: 11, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>Pillar</label>
+                  <select
+                    value={newKw.pillar}
+                    onChange={e => {
+                      const opt = PILLAR_OPTIONS.find(o => o.value === e.target.value);
+                      setNewKw(p => ({ ...p, pillar: e.target.value, pillarLabel: opt?.label ?? "" }));
+                    }}
+                    style={{ width: "100%", background: "#0D1225", border: `1px solid ${BORDER}`, borderRadius: 8, padding: "8px 12px", color: TEXT, fontSize: 13 }}
+                  >
+                    {PILLAR_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </select>
+                </div>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <Button
+                    onClick={addKeyword}
+                    disabled={kwAdding || !newKw.keyword.trim()}
+                    style={{ background: AMBER, color: "#0D1225", fontWeight: 700, border: "none", fontSize: 13, padding: "8px 16px" }}
+                  >
+                    {kwAdding ? <Loader2 size={13} className="animate-spin" /> : "Add"}
+                  </Button>
+                  <Button variant="ghost" onClick={() => setShowKwForm(false)} style={{ color: MUTED, fontSize: 13 }}>Cancel</Button>
+                </div>
+              </div>
+            )}
+
+            {kwLoading ? (
+              <div style={{ display: "flex", alignItems: "center", gap: 8, color: MUTED, fontSize: 13 }}><Loader2 size={14} className="animate-spin" /> Loading…</div>
+            ) : keywords.length === 0 ? (
+              <div style={{ color: MUTED, fontSize: 13 }}>No custom keywords yet — using built-in pool of 15 topics. Add keywords above to take priority.</div>
+            ) : (
+              <div>
+                {keywords.map(kw => (
+                  <div key={kw.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0", borderBottom: `1px solid ${BORDER}`, fontSize: 13 }}>
+                    <span style={{ color: kw.usedAt ? DIM : TEXT, flex: 1, textDecoration: kw.usedAt ? "line-through" : "none" }}>{kw.keyword}</span>
+                    <span style={{ color: DIM, fontSize: 11, background: "#0D1225", borderRadius: 4, padding: "2px 6px" }}>{kw.pillarLabel}</span>
+                    {kw.usedAt ? (
+                      <span style={{ color: "#22c55e", fontSize: 11 }}>✓ used {new Date(kw.usedAt).toLocaleDateString("en-US")}</span>
+                    ) : (
+                      <span style={{ color: AMBER, fontSize: 11, fontWeight: 600 }}>pending</span>
+                    )}
+                    <button
+                      onClick={() => deleteKeyword(kw.id)}
+                      style={{ background: "none", border: "none", cursor: "pointer", color: DIM, display: "flex", padding: 2 }}
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+            <Button
+              onClick={generateBlog}
+              disabled={blogGenerating}
+              style={{ background: AMBER, color: "#0D1225", fontWeight: 700, border: "none", display: "flex", alignItems: "center", gap: 6 }}
+            >
+              {blogGenerating ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+              Generate Draft Now
+            </Button>
+            <a href={`${BASE}/admin/blog`} style={{ color: AMBER, fontSize: 13, textDecoration: "underline" }}>View all blog posts →</a>
+          </div>
+
+          {blogResult && (
+            <div style={{ marginTop: 16, background: CARD_BG, borderRadius: 10, padding: "14px 18px", border: `1px solid #22c55e` }}>
+              <CheckCircle size={14} color="#22c55e" style={{ display: "inline", marginRight: 6 }} />
+              <strong style={{ color: "#22c55e" }}>Draft created:</strong>{" "}
+              <span style={{ color: TEXT }}>{blogResult.title}</span>
+              <span style={{ color: MUTED, fontSize: 12, display: "block", marginTop: 4 }}>Saved as draft at /blog/{blogResult.slug} — go to Blog Admin to publish.</span>
+            </div>
+          )}
+          {blogError && (
+            <div style={{ marginTop: 16, background: CARD_BG, borderRadius: 10, padding: "14px 18px", border: `1px solid #ef4444` }}>
+              <XCircle size={14} color="#ef4444" style={{ display: "inline", marginRight: 6 }} />
+              <span style={{ color: "#ef4444" }}>{blogError}</span>
+            </div>
+          )}
+        </section>
 
         {/* ── DRIP SYNC ──────────────────────────────────── */}
         <section style={{ background: SECTION_BG, borderRadius: 14, border: `1px solid ${BORDER}`, padding: "24px 28px", marginBottom: 24 }}>
@@ -240,9 +525,8 @@ export default function AdminGrowthPage() {
               <strong style={{ color: "#22c55e" }}>Sync complete.</strong>{" "}
               <span style={{ color: MUTED, fontSize: 13 }}>
                 Enrolled <strong style={{ color: TEXT }}>{dripSyncResult.enrolled}</strong> new users,{" "}
-                <strong style={{ color: TEXT }}>{dripSyncResult.skipped}</strong> already enrolled,{" "}
+                <strong style={{ color: TEXT }}>{dripSyncResult.skipped}</strong> already enrolled.{" "}
                 {dripSyncResult.failed > 0 && <><strong style={{ color: "#ef4444" }}>{dripSyncResult.failed}</strong> failed. </>}
-                Total: {dripSyncResult.total}
               </span>
             </div>
           )}
@@ -256,7 +540,7 @@ export default function AdminGrowthPage() {
           </div>
 
           <div style={{ background: CARD_BG, borderRadius: 10, padding: "14px 18px", border: `1px solid ${BORDER}`, marginBottom: 20, fontSize: 13, color: MUTED, lineHeight: 1.7 }}>
-            Each user gets a unique referral link (<code style={{ color: TEXT, background: "#0D1225", padding: "1px 6px", borderRadius: 4 }}>resilium-platform.com?ref=CODE</code>) available via <code style={{ color: TEXT, background: "#0D1225", padding: "1px 6px", borderRadius: 4 }}>GET /api/referral/my-code</code>. When a new user signs up, the frontend should call <code style={{ color: TEXT, background: "#0D1225", padding: "1px 6px", borderRadius: 4 }}>POST /api/referral/claim</code> with the code from localStorage. When referrals convert to Pro, mark them here.
+            Each user gets a unique referral link (<code style={{ color: TEXT, background: "#0D1225", padding: "1px 6px", borderRadius: 4 }}>resilium-platform.com?ref=CODE</code>) via <code style={{ color: TEXT, background: "#0D1225", padding: "1px 6px", borderRadius: 4 }}>GET /api/referral/my-code</code>. When a new user lands with a ref code and signs up, the frontend auto-claims it. Mark conversions to Pro manually below.
           </div>
 
           {refLoading ? (
@@ -269,7 +553,6 @@ export default function AdminGrowthPage() {
                 <StatCard label="Converted to Pro" value={refStats.converted} color="#22c55e" />
                 <StatCard label="Conversion rate" value={`${refStats.conversionRate}%`} color={AMBER} />
               </div>
-
               {refStats.recentReferrals.length > 0 ? (
                 <div>
                   <div style={{ color: DIM, fontSize: 11, textTransform: "uppercase", letterSpacing: 1, marginBottom: 10 }}>Recent Referrals</div>
@@ -296,47 +579,6 @@ export default function AdminGrowthPage() {
               )}
             </>
           ) : null}
-        </section>
-
-        {/* ── BLOG AUTO-GENERATION ───────────────────────── */}
-        <section style={{ background: SECTION_BG, borderRadius: 14, border: `1px solid ${BORDER}`, padding: "24px 28px", marginBottom: 24 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-            <Sparkles size={18} color={AMBER} />
-            <h2 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: TEXT }}>AI Blog Content Engine</h2>
-          </div>
-          <p style={{ margin: "0 0 20px", color: MUTED, fontSize: 13 }}>
-            Every Monday at 08:00 UTC, a blog post draft is auto-generated targeting a rotating SEO keyword and saved to the Blog admin page for your review. You can also trigger generation manually below.
-          </p>
-          <div style={{ background: CARD_BG, borderRadius: 10, padding: "14px 18px", border: `1px solid ${BORDER}`, marginBottom: 20, fontSize: 13, color: MUTED }}>
-            <strong style={{ color: TEXT }}>Keyword pool (15 topics):</strong> emergency fund, job loss prep, relocation checklist, disaster kit, mental resilience, income diversification, geopolitical risk, financial independence, and more — rotating weekly.
-          </div>
-
-          <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-            <Button
-              onClick={generateBlog}
-              disabled={blogGenerating}
-              style={{ background: AMBER, color: "#0D1225", fontWeight: 700, border: "none", display: "flex", alignItems: "center", gap: 6 }}
-            >
-              {blogGenerating ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
-              Generate Draft Now
-            </Button>
-            <a href={`${BASE}/admin/blog`} style={{ color: AMBER, fontSize: 13, textDecoration: "underline" }}>View all blog posts →</a>
-          </div>
-
-          {blogResult && (
-            <div style={{ marginTop: 16, background: CARD_BG, borderRadius: 10, padding: "14px 18px", border: `1px solid #22c55e` }}>
-              <CheckCircle size={14} color="#22c55e" style={{ display: "inline", marginRight: 6 }} />
-              <strong style={{ color: "#22c55e" }}>Draft created:</strong>{" "}
-              <span style={{ color: TEXT }}>{blogResult.title}</span>
-              <span style={{ color: MUTED, fontSize: 12, display: "block", marginTop: 4 }}>Saved as draft at /blog/{blogResult.slug} — go to Blog Admin to publish.</span>
-            </div>
-          )}
-          {blogError && (
-            <div style={{ marginTop: 16, background: CARD_BG, borderRadius: 10, padding: "14px 18px", border: `1px solid #ef4444` }}>
-              <XCircle size={14} color="#ef4444" style={{ display: "inline", marginRight: 6 }} />
-              <span style={{ color: "#ef4444" }}>{blogError}</span>
-            </div>
-          )}
         </section>
 
         {/* ── BROADCAST CAMPAIGNS ────────────────────────── */}
@@ -430,29 +672,24 @@ export default function AdminGrowthPage() {
           {campLoading ? (
             <div style={{ display: "flex", alignItems: "center", gap: 8, color: MUTED }}><Loader2 size={16} className="animate-spin" /> Loading…</div>
           ) : campaigns.length === 0 ? (
-            <div style={{ color: MUTED, fontSize: 13, textAlign: "center", padding: "24px 0" }}>No campaigns yet. Create your first one above.</div>
+            <div style={{ color: MUTED, fontSize: 13 }}>No campaigns yet.</div>
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-              {campaigns.map((c, i) => (
-                <div key={c.id} style={{ padding: "14px 0", borderBottom: i < campaigns.length - 1 ? `1px solid ${BORDER}` : "none", display: "flex", gap: 16, alignItems: "flex-start" }}>
+            <div>
+              {campaigns.map(c => (
+                <div key={c.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 0", borderBottom: `1px solid ${BORDER}`, fontSize: 13 }}>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
-                      <span style={{ color: TEXT, fontSize: 14, fontWeight: 600 }}>{c.name}</span>
-                      <StatusBadge status={c.status} />
-                    </div>
-                    <div style={{ color: MUTED, fontSize: 12, marginBottom: 4 }}>{c.subject}</div>
-                    <div style={{ display: "flex", gap: 12, fontSize: 12, color: DIM }}>
-                      <span>{SEGMENT_LABELS[c.segment] ?? c.segment}</span>
-                      {c.status === "sent" && <span>✓ {c.sentCount} sent · {c.failedCount} failed</span>}
-                      {c.sentAt && <span>{new Date(c.sentAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>}
-                    </div>
+                    <div style={{ color: TEXT, fontWeight: 600, marginBottom: 2 }}>{c.name}</div>
+                    <div style={{ color: MUTED, fontSize: 12 }}>{c.subject} · <span style={{ color: DIM }}>{SEGMENT_LABELS[c.segment] ?? c.segment}</span></div>
                   </div>
+                  <StatusBadge status={c.status} />
+                  {c.sentCount > 0 && <span style={{ color: MUTED, fontSize: 12 }}>{c.sentCount} sent</span>}
+                  <span style={{ color: DIM, fontSize: 12 }}>{c.sentAt ? new Date(c.sentAt).toLocaleDateString("en-US") : new Date(c.createdAt).toLocaleDateString("en-US")}</span>
                   {c.status === "draft" && (
                     <button
                       onClick={() => sendDraftCampaign(c.id)}
-                      style={{ background: AMBER, color: "#0D1225", border: "none", borderRadius: 6, padding: "6px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 4, whiteSpace: "nowrap" }}
+                      style={{ background: "none", border: `1px solid ${BORDER}`, borderRadius: 6, padding: "4px 10px", color: AMBER, fontSize: 12, cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}
                     >
-                      <Play size={12} /> Send now
+                      <Send size={11} /> Send
                     </button>
                   )}
                 </div>

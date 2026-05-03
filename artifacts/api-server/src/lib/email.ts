@@ -743,6 +743,41 @@ export async function sendBroadcastEmail(opts: {
   await send({ to: opts.to, subject: opts.subject, html, text, headers: listHeader });
 }
 
+// ─── Content Opportunity Digest (admin notification) ─────────────────────────
+
+export async function sendOpportunityDigestEmail(opts: {
+  opportunities: {
+    id: number; source: string; url: string; title: string;
+    subreddit?: string | null; relevanceScore: number; draftReply: string;
+  }[];
+}): Promise<void> {
+  if (opts.opportunities.length === 0) return;
+
+  const adminUrl = `${APP_URL}/admin/growth`;
+  const subject = `🎯 ${opts.opportunities.length} Reddit opportunit${opts.opportunities.length === 1 ? "y" : "ies"} ready to reply`;
+
+  const rowsHtml = opts.opportunities.map(o => `
+    <div style="background:#1a2235;border-radius:10px;padding:18px 20px;margin-bottom:16px;border:1px solid #2a3245;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <span style="background:#E08040;color:#0D1225;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;">r/${o.subreddit ?? o.source}</span>
+        <span style="color:#22c55e;font-size:12px;font-weight:700;">Score ${o.relevanceScore}/10</span>
+      </div>
+      <p style="margin:0 0 10px;color:#EAD9BE;font-size:14px;font-weight:600;line-height:1.4;">${o.title}</p>
+      <p style="margin:0 0 12px;color:#8A7A6A;font-size:12px;font-style:italic;line-height:1.6;border-left:2px solid #E08040;padding-left:10px;">${o.draftReply.slice(0, 280)}${o.draftReply.length > 280 ? "…" : ""}</p>
+      <a href="${o.url}" style="color:#E08040;font-size:12px;font-weight:600;text-decoration:none;">View thread →</a>
+    </div>`).join("");
+
+  const rowsText = opts.opportunities.map((o, i) =>
+    `${i + 1}. r/${o.subreddit ?? o.source} (score ${o.relevanceScore}/10)\n   ${o.title}\n   ${o.url}\n\n   Draft reply:\n   ${o.draftReply.slice(0, 300)}\n`
+  ).join("\n---\n\n");
+
+  const html = `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0D1225;font-family:'Helvetica Neue',Arial,sans-serif;color:#EAD9BE;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:40px 20px;"><table width="560" cellpadding="0" cellspacing="0" style="background:#131929;border-radius:16px;overflow:hidden;"><tr><td style="background:#E08040;padding:20px 32px;"><h1 style="margin:0;color:#0D1225;font-size:20px;font-weight:800;">Resilium · Content Opportunities</h1></td></tr><tr><td style="padding:32px;"><h2 style="margin:0 0 6px;color:#EAD9BE;font-size:18px;font-weight:700;">🎯 ${opts.opportunities.length} Reddit thread${opts.opportunities.length === 1 ? "" : "s"} to reply to</h2><p style="margin:0 0 24px;color:#b8a99a;font-size:14px;line-height:1.6;">Each has a draft reply ready. Copy, personalize lightly, and post. These are genuine helpful replies — never paste them verbatim.</p>${rowsHtml}<a href="${adminUrl}" style="display:inline-block;background:#E08040;color:#0D1225;font-weight:700;font-size:14px;padding:12px 24px;border-radius:8px;text-decoration:none;margin-top:8px;">View All Opportunities →</a></td></tr></table></td></tr></table></body></html>`;
+
+  const text = `${opts.opportunities.length} Reddit thread${opts.opportunities.length === 1 ? "" : "s"} to reply to\n\nEach has a draft reply. Personalize before posting.\n\n${rowsText}\nView all: ${adminUrl}`;
+
+  await send({ to: ADMIN_TO, subject, html, text });
+}
+
 // ─── Blog Draft Ready (admin notification) ────────────────────────────────────
 
 export async function sendBlogDraftReadyEmail(opts: {

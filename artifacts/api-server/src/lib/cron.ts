@@ -3,7 +3,7 @@ import { exec } from "child_process";
 import { promisify } from "util";
 import { db, subscriptionsTable, reportFeedbackTable, resilienceReportsTable, usersTable, emailDripQueueTable } from "@workspace/db";
 import { and, desc, eq, gte, inArray, isNull, lte, sql } from "drizzle-orm";
-import { sendAdminDigest, sendErrorAlert, sendReassessmentReminder, sendUserWeeklyDigest, sendE2eAssessmentReport, sendSiteAuditReport, sendDripDay2Email, sendDripDay5Email, sendDripDay9Email, sendDripDay14Email, sendDependencyAuditEmail, sendBlogDraftReadyEmail, type E2eCheckResult } from "./email.js";
+import { sendAdminDigest, sendErrorAlert, sendReassessmentReminder, sendUserWeeklyDigest, sendE2eAssessmentReport, sendSiteAuditReport, sendDripDay2Email, sendDripDay5Email, sendDripDay9Email, sendDripDay14Email, sendDependencyAuditEmail, sendBlogDraftReadyEmail, sendOpportunityDigestEmail, type E2eCheckResult } from "./email.js";
 import { runDatabaseBackup } from "./backup.js";
 import { sendPushNotificationsToUsers } from "./push.js";
 import { logger } from "./logger.js";
@@ -582,18 +582,73 @@ async function runSiteAudit() {
 async function runBlogAutoGeneration() {
   try {
     logger.info("Running weekly blog post auto-generation");
-    const { generateBlogPost } = await import("../routes/admin/blog.js");
+    const { generateBlogPost, pickNextKeyword, markKeywordUsed } = await import("../routes/admin/blog.js");
     const { db, blogPostsTable } = await import("@workspace/db");
-    const post = await generateBlogPost();
+
+    const dbKeyword = await pickNextKeyword();
+    const post = await generateBlogPost(
+      dbKeyword?.keyword,
+      dbKeyword?.pillar,
+      dbKeyword?.pillarLabel,
+    );
+
     await db.insert(blogPostsTable).values({
       ...post,
       status: "draft",
       publishedAt: new Date(),
     });
+
+    if (dbKeyword?.id) await markKeywordUsed(dbKeyword.id);
     await sendBlogDraftReadyEmail({ title: post.title, slug: post.slug, keyword: post.targetKeyword, pillar: post.pillarLabel });
-    logger.info({ title: post.title }, "Blog post auto-generated and saved as draft");
+    logger.info({ title: post.title, usedDbKeyword: !!dbKeyword }, "Blog post auto-generated and saved as draft");
   } catch (err) {
     logger.error({ err }, "Blog auto-generation failed");
+  }
+}
+
+// ─── Daily Reddit opportunity scanner ────────────────────────────────────────
+
+async function runOpportunityScan() {
+  try {
+    logger.info("Running daily Reddit opportunity scan");
+    const { runOpportunityScanner } = await import("../routes/admin/opportunities.js");
+    const { db, contentOpportunitiesTable } = await import("@workspace/db");
+    const { isNull, gte } = await import("drizzle-orm");
+
+    const result = await runOpportunityScanner();
+
+    if (result.saved > 0) {
+      const unseenRows = await db
+        .select()
+        .from(contentOpportunitiesTable)
+        .where(isNull(contentOpportunitiesTable.emailedAt))
+        .orderBy((await import("drizzle-orm")).desc(contentOpportunitiesTable.relevanceScore))
+        .limit(8);
+
+      if (unseenRows.length > 0) {
+        await sendOpportunityDigestEmail({ opportunities: unseenRows.map(o => ({
+          id: o.id,
+          source: o.source,
+          url: o.url,
+          title: o.title,
+          subreddit: o.subreddit,
+          relevanceScore: o.relevanceScore ?? 0,
+          draftReply: o.draftReply ?? "",
+        })) });
+
+        const now = new Date();
+        for (const row of unseenRows) {
+          await db.update(contentOpportunitiesTable)
+            .set({ emailedAt: now })
+            .where((await import("drizzle-orm")).eq(contentOpportunitiesTable.id, row.id));
+        }
+        logger.info({ sent: unseenRows.length }, "Opportunity digest email sent");
+      }
+    }
+
+    logger.info(result, "Daily opportunity scan complete");
+  } catch (err) {
+    logger.error({ err }, "Daily opportunity scan failed");
   }
 }
 
@@ -773,5 +828,10 @@ export function startCron(): void {
     runBlogAutoGeneration().catch(() => {});
   }, { timezone: "UTC" });
 
-  logger.info("Cron jobs scheduled (admin digest: Mon 07:00, user digest: Sun 18:00, 7d reminders: daily 09:00, 30d reminders: Mon 08:00, e2e test: daily 06:00, site audit: daily 07:00, drip: hourly :15, db-backup: daily 02:30, dep-audit: 1st of month 09:00 UTC, blog-gen: Mon 08:00 UTC)");
+  // Every day at 10:00 UTC — scan Reddit for reply opportunities
+  cron.schedule("0 10 * * *", () => {
+    runOpportunityScan().catch(() => {});
+  }, { timezone: "UTC" });
+
+  logger.info("Cron jobs scheduled (admin digest: Mon 07:00, user digest: Sun 18:00, 7d reminders: daily 09:00, 30d reminders: Mon 08:00, e2e test: daily 06:00, site audit: daily 07:00, drip: hourly :15, db-backup: daily 02:30, dep-audit: 1st of month 09:00 UTC, blog-gen: Mon 08:00 UTC, reddit-scan: daily 10:00 UTC)");
 }

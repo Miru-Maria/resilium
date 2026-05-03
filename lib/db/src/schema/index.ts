@@ -33,3 +33,5 @@ export * from "./admin-audit-log";
 export * from "./blog";
 export * from "./referrals";
 export * from "./broadcasts";
+export * from "./blog-keywords";
+export * from "./content-opportunities";
