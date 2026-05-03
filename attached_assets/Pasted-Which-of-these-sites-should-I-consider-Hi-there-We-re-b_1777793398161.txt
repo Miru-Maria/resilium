@@ -1,0 +1,133 @@
+Which of these sites should I consider:
+
+Hi there! 👋
+
+We’re building 1000 Tools — a curated directory of the 1000 most useful tools in the world. Unlike Product Hunt, we focus on quality over quantity, giving each product a permanent spotlight.
+By submitting your tool, you’ll get:
+- Immediate visibility — your product goes live upon submission
+- High-quality backlink from a trusted domain
+- Targeted traffic from builders, creators, and early adopters
+It only takes a minute to submit: 1000 Tools
+🎯 If your product is a SaaS tool, we’ve created a dedicated niche directory just for you: 1000 Saas — designed to showcase the most promising SaaS products and help you reach a highly relevant audience.
+We’d love to feature your work!
+Best, Allen @1000tools
+---
+Hi,
+I came across Resilium – Score Your Preparedness (resilium-platform.com) and wanted to share something that might help.
+I run LaunchIgniter, a weekly launch platform where makers get a full week of visibility (unlike the usual 24-hour cycle).
+We offer three options:
+- Free Launch: 1 week visibility + DR 75 backlink (if you rank top 3) - requires adding our badge
+- Basic Launch (12 USD): 1 week visibility + guaranteed DR 75 backlink + no waiting period + no badge required
+- Pro Launch (15 USD): Everything in Basic + featured on StartupTrusted.com (DR 50) + SaaSGrow.app (DR 26) + 5 launches per product
+If it sounds useful, you can list Resilium – Score Your Preparedness here: https://launchigniter.com
+Best,MaulikMaker of LaunchIgnitermaulik@launchigniter.com
+---
+Hi there!
+We came across Resilium Platform and were impressed — here are some growth insights we put together:
+
+UX quick wins
+
+- The website's primary call to action, 'Free assessment in under 5 minutes', is clear and prominently displayed, aligning with best practices for conversion-focused design.
+- However, to further enhance user experience in 2026, implementing clear visual contrast for CTA buttons and strategic placement above the fold is crucial.
+- Given that most users access websites via mobile, ensuring a highly responsive and mobile-first design, with touch-friendly buttons and optimized images, is paramount for usability and search engine rankings.
+
+Marketing & positioning
+
+- The description effectively highlights the core value proposition: an objective resilience score across six dimensions and a personalized action plan.
+- In 2026, digital marketing emphasizes personalization and customer experience.
+- The 'personalized action plan' already addresses personalization, but further leveraging AI-driven personalization to adapt site experiences in real-time based on user intent signals would be a strong differentiator.
+
+Conversion ideas
+
+- The 'Free assessment in under 5 minutes' is a strong conversion hook, as clear, actionable CTAs are essential for higher engagement.
+- To optimize conversion rates, the website should focus on minimizing friction in the assessment process by simplifying forms and only asking for essential information.
+- Implementing A/B testing for different elements like button colors, microcopy, and placement is a best practice for identifying what resonates most with the audience and driving conversions.
+
+Differentiation
+
+- The platform differentiates itself by offering an 'objective resilience score across 6 dimensions' and a 'personalized AI action plan'.
+- To further strengthen its unique selling proposition (USP) in a competitive landscape, Resilium should emphasize the scientific basis or research backing of its 6-dimension model and AI.
+
+Technical
+
+- For optimal performance and search engine visibility in 2026, the website must prioritize fast page load speeds, measured by Core Web Vitals (LCP, INP, CLS).
+- Implementing mobile-first responsive design is crucial for search engine indexing and user experience.
+We'd love to help you gain more visibility. Viberank is a free platform where founders get direct feedback, interact with interested users, and track growth on our leaderboards.
+How to submit Resilium Platform:
+- Go to viberank.dev
+- Click "Submit your app"
+- Fill in a short description — takes 2 minutes
+Free to submit. Optional sponsorship ($4.99) unlocks gold badge, SEO articles, security audits and targeted outreach.
+Excited to see Resilium Platform grow! 🚀
+Best regards,The Viberank Team
+
+Hi there!
+We came across Resilium Platform and were impressed — here are some growth insights we put together:
+
+UX quick wins
+
+- The website's primary call to action, 'Free assessment in under 5 minutes', is clear and prominently displayed, aligning with best practices for conversion-focused design.
+- However, to further enhance user experience in 2026, implementing clear visual contrast for CTA buttons and strategic placement above the fold is crucial.
+- Given that most users access websites via mobile, ensuring a highly responsive and mobile-first design, with touch-friendly buttons and optimized images, is paramount for usability and search engine rankings.
+
+Marketing & positioning
+
+- The description effectively highlights the core value proposition: an objective resilience score across six dimensions and a personalized action plan.
+- In 2026, digital marketing emphasizes personalization and customer experience.
+- The 'personalized action plan' already addresses personalization, but further leveraging AI-driven personalization to adapt site experiences in real-time based on user intent signals would be a strong differentiator.
+
+Conversion ideas
+
+- The 'Free assessment in under 5 minutes' is a strong conversion hook, as clear, actionable CTAs are essential for higher engagement.
+- To optimize conversion rates, the website should focus on minimizing friction in the assessment process by simplifying forms and only asking for essential information.
+- Implementing A/B testing for different elements like button colors, microcopy, and placement is a best practice for identifying what resonates most with the audience and driving conversions.
+
+Differentiation
+
+- The platform differentiates itself by offering an 'objective resilience score across 6 dimensions' and a 'personalized AI action plan'.
+- To further strengthen its unique selling proposition (USP) in a competitive landscape, Resilium should emphasize the scientific basis or research backing of its 6-dimension model and AI.
+
+Technical
+
+- For optimal performance and search engine visibility in 2026, the website must prioritize fast page load speeds, measured by Core Web Vitals (LCP, INP, CLS).
+- Implementing mobile-first responsive design is crucial for search engine indexing and user experience.
+We'd love to help you gain more visibility. Viberank is a free platform where founders get direct feedback, interact with interested users, and track growth on our leaderboards.
+How to submit Resilium Platform:
+- Go to viberank.dev
+- Click "Submit your app"
+- Fill in a short description — takes 2 minutes
+Free to submit. Optional sponsorship ($4.99) unlocks gold badge, SEO articles, security audits and targeted outreach.
+Excited to see Resilium Platform grow! 🚀
+Best regards,The Viberank Team
+---
+P.S. Just 2 minutes: viberank.dev
+---
+
+Hi there! 👋
+
+I came across your product and thought it might be a great fit for one of our product:
+- SaasHunt: A community-driven platform for showcasing SaaS products (alternative to Product Hunt).
+- DevHub: A curated directory for developers to discover and share tech tools.
+With our powerful AI feature. Submit it with just one click.
+We’d love to feature your awesome product. Looking forward to your launch!
+Best regards,
+Allen @SaasHunt. Focus Apps LLC
+
+---
+Hey,
+came across Resilium – Score Your Preparedness earlier while scrolling Product Hunt.
+felt like it could do well on NextGen Tools too, a lot of people there look for new tools.
+might be worth trying.
+Robert
+---
+Hey,
+Resilium – Score Your Preparedness caught my eye on Product Hunt - "Know exactly where you stand before disruption finds you".
+We're closing out our April 2026 batch at BacklinkLog - each product gets:
+- A permanent indexed page with a dofollow backlink
+- Placement in our monthly batch browsed by founders and early adopters
+Starts at $20/year. Takes about 2 minutes:
+https://www.google.com/search?q=backlinklog
+Interested?
+Best,
+Nick
+https://backlinklog.com
