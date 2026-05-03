@@ -52,6 +52,97 @@ router.get("/stats", async (_req, res) => {
   }
 });
 
+// ── POST /clerk-import ────────────────────────────────────────────────────────
+// Fetches EVERY user from Clerk and upserts them into the local users table.
+// This makes them visible to broadcast segments and prepares them for drip
+// enrollment once they complete their assessment.
+router.post("/clerk-import", async (_req, res) => {
+  try {
+    const clerkClient = createClerkClient({ secretKey: process.env["CLERK_SECRET_KEY"] });
+
+    // Paginate through all Clerk users (100 per page)
+    let offset = 0;
+    const limit = 100;
+    const allClerkUsers: Array<{
+      id: string;
+      emailAddresses: Array<{ emailAddress: string; id: string }>;
+      primaryEmailAddressId: string | null;
+      firstName: string | null;
+      lastName: string | null;
+      imageUrl: string;
+      createdAt: number;
+    }> = [];
+
+    while (true) {
+      const page = await clerkClient.users.getUserList({ limit, offset });
+      allClerkUsers.push(...page.data);
+      if (page.data.length < limit) break;
+      offset += limit;
+    }
+
+    logger.info({ total: allClerkUsers.length }, "Fetched all Clerk users");
+
+    let imported = 0;
+    let alreadyExisted = 0;
+    let failed = 0;
+    const errors: string[] = [];
+
+    // Fetch existing user IDs from local DB in one query
+    const existingRows = await db.select({ id: usersTable.id }).from(usersTable);
+    const existingIds = new Set(existingRows.map(r => r.id));
+
+    for (const cu of allClerkUsers) {
+      try {
+        const primaryEmail = cu.emailAddresses.find(e => e.id === cu.primaryEmailAddressId)
+          ?? cu.emailAddresses[0];
+
+        if (!primaryEmail) { failed++; errors.push(`${cu.id}: no email`); continue; }
+
+        if (existingIds.has(cu.id)) {
+          // Update email/name in case they changed in Clerk
+          await db.update(usersTable)
+            .set({
+              email: primaryEmail.emailAddress,
+              firstName: cu.firstName ?? undefined,
+              lastName: cu.lastName ?? undefined,
+              profileImageUrl: cu.imageUrl ?? undefined,
+            })
+            .where(eq(usersTable.id, cu.id));
+          alreadyExisted++;
+        } else {
+          await db.insert(usersTable).values({
+            id: cu.id,
+            email: primaryEmail.emailAddress,
+            firstName: cu.firstName ?? null,
+            lastName: cu.lastName ?? null,
+            profileImageUrl: cu.imageUrl ?? null,
+            createdAt: new Date(cu.createdAt),
+          }).onConflictDoNothing();
+          imported++;
+          existingIds.add(cu.id);
+        }
+      } catch (err) {
+        failed++;
+        errors.push(`${cu.id}: ${String(err)}`);
+        logger.warn({ err, userId: cu.id }, "Failed to upsert Clerk user");
+      }
+    }
+
+    logger.info({ total: allClerkUsers.length, imported, alreadyExisted, failed }, "Clerk import complete");
+    res.json({
+      totalClerk: allClerkUsers.length,
+      imported,
+      alreadyExisted,
+      failed,
+      errors: errors.slice(0, 5),
+      message: `Imported ${imported} new users from Clerk (${alreadyExisted} already existed).`,
+    });
+  } catch (err) {
+    logger.error({ err }, "Clerk import failed");
+    res.status(500).json({ error: "Clerk import failed. Check server logs." });
+  }
+});
+
 router.post("/sync", async (req, res) => {
   if (process.env["DRIP_EMAILS_ENABLED"] !== "true") {
     res.status(400).json({ error: "DRIP_EMAILS_ENABLED is not set to true — enable it first" });

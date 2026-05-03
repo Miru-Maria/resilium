@@ -93,6 +93,12 @@ export default function AdminGrowthPage() {
   const [dripSyncing, setDripSyncing] = useState(false);
   const [dripSyncResult, setDripSyncResult] = useState<{ enrolled: number; skipped: number; total: number; failed: number } | null>(null);
 
+  const [clerkImporting, setClerkImporting] = useState(false);
+  const [clerkImportResult, setClerkImportResult] = useState<{
+    totalClerk: number; imported: number; alreadyExisted: number; failed: number; message: string;
+  } | null>(null);
+  const [clerkImportError, setClerkImportError] = useState<string | null>(null);
+
   const [refStats, setRefStats] = useState<ReferralStats | null>(null);
   const [refLoading, setRefLoading] = useState(true);
 
@@ -158,6 +164,17 @@ export default function AdminGrowthPage() {
   useEffect(() => {
     loadDrip(); loadReferrals(); loadCampaigns(); loadKeywords(); loadOpportunities();
   }, []);
+
+  async function importFromClerk() {
+    setClerkImporting(true); setClerkImportResult(null); setClerkImportError(null);
+    try {
+      const r = await fetch(`${BASE}/api/admin/drip/clerk-import`, { method: "POST", credentials: "include" });
+      const d = await r.json();
+      if (!r.ok) { setClerkImportError(d.error ?? "Import failed"); return; }
+      setClerkImportResult(d);
+      loadDrip();
+    } finally { setClerkImporting(false); }
+  }
 
   async function syncDrip() {
     setDripSyncing(true); setDripSyncResult(null);
@@ -468,32 +485,125 @@ export default function AdminGrowthPage() {
           )}
         </section>
 
-        {/* ── DRIP SYNC ──────────────────────────────────── */}
+        {/* ── USER SYNC + DRIP ───────────────────────────── */}
         <section style={{ background: SECTION_BG, borderRadius: 14, border: `1px solid ${BORDER}`, padding: "24px 28px", marginBottom: 24 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
             <Mail size={18} color={AMBER} />
-            <h2 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: TEXT }}>Email Drip Sequences</h2>
+            <h2 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: TEXT }}>User Sync &amp; Email Drip</h2>
+          </div>
+          <p style={{ margin: "0 0 24px", color: MUTED, fontSize: 13, lineHeight: 1.7 }}>
+            Use the two steps below to make sure every Clerk-registered user is in your growth pipeline. Run these once when first setting up, then periodically to catch new signups.
+          </p>
+
+          {/* ── Step 1: Clerk Import ── */}
+          <div style={{ background: CARD_BG, borderRadius: 12, border: `1px solid ${BORDER}`, padding: "20px 22px", marginBottom: 16 }}>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
+              <div style={{ background: AMBER, color: "#0D1225", borderRadius: "50%", width: 26, height: 26, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 13, flexShrink: 0, marginTop: 2 }}>1</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ color: TEXT, fontWeight: 700, fontSize: 14, marginBottom: 6 }}>Import all users from Clerk</div>
+                <p style={{ margin: "0 0 14px", color: MUTED, fontSize: 13, lineHeight: 1.65 }}>
+                  Clerk is your auth provider — every registered account lives there. Your local database only knows about users who have already signed in to the app at least once. This step fetches <strong style={{ color: TEXT }}>all</strong> Clerk users (paginated, no limit) and upserts them into your local database, so broadcasts and segment counts include everyone, even users who registered but never completed onboarding.
+                </p>
+                <div style={{ background: "#0D1225", borderRadius: 8, padding: "10px 14px", border: `1px solid ${BORDER}`, marginBottom: 14, fontSize: 12, color: MUTED, lineHeight: 1.6 }}>
+                  <span style={{ color: AMBER, fontWeight: 700 }}>What it does:</span> calls Clerk's Admin API → upserts each user (id, email, name, avatar) into your <code style={{ color: TEXT }}>users</code> table → updates name/email for existing users in case they changed it in Clerk. Safe to run multiple times.
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+                  <Button
+                    onClick={importFromClerk}
+                    disabled={clerkImporting}
+                    style={{ background: AMBER, color: "#0D1225", fontWeight: 700, border: "none", display: "flex", alignItems: "center", gap: 6 }}
+                  >
+                    {clerkImporting ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
+                    {clerkImporting ? "Importing from Clerk…" : "Import from Clerk"}
+                  </Button>
+                  <span style={{ color: DIM, fontSize: 12 }}>Takes ~2–10 s for hundreds of users</span>
+                </div>
+
+                {clerkImportResult && (
+                  <div style={{ marginTop: 14, background: "#0D1225", borderRadius: 10, padding: "14px 18px", border: `1px solid #22c55e` }}>
+                    <div style={{ display: "flex", gap: 20, flexWrap: "wrap", marginBottom: 8 }}>
+                      <span style={{ color: MUTED, fontSize: 13 }}>Total in Clerk: <strong style={{ color: TEXT }}>{clerkImportResult.totalClerk}</strong></span>
+                      <span style={{ color: MUTED, fontSize: 13 }}>Newly imported: <strong style={{ color: "#22c55e" }}>{clerkImportResult.imported}</strong></span>
+                      <span style={{ color: MUTED, fontSize: 13 }}>Already existed: <strong style={{ color: TEXT }}>{clerkImportResult.alreadyExisted}</strong></span>
+                      {clerkImportResult.failed > 0 && <span style={{ color: MUTED, fontSize: 13 }}>Failed: <strong style={{ color: "#ef4444" }}>{clerkImportResult.failed}</strong></span>}
+                    </div>
+                    <div style={{ color: MUTED, fontSize: 12 }}>
+                      <CheckCircle size={12} color="#22c55e" style={{ display: "inline", marginRight: 5 }} />
+                      {clerkImportResult.message} All imported users are now visible to broadcast segments. Proceed to Step 2 to enroll assessed users in the drip.
+                    </div>
+                  </div>
+                )}
+                {clerkImportError && (
+                  <div style={{ marginTop: 14, background: "#0D1225", borderRadius: 10, padding: "12px 16px", border: `1px solid #ef4444`, color: "#ef4444", fontSize: 13 }}>
+                    <XCircle size={13} style={{ display: "inline", marginRight: 6 }} /> {clerkImportError}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
+          {/* ── Step 2: Drip Enrollment ── */}
+          <div style={{ background: CARD_BG, borderRadius: 12, border: `1px solid ${BORDER}`, padding: "20px 22px", marginBottom: 20 }}>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
+              <div style={{ background: BORDER, color: TEXT, borderRadius: "50%", width: 26, height: 26, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 13, flexShrink: 0, marginTop: 2 }}>2</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ color: TEXT, fontWeight: 700, fontSize: 14, marginBottom: 6 }}>Enroll assessed users in drip sequence</div>
+                <p style={{ margin: "0 0 14px", color: MUTED, fontSize: 13, lineHeight: 1.65 }}>
+                  The drip sequence sends a series of 5 personalized emails over 14 days based on a user's resilience score (day 0, 2, 5, 9, 14). This step scans all users in your local database who have completed at least one assessment and enrolls them — scheduling the right emails relative to their signup date and automatically marking past emails as skipped. Requires <code style={{ color: TEXT }}>DRIP_EMAILS_ENABLED=true</code> in your environment.
+                </p>
+                <div style={{ background: "#0D1225", borderRadius: 8, padding: "10px 14px", border: `1px solid ${BORDER}`, marginBottom: 14, fontSize: 12, color: MUTED, lineHeight: 1.6 }}>
+                  <span style={{ color: AMBER, fontWeight: 700 }}>Note:</span> users without an assessment score are skipped — they'll be enrolled automatically the moment they complete their first assessment. Safe to run multiple times; already-enrolled users are skipped.
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+                  <Button
+                    onClick={syncDrip}
+                    disabled={dripSyncing}
+                    style={{ background: "none", color: AMBER, fontWeight: 700, border: `1px solid ${AMBER}`, display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 8, cursor: "pointer", fontSize: 14 }}
+                  >
+                    {dripSyncing ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
+                    {dripSyncing ? "Enrolling…" : "Enroll in Drip"}
+                  </Button>
+                  <span style={{ color: DIM, fontSize: 12 }}>Only users with a completed assessment are enrolled</span>
+                </div>
+
+                {dripSyncResult && (
+                  <div style={{ marginTop: 14, background: "#0D1225", borderRadius: 10, padding: "14px 18px", border: `1px solid ${BORDER}` }}>
+                    <CheckCircle size={14} color="#22c55e" style={{ display: "inline", marginRight: 6 }} />
+                    <strong style={{ color: "#22c55e" }}>Enrollment complete.</strong>{" "}
+                    <span style={{ color: MUTED, fontSize: 13 }}>
+                      Enrolled <strong style={{ color: TEXT }}>{dripSyncResult.enrolled}</strong> users,{" "}
+                      <strong style={{ color: TEXT }}>{dripSyncResult.skipped}</strong> already enrolled.{" "}
+                      {dripSyncResult.failed > 0 && <><strong style={{ color: "#ef4444" }}>{dripSyncResult.failed}</strong> failed. </>}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* ── Drip Stats ── */}
           {dripLoading ? (
-            <div style={{ display: "flex", alignItems: "center", gap: 8, color: MUTED }}><Loader2 size={16} className="animate-spin" /> Loading…</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, color: MUTED }}><Loader2 size={16} className="animate-spin" /> Loading stats…</div>
           ) : dripStats ? (
             <>
-              <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 20 }}>
+              <div style={{ color: DIM, fontSize: 11, textTransform: "uppercase", letterSpacing: 1, marginBottom: 12, marginTop: 4 }}>Drip Queue Stats</div>
+              <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 16 }}>
                 <StatCard label="Total queued" value={dripStats.total} />
                 <StatCard label="Sent" value={dripStats.sent} color="#22c55e" />
                 <StatCard label="Pending" value={dripStats.pending} color={AMBER} />
-                <StatCard label="Cancelled" value={dripStats.cancelled} color="#6b7280" />
+                <StatCard label="Cancelled / skipped" value={dripStats.cancelled} color="#6b7280" />
               </div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 20 }}>
-                {dripStats.byType.map(t => (
-                  <span key={t.emailType} style={{ background: CARD_BG, border: `1px solid ${BORDER}`, borderRadius: 6, padding: "4px 10px", fontSize: 12, color: MUTED }}>
-                    <strong style={{ color: TEXT }}>{t.sent}</strong> {t.emailType}
-                  </span>
-                ))}
-              </div>
+              {dripStats.byType.length > 0 && (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
+                  {dripStats.byType.map(t => (
+                    <span key={t.emailType} style={{ background: CARD_BG, border: `1px solid ${BORDER}`, borderRadius: 6, padding: "4px 10px", fontSize: 12, color: MUTED }}>
+                      <strong style={{ color: TEXT }}>{t.sent}</strong> {t.emailType}
+                    </span>
+                  ))}
+                </div>
+              )}
               {dripStats.recentSent.length > 0 && (
-                <div style={{ marginBottom: 20 }}>
+                <div>
                   <div style={{ color: DIM, fontSize: 11, textTransform: "uppercase", letterSpacing: 1, marginBottom: 10 }}>Recent Sends</div>
                   {dripStats.recentSent.slice(0, 5).map(r => (
                     <div key={r.id} style={{ display: "flex", gap: 12, padding: "8px 0", borderBottom: `1px solid ${BORDER}`, fontSize: 13 }}>
@@ -506,30 +616,6 @@ export default function AdminGrowthPage() {
               )}
             </>
           ) : null}
-
-          <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-            <Button
-              onClick={syncDrip}
-              disabled={dripSyncing}
-              style={{ background: AMBER, color: "#0D1225", fontWeight: 700, border: "none", display: "flex", alignItems: "center", gap: 6 }}
-            >
-              {dripSyncing ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
-              Sync Existing Users
-            </Button>
-            <span style={{ color: MUTED, fontSize: 12 }}>Enrolls any users not yet in the drip sequence based on their signup date.</span>
-          </div>
-
-          {dripSyncResult && (
-            <div style={{ marginTop: 16, background: CARD_BG, borderRadius: 10, padding: "14px 18px", border: `1px solid ${BORDER}` }}>
-              <CheckCircle size={14} color="#22c55e" style={{ display: "inline", marginRight: 6 }} />
-              <strong style={{ color: "#22c55e" }}>Sync complete.</strong>{" "}
-              <span style={{ color: MUTED, fontSize: 13 }}>
-                Enrolled <strong style={{ color: TEXT }}>{dripSyncResult.enrolled}</strong> new users,{" "}
-                <strong style={{ color: TEXT }}>{dripSyncResult.skipped}</strong> already enrolled.{" "}
-                {dripSyncResult.failed > 0 && <><strong style={{ color: "#ef4444" }}>{dripSyncResult.failed}</strong> failed. </>}
-              </span>
-            </div>
-          )}
         </section>
 
         {/* ── REFERRALS ──────────────────────────────────── */}
