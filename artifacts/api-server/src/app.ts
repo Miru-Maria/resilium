@@ -1,5 +1,5 @@
-// Normalise secret key name — Replit secret may be stored under either name
-if (!process.env["CLERK_SECRET_KEY"] && process.env["SECRET_CLERK_KEY"]) {
+// SECRET_CLERK_KEY always wins — overrides any stale CLERK_SECRET_KEY snapshot
+if (process.env["SECRET_CLERK_KEY"]) {
   process.env["CLERK_SECRET_KEY"] = process.env["SECRET_CLERK_KEY"];
 }
 
