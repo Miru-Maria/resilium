@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { useLocation, useSearch, Link } from "wouter";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -7,9 +7,12 @@ import {
 } from "recharts";
 import {
   Loader2, AlertTriangle, FileText,
-  Star, Activity, MessageSquare, Smartphone, Shield, LayoutDashboard, FlaskConical, ExternalLink, Eye,
-  Search, ChevronLeft, ChevronRight, X
+  Star, Activity, MessageSquare, Smartphone, ExternalLink, Eye,
+  Search, ChevronLeft, ChevronRight, X,
+  Users, TrendingUp, Zap, Award, Target, BarChart2,
+  Download, ClipboardPaste, Maximize2, Minimize2, Settings2,
 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -18,6 +21,9 @@ import { adminAuthHeaders, AdminLayout } from "./layout";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 const COLORS = ["#6366f1", "#22d3ee", "#f59e0b", "#10b981", "#ec4899", "#8b5cf6", "#f97316", "#14b8a6"];
+
+const UMAMI_SHARE_URL = import.meta.env.VITE_UMAMI_SHARE_URL as string | undefined;
+const UMAMI_WEBSITE_ID = "c5f820b3-31df-42c7-9c67-2d669117f9b6";
 
 interface AnalyticsData {
   overview: {
@@ -57,6 +63,36 @@ interface AnalyticsData {
   };
 }
 
+interface UserAnalytics {
+  totals: {
+    totalUsers: number;
+    totalPro: number;
+    usersWithAtLeastOnePlan: number;
+    activeUsers30d: number;
+    conversionRate: number;
+  };
+  signupsByMonth: { month: string; count: number }[];
+  assessmentsByMonth: { month: string; count: number }[];
+  dimensionAverages: { name: string; value: number }[];
+  planBuckets: { label: string; count: number }[];
+  activeUsersByDay: { date: string; count: number }[];
+}
+
+const DIM_COLORS: Record<string, string> = {
+  Financial: "#10b981",
+  Health: "#ef4444",
+  Skills: "#3b82f6",
+  Mobility: "#8b5cf6",
+  Psychological: "#f59e0b",
+  Resources: "#14b8a6",
+};
+
+async function fetchUserAnalytics(): Promise<UserAnalytics> {
+  const res = await fetch(`${BASE}/api/admin/analytics/users`, { credentials: "include" });
+  if (!res.ok) throw new Error("Failed to fetch user analytics");
+  return res.json();
+}
+
 function StatCard({ title, value, icon: Icon, description }: { title: string; value: string | number; icon: React.ElementType; description?: string }) {
   return (
     <Card className="border-none shadow-md">
@@ -67,6 +103,27 @@ function StatCard({ title, value, icon: Icon, description }: { title: string; va
         </div>
         <div className="text-2xl font-bold font-display">{value}</div>
         {description && <p className="text-xs text-muted-foreground mt-1">{description}</p>}
+      </CardContent>
+    </Card>
+  );
+}
+
+function UserStatCard({ title, value, sub, icon: Icon, color }: {
+  title: string; value: string | number; sub?: string; icon: React.ElementType; color: string;
+}) {
+  return (
+    <Card className="border-none shadow-md">
+      <CardContent className="p-5">
+        <div className="flex items-start justify-between gap-2">
+          <div>
+            <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">{title}</p>
+            <p className={`text-3xl font-display font-bold ${color}`}>{value}</p>
+            {sub && <p className="text-xs text-muted-foreground mt-1">{sub}</p>}
+          </div>
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${color.replace("text-", "bg-").replace("500", "100")}`}>
+            <Icon className={`w-5 h-5 ${color}`} />
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
@@ -101,7 +158,198 @@ const renderPieLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, n
   );
 };
 
-const VALID_TABS = ["overview", "demographics", "scores", "goals", "risks", "reports", "feedback"];
+// ─── Umami Traffic Section ──────────────────────────────────────────────────────
+function UmamiSection() {
+  const [expanded, setExpanded] = useState(false);
+
+  if (!UMAMI_SHARE_URL) {
+    return (
+      <Card className="border-none shadow-md">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-display flex items-center gap-2">
+            <BarChart2 className="w-4 h-4 text-primary" /> Traffic Analytics — Umami
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="rounded-xl bg-muted/40 border border-dashed border-muted-foreground/20 p-6 space-y-4">
+            <div className="flex items-start gap-3">
+              <Settings2 className="w-5 h-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+              <div className="space-y-1">
+                <p className="text-sm font-semibold">One-time setup required</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Your Umami tracking is already live (website ID <code className="bg-muted px-1 py-0.5 rounded text-[11px]">{UMAMI_WEBSITE_ID}</code>).
+                  To embed the dashboard here, generate a public share URL from your Umami account and add it as an environment variable.
+                </p>
+              </div>
+            </div>
+            <div className="bg-background rounded-lg border p-4 space-y-3 text-xs">
+              <p className="font-semibold text-muted-foreground uppercase tracking-wider text-[10px]">Setup steps</p>
+              <ol className="space-y-2 text-sm text-foreground/80 list-none">
+                {[
+                  <>Log into <a href="https://cloud.umami.is" target="_blank" rel="noreferrer" className="text-primary underline underline-offset-2 inline-flex items-center gap-1">cloud.umami.is <ExternalLink className="w-3 h-3" /></a> and open your Resilium website.</>,
+                  <>Go to <strong>Settings</strong> → <strong>Share URL</strong> and toggle it on.</>,
+                  <>Copy the generated share URL (looks like <code className="bg-muted px-1 py-0.5 rounded">https://cloud.umami.is/share/…/resilium-platform.com</code>).</>,
+                  <>In Replit, add a new secret: <code className="bg-muted px-1 py-0.5 rounded">VITE_UMAMI_SHARE_URL</code> with that URL as the value.</>,
+                  <>Restart the web workflow — the dashboard will appear here automatically.</>,
+                ].map((step, i) => (
+                  <li key={i} className="flex items-start gap-3">
+                    <span className="flex-shrink-0 w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-bold flex items-center justify-center mt-0.5">{i + 1}</span>
+                    <span>{step}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="border-none shadow-md">
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-sm font-display flex items-center gap-2">
+            <BarChart2 className="w-4 h-4 text-primary" /> Traffic Analytics — Umami
+          </CardTitle>
+          <div className="flex items-center gap-2">
+            <a
+              href={UMAMI_SHARE_URL} target="_blank" rel="noreferrer"
+              className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1 transition-colors"
+            >
+              Open full view <ExternalLink className="w-3 h-3" />
+            </a>
+            <button
+              onClick={() => setExpanded(e => !e)}
+              className="text-muted-foreground hover:text-primary transition-colors p-1 rounded"
+              title={expanded ? "Collapse" : "Expand"}
+            >
+              {expanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+            </button>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="p-0 pb-1">
+        <div className="px-4 pb-2">
+          <p className="text-[11px] text-muted-foreground bg-muted/40 rounded-lg px-3 py-1.5 flex items-center gap-1.5">
+            <Download className="w-3 h-3 flex-shrink-0 opacity-50" />
+            The Download button inside the embed is blocked by browser security — use the paste tool below to export table data as CSV.
+          </p>
+        </div>
+        <iframe
+          src={UMAMI_SHARE_URL}
+          className="w-full rounded-b-xl border-0 transition-all duration-300"
+          style={{ height: expanded ? "900px" : "520px" }}
+          title="Umami Analytics Dashboard"
+          loading="lazy"
+          sandbox="allow-scripts allow-same-origin allow-forms"
+        />
+      </CardContent>
+    </Card>
+  );
+}
+
+function UmamiExportSection() {
+  const [raw, setRaw] = useState("");
+  type Row = { page: string; visitors: string; visits: string; views: string };
+  const parsed: Row[] = useMemo(() => {
+    if (!raw.trim()) return [];
+    const lines = raw.trim().split("\n").filter(Boolean);
+    const rows: Row[] = [];
+    for (const line of lines) {
+      const cols = line.split(/\t|  +/).map(c => c.trim()).filter(Boolean);
+      if (cols.length < 2) continue;
+      if (/^(exit\s*page|page|url)/i.test(cols[0])) continue;
+      const [page, ...rest] = cols;
+      const nums = rest.filter(c => /^\d+$/.test(c));
+      rows.push({ page: page ?? "", visitors: nums[0] ?? "", visits: nums[1] ?? "", views: nums[2] ?? "" });
+    }
+    return rows;
+  }, [raw]);
+
+  function downloadCSV() {
+    if (!parsed.length) return;
+    const header = "Page,Visitors,Visits,Views";
+    const lines = parsed.map(r =>
+      [r.page, r.visitors, r.visits, r.views].map(v => `"${v.replace(/"/g, '""')}"`).join(",")
+    );
+    const csv = [header, ...lines].join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `umami-export-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  return (
+    <Card className="border-none shadow-md">
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-sm font-display flex items-center gap-2">
+            <Download className="w-4 h-4 text-primary" /> Export Table as CSV
+          </CardTitle>
+        </div>
+        <p className="text-xs text-muted-foreground mt-1">
+          Select and copy any table from the embed above (click into the table, then Ctrl+A / Cmd+A and Ctrl+C), then paste below to download as CSV.
+        </p>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <div className="relative">
+          <textarea
+            className="w-full h-36 px-3 py-2.5 text-xs rounded-xl border bg-muted/30 font-mono resize-y focus:outline-none focus:ring-2 focus:ring-primary text-foreground"
+            placeholder={"Paste table data from the embed above…\n\nExample:\n/           35    56    172\n/profile     9    22    144"}
+            value={raw}
+            onChange={e => setRaw(e.target.value)}
+          />
+          {!raw && (
+            <div className="absolute top-3 right-3 pointer-events-none">
+              <ClipboardPaste className="w-4 h-4 text-muted-foreground/40" />
+            </div>
+          )}
+        </div>
+        {parsed.length > 0 && (
+          <>
+            <div className="rounded-xl border overflow-hidden">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="bg-muted/40 border-b">
+                    <th className="px-3 py-2 text-left font-semibold text-muted-foreground">Page</th>
+                    <th className="px-3 py-2 text-right font-semibold text-muted-foreground">Visitors</th>
+                    <th className="px-3 py-2 text-right font-semibold text-muted-foreground">Visits</th>
+                    <th className="px-3 py-2 text-right font-semibold text-muted-foreground">Views</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {parsed.map((r, i) => (
+                    <tr key={i} className="hover:bg-muted/20">
+                      <td className="px-3 py-1.5 font-mono text-primary">{r.page}</td>
+                      <td className="px-3 py-1.5 text-right">{r.visitors}</td>
+                      <td className="px-3 py-1.5 text-right">{r.visits}</td>
+                      <td className="px-3 py-1.5 text-right">{r.views}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <button
+              onClick={downloadCSV}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-opacity hover:opacity-90"
+              style={{ background: "#E08040", color: "#0D1225" }}
+            >
+              <Download className="w-4 h-4" />
+              Download {parsed.length} rows as CSV
+            </button>
+          </>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+// ─── Valid tabs ─────────────────────────────────────────────────────────────────
+const VALID_TABS = ["overview", "demographics", "scores", "goals", "risks", "reports", "feedback", "traffic", "users"];
 
 export default function AdminDashboard() {
   const [location, setLocation] = useLocation();
@@ -168,7 +416,7 @@ export default function AdminDashboard() {
     try {
       const params = new URLSearchParams({ page: String(page), limit: "25" });
       if (search) params.set("search", search);
-      const res = await fetch(`${BASE}/api/admin/reports?${params}`, { headers: adminAuthHeaders() });
+      const res = await fetch(`${BASE}/api/admin/reports?${params}`, { credentials: "include" });
       if (res.ok) setReportsData(await res.json());
     } finally {
       setReportsLoading(false);
@@ -182,6 +430,14 @@ export default function AdminDashboard() {
     return () => { if (reportsDebounce.current) clearTimeout(reportsDebounce.current); };
   }, [activeTab, reportsPage, reportsSearch, fetchReports]);
 
+  // User analytics query (lazy — only when tab is active)
+  const { data: userData, isLoading: userLoading, error: userError } = useQuery({
+    queryKey: ["adminUserAnalytics"],
+    queryFn: fetchUserAnalytics,
+    staleTime: 2 * 60 * 1000,
+    enabled: activeTab === "users",
+  });
+
   if (!loading && (error || !data)) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
@@ -193,14 +449,17 @@ export default function AdminDashboard() {
   }
 
   const formatDate = (iso: string) => new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
-  const formatScore = (n: number) => Math.round(n);
+  const fmtMonth = (key: string) => {
+    const [y, m] = key.split("-");
+    return new Date(Number(y), Number(m) - 1).toLocaleDateString("en-US", { month: "short", year: "2-digit" });
+  };
 
   return (
     <AdminLayout activeSection="dashboard">
       <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
         <div>
           <h1 className="font-display font-bold text-2xl text-foreground">Analytics Dashboard</h1>
-          <p className="text-muted-foreground text-sm mt-1">Overview of all resilience assessments and user feedback.</p>
+          <p className="text-muted-foreground text-sm mt-1">Overview of all resilience assessments, user analytics, traffic, and feedback.</p>
         </div>
 
         <Tabs value={activeTab} onValueChange={setTab}>
@@ -212,6 +471,8 @@ export default function AdminDashboard() {
             <TabsTrigger value="risks">Risk Concerns</TabsTrigger>
             <TabsTrigger value="reports">Reports</TabsTrigger>
             <TabsTrigger value="feedback">Feedback</TabsTrigger>
+            <TabsTrigger value="traffic">Traffic</TabsTrigger>
+            <TabsTrigger value="users">Users</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -334,13 +595,9 @@ export default function AdminDashboard() {
                       <PieChart>
                         <Pie
                           data={data.demographics.location}
-                          dataKey="count"
-                          nameKey="name"
-                          cx="50%"
-                          cy="45%"
-                          outerRadius={95}
-                          labelLine={false}
-                          label={renderPieLabel}
+                          dataKey="count" nameKey="name"
+                          cx="50%" cy="45%" outerRadius={95}
+                          labelLine={false} label={renderPieLabel}
                         >
                           {data.demographics.location.map((_, i) => (
                             <Cell key={i} fill={COLORS[i % COLORS.length]} />
@@ -538,52 +795,41 @@ export default function AdminDashboard() {
                             <th className="text-left py-2 px-3 text-muted-foreground font-medium">Date</th>
                             <th className="text-left py-2 px-3 text-muted-foreground font-medium">Location</th>
                             <th className="text-left py-2 px-3 text-muted-foreground font-medium">Score</th>
-                            <th className="text-left py-2 px-3 text-muted-foreground font-medium">Age</th>
-                            <th className="text-left py-2 px-3 text-muted-foreground font-medium">Goal</th>
-                            <th className="text-left py-2 px-3 text-muted-foreground font-medium">View</th>
+                            <th className="text-left py-2 px-3 text-muted-foreground font-medium">Income</th>
+                            <th className="text-left py-2 px-3 text-muted-foreground font-medium">Report ID</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {reportsData.reports.map(r => (
-                            <tr key={r.reportId} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
-                              <td className="py-2.5 px-3 text-muted-foreground whitespace-nowrap">{formatDate(r.createdAt)}</td>
-                              <td className="py-2.5 px-3 font-medium max-w-[140px] truncate">{r.location || "—"}</td>
-                              <td className="py-2.5 px-3">
-                                <span className={`font-semibold ${r.overallScore >= 70 ? "text-emerald-500" : r.overallScore >= 40 ? "text-amber-500" : "text-destructive"}`}>
-                                  {Math.round(r.overallScore)}
-                                </span>
-                              </td>
-                              <td className="py-2.5 px-3 text-muted-foreground">{r.ageBracket || "—"}</td>
-                              <td className="py-2.5 px-3 max-w-[120px] truncate text-muted-foreground text-xs">{r.primaryGoal?.replace(/_/g, " ") || "—"}</td>
-                              <td className="py-2.5 px-3">
-                                <Link href={`/results/${r.reportId}?from=admin`} className="text-primary hover:underline text-xs font-medium">
-                                  View →
-                                </Link>
-                              </td>
+                          {reportsData.reports.map((r) => (
+                            <tr key={r.reportId} className="border-b border-border/40 hover:bg-muted/30">
+                              <td className="py-2 px-3 text-muted-foreground">{formatDate(r.createdAt)}</td>
+                              <td className="py-2 px-3">{r.location}</td>
+                              <td className="py-2 px-3 font-semibold">{r.overallScore}/100</td>
+                              <td className="py-2 px-3 text-muted-foreground capitalize">{r.incomeStability?.replace(/_/g, " ")}</td>
+                              <td className="py-2 px-3 font-mono text-xs text-muted-foreground">{r.reportId.slice(0, 8)}…</td>
                             </tr>
                           ))}
                         </tbody>
                       </table>
                     </div>
                     {reportsData.totalPages > 1 && (
-                      <div className="flex items-center justify-between pt-4 border-t border-border mt-3">
+                      <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
                         <span className="text-xs text-muted-foreground">
-                          Page {reportsData.page} of {reportsData.totalPages} · {reportsData.total} reports
+                          Page {reportsData.page} of {reportsData.totalPages}
                         </span>
-                        <div className="flex items-center gap-1">
-                          <Button variant="ghost" size="sm" className="h-7 w-7 p-0" disabled={reportsPage <= 1} onClick={() => setReportsPage(p => p - 1)}>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline" size="sm"
+                            disabled={reportsData.page <= 1}
+                            onClick={() => setReportsPage(p => p - 1)}
+                          >
                             <ChevronLeft className="w-4 h-4" />
                           </Button>
-                          {Array.from({ length: Math.min(5, reportsData.totalPages) }, (_, i) => {
-                            const start = Math.max(1, Math.min(reportsData.page - 2, reportsData.totalPages - 4));
-                            const pg = start + i;
-                            return (
-                              <Button key={pg} variant={pg === reportsData.page ? "default" : "ghost"} size="sm" className="h-7 w-7 p-0 text-xs" onClick={() => setReportsPage(pg)}>
-                                {pg}
-                              </Button>
-                            );
-                          })}
-                          <Button variant="ghost" size="sm" className="h-7 w-7 p-0" disabled={reportsPage >= reportsData.totalPages} onClick={() => setReportsPage(p => p + 1)}>
+                          <Button
+                            variant="outline" size="sm"
+                            disabled={reportsData.page >= reportsData.totalPages}
+                            onClick={() => setReportsPage(p => p + 1)}
+                          >
                             <ChevronRight className="w-4 h-4" />
                           </Button>
                         </div>
@@ -602,9 +848,9 @@ export default function AdminDashboard() {
               </div>
             ) : (
             <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <StatCard title="Total Feedback" value={data.feedback.totalFeedback} icon={MessageSquare} />
-              <StatCard title="Average Rating" value={data.feedback.totalFeedback > 0 ? `${data.feedback.avgRating} / 5` : "—"} icon={Star} description={data.feedback.totalFeedback > 0 ? `Based on ${data.feedback.totalFeedback} ratings` : "No ratings yet"} />
+              <StatCard title="Avg Rating" value={`${data.feedback.avgRating}/5`} icon={Star} />
             </div>
             <Card className="border-none shadow-md">
               <CardHeader>
@@ -648,6 +894,209 @@ export default function AdminDashboard() {
               </Card>
             )}
             </>
+            )}
+          </TabsContent>
+
+          {/* ── TRAFFIC TAB ── */}
+          <TabsContent value="traffic" className="space-y-6">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
+                <BarChart2 className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-base font-bold">Traffic Analytics</h2>
+                <p className="text-sm text-muted-foreground">Powered by Umami — cookieless, GDPR-friendly</p>
+              </div>
+            </div>
+            <UmamiSection />
+            <UmamiExportSection />
+          </TabsContent>
+
+          {/* ── USERS TAB ── */}
+          <TabsContent value="users" className="space-y-6">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-orange-50 flex items-center justify-center">
+                <Users className="w-5 h-5 text-orange-500" />
+              </div>
+              <div>
+                <h2 className="text-base font-bold">User Analytics</h2>
+                <p className="text-sm text-muted-foreground">Signups, engagement, and conversion — last 12 months</p>
+              </div>
+            </div>
+
+            {userLoading && (
+              <div className="flex justify-center py-20">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              </div>
+            )}
+
+            {userError && (
+              <div className="flex items-center gap-3 text-destructive py-8">
+                <AlertTriangle className="w-5 h-5" />
+                <span className="text-sm">Failed to load user analytics.</span>
+              </div>
+            )}
+
+            {userData && (
+              <>
+                {/* KPI cards */}
+                <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+                  <UserStatCard title="Total Users" value={userData.totals.totalUsers} sub="registered accounts" icon={Users} color="text-blue-500" />
+                  <UserStatCard title="Active (30d)" value={userData.totals.activeUsers30d} sub="reports, check-ins, or messages" icon={Zap} color="text-orange-500" />
+                  <UserStatCard
+                    title="With Assessment"
+                    value={userData.totals.usersWithAtLeastOnePlan}
+                    sub={`${userData.totals.totalUsers > 0 ? Math.round((userData.totals.usersWithAtLeastOnePlan / userData.totals.totalUsers) * 100) : 0}% of users`}
+                    icon={Target}
+                    color="text-amber-500"
+                  />
+                  <UserStatCard title="Pro Subscribers" value={userData.totals.totalPro} sub="active or scheduled" icon={Award} color="text-emerald-500" />
+                  <UserStatCard title="Conversion Rate" value={`${userData.totals.conversionRate}%`} sub="users → Pro" icon={TrendingUp} color="text-violet-500" />
+                </div>
+
+                {/* Daily active users */}
+                <Card className="border-none shadow-md">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-display flex items-center gap-2">
+                      <Zap className="w-4 h-4 text-orange-500" /> Daily Active Users — Last 30 Days
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ResponsiveContainer width="100%" height={200}>
+                      <LineChart data={userData.activeUsersByDay.map(d => ({
+                        ...d,
+                        label: new Date(d.date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+                      }))}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
+                        <XAxis dataKey="label" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} interval={Math.floor(userData.activeUsersByDay.length / 6)} />
+                        <YAxis tick={{ fontSize: 10 }} axisLine={false} tickLine={false} width={24} allowDecimals={false} />
+                        <Tooltip contentStyle={{ borderRadius: 8, fontSize: 12 }} formatter={(v: number) => [v, "Active Users"]} />
+                        <Line type="monotone" dataKey="count" name="Active Users" stroke="#f97316" strokeWidth={2.5} dot={false} activeDot={{ r: 5 }} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                    <p className="text-xs text-muted-foreground mt-2 text-center">Users with at least one report, check-in, or companion message that day</p>
+                  </CardContent>
+                </Card>
+
+                {/* Growth charts */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <Card className="border-none shadow-md">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-display flex items-center gap-2">
+                        <Users className="w-4 h-4 text-primary" /> User Signups — Last 12 Months
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={200}>
+                        <LineChart data={userData.signupsByMonth.map(d => ({ ...d, month: fmtMonth(d.month) }))}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
+                          <XAxis dataKey="month" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
+                          <YAxis tick={{ fontSize: 10 }} axisLine={false} tickLine={false} width={24} allowDecimals={false} />
+                          <Tooltip contentStyle={{ borderRadius: 8, fontSize: 12 }} />
+                          <Line type="monotone" dataKey="count" name="Signups" stroke="hsl(var(--primary))" strokeWidth={2.5} dot={{ r: 3 }} activeDot={{ r: 5 }} />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="border-none shadow-md">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-display flex items-center gap-2">
+                        <Activity className="w-4 h-4 text-primary" /> Assessments — Last 12 Months
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={200}>
+                        <LineChart data={userData.assessmentsByMonth.map(d => ({ ...d, month: fmtMonth(d.month) }))}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
+                          <XAxis dataKey="month" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
+                          <YAxis tick={{ fontSize: 10 }} axisLine={false} tickLine={false} width={24} allowDecimals={false} />
+                          <Tooltip contentStyle={{ borderRadius: 8, fontSize: 12 }} />
+                          <Line type="monotone" dataKey="count" name="Assessments" stroke="#f59e0b" strokeWidth={2.5} dot={{ r: 3 }} activeDot={{ r: 5 }} />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Dimension averages + Plan distribution */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <Card className="border-none shadow-md">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-display flex items-center gap-2">
+                        <Target className="w-4 h-4 text-primary" /> Average Dimension Scores
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={220}>
+                        <BarChart data={userData.dimensionAverages} layout="vertical">
+                          <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" horizontal={false} />
+                          <XAxis type="number" domain={[0, 100]} tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
+                          <YAxis dataKey="name" type="category" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} width={90} />
+                          <Tooltip contentStyle={{ borderRadius: 8, fontSize: 12 }} formatter={(v: number) => [`${v}/100`, "Avg Score"]} />
+                          <Bar dataKey="value" radius={[0, 4, 4, 0]}>
+                            {userData.dimensionAverages.map(entry => (
+                              <Cell key={entry.name} fill={DIM_COLORS[entry.name] ?? "#6366f1"} />
+                            ))}
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                      <p className="text-xs text-muted-foreground mt-2 text-center">Lowest = most challenging area across all users</p>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="border-none shadow-md">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-display flex items-center gap-2">
+                        <Users className="w-4 h-4 text-primary" /> User Engagement — Plan Count Distribution
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={220}>
+                        <BarChart data={userData.planBuckets}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" vertical={false} />
+                          <XAxis dataKey="label" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
+                          <YAxis tick={{ fontSize: 10 }} axisLine={false} tickLine={false} width={24} allowDecimals={false} />
+                          <Tooltip contentStyle={{ borderRadius: 8, fontSize: 12 }} formatter={(v: number) => [v, "Users"]} />
+                          <Bar dataKey="count" name="Users" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                      <p className="text-xs text-muted-foreground mt-2 text-center">How many assessments registered users have completed</p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Conversion funnel */}
+                <Card className="border-none shadow-md">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-display flex items-center gap-2">
+                      <TrendingUp className="w-4 h-4 text-primary" /> Free → Pro Conversion Funnel
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {[
+                        { label: "Registered", value: userData.totals.totalUsers, color: "bg-blue-500", pct: 100 },
+                        { label: "Completed ≥1 Assessment", value: userData.totals.usersWithAtLeastOnePlan, color: "bg-amber-500", pct: userData.totals.totalUsers > 0 ? Math.round((userData.totals.usersWithAtLeastOnePlan / userData.totals.totalUsers) * 100) : 0 },
+                        { label: "Converted to Pro", value: userData.totals.totalPro, color: "bg-emerald-500", pct: userData.totals.totalUsers > 0 ? Math.round((userData.totals.totalPro / userData.totals.totalUsers) * 100) : 0 },
+                      ].map(step => (
+                        <div key={step.label} className="flex items-center gap-4">
+                          <div className="w-40 text-right text-xs font-medium text-muted-foreground flex-shrink-0">{step.label}</div>
+                          <div className="flex-1 bg-muted/30 rounded-full h-6 relative overflow-hidden">
+                            <div
+                              className={`h-full ${step.color} rounded-full transition-all flex items-center justify-end pr-3`}
+                              style={{ width: `${Math.max(step.pct, 2)}%` }}
+                            >
+                              <span className="text-xs font-bold text-white whitespace-nowrap">{step.value}</span>
+                            </div>
+                          </div>
+                          <div className="w-12 text-xs font-semibold text-muted-foreground flex-shrink-0">{step.pct}%</div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </>
             )}
           </TabsContent>
         </Tabs>

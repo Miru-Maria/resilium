@@ -29,21 +29,15 @@ import PricingPage from "@/pages/pricing";
 import NotFound from "@/pages/not-found";
 import AdminLoginPage from "@/pages/admin/login";
 import AdminDashboard from "@/pages/admin/dashboard";
-import UxTestingPage from "@/pages/admin/ux-testing";
 import UxTestReportPage from "@/pages/admin/ux-test-report";
 import AdminMobilePage from "@/pages/admin/mobile";
 import AdminGdprPage from "@/pages/admin/gdpr";
-import AdminConsentLogPage from "@/pages/admin/consent-log";
 import AdminUsersPage from "@/pages/admin/users";
-import AdminAnnouncementsPage from "@/pages/admin/announcements";
 import AdminTestimonialsPage from "@/pages/admin/testimonials";
 import AdminMarketingPage from "@/pages/admin/marketing";
 import AdminSecurityPage from "@/pages/admin/security";
 import AdminMonitoringPage from "@/pages/admin/monitoring";
 import AdminDocumentsPage from "@/pages/admin/documents";
-import AdminAnalyticsPage from "@/pages/admin/analytics";
-import AdminPostLaunchPage from "@/pages/admin/post-launch";
-import AdminOutreachPage from "@/pages/admin/outreach";
 import ConsentPage from "@/pages/consent";
 import CoachingPage from "@/pages/coaching";
 import DemoPage from "@/pages/demo";
@@ -344,23 +338,24 @@ function Router() {
       <Route path="/admin/login" component={AdminLoginPage} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
       <Route path="/admin" component={AdminLoginPage} />
-      <Route path="/admin/ux-testing" component={UxTestingPage} />
       <Route path="/admin/ux-test/report/:runId" component={UxTestReportPage} />
       <Route path="/admin/mobile" component={AdminMobilePage} />
       <Route path="/admin/gdpr" component={AdminGdprPage} />
-      <Route path="/admin/consent-log" component={AdminConsentLogPage} />
       <Route path="/admin/users" component={AdminUsersPage} />
-      <Route path="/admin/announcements" component={AdminAnnouncementsPage} />
       <Route path="/admin/testimonials" component={AdminTestimonialsPage} />
       <Route path="/admin/marketing" component={AdminMarketingPage} />
       <Route path="/admin/documents" component={AdminDocumentsPage} />
       <Route path="/admin/security" component={AdminSecurityPage} />
       <Route path="/admin/monitoring" component={AdminMonitoringPage} />
-      <Route path="/admin/analytics" component={AdminAnalyticsPage} />
-      <Route path="/admin/post-launch" component={AdminPostLaunchPage} />
-      <Route path="/admin/outreach" component={AdminOutreachPage} />
       <Route path="/admin/blog" component={AdminBlogPage} />
       <Route path="/admin/growth" component={AdminGrowthPage} />
+      {/* Redirects for consolidated pages */}
+      <Route path="/admin/analytics" component={() => <RedirectTo to="/admin/dashboard?tab=traffic" />} />
+      <Route path="/admin/ux-testing" component={() => <RedirectTo to="/admin/monitoring" />} />
+      <Route path="/admin/consent-log" component={() => <RedirectTo to="/admin/gdpr" />} />
+      <Route path="/admin/announcements" component={() => <RedirectTo to="/admin/dashboard" />} />
+      <Route path="/admin/post-launch" component={() => <RedirectTo to="/admin/growth" />} />
+      <Route path="/admin/outreach" component={() => <RedirectTo to="/admin/growth" />} />
       <Route path="/blog" component={BlogPage} />
       <Route path="/blog/:slug" component={BlogPostPage} />
       <Route path="/coaching" component={CoachingPage} />
