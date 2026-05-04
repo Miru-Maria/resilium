@@ -106,6 +106,18 @@ router.get("/check", async (_req, res) => {
   let clerkCount: number | null = null;
   let clerkError: string | null = null;
   let localCount: number | null = null;
+  let clerkInstanceDomain: string | null = null;
+
+  // Identify which Clerk application this key belongs to
+  try {
+    const instResp = await fetch("https://api.clerk.com/v1/instance", {
+      headers: { Authorization: `Bearer ${secretKey ?? ""}` },
+    });
+    if (instResp.ok) {
+      const inst = await instResp.json() as { home_origin?: string; domain?: string; id?: string };
+      clerkInstanceDomain = inst.home_origin ?? inst.domain ?? inst.id ?? null;
+    }
+  } catch { /* non-fatal */ }
 
   try {
     // Use the lightweight /count endpoint instead of fetching all users
@@ -116,7 +128,6 @@ router.get("/check", async (_req, res) => {
       const data = await countResp.json() as { total_count?: number };
       clerkCount = data.total_count ?? 0;
     } else {
-      // Fall back to listing (catches auth errors with a proper message)
       const body = await countResp.text();
       clerkError = `Clerk API ${countResp.status}: ${body.slice(0, 200)}`;
     }
@@ -129,7 +140,7 @@ router.get("/check", async (_req, res) => {
     localCount = Number(rows[0]?.cnt ?? 0);
   } catch (_) {}
 
-  res.json({ keyPresent, keyPrefix, keyType, clerkCount, clerkError, localCount });
+  res.json({ keyPresent, keyPrefix, keyType, clerkCount, clerkError, localCount, clerkInstanceDomain });
 });
 
 // ── POST /clerk-import ────────────────────────────────────────────────────────

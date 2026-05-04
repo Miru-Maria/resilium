@@ -277,6 +277,7 @@ export default function AdminGrowthPage() {
   const [clerkCheck, setClerkCheck] = useState<{
     keyPresent: boolean; keyPrefix: string; keyType: "live" | "test" | "unknown";
     clerkCount: number | null; clerkError: string | null; localCount: number | null;
+    clerkInstanceDomain: string | null;
   } | null>(null);
   const [clerkChecking, setClerkChecking] = useState(false);
 
@@ -781,7 +782,7 @@ export default function AdminGrowthPage() {
                     {clerkCheck && (
                       <div style={{ marginBottom: 14 }}>
                         <div style={{ background: "#0D1225", borderRadius: 8, padding: "12px 14px", border: `1px solid ${BORDER}`, fontSize: 13 }}>
-                          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
+                          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: clerkCheck.clerkInstanceDomain ? 10 : 0 }}>
                             <div>
                               <div style={{ color: DIM, fontSize: 11, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>Clerk key</div>
                               <div style={{ color: clerkCheck.keyPresent ? "#22c55e" : "#ef4444", fontWeight: 700 }}>
@@ -805,6 +806,17 @@ export default function AdminGrowthPage() {
                               <div style={{ color: TEXT, fontWeight: 700 }}>{clerkCheck.localCount ?? "—"}</div>
                             </div>
                           </div>
+                          {clerkCheck.clerkInstanceDomain && (
+                            <div style={{ borderTop: `1px solid ${BORDER}`, paddingTop: 10, display: "flex", alignItems: "center", gap: 8 }}>
+                              <span style={{ color: DIM, fontSize: 11, textTransform: "uppercase", letterSpacing: 1, flexShrink: 0 }}>Key belongs to</span>
+                              <span style={{ color: clerkCheck.clerkInstanceDomain.includes("resilium-platform") ? "#22c55e" : "#f59e0b", fontWeight: 700, fontSize: 13, fontFamily: "monospace", wordBreak: "break-all" }}>
+                                {clerkCheck.clerkInstanceDomain}
+                              </span>
+                              {!clerkCheck.clerkInstanceDomain.includes("resilium-platform") && (
+                                <span style={{ color: "#f59e0b", fontSize: 12, flexShrink: 0 }}>← wrong app!</span>
+                              )}
+                            </div>
+                          )}
                           {clerkCheck.clerkError && (
                             <div style={{ marginTop: 10, color: "#ef4444", fontSize: 12 }}>Clerk error: {clerkCheck.clerkError}</div>
                           )}
