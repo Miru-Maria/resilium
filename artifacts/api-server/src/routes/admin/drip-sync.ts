@@ -52,71 +52,125 @@ router.get("/stats", async (_req, res) => {
   }
 });
 
-// ── POST /clerk-import ────────────────────────────────────────────────────────
-// Fetches EVERY user from Clerk and upserts them into the local users table.
-// This makes them visible to broadcast segments and prepares them for drip
-// enrollment once they complete their assessment.
-router.post("/clerk-import", async (_req, res) => {
-  try {
-    const clerkClient = createClerkClient({ secretKey: process.env["CLERK_SECRET_KEY"] });
+// ── Clerk REST API helper ─────────────────────────────────────────────────────
+// Uses fetch directly against the Clerk Backend REST API instead of the SDK
+// to guarantee correct pagination and avoid SDK initialization issues.
+type ClerkRestUser = {
+  id: string;
+  email_addresses: Array<{ id: string; email_address: string }>;
+  primary_email_address_id: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  image_url: string;
+  created_at: number; // Unix ms
+};
 
-    // Paginate through all Clerk users (100 per page)
-    let offset = 0;
-    const limit = 100;
-    const allClerkUsers: Array<{
-      id: string;
-      emailAddresses: Array<{ emailAddress: string; id: string }>;
-      primaryEmailAddressId: string | null;
-      firstName: string | null;
-      lastName: string | null;
-      imageUrl: string;
-      createdAt: number;
-    }> = [];
+async function fetchAllClerkUsers(secretKey: string): Promise<ClerkRestUser[]> {
+  const all: ClerkRestUser[] = [];
+  const limit = 500; // Clerk max per page
+  let offset = 0;
 
-    while (true) {
-      const page = await clerkClient.users.getUserList({ limit, offset });
-      allClerkUsers.push(...page.data);
-      if (page.data.length < limit) break;
-      offset += limit;
+  while (true) {
+    const url = `https://api.clerk.com/v1/users?limit=${limit}&offset=${offset}&order_by=-created_at`;
+    const resp = await fetch(url, {
+      headers: { Authorization: `Bearer ${secretKey}`, "Content-Type": "application/json" },
+    });
+
+    if (!resp.ok) {
+      const body = await resp.text();
+      throw new Error(`Clerk API ${resp.status}: ${body.slice(0, 200)}`);
     }
 
-    logger.info({ total: allClerkUsers.length }, "Fetched all Clerk users");
+    const page: ClerkRestUser[] = await resp.json();
+    all.push(...page);
+    if (page.length < limit) break;
+    offset += limit;
+  }
+
+  return all;
+}
+
+// ── GET /check ─────────────────────────────────────────────────────────────────
+// Diagnostic endpoint: shows key presence, Clerk user count, and local DB count.
+router.get("/check", async (_req, res) => {
+  const secretKey = process.env["CLERK_SECRET_KEY"];
+  const keyPresent = !!secretKey;
+  const keyPrefix = secretKey ? secretKey.slice(0, 14) + "…" : "(not set)";
+
+  let clerkCount: number | null = null;
+  let clerkError: string | null = null;
+  let localCount: number | null = null;
+
+  try {
+    const users = await fetchAllClerkUsers(secretKey ?? "");
+    clerkCount = users.length;
+  } catch (err) {
+    clerkError = String(err).slice(0, 200);
+  }
+
+  try {
+    const rows = await db.select({ cnt: count() }).from(usersTable);
+    localCount = Number(rows[0]?.cnt ?? 0);
+  } catch (_) {}
+
+  res.json({ keyPresent, keyPrefix, clerkCount, clerkError, localCount });
+});
+
+// ── POST /clerk-import ────────────────────────────────────────────────────────
+// Fetches EVERY user from Clerk's REST API and upserts them into the local
+// users table. Makes them visible to broadcast segments and drip enrollment.
+router.post("/clerk-import", async (_req, res) => {
+  const secretKey = process.env["CLERK_SECRET_KEY"];
+
+  if (!secretKey) {
+    res.status(500).json({ error: "CLERK_SECRET_KEY is not set in this environment. Add it under Secrets and redeploy." });
+    return;
+  }
+
+  try {
+    const allClerkUsers = await fetchAllClerkUsers(secretKey);
+    logger.info({ total: allClerkUsers.length }, "Fetched all Clerk users via REST API");
 
     let imported = 0;
     let alreadyExisted = 0;
     let failed = 0;
     const errors: string[] = [];
 
-    // Fetch existing user IDs from local DB in one query
+    // Load existing user IDs in one query
     const existingRows = await db.select({ id: usersTable.id }).from(usersTable);
     const existingIds = new Set(existingRows.map(r => r.id));
 
     for (const cu of allClerkUsers) {
       try {
-        const primaryEmail = cu.emailAddresses.find(e => e.id === cu.primaryEmailAddressId)
-          ?? cu.emailAddresses[0];
+        const primaryEmail =
+          cu.email_addresses.find(e => e.id === cu.primary_email_address_id)
+          ?? cu.email_addresses[0];
 
-        if (!primaryEmail) { failed++; errors.push(`${cu.id}: no email`); continue; }
+        if (!primaryEmail) {
+          failed++;
+          errors.push(`${cu.id}: no email address`);
+          continue;
+        }
 
         if (existingIds.has(cu.id)) {
-          // Update email/name in case they changed in Clerk
+          // Refresh name/email in case they changed it in Clerk
           await db.update(usersTable)
             .set({
-              email: primaryEmail.emailAddress,
-              firstName: cu.firstName ?? undefined,
-              lastName: cu.lastName ?? undefined,
-              profileImageUrl: cu.imageUrl ?? undefined,
+              email: primaryEmail.email_address,
+              firstName: cu.first_name ?? undefined,
+              lastName: cu.last_name ?? undefined,
+              profileImageUrl: cu.image_url ?? undefined,
             })
             .where(eq(usersTable.id, cu.id));
           alreadyExisted++;
         } else {
           await db.insert(usersTable).values({
             id: cu.id,
-            email: primaryEmail.emailAddress,
-            firstName: cu.firstName ?? null,
-            lastName: cu.lastName ?? null,
-            profileImageUrl: cu.imageUrl ?? null,
-            createdAt: new Date(cu.createdAt),
+            email: primaryEmail.email_address,
+            firstName: cu.first_name ?? null,
+            lastName: cu.last_name ?? null,
+            profileImageUrl: cu.image_url ?? null,
+            createdAt: new Date(cu.created_at),
           }).onConflictDoNothing();
           imported++;
           existingIds.add(cu.id);
@@ -135,11 +189,12 @@ router.post("/clerk-import", async (_req, res) => {
       alreadyExisted,
       failed,
       errors: errors.slice(0, 5),
-      message: `Imported ${imported} new users from Clerk (${alreadyExisted} already existed).`,
+      message: `Imported ${imported} new users from Clerk (${alreadyExisted} already existed, ${failed} failed).`,
     });
   } catch (err) {
+    const msg = String(err);
     logger.error({ err }, "Clerk import failed");
-    res.status(500).json({ error: "Clerk import failed. Check server logs." });
+    res.status(500).json({ error: `Clerk import failed: ${msg.slice(0, 200)}` });
   }
 });
 

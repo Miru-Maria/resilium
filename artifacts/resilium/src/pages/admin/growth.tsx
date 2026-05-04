@@ -98,6 +98,10 @@ export default function AdminGrowthPage() {
     totalClerk: number; imported: number; alreadyExisted: number; failed: number; message: string;
   } | null>(null);
   const [clerkImportError, setClerkImportError] = useState<string | null>(null);
+  const [clerkCheck, setClerkCheck] = useState<{
+    keyPresent: boolean; keyPrefix: string; clerkCount: number | null; clerkError: string | null; localCount: number | null;
+  } | null>(null);
+  const [clerkChecking, setClerkChecking] = useState(false);
 
   const [refStats, setRefStats] = useState<ReferralStats | null>(null);
   const [refLoading, setRefLoading] = useState(true);
@@ -164,6 +168,16 @@ export default function AdminGrowthPage() {
   useEffect(() => {
     loadDrip(); loadReferrals(); loadCampaigns(); loadKeywords(); loadOpportunities();
   }, []);
+
+  async function checkClerk() {
+    setClerkChecking(true);
+    try {
+      const r = await fetch(`${BASE}/api/admin/drip/check`, { credentials: "include" });
+      if (r.ok) setClerkCheck(await r.json());
+    } finally { setClerkChecking(false); }
+  }
+
+  useEffect(() => { checkClerk(); }, []);
 
   async function importFromClerk() {
     setClerkImporting(true); setClerkImportResult(null); setClerkImportError(null);
@@ -505,8 +519,46 @@ export default function AdminGrowthPage() {
                   Clerk is your auth provider — every registered account lives there. Your local database only knows about users who have already signed in to the app at least once. This step fetches <strong style={{ color: TEXT }}>all</strong> Clerk users (paginated, no limit) and upserts them into your local database, so broadcasts and segment counts include everyone, even users who registered but never completed onboarding.
                 </p>
                 <div style={{ background: "#0D1225", borderRadius: 8, padding: "10px 14px", border: `1px solid ${BORDER}`, marginBottom: 14, fontSize: 12, color: MUTED, lineHeight: 1.6 }}>
-                  <span style={{ color: AMBER, fontWeight: 700 }}>What it does:</span> calls Clerk's Admin API → upserts each user (id, email, name, avatar) into your <code style={{ color: TEXT }}>users</code> table → updates name/email for existing users in case they changed it in Clerk. Safe to run multiple times.
+                  <span style={{ color: AMBER, fontWeight: 700 }}>What it does:</span> calls the Clerk REST API → upserts each user (id, email, name, avatar) into your <code style={{ color: TEXT }}>users</code> table → updates name/email for existing users in case they changed it in Clerk. Safe to run multiple times.
                 </div>
+
+                {/* Diagnostic status bar */}
+                <div style={{ background: "#0D1225", borderRadius: 8, padding: "10px 14px", border: `1px solid ${BORDER}`, marginBottom: 14, fontSize: 12 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                    <span style={{ color: DIM, textTransform: "uppercase", letterSpacing: 1, fontSize: 10 }}>Connection Status</span>
+                    <button onClick={checkClerk} disabled={clerkChecking} style={{ background: "none", border: "none", cursor: "pointer", color: DIM, display: "flex", alignItems: "center", gap: 3, fontSize: 11 }}>
+                      <RefreshCw size={10} style={{ animation: clerkChecking ? "spin 1s linear infinite" : "none" }} /> refresh
+                    </button>
+                  </div>
+                  {clerkChecking && !clerkCheck ? (
+                    <span style={{ color: MUTED }}>Checking…</span>
+                  ) : clerkCheck ? (
+                    <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
+                      <span style={{ color: MUTED }}>
+                        Secret key: <strong style={{ color: clerkCheck.keyPresent ? "#22c55e" : "#ef4444" }}>
+                          {clerkCheck.keyPresent ? `✓ present (${clerkCheck.keyPrefix})` : "✗ missing"}
+                        </strong>
+                      </span>
+                      <span style={{ color: MUTED }}>
+                        Clerk sees: <strong style={{ color: clerkCheck.clerkCount === null ? "#ef4444" : TEXT }}>
+                          {clerkCheck.clerkCount === null ? `error — ${clerkCheck.clerkError?.slice(0, 60)}` : `${clerkCheck.clerkCount} users`}
+                        </strong>
+                      </span>
+                      <span style={{ color: MUTED }}>
+                        Local DB: <strong style={{ color: TEXT }}>{clerkCheck.localCount ?? "?"} users</strong>
+                      </span>
+                      {clerkCheck.clerkCount !== null && clerkCheck.localCount !== null && clerkCheck.clerkCount > clerkCheck.localCount && (
+                        <span style={{ color: AMBER, fontWeight: 600 }}>
+                          ↑ {clerkCheck.clerkCount - clerkCheck.localCount} not yet imported
+                        </span>
+                      )}
+                      {clerkCheck.clerkCount !== null && clerkCheck.localCount !== null && clerkCheck.clerkCount <= clerkCheck.localCount && (
+                        <span style={{ color: "#22c55e", fontWeight: 600 }}>✓ all synced</span>
+                      )}
+                    </div>
+                  ) : null}
+                </div>
+
                 <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
                   <Button
                     onClick={importFromClerk}
@@ -516,7 +568,7 @@ export default function AdminGrowthPage() {
                     {clerkImporting ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
                     {clerkImporting ? "Importing from Clerk…" : "Import from Clerk"}
                   </Button>
-                  <span style={{ color: DIM, fontSize: 12 }}>Takes ~2–10 s for hundreds of users</span>
+                  <span style={{ color: DIM, fontSize: 12 }}>Safe to run multiple times · takes ~2–10 s</span>
                 </div>
 
                 {clerkImportResult && (
