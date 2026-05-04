@@ -72,16 +72,35 @@ async function fetchAllClerkUsers(secretKey: string): Promise<ClerkRestUser[]> {
 
   while (true) {
     const url = `https://api.clerk.com/v1/users?limit=${limit}&offset=${offset}&order_by=-created_at`;
+    // NOTE: no Content-Type on GET requests — some proxies reject it
     const resp = await fetch(url, {
-      headers: { Authorization: `Bearer ${secretKey}`, "Content-Type": "application/json" },
+      headers: { Authorization: `Bearer ${secretKey}` },
     });
 
+    const rawBody = await resp.text();
+
     if (!resp.ok) {
-      const body = await resp.text();
-      throw new Error(`Clerk API ${resp.status}: ${body.slice(0, 200)}`);
+      logger.error({ status: resp.status, body: rawBody.slice(0, 400) }, "Clerk /v1/users non-OK response");
+      throw new Error(`Clerk API ${resp.status}: ${rawBody.slice(0, 200)}`);
     }
 
-    const page: ClerkRestUser[] = await resp.json();
+    // Log raw body when result is suspiciously small so we can diagnose issues
+    let page: ClerkRestUser[];
+    try {
+      const parsed = JSON.parse(rawBody);
+      if (!Array.isArray(parsed)) {
+        logger.error({ type: typeof parsed, keys: Object.keys(parsed).slice(0, 10), body: rawBody.slice(0, 400) }, "Clerk /v1/users returned non-array");
+        throw new Error(`Unexpected Clerk response shape: ${rawBody.slice(0, 200)}`);
+      }
+      page = parsed;
+    } catch (err) {
+      throw new Error(`Failed to parse Clerk response: ${rawBody.slice(0, 200)}`);
+    }
+
+    if (page.length === 0 && offset === 0) {
+      logger.warn({ rawBody: rawBody.slice(0, 200), status: resp.status }, "Clerk returned 0 users on first page");
+    }
+
     all.push(...page);
     if (page.length < limit) break;
     offset += limit;
@@ -122,7 +141,7 @@ router.get("/check", async (_req, res) => {
   try {
     // Use the lightweight /count endpoint instead of fetching all users
     const countResp = await fetch("https://api.clerk.com/v1/users/count", {
-      headers: { Authorization: `Bearer ${secretKey ?? ""}`, "Content-Type": "application/json" },
+      headers: { Authorization: `Bearer ${secretKey ?? ""}` },
     });
     if (countResp.ok) {
       const data = await countResp.json() as { total_count?: number };
@@ -140,6 +159,8 @@ router.get("/check", async (_req, res) => {
     localCount = Number(rows[0]?.cnt ?? 0);
   } catch (_) {}
 
+  // Never cache — always show fresh key/instance info
+  res.set("Cache-Control", "no-store");
   res.json({ keyPresent, keyPrefix, keyType, clerkCount, clerkError, localCount, clerkInstanceDomain });
 });
 
@@ -153,6 +174,9 @@ router.post("/clerk-import", async (_req, res) => {
     res.status(500).json({ error: "CLERK_SECRET_KEY is not set in this environment. Add it under Secrets and redeploy." });
     return;
   }
+
+  // Log key prefix so we can verify which key production is using
+  logger.info({ keyPrefix: secretKey.slice(0, 14) + "…", keyType: secretKey.startsWith("sk_live_") ? "live" : "test" }, "Starting Clerk import");
 
   try {
     const allClerkUsers = await fetchAllClerkUsers(secretKey);
