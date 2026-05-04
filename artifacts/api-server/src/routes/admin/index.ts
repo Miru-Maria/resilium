@@ -2,7 +2,7 @@ import { Router, type IRouter, type Request } from "express";
 import path from "path";
 import { fileURLToPath } from "url";
 import { db, resilienceReportsTable, reportFeedbackTable, usersTable, planViewsTable, adminConfigTable, adminAuditLogTable } from "@workspace/db";
-import { desc, eq, count, max, and, isNotNull, gte, lte, ilike, or } from "drizzle-orm";
+import { desc, eq, count, max, and, isNotNull, gte, lte, ilike, or, sql } from "drizzle-orm";
 import {
   requireAdminSession, generateAdminToken, verifyAdminToken,
   hashPassword, verifyPassword, generateRecoveryCode, consumeRecoveryCode,

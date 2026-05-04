@@ -91,19 +91,35 @@ async function fetchAllClerkUsers(secretKey: string): Promise<ClerkRestUser[]> {
 }
 
 // ── GET /check ─────────────────────────────────────────────────────────────────
-// Diagnostic endpoint: shows key presence, Clerk user count, and local DB count.
+// Diagnostic endpoint: shows key presence, key type (test vs live), Clerk user
+// count (via fast /count endpoint), and local DB count.
 router.get("/check", async (_req, res) => {
   const secretKey = process.env["CLERK_SECRET_KEY"];
   const keyPresent = !!secretKey;
   const keyPrefix = secretKey ? secretKey.slice(0, 14) + "…" : "(not set)";
+
+  // Detect whether this is a test key (sk_test_) or live key (sk_live_)
+  let keyType: "live" | "test" | "unknown" = "unknown";
+  if (secretKey?.startsWith("sk_live_")) keyType = "live";
+  else if (secretKey?.startsWith("sk_test_")) keyType = "test";
 
   let clerkCount: number | null = null;
   let clerkError: string | null = null;
   let localCount: number | null = null;
 
   try {
-    const users = await fetchAllClerkUsers(secretKey ?? "");
-    clerkCount = users.length;
+    // Use the lightweight /count endpoint instead of fetching all users
+    const countResp = await fetch("https://api.clerk.com/v1/users/count", {
+      headers: { Authorization: `Bearer ${secretKey ?? ""}`, "Content-Type": "application/json" },
+    });
+    if (countResp.ok) {
+      const data = await countResp.json() as { total_count?: number };
+      clerkCount = data.total_count ?? 0;
+    } else {
+      // Fall back to listing (catches auth errors with a proper message)
+      const body = await countResp.text();
+      clerkError = `Clerk API ${countResp.status}: ${body.slice(0, 200)}`;
+    }
   } catch (err) {
     clerkError = String(err).slice(0, 200);
   }
@@ -113,7 +129,7 @@ router.get("/check", async (_req, res) => {
     localCount = Number(rows[0]?.cnt ?? 0);
   } catch (_) {}
 
-  res.json({ keyPresent, keyPrefix, clerkCount, clerkError, localCount });
+  res.json({ keyPresent, keyPrefix, keyType, clerkCount, clerkError, localCount });
 });
 
 // ── POST /clerk-import ────────────────────────────────────────────────────────

@@ -275,7 +275,8 @@ export default function AdminGrowthPage() {
   } | null>(null);
   const [clerkImportError, setClerkImportError] = useState<string | null>(null);
   const [clerkCheck, setClerkCheck] = useState<{
-    keyPresent: boolean; keyPrefix: string; clerkCount: number | null; clerkError: string | null; localCount: number | null;
+    keyPresent: boolean; keyPrefix: string; keyType: "live" | "test" | "unknown";
+    clerkCount: number | null; clerkError: string | null; localCount: number | null;
   } | null>(null);
   const [clerkChecking, setClerkChecking] = useState(false);
 
@@ -778,27 +779,45 @@ export default function AdminGrowthPage() {
                     </div>
 
                     {clerkCheck && (
-                      <div style={{ background: "#0D1225", borderRadius: 8, padding: "12px 14px", border: `1px solid ${BORDER}`, marginBottom: 14, fontSize: 13 }}>
-                        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
-                          <div>
-                            <div style={{ color: DIM, fontSize: 11, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>Clerk key</div>
-                            <div style={{ color: clerkCheck.keyPresent ? "#22c55e" : "#ef4444", fontWeight: 700 }}>
-                              {clerkCheck.keyPresent ? `✓ ${clerkCheck.keyPrefix}…` : "✗ Not set"}
+                      <div style={{ marginBottom: 14 }}>
+                        <div style={{ background: "#0D1225", borderRadius: 8, padding: "12px 14px", border: `1px solid ${BORDER}`, fontSize: 13 }}>
+                          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
+                            <div>
+                              <div style={{ color: DIM, fontSize: 11, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>Clerk key</div>
+                              <div style={{ color: clerkCheck.keyPresent ? "#22c55e" : "#ef4444", fontWeight: 700 }}>
+                                {clerkCheck.keyPresent ? `✓ ${clerkCheck.keyPrefix}` : "✗ Not set"}
+                              </div>
+                            </div>
+                            <div>
+                              <div style={{ color: DIM, fontSize: 11, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>Key type</div>
+                              <div style={{ fontWeight: 700, color: clerkCheck.keyType === "live" ? "#22c55e" : clerkCheck.keyType === "test" ? "#f59e0b" : MUTED }}>
+                                {clerkCheck.keyType === "live" ? "✓ Production" : clerkCheck.keyType === "test" ? "⚠ Test/Dev" : "Unknown"}
+                              </div>
+                            </div>
+                            <div>
+                              <div style={{ color: DIM, fontSize: 11, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>Clerk users</div>
+                              <div style={{ color: TEXT, fontWeight: 700 }}>
+                                {clerkCheck.clerkError ? <span style={{ color: "#ef4444" }}>Error</span> : (clerkCheck.clerkCount ?? "—")}
+                              </div>
+                            </div>
+                            <div>
+                              <div style={{ color: DIM, fontSize: 11, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>Local users</div>
+                              <div style={{ color: TEXT, fontWeight: 700 }}>{clerkCheck.localCount ?? "—"}</div>
                             </div>
                           </div>
-                          <div>
-                            <div style={{ color: DIM, fontSize: 11, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>Clerk users</div>
-                            <div style={{ color: TEXT, fontWeight: 700 }}>
-                              {clerkCheck.clerkError ? <span style={{ color: "#ef4444" }}>Error</span> : (clerkCheck.clerkCount ?? "—")}
-                            </div>
-                          </div>
-                          <div>
-                            <div style={{ color: DIM, fontSize: 11, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>Local users</div>
-                            <div style={{ color: TEXT, fontWeight: 700 }}>{clerkCheck.localCount ?? "—"}</div>
-                          </div>
+                          {clerkCheck.clerkError && (
+                            <div style={{ marginTop: 10, color: "#ef4444", fontSize: 12 }}>Clerk error: {clerkCheck.clerkError}</div>
+                          )}
                         </div>
-                        {clerkCheck.clerkError && (
-                          <div style={{ marginTop: 10, color: "#ef4444", fontSize: 12 }}>Clerk error: {clerkCheck.clerkError}</div>
+                        {clerkCheck.keyType === "test" && (
+                          <div style={{ marginTop: 8, background: "#2d1a00", borderRadius: 8, padding: "10px 14px", border: "1px solid #f59e0b", fontSize: 13, color: "#f59e0b", lineHeight: 1.6 }}>
+                            <strong>⚠ Test key detected.</strong> Your <code style={{ background: "#0D1225", padding: "1px 5px", borderRadius: 4, fontSize: 12 }}>CLERK_SECRET_KEY</code> starts with <code style={{ background: "#0D1225", padding: "1px 5px", borderRadius: 4, fontSize: 12 }}>sk_test_</code> — this is a development key connected to a separate Clerk instance from your production app. Users who signed up on <strong>resilium-platform.com</strong> are in the <em>live</em> instance. Go to <a href="https://dashboard.clerk.com" target="_blank" rel="noreferrer" style={{ color: "#f59e0b", textDecoration: "underline" }}>Clerk dashboard</a> → your production app → API Keys, copy the <strong>Secret key</strong> (starts with <code style={{ background: "#0D1225", padding: "1px 5px", borderRadius: 4, fontSize: 12 }}>sk_live_</code>), and update the <code>CLERK_SECRET_KEY</code> secret in your Replit project, then redeploy.
+                          </div>
+                        )}
+                        {clerkCheck.keyType !== "test" && clerkCheck.clerkCount === 0 && !clerkCheck.clerkError && (
+                          <div style={{ marginTop: 8, background: "#1a1a2e", borderRadius: 8, padding: "10px 14px", border: "1px solid #6b7280", fontSize: 13, color: MUTED, lineHeight: 1.6 }}>
+                            Clerk reports 0 users. If you know users have signed up, this key may point to a different Clerk application. Check the <a href="https://dashboard.clerk.com" target="_blank" rel="noreferrer" style={{ color: AMBER, textDecoration: "underline" }}>Clerk dashboard</a> to verify which app the key belongs to.
+                          </div>
                         )}
                       </div>
                     )}

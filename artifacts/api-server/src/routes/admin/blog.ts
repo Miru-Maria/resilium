@@ -22,19 +22,6 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.get("/:id", async (req, res) => {
-  try {
-    const id = parseInt(req.params.id, 10);
-    if (isNaN(id)) { res.status(400).json({ error: "Invalid id" }); return; }
-    const [row] = await db.select().from(blogPostsTable).where(eq(blogPostsTable.id, id)).limit(1);
-    if (!row) { res.status(404).json({ error: "Not found" }); return; }
-    res.json({ post: row });
-  } catch (err) {
-    req.log.error({ err }, "Error fetching blog post");
-    res.status(500).json({ error: "Failed to fetch blog post" });
-  }
-});
-
 router.post("/", async (req, res) => {
   try {
     const {
@@ -127,6 +114,8 @@ router.delete("/:id", async (req, res) => {
 });
 
 // ─── Keyword queue CRUD routes ────────────────────────────────────────────────
+// IMPORTANT: these specific routes MUST be declared before /:id to avoid Express
+// matching "keywords" as a numeric id parameter and returning 400.
 
 router.get("/keywords", async (_req, res) => {
   try {
@@ -163,6 +152,22 @@ router.delete("/keywords/:id", async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: "Failed to delete keyword" });
+  }
+});
+
+// ─── Individual post fetch — declared AFTER /keywords so Express matches the
+//     literal path first and never confuses "keywords" for a numeric :id ──────
+
+router.get("/:id", async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) { res.status(400).json({ error: "Invalid id" }); return; }
+    const [row] = await db.select().from(blogPostsTable).where(eq(blogPostsTable.id, id)).limit(1);
+    if (!row) { res.status(404).json({ error: "Not found" }); return; }
+    res.json({ post: row });
+  } catch (err) {
+    req.log.error({ err }, "Error fetching blog post");
+    res.status(500).json({ error: "Failed to fetch blog post" });
   }
 });
 
