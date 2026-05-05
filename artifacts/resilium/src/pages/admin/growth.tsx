@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { AdminLayout } from "./layout";
 import {
   Loader2, Send, Mail, TrendingUp,
@@ -7,7 +7,7 @@ import {
   AlertCircle, Building2, User, Pencil,
   Rocket, CheckSquare, Square, ChevronDown, ChevronRight,
   CheckCircle2, Activity, Users, MessageSquare,
-  BarChart2, Calendar, AlertTriangle, Smartphone, RefreshCw, GitBranch, Wand2, Eye,
+  BarChart2, Calendar, AlertTriangle, Smartphone, RefreshCw, GitBranch, Wand2, Eye, MousePointerClick,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -324,6 +324,24 @@ export default function AdminGrowthPage() {
   const [selectedScenario, setSelectedScenario] = useState<string | null>(null);
   const [draftSegment, setDraftSegment] = useState("all");
   const [previewName, setPreviewName] = useState("Alex");
+  const bodyRef = useRef<HTMLTextAreaElement>(null);
+
+  function insertCtaAssessment() {
+    const el = bodyRef.current;
+    if (!el) {
+      setNewCamp(p => ({ ...p, body: p.body + "\n\n{{ctaAssessment}}\n" }));
+      return;
+    }
+    const start = el.selectionStart ?? el.value.length;
+    const end = el.selectionEnd ?? el.value.length;
+    const insert = "\n\n{{ctaAssessment}}\n";
+    const next = el.value.slice(0, start) + insert + el.value.slice(end);
+    setNewCamp(p => ({ ...p, body: next }));
+    requestAnimationFrame(() => {
+      el.focus();
+      el.setSelectionRange(start + insert.length, start + insert.length);
+    });
+  }
 
   // ── Outreach state ──
   const [outRaw, setOutRaw] = useState("");
@@ -1129,8 +1147,20 @@ export default function AdminGrowthPage() {
                         </div>
                       ))}
                       <div>
-                        <label style={{ display: "block", color: DIM, fontSize: 11, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>Email body (plain text)</label>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
+                          <label style={{ color: DIM, fontSize: 11, textTransform: "uppercase", letterSpacing: 1 }}>Email body (plain text)</label>
+                          <button
+                            type="button"
+                            onClick={insertCtaAssessment}
+                            title="Insert an assessment CTA button at the cursor"
+                            style={{ display: "flex", alignItems: "center", gap: 5, background: "none", border: `1px solid ${AMBER}`, borderRadius: 6, padding: "3px 10px", color: AMBER, fontSize: 11, fontWeight: 600, cursor: "pointer", letterSpacing: 0.3 }}
+                          >
+                            <MousePointerClick size={11} />
+                            Insert assessment CTA
+                          </button>
+                        </div>
                         <textarea
+                          ref={bodyRef}
                           value={newCamp.body}
                           onChange={e => setNewCamp(p => ({ ...p, body: e.target.value }))}
                           rows={10}
@@ -1181,11 +1211,26 @@ export default function AdminGrowthPage() {
                         {/* Email body */}
                         <div style={{ padding: "20px 20px 24px", minHeight: 200 }}>
                           {newCamp.body ? (
-                            <pre style={{ margin: 0, fontFamily: "Georgia, serif", fontSize: 14, lineHeight: 1.7, color: "#2a2010", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+                            <div style={{ fontFamily: "Georgia, serif", fontSize: 14, lineHeight: 1.7, color: "#2a2010" }}>
                               {newCamp.body
                                 .replace(/\{\{firstName\}\}/g, previewName)
-                                .replace(/\{\{referralLink\}\}/g, "https://resilium-platform.com/r/YOURCODE")}
-                            </pre>
+                                .replace(/\{\{referralLink\}\}/g, "https://resilium-platform.com/r/YOURCODE")
+                                .split(/\n\n+/)
+                                .map((para, i) => {
+                                  const trimmed = para.trim();
+                                  if (!trimmed) return null;
+                                  if (trimmed === "{{ctaAssessment}}") {
+                                    return (
+                                      <div key={i} style={{ textAlign: "center", margin: "20px 0" }}>
+                                        <span style={{ display: "inline-block", background: "#E08040", color: "#0D1225", fontWeight: 700, fontSize: 13, padding: "11px 22px", borderRadius: 8, fontFamily: "sans-serif", letterSpacing: -0.2 }}>
+                                          Take My Free Resilience Assessment →
+                                        </span>
+                                      </div>
+                                    );
+                                  }
+                                  return <p key={i} style={{ margin: "0 0 14px", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{trimmed}</p>;
+                                })}
+                            </div>
                           ) : (
                             <p style={{ margin: 0, color: "#bbb", fontStyle: "italic", fontSize: 13 }}>Start typing your email body to see the preview…</p>
                           )}
@@ -1200,6 +1245,9 @@ export default function AdminGrowthPage() {
                       )}
                       {newCamp.body.includes("{{referralLink}}") && (
                         <div style={{ marginTop: 4, fontSize: 11, color: "#22c55e" }}>{"✓ {{referralLink}} will be replaced with each user's unique referral URL"}</div>
+                      )}
+                      {newCamp.body.includes("{{ctaAssessment}}") && (
+                        <div style={{ marginTop: 4, fontSize: 11, color: "#22c55e" }}>{"✓ {{ctaAssessment}} will render as a styled 'Take My Free Resilience Assessment' button"}</div>
                       )}
                     </div>
                   </div>

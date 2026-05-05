@@ -718,7 +718,11 @@ export async function sendBroadcastEmail(opts: {
 }): Promise<void> {
   if (!opts.to) return;
   const name = opts.firstName ?? "there";
-  const bodyWithName = opts.body.replace(/\[Name\]/g, name);
+  const ctaAssessmentHtml = `<div style="text-align:center;margin:28px 0;"><a href="${APP_URL}/assessment" style="display:inline-block;background:#E08040;color:#0D1225;font-weight:700;font-size:15px;padding:14px 28px;border-radius:10px;text-decoration:none;letter-spacing:-0.3px;">Take My Free Resilience Assessment →</a></div>`;
+  const ctaAssessmentText = `→ Take your free resilience assessment:\n${APP_URL}/assessment`;
+  const bodyWithName = opts.body
+    .replace(/\{\{firstName\}\}/g, name)
+    .replace(/\[Name\]/g, name);
   const unsubHtml = opts.userId ? unsubscribeFooterHtml(opts.userId) : "";
   const unsubText = opts.userId ? unsubscribeFooterText(opts.userId) : "";
   const listHeader = opts.userId
@@ -730,6 +734,7 @@ export async function sendBroadcastEmail(opts: {
     .map(para => {
       const trimmed = para.trim();
       if (!trimmed) return "";
+      if (trimmed === "{{ctaAssessment}}") return ctaAssessmentHtml;
       if (trimmed.startsWith("→ ") || trimmed.startsWith("• ")) {
         return `<p style="margin:0 0 12px;color:#b8a99a;font-size:14px;line-height:1.7;padding-left:16px;border-left:2px solid #E08040;">${trimmed.replace(/^[→•]\s*/, "")}</p>`;
       }
@@ -738,7 +743,7 @@ export async function sendBroadcastEmail(opts: {
     .join("");
 
   const html = `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0D1225;font-family:'Helvetica Neue',Arial,sans-serif;color:#EAD9BE;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:40px 20px;"><table width="560" cellpadding="0" cellspacing="0" style="background:#131929;border-radius:16px;overflow:hidden;"><tr><td style="background:#E08040;padding:20px 32px;"><h1 style="margin:0;color:#0D1225;font-size:20px;font-weight:800;">Resilium</h1></td></tr><tr><td style="padding:32px;">${bodyHtml}<a href="${APP_URL}" style="display:inline-block;background:#E08040;color:#0D1225;font-weight:700;font-size:14px;padding:12px 24px;border-radius:8px;text-decoration:none;margin-top:8px;">Open Resilium →</a>${unsubHtml}</td></tr></table></td></tr></table></body></html>`;
-  const text = `${bodyWithName}\n\n${APP_URL}${unsubText}`;
+  const text = `${bodyWithName.replace(/\{\{ctaAssessment\}\}/g, ctaAssessmentText)}\n\n${APP_URL}${unsubText}`;
 
   await send({ to: opts.to, subject: opts.subject, html, text, headers: listHeader });
 }
