@@ -7,7 +7,7 @@ import {
   AlertCircle, Building2, User, Pencil,
   Rocket, CheckSquare, Square, ChevronDown, ChevronRight,
   CheckCircle2, Activity, Users, MessageSquare,
-  BarChart2, Calendar, AlertTriangle, Smartphone, RefreshCw, GitBranch, Wand2,
+  BarChart2, Calendar, AlertTriangle, Smartphone, RefreshCw, GitBranch, Wand2, Eye,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -323,6 +323,7 @@ export default function AdminGrowthPage() {
   const [draftGenError, setDraftGenError] = useState<string | null>(null);
   const [selectedScenario, setSelectedScenario] = useState<string | null>(null);
   const [draftSegment, setDraftSegment] = useState("all");
+  const [previewName, setPreviewName] = useState("Alex");
 
   // ── Outreach state ──
   const [outRaw, setOutRaw] = useState("");
@@ -1093,69 +1094,113 @@ export default function AdminGrowthPage() {
 
               {campCompose && (
                 <div style={{ background: CARD_BG, borderRadius: 12, border: `1px solid ${BORDER}`, padding: "20px 24px", marginBottom: 20 }}>
-                  <div style={{ color: TEXT, fontWeight: 700, fontSize: 14, marginBottom: 16 }}>New Campaign</div>
-                  <div style={{ display: "grid", gap: 12 }}>
-                    {[
-                      { label: "Campaign name", key: "name" as const, placeholder: "May re-engagement" },
-                      { label: "Subject line", key: "subject" as const, placeholder: "Here's what's new in Resilium" },
-                    ].map(f => (
-                      <div key={f.key}>
-                        <label style={{ display: "block", color: DIM, fontSize: 11, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>{f.label}</label>
-                        <input
-                          value={newCamp[f.key]}
-                          onChange={e => setNewCamp(p => ({ ...p, [f.key]: e.target.value }))}
-                          placeholder={f.placeholder}
-                          style={{ width: "100%", background: "#0D1225", border: `1px solid ${BORDER}`, borderRadius: 8, padding: "8px 12px", color: TEXT, fontSize: 13, boxSizing: "border-box" }}
+                  {/* Header row */}
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+                    <div style={{ color: TEXT, fontWeight: 700, fontSize: 14 }}>New Campaign</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      <Eye size={13} color={DIM} />
+                      <span style={{ color: DIM, fontSize: 11, textTransform: "uppercase", letterSpacing: 1 }}>Preview as</span>
+                      {["Alex", "Maria", "James"].map(n => (
+                        <button
+                          key={n}
+                          onClick={() => setPreviewName(n)}
+                          style={{ background: previewName === n ? AMBER : "#0D1225", color: previewName === n ? "#0D1225" : MUTED, border: `1px solid ${previewName === n ? AMBER : BORDER}`, borderRadius: 6, padding: "3px 10px", fontSize: 12, fontWeight: 600, cursor: "pointer" }}
+                        >{n}</button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Two-column: form left, preview right */}
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+                    {/* ── LEFT: form fields ── */}
+                    <div style={{ display: "grid", gap: 12 }}>
+                      {[
+                        { label: "Campaign name", key: "name" as const, placeholder: "May re-engagement" },
+                        { label: "Subject line", key: "subject" as const, placeholder: "Here's what's new in Resilium" },
+                      ].map(f => (
+                        <div key={f.key}>
+                          <label style={{ display: "block", color: DIM, fontSize: 11, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>{f.label}</label>
+                          <input
+                            value={newCamp[f.key]}
+                            onChange={e => setNewCamp(p => ({ ...p, [f.key]: e.target.value }))}
+                            placeholder={f.placeholder}
+                            style={{ width: "100%", background: "#0D1225", border: `1px solid ${BORDER}`, borderRadius: 8, padding: "8px 12px", color: TEXT, fontSize: 13, boxSizing: "border-box" }}
+                          />
+                        </div>
+                      ))}
+                      <div>
+                        <label style={{ display: "block", color: DIM, fontSize: 11, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>Email body (plain text)</label>
+                        <textarea
+                          value={newCamp.body}
+                          onChange={e => setNewCamp(p => ({ ...p, body: e.target.value }))}
+                          rows={10}
+                          placeholder="Hi {{firstName}},&#10;&#10;..."
+                          style={{ width: "100%", background: "#0D1225", border: `1px solid ${BORDER}`, borderRadius: 8, padding: "8px 12px", color: TEXT, fontSize: 13, fontFamily: "inherit", resize: "vertical", boxSizing: "border-box" }}
                         />
                       </div>
-                    ))}
-                    <div>
-                      <label style={{ display: "block", color: DIM, fontSize: 11, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>Email body (plain text)</label>
-                      <textarea
-                        value={newCamp.body}
-                        onChange={e => setNewCamp(p => ({ ...p, body: e.target.value }))}
-                        rows={8}
-                        placeholder="Hi {{firstName}},&#10;&#10;..."
-                        style={{ width: "100%", background: "#0D1225", border: `1px solid ${BORDER}`, borderRadius: 8, padding: "8px 12px", color: TEXT, fontSize: 13, fontFamily: "inherit", resize: "vertical", boxSizing: "border-box" }}
-                      />
+                      <div>
+                        <label style={{ display: "block", color: DIM, fontSize: 11, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>Audience segment</label>
+                        <select
+                          value={newCamp.segment}
+                          onChange={e => { setNewCamp(p => ({ ...p, segment: e.target.value })); previewSegmentCount(e.target.value); }}
+                          style={{ width: "100%", background: "#0D1225", border: `1px solid ${BORDER}`, borderRadius: 8, padding: "8px 12px", color: TEXT, fontSize: 13 }}
+                        >
+                          {Object.entries(SEGMENT_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                        </select>
+                        {campSegmentCount !== null && (
+                          <div style={{ marginTop: 6, color: MUTED, fontSize: 12 }}>
+                            Estimated recipients: <strong style={{ color: TEXT }}>{campSegmentCount}</strong>
+                          </div>
+                        )}
+                      </div>
+                      <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+                        <input type="checkbox" checked={newCamp.sendNow} onChange={e => setNewCamp(p => ({ ...p, sendNow: e.target.checked }))} style={{ accentColor: AMBER }} />
+                        <span style={{ color: MUTED, fontSize: 13 }}>Send immediately (otherwise saved as draft)</span>
+                      </label>
+                      {campError && <div style={{ color: "#ef4444", fontSize: 13 }}>{campError}</div>}
+                      <div style={{ display: "flex", gap: 10 }}>
+                        <button onClick={submitCampaign} disabled={campSending} style={{ background: AMBER, color: "#0D1225", border: "none", borderRadius: 8, padding: "10px 20px", fontWeight: 700, fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, opacity: campSending ? 0.7 : 1 }}>
+                          {campSending ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+                          {campSending ? "Saving…" : (newCamp.sendNow ? "Send campaign" : "Save as draft")}
+                        </button>
+                        <button onClick={() => setCampCompose(false)} style={{ background: "none", border: `1px solid ${BORDER}`, borderRadius: 8, padding: "10px 16px", color: MUTED, fontSize: 13, cursor: "pointer" }}>
+                          Cancel
+                        </button>
+                      </div>
                     </div>
-                    <div>
-                      <label style={{ display: "block", color: DIM, fontSize: 11, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>Audience segment</label>
-                      <select
-                        value={newCamp.segment}
-                        onChange={e => { setNewCamp(p => ({ ...p, segment: e.target.value })); previewSegmentCount(e.target.value); }}
-                        style={{ width: "100%", background: "#0D1225", border: `1px solid ${BORDER}`, borderRadius: 8, padding: "8px 12px", color: TEXT, fontSize: 13 }}
-                      >
-                        {Object.entries(SEGMENT_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-                      </select>
-                      {campSegmentCount !== null && (
-                        <div style={{ marginTop: 6, color: MUTED, fontSize: 12 }}>
-                          Estimated recipients: <strong style={{ color: TEXT }}>{campSegmentCount}</strong>
+
+                    {/* ── RIGHT: live email preview ── */}
+                    <div style={{ position: "sticky", top: 16, alignSelf: "start" }}>
+                      <div style={{ color: DIM, fontSize: 11, textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>Email preview</div>
+                      <div style={{ background: "#f8f5f0", borderRadius: 10, overflow: "hidden", border: `1px solid ${BORDER}` }}>
+                        {/* Fake email chrome */}
+                        <div style={{ background: "#eee8e0", padding: "10px 16px", borderBottom: "1px solid #ddd5c8" }}>
+                          <div style={{ fontSize: 11, color: "#888", marginBottom: 3 }}>From: <strong style={{ color: "#555" }}>Miruna · Resilium &lt;hello@resilium-platform.com&gt;</strong></div>
+                          <div style={{ fontSize: 11, color: "#888" }}>Subject: <strong style={{ color: "#222", fontSize: 13 }}>{newCamp.subject ? newCamp.subject.replace(/\{\{firstName\}\}/g, previewName).replace(/\{\{referralLink\}\}/g, "https://resilium-platform.com/r/YOURCODE") : <span style={{ color: "#aaa", fontStyle: "italic" }}>No subject yet</span>}</strong></div>
                         </div>
+                        {/* Email body */}
+                        <div style={{ padding: "20px 20px 24px", minHeight: 200 }}>
+                          {newCamp.body ? (
+                            <pre style={{ margin: 0, fontFamily: "Georgia, serif", fontSize: 14, lineHeight: 1.7, color: "#2a2010", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+                              {newCamp.body
+                                .replace(/\{\{firstName\}\}/g, previewName)
+                                .replace(/\{\{referralLink\}\}/g, "https://resilium-platform.com/r/YOURCODE")}
+                            </pre>
+                          ) : (
+                            <p style={{ margin: 0, color: "#bbb", fontStyle: "italic", fontSize: 13 }}>Start typing your email body to see the preview…</p>
+                          )}
+                        </div>
+                        {/* Footer */}
+                        <div style={{ background: "#eee8e0", borderTop: "1px solid #ddd5c8", padding: "10px 16px" }}>
+                          <div style={{ fontSize: 11, color: "#aaa", textAlign: "center" }}>Resilium · <a href="#" style={{ color: "#aaa" }}>Unsubscribe</a></div>
+                        </div>
+                      </div>
+                      {(newCamp.body.includes("{{firstName}}") || newCamp.subject.includes("{{firstName}}")) && (
+                        <div style={{ marginTop: 8, fontSize: 11, color: "#22c55e" }}>{"✓ {{firstName}} will be replaced with each recipient's first name"}</div>
                       )}
-                    </div>
-                    <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
-                      <input
-                        type="checkbox"
-                        checked={newCamp.sendNow}
-                        onChange={e => setNewCamp(p => ({ ...p, sendNow: e.target.checked }))}
-                        style={{ accentColor: AMBER }}
-                      />
-                      <span style={{ color: MUTED, fontSize: 13 }}>Send immediately (otherwise saved as draft)</span>
-                    </label>
-                    {campError && <div style={{ color: "#ef4444", fontSize: 13 }}>{campError}</div>}
-                    <div style={{ display: "flex", gap: 10 }}>
-                      <button
-                        onClick={submitCampaign}
-                        disabled={campSending}
-                        style={{ background: AMBER, color: "#0D1225", border: "none", borderRadius: 8, padding: "10px 20px", fontWeight: 700, fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, opacity: campSending ? 0.7 : 1 }}
-                      >
-                        {campSending ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
-                        {campSending ? "Saving…" : (newCamp.sendNow ? "Send campaign" : "Save as draft")}
-                      </button>
-                      <button onClick={() => setCampCompose(false)} style={{ background: "none", border: `1px solid ${BORDER}`, borderRadius: 8, padding: "10px 16px", color: MUTED, fontSize: 13, cursor: "pointer" }}>
-                        Cancel
-                      </button>
+                      {newCamp.body.includes("{{referralLink}}") && (
+                        <div style={{ marginTop: 4, fontSize: 11, color: "#22c55e" }}>{"✓ {{referralLink}} will be replaced with each user's unique referral URL"}</div>
+                      )}
                     </div>
                   </div>
                 </div>
