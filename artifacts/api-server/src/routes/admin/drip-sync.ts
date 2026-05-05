@@ -134,7 +134,7 @@ router.get("/check", async (_req, res) => {
     });
     if (instResp.ok) {
       const inst = await instResp.json() as { home_origin?: string; domain?: string; id?: string };
-      clerkInstanceDomain = inst.home_origin ?? inst.domain ?? inst.id ?? null;
+      clerkInstanceDomain = inst.home_origin ?? inst.domain ?? null;
     }
   } catch { /* non-fatal */ }
 

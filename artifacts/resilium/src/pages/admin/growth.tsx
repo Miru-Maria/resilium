@@ -809,10 +809,10 @@ export default function AdminGrowthPage() {
                           {clerkCheck.clerkInstanceDomain && (
                             <div style={{ borderTop: `1px solid ${BORDER}`, paddingTop: 10, display: "flex", alignItems: "center", gap: 8 }}>
                               <span style={{ color: DIM, fontSize: 11, textTransform: "uppercase", letterSpacing: 1, flexShrink: 0 }}>Key belongs to</span>
-                              <span style={{ color: clerkCheck.clerkInstanceDomain.includes("resilium-platform") ? "#22c55e" : "#f59e0b", fontWeight: 700, fontSize: 13, fontFamily: "monospace", wordBreak: "break-all" }}>
+                              <span style={{ color: clerkCheck.clerkInstanceDomain.includes("resilium-platform") || (clerkCheck.clerkCount ?? 0) > 0 ? "#22c55e" : "#f59e0b", fontWeight: 700, fontSize: 13, fontFamily: "monospace", wordBreak: "break-all" }}>
                                 {clerkCheck.clerkInstanceDomain}
                               </span>
-                              {!clerkCheck.clerkInstanceDomain.includes("resilium-platform") && (
+                              {!clerkCheck.clerkInstanceDomain.includes("resilium-platform") && (clerkCheck.clerkCount ?? 0) === 0 && (
                                 <span style={{ color: "#f59e0b", fontSize: 12, flexShrink: 0 }}>← wrong app!</span>
                               )}
                             </div>
