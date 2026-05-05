@@ -16,12 +16,12 @@ const FREE_FEATURES = [
   "Full resilience score — all 6 dimensions",
   "Personalized action plan",
   "Mental resilience profile",
-  "10 practical crisis guides — readable offline",
   "Markdown export (Notion, Obsidian, etc.)",
   "GDPR-compliant data handling",
 ];
 
 const FREE_LIMITS = [
+  "No crisis guides",
   "No long-term trend tracking",
   "No plan comparison between assessments",
   "No scenario stress-testing",
@@ -34,6 +34,7 @@ const PRO_FEATURES = [
   "Know what changed between plans and why — so you act on the right things",
   "Model crises before they hit: job loss, health emergency, relocation, disaster",
   "Carry a clear 90-day action list that updates every time you reassess",
+  "10 practical crisis guides — readable and downloadable offline",
   "AI Companion — ask questions specific to your gaps, location, and situation",
 ];
 
