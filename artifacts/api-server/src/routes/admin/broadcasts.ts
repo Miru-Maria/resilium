@@ -5,6 +5,8 @@ import { createClerkClient } from "@clerk/express";
 import { requireAdminSession } from "../../middlewares/adminAuth.js";
 import { logger } from "../../lib/logger.js";
 import { sendBroadcastEmail } from "../../lib/email.js";
+import { openai } from "@workspace/integrations-openai-ai-server";
+import { MINI_MODEL } from "../../lib/models.js";
 
 const router: IRouter = Router();
 router.use(requireAdminSession);
@@ -157,6 +159,67 @@ router.post("/", async (req, res) => {
   } catch (err) {
     logger.error({ err }, "Error creating broadcast");
     res.status(500).json({ error: "Failed to create broadcast" });
+  }
+});
+
+router.post("/generate-draft", async (req, res) => {
+  const { scenario, segment } = req.body as { scenario?: string; segment?: string };
+  if (!scenario) { res.status(400).json({ error: "scenario required" }); return; }
+
+  const scenarioDescriptions: Record<string, string> = {
+    "founder-note": "A warm, personal note from Miruna (the founder) checking in with users and asking what brought them to Resilium. Genuine, curious, non-promotional. Ask one simple question.",
+    "re-engagement": "An email to bring back users who haven't been active recently. Remind them what Resilium offers and invite them back warmly — no guilt, just a friendly nudge.",
+    "upgrade-nudge": "Invite free-tier users who completed their assessment over 2 weeks ago to upgrade to Pro. Lead with what they're missing (scenario stress-tests, AI sub-steps). Value-led, no pressure.",
+    "referral-push": "Encourage users to share Resilium with a friend. Keep it genuine — explain why sharing matters and make it easy. Include the referral link placeholder {{referralLink}}.",
+    "new-feature": "Announce a new Resilium capability. Exciting but grounded — explain the benefit to the user, not just the feature itself.",
+    "check-in": "A nudge for users to revisit their resilience plan and check their progress. Encouraging, not nagging. Remind them the plan is actionable, not just a report.",
+    "value-tip": "Share one single, actionable resilience tip or insight — no promotion. Educational, genuinely useful. Could relate to financial, psychological, health, or skills resilience.",
+    "milestone": "Celebrate a platform or community milestone — number of users, a launch, or a personal win. Warm, grateful tone. Thank the user for being part of it.",
+  };
+
+  const segmentContext: Record<string, string> = {
+    all: "all users",
+    pro: "Pro subscribers",
+    free: "free-tier users who haven't upgraded",
+    free_assessed_14d: "free-tier users who completed their assessment 14+ days ago but haven't upgraded",
+  };
+
+  const desc = scenarioDescriptions[scenario] ?? scenario;
+  const audienceCtx = segmentContext[segment ?? "all"] ?? "all users";
+
+  try {
+    const completion = await openai.chat.completions.create({
+      model: MINI_MODEL,
+      response_format: { type: "json_object" },
+      messages: [
+        {
+          role: "system",
+          content: `You are a copywriter for Resilium, a personal resilience planning platform. The founder is Miruna C. Paun (goes by Miruna or Cristiana). Resilium helps people assess their preparedness across financial, psychological, health, skills, and mobility dimensions and receive an AI-powered prioritised action plan. The platform is a Romanian SRL, focused on the EU and English-speaking markets.
+
+Tone: intelligent, grounded, genuine, empowering — never salesy or corporate. Emails feel like they come from a real person, not a startup.
+
+Write a broadcast email draft and return JSON with exactly these three keys:
+- "name": short internal campaign name (3-5 words, e.g. "May re-engagement")
+- "subject": email subject line — compelling, direct, under 60 characters, no emoji
+- "body": plain text email body. Start with "Hi {{firstName}}," and sign off as "— Miruna / Resilium". Use {{firstName}} for personalisation. Keep it under 180 words. Include one clear call to action. No HTML, no markdown.`,
+        },
+        {
+          role: "user",
+          content: `Scenario: ${desc}\nAudience: ${audienceCtx}`,
+        },
+      ],
+    });
+
+    const raw = completion.choices[0]?.message?.content ?? "{}";
+    const parsed = JSON.parse(raw) as { name?: string; subject?: string; body?: string };
+    if (!parsed.name || !parsed.subject || !parsed.body) {
+      res.status(500).json({ error: "AI returned an incomplete draft — please try again." });
+      return;
+    }
+    res.json({ name: parsed.name, subject: parsed.subject, body: parsed.body });
+  } catch (err) {
+    logger.error({ err }, "Error generating broadcast draft");
+    res.status(500).json({ error: "Failed to generate draft" });
   }
 });
 

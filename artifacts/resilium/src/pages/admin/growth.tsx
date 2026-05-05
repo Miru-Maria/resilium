@@ -7,7 +7,7 @@ import {
   AlertCircle, Building2, User, Pencil,
   Rocket, CheckSquare, Square, ChevronDown, ChevronRight,
   CheckCircle2, Activity, Users, MessageSquare,
-  BarChart2, Calendar, AlertTriangle, Smartphone, RefreshCw, GitBranch,
+  BarChart2, Calendar, AlertTriangle, Smartphone, RefreshCw, GitBranch, Wand2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -38,6 +38,17 @@ const SEGMENT_LABELS: Record<string, string> = {
   free: "Free users (not Pro)",
   free_assessed_14d: "Free users who assessed 14+ days ago (no upgrade)",
 };
+
+const DRAFT_SCENARIOS = [
+  { id: "founder-note",   emoji: "💌", label: "Founder note",      desc: "Personal outreach from Miruna — ask what brought them here.",    segment: "all" },
+  { id: "re-engagement",  emoji: "🔄", label: "Re-engagement",      desc: "Bring back users who've gone quiet.",                            segment: "free" },
+  { id: "upgrade-nudge",  emoji: "⬆️", label: "Upgrade nudge",      desc: "Invite assessed free users to go Pro.",                          segment: "free_assessed_14d" },
+  { id: "referral-push",  emoji: "👥", label: "Referral push",       desc: "Encourage users to refer a friend.",                             segment: "all" },
+  { id: "new-feature",    emoji: "🚀", label: "Feature announce",    desc: "Announce a new Resilium capability.",                            segment: "all" },
+  { id: "check-in",       emoji: "📊", label: "Check-in",            desc: "Nudge users to revisit their resilience plan.",                  segment: "free" },
+  { id: "value-tip",      emoji: "💡", label: "Resilience tip",      desc: "Share one actionable insight or habit — no promotion.",          segment: "all" },
+  { id: "milestone",      emoji: "🎉", label: "Milestone",           desc: "Celebrate a platform or community win.",                         segment: "all" },
+];
 
 const FREE_DOMAINS = new Set([
   "gmail.com","yahoo.com","hotmail.com","outlook.com","icloud.com","proton.me",
@@ -307,6 +318,11 @@ export default function AdminGrowthPage() {
   const [campCompose, setCampCompose] = useState(false);
   const [campSending, setCampSending] = useState(false);
   const [campError, setCampError] = useState<string | null>(null);
+  const [draftPicker, setDraftPicker] = useState(false);
+  const [draftGenerating, setDraftGenerating] = useState(false);
+  const [draftGenError, setDraftGenError] = useState<string | null>(null);
+  const [selectedScenario, setSelectedScenario] = useState<string | null>(null);
+  const [draftSegment, setDraftSegment] = useState("all");
 
   // ── Outreach state ──
   const [outRaw, setOutRaw] = useState("");
@@ -482,6 +498,26 @@ export default function AdminGrowthPage() {
   async function markReferralConverted(id: number) {
     await fetch(`${BASE}/api/admin/referrals/${id}/mark-converted`, { method: "PATCH", credentials: "include" });
     loadReferrals();
+  }
+
+  async function generateDraft() {
+    if (!selectedScenario) return;
+    setDraftGenerating(true); setDraftGenError(null);
+    try {
+      const r = await fetch(`${BASE}/api/admin/broadcasts/generate-draft`, {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ scenario: selectedScenario, segment: draftSegment }),
+      });
+      const d = await r.json();
+      if (!r.ok) { setDraftGenError(d.error ?? "Failed to generate draft"); return; }
+      setNewCamp({ name: d.name, subject: d.subject, body: d.body, segment: draftSegment, sendNow: false });
+      setDraftPicker(false);
+      setSelectedScenario(null);
+      setDraftGenError(null);
+      setCampCompose(true);
+      previewSegmentCount(draftSegment);
+    } finally { setDraftGenerating(false); }
   }
 
   async function handleOutreachSend() {
@@ -981,16 +1017,79 @@ export default function AdminGrowthPage() {
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
                 <Megaphone size={18} color={AMBER} />
                 <h2 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: TEXT }}>Broadcast Campaigns</h2>
-                <button
-                  onClick={() => { setCampCompose(true); previewSegmentCount(newCamp.segment); }}
-                  style={{ marginLeft: "auto", background: AMBER, color: "#0D1225", border: "none", borderRadius: 8, padding: "8px 16px", fontWeight: 700, fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}
-                >
-                  <Plus size={14} /> New Campaign
-                </button>
+                <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
+                  <button
+                    onClick={() => { setDraftPicker(p => !p); setCampCompose(false); setDraftGenError(null); }}
+                    style={{ background: "none", border: `1px solid ${AMBER}`, borderRadius: 8, padding: "8px 14px", color: AMBER, fontWeight: 700, fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}
+                  >
+                    <Wand2 size={14} /> AI Draft
+                  </button>
+                  <button
+                    onClick={() => { setCampCompose(true); setDraftPicker(false); previewSegmentCount(newCamp.segment); }}
+                    style={{ background: AMBER, color: "#0D1225", border: "none", borderRadius: 8, padding: "8px 16px", fontWeight: 700, fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}
+                  >
+                    <Plus size={14} /> New Campaign
+                  </button>
+                </div>
               </div>
               <p style={{ margin: "0 0 20px", color: MUTED, fontSize: 13 }}>
                 Send one-off emails to segments of your user base. Drafts are saved; use "Send now" to send immediately or let the cron send it on schedule.
               </p>
+
+              {/* ── AI Draft Scenario Picker ── */}
+              {draftPicker && (
+                <div style={{ background: CARD_BG, borderRadius: 12, border: `1px solid ${BORDER}`, padding: "20px 24px", marginBottom: 20 }}>
+                  <div style={{ color: TEXT, fontWeight: 700, fontSize: 14, marginBottom: 4 }}>Generate AI Draft</div>
+                  <div style={{ color: MUTED, fontSize: 13, marginBottom: 18 }}>Pick a scenario — AI writes the subject line and body for you to review and edit before sending.</div>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginBottom: 18 }}>
+                    {DRAFT_SCENARIOS.map(s => (
+                      <div
+                        key={s.id}
+                        onClick={() => { setSelectedScenario(s.id); setDraftSegment(s.segment); }}
+                        style={{
+                          background: selectedScenario === s.id ? `${AMBER}18` : "#0D1225",
+                          border: `1px solid ${selectedScenario === s.id ? AMBER : BORDER}`,
+                          borderRadius: 10, padding: "14px 16px", cursor: "pointer",
+                          transition: "border-color 0.15s, background 0.15s",
+                        }}
+                      >
+                        <div style={{ fontSize: 22, marginBottom: 6, lineHeight: 1 }}>{s.emoji}</div>
+                        <div style={{ color: selectedScenario === s.id ? AMBER : TEXT, fontWeight: 700, fontSize: 13, marginBottom: 4 }}>{s.label}</div>
+                        <div style={{ color: MUTED, fontSize: 11, lineHeight: 1.45 }}>{s.desc}</div>
+                      </div>
+                    ))}
+                  </div>
+                  {selectedScenario && (
+                    <div style={{ marginBottom: 16 }}>
+                      <label style={{ display: "block", color: DIM, fontSize: 11, textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>Audience segment</label>
+                      <select
+                        value={draftSegment}
+                        onChange={e => setDraftSegment(e.target.value)}
+                        style={{ background: "#0D1225", border: `1px solid ${BORDER}`, borderRadius: 8, padding: "8px 12px", color: TEXT, fontSize: 13, minWidth: 280 }}
+                      >
+                        {Object.entries(SEGMENT_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                      </select>
+                    </div>
+                  )}
+                  {draftGenError && <div style={{ color: "#ef4444", fontSize: 13, marginBottom: 12 }}>{draftGenError}</div>}
+                  <div style={{ display: "flex", gap: 10 }}>
+                    <button
+                      onClick={generateDraft}
+                      disabled={!selectedScenario || draftGenerating}
+                      style={{ background: AMBER, color: "#0D1225", border: "none", borderRadius: 8, padding: "10px 20px", fontWeight: 700, fontSize: 13, cursor: selectedScenario && !draftGenerating ? "pointer" : "not-allowed", opacity: !selectedScenario || draftGenerating ? 0.6 : 1, display: "flex", alignItems: "center", gap: 6 }}
+                    >
+                      {draftGenerating ? <Loader2 size={14} className="animate-spin" /> : <Wand2 size={14} />}
+                      {draftGenerating ? "Generating…" : "Generate Draft"}
+                    </button>
+                    <button
+                      onClick={() => { setDraftPicker(false); setSelectedScenario(null); setDraftGenError(null); }}
+                      style={{ background: "none", border: `1px solid ${BORDER}`, borderRadius: 8, padding: "10px 16px", color: MUTED, fontSize: 13, cursor: "pointer" }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {campCompose && (
                 <div style={{ background: CARD_BG, borderRadius: 12, border: `1px solid ${BORDER}`, padding: "20px 24px", marginBottom: 20 }}>
