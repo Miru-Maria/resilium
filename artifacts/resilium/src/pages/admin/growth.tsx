@@ -40,7 +40,7 @@ const SEGMENT_LABELS: Record<string, string> = {
 };
 
 const DRAFT_SCENARIOS = [
-  { id: "founder-note",   emoji: "💌", label: "Founder note",      desc: "Personal outreach from Miruna — ask what brought them here.",    segment: "all" },
+  { id: "founder-note",   emoji: "💌", label: "Founder note",      desc: "Personal outreach from Cristiana — ask what brought them here.",    segment: "all" },
   { id: "re-engagement",  emoji: "🔄", label: "Re-engagement",      desc: "Bring back users who've gone quiet.",                            segment: "free" },
   { id: "upgrade-nudge",  emoji: "⬆️", label: "Upgrade nudge",      desc: "Invite assessed free users to go Pro.",                          segment: "free_assessed_14d" },
   { id: "referral-push",  emoji: "👥", label: "Referral push",       desc: "Encourage users to refer a friend.",                             segment: "all" },
@@ -62,7 +62,7 @@ const DEFAULT_BODY = `Hi [Name],
 
 You signed up for Resilium yesterday — thank you for being there on day one.
 
-I'm Miruna, the person who built it. I wanted to reach out personally while everything is still fresh.
+I'm Cristiana, the person who built it. I wanted to reach out personally while everything is still fresh.
 
 One question: What made you sign up?
 
@@ -74,7 +74,7 @@ If you haven't taken the assessment yet, it takes about 10 minutes. You'll get a
 
 Thank you for being here.
 
-— Miruna
+— Cristiana
 Resilium`;
 
 const QUICK_LINKS = [
@@ -1205,7 +1205,8 @@ export default function AdminGrowthPage() {
                       <div style={{ background: "#f8f5f0", borderRadius: 10, overflow: "hidden", border: `1px solid ${BORDER}` }}>
                         {/* Fake email chrome */}
                         <div style={{ background: "#eee8e0", padding: "10px 16px", borderBottom: "1px solid #ddd5c8" }}>
-                          <div style={{ fontSize: 11, color: "#888", marginBottom: 3 }}>From: <strong style={{ color: "#555" }}>Miruna · Resilium &lt;hello@resilium-platform.com&gt;</strong></div>
+                          <div style={{ fontSize: 11, color: "#888", marginBottom: 3 }}>From: <strong style={{ color: "#555" }}>Cristiana · Resilium &lt;hello@resilium-platform.com&gt;</strong></div>
+                          <div style={{ fontSize: 11, color: "#888", marginBottom: 3 }}>Reply-To: <strong style={{ color: "#555" }}>contact_resilium@pm.me</strong></div>
                           <div style={{ fontSize: 11, color: "#888" }}>Subject: <strong style={{ color: "#222", fontSize: 13 }}>{newCamp.subject ? newCamp.subject.replace(/\{\{firstName\}\}/g, previewName).replace(/\{\{referralLink\}\}/g, "https://resilium-platform.com/r/YOURCODE") : <span style={{ color: "#aaa", fontStyle: "italic" }}>No subject yet</span>}</strong></div>
                         </div>
                         {/* Email body */}

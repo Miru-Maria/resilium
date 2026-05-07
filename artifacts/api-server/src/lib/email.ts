@@ -5,7 +5,8 @@ const resend = process.env["RESEND_API_KEY"]
   ? new Resend(process.env["RESEND_API_KEY"])
   : null;
 
-const FROM = process.env["RESEND_FROM"] ?? "Resilium <hello@resilium-platform.com>";
+const FROM = process.env["RESEND_FROM"] ?? "Cristiana | Resilium <hello@resilium-platform.com>";
+const REPLY_TO = "contact_resilium@pm.me";
 const ADMIN_TO = process.env["ADMIN_EMAIL"] ?? "contact_resilium@pm.me";
 const APP_URL = process.env["APP_URL"] ?? "https://resilium-platform.com";
 
@@ -15,6 +16,7 @@ async function send(opts: {
   html: string;
   text: string;
   headers?: Record<string, string>;
+  replyTo?: string;
 }): Promise<void> {
   if (!resend) {
     console.warn(`[Email] RESEND_API_KEY not set — would have sent "${opts.subject}" to ${opts.to}`);
@@ -28,6 +30,7 @@ async function send(opts: {
       html: opts.html,
       text: opts.text,
       headers: opts.headers,
+      ...(opts.replyTo ? { replyTo: opts.replyTo } : {}),
     });
     if (error) console.error("[Email] Resend error:", error);
     else console.info(`[Email] Sent "${opts.subject}" to ${opts.to}`);
@@ -745,7 +748,7 @@ export async function sendBroadcastEmail(opts: {
   const html = `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0D1225;font-family:'Helvetica Neue',Arial,sans-serif;color:#EAD9BE;"><table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:40px 20px;"><table width="560" cellpadding="0" cellspacing="0" style="background:#131929;border-radius:16px;overflow:hidden;"><tr><td style="background:#E08040;padding:20px 32px;"><h1 style="margin:0;color:#0D1225;font-size:20px;font-weight:800;">Resilium</h1></td></tr><tr><td style="padding:32px;">${bodyHtml}<a href="${APP_URL}" style="display:inline-block;background:#E08040;color:#0D1225;font-weight:700;font-size:14px;padding:12px 24px;border-radius:8px;text-decoration:none;margin-top:8px;">Open Resilium →</a>${unsubHtml}</td></tr></table></td></tr></table></body></html>`;
   const text = `${bodyWithName.replace(/\{\{ctaAssessment\}\}/g, ctaAssessmentText)}\n\n${APP_URL}${unsubText}`;
 
-  await send({ to: opts.to, subject: opts.subject, html, text, headers: listHeader });
+  await send({ to: opts.to, subject: opts.subject, html, text, headers: listHeader, replyTo: REPLY_TO });
 }
 
 // ─── Content Opportunity Digest (admin notification) ─────────────────────────
