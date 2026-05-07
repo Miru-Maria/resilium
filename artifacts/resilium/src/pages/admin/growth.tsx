@@ -313,6 +313,18 @@ export default function AdminGrowthPage() {
   const [oppScanResult, setOppScanResult] = useState<{ found: number; saved: number } | null>(null);
   const [expandedOpp, setExpandedOpp] = useState<number | null>(null);
 
+  // ── Instagram state ──
+  const [igConfigured, setIgConfigured] = useState<boolean | null>(null);
+  const [igCaption, setIgCaption] = useState("");
+  const [igImageUrl, setIgImageUrl] = useState("");
+  const [igTopic, setIgTopic] = useState("");
+  const [igPillar, setIgPillar] = useState("financial");
+  const [igGenerating, setIgGenerating] = useState(false);
+  const [igPosting, setIgPosting] = useState(false);
+  const [igError, setIgError] = useState<string | null>(null);
+  const [igResult, setIgResult] = useState<{ mediaId: string } | null>(null);
+  const [igGenError, setIgGenError] = useState<string | null>(null);
+
   const [newCamp, setNewCamp] = useState({ name: "", subject: "", body: "", segment: "free", sendNow: false });
   const [campSegmentCount, setCampSegmentCount] = useState<number | null>(null);
   const [campCompose, setCampCompose] = useState(false);
@@ -397,8 +409,15 @@ export default function AdminGrowthPage() {
     } finally { setOppLoading(false); }
   }, []);
 
+  const loadIgStatus = useCallback(async () => {
+    try {
+      const r = await fetch(`${BASE}/api/admin/instagram/status`, { credentials: "include" });
+      if (r.ok) { const d = await r.json(); setIgConfigured(d.configured ?? false); }
+    } catch { setIgConfigured(false); }
+  }, []);
+
   useEffect(() => {
-    loadDrip(); loadReferrals(); loadCampaigns(); loadKeywords(); loadOpportunities();
+    loadDrip(); loadReferrals(); loadCampaigns(); loadKeywords(); loadOpportunities(); loadIgStatus();
   }, []);
 
   async function checkClerk() {
@@ -477,6 +496,36 @@ export default function AdminGrowthPage() {
       const d = await r.json();
       if (r.ok) { setOppScanResult(d); loadOpportunities(); }
     } finally { setOppScanning(false); }
+  }
+
+  async function generateIgCaption() {
+    setIgGenerating(true); setIgGenError(null);
+    try {
+      const r = await fetch(`${BASE}/api/admin/instagram/generate-caption`, {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ topic: igTopic, pillar: igPillar }),
+      });
+      const d = await r.json();
+      if (!r.ok) { setIgGenError(d.error ?? "Generation failed"); return; }
+      setIgCaption(d.caption ?? "");
+    } finally { setIgGenerating(false); }
+  }
+
+  async function postToInstagram() {
+    if (!igImageUrl.trim() || !igCaption.trim()) { setIgError("Both image URL and caption are required."); return; }
+    setIgPosting(true); setIgError(null); setIgResult(null);
+    try {
+      const r = await fetch(`${BASE}/api/admin/instagram/post`, {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ caption: igCaption, imageUrl: igImageUrl }),
+      });
+      const d = await r.json();
+      if (!r.ok) { setIgError(d.error ?? "Post failed"); return; }
+      setIgResult(d);
+      setIgCaption(""); setIgImageUrl(""); setIgTopic("");
+    } finally { setIgPosting(false); }
   }
 
   async function previewSegmentCount(segment: string) {
@@ -627,7 +676,8 @@ export default function AdminGrowthPage() {
                 </button>
               </div>
               <p style={{ margin: "0 0 16px", color: MUTED, fontSize: 13 }}>
-                Every day at 10:00 UTC, Resilium scans r/preppers, r/personalfinance, r/digitalnomad, r/expats, r/FIRE, and more for relevant threads. AI scores each thread and writes a draft reply — you just personalize and post.
+                Every day at 10:00 UTC, Resilium scans 12 subreddits (r/preppers, r/personalfinance, r/FIRE, r/laidoff, and more) using all 7 search terms via Reddit OAuth for reliable access. AI scores each thread and writes a draft reply — you just personalize and post.
+                {" "}<span style={{ color: AMBER }}>Add REDDIT_CLIENT_ID + REDDIT_CLIENT_SECRET secrets for authenticated access.</span>
               </p>
 
               {oppScanResult && (
@@ -1293,6 +1343,140 @@ export default function AdminGrowthPage() {
                   ))}
                 </div>
               )}
+            </section>
+
+            {/* ── INSTAGRAM POSTING ───────────────── */}
+            <section style={{ background: SECTION_BG, borderRadius: 14, border: `1px solid ${BORDER}`, padding: "24px 28px", marginBottom: 24 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+                <Smartphone size={18} color={AMBER} />
+                <h2 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: TEXT }}>Instagram</h2>
+                <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8 }}>
+                  {igConfigured === true && (
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: 5, color: "#22c55e", fontSize: 12, fontWeight: 600 }}>
+                      <CheckCircle size={13} /> Connected
+                    </span>
+                  )}
+                  {igConfigured === false && (
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: 5, color: "#f59e0b", fontSize: 12, fontWeight: 600 }}>
+                      <AlertCircle size={13} /> Not configured
+                    </span>
+                  )}
+                </div>
+              </div>
+              <p style={{ margin: "0 0 20px", color: MUTED, fontSize: 13 }}>
+                Post directly to your Resilium Instagram page. Generate an AI caption, paste a public image URL, and publish — all from here. Requires Meta App Review approval + access token in secrets.
+              </p>
+
+              {igConfigured === false && (
+                <div style={{ background: "#1a1200", border: "1px solid #f59e0b40", borderRadius: 10, padding: "14px 18px", marginBottom: 20 }}>
+                  <div style={{ color: "#f59e0b", fontWeight: 700, fontSize: 13, marginBottom: 6 }}>Setup required</div>
+                  <div style={{ color: MUTED, fontSize: 13, lineHeight: 1.7 }}>
+                    Once your Meta App Review is approved, add two secrets:<br />
+                    <code style={{ color: AMBER, fontFamily: "monospace", fontSize: 12 }}>INSTAGRAM_ACCESS_TOKEN</code> — your long-lived Page/User access token<br />
+                    <code style={{ color: AMBER, fontFamily: "monospace", fontSize: 12 }}>INSTAGRAM_BUSINESS_ACCOUNT_ID</code> — your IG Business account ID<br />
+                    <span style={{ color: DIM, fontSize: 12, marginTop: 4, display: "block" }}>The form below is ready — posting will activate as soon as the secrets are set.</span>
+                  </div>
+                </div>
+              )}
+
+              {/* ── AI Caption Generator ── */}
+              <div style={{ background: CARD_BG, borderRadius: 10, border: `1px solid ${BORDER}`, padding: "16px 20px", marginBottom: 16 }}>
+                <div style={{ color: TEXT, fontSize: 14, fontWeight: 700, marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
+                  <Wand2 size={14} color={AMBER} /> AI Caption Generator
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 180px", gap: 8, marginBottom: 10 }}>
+                  <div>
+                    <label style={{ display: "block", color: DIM, fontSize: 11, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>Post topic</label>
+                    <input
+                      value={igTopic}
+                      onChange={e => setIgTopic(e.target.value)}
+                      placeholder="e.g. building an emergency fund, mental resilience at work…"
+                      style={{ width: "100%", background: "#0D1225", border: `1px solid ${BORDER}`, borderRadius: 8, padding: "8px 12px", color: TEXT, fontSize: 13, boxSizing: "border-box" }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: "block", color: DIM, fontSize: 11, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>Pillar</label>
+                    <select
+                      value={igPillar}
+                      onChange={e => setIgPillar(e.target.value)}
+                      style={{ width: "100%", background: "#0D1225", border: `1px solid ${BORDER}`, borderRadius: 8, padding: "8px 12px", color: TEXT, fontSize: 13 }}
+                    >
+                      {PILLAR_OPTIONS.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
+                    </select>
+                  </div>
+                </div>
+                {igGenError && <div style={{ color: "#ef4444", fontSize: 12, marginBottom: 8 }}>{igGenError}</div>}
+                <button
+                  onClick={generateIgCaption}
+                  disabled={igGenerating}
+                  style={{ background: "none", border: `1px solid ${AMBER}`, borderRadius: 8, padding: "8px 14px", color: AMBER, fontWeight: 700, fontSize: 13, cursor: igGenerating ? "not-allowed" : "pointer", display: "flex", alignItems: "center", gap: 6, opacity: igGenerating ? 0.7 : 1 }}
+                >
+                  {igGenerating ? <Loader2 size={13} className="animate-spin" /> : <Wand2 size={13} />}
+                  {igGenerating ? "Generating…" : "Generate caption"}
+                </button>
+              </div>
+
+              {/* ── Post Form ── */}
+              <div style={{ display: "grid", gap: 12 }}>
+                <div>
+                  <label style={{ display: "block", color: DIM, fontSize: 11, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>Caption</label>
+                  <textarea
+                    value={igCaption}
+                    onChange={e => setIgCaption(e.target.value)}
+                    rows={6}
+                    placeholder="Your caption with hashtags…"
+                    style={{ width: "100%", background: "#0D1225", border: `1px solid ${BORDER}`, borderRadius: 8, padding: "8px 12px", color: TEXT, fontSize: 13, fontFamily: "inherit", resize: "vertical", boxSizing: "border-box" }}
+                  />
+                  <div style={{ textAlign: "right", color: igCaption.length > 2200 ? "#ef4444" : DIM, fontSize: 11, marginTop: 4 }}>
+                    {igCaption.length} / 2200 characters
+                  </div>
+                </div>
+                <div>
+                  <label style={{ display: "block", color: DIM, fontSize: 11, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>Image URL (public, accessible by Meta)</label>
+                  <input
+                    value={igImageUrl}
+                    onChange={e => setIgImageUrl(e.target.value)}
+                    placeholder="https://resilium-platform.com/images/post-graphic.jpg"
+                    style={{ width: "100%", background: "#0D1225", border: `1px solid ${BORDER}`, borderRadius: 8, padding: "8px 12px", color: TEXT, fontSize: 13, boxSizing: "border-box" }}
+                  />
+                  <div style={{ color: DIM, fontSize: 11, marginTop: 4 }}>Must be a publicly reachable JPEG/PNG URL. Instagram requires an image for every feed post.</div>
+                </div>
+
+                {igError && (
+                  <div style={{ background: "#1a0000", border: "1px solid #ef444440", borderRadius: 8, padding: "10px 14px", color: "#ef4444", fontSize: 13 }}>
+                    {igError}
+                  </div>
+                )}
+
+                {igResult && (
+                  <div style={{ background: "#001a00", border: "1px solid #22c55e40", borderRadius: 8, padding: "12px 16px", display: "flex", alignItems: "center", gap: 10 }}>
+                    <CheckCircle size={16} color="#22c55e" />
+                    <div>
+                      <div style={{ color: "#22c55e", fontWeight: 700, fontSize: 13 }}>Posted successfully!</div>
+                      <div style={{ color: DIM, fontSize: 12 }}>Media ID: {igResult.mediaId}</div>
+                    </div>
+                  </div>
+                )}
+
+                <div>
+                  <button
+                    onClick={postToInstagram}
+                    disabled={igPosting || !igCaption.trim() || !igImageUrl.trim() || igConfigured === false}
+                    style={{
+                      background: igConfigured === false ? BORDER : AMBER,
+                      color: igConfigured === false ? MUTED : "#0D1225",
+                      border: "none", borderRadius: 8, padding: "10px 20px",
+                      fontWeight: 700, fontSize: 13,
+                      cursor: (igPosting || !igCaption.trim() || !igImageUrl.trim() || igConfigured === false) ? "not-allowed" : "pointer",
+                      opacity: (igPosting || !igCaption.trim() || !igImageUrl.trim()) ? 0.7 : 1,
+                      display: "flex", alignItems: "center", gap: 6,
+                    }}
+                  >
+                    {igPosting ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+                    {igPosting ? "Posting…" : igConfigured === false ? "Post to Instagram (not configured)" : "Post to Instagram"}
+                  </button>
+                </div>
+              </div>
             </section>
           </div>
         )}

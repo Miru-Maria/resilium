@@ -12,6 +12,7 @@ router.use(requireAdminSession);
 const SUBREDDITS = [
   "preppers", "personalfinance", "digitalnomad", "expats",
   "financialindependence", "FIRE", "survivalism", "povertyfinance",
+  "anxiety", "jobs", "careerguidance", "laidoff",
 ];
 
 const SEARCH_TERMS = [
@@ -20,6 +21,55 @@ const SEARCH_TERMS = [
 ];
 
 const REDDIT_UA = "Resilium/1.0 (growth-tool; contact@resilium-platform.com)";
+
+// ─── Reddit OAuth token cache ────────────────────────────────────────────────
+
+interface TokenCache { token: string; expiresAt: number }
+let _tokenCache: TokenCache | null = null;
+
+async function getRedditToken(): Promise<string | null> {
+  const clientId = process.env["REDDIT_CLIENT_ID"];
+  const clientSecret = process.env["REDDIT_CLIENT_SECRET"];
+
+  if (!clientId || !clientSecret) return null;
+
+  const now = Date.now();
+  if (_tokenCache && _tokenCache.expiresAt > now + 30_000) {
+    return _tokenCache.token;
+  }
+
+  try {
+    const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
+    const res = await fetch("https://www.reddit.com/api/v1/access_token", {
+      method: "POST",
+      headers: {
+        Authorization: `Basic ${credentials}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+        "User-Agent": REDDIT_UA,
+      },
+      body: "grant_type=client_credentials",
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!res.ok) {
+      logger.warn({ status: res.status }, "Reddit OAuth token request failed");
+      return null;
+    }
+    const data = await res.json() as { access_token?: string; expires_in?: number };
+    if (!data.access_token) return null;
+
+    _tokenCache = {
+      token: data.access_token,
+      expiresAt: now + (data.expires_in ?? 3600) * 1000,
+    };
+    logger.info("Reddit OAuth token acquired");
+    return _tokenCache.token;
+  } catch (err) {
+    logger.warn({ err }, "Reddit OAuth token fetch failed");
+    return null;
+  }
+}
+
+// ─── Types ───────────────────────────────────────────────────────────────────
 
 interface RedditPost {
   id: string;
@@ -33,25 +83,45 @@ interface RedditPost {
   created_utc: number;
 }
 
+// ─── Scanner ─────────────────────────────────────────────────────────────────
+
 export async function runOpportunityScanner(): Promise<{ found: number; saved: number; emailed: boolean }> {
+  const token = await getRedditToken();
+  const isAuthed = !!token;
+
+  const authHeaders: Record<string, string> = {
+    "User-Agent": REDDIT_UA,
+    ...(isAuthed ? { Authorization: `Bearer ${token}` } : {}),
+  };
+  const baseUrl = isAuthed
+    ? "https://oauth.reddit.com"
+    : "https://www.reddit.com";
+
+  if (!isAuthed) {
+    logger.warn("Reddit scanner running unauthenticated — set REDDIT_CLIENT_ID and REDDIT_CLIENT_SECRET for reliable access");
+  }
+
   const seen = new Set<string>();
   const candidates: RedditPost[] = [];
 
   for (const sub of SUBREDDITS) {
-    for (const term of SEARCH_TERMS.slice(0, 3)) {
+    for (const term of SEARCH_TERMS) {
       try {
-        await new Promise(r => setTimeout(r, 800));
-        const url = `https://www.reddit.com/r/${sub}/search.json?q=${encodeURIComponent(term)}&sort=new&restrict_sr=on&t=week&limit=5`;
+        await new Promise(r => setTimeout(r, isAuthed ? 400 : 1000));
+        const url = `${baseUrl}/r/${sub}/search.json?q=${encodeURIComponent(term)}&sort=new&restrict_sr=on&t=week&limit=10`;
         const res = await fetch(url, {
-          headers: { "User-Agent": REDDIT_UA },
+          headers: authHeaders,
           signal: AbortSignal.timeout(8000),
         });
-        if (!res.ok) continue;
+        if (!res.ok) {
+          logger.warn({ status: res.status, sub, term }, "Reddit fetch non-OK");
+          continue;
+        }
         const json = await res.json() as { data?: { children?: { data: RedditPost }[] } };
         const posts = json.data?.children ?? [];
         for (const { data: p } of posts) {
           const fullUrl = `https://www.reddit.com${p.permalink}`;
-          if (!seen.has(fullUrl) && p.title && p.ups >= 2) {
+          if (!seen.has(fullUrl) && p.title && p.ups >= 1) {
             seen.add(fullUrl);
             candidates.push({ ...p, url: fullUrl });
           }
@@ -67,7 +137,7 @@ export async function runOpportunityScanner(): Promise<{ found: number; saved: n
     return { found: 0, saved: 0, emailed: false };
   }
 
-  const top = candidates.sort((a, b) => b.ups - a.ups).slice(0, 12);
+  const top = candidates.sort((a, b) => b.ups - a.ups).slice(0, 20);
 
   const prompt = `You are a growth advisor for Resilium, a personal resilience platform (resilium-platform.com). It helps people score their preparedness across 6 dimensions: Financial, Health, Skills, Mobility, Emergency Resources, Mental Resilience.
 
@@ -87,7 +157,7 @@ Return ONLY valid JSON array:
       model: MINI_MODEL,
       messages: [{ role: "user", content: prompt }],
       temperature: 0.6,
-      max_tokens: 3000,
+      max_tokens: 4000,
       response_format: { type: "json_object" },
     });
     const raw = completion.choices[0]?.message?.content ?? "{}";
@@ -120,9 +190,11 @@ Return ONLY valid JSON array:
     } catch { /* duplicate URL — skip */ }
   }
 
-  logger.info({ found: candidates.length, relevant: relevant.length, saved }, "Opportunity scanner complete");
+  logger.info({ found: candidates.length, relevant: relevant.length, saved, authed: isAuthed }, "Opportunity scanner complete");
   return { found: candidates.length, saved, emailed: false };
 }
+
+// ─── Routes ──────────────────────────────────────────────────────────────────
 
 router.get("/", async (req, res) => {
   try {

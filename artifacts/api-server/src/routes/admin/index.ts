@@ -18,6 +18,7 @@ import adminDripSyncRouter from "./drip-sync.js";
 import adminReferralsRouter from "./referrals.js";
 import adminBroadcastsRouter from "./broadcasts.js";
 import adminOpportunitiesRouter from "./opportunities.js";
+import adminInstagramRouter from "./instagram.js";
 import { getCoachingClickCount, runDependencyAudit, getLastHealthCheckResults, runE2eAssessmentTest, runSiteAudit } from "../../lib/cron.js";
 import { logger } from "../../lib/logger.js";
 import { sendWelcomeEmail, sendProUpgradeEmail, sendReassessmentReminder, sendUserWeeklyDigest, sendFounderOutreachEmail } from "../../lib/email.js";
@@ -739,5 +740,6 @@ router.use("/drip", adminDripSyncRouter);
 router.use("/referrals", adminReferralsRouter);
 router.use("/broadcasts", adminBroadcastsRouter);
 router.use("/opportunities", adminOpportunitiesRouter);
+router.use("/instagram", adminInstagramRouter);
 
 export default router;
