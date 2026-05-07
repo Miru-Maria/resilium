@@ -125,6 +125,7 @@ router.post("/", async (req, res) => {
 
         for (const user of segmentUsers) {
           if (optedOutIds.has(user.id)) continue;
+          if (!user.id.startsWith("user_")) continue;
           try {
             const clerkUser = await clerkClient.users.getUser(user.id);
             const email = clerkUser.emailAddresses[0]?.emailAddress;
@@ -247,6 +248,7 @@ router.post("/:id/send", async (req, res) => {
 
         for (const user of segmentUsers) {
           if (optedOutIds.has(user.id)) continue;
+          if (!user.id.startsWith("user_")) continue;
           try {
             const clerkUser = await clerkClient.users.getUser(user.id);
             const email = clerkUser.emailAddresses[0]?.emailAddress;
