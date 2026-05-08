@@ -10,8 +10,15 @@ const router: IRouter = Router();
 router.use(requireAdminSession);
 
 const SUBREDDITS = [
-  "preppers", "personalfinance", "digitalnomad", "expats",
-  "financialindependence", "FIRE", "survivalism", "povertyfinance",
+  // Core resilience
+  "preppers", "survivalism", "povertyfinance", "financialindependence", "FIRE",
+  // High-value additions from community research
+  "IWantOut",           // people actively considering leaving their country — perfect fit
+  "UKPersonalFinance",  // engaged, high-quality financial resilience community
+  "PersonalFinanceCanada",
+  "solotravel",         // self-reliant, contingency-minded audience
+  // Existing
+  "personalfinance", "digitalnomad", "expats",
   "anxiety", "jobs", "careerguidance", "laidoff",
 ];
 
