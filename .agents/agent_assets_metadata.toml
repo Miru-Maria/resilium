@@ -30,6 +30,36 @@ uri = "file://attached_assets/generated_images/resilium-linkedin-banner-v2-bg.pn
 type = "image"
 title = "resilium linkedin banner v2 background"
 
+[[generated]]
+id = "Ml_aBW_Ek6EXmIqgIzBg4"
+uri = "file://attached_assets/instagram/bg-carousel-dark.png"
+type = "image"
+title = "carousel dark background"
+
+[[generated]]
+id = "YZGgZnTDnCSoB_b0mtHmN"
+uri = "file://attached_assets/instagram/bg-single-image.png"
+type = "image"
+title = "single image background"
+
+[[generated]]
+id = "Wg8HUt5bh5OX_GW_tUjve"
+uri = "file://attached_assets/instagram/bg-quote.png"
+type = "image"
+title = "quote graphic background"
+
+[[generated]]
+id = "YTFlqrnlsWIgF_H4U6Uj_"
+uri = "file://attached_assets/instagram/bg-carousel-alt.png"
+type = "image"
+title = "carousel alternate background"
+
+[[generated]]
+id = "2Ji_lJXvKMgDvcKJZGFNF"
+uri = "file://attached_assets/instagram/bg-hero.png"
+type = "image"
+title = "hero background"
+
 [[outputs]]
 id = "Idq-hMXsmfbVatslIDfxJ"
 uri = "file://attached_assets/resilium-thumbnail.png"
@@ -221,3 +251,39 @@ id = "o5bTlkfm6LQPpa8IirheN"
 uri = "file://.local/outputs/instagram/4-week-content-plan.md"
 type = "text"
 title = "Resilium — 4-Week Instagram Content Plan"
+
+[[outputs]]
+id = "Ska99x2K_X5849yE7JQJz"
+uri = "file://.local/outputs/instagram/90-day-content-plan.md"
+type = "text"
+title = "Resilium — 90-Day Instagram Content Plan (39 posts)"
+
+[[outputs]]
+id = "rfVAx0VGVajoUE2haQbBV"
+uri = "file://attached_assets/instagram/bg-carousel-dark.png"
+type = "image"
+title = "Background — Carousel (main)"
+
+[[outputs]]
+id = "NqKijOTo_NAhS53wmTDhW"
+uri = "file://attached_assets/instagram/bg-carousel-alt.png"
+type = "image"
+title = "Background — Carousel (alternate)"
+
+[[outputs]]
+id = "P26jNNUm2c242LjlnhpR0"
+uri = "file://attached_assets/instagram/bg-single-image.png"
+type = "image"
+title = "Background — Single Image (Wednesday)"
+
+[[outputs]]
+id = "r-bfQURXf4FkU3-BPBBOI"
+uri = "file://attached_assets/instagram/bg-quote.png"
+type = "image"
+title = "Background — Quote Graphic (Friday/Sat)"
+
+[[outputs]]
+id = "NHkBGcad1SjfAzF-phoFj"
+uri = "file://attached_assets/instagram/bg-hero.png"
+type = "image"
+title = "Background — Hero (founder posts)"
