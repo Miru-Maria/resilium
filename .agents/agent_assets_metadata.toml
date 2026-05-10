@@ -215,3 +215,9 @@ id = "S84ULmwGYGNe-cKpkDhRE"
 uri = "file://artifacts/resilium/public/favicon.svg"
 type = "image"
 title = "Logo SVG — scalable (vector)"
+
+[[outputs]]
+id = "o5bTlkfm6LQPpa8IirheN"
+uri = "file://.local/outputs/instagram/4-week-content-plan.md"
+type = "text"
+title = "Resilium — 4-Week Instagram Content Plan"
