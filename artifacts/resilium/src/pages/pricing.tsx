@@ -5,6 +5,7 @@ import { CheckCircle2, Zap, ShieldCheck, BarChart2, RefreshCw, Lock, ArrowRight,
 import { Button } from "@/components/ui/button";
 import { SiteFooter } from "@/components/site-footer";
 import { PageSEO } from "@/components/page-seo";
+import { useToast } from "@/hooks/use-toast";
 import { useAuth, useClerk } from "@clerk/react";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -101,6 +102,7 @@ export default function PricingPage() {
   const { openSignIn } = useClerk();
   const isAuthenticated = !!isSignedIn;
   const login = () => openSignIn({});
+  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [billing, setBilling] = useState<BillingPeriod>("monthly");
   const queryClient = useQueryClient();
@@ -128,7 +130,7 @@ export default function PricingPage() {
 
   const handleUpgrade = async () => {
     if (!navigator.onLine) {
-      alert("You're offline right now. An internet connection is required to upgrade to Pro. Please reconnect and try again.");
+      toast({ title: "You're offline", description: "An internet connection is required to upgrade to Pro. Please reconnect and try again.", variant: "destructive" });
       return;
     }
     if (!isAuthenticated) {
@@ -151,10 +153,10 @@ export default function PricingPage() {
       if (data.url) {
         window.location.href = data.url;
       } else {
-        alert(data.error ?? "Failed to start checkout. Please try again.");
+        toast({ title: "Checkout failed", description: data.error ?? "Failed to start checkout. Please try again.", variant: "destructive" });
       }
     } catch {
-      alert("Failed to start checkout. Please try again.");
+      toast({ title: "Checkout failed", description: "Failed to start checkout. Please try again.", variant: "destructive" });
     } finally {
       setLoading(false);
     }
