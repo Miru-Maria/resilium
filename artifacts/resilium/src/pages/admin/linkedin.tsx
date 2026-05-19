@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
   Download, Copy, Check, Linkedin, User, Calendar,
-  Target, BookOpen,
+  Target, BookOpen, ChevronDown, ChevronRight,
 } from "lucide-react";
 
 const BASE       = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -255,12 +255,27 @@ function StoryPicker({ value, onChange }: { value: string; onChange: (k: string)
 type Tab = "calendar" | "founder";
 
 export default function AdminLinkedInPage() {
-  const [tab,         setTab]         = useState<Tab>("calendar");
-  const [selectedId,  setSelectedId]  = useState<number>(1);
-  const [founderId,   setFounderId]   = useState<string>("fl-1");
-  const [downloading, setDownloading] = useState(false);
-  const [storyKey,    setStoryKey]    = useState("brand");
+  const [tab,              setTab]              = useState<Tab>("calendar");
+  const [selectedId,       setSelectedId]       = useState<number>(1);
+  const [founderId,        setFounderId]        = useState<string>("fl-1");
+  const [downloading,      setDownloading]      = useState(false);
+  const [storyKey,         setStoryKey]         = useState("brand");
+  const [collapsedQuarters, setCollapsedQuarters] = useState<Set<string>>(() => {
+    try {
+      const s = localStorage.getItem("li-collapsed-quarters");
+      return s ? new Set(JSON.parse(s)) : new Set();
+    } catch { return new Set(); }
+  });
   const captureRef = useRef<HTMLDivElement>(null);
+
+  const toggleQuarter = (q: string) => {
+    setCollapsedQuarters(prev => {
+      const next = new Set(prev);
+      if (next.has(q)) next.delete(q); else next.add(q);
+      localStorage.setItem("li-collapsed-quarters", JSON.stringify([...next]));
+      return next;
+    });
+  };
 
   const post        = LI_POSTS.find(p => p.id === selectedId) ?? LI_POSTS[0];
   const founderPost = FOUNDER_POSTS.find(p => p.id === founderId) ?? FOUNDER_POSTS[0];
@@ -331,36 +346,57 @@ export default function AdminLinkedInPage() {
 
           <nav className="p-2">
             {tab === "calendar" && quarters.map(q => {
-              const qPosts = LI_POSTS.filter(p => p.quarter === q);
+              const qPosts   = LI_POSTS.filter(p => p.quarter === q);
+              const collapsed = collapsedQuarters.has(q);
+              const hasActive = qPosts.some(p => p.id === selectedId);
               return (
-                <div key={q} className="mb-3">
-                  <div className="px-2 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
-                    {q}
-                  </div>
-                  {qPosts.map(p => (
-                    <button
-                      key={p.id}
-                      onClick={() => setSelectedId(p.id)}
-                      className={cn(
-                        "w-full text-left px-3 py-2.5 rounded-lg mb-0.5 transition-all",
-                        selectedId === p.id
-                          ? "bg-[#E08040]/10 border border-[#E08040]/30"
-                          : "hover:bg-muted/50 border border-transparent",
-                      )}
-                    >
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className={cn(
-                          "inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold border",
-                          PHASE_COLOR[p.phase],
-                        )}>
-                          {p.phase}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground font-medium">W{p.week}</span>
-                      </div>
-                      <p className="text-xs font-medium text-foreground leading-snug line-clamp-2">{p.hook}</p>
-                      <p className="text-[10px] text-muted-foreground mt-0.5">{p.date}</p>
-                    </button>
-                  ))}
+                <div key={q} className="mb-1">
+                  <button
+                    onClick={() => toggleQuarter(q)}
+                    className={cn(
+                      "w-full flex items-center justify-between px-2 py-1.5 rounded-md transition-colors hover:bg-muted/50",
+                      collapsed && hasActive && "bg-[#E08040]/8",
+                    )}
+                  >
+                    <span className={cn(
+                      "text-[10px] font-bold uppercase tracking-widest",
+                      collapsed ? "text-muted-foreground/40" : "text-muted-foreground/70",
+                    )}>
+                      {q}
+                    </span>
+                    <ChevronDown className={cn(
+                      "w-3 h-3 text-muted-foreground/40 transition-transform duration-200",
+                      collapsed && "-rotate-90",
+                    )} />
+                  </button>
+                  {!collapsed && (
+                    <div className="mt-0.5 mb-2">
+                      {qPosts.map(p => (
+                        <button
+                          key={p.id}
+                          onClick={() => setSelectedId(p.id)}
+                          className={cn(
+                            "w-full text-left px-3 py-2.5 rounded-lg mb-0.5 transition-all",
+                            selectedId === p.id
+                              ? "bg-[#E08040]/10 border border-[#E08040]/30"
+                              : "hover:bg-muted/50 border border-transparent",
+                          )}
+                        >
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className={cn(
+                              "inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold border",
+                              PHASE_COLOR[p.phase],
+                            )}>
+                              {p.phase}
+                            </span>
+                            <span className="text-[10px] text-muted-foreground font-medium">W{p.week}</span>
+                          </div>
+                          <p className="text-xs font-medium text-foreground leading-snug line-clamp-2">{p.hook}</p>
+                          <p className="text-[10px] text-muted-foreground mt-0.5">{p.date}</p>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               );
             })}

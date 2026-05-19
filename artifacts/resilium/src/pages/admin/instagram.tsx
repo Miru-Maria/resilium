@@ -8,7 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
-  ChevronLeft, ChevronRight, Download, Copy, Check,
+  ChevronLeft, ChevronRight, ChevronDown, Download, Copy, Check,
   Instagram, Images, ImageIcon, Quote,
 } from "lucide-react";
 
@@ -304,11 +304,26 @@ function StoryPicker({ value, onChange }: { value: string; onChange: (k: string)
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function AdminInstagramPage() {
-  const [selectedId,  setSelectedId]  = useState<number>(1);
-  const [slideIndex,  setSlideIndex]  = useState(0);
-  const [downloading, setDownloading] = useState(false);
-  const [storyKey,    setStoryKey]    = useState("brand");
+  const [selectedId,     setSelectedId]     = useState<number>(1);
+  const [slideIndex,     setSlideIndex]     = useState(0);
+  const [downloading,    setDownloading]    = useState(false);
+  const [storyKey,       setStoryKey]       = useState("brand");
+  const [collapsedWeeks, setCollapsedWeeks] = useState<Set<string>>(() => {
+    try {
+      const s = localStorage.getItem("ig-collapsed-weeks");
+      return s ? new Set(JSON.parse(s)) : new Set();
+    } catch { return new Set(); }
+  });
   const captureRef = useRef<HTMLDivElement>(null);
+
+  const toggleWeek = (week: string) => {
+    setCollapsedWeeks(prev => {
+      const next = new Set(prev);
+      if (next.has(week)) next.delete(week); else next.add(week);
+      localStorage.setItem("ig-collapsed-weeks", JSON.stringify([...next]));
+      return next;
+    });
+  };
 
   const post         = IG_POSTS.find(p => p.id === selectedId) ?? IG_POSTS[0];
   const totalSlides  = post.slides?.length ?? 1;
@@ -377,37 +392,58 @@ export default function AdminInstagramPage() {
 
           <nav className="p-2">
             {WEEKS.map(week => {
-              const weekPosts = IG_POSTS.filter(p => p.week === week);
-              const weekNum   = parseInt(week.slice(1));
+              const weekPosts  = IG_POSTS.filter(p => p.week === week);
+              const weekNum    = parseInt(week.slice(1));
+              const collapsed  = collapsedWeeks.has(week);
+              const hasActive  = weekPosts.some(p => p.id === selectedId);
               return (
-                <div key={week} className="mb-3">
-                  <div className="px-2 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
-                    Week {weekNum}
-                  </div>
-                  {weekPosts.map(p => (
-                    <button
-                      key={p.id}
-                      onClick={() => selectPost(p.id)}
-                      className={cn(
-                        "w-full text-left px-3 py-2.5 rounded-lg mb-0.5 transition-all",
-                        selectedId === p.id
-                          ? "bg-[#E08040]/10 border border-[#E08040]/30"
-                          : "hover:bg-muted/50 border border-transparent",
-                      )}
-                    >
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className={cn(
-                          "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold border",
-                          TYPE_COLOR[p.type],
-                        )}>
-                          <TypeIcon type={p.type} />
-                          {p.day}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground">#{p.id}</span>
-                      </div>
-                      <p className="text-xs font-medium text-foreground leading-snug truncate">{p.topic}</p>
-                    </button>
-                  ))}
+                <div key={week} className="mb-1">
+                  <button
+                    onClick={() => toggleWeek(week)}
+                    className={cn(
+                      "w-full flex items-center justify-between px-2 py-1.5 rounded-md transition-colors hover:bg-muted/50 group",
+                      collapsed && hasActive && "bg-[#E08040]/8",
+                    )}
+                  >
+                    <span className={cn(
+                      "text-[10px] font-bold uppercase tracking-widest",
+                      collapsed ? "text-muted-foreground/40" : "text-muted-foreground/70",
+                    )}>
+                      Week {weekNum}
+                    </span>
+                    <ChevronDown className={cn(
+                      "w-3 h-3 text-muted-foreground/40 transition-transform duration-200",
+                      collapsed && "-rotate-90",
+                    )} />
+                  </button>
+                  {!collapsed && (
+                    <div className="mt-0.5 mb-2">
+                      {weekPosts.map(p => (
+                        <button
+                          key={p.id}
+                          onClick={() => selectPost(p.id)}
+                          className={cn(
+                            "w-full text-left px-3 py-2.5 rounded-lg mb-0.5 transition-all",
+                            selectedId === p.id
+                              ? "bg-[#E08040]/10 border border-[#E08040]/30"
+                              : "hover:bg-muted/50 border border-transparent",
+                          )}
+                        >
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className={cn(
+                              "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold border",
+                              TYPE_COLOR[p.type],
+                            )}>
+                              <TypeIcon type={p.type} />
+                              {p.day}
+                            </span>
+                            <span className="text-[10px] text-muted-foreground">#{p.id}</span>
+                          </div>
+                          <p className="text-xs font-medium text-foreground leading-snug truncate">{p.topic}</p>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               );
             })}
