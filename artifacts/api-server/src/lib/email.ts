@@ -800,6 +800,64 @@ export async function sendOpportunityDigestEmail(opts: {
   await send({ to: ADMIN_TO, subject, html, text });
 }
 
+// ─── Social posting reminder (admin) ─────────────────────────────────────────
+
+export interface SocialPostReminderOpts {
+  ig?: { week: string; day: string; topic: string; type: string };
+  li?: { week: number; date: string; hook: string; phase: string };
+}
+
+export async function sendSocialPostingReminder(opts: SocialPostReminderOpts): Promise<void> {
+  const { ig, li } = opts;
+  if (!ig && !li) return;
+
+  const STUDIO_BASE = `${APP_URL}/admin`;
+  const parts: string[] = [];
+  if (ig) parts.push(`📸 IG ${ig.week} ${ig.day}`);
+  if (li) parts.push(`💼 LI Week ${li.week}`);
+  const subject = `📅 Post today — ${parts.join(" · ")}`;
+
+  const igSection = ig ? `
+    <div style="background:#131929;border-radius:10px;padding:20px 24px;margin-bottom:20px;border:1px solid #2d3a50;">
+      <p style="margin:0 0 10px;color:#E08040;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">📸 Instagram &nbsp;·&nbsp; ${ig.week} &nbsp;·&nbsp; ${ig.day}</p>
+      <p style="margin:0 0 6px;color:#EAD9BE;font-size:16px;font-weight:600;line-height:1.4;">${ig.topic}</p>
+      <p style="margin:0 0 18px;color:#5a6a7a;font-size:12px;text-transform:uppercase;letter-spacing:0.8px;">${ig.type}</p>
+      <a href="${STUDIO_BASE}/instagram" style="display:inline-block;background:#E08040;color:#0D1225;font-weight:700;font-size:13px;padding:10px 20px;border-radius:7px;text-decoration:none;">Open Instagram Studio →</a>
+    </div>` : "";
+
+  const liSection = li ? `
+    <div style="background:#131929;border-radius:10px;padding:20px 24px;margin-bottom:20px;border:1px solid #2d3a50;">
+      <p style="margin:0 0 10px;color:#38bdf8;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">💼 LinkedIn &nbsp;·&nbsp; Week ${li.week} &nbsp;·&nbsp; ${li.date}</p>
+      <p style="margin:0 0 6px;color:#EAD9BE;font-size:16px;font-weight:600;line-height:1.5;">"${li.hook}"</p>
+      <p style="margin:0 0 18px;color:#5a6a7a;font-size:12px;text-transform:uppercase;letter-spacing:0.8px;">${li.phase}</p>
+      <a href="${STUDIO_BASE}/linkedin" style="display:inline-block;background:#38bdf8;color:#0D1225;font-weight:700;font-size:13px;padding:10px 20px;border-radius:7px;text-decoration:none;">Open LinkedIn Studio →</a>
+    </div>` : "";
+
+  const html = `<!DOCTYPE html>
+<html lang="en"><body style="margin:0;padding:0;background:#0D1225;font-family:'Helvetica Neue',Arial,sans-serif;color:#EAD9BE;">
+<table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:40px 20px;">
+<table width="560" cellpadding="0" cellspacing="0" style="background:#0f1730;border-radius:16px;overflow:hidden;border:1px solid #1e2a40;">
+<tr><td style="background:#E08040;padding:20px 32px;">
+  <h1 style="margin:0;color:#0D1225;font-size:18px;font-weight:800;letter-spacing:-0.3px;">Resilium &nbsp;·&nbsp; Social Studio</h1>
+</td></tr>
+<tr><td style="padding:32px;">
+  <h2 style="margin:0 0 6px;color:#EAD9BE;font-size:20px;font-weight:700;">Content due today 📅</h2>
+  <p style="margin:0 0 28px;color:#7a8a9a;font-size:13px;line-height:1.6;">Open the studio, export your graphic, and post. Takes about 5 minutes.</p>
+  ${igSection}
+  ${liSection}
+  <p style="margin:24px 0 0;color:#3a4a5a;font-size:11px;line-height:1.8;">Resilium admin system &nbsp;·&nbsp; automated content calendar reminder</p>
+</td></tr>
+</table>
+</td></tr></table></body></html>`;
+
+  const textLines: string[] = ["Content due today:\n"];
+  if (ig) textLines.push(`📸 Instagram ${ig.week} ${ig.day}: "${ig.topic}" (${ig.type})\n${STUDIO_BASE}/instagram\n`);
+  if (li) textLines.push(`💼 LinkedIn Week ${li.week} (${li.date}): "${li.hook}"\nPhase: ${li.phase}\n${STUDIO_BASE}/linkedin\n`);
+  textLines.push("\n— Resilium admin system");
+
+  await send({ to: ADMIN_TO, subject, html, text: textLines.join("\n") });
+}
+
 // ─── Blog Draft Ready (admin notification) ────────────────────────────────────
 
 export async function sendBlogDraftReadyEmail(opts: {

@@ -3,7 +3,7 @@ import { exec } from "child_process";
 import { promisify } from "util";
 import { db, subscriptionsTable, reportFeedbackTable, resilienceReportsTable, usersTable, emailDripQueueTable } from "@workspace/db";
 import { and, desc, eq, gte, inArray, isNull, lte, sql } from "drizzle-orm";
-import { sendAdminDigest, sendErrorAlert, sendReassessmentReminder, sendUserWeeklyDigest, sendE2eAssessmentReport, sendSiteAuditReport, sendDripDay2Email, sendDripDay5Email, sendDripDay9Email, sendDripDay14Email, sendDependencyAuditEmail, sendBlogDraftReadyEmail, sendOpportunityDigestEmail, type E2eCheckResult } from "./email.js";
+import { sendAdminDigest, sendErrorAlert, sendReassessmentReminder, sendUserWeeklyDigest, sendE2eAssessmentReport, sendSiteAuditReport, sendDripDay2Email, sendDripDay5Email, sendDripDay9Email, sendDripDay14Email, sendDependencyAuditEmail, sendBlogDraftReadyEmail, sendOpportunityDigestEmail, sendSocialPostingReminder, type E2eCheckResult } from "./email.js";
 import { runDatabaseBackup } from "./backup.js";
 import { sendPushNotificationsToUsers } from "./push.js";
 import { logger } from "./logger.js";
@@ -777,6 +777,120 @@ export async function runDependencyAudit(): Promise<void> {
 
 // ─── Start cron ───────────────────────────────────────────────────────────────
 
+// ─── Social posting reminder data ────────────────────────────────────────────
+
+// Instagram campaign: W1 starts May 19 2026 (Monday), 13 weeks, Mon/Wed/Fri/Sat cadence.
+// Each entry corresponds exactly to one post in instagram-data.ts.
+const IG_CAMPAIGN_START = new Date("2026-05-19T00:00:00Z");
+
+interface IGScheduleEntry { week: string; day: string; type: string; topic: string }
+const IG_SCHEDULE: IGScheduleEntry[] = [
+  { week: "W1",  day: "Mon", type: "carousel", topic: "6 dimensions of resilience" },
+  { week: "W2",  day: "Mon", type: "carousel", topic: "5 signs you're less prepared" },
+  { week: "W2",  day: "Wed", type: "single",   topic: "Score example: 34 vs 71" },
+  { week: "W2",  day: "Sat", type: "quote",    topic: "60% couldn't cover $1k" },
+  { week: "W3",  day: "Mon", type: "carousel", topic: "Job loss scenario" },
+  { week: "W3",  day: "Wed", type: "single",   topic: "3 questions" },
+  { week: "W3",  day: "Fri", type: "quote",    topic: "Preparation isn't pessimism" },
+  { week: "W4",  day: "Mon", type: "carousel", topic: "90-day plan" },
+  { week: "W4",  day: "Wed", type: "single",   topic: "Testimonial: score 41" },
+  { week: "W4",  day: "Fri", type: "quote",    topic: "Best time to prepare" },
+  { week: "W5",  day: "Mon", type: "carousel", topic: "Financial dimension deep-dive" },
+  { week: "W5",  day: "Wed", type: "single",   topic: "21-day savings stat" },
+  { week: "W5",  day: "Sat", type: "quote",    topic: "One income = one failure point" },
+  { week: "W6",  day: "Mon", type: "carousel", topic: "Is your career portable?" },
+  { week: "W6",  day: "Wed", type: "single",   topic: "3–6 month job search stat" },
+  { week: "W6",  day: "Fri", type: "quote",    topic: "Most recession-proof asset" },
+  { week: "W7",  day: "Mon", type: "carousel", topic: "Health resilience dimension" },
+  { week: "W7",  day: "Wed", type: "single",   topic: "1 in 4 skip medical care" },
+  { week: "W7",  day: "Sat", type: "quote",    topic: "Health is a resilience variable" },
+  { week: "W8",  day: "Mon", type: "carousel", topic: "Geographic flexibility" },
+  { week: "W8",  day: "Wed", type: "single",   topic: "54% no passport stat" },
+  { week: "W8",  day: "Fri", type: "quote",    topic: "Options require preparation" },
+  { week: "W9",  day: "Mon", type: "carousel", topic: "Mental resilience is the root" },
+  { week: "W9",  day: "Wed", type: "single",   topic: "Most expensive crisis quote" },
+  { week: "W9",  day: "Fri", type: "quote",    topic: "Mind must be stable" },
+  { week: "W10", day: "Mon", type: "carousel", topic: "Network as survival asset" },
+  { week: "W10", day: "Wed", type: "single",   topic: "10 people who'd go out of their way" },
+  { week: "W10", day: "Sat", type: "quote",    topic: "No one survives alone" },
+  { week: "W11", day: "Mon", type: "carousel", topic: "Emergency kit gaps" },
+  { week: "W11", day: "Wed", type: "single",   topic: "15-minute evacuation check" },
+  { week: "W11", day: "Sat", type: "quote",    topic: "Crisis doesn't give time to prepare" },
+  { week: "W12", day: "Mon", type: "carousel", topic: "Why I built Resilium" },
+  { week: "W12", day: "Wed", type: "single",   topic: "My score was 58" },
+  { week: "W12", day: "Fri", type: "quote",    topic: "Built for honesty not fear" },
+  { week: "W13", day: "Mon", type: "carousel", topic: "90-day results" },
+  { week: "W13", day: "Wed", type: "single",   topic: "Progress over perfection" },
+  { week: "W13", day: "Sat", type: "quote",    topic: "The version of you who prepared" },
+];
+
+// LinkedIn campaign: 32 weekly posts, every Monday May 25 → Dec 28 2026.
+// Dates match exactly the `date` field in linkedin-data.ts.
+interface LIScheduleEntry { week: number; date: string; hook: string; phase: string }
+const LI_SCHEDULE: LIScheduleEntry[] = [
+  { week: 1,  date: "May 25, 2026",      hook: "Most people think resilience is personality. Research says otherwise.",  phase: "Awareness" },
+  { week: 2,  date: "June 01, 2026",     hook: "The pandemic revealed how preparation changes outcomes.",                 phase: "Awareness" },
+  { week: 3,  date: "June 08, 2026",     hook: "Savings don't just buy comfort. They buy decision-making time.",         phase: "Awareness" },
+  { week: 4,  date: "June 15, 2026",     hook: "Pressure doesn't build character if it breaks capacity.",                phase: "Awareness" },
+  { week: 5,  date: "June 22, 2026",     hook: "The people who adapt fastest often recover fastest.",                    phase: "Awareness" },
+  { week: 6,  date: "June 29, 2026",     hook: "Transferable skills are modern insurance policies.",                     phase: "Awareness" },
+  { week: 7,  date: "July 06, 2026",     hook: "Calm is a strategic advantage during uncertainty.",                      phase: "Authority" },
+  { week: 8,  date: "July 13, 2026",     hook: "Resilience is rarely built alone.",                                      phase: "Authority" },
+  { week: 9,  date: "July 20, 2026",     hook: "Location flexibility matters more than people realize.",                 phase: "Authority" },
+  { week: 10, date: "July 27, 2026",     hook: "Preparedness is not paranoia. It's reducing avoidable fragility.",       phase: "Authority" },
+  { week: 11, date: "August 03, 2026",   hook: "You shouldn't have to trade privacy for self-awareness.",                phase: "Authority" },
+  { week: 12, date: "August 10, 2026",   hook: "Resilium was built on peer-reviewed resilience research.",               phase: "Authority" },
+  { week: 13, date: "August 17, 2026",   hook: "Most people think resilience is personality. Research says otherwise.",  phase: "Authority" },
+  { week: 14, date: "August 24, 2026",   hook: "The pandemic revealed how preparation changes outcomes.",                 phase: "Authority" },
+  { week: 15, date: "August 31, 2026",   hook: "Savings don't just buy comfort. They buy decision-making time.",         phase: "Authority" },
+  { week: 16, date: "September 07, 2026",hook: "Pressure doesn't build character if it breaks capacity.",                phase: "Authority" },
+  { week: 17, date: "September 14, 2026",hook: "The people who adapt fastest often recover fastest.",                    phase: "Authority" },
+  { week: 18, date: "September 21, 2026",hook: "Transferable skills are modern insurance policies.",                     phase: "Authority" },
+  { week: 19, date: "September 28, 2026",hook: "Calm is a strategic advantage during uncertainty.",                      phase: "Authority" },
+  { week: 20, date: "October 05, 2026",  hook: "Resilience is rarely built alone.",                                      phase: "Conversion" },
+  { week: 21, date: "October 12, 2026",  hook: "Location flexibility matters more than people realize.",                 phase: "Conversion" },
+  { week: 22, date: "October 19, 2026",  hook: "Preparedness is not paranoia. It's reducing avoidable fragility.",       phase: "Conversion" },
+  { week: 23, date: "October 26, 2026",  hook: "You shouldn't have to trade privacy for self-awareness.",                phase: "Conversion" },
+  { week: 24, date: "November 02, 2026", hook: "Resilium was built on peer-reviewed resilience research.",               phase: "Conversion" },
+  { week: 25, date: "November 09, 2026", hook: "Most people think resilience is personality. Research says otherwise.",  phase: "Conversion" },
+  { week: 26, date: "November 16, 2026", hook: "The pandemic revealed how preparation changes outcomes.",                 phase: "Conversion" },
+  { week: 27, date: "November 23, 2026", hook: "Savings don't just buy comfort. They buy decision-making time.",         phase: "Conversion" },
+  { week: 28, date: "November 30, 2026", hook: "Pressure doesn't build character if it breaks capacity.",                phase: "Conversion" },
+  { week: 29, date: "December 07, 2026", hook: "The people who adapt fastest often recover fastest.",                    phase: "Conversion" },
+  { week: 30, date: "December 14, 2026", hook: "Transferable skills are modern insurance policies.",                     phase: "Conversion" },
+  { week: 31, date: "December 21, 2026", hook: "Calm is a strategic advantage during uncertainty.",                      phase: "Conversion" },
+  { week: 32, date: "December 28, 2026", hook: "Resilience is rarely built alone.",                                      phase: "Conversion" },
+];
+
+const DOW_TO_DAY: Record<number, string> = { 1: "Mon", 3: "Wed", 5: "Fri", 6: "Sat" };
+
+async function runSocialPostingReminders(): Promise<void> {
+  const now = new Date();
+
+  // ── Instagram: calculate campaign week (W1-W13) ──────────────────────────
+  const msSinceStart = now.getTime() - IG_CAMPAIGN_START.getTime();
+  const daysSinceStart = Math.floor(msSinceStart / (1000 * 60 * 60 * 24));
+  const igWeekNum = Math.floor(daysSinceStart / 7) + 1;
+  const weekLabel = `W${igWeekNum}`;
+  const todayDay = DOW_TO_DAY[now.getUTCDay()];
+  const igPost = (igWeekNum >= 1 && igWeekNum <= 13 && todayDay)
+    ? IG_SCHEDULE.find(p => p.week === weekLabel && p.day === todayDay)
+    : undefined;
+
+  // ── LinkedIn: match by exact ISO date ────────────────────────────────────
+  const todayISO = now.toISOString().slice(0, 10);
+  const liPost = LI_SCHEDULE.find(p => new Date(p.date).toISOString().slice(0, 10) === todayISO);
+
+  if (!igPost && !liPost) return;
+
+  logger.info({ igWeek: weekLabel, igDay: todayDay, liMatch: !!liPost }, "Social posting reminder firing");
+
+  await sendSocialPostingReminder({
+    ig: igPost ? { week: igPost.week, day: igPost.day, topic: igPost.topic, type: igPost.type } : undefined,
+    li: liPost ? { week: liPost.week, date: liPost.date, hook: liPost.hook, phase: liPost.phase } : undefined,
+  });
+}
+
 export function startCron(): void {
   // Every Monday at 07:00 UTC — weekly admin digest
   cron.schedule("0 7 * * 1", () => {
@@ -833,5 +947,13 @@ export function startCron(): void {
     runOpportunityScan().catch(() => {});
   }, { timezone: "UTC" });
 
-  logger.info("Cron jobs scheduled (admin digest: Mon 07:00, user digest: Sun 18:00, 7d reminders: daily 09:00, 30d reminders: Mon 08:00, e2e test: daily 06:00, site audit: daily 07:00, drip: hourly :15, db-backup: daily 02:30, dep-audit: 1st of month 09:00 UTC, blog-gen: Mon 08:00 UTC, reddit-scan: daily 10:00 UTC)");
+  // Mon/Wed/Fri/Sat at 07:30 UTC (10:30 Bucharest EEST) — social posting reminder
+  // Instagram: Mon/Wed/Fri/Sat within the 13-week campaign (W1 May 19 → W13 Aug 10 2026)
+  // LinkedIn: every Monday May 25 → Dec 28 2026 (matched by exact date)
+  // On Mondays both platforms are checked; a single combined email is sent when both are due.
+  cron.schedule("30 7 * * 1,3,5,6", () => {
+    runSocialPostingReminders().catch(() => {});
+  }, { timezone: "UTC" });
+
+  logger.info("Cron jobs scheduled (admin digest: Mon 07:00, user digest: Sun 18:00, 7d reminders: daily 09:00, 30d reminders: Mon 08:00, e2e test: daily 06:00, site audit: daily 07:00, drip: hourly :15, db-backup: daily 02:30, dep-audit: 1st of month 09:00 UTC, blog-gen: Mon 08:00 UTC, reddit-scan: daily 10:00 UTC, social-reminder: Mon/Wed/Fri/Sat 07:30 UTC)");
 }
