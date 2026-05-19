@@ -111,73 +111,60 @@ function LinkedInFrame({ post, isFounder = false, founderTitle = "", founderBody
         </div>
 
         {/* Center: Hook / title */}
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 28 }}>
-          {/* Phase label */}
-          {!isFounder && (
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <div style={{ width: 40, height: 3, background: accentColor, borderRadius: 2 }} />
-              <span style={{ color: accentColor, fontSize: 22, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase" }}>
-                {phase} — {post?.phaseGoal}
-              </span>
-            </div>
-          )}
-
-          {isFounder && (
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <div style={{ width: 40, height: 3, background: AMBER, borderRadius: 2 }} />
-              <span style={{ color: AMBER, fontSize: 22, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase" }}>
-                Founder Thought-Leadership
-              </span>
-            </div>
-          )}
-
-          {/* Hook / title — main text */}
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", position: "relative" }}>
+          {/* 40% opacity readability overlay behind the text block */}
           <div style={{
-            fontSize: hook.length > 60 ? 64 : 74,
-            fontWeight: 800,
-            color: CREAM,
-            lineHeight: 1.2,
-            whiteSpace: "pre-line",
-          }}>
-            {hook}
-          </div>
+            position: "absolute",
+            inset: "-36px -44px",
+            background: "rgba(13, 18, 37, 0.40)",
+            borderRadius: 20,
+          }} />
 
-          {/* Founder: body preview */}
-          {isFounder && bodyPreview && (
-            <div style={{
-              fontSize: 34,
-              color: CREAM,
-              opacity: 0.65,
-              lineHeight: 1.55,
-              whiteSpace: "pre-line",
-              fontWeight: 400,
-            }}>
-              {bodyPreview}
-            </div>
-          )}
-
-          {/* Graphic direction brief */}
-          {!isFounder && post?.graphicDirection && (
-            <div style={{
-              background: "rgba(224,128,64,0.10)",
-              border: `1px solid ${AMBER}40`,
-              borderRadius: 12,
-              padding: "18px 24px",
-              display: "flex",
-              alignItems: "flex-start",
-              gap: 14,
-            }}>
-              <span style={{ color: AMBER, fontSize: 22, marginTop: 2 }}>✦</span>
-              <div>
-                <span style={{ color: AMBER, fontSize: 18, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1 }}>
-                  Canva direction:{" "}
-                </span>
-                <span style={{ color: CREAM, fontSize: 22, opacity: 0.8, lineHeight: 1.4 }}>
-                  {post.graphicDirection}
+          <div style={{ position: "relative", display: "flex", flexDirection: "column", gap: 28 }}>
+            {/* Phase label */}
+            {!isFounder && (
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div style={{ width: 40, height: 3, background: accentColor, borderRadius: 2 }} />
+                <span style={{ color: accentColor, fontSize: 22, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase" }}>
+                  {phase} — {post?.phaseGoal}
                 </span>
               </div>
+            )}
+
+            {isFounder && (
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div style={{ width: 40, height: 3, background: AMBER, borderRadius: 2 }} />
+                <span style={{ color: AMBER, fontSize: 22, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase" }}>
+                  Founder Thought-Leadership
+                </span>
+              </div>
+            )}
+
+            {/* Hook / title — main text */}
+            <div style={{
+              fontSize: hook.length > 60 ? 64 : 74,
+              fontWeight: 800,
+              color: CREAM,
+              lineHeight: 1.2,
+              whiteSpace: "pre-line",
+            }}>
+              {hook}
             </div>
-          )}
+
+            {/* Founder: body preview */}
+            {isFounder && bodyPreview && (
+              <div style={{
+                fontSize: 34,
+                color: CREAM,
+                opacity: 0.65,
+                lineHeight: 1.55,
+                whiteSpace: "pre-line",
+                fontWeight: 400,
+              }}>
+                {bodyPreview}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Bottom row: CTA + brand tagline */}
@@ -430,12 +417,12 @@ export default function AdminLinkedInPage() {
                 </p>
               </div>
 
-              {/* Canva direction + hook */}
+              {/* Internal design notes + hook */}
               <div className="flex-1 min-w-0 space-y-4">
                 {isCalendar && (
-                  <div className="bg-[#E08040]/5 border border-[#E08040]/20 rounded-xl p-4">
-                    <p className="text-[10px] font-bold text-[#E08040] uppercase tracking-widest mb-2">
-                      ✦ Canva graphic direction
+                  <div className="bg-muted/40 border border-border/50 rounded-xl p-4">
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">
+                      🔒 Internal design notes — not on graphic
                     </p>
                     <p className="text-sm text-foreground leading-relaxed">{post.graphicDirection}</p>
                     <p className="text-xs text-muted-foreground mt-2">
