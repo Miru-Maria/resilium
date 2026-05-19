@@ -7,7 +7,7 @@ import {
   Loader2, LayoutDashboard, Smartphone, Shield, LogOut,
   Users, KeyRound, Activity, FolderLock,
   Star, BarChart2, FileText, LayoutTemplate, Radar, Rocket,
-  BookOpen, Code2, Layers, Palette, ChevronDown, Newspaper, TrendingUp, FlaskConical,
+  BookOpen, Code2, Layers, Palette, ChevronDown, Newspaper, TrendingUp, FlaskConical, Instagram,
 } from "lucide-react";
 
 // ── Admin Error Boundary ─────────────────────────────────────────────────────
@@ -39,7 +39,7 @@ class AdminErrorBoundary extends Component<{ children: ReactNode }, AdminErrorBo
 
 export interface AdminLayoutProps {
   children: React.ReactNode;
-  activeSection?: "dashboard" | "testimonials" | "mobile" | "gdpr" | "users" | "marketing" | "security" | "monitoring" | "documents" | "blog" | "growth";
+  activeSection?: "dashboard" | "testimonials" | "mobile" | "gdpr" | "users" | "marketing" | "security" | "monitoring" | "documents" | "blog" | "growth" | "instagram";
 }
 
 /** @deprecated Token is now stored in an httpOnly cookie — no longer readable from JS. */
@@ -113,6 +113,7 @@ export function AdminLayout({ children, activeSection }: AdminLayoutProps) {
     { href: "/admin/mobile",     label: "Mobile",               icon: Smartphone,       key: "mobile" },
     { href: "/admin/testimonials",label: "Testimonials",        icon: Star,             key: "testimonials" },
     { href: "/admin/marketing",  label: "Marketing",            icon: Activity,         key: "marketing" },
+    { href: "/admin/instagram",  label: "Instagram Studio",     icon: Instagram,        key: "instagram" },
   ];
 
   const isDocuments = activeSection === "documents";

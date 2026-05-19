@@ -46,6 +46,7 @@ import BlogPage from "@/pages/blog";
 import BlogPostPage from "@/pages/blog-post";
 import AdminBlogPage from "@/pages/admin/blog";
 import AdminGrowthPage from "@/pages/admin/growth";
+import AdminInstagramPage from "@/pages/admin/instagram";
 import ScenariosPage from "@/pages/scenarios";
 import PlanPage from "@/pages/plan";
 import { AnnouncementBanner } from "@/components/announcement-banner";
@@ -349,6 +350,7 @@ function Router() {
       <Route path="/admin/monitoring" component={AdminMonitoringPage} />
       <Route path="/admin/blog" component={AdminBlogPage} />
       <Route path="/admin/growth" component={AdminGrowthPage} />
+      <Route path="/admin/instagram" component={AdminInstagramPage} />
       {/* Redirects for consolidated pages */}
       <Route path="/admin/analytics" component={() => <RedirectTo to="/admin/dashboard?tab=traffic" />} />
       <Route path="/admin/ux-testing" component={() => <RedirectTo to="/admin/monitoring" />} />
