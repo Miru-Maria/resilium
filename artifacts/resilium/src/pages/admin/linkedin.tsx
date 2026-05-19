@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { toPng } from "html-to-image";
 import { AdminLayout } from "@/pages/admin/layout";
 import {
-  LI_POSTS, LI_BODY, LI_CTA, FOUNDER_POSTS,
+  LI_POSTS, LI_CTA, FOUNDER_POSTS,
   QUARTER_COLOR, PHASE_COLOR,
   type LIPost,
 } from "@/pages/admin/linkedin-data";
@@ -263,7 +263,7 @@ export default function AdminLinkedInPage() {
   };
 
   const fullPostCopy = isCalendar
-    ? `${post.hook}\n\n${LI_BODY}\n\n${LI_CTA}`
+    ? `${post.hook}\n\n${post.body}\n\n${LI_CTA}`
     : `${founderPost.body}\n\n${founderPost.cta}`;
 
   const quarters = Array.from(new Set(LI_POSTS.map(p => p.quarter)));
@@ -480,10 +480,10 @@ export default function AdminLinkedInPage() {
             <div className="bg-background border border-border/60 rounded-xl p-4 space-y-3">
               <div className="flex items-center justify-between">
                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Post body</p>
-                <CopyBtn text={isCalendar ? LI_BODY : founderPost.body} label="Copy body" />
+                <CopyBtn text={isCalendar ? post.body : founderPost.body} label="Copy body" />
               </div>
               <p className="text-sm text-foreground leading-relaxed whitespace-pre-line">
-                {isCalendar ? LI_BODY : founderPost.body}
+                {isCalendar ? post.body : founderPost.body}
               </p>
             </div>
 
