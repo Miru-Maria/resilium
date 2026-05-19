@@ -145,26 +145,25 @@ function FrameContent({ post, slideIndex, colors }: FrameProps) {
       {/* ── CTA slide ── */}
       {isCarousel && slide?.isCta && (
         <div style={{ position: "absolute", inset: 0, padding: 80, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-          <div style={{ textAlign: "right", color: colors.accent, fontSize: 28, opacity: 0.7, fontWeight: 600 }}>
-            {slideIndex + 1} / {totalSlides}
-          </div>
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 20 }}>
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 24 }}>
             {slide.lines.map((line, i) => {
               const isUrl = line.includes("resilium-platform.com");
+              const isTitle = i === 0;
               return (
                 <div key={i} style={{
-                  fontSize: isUrl ? 44 : 42,
-                  fontWeight: isUrl ? 800 : 500,
-                  color: isUrl ? colors.accent : colors.text,
+                  fontSize: isUrl ? 44 : isTitle ? 60 : 42,
+                  fontWeight: isUrl || isTitle ? 800 : 400,
+                  color: isUrl || isTitle ? colors.accent : colors.text,
                   lineHeight: 1.3,
                   whiteSpace: "pre-line",
+                  opacity: isUrl || isTitle ? 1 : 0.9,
                 }}>{line}</div>
               );
             })}
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <LogoMark size={32} accent={colors.accent} />
-            <span style={{ color: colors.text, opacity: 0.5, fontSize: 24, letterSpacing: 1 }}>RESILIUM</span>
+            <span style={{ color: colors.text, opacity: 0.6, fontSize: 24, letterSpacing: 1 }}>RESILIUM</span>
           </div>
         </div>
       )}
@@ -172,17 +171,8 @@ function FrameContent({ post, slideIndex, colors }: FrameProps) {
       {/* ── Content slide ── */}
       {isCarousel && slide && !slide.isHook && !slide.isCta && (
         <div style={{ position: "absolute", inset: 0, padding: 80, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-          <div style={{ textAlign: "right", color: colors.accent, fontSize: 26, opacity: 0.6, fontWeight: 600 }}>
-            {slideIndex + 1} / {totalSlides}
-          </div>
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", position: "relative" }}>
-            <div style={{
-              position: "absolute",
-              inset: "-32px -40px",
-              background: colors.overlay,
-              borderRadius: 16,
-            }} />
-            <div style={{ position: "relative", display: "flex", flexDirection: "column", gap: 24 }}>
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
               {slide.lines.map((line, i) => (
                 <div key={i} style={{
                   fontSize: i === 0 ? 60 : 40,
@@ -197,7 +187,7 @@ function FrameContent({ post, slideIndex, colors }: FrameProps) {
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <LogoMark size={32} accent={colors.accent} />
-            <span style={{ color: colors.text, opacity: 0.4, fontSize: 24, letterSpacing: 1 }}>RESILIUM</span>
+            <span style={{ color: colors.text, opacity: 0.6, fontSize: 24, letterSpacing: 1 }}>RESILIUM</span>
           </div>
         </div>
       )}
