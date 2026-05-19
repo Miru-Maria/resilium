@@ -81,12 +81,8 @@ function LinkedInFrame({
   founderBody?:  string;
   colors:        ColorStory;
 }) {
-  const hook      = post?.hook ?? founderTitle;
-  const phase     = post?.phase ?? "Authority";
-  const quarter   = post?.quarter ?? "";
-  const weekLabel = post ? `Week ${post.week}` : "Founder Series";
-  const dateLabel = post?.date ?? "";
-
+  const hook        = post?.hook ?? founderTitle;
+  const phase       = post?.phase ?? "Authority";
   const phaseColors: Record<string, string> = {
     Awareness:  "#38bdf8",
     Authority:  "#a78bfa",
@@ -117,56 +113,19 @@ function LinkedInFrame({
       {/* Content */}
       <div style={{ position: "absolute", inset: 0, padding: 80, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
 
-        {/* Top: logo + quarter/week badge */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-            <LogoMark size={42} accent={colors.accent} />
-            <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              <span style={{ color: colors.accent, fontWeight: 700, fontSize: 28, letterSpacing: 2, textTransform: "uppercase" }}>RESILIUM</span>
-              <span style={{ color: colors.text, opacity: 0.5, fontSize: 18, letterSpacing: 1 }}>resilium-platform.com</span>
-            </div>
-          </div>
-
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8 }}>
-            {quarter && (
-              <div style={{
-                background: `${accentColor}22`,
-                border: `1.5px solid ${accentColor}55`,
-                borderRadius: 8, padding: "6px 16px",
-                color: accentColor, fontSize: 22, fontWeight: 700, letterSpacing: 1,
-              }}>
-                {quarter}
-              </div>
-            )}
-            <div style={{
-              background: "rgba(255,255,255,0.08)", borderRadius: 8, padding: "5px 14px",
-              color: colors.text, fontSize: 20, opacity: 0.7,
-            }}>
-              {isFounder ? "Founder Series" : weekLabel}{dateLabel ? ` · ${dateLabel}` : ""}
-            </div>
+        {/* Top: logo only */}
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <LogoMark size={42} accent={colors.accent} />
+          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <span style={{ color: colors.accent, fontWeight: 700, fontSize: 28, letterSpacing: 2, textTransform: "uppercase" }}>RESILIUM</span>
+            <span style={{ color: colors.text, opacity: 0.5, fontSize: 18, letterSpacing: 1 }}>resilium-platform.com</span>
           </div>
         </div>
 
-        {/* Centre: hook + phase label */}
+        {/* Centre: hook + decorative accent line */}
         <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
-            {!isFounder && (
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <div style={{ width: 40, height: 3, background: accentColor, borderRadius: 2 }} />
-                <span style={{ color: accentColor, fontSize: 22, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase" }}>
-                  {phase} — {post?.phaseGoal}
-                </span>
-              </div>
-            )}
-
-            {isFounder && (
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <div style={{ width: 40, height: 3, background: colors.accent, borderRadius: 2 }} />
-                <span style={{ color: colors.accent, fontSize: 22, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase" }}>
-                  Founder Thought-Leadership
-                </span>
-              </div>
-            )}
+            <div style={{ width: 40, height: 3, background: accentColor, borderRadius: 2 }} />
 
             <div style={{
               fontSize: hook.length > 60 ? 64 : 74,
