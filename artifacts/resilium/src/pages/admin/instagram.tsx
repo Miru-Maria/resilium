@@ -136,17 +136,26 @@ function FrameContent({ post, slideIndex }: FrameProps) {
           <div style={{ textAlign: "right", color: AMBER, fontSize: 26, opacity: 0.6, fontWeight: 600 }}>
             {slideIndex + 1} / {totalSlides}
           </div>
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 24 }}>
-            {slide.lines.map((line, i) => (
-              <div key={i} style={{
-                fontSize: i === 0 ? 60 : 40,
-                fontWeight: i === 0 ? 800 : 400,
-                color: i === 0 ? AMBER : CREAM,
-                lineHeight: 1.4,
-                whiteSpace: "pre-line",
-                opacity: i === 0 ? 1 : 0.9,
-              }}>{line}</div>
-            ))}
+          {/* Text area with 40% opacity readability overlay */}
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", position: "relative" }}>
+            <div style={{
+              position: "absolute",
+              inset: "-32px -40px",
+              background: "rgba(13, 18, 37, 0.4)",
+              borderRadius: 16,
+            }} />
+            <div style={{ position: "relative", display: "flex", flexDirection: "column", gap: 24 }}>
+              {slide.lines.map((line, i) => (
+                <div key={i} style={{
+                  fontSize: i === 0 ? 60 : 40,
+                  fontWeight: i === 0 ? 800 : 400,
+                  color: i === 0 ? AMBER : CREAM,
+                  lineHeight: 1.4,
+                  whiteSpace: "pre-line",
+                  opacity: i === 0 ? 1 : 0.9,
+                }}>{line}</div>
+              ))}
+            </div>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <div style={{ width: 32, height: 32, borderRadius: 6, background: AMBER, display: "flex", alignItems: "center", justifyContent: "center" }}>
