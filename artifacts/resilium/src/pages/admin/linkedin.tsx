@@ -71,6 +71,23 @@ function LogoMark({ size = 42, accent }: { size?: number; accent: string }) {
   );
 }
 
+// ─── Visual treatment system ───────────────────────────────────────────────────
+type Treatment = "standard" | "hero" | "data" | "quote" | "split" | "geometric";
+
+const TREATMENT_MAP: Record<number, Treatment> = {
+  1:  "standard",  2:  "hero",      3:  "geometric",
+  4:  "data",      5:  "quote",     6:  "split",
+  7:  "standard",  8:  "quote",     9:  "hero",
+  10: "geometric", 11: "data",      12: "data",
+  13: "split",     14: "data",      15: "data",
+  16: "data",      17: "hero",      18: "quote",
+  19: "standard",  20: "hero",      21: "split",
+  22: "geometric", 23: "data",      24: "quote",
+  25: "standard",  26: "data",      27: "hero",
+  28: "data",      29: "geometric", 30: "split",
+  31: "quote",     32: "hero",
+};
+
 // ─── Branded LinkedIn graphic ─────────────────────────────────────────────────
 function LinkedInFrame({
   post, isFounder = false, founderTitle = "", founderBody = "", colors,
@@ -89,76 +106,152 @@ function LinkedInFrame({
     Conversion: colors.accent,
   };
   const accentColor = phaseColors[phase] ?? colors.accent;
+  const treatment: Treatment = isFounder ? "standard" : (TREATMENT_MAP[post?.id ?? 1] ?? "standard");
 
   const bodyPreview = isFounder
     ? founderBody.split("\n").filter(Boolean).slice(0, 3).join("\n")
     : "";
 
-  return (
+  const hookSize = hook.length > 70 ? 58 : hook.length > 55 ? 64 : 74;
+
+  // ─── Shared full-bleed content overlay ──────────────────────────────────────
+  const FullBleedContent = () => (
     <div style={{
-      width: FRAME_SIZE, height: FRAME_SIZE,
-      position: "relative", overflow: "hidden",
-      fontFamily: FONT, backgroundColor: colors.bg,
+      position: "absolute", inset: 0, padding: 80,
+      display: "flex", flexDirection: "column", justifyContent: "space-between",
     }}>
-      {/* Background image */}
-      <img
-        src={`${BASE}/instagram/bg-single-image.png`}
-        alt="" crossOrigin="anonymous"
-        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
-      />
-
-      {/* Gradient overlay */}
-      <div style={{ position: "absolute", inset: 0, background: colors.gradient }} />
-
-      {/* Content */}
-      <div style={{ position: "absolute", inset: 0, padding: 80, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-
-        {/* Top: logo only */}
-        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          <LogoMark size={42} accent={colors.accent} />
-          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <span style={{ color: colors.accent, fontWeight: 700, fontSize: 28, letterSpacing: 2, textTransform: "uppercase" }}>RESILIUM</span>
-            <span style={{ color: colors.text, opacity: 0.5, fontSize: 18, letterSpacing: 1 }}>resilium-platform.com</span>
-          </div>
-        </div>
-
-        {/* Centre: hook + decorative accent line */}
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
-            <div style={{ width: 40, height: 3, background: accentColor, borderRadius: 2 }} />
-
-            <div style={{
-              fontSize: hook.length > 60 ? 64 : 74,
-              fontWeight: 800, color: colors.text,
-              lineHeight: 1.2, whiteSpace: "pre-line",
-            }}>
-              {hook}
-            </div>
-
-            {isFounder && bodyPreview && (
-              <div style={{
-                fontSize: 34, color: colors.text, opacity: 0.65,
-                lineHeight: 1.55, whiteSpace: "pre-line", fontWeight: 400,
-              }}>
-                {bodyPreview}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Bottom: CTA + tagline */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div style={{
-            background: colors.accent, borderRadius: 10, padding: "14px 30px",
-            color: colors.bg, fontWeight: 800, fontSize: 26, letterSpacing: 0.5,
-          }}>
-            Take the free assessment →
-          </div>
-          <span style={{ color: colors.text, opacity: 0.4, fontSize: 20, letterSpacing: 1 }}>
-            Calm. Grounded. Intelligent.
-          </span>
+      <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+        <LogoMark size={42} accent={colors.accent} />
+        <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <span style={{ color: colors.accent, fontWeight: 700, fontSize: 28, letterSpacing: 2, textTransform: "uppercase" }}>RESILIUM</span>
+          <span style={{ color: colors.text, opacity: 0.5, fontSize: 18, letterSpacing: 1 }}>resilium-platform.com</span>
         </div>
       </div>
+
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
+          <div style={{ width: 40, height: 3, background: accentColor, borderRadius: 2 }} />
+          <div style={{ fontSize: hookSize, fontWeight: 800, color: colors.text, lineHeight: 1.2, whiteSpace: "pre-line" }}>
+            {hook}
+          </div>
+          {isFounder && bodyPreview && (
+            <div style={{ fontSize: 34, color: colors.text, opacity: 0.65, lineHeight: 1.55, whiteSpace: "pre-line", fontWeight: 400 }}>
+              {bodyPreview}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ background: colors.accent, borderRadius: 10, padding: "14px 30px", color: colors.bg, fontWeight: 800, fontSize: 26, letterSpacing: 0.5 }}>
+          Take the free assessment →
+        </div>
+        <span style={{ color: colors.text, opacity: 0.4, fontSize: 20, letterSpacing: 1 }}>
+          Calm. Grounded. Intelligent.
+        </span>
+      </div>
+    </div>
+  );
+
+  // ─── Split treatment — structurally different layout ─────────────────────────
+  if (treatment === "split") {
+    return (
+      <div style={{ width: FRAME_SIZE, height: FRAME_SIZE, position: "relative", overflow: "hidden", fontFamily: FONT, backgroundColor: colors.bg, display: "flex" }}>
+
+        {/* Left accent panel */}
+        <div style={{ width: 340, height: "100%", flexShrink: 0, background: accentColor, position: "relative" }}>
+          <div style={{ position: "absolute", top: 80, left: 0, right: 0, display: "flex", justifyContent: "center" }}>
+            <LogoMark size={56} accent={colors.bg} />
+          </div>
+          {/* Vertical phase label */}
+          <div style={{ position: "absolute", bottom: 90, left: 0, right: 0, display: "flex", justifyContent: "center" }}>
+            <span style={{ writingMode: "vertical-rl", textOrientation: "mixed", transform: "rotate(180deg)", fontSize: 20, fontWeight: 700, letterSpacing: 12, color: colors.bg, opacity: 0.22, textTransform: "uppercase" }}>
+              {phase}
+            </span>
+          </div>
+          {/* Decorative circle */}
+          <div style={{ position: "absolute", bottom: -140, left: -140, width: 520, height: 520, borderRadius: "50%", background: colors.bg, opacity: 0.08 }} />
+        </div>
+
+        {/* Right dark panel */}
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between", padding: "80px 70px" }}>
+          <div>
+            <span style={{ color: accentColor, fontSize: 16, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", opacity: 0.7 }}>resilium-platform.com</span>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
+            <div style={{ width: 40, height: 3, background: accentColor, borderRadius: 2 }} />
+            <div style={{ fontSize: hook.length > 60 ? 56 : 64, fontWeight: 800, color: colors.text, lineHeight: 1.2 }}>
+              {hook}
+            </div>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+            <div style={{ background: accentColor, borderRadius: 10, padding: "14px 28px", color: colors.bg, fontWeight: 800, fontSize: 23, alignSelf: "flex-start" }}>
+              Take the free assessment →
+            </div>
+            <span style={{ color: colors.text, opacity: 0.35, fontSize: 17, letterSpacing: 1 }}>Calm. Grounded. Intelligent.</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ─── Full-bleed treatments ────────────────────────────────────────────────────
+  const bgSrc: Record<Treatment, string> = {
+    standard: `${BASE}/instagram/bg-single-image.png`,
+    hero:     `${BASE}/bg-hero.png`,
+    data:     `${BASE}/instagram/bg-carousel-dark.png`,
+    quote:    `${BASE}/bg-quote.png`,
+    geometric:`${BASE}/instagram/bg-carousel-dark.png`,
+    split:    "",
+  };
+  const bgOpacity: Record<Treatment, number> = {
+    standard: 1, hero: 1, data: 0.30, quote: 1, geometric: 0.18, split: 1,
+  };
+  const overlayGradient: Record<Treatment, string> = {
+    standard: colors.gradient,
+    hero:     `linear-gradient(180deg, rgba(0,0,0,0.1) 0%, ${colors.bg}bb 65%, ${colors.bg}ee 100%)`,
+    data:     `linear-gradient(160deg, ${colors.bg}80 0%, ${colors.bg}d0 100%)`,
+    quote:    colors.gradient,
+    geometric:`linear-gradient(160deg, ${colors.bg}70 0%, ${colors.bg}cc 100%)`,
+    split:    "",
+  };
+
+  return (
+    <div style={{ width: FRAME_SIZE, height: FRAME_SIZE, position: "relative", overflow: "hidden", fontFamily: FONT, backgroundColor: colors.bg }}>
+
+      {/* Background image */}
+      <img
+        src={bgSrc[treatment]} alt="" crossOrigin="anonymous"
+        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", opacity: bgOpacity[treatment] }}
+      />
+
+      {/* Data treatment: horizontal grid lines + left accent bar */}
+      {treatment === "data" && <>
+        {Array.from({ length: 14 }).map((_, i) => (
+          <div key={i} style={{ position: "absolute", top: `${Math.round((i + 1) * 100 / 15)}%`, left: 0, right: 0, height: 1, background: accentColor, opacity: 0.12 }} />
+        ))}
+        <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 8, background: accentColor }} />
+      </>}
+
+      {/* Quote treatment: giant decorative quotation mark */}
+      {treatment === "quote" && (
+        <div style={{ position: "absolute", top: -100, left: 40, fontSize: 640, fontWeight: 900, color: accentColor, opacity: 0.07, lineHeight: 1, userSelect: "none", fontFamily: "Georgia, 'Times New Roman', serif" }}>
+          "
+        </div>
+      )}
+
+      {/* Geometric treatment: large circles */}
+      {treatment === "geometric" && <>
+        <div style={{ position: "absolute", top: -240, right: -240, width: 760, height: 760, borderRadius: "50%", background: accentColor, opacity: 0.08 }} />
+        <div style={{ position: "absolute", bottom: -180, left: -140, width: 540, height: 540, borderRadius: "50%", border: `3px solid ${accentColor}`, opacity: 0.13, background: "transparent" }} />
+        <div style={{ position: "absolute", top: "40%", right: 80, width: 110, height: 110, borderRadius: "50%", border: `2px solid ${accentColor}`, opacity: 0.20, background: "transparent" }} />
+      </>}
+
+      {/* Gradient overlay */}
+      <div style={{ position: "absolute", inset: 0, background: overlayGradient[treatment] }} />
+
+      {/* Content */}
+      <FullBleedContent />
     </div>
   );
 }
