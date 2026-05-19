@@ -5,7 +5,7 @@ const router: IRouter = Router();
 
 router.post("/login", (req, res) => {
   const { username, password } = req.body ?? {};
-  const ADMIN_USERNAME = process.env.ADMIN_USERNAME;
+  const ADMIN_USERNAME = process.env.ADMIN_USERNAME || process.env.RESILIUM_ADMIN_USERNAME;
   const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
   if (!ADMIN_USERNAME || !ADMIN_PASSWORD) {
