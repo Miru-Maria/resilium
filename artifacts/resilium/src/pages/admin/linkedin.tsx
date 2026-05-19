@@ -148,13 +148,8 @@ function LinkedInFrame({
         </div>
 
         {/* Centre: hook + phase label */}
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", position: "relative" }}>
-          <div style={{
-            position: "absolute", inset: "-36px -44px",
-            background: colors.overlay, borderRadius: 20,
-          }} />
-
-          <div style={{ position: "relative", display: "flex", flexDirection: "column", gap: 28 }}>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
             {!isFounder && (
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                 <div style={{ width: 40, height: 3, background: accentColor, borderRadius: 2 }} />
