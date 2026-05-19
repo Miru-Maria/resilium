@@ -824,42 +824,42 @@ const IG_SCHEDULE: IGScheduleEntry[] = [
   { week: "W13", day: "Sat", type: "quote",    topic: "The version of you who prepared" },
 ];
 
-// LinkedIn campaign: 32 weekly posts, every Monday May 25 → Dec 28 2026.
+// LinkedIn campaign: 32 weekly posts, every Wednesday May 27 → Dec 30 2026.
 // Dates match exactly the `date` field in linkedin-data.ts.
 interface LIScheduleEntry { week: number; date: string; hook: string; phase: string }
 const LI_SCHEDULE: LIScheduleEntry[] = [
-  { week: 1,  date: "May 25, 2026",      hook: "Most people think resilience is personality. Research says otherwise.",  phase: "Awareness" },
-  { week: 2,  date: "June 01, 2026",     hook: "The pandemic revealed how preparation changes outcomes.",                 phase: "Awareness" },
-  { week: 3,  date: "June 08, 2026",     hook: "Savings don't just buy comfort. They buy decision-making time.",         phase: "Awareness" },
-  { week: 4,  date: "June 15, 2026",     hook: "Pressure doesn't build character if it breaks capacity.",                phase: "Awareness" },
-  { week: 5,  date: "June 22, 2026",     hook: "The people who adapt fastest often recover fastest.",                    phase: "Awareness" },
-  { week: 6,  date: "June 29, 2026",     hook: "Transferable skills are modern insurance policies.",                     phase: "Awareness" },
-  { week: 7,  date: "July 06, 2026",     hook: "Calm is a strategic advantage during uncertainty.",                      phase: "Authority" },
-  { week: 8,  date: "July 13, 2026",     hook: "Resilience is rarely built alone.",                                      phase: "Authority" },
-  { week: 9,  date: "July 20, 2026",     hook: "Location flexibility matters more than people realize.",                 phase: "Authority" },
-  { week: 10, date: "July 27, 2026",     hook: "Preparedness is not paranoia. It's reducing avoidable fragility.",       phase: "Authority" },
-  { week: 11, date: "August 03, 2026",   hook: "You shouldn't have to trade privacy for self-awareness.",                phase: "Authority" },
-  { week: 12, date: "August 10, 2026",   hook: "Resilium was built on peer-reviewed resilience research.",               phase: "Authority" },
-  { week: 13, date: "August 17, 2026",   hook: "Most people think resilience is personality. Research says otherwise.",  phase: "Authority" },
-  { week: 14, date: "August 24, 2026",   hook: "The pandemic revealed how preparation changes outcomes.",                 phase: "Authority" },
-  { week: 15, date: "August 31, 2026",   hook: "Savings don't just buy comfort. They buy decision-making time.",         phase: "Authority" },
-  { week: 16, date: "September 07, 2026",hook: "Pressure doesn't build character if it breaks capacity.",                phase: "Authority" },
-  { week: 17, date: "September 14, 2026",hook: "The people who adapt fastest often recover fastest.",                    phase: "Authority" },
-  { week: 18, date: "September 21, 2026",hook: "Transferable skills are modern insurance policies.",                     phase: "Authority" },
-  { week: 19, date: "September 28, 2026",hook: "Calm is a strategic advantage during uncertainty.",                      phase: "Authority" },
-  { week: 20, date: "October 05, 2026",  hook: "Resilience is rarely built alone.",                                      phase: "Conversion" },
-  { week: 21, date: "October 12, 2026",  hook: "Location flexibility matters more than people realize.",                 phase: "Conversion" },
-  { week: 22, date: "October 19, 2026",  hook: "Preparedness is not paranoia. It's reducing avoidable fragility.",       phase: "Conversion" },
-  { week: 23, date: "October 26, 2026",  hook: "You shouldn't have to trade privacy for self-awareness.",                phase: "Conversion" },
-  { week: 24, date: "November 02, 2026", hook: "Resilium was built on peer-reviewed resilience research.",               phase: "Conversion" },
-  { week: 25, date: "November 09, 2026", hook: "Most people think resilience is personality. Research says otherwise.",  phase: "Conversion" },
-  { week: 26, date: "November 16, 2026", hook: "The pandemic revealed how preparation changes outcomes.",                 phase: "Conversion" },
-  { week: 27, date: "November 23, 2026", hook: "Savings don't just buy comfort. They buy decision-making time.",         phase: "Conversion" },
-  { week: 28, date: "November 30, 2026", hook: "Pressure doesn't build character if it breaks capacity.",                phase: "Conversion" },
-  { week: 29, date: "December 07, 2026", hook: "The people who adapt fastest often recover fastest.",                    phase: "Conversion" },
-  { week: 30, date: "December 14, 2026", hook: "Transferable skills are modern insurance policies.",                     phase: "Conversion" },
-  { week: 31, date: "December 21, 2026", hook: "Calm is a strategic advantage during uncertainty.",                      phase: "Conversion" },
-  { week: 32, date: "December 28, 2026", hook: "Resilience is rarely built alone.",                                      phase: "Conversion" },
+  { week: 1,  date: "May 27, 2026",       hook: "Most people think resilience is personality. Research says otherwise.",  phase: "Awareness" },
+  { week: 2,  date: "June 03, 2026",      hook: "The pandemic revealed how preparation changes outcomes.",                 phase: "Awareness" },
+  { week: 3,  date: "June 10, 2026",      hook: "Savings don't just buy comfort. They buy decision-making time.",         phase: "Awareness" },
+  { week: 4,  date: "June 17, 2026",      hook: "Pressure doesn't build character if it breaks capacity.",                phase: "Awareness" },
+  { week: 5,  date: "June 24, 2026",      hook: "The people who adapt fastest often recover fastest.",                    phase: "Awareness" },
+  { week: 6,  date: "July 01, 2026",      hook: "Transferable skills are modern insurance policies.",                     phase: "Awareness" },
+  { week: 7,  date: "July 08, 2026",      hook: "Calm is a strategic advantage during uncertainty.",                      phase: "Authority" },
+  { week: 8,  date: "July 15, 2026",      hook: "Resilience is rarely built alone.",                                      phase: "Authority" },
+  { week: 9,  date: "July 22, 2026",      hook: "Location flexibility matters more than people realize.",                 phase: "Authority" },
+  { week: 10, date: "July 29, 2026",      hook: "Preparedness is not paranoia. It's reducing avoidable fragility.",       phase: "Authority" },
+  { week: 11, date: "August 05, 2026",    hook: "You shouldn't have to trade privacy for self-awareness.",                phase: "Authority" },
+  { week: 12, date: "August 12, 2026",    hook: "Resilium was built on peer-reviewed resilience research.",               phase: "Authority" },
+  { week: 13, date: "August 19, 2026",    hook: "Most people think resilience is personality. Research says otherwise.",  phase: "Authority" },
+  { week: 14, date: "August 26, 2026",    hook: "The pandemic revealed how preparation changes outcomes.",                 phase: "Authority" },
+  { week: 15, date: "September 02, 2026", hook: "Savings don't just buy comfort. They buy decision-making time.",         phase: "Authority" },
+  { week: 16, date: "September 09, 2026", hook: "Pressure doesn't build character if it breaks capacity.",                phase: "Authority" },
+  { week: 17, date: "September 16, 2026", hook: "The people who adapt fastest often recover fastest.",                    phase: "Authority" },
+  { week: 18, date: "September 23, 2026", hook: "Transferable skills are modern insurance policies.",                     phase: "Authority" },
+  { week: 19, date: "September 30, 2026", hook: "Calm is a strategic advantage during uncertainty.",                      phase: "Authority" },
+  { week: 20, date: "October 07, 2026",   hook: "Resilience is rarely built alone.",                                      phase: "Conversion" },
+  { week: 21, date: "October 14, 2026",   hook: "Location flexibility matters more than people realize.",                 phase: "Conversion" },
+  { week: 22, date: "October 21, 2026",   hook: "Preparedness is not paranoia. It's reducing avoidable fragility.",       phase: "Conversion" },
+  { week: 23, date: "October 28, 2026",   hook: "You shouldn't have to trade privacy for self-awareness.",                phase: "Conversion" },
+  { week: 24, date: "November 04, 2026",  hook: "Resilium was built on peer-reviewed resilience research.",               phase: "Conversion" },
+  { week: 25, date: "November 11, 2026",  hook: "Most people think resilience is personality. Research says otherwise.",  phase: "Conversion" },
+  { week: 26, date: "November 18, 2026",  hook: "The pandemic revealed how preparation changes outcomes.",                 phase: "Conversion" },
+  { week: 27, date: "November 25, 2026",  hook: "Savings don't just buy comfort. They buy decision-making time.",         phase: "Conversion" },
+  { week: 28, date: "December 02, 2026",  hook: "Pressure doesn't build character if it breaks capacity.",                phase: "Conversion" },
+  { week: 29, date: "December 09, 2026",  hook: "The people who adapt fastest often recover fastest.",                    phase: "Conversion" },
+  { week: 30, date: "December 16, 2026",  hook: "Transferable skills are modern insurance policies.",                     phase: "Conversion" },
+  { week: 31, date: "December 23, 2026",  hook: "Calm is a strategic advantage during uncertainty.",                      phase: "Conversion" },
+  { week: 32, date: "December 30, 2026",  hook: "Resilience is rarely built alone.",                                      phase: "Conversion" },
 ];
 
 const DOW_TO_DAY: Record<number, string> = { 1: "Mon", 3: "Wed", 5: "Fri", 6: "Sat" };
@@ -949,7 +949,7 @@ export function startCron(): void {
 
   // Mon/Wed/Fri/Sat at 07:30 UTC (10:30 Bucharest EEST) — social posting reminder
   // Instagram: Mon/Wed/Fri/Sat within the 13-week campaign (W1 May 19 → W13 Aug 10 2026)
-  // LinkedIn: every Monday May 25 → Dec 28 2026 (matched by exact date)
+  // LinkedIn: every Wednesday May 27 → Dec 30 2026 (matched by exact date)
   // On Mondays both platforms are checked; a single combined email is sent when both are due.
   cron.schedule("30 7 * * 1,3,5,6", () => {
     runSocialPostingReminders().catch(() => {});
