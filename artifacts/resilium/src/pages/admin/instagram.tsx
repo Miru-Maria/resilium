@@ -14,22 +14,64 @@ import {
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 const PREVIEW_SIZE = 432;
-const FRAME_SIZE = 1080;
-const SCALE = PREVIEW_SIZE / FRAME_SIZE;
+const FRAME_SIZE   = 1080;
+const SCALE        = PREVIEW_SIZE / FRAME_SIZE;
+const FONT         = '"DM Sans", "Inter", system-ui, sans-serif';
 
-// ─── Colors & fonts ───────────────────────────────────────────────────────────
-const AMBER = "#E08040";
-const CREAM = "#EAD9BE";
-const NAVY  = "#0D1225";
-const FONT  = '"DM Sans", "Inter", system-ui, sans-serif';
-
-// ─── Frame renderer (used for both preview and PNG capture) ───────────────────
-interface FrameProps {
-  post: IGPost;
-  slideIndex: number;
+// ─── Color stories ────────────────────────────────────────────────────────────
+interface ColorStory {
+  key:     string;
+  name:    string;
+  bg:      string;
+  accent:  string;
+  text:    string;
+  overlay: string;
 }
 
-function FrameContent({ post, slideIndex }: FrameProps) {
+const COLOR_STORIES: ColorStory[] = [
+  {
+    key: "brand", name: "Resilium Brand",
+    bg: "#0D1225", accent: "#E08040", text: "#EAD9BE",
+    overlay: "rgba(13,18,37,0.4)",
+  },
+  {
+    key: "earth", name: "Warm Earth",
+    bg: "#1A0E08", accent: "#C8613A", text: "#EDD5BB",
+    overlay: "rgba(26,14,8,0.55)",
+  },
+  {
+    key: "slate", name: "Coastal Slate",
+    bg: "#0B1521", accent: "#3D9B8A", text: "#D8EBE6",
+    overlay: "rgba(11,21,33,0.5)",
+  },
+];
+
+// ─── Logo mark (replaces the old "R" text) ───────────────────────────────────
+function LogoMark({ size = 36, accent }: { size?: number; accent: string }) {
+  return (
+    <div style={{
+      width: size, height: size, borderRadius: Math.round(size * 0.22),
+      background: accent, display: "flex", alignItems: "center",
+      justifyContent: "center", padding: Math.round(size * 0.18), flexShrink: 0,
+    }}>
+      <img
+        src={`${BASE}/logo.png`}
+        alt="Resilium"
+        crossOrigin="anonymous"
+        style={{ width: "100%", height: "100%", objectFit: "contain", filter: "brightness(0)" }}
+      />
+    </div>
+  );
+}
+
+// ─── Frame renderer ───────────────────────────────────────────────────────────
+interface FrameProps {
+  post:       IGPost;
+  slideIndex: number;
+  colors:     ColorStory;
+}
+
+function FrameContent({ post, slideIndex, colors }: FrameProps) {
   const isCarousel = post.type === "carousel";
   const isSingle   = post.type === "single";
   const isQuote    = post.type === "quote";
@@ -53,34 +95,34 @@ function FrameContent({ post, slideIndex }: FrameProps) {
     <div style={{
       width: FRAME_SIZE, height: FRAME_SIZE,
       position: "relative", overflow: "hidden",
-      fontFamily: FONT, backgroundColor: NAVY,
+      fontFamily: FONT, backgroundColor: colors.bg,
     }}>
-      {/* Background */}
+      {/* Background image */}
       <img
-        src={bg}
-        alt=""
-        crossOrigin="anonymous"
+        src={bg} alt="" crossOrigin="anonymous"
         style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
       />
 
-      {/* Carousel: Hook slide */}
+      {/* Color story tint overlay (helps non-brand stories blend with the bg image) */}
+      <div style={{
+        position: "absolute", inset: 0,
+        background: colors.overlay,
+      }} />
+
+      {/* ── Hook slide ── */}
       {isCarousel && slide?.isHook && (
         <div style={{ position: "absolute", inset: 0, padding: 80, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-          {/* Logo */}
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ width: 36, height: 36, borderRadius: 8, background: AMBER, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <span style={{ color: NAVY, fontWeight: 900, fontSize: 20 }}>R</span>
-            </div>
-            <span style={{ color: AMBER, fontWeight: 700, fontSize: 28, letterSpacing: 2, textTransform: "uppercase" }}>RESILIUM</span>
+            <LogoMark size={36} accent={colors.accent} />
+            <span style={{ color: colors.accent, fontWeight: 700, fontSize: 28, letterSpacing: 2, textTransform: "uppercase" }}>RESILIUM</span>
           </div>
 
-          {/* Headline */}
           <div style={{ textAlign: "left", flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", paddingTop: 40, paddingBottom: 40 }}>
             {slide.lines.map((line, i) => (
               <div key={i} style={{
                 fontSize: i === 0 ? 86 : 76,
                 fontWeight: 900,
-                color: i === 0 ? CREAM : AMBER,
+                color: i === 0 ? colors.text : colors.accent,
                 lineHeight: 1.1,
                 marginBottom: i < slide.lines.length - 1 ? 12 : 0,
                 whiteSpace: "pre-line",
@@ -88,23 +130,22 @@ function FrameContent({ post, slideIndex }: FrameProps) {
             ))}
           </div>
 
-          {/* Swipe hint + dots */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <span style={{ color: CREAM, opacity: 0.5, fontSize: 26 }}>Calm. Grounded. Intelligent.</span>
+            <span style={{ color: colors.text, opacity: 0.5, fontSize: 26 }}>Calm. Grounded. Intelligent.</span>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               {Array.from({ length: totalSlides }).map((_, i) => (
-                <div key={i} style={{ width: i === 0 ? 28 : 14, height: 14, borderRadius: 7, background: i === 0 ? AMBER : CREAM, opacity: i === 0 ? 1 : 0.35 }} />
+                <div key={i} style={{ width: i === 0 ? 28 : 14, height: 14, borderRadius: 7, background: i === 0 ? colors.accent : colors.text, opacity: i === 0 ? 1 : 0.35 }} />
               ))}
-              <span style={{ color: AMBER, fontSize: 28, marginLeft: 12 }}>→</span>
+              <span style={{ color: colors.accent, fontSize: 28, marginLeft: 12 }}>→</span>
             </div>
           </div>
         </div>
       )}
 
-      {/* Carousel: CTA slide */}
+      {/* ── CTA slide ── */}
       {isCarousel && slide?.isCta && (
         <div style={{ position: "absolute", inset: 0, padding: 80, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-          <div style={{ textAlign: "right", color: AMBER, fontSize: 28, opacity: 0.7, fontWeight: 600 }}>
+          <div style={{ textAlign: "right", color: colors.accent, fontSize: 28, opacity: 0.7, fontWeight: 600 }}>
             {slideIndex + 1} / {totalSlides}
           </div>
           <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 20 }}>
@@ -114,7 +155,7 @@ function FrameContent({ post, slideIndex }: FrameProps) {
                 <div key={i} style={{
                   fontSize: isUrl ? 44 : 42,
                   fontWeight: isUrl ? 800 : 500,
-                  color: isUrl ? AMBER : CREAM,
+                  color: isUrl ? colors.accent : colors.text,
                   lineHeight: 1.3,
                   whiteSpace: "pre-line",
                 }}>{line}</div>
@@ -122,26 +163,23 @@ function FrameContent({ post, slideIndex }: FrameProps) {
             })}
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ width: 32, height: 32, borderRadius: 6, background: AMBER, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <span style={{ color: NAVY, fontWeight: 900, fontSize: 18 }}>R</span>
-            </div>
-            <span style={{ color: CREAM, opacity: 0.5, fontSize: 24, letterSpacing: 1 }}>RESILIUM</span>
+            <LogoMark size={32} accent={colors.accent} />
+            <span style={{ color: colors.text, opacity: 0.5, fontSize: 24, letterSpacing: 1 }}>RESILIUM</span>
           </div>
         </div>
       )}
 
-      {/* Carousel: Content slide */}
+      {/* ── Content slide ── */}
       {isCarousel && slide && !slide.isHook && !slide.isCta && (
         <div style={{ position: "absolute", inset: 0, padding: 80, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-          <div style={{ textAlign: "right", color: AMBER, fontSize: 26, opacity: 0.6, fontWeight: 600 }}>
+          <div style={{ textAlign: "right", color: colors.accent, fontSize: 26, opacity: 0.6, fontWeight: 600 }}>
             {slideIndex + 1} / {totalSlides}
           </div>
-          {/* Text area with 40% opacity readability overlay */}
           <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", position: "relative" }}>
             <div style={{
               position: "absolute",
               inset: "-32px -40px",
-              background: "rgba(13, 18, 37, 0.4)",
+              background: colors.overlay,
               borderRadius: 16,
             }} />
             <div style={{ position: "relative", display: "flex", flexDirection: "column", gap: 24 }}>
@@ -149,7 +187,7 @@ function FrameContent({ post, slideIndex }: FrameProps) {
                 <div key={i} style={{
                   fontSize: i === 0 ? 60 : 40,
                   fontWeight: i === 0 ? 800 : 400,
-                  color: i === 0 ? AMBER : CREAM,
+                  color: i === 0 ? colors.accent : colors.text,
                   lineHeight: 1.4,
                   whiteSpace: "pre-line",
                   opacity: i === 0 ? 1 : 0.9,
@@ -158,22 +196,18 @@ function FrameContent({ post, slideIndex }: FrameProps) {
             </div>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ width: 32, height: 32, borderRadius: 6, background: AMBER, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <span style={{ color: NAVY, fontWeight: 900, fontSize: 18 }}>R</span>
-            </div>
-            <span style={{ color: CREAM, opacity: 0.4, fontSize: 24, letterSpacing: 1 }}>RESILIUM</span>
+            <LogoMark size={32} accent={colors.accent} />
+            <span style={{ color: colors.text, opacity: 0.4, fontSize: 24, letterSpacing: 1 }}>RESILIUM</span>
           </div>
         </div>
       )}
 
-      {/* Single Image */}
+      {/* ── Single image ── */}
       {isSingle && (
         <div style={{ position: "absolute", inset: 0, padding: 80, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ width: 36, height: 36, borderRadius: 8, background: AMBER, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <span style={{ color: NAVY, fontWeight: 900, fontSize: 20 }}>R</span>
-            </div>
-            <span style={{ color: AMBER, fontWeight: 700, fontSize: 26, letterSpacing: 2, textTransform: "uppercase" }}>RESILIUM</span>
+            <LogoMark size={36} accent={colors.accent} />
+            <span style={{ color: colors.accent, fontWeight: 700, fontSize: 26, letterSpacing: 2, textTransform: "uppercase" }}>RESILIUM</span>
           </div>
 
           <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 32 }}>
@@ -181,7 +215,7 @@ function FrameContent({ post, slideIndex }: FrameProps) {
               <div key={i} style={{
                 fontSize: i === 0 && (post.imageLines?.length ?? 0) > 1 ? 52 : 48,
                 fontWeight: i === 0 ? 700 : 400,
-                color: i === 0 ? AMBER : CREAM,
+                color: i === 0 ? colors.accent : colors.text,
                 lineHeight: 1.45,
                 whiteSpace: "pre-line",
               }}>{line}</div>
@@ -189,24 +223,23 @@ function FrameContent({ post, slideIndex }: FrameProps) {
           </div>
 
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <span style={{ color: AMBER, fontSize: 32, fontWeight: 700 }}>resilium-platform.com</span>
-            <span style={{ color: CREAM, opacity: 0.4, fontSize: 22, letterSpacing: 2 }}>LINK IN BIO</span>
+            <span style={{ color: colors.accent, fontSize: 32, fontWeight: 700 }}>resilium-platform.com</span>
+            <span style={{ color: colors.text, opacity: 0.4, fontSize: 22, letterSpacing: 2 }}>LINK IN BIO</span>
           </div>
         </div>
       )}
 
-      {/* Quote Graphic */}
+      {/* ── Quote graphic ── */}
       {isQuote && (
         <div style={{ position: "absolute", inset: 0, padding: 80, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-          {/* Decorative quote mark */}
-          <div style={{ fontSize: 200, lineHeight: 0.8, color: AMBER, opacity: 0.25, fontWeight: 900, fontFamily: "Georgia, serif" }}>"</div>
+          <div style={{ fontSize: 200, lineHeight: 0.8, color: colors.accent, opacity: 0.25, fontWeight: 900, fontFamily: "Georgia, serif" }}>"</div>
 
           <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 28, marginTop: -60 }}>
             {(post.imageLines ?? []).map((line, i) => (
               <div key={i} style={{
                 fontSize: i === 0 ? 62 : 44,
                 fontWeight: i === 0 ? 600 : 500,
-                color: i === 0 ? CREAM : AMBER,
+                color: i === 0 ? colors.text : colors.accent,
                 lineHeight: 1.4,
                 whiteSpace: "pre-line",
                 fontStyle: i === 0 ? "italic" : "normal",
@@ -216,12 +249,10 @@ function FrameContent({ post, slideIndex }: FrameProps) {
 
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <div style={{ width: 32, height: 32, borderRadius: 6, background: AMBER, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <span style={{ color: NAVY, fontWeight: 900, fontSize: 18 }}>R</span>
-              </div>
-              <span style={{ color: CREAM, opacity: 0.5, fontSize: 22, letterSpacing: 1 }}>RESILIUM</span>
+              <LogoMark size={32} accent={colors.accent} />
+              <span style={{ color: colors.text, opacity: 0.5, fontSize: 22, letterSpacing: 1 }}>RESILIUM</span>
             </div>
-            <span style={{ color: AMBER, opacity: 0.7, fontSize: 26, fontWeight: 600 }}>resilium-platform.com</span>
+            <span style={{ color: colors.accent, opacity: 0.7, fontSize: 26, fontWeight: 600 }}>resilium-platform.com</span>
           </div>
         </div>
       )}
@@ -252,15 +283,46 @@ function TypeIcon({ type }: { type: IGPost["type"] }) {
   return <Quote className="w-3.5 h-3.5" />;
 }
 
+// ─── Color story selector ─────────────────────────────────────────────────────
+function StoryPicker({ value, onChange }: { value: string; onChange: (k: string) => void }) {
+  const current = COLOR_STORIES.find(s => s.key === value) ?? COLOR_STORIES[0];
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider hidden sm:block">
+        Color story
+      </span>
+      <div className="flex gap-1.5 items-center">
+        {COLOR_STORIES.map(s => (
+          <button
+            key={s.key}
+            onClick={() => onChange(s.key)}
+            title={s.name}
+            className={cn(
+              "w-5 h-5 rounded-full transition-all flex-shrink-0",
+              value === s.key
+                ? "ring-2 ring-offset-2 ring-foreground/40 scale-110"
+                : "opacity-50 hover:opacity-80",
+            )}
+            style={{ background: s.accent }}
+          />
+        ))}
+      </div>
+      <span className="text-[11px] text-muted-foreground font-medium">{current.name}</span>
+    </div>
+  );
+}
+
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function AdminInstagramPage() {
-  const [selectedId, setSelectedId] = useState<number>(1);
-  const [slideIndex, setSlideIndex] = useState(0);
+  const [selectedId,  setSelectedId]  = useState<number>(1);
+  const [slideIndex,  setSlideIndex]  = useState(0);
   const [downloading, setDownloading] = useState(false);
+  const [storyKey,    setStoryKey]    = useState("brand");
   const captureRef = useRef<HTMLDivElement>(null);
 
-  const post = IG_POSTS.find(p => p.id === selectedId) ?? IG_POSTS[0];
-  const totalSlides = post.slides?.length ?? 1;
+  const post         = IG_POSTS.find(p => p.id === selectedId) ?? IG_POSTS[0];
+  const totalSlides  = post.slides?.length ?? 1;
+  const colors       = COLOR_STORIES.find(s => s.key === storyKey) ?? COLOR_STORIES[0];
 
   const selectPost = useCallback((id: number) => {
     setSelectedId(id);
@@ -272,15 +334,12 @@ export default function AdminInstagramPage() {
     setDownloading(true);
     try {
       const dataUrl = await toPng(captureRef.current, {
-        cacheBust: true,
-        width: FRAME_SIZE,
-        height: FRAME_SIZE,
-        pixelRatio: 1,
+        cacheBust: true, width: FRAME_SIZE, height: FRAME_SIZE, pixelRatio: 1,
       });
       const a = document.createElement("a");
       a.href = dataUrl;
       const slideLabel = post.type === "carousel" ? `-slide${slideIndex + 1}` : "";
-      a.download = `resilium-ig-${post.week}-${post.type}${slideLabel}.png`;
+      a.download = `resilium-ig-${post.week}-${post.type}${slideLabel}-${storyKey}.png`;
       a.click();
     } catch (e) {
       console.error("Download failed", e);
@@ -301,7 +360,7 @@ export default function AdminInstagramPage() {
         const dataUrl = await toPng(captureRef.current, { cacheBust: true, width: FRAME_SIZE, height: FRAME_SIZE, pixelRatio: 1 });
         const a = document.createElement("a");
         a.href = dataUrl;
-        a.download = `resilium-ig-${post.week}-carousel-slide${i + 1}of${totalSlides}.png`;
+        a.download = `resilium-ig-${post.week}-carousel-slide${i + 1}of${totalSlides}-${storyKey}.png`;
         a.click();
         await new Promise(r => setTimeout(r, 200));
       }
@@ -316,7 +375,7 @@ export default function AdminInstagramPage() {
     <AdminLayout activeSection="instagram">
       <div className="flex h-screen overflow-hidden">
 
-        {/* ── Left Sidebar: Post List ── */}
+        {/* ── Left sidebar ── */}
         <aside className="w-72 border-r bg-background overflow-y-auto flex-shrink-0">
           <div className="p-4 border-b sticky top-0 bg-background z-10">
             <div className="flex items-center gap-2">
@@ -329,7 +388,7 @@ export default function AdminInstagramPage() {
           <nav className="p-2">
             {WEEKS.map(week => {
               const weekPosts = IG_POSTS.filter(p => p.week === week);
-              const weekNum = parseInt(week.slice(1));
+              const weekNum   = parseInt(week.slice(1));
               return (
                 <div key={week} className="mb-3">
                   <div className="px-2 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
@@ -343,13 +402,13 @@ export default function AdminInstagramPage() {
                         "w-full text-left px-3 py-2.5 rounded-lg mb-0.5 transition-all",
                         selectedId === p.id
                           ? "bg-[#E08040]/10 border border-[#E08040]/30"
-                          : "hover:bg-muted/50 border border-transparent"
+                          : "hover:bg-muted/50 border border-transparent",
                       )}
                     >
                       <div className="flex items-center gap-2 mb-1">
                         <span className={cn(
                           "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold border",
-                          TYPE_COLOR[p.type]
+                          TYPE_COLOR[p.type],
                         )}>
                           <TypeIcon type={p.type} />
                           {p.day}
@@ -365,17 +424,17 @@ export default function AdminInstagramPage() {
           </nav>
         </aside>
 
-        {/* ── Main Studio Area ── */}
+        {/* ── Main studio area ── */}
         <main className="flex-1 overflow-y-auto bg-muted/20">
           <div className="max-w-4xl mx-auto p-6 space-y-6">
 
             {/* Header */}
-            <div className="flex items-start justify-between gap-4">
+            <div className="flex items-start justify-between gap-4 flex-wrap">
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <span className={cn(
                     "inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-semibold border",
-                    TYPE_COLOR[post.type]
+                    TYPE_COLOR[post.type],
                   )}>
                     <TypeIcon type={post.type} />
                     {TYPE_LABEL[post.type]}
@@ -385,23 +444,16 @@ export default function AdminInstagramPage() {
                 </div>
                 <h1 className="text-lg font-bold text-foreground">{post.topic}</h1>
               </div>
-              <div className="flex items-center gap-2 flex-shrink-0">
+              <div className="flex items-center gap-3 flex-wrap flex-shrink-0">
+                <StoryPicker value={storyKey} onChange={setStoryKey} />
                 {post.type === "carousel" && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleDownloadAll}
-                    disabled={downloading}
-                    className="gap-1.5 text-xs"
-                  >
+                  <Button variant="outline" size="sm" onClick={handleDownloadAll} disabled={downloading} className="gap-1.5 text-xs">
                     <Download className="w-3.5 h-3.5" />
                     All {totalSlides} slides
                   </Button>
                 )}
                 <Button
-                  size="sm"
-                  onClick={handleDownload}
-                  disabled={downloading}
+                  size="sm" onClick={handleDownload} disabled={downloading}
                   className="gap-1.5 text-xs bg-[#E08040] hover:bg-[#E08040]/90 text-white"
                 >
                   <Download className="w-3.5 h-3.5" />
@@ -410,16 +462,12 @@ export default function AdminInstagramPage() {
               </div>
             </div>
 
-            {/* Preview + Controls row */}
+            {/* Preview + controls */}
             <div className="flex gap-6 items-start">
-
-              {/* Preview */}
               <div className="flex-shrink-0 space-y-3">
                 <div style={{
-                  width: PREVIEW_SIZE,
-                  height: PREVIEW_SIZE,
-                  overflow: "hidden",
-                  position: "relative",
+                  width: PREVIEW_SIZE, height: PREVIEW_SIZE,
+                  overflow: "hidden", position: "relative",
                   borderRadius: 12,
                   boxShadow: "0 4px 32px rgba(0,0,0,0.3)",
                 }}>
@@ -427,23 +475,15 @@ export default function AdminInstagramPage() {
                     transform: `scale(${SCALE})`,
                     transformOrigin: "top left",
                     position: "absolute",
-                    width: FRAME_SIZE,
-                    height: FRAME_SIZE,
+                    width: FRAME_SIZE, height: FRAME_SIZE,
                   }}>
-                    <FrameContent post={post} slideIndex={slideIndex} />
+                    <FrameContent post={post} slideIndex={slideIndex} colors={colors} />
                   </div>
                 </div>
 
-                {/* Slide navigation */}
                 {post.type === "carousel" && (
                   <div className="flex items-center justify-between">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setSlideIndex(i => Math.max(0, i - 1))}
-                      disabled={slideIndex === 0}
-                      className="h-8 w-8 p-0"
-                    >
+                    <Button variant="outline" size="sm" onClick={() => setSlideIndex(i => Math.max(0, i - 1))} disabled={slideIndex === 0} className="h-8 w-8 p-0">
                       <ChevronLeft className="w-4 h-4" />
                     </Button>
                     <div className="flex items-center gap-1.5">
@@ -453,20 +493,12 @@ export default function AdminInstagramPage() {
                           onClick={() => setSlideIndex(i)}
                           className={cn(
                             "rounded-full transition-all",
-                            i === slideIndex
-                              ? "w-5 h-2.5 bg-[#E08040]"
-                              : "w-2.5 h-2.5 bg-muted-foreground/30 hover:bg-muted-foreground/50"
+                            i === slideIndex ? "w-5 h-2.5 bg-[#E08040]" : "w-2.5 h-2.5 bg-muted-foreground/30 hover:bg-muted-foreground/50",
                           )}
                         />
                       ))}
                     </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setSlideIndex(i => Math.min(totalSlides - 1, i + 1))}
-                      disabled={slideIndex === totalSlides - 1}
-                      className="h-8 w-8 p-0"
-                    >
+                    <Button variant="outline" size="sm" onClick={() => setSlideIndex(i => Math.min(totalSlides - 1, i + 1))} disabled={slideIndex === totalSlides - 1} className="h-8 w-8 p-0">
                       <ChevronRight className="w-4 h-4" />
                     </Button>
                   </div>
@@ -495,15 +527,11 @@ export default function AdminInstagramPage() {
                     ))}
                   </div>
                   <div className="mt-3">
-                    <CopyButton
-                      text={post.slides[slideIndex].lines.join("\n")}
-                      label="Copy slide text"
-                    />
+                    <CopyButton text={post.slides[slideIndex].lines.join("\n")} label="Copy slide text" />
                   </div>
                 </div>
               )}
 
-              {/* Single / Quote image text */}
               {(post.type === "single" || post.type === "quote") && post.imageLines && (
                 <div className="flex-1 min-w-0">
                   <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
@@ -517,10 +545,7 @@ export default function AdminInstagramPage() {
                     ))}
                   </div>
                   <div className="mt-3">
-                    <CopyButton
-                      text={post.imageLines.join("\n")}
-                      label="Copy image text"
-                    />
+                    <CopyButton text={post.imageLines.join("\n")} label="Copy image text" />
                   </div>
                 </div>
               )}
@@ -544,7 +569,7 @@ export default function AdminInstagramPage() {
               <p className="text-sm text-muted-foreground leading-relaxed">{post.hashtags}</p>
             </div>
 
-            {/* Full caption + hashtags combined */}
+            {/* Full post copy */}
             <div className="bg-[#E08040]/5 border border-[#E08040]/20 rounded-xl p-4 space-y-2">
               <div className="flex items-center justify-between">
                 <h3 className="text-xs font-semibold text-[#E08040] uppercase tracking-wider">Full post copy (caption + hashtags)</h3>
@@ -556,10 +581,10 @@ export default function AdminInstagramPage() {
         </main>
       </div>
 
-      {/* ── Hidden capture target (actual 1080×1080) ── */}
+      {/* ── Hidden capture target ── */}
       <div style={{ position: "fixed", top: -9999, left: -9999, zIndex: -1 }}>
         <div ref={captureRef}>
-          <FrameContent post={post} slideIndex={slideIndex} />
+          <FrameContent post={post} slideIndex={slideIndex} colors={colors} />
         </div>
       </div>
     </AdminLayout>

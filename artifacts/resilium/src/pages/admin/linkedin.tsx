@@ -13,36 +13,87 @@ import {
   Target, BookOpen,
 } from "lucide-react";
 
-const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+const BASE       = import.meta.env.BASE_URL.replace(/\/$/, "");
 const FRAME_SIZE = 1080;
-const PREVIEW_SIZE = 432;
-const SCALE = PREVIEW_SIZE / FRAME_SIZE;
+const PREV_SIZE  = 432;
+const SCALE      = PREV_SIZE / FRAME_SIZE;
+const FONT       = '"DM Sans", "Inter", system-ui, sans-serif';
 
-const AMBER = "#E08040";
-const CREAM = "#EAD9BE";
-const NAVY  = "#0D1225";
-const FONT  = '"DM Sans", "Inter", system-ui, sans-serif';
+// ─── Color stories ────────────────────────────────────────────────────────────
+interface ColorStory {
+  key:      string;
+  name:     string;
+  bg:       string;
+  accent:   string;
+  text:     string;
+  gradient: string;
+  overlay:  string;
+}
 
-// ─── Branded LinkedIn Graphic ─────────────────────────────────────────────────
-function LinkedInFrame({ post, isFounder = false, founderTitle = "", founderBody = "" }: {
-  post?: LIPost;
-  isFounder?: boolean;
+const COLOR_STORIES: ColorStory[] = [
+  {
+    key: "brand", name: "Resilium Brand",
+    bg: "#0D1225", accent: "#E08040", text: "#EAD9BE",
+    gradient: "linear-gradient(160deg, rgba(13,18,37,0.55) 0%, rgba(13,18,37,0.78) 100%)",
+    overlay:  "rgba(13,18,37,0.40)",
+  },
+  {
+    key: "earth", name: "Warm Earth",
+    bg: "#1A0E08", accent: "#C8613A", text: "#EDD5BB",
+    gradient: "linear-gradient(160deg, rgba(26,14,8,0.60) 0%, rgba(26,14,8,0.82) 100%)",
+    overlay:  "rgba(26,14,8,0.45)",
+  },
+  {
+    key: "slate", name: "Coastal Slate",
+    bg: "#0B1521", accent: "#3D9B8A", text: "#D8EBE6",
+    gradient: "linear-gradient(160deg, rgba(11,21,33,0.58) 0%, rgba(11,21,33,0.80) 100%)",
+    overlay:  "rgba(11,21,33,0.42)",
+  },
+];
+
+// ─── Logo mark ────────────────────────────────────────────────────────────────
+function LogoMark({ size = 42, accent }: { size?: number; accent: string }) {
+  return (
+    <div style={{
+      width: size, height: size,
+      borderRadius: Math.round(size * 0.24),
+      background: accent,
+      display: "flex", alignItems: "center", justifyContent: "center",
+      padding: Math.round(size * 0.18), flexShrink: 0,
+    }}>
+      <img
+        src={`${BASE}/logo.png`}
+        alt="Resilium"
+        crossOrigin="anonymous"
+        style={{ width: "100%", height: "100%", objectFit: "contain", filter: "brightness(0)" }}
+      />
+    </div>
+  );
+}
+
+// ─── Branded LinkedIn graphic ─────────────────────────────────────────────────
+function LinkedInFrame({
+  post, isFounder = false, founderTitle = "", founderBody = "", colors,
+}: {
+  post?:         LIPost;
+  isFounder?:    boolean;
   founderTitle?: string;
-  founderBody?: string;
+  founderBody?:  string;
+  colors:        ColorStory;
 }) {
-  const hook        = post?.hook ?? founderTitle;
-  const phase       = post?.phase ?? "Authority";
-  const quarter     = post?.quarter ?? "";
-  const weekLabel   = post ? `Week ${post.week}` : "Founder Series";
-  const dateLabel   = post?.date ?? "";
+  const hook      = post?.hook ?? founderTitle;
+  const phase     = post?.phase ?? "Authority";
+  const quarter   = post?.quarter ?? "";
+  const weekLabel = post ? `Week ${post.week}` : "Founder Series";
+  const dateLabel = post?.date ?? "";
+
   const phaseColors: Record<string, string> = {
     Awareness:  "#38bdf8",
     Authority:  "#a78bfa",
-    Conversion: AMBER,
+    Conversion: colors.accent,
   };
-  const accentColor = phaseColors[phase] ?? AMBER;
+  const accentColor = phaseColors[phase] ?? colors.accent;
 
-  // For founder posts, show opening lines of body instead of hook
   const bodyPreview = isFounder
     ? founderBody.split("\n").filter(Boolean).slice(0, 3).join("\n")
     : "";
@@ -51,34 +102,28 @@ function LinkedInFrame({ post, isFounder = false, founderTitle = "", founderBody
     <div style={{
       width: FRAME_SIZE, height: FRAME_SIZE,
       position: "relative", overflow: "hidden",
-      fontFamily: FONT, backgroundColor: NAVY,
+      fontFamily: FONT, backgroundColor: colors.bg,
     }}>
       {/* Background image */}
       <img
         src={`${BASE}/instagram/bg-single-image.png`}
-        alt=""
-        crossOrigin="anonymous"
+        alt="" crossOrigin="anonymous"
         style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
       />
 
-      {/* Dark gradient overlay for readability */}
-      <div style={{
-        position: "absolute", inset: 0,
-        background: "linear-gradient(160deg, rgba(13,18,37,0.55) 0%, rgba(13,18,37,0.75) 100%)",
-      }} />
+      {/* Gradient overlay */}
+      <div style={{ position: "absolute", inset: 0, background: colors.gradient }} />
 
       {/* Content */}
       <div style={{ position: "absolute", inset: 0, padding: 80, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
 
-        {/* Top row: logo + quarter/week badge */}
+        {/* Top: logo + quarter/week badge */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-            <div style={{ width: 42, height: 42, borderRadius: 10, background: AMBER, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <span style={{ color: NAVY, fontWeight: 900, fontSize: 22 }}>R</span>
-            </div>
+            <LogoMark size={42} accent={colors.accent} />
             <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              <span style={{ color: AMBER, fontWeight: 700, fontSize: 28, letterSpacing: 2, textTransform: "uppercase" }}>RESILIUM</span>
-              <span style={{ color: CREAM, opacity: 0.5, fontSize: 18, letterSpacing: 1 }}>resilium-platform.com</span>
+              <span style={{ color: colors.accent, fontWeight: 700, fontSize: 28, letterSpacing: 2, textTransform: "uppercase" }}>RESILIUM</span>
+              <span style={{ color: colors.text, opacity: 0.5, fontSize: 18, letterSpacing: 1 }}>resilium-platform.com</span>
             </div>
           </div>
 
@@ -87,41 +132,29 @@ function LinkedInFrame({ post, isFounder = false, founderTitle = "", founderBody
               <div style={{
                 background: `${accentColor}22`,
                 border: `1.5px solid ${accentColor}55`,
-                borderRadius: 8,
-                padding: "6px 16px",
-                color: accentColor,
-                fontSize: 22,
-                fontWeight: 700,
-                letterSpacing: 1,
+                borderRadius: 8, padding: "6px 16px",
+                color: accentColor, fontSize: 22, fontWeight: 700, letterSpacing: 1,
               }}>
                 {quarter}
               </div>
             )}
             <div style={{
-              background: "rgba(255,255,255,0.08)",
-              borderRadius: 8,
-              padding: "5px 14px",
-              color: CREAM,
-              fontSize: 20,
-              opacity: 0.7,
+              background: "rgba(255,255,255,0.08)", borderRadius: 8, padding: "5px 14px",
+              color: colors.text, fontSize: 20, opacity: 0.7,
             }}>
-              {isFounder ? "Founder Series" : weekLabel} {dateLabel ? `· ${dateLabel}` : ""}
+              {isFounder ? "Founder Series" : weekLabel}{dateLabel ? ` · ${dateLabel}` : ""}
             </div>
           </div>
         </div>
 
-        {/* Center: Hook / title */}
+        {/* Centre: hook + phase label */}
         <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", position: "relative" }}>
-          {/* 40% opacity readability overlay behind the text block */}
           <div style={{
-            position: "absolute",
-            inset: "-36px -44px",
-            background: "rgba(13, 18, 37, 0.40)",
-            borderRadius: 20,
+            position: "absolute", inset: "-36px -44px",
+            background: colors.overlay, borderRadius: 20,
           }} />
 
           <div style={{ position: "relative", display: "flex", flexDirection: "column", gap: 28 }}>
-            {/* Phase label */}
             {!isFounder && (
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                 <div style={{ width: 40, height: 3, background: accentColor, borderRadius: 2 }} />
@@ -133,33 +166,25 @@ function LinkedInFrame({ post, isFounder = false, founderTitle = "", founderBody
 
             {isFounder && (
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <div style={{ width: 40, height: 3, background: AMBER, borderRadius: 2 }} />
-                <span style={{ color: AMBER, fontSize: 22, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase" }}>
+                <div style={{ width: 40, height: 3, background: colors.accent, borderRadius: 2 }} />
+                <span style={{ color: colors.accent, fontSize: 22, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase" }}>
                   Founder Thought-Leadership
                 </span>
               </div>
             )}
 
-            {/* Hook / title — main text */}
             <div style={{
               fontSize: hook.length > 60 ? 64 : 74,
-              fontWeight: 800,
-              color: CREAM,
-              lineHeight: 1.2,
-              whiteSpace: "pre-line",
+              fontWeight: 800, color: colors.text,
+              lineHeight: 1.2, whiteSpace: "pre-line",
             }}>
               {hook}
             </div>
 
-            {/* Founder: body preview */}
             {isFounder && bodyPreview && (
               <div style={{
-                fontSize: 34,
-                color: CREAM,
-                opacity: 0.65,
-                lineHeight: 1.55,
-                whiteSpace: "pre-line",
-                fontWeight: 400,
+                fontSize: 34, color: colors.text, opacity: 0.65,
+                lineHeight: 1.55, whiteSpace: "pre-line", fontWeight: 400,
               }}>
                 {bodyPreview}
               </div>
@@ -167,20 +192,15 @@ function LinkedInFrame({ post, isFounder = false, founderTitle = "", founderBody
           </div>
         </div>
 
-        {/* Bottom row: CTA + brand tagline */}
+        {/* Bottom: CTA + tagline */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{
-            background: AMBER,
-            borderRadius: 10,
-            padding: "14px 30px",
-            color: NAVY,
-            fontWeight: 800,
-            fontSize: 26,
-            letterSpacing: 0.5,
+            background: colors.accent, borderRadius: 10, padding: "14px 30px",
+            color: colors.bg, fontWeight: 800, fontSize: 26, letterSpacing: 0.5,
           }}>
             Take the free assessment →
           </div>
-          <span style={{ color: CREAM, opacity: 0.4, fontSize: 20, letterSpacing: 1 }}>
+          <span style={{ color: colors.text, opacity: 0.4, fontSize: 20, letterSpacing: 1 }}>
             Calm. Grounded. Intelligent.
           </span>
         </div>
@@ -194,8 +214,7 @@ function CopyBtn({ text, label }: { text: string; label: string }) {
   const [copied, setCopied] = useState(false);
   return (
     <Button
-      variant="outline" size="sm"
-      className="gap-1.5 text-xs h-7"
+      variant="outline" size="sm" className="gap-1.5 text-xs h-7"
       onClick={async () => {
         await navigator.clipboard.writeText(text);
         setCopied(true);
@@ -208,7 +227,36 @@ function CopyBtn({ text, label }: { text: string; label: string }) {
   );
 }
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
+// ─── Color story selector ─────────────────────────────────────────────────────
+function StoryPicker({ value, onChange }: { value: string; onChange: (k: string) => void }) {
+  const current = COLOR_STORIES.find(s => s.key === value) ?? COLOR_STORIES[0];
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider hidden sm:block">
+        Color story
+      </span>
+      <div className="flex gap-1.5 items-center">
+        {COLOR_STORIES.map(s => (
+          <button
+            key={s.key}
+            onClick={() => onChange(s.key)}
+            title={s.name}
+            className={cn(
+              "w-5 h-5 rounded-full transition-all flex-shrink-0",
+              value === s.key
+                ? "ring-2 ring-offset-2 ring-foreground/40 scale-110"
+                : "opacity-50 hover:opacity-80",
+            )}
+            style={{ background: s.accent }}
+          />
+        ))}
+      </div>
+      <span className="text-[11px] text-muted-foreground font-medium">{current.name}</span>
+    </div>
+  );
+}
+
+// ─── Main page ────────────────────────────────────────────────────────────────
 type Tab = "calendar" | "founder";
 
 export default function AdminLinkedInPage() {
@@ -216,12 +264,13 @@ export default function AdminLinkedInPage() {
   const [selectedId,  setSelectedId]  = useState<number>(1);
   const [founderId,   setFounderId]   = useState<string>("fl-1");
   const [downloading, setDownloading] = useState(false);
+  const [storyKey,    setStoryKey]    = useState("brand");
   const captureRef = useRef<HTMLDivElement>(null);
 
   const post        = LI_POSTS.find(p => p.id === selectedId) ?? LI_POSTS[0];
   const founderPost = FOUNDER_POSTS.find(p => p.id === founderId) ?? FOUNDER_POSTS[0];
-
-  const isCalendar = tab === "calendar";
+  const isCalendar  = tab === "calendar";
+  const colors      = COLOR_STORIES.find(s => s.key === storyKey) ?? COLOR_STORIES[0];
 
   const handleDownload = async () => {
     if (!captureRef.current) return;
@@ -230,11 +279,11 @@ export default function AdminLinkedInPage() {
       const dataUrl = await toPng(captureRef.current, {
         cacheBust: true, width: FRAME_SIZE, height: FRAME_SIZE, pixelRatio: 1,
       });
-      const a      = document.createElement("a");
-      a.href       = dataUrl;
-      a.download   = isCalendar
-        ? `resilium-li-w${post.week}-${post.date.replace(/[, ]+/g, "-")}.png`
-        : `resilium-li-founder-${founderPost.id}.png`;
+      const a    = document.createElement("a");
+      a.href     = dataUrl;
+      a.download = isCalendar
+        ? `resilium-li-w${post.week}-${post.date.replace(/[, ]+/g, "-")}-${storyKey}.png`
+        : `resilium-li-founder-${founderPost.id}-${storyKey}.png`;
       a.click();
     } catch (e) {
       console.error("Download failed", e);
@@ -244,12 +293,10 @@ export default function AdminLinkedInPage() {
     }
   };
 
-  // Full post copy (hook + body + CTA)
   const fullPostCopy = isCalendar
     ? `${post.hook}\n\n${LI_BODY}\n\n${LI_CTA}`
     : `${founderPost.body}\n\n${founderPost.cta}`;
 
-  // Group calendar posts by quarter
   const quarters = Array.from(new Set(LI_POSTS.map(p => p.quarter)));
 
   return (
@@ -265,13 +312,12 @@ export default function AdminLinkedInPage() {
             </div>
             <p className="text-[11px] text-muted-foreground">May–Dec 2026 · 32 weekly posts</p>
 
-            {/* Tab switcher */}
             <div className="flex gap-1 mt-3 p-1 bg-muted/50 rounded-lg">
               <button
                 onClick={() => setTab("calendar")}
                 className={cn(
                   "flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-medium transition-all",
-                  tab === "calendar" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground"
+                  tab === "calendar" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground",
                 )}
               >
                 <Calendar className="w-3 h-3" /> Calendar
@@ -280,7 +326,7 @@ export default function AdminLinkedInPage() {
                 onClick={() => setTab("founder")}
                 className={cn(
                   "flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-medium transition-all",
-                  tab === "founder" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground"
+                  tab === "founder" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground",
                 )}
               >
                 <User className="w-3 h-3" /> Founder
@@ -304,13 +350,13 @@ export default function AdminLinkedInPage() {
                         "w-full text-left px-3 py-2.5 rounded-lg mb-0.5 transition-all",
                         selectedId === p.id
                           ? "bg-[#E08040]/10 border border-[#E08040]/30"
-                          : "hover:bg-muted/50 border border-transparent"
+                          : "hover:bg-muted/50 border border-transparent",
                       )}
                     >
                       <div className="flex items-center gap-2 mb-1">
                         <span className={cn(
                           "inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold border",
-                          PHASE_COLOR[p.phase]
+                          PHASE_COLOR[p.phase],
                         )}>
                           {p.phase}
                         </span>
@@ -332,7 +378,7 @@ export default function AdminLinkedInPage() {
                   "w-full text-left px-3 py-2.5 rounded-lg mb-1 transition-all",
                   founderId === fp.id
                     ? "bg-[#E08040]/10 border border-[#E08040]/30"
-                    : "hover:bg-muted/50 border border-transparent"
+                    : "hover:bg-muted/50 border border-transparent",
                 )}
               >
                 <div className="flex items-center gap-1.5 mb-1">
@@ -345,12 +391,12 @@ export default function AdminLinkedInPage() {
           </nav>
         </aside>
 
-        {/* ── Main Studio ── */}
+        {/* ── Main studio ── */}
         <main className="flex-1 overflow-y-auto bg-muted/20">
           <div className="max-w-4xl mx-auto p-6 space-y-6">
 
             {/* Header */}
-            <div className="flex items-start justify-between gap-4">
+            <div className="flex items-start justify-between gap-4 flex-wrap">
               <div>
                 {isCalendar ? (
                   <>
@@ -379,36 +425,33 @@ export default function AdminLinkedInPage() {
                   </>
                 )}
               </div>
-              <Button
-                size="sm"
-                onClick={handleDownload}
-                disabled={downloading}
-                className="gap-1.5 text-xs bg-[#E08040] hover:bg-[#E08040]/90 text-white flex-shrink-0"
-              >
-                <Download className="w-3.5 h-3.5" />
-                {downloading ? "Exporting…" : "Download graphic"}
-              </Button>
+              <div className="flex items-center gap-3 flex-wrap flex-shrink-0">
+                <StoryPicker value={storyKey} onChange={setStoryKey} />
+                <Button
+                  size="sm" onClick={handleDownload} disabled={downloading}
+                  className="gap-1.5 text-xs bg-[#E08040] hover:bg-[#E08040]/90 text-white"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  {downloading ? "Exporting…" : "Download graphic"}
+                </Button>
+              </div>
             </div>
 
             {/* Preview + details */}
             <div className="flex gap-6 items-start">
-              {/* Preview */}
               <div className="flex-shrink-0 space-y-2">
                 <div style={{
-                  width: PREVIEW_SIZE, height: PREVIEW_SIZE,
+                  width: PREV_SIZE, height: PREV_SIZE,
                   overflow: "hidden", position: "relative",
-                  borderRadius: 12,
-                  boxShadow: "0 4px 32px rgba(0,0,0,0.3)",
+                  borderRadius: 12, boxShadow: "0 4px 32px rgba(0,0,0,0.3)",
                 }}>
                   <div style={{
-                    transform: `scale(${SCALE})`,
-                    transformOrigin: "top left",
-                    position: "absolute",
-                    width: FRAME_SIZE, height: FRAME_SIZE,
+                    transform: `scale(${SCALE})`, transformOrigin: "top left",
+                    position: "absolute", width: FRAME_SIZE, height: FRAME_SIZE,
                   }}>
                     {isCalendar
-                      ? <LinkedInFrame post={post} />
-                      : <LinkedInFrame isFounder founderTitle={founderPost.title} founderBody={founderPost.body} />
+                      ? <LinkedInFrame post={post} colors={colors} />
+                      : <LinkedInFrame isFounder founderTitle={founderPost.title} founderBody={founderPost.body} colors={colors} />
                     }
                   </div>
                 </div>
@@ -417,7 +460,7 @@ export default function AdminLinkedInPage() {
                 </p>
               </div>
 
-              {/* Internal design notes + hook */}
+              {/* Design notes + hook */}
               <div className="flex-1 min-w-0 space-y-4">
                 {isCalendar && (
                   <div className="bg-muted/40 border border-border/50 rounded-xl p-4">
@@ -465,7 +508,7 @@ export default function AdminLinkedInPage() {
               </p>
             </div>
 
-            {/* Full post combined */}
+            {/* Full post */}
             <div className="bg-[#E08040]/5 border border-[#E08040]/20 rounded-xl p-4 space-y-2">
               <div className="flex items-center justify-between">
                 <p className="text-[10px] font-bold text-[#E08040] uppercase tracking-widest">Full post (hook + body + CTA)</p>
@@ -481,8 +524,8 @@ export default function AdminLinkedInPage() {
       <div style={{ position: "fixed", top: -9999, left: -9999, zIndex: -1 }}>
         <div ref={captureRef}>
           {isCalendar
-            ? <LinkedInFrame post={post} />
-            : <LinkedInFrame isFounder founderTitle={founderPost.title} founderBody={founderPost.body} />
+            ? <LinkedInFrame post={post} colors={colors} />
+            : <LinkedInFrame isFounder founderTitle={founderPost.title} founderBody={founderPost.body} colors={colors} />
           }
         </div>
       </div>
