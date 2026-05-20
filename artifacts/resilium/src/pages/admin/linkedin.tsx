@@ -169,12 +169,6 @@ function LinkedInFrame({
           <div style={{ position: "absolute", top: 80, left: 0, right: 0, display: "flex", justifyContent: "center" }}>
             <LogoMark size={56} accent={colors.bg} />
           </div>
-          {/* Vertical phase label */}
-          <div style={{ position: "absolute", bottom: 90, left: 0, right: 0, display: "flex", justifyContent: "center" }}>
-            <span style={{ writingMode: "vertical-rl", textOrientation: "mixed", transform: "rotate(180deg)", fontSize: 20, fontWeight: 700, letterSpacing: 12, color: colors.bg, opacity: 0.22, textTransform: "uppercase" }}>
-              {phase}
-            </span>
-          </div>
           {/* Decorative circle */}
           <div style={{ position: "absolute", bottom: -140, left: -140, width: 520, height: 520, borderRadius: "50%", background: colors.bg, opacity: 0.08 }} />
         </div>
