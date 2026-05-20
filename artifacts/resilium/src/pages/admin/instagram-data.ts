@@ -1,10 +1,12 @@
 export type SlideBg = "alt" | "dark";
+export type SlideType = "score-bands" | "icon-grid" | "pillars" | "numbered";
 
 export interface Slide {
   bg: SlideBg;
   lines: string[];
   isHook?: boolean;
   isCta?: boolean;
+  slideType?: SlideType;
 }
 
 export interface IGPost {
@@ -423,6 +425,376 @@ export const IG_POSTS: IGPost[] = [
     imageLines: ["The version of you who prepared\nwill take care of the version of you\nwho needed it."],
     caption: "That's the whole point.\n\nresilium-platform.com — free resilience assessment. Link in bio.",
     hashtags: "#resilience #personaldevelopment #mindset #preparedness #selfimprovement #growthmindset #intentionalliving #selfcare #futureself #financialplanning",
+  },
+
+  // ─── Q1 2027 — INSPIRE ACTION ─────────────────────────────────────────────
+
+  // ─── WEEK 14 ──────────────────────────────────────────────────────────────
+  {
+    id: 40, week: "W14", day: "Mon", type: "carousel",
+    topic: "2027 resilience roadmap",
+    slides: [
+      { bg: "alt", isHook: true, lines: ["2027 starts with a question worth answering.", "Where do you actually stand?"] },
+      { bg: "dark", slideType: "numbered", lines: ["Your Q1 2027 Resilience Roadmap", "Take or retake the assessment — set your real baseline.", "Identify your two lowest-scoring dimensions — those are your Q1 focus.", "Set one specific, measurable improvement per focus area.", "Schedule check-ins at day 30, 60, and 90.", "Reassess at the end of Q1. Measure the distance."] },
+      { bg: "dark", lines: ["Why a roadmap beats a resolution:", "Resolutions are vague.\nRoadmaps are specific.", "Specific is what makes improvement measurable.", "Measurable is what makes improvement real."] },
+      { bg: "dark", isCta: true, lines: ["Start with step one — it's free.", "resilium-platform.com · Link in bio ↑"] },
+    ],
+    caption: "New year energy is real — but it fades fast without a structure underneath it.\n\nA resilience roadmap is different from a resolution. It starts with an honest baseline, identifies specific gaps, and gives you four milestones instead of one vague intention.\n\nFree assessment at resilium-platform.com. What's your Q1 focus dimension? 👇",
+    hashtags: "#newyear2027 #resilience #goalsetting #personaldevelopment #selfimprovement #intentionalliving #growthmindset #preparedness #habitbuilding #resiliumplatform",
+  },
+  {
+    id: 41, week: "W14", day: "Wed", type: "single",
+    topic: "Where were you 90 days ago",
+    imageLines: ["Where were you 90 days ago?\nWhere are you now?", "If you can't answer — that's the gap worth closing first."],
+    caption: "Progress without measurement is just motion.\n\nThe Resilium assessment gives you a number — across six dimensions — that you can actually track over time. Free at resilium-platform.com.",
+    hashtags: "#selfassessment #progressnotperfection #personaldevelopment #resilience #goalsetting #intentionalliving #growthmindset",
+  },
+  {
+    id: 42, week: "W14", day: "Fri", type: "quote",
+    topic: "You don't need a resolution",
+    imageLines: ["\u201cYou don\u2019t need a resolution.\nYou need a baseline.\u201d", "\u2014 Cristiana, Resilium"],
+    caption: "Resolutions assume you know what to improve. A baseline tells you.\n\nFree resilience assessment — resilium-platform.com.",
+    hashtags: "#newyear #resilience #personaldevelopment #growthmindset #selfawareness #intentionalliving #founderquote #resiliumplatform",
+  },
+
+  // ─── WEEK 15 ──────────────────────────────────────────────────────────────
+  {
+    id: 43, week: "W15", day: "Mon", type: "carousel",
+    topic: "What your score means",
+    slides: [
+      { bg: "alt", isHook: true, lines: ["Your Resilium score isn't a grade.", "It's a map. Here's how to read it."] },
+      { bg: "dark", slideType: "score-bands", lines: ["Where does your score put you?"] },
+      { bg: "dark", lines: ["What your score tells you:", "Which dimensions are pulling the overall number down.", "Where your highest-leverage improvements are.", "What to work on first — and why."] },
+      { bg: "dark", lines: ["What your score doesn't tell you:", "It's not a judgment of your intelligence, your worth,\nor your potential.", "It's a starting point — and starting points are meant to change."] },
+      { bg: "dark", isCta: true, lines: ["Know your score before you plan your quarter.", "Free — 5 minutes.", "resilium-platform.com · Link in bio ↑"] },
+    ],
+    caption: "A lot of people take the assessment and feel relieved. A lot of people feel surprised. Very few feel exactly what they expected.\n\nThe score isn't the point. What you do with it is.\n\nWhat did your first score tell you that you didn't already know? 👇",
+    hashtags: "#personalresilience #selfassessment #resilience #scorebands #growthmindset #personaldevelopment #intentionalliving #preparedness #resiliumplatform",
+  },
+  {
+    id: 44, week: "W15", day: "Wed", type: "single",
+    topic: "Most common first score",
+    imageLines: ["The most common first score on Resilium: 58.", "Strong in mindset.\nExposed in finances and preparedness.", "That\u2019s not a bad score.\nIt\u2019s an honest one."],
+    caption: "58 means you're above the midpoint overall, but your gaps are concentrated and specific — which makes them addressable.\n\nKnow your number. Start from there. resilium-platform.com",
+    hashtags: "#personalresilience #selfassessment #financialpreparedness #preparedness #growthmindset #resilience #resiliumplatform",
+  },
+  {
+    id: 45, week: "W15", day: "Sat", type: "quote",
+    topic: "Score as map not verdict",
+    imageLines: ["A score isn\u2019t a verdict.\nIt\u2019s the map\nyou didn\u2019t know you needed."],
+    caption: "Maps don't judge where you are. They show you how to get where you want to go.\n\nresilium-platform.com — free resilience assessment.",
+    hashtags: "#resilience #selfawareness #personaldevelopment #growthmindset #mindset #preparedness #resiliumplatform",
+  },
+
+  // ─── WEEK 16 ──────────────────────────────────────────────────────────────
+  {
+    id: 46, week: "W16", day: "Mon", type: "carousel",
+    topic: "The two pillars of resilience",
+    slides: [
+      { bg: "alt", isHook: true, lines: ["Resilience is built on two pillars.", "Most people only strengthen one."] },
+      { bg: "dark", slideType: "pillars", lines: ["The Two Pillars of Resilience", "Mental Resilience", "How you think, respond, and recover under pressure.", "Logistics & Resources", "The practical foundations that determine what\u2019s available when pressure arrives."] },
+      { bg: "dark", lines: ["Mental resilience without practical foundations:", "You can stay calm in a crisis — but you have no emergency fund.", "You think clearly — but have no options to choose from."] },
+      { bg: "dark", lines: ["Practical foundations without mental resilience:", "You have resources — but you freeze when pressure arrives.", "You prepared — but can\u2019t access your own plan under stress."] },
+      { bg: "dark", isCta: true, lines: ["Resilium measures both.\nBecause both matter.", "Free — 5 minutes.", "resilium-platform.com · Link in bio \u2191"] },
+    ],
+    caption: "Most resilience advice focuses on mindset. Most preparedness advice focuses on logistics. Resilium is built on the insight that you need both — and that gaps in one undermine the other.\n\nWhich pillar do you think is your stronger one right now? 👇",
+    hashtags: "#resilience #mentalresilience #preparedness #twopillars #personaldevelopment #growthmindset #selfimprovement #resiliumplatform #intentionalliving",
+  },
+  {
+    id: 47, week: "W16", day: "Wed", type: "single",
+    topic: "Why both pillars matter",
+    imageLines: ["Mindset prepares you to think clearly under pressure.", "Logistics prepares you to have something to think clearly about.", "Both pillars. Both scored."],
+    caption: "The difference between people who navigate disruption well and those who don't isn't usually mindset alone or preparation alone. It's both, working together.\n\nFree assessment at resilium-platform.com.",
+    hashtags: "#resilience #mentalstrength #preparedness #personaldevelopment #growthmindset #mindset #resiliumplatform",
+  },
+  {
+    id: 48, week: "W16", day: "Fri", type: "quote",
+    topic: "Confidence without preparation is fragile",
+    imageLines: ["\u201cConfidence without preparation is fragile.\nPreparation without adaptability\nbreaks under pressure.\nYou need both.\u201d", "\u2014 Cristiana, Resilium"],
+    caption: "Both pillars. Measured together at resilium-platform.com.",
+    hashtags: "#resilience #mindset #preparedness #founderquote #growthmindset #personaldevelopment #resiliumplatform",
+  },
+
+  // ─── WEEK 17 ──────────────────────────────────────────────────────────────
+  {
+    id: 49, week: "W17", day: "Mon", type: "carousel",
+    topic: "30-day resilience habit plan",
+    slides: [
+      { bg: "alt", isHook: true, lines: ["Thirty days is enough to build one real resilience habit.", "Here\u2019s the plan worth following."] },
+      { bg: "dark", slideType: "numbered", lines: ["A 30-Day Resilience Habit Plan", "Week 1: Identify your lowest-scoring dimension. Focus there only.", "Week 2: Take one concrete, small action in that dimension.", "Week 3: Add a second small action in the same dimension.", "Week 4: Reflect — did it move the needle? Extend what worked."] },
+      { bg: "dark", lines: ["The rule:", "One dimension. One focus. One month.", "Improvement isn\u2019t about doing everything at once.", "It\u2019s about doing the right thing — consistently."] },
+      { bg: "dark", isCta: true, lines: ["Start with your lowest score.\nThat\u2019s your highest-leverage move.", "Free assessment — 5 minutes.", "resilium-platform.com · Link in bio \u2191"] },
+    ],
+    caption: "The mistake most people make: trying to improve every dimension at once.\n\nThe better approach: pick the dimension where a small improvement creates the most downstream benefit — and focus there for 30 days.\n\nSave this post. What's your 30-day focus? 👇",
+    hashtags: "#30daychallenge #resilience #habitbuilding #personaldevelopment #goalsetting #intentionalliving #growthmindset #selfimprovement #resiliumplatform",
+  },
+  {
+    id: 50, week: "W17", day: "Wed", type: "single",
+    topic: "Highest ROI daily action",
+    imageLines: ["The highest-ROI resilience habit:\nReview your score once a month and ask one question.", "\u201cWhat changed \u2014 and did I do it intentionally?\u201d"],
+    caption: "Most improvement happens when you're watching. The habit of measurement makes the difference between accidental progress and intentional progress.\n\nTrack your score over time with Resilium Pro — resilium-platform.com.",
+    hashtags: "#habitbuilding #personaldevelopment #resilience #selfimprovement #intentionalliving #growthmindset #resiliumplatform",
+  },
+  {
+    id: 51, week: "W17", day: "Sat", type: "quote",
+    topic: "Small consistent actions",
+    imageLines: ["Small consistent actions.\nThat\u2019s the whole method."],
+    caption: "No dramatic overhaul. No perfect conditions. Just the next small thing, done again.\n\nresilium-platform.com",
+    hashtags: "#resilience #habitbuilding #consistency #personaldevelopment #growthmindset #selfimprovement #intentionalliving",
+  },
+
+  // ─── WEEK 18 ──────────────────────────────────────────────────────────────
+  {
+    id: 52, week: "W18", day: "Mon", type: "carousel",
+    topic: "5 financial habits that build resilience",
+    slides: [
+      { bg: "alt", isHook: true, lines: ["Financial resilience isn\u2019t about wealth.", "It\u2019s about these five habits."] },
+      { bg: "dark", slideType: "icon-grid", lines: ["5 Financial Habits That Build Real Resilience", "\ud83d\udcb0 Separate buffer\nA dedicated emergency account, untouched.", "\ud83d\udcca Know your runway\nMonths of expenses covered if income stops.", "\ud83d\udd01 Automate protection\nWeekly auto-transfer to your emergency account.", "\ud83d\udee1\ufe0f Audit insurance\nHealth, disability, renters — find the gaps."] },
+      { bg: "dark", lines: ["The fifth habit:", "Diversify income deliberately.", "Not dramatically \u2014 one consulting option,\none portable skill, one income stream that\nisn\u2019t dependent on your current employer."] },
+      { bg: "dark", isCta: true, lines: ["Your financial dimension score shows\nyou exactly where to start.", "Free \u2014 5 minutes.", "resilium-platform.com \u00b7 Link in bio \u2191"] },
+    ],
+    caption: "Financial resilience is the dimension that most people think they're better at than they are.\n\nIt's not about income level. It's about these five habits — and most people are missing at least two of them.\n\nWhich habit is your weakest? 👇",
+    hashtags: "#financialresilience #personalfinance #emergencyfund #financialhabits #moneymindset #financialliteracy #wealthbuilding #incomestreams #financialplanning #resiliumplatform",
+  },
+  {
+    id: 53, week: "W18", day: "Wed", type: "single",
+    topic: "Emergency fund wrong question",
+    imageLines: ["The emergency fund question most people ask:\n\u201cDo I have one?\u201d", "The right question:\n\u201cCould I access it in 48 hours\nwithout penalty?\u201d"],
+    caption: "A 401k is not an emergency fund. Home equity is not an emergency fund. Investments that take days to liquidate are not an emergency fund.\n\nThe real question is: what can you access immediately? That number is your actual buffer.\n\nFree financial resilience score at resilium-platform.com.",
+    hashtags: "#emergencyfund #personalfinance #financialliteracy #financialplanning #financialresilience #moneymindset #wealthbuilding",
+  },
+  {
+    id: 54, week: "W18", day: "Fri", type: "quote",
+    topic: "Buffer is decision-making time",
+    imageLines: ["A buffer isn\u2019t savings.\nIt\u2019s decision-making time."],
+    caption: "The difference between reacting and responding — in a financial crisis — is usually measured in months of runway.\n\nresilium-platform.com — score your financial resilience.",
+    hashtags: "#financialresilience #emergencyfund #personalfinance #moneymindset #financialliteracy #resilience #resiliumplatform",
+  },
+
+  // ─── WEEK 19 ──────────────────────────────────────────────────────────────
+  {
+    id: 55, week: "W19", day: "Mon", type: "carousel",
+    topic: "Career portability test",
+    slides: [
+      { bg: "alt", isHook: true, lines: ["Your career resilience comes down to 5 questions.", "Most people can\u2019t answer all of them honestly."] },
+      { bg: "dark", slideType: "numbered", lines: ["The Career Portability Test", "Could 3 different types of companies hire you for what you do?", "Could you freelance your core skill if you had to tomorrow?", "When did you last update your resume or LinkedIn?", "Who in your network would refer you within 30 days?", "What skill, if you had it, would make you 50% more valuable?"] },
+      { bg: "dark", lines: ["The answers that matter:", "Not the ones you wish were true \u2014\nthe ones that are actually true today.", "The gap between those two answers\nis your career resilience gap."] },
+      { bg: "dark", isCta: true, lines: ["Resilium scores your career dimension specifically.", "Free \u2014 5 minutes.", "resilium-platform.com \u00b7 Link in bio \u2191"] },
+    ],
+    caption: "Career resilience isn't about your salary. It's about your options.\n\nThe portability test is the fastest way to see whether a disruption would give you leverage — or leave you scrambling.\n\nWhich of these 5 questions is hardest to answer honestly? 👇",
+    hashtags: "#careerresilience #careerdevelopment #jobsecurity #careertips #professionaldevelopment #portableskills #networking #futureofwork #layoffs #resiliumplatform",
+  },
+  {
+    id: 56, week: "W19", day: "Wed", type: "single",
+    topic: "Skills that travel vs skills that don't",
+    imageLines: ["Skills tied to one employer expire with the job.", "Skills tied to a problem \u2014 writing, building,\nanalyzing, selling, managing \u2014 travel with you forever.", "Know which kind you have more of."],
+    caption: "Career resilience starts with an honest inventory of what you're actually bringing to the market — not what your title says.\n\nFree career resilience score at resilium-platform.com.",
+    hashtags: "#careerresilience #portableskills #careerdevelopment #jobsecurity #futureofwork #professionaldevelopment #upskilling #resiliumplatform",
+  },
+  {
+    id: 57, week: "W19", day: "Sat", type: "quote",
+    topic: "Value not attached to employer",
+    imageLines: ["Your value isn\u2019t attached to your employer.\nMake sure you actually know that."],
+    caption: "The clearest sign of career resilience: you could leave — and be fine.\n\nresilium-platform.com — score your career dimension.",
+    hashtags: "#careerresilience #careerdevelopment #jobsecurity #personaldevelopment #professionalgrowth #resiliumplatform",
+  },
+
+  // ─── WEEK 20 ──────────────────────────────────────────────────────────────
+  {
+    id: 58, week: "W20", day: "Mon", type: "carousel",
+    topic: "Social resilience — quality not quantity",
+    slides: [
+      { bg: "alt", isHook: true, lines: ["Social resilience isn\u2019t about your follower count.", "It\u2019s about four very specific things."] },
+      { bg: "dark", slideType: "icon-grid", lines: ["What Social Resilience Actually Measures", "\ud83d\udcde Crisis contacts\nWho answers at 2am \u2014 and actually helps.", "\ud83e\udd1d Reliable support\nPeople who show up, not just sympathize.", "\ud83c\udf10 Professional reach\nConnections that create real optionality.", "\ud83c\udfd8\ufe0f Community\nBelonging beyond work and immediate family."] },
+      { bg: "dark", lines: ["The gap most people have:", "A wide network and shallow connections.", "Social resilience requires depth \u2014 not reach.", "One person who will actually help outweighs\n500 connections who won\u2019t."] },
+      { bg: "dark", isCta: true, lines: ["Map your social resilience honestly.", "Free \u2014 5 minutes.", "resilium-platform.com \u00b7 Link in bio \u2191"] },
+    ],
+    caption: "The loneliest people aren't the ones who are alone — they're the ones who are connected to a lot of people but deeply supported by very few.\n\nSocial resilience is one of the most underassessed dimensions in most people's profiles.\n\nHow many people could you genuinely call in a crisis? 👇",
+    hashtags: "#socialresilience #community #relationships #personaldevelopment #resilience #mentalhealth #support #intentionalliving #resiliumplatform",
+  },
+  {
+    id: 59, week: "W20", day: "Wed", type: "single",
+    topic: "The two calls you need to make",
+    imageLines: ["Two calls you need to be able to make:", "1. A professional contact who would vouch for you in a crisis.\n2. A personal contact who would show up if you needed help.", "If you\u2019re not certain who those people are \u2014 that\u2019s worth knowing."],
+    caption: "Not a network of hundreds. Just two specific people, for two specific situations.\n\nSocial resilience is scored in the Resilium assessment — free at resilium-platform.com.",
+    hashtags: "#socialresilience #relationships #community #resilience #personaldevelopment #support #resiliumplatform",
+  },
+  {
+    id: 60, week: "W20", day: "Fri", type: "quote",
+    topic: "Resilience without relationships",
+    imageLines: ["Resilience without relationships\nis just stubbornness."],
+    caption: "The research is consistent: social support is one of the strongest predictors of recovery after disruption.\n\nresilium-platform.com — score your social resilience.",
+    hashtags: "#socialresilience #relationships #community #resilience #personaldevelopment #mentalhealth #resiliumplatform",
+  },
+
+  // ─── WEEK 21 ──────────────────────────────────────────────────────────────
+  {
+    id: 61, week: "W21", day: "Mon", type: "carousel",
+    topic: "Physical resilience — the skipped dimension",
+    slides: [
+      { bg: "alt", isHook: true, lines: ["Physical resilience is the dimension most people skip.", "It\u2019s also the one that affects every other dimension."] },
+      { bg: "dark", lines: ["Why it matters:", "Under sustained pressure, physical capacity determines\nhow long you can think clearly, work consistently,\nand recover when disruption passes."] },
+      { bg: "dark", lines: ["Sleep:", "Chronic poor sleep degrades decision quality faster\nthan almost any other single variable.", "It\u2019s a resilience input, not a lifestyle preference."] },
+      { bg: "dark", lines: ["Movement:", "Regular physical activity is the most evidence-backed\nform of stress regulation available.", "Not performance \u2014 function. Not fitness \u2014 capacity."] },
+      { bg: "dark", lines: ["Health access:", "Do you have access to care if you need it?\nIs there a 30-day medication supply?\nIs your health a risk factor in a disruption?"] },
+      { bg: "dark", isCta: true, lines: ["Physical resilience is scored in the assessment.\nIt\u2019s not about fitness.\nIt\u2019s about capacity.", "Free \u2014 5 minutes.", "resilium-platform.com \u00b7 Link in bio \u2191"] },
+    ],
+    caption: "Most people deplete their physical resilience first under pressure — sleep goes, movement goes, nutrition goes. And then the cognitive capacity they need to navigate the disruption also starts to go.\n\nTaking care of your body isn't a luxury. It's resilience infrastructure.\n\nWhat's your weakest physical resilience habit? 👇",
+    hashtags: "#physicalresilience #health #sleep #wellness #personaldevelopment #resilience #selfcare #growthmindset #resiliumplatform",
+  },
+  {
+    id: 62, week: "W21", day: "Wed", type: "single",
+    topic: "Health as resilience asset",
+    imageLines: ["Your health is a resilience asset.", "It\u2019s also, for most people,\nthe first one to deplete under sustained pressure.", "Recovery isn\u2019t a luxury.\nIt\u2019s maintenance."],
+    caption: "Physical resilience isn't about peak performance. It's about having enough capacity in reserve to navigate disruption without your body becoming the crisis.\n\nFree assessment — resilium-platform.com.",
+    hashtags: "#physicalresilience #health #wellness #selfcare #resilience #personaldevelopment #resiliumplatform",
+  },
+  {
+    id: 63, week: "W21", day: "Sat", type: "quote",
+    topic: "Body as infrastructure",
+    imageLines: ["Your body is your most important infrastructure.\nMaintain it accordingly."],
+    caption: "No other asset you have is as foundational — or as overlooked when everything else demands attention.\n\nresilium-platform.com",
+    hashtags: "#physicalresilience #health #wellness #resilience #selfcare #personaldevelopment #resiliumplatform",
+  },
+
+  // ─── WEEK 22 ──────────────────────────────────────────────────────────────
+  {
+    id: 64, week: "W22", day: "Mon", type: "carousel",
+    topic: "Practical preparedness — 72 hours",
+    slides: [
+      { bg: "alt", isHook: true, lines: ["72 hours.", "That\u2019s the resilience window most emergency frameworks target.", "Here\u2019s what practical preparedness actually means."] },
+      { bg: "dark", slideType: "icon-grid", lines: ["The Practical Preparedness Essentials", "\ud83c\udf92 72-hour kit\nWater, food, first aid, power bank, cash.", "\ud83d\udcc4 Important documents\nBackup copies \u2014 digital and physical.", "\ud83d\udcde Emergency contacts\nLocal numbers you\u2019ve actually saved.", "\ud83d\udc8a Medication supply\n30-day buffer for essential prescriptions."] },
+      { bg: "dark", lines: ["Why most people don\u2019t do this:", "It\u2019s not difficult. It\u2019s not expensive.", "It\u2019s just not urgent until it is.", "And by then, you can\u2019t do it calmly."] },
+      { bg: "dark", isCta: true, lines: ["Know your practical resilience score.", "Then spend one afternoon closing the gaps.", "resilium-platform.com \u00b7 Link in bio \u2191"] },
+    ],
+    caption: "Practical preparedness is the most actionable dimension in the entire assessment.\n\nThe gaps are specific. The actions are clear. And most of them can be completed in a single focused afternoon — not a weekend, not a major project. An afternoon.\n\nWhat's on your practical preparedness to-do list? 👇",
+    hashtags: "#practicalpreparedness #emergencypreparedness #preparedness #72hourkit #resilience #personaldevelopment #intentionalliving #resiliumplatform",
+  },
+  {
+    id: 65, week: "W22", day: "Wed", type: "single",
+    topic: "One afternoon",
+    imageLines: ["Most practical resilience gaps take one afternoon to close.", "Check the kit. Back up the documents.\nSave the emergency contacts.", "The barrier isn\u2019t effort.\nIt\u2019s awareness."],
+    caption: "You know this needs to happen. The only thing missing is a specific afternoon on the calendar.\n\nFind your practical resilience gaps first — free at resilium-platform.com.",
+    hashtags: "#practicalpreparedness #emergencypreparedness #preparedness #resilience #personaldevelopment #intentionalliving #resiliumplatform",
+  },
+  {
+    id: 66, week: "W22", day: "Fri", type: "quote",
+    topic: "Not preparing for catastrophe",
+    imageLines: ["You\u2019re not preparing for catastrophe.\nYou\u2019re reducing the cost\nof the ordinary unexpected."],
+    caption: "Car insurance isn't pessimistic. Neither is practical preparedness.\n\nresilium-platform.com",
+    hashtags: "#preparedness #resilience #personaldevelopment #mindset #growthmindset #resiliumplatform",
+  },
+
+  // ─── WEEK 23 ──────────────────────────────────────────────────────────────
+  {
+    id: 67, week: "W23", day: "Mon", type: "carousel",
+    topic: "What 90 days of work looks like",
+    slides: [
+      { bg: "alt", isHook: true, lines: ["You started Q1 with a baseline.", "Here\u2019s what 90 days of intentional work actually changes."] },
+      { bg: "dark", slideType: "numbered", lines: ["What Changes After 90 Days", "Financial: A buffer that didn\u2019t exist \u2014 or grew meaningfully.", "Career: A network re-engaged. A portable skill started.", "Practical: A kit assembled. Documents backed up. Contacts saved.", "Social: One relationship deepened. One community touchpoint made.", "Psychological: A recovery practice adopted and protected."] },
+      { bg: "dark", lines: ["The score shift:", "Most users who complete a focused 90-day period see\na 10\u201320 point improvement in targeted dimensions.", "Not because everything changed.\nBecause targeted things did."] },
+      { bg: "dark", isCta: true, lines: ["Retake your assessment.\nSee exactly how far you\u2019ve come.", "resilium-platform.com \u00b7 Link in bio \u2191"] },
+    ],
+    caption: "Ninety days is not a long time. But it's enough to move a number — if you know which number you're targeting.\n\nIf you started with Resilium in January — what's changed? Share below 👇\n\nIf you haven't started yet — this is your prompt.",
+    hashtags: "#90daychallenge #resilience #progressnotperfection #personaldevelopment #selfimprovement #habitbuilding #growthmindset #intentionalliving #resiliumplatform",
+  },
+  {
+    id: 68, week: "W23", day: "Wed", type: "single",
+    topic: "Dimensions that improve fastest",
+    imageLines: ["The dimensions that improve fastest in 90 days:", "Practical resilience \u2014 gaps are specific, actions are clear.\nCareer resilience \u2014 one conversation can shift it significantly.", "The slowest: financial \u2014\nbecause it compounds over months, not weeks."],
+    caption: "Knowing which dimension responds fastest to focused effort helps you sequence your improvements in the right order.\n\nResilium Pro shows you prioritized recommendations based on your specific profile. resilium-platform.com.",
+    hashtags: "#resilience #selfimprovement #personaldevelopment #growthmindset #habitbuilding #financialplanning #resiliumplatform",
+  },
+  {
+    id: 69, week: "W23", day: "Sat", type: "quote",
+    topic: "Second assessment is more honest",
+    imageLines: ["The second assessment is always\nmore honest than the first.\nBecause you know what you actually did."],
+    caption: "The first score shows where you are. The second shows whether the work was real.\n\nTrack your resilience over time at resilium-platform.com.",
+    hashtags: "#resilience #selfassessment #personaldevelopment #growthmindset #selfawareness #intentionalliving #resiliumplatform",
+  },
+
+  // ─── WEEK 24 ──────────────────────────────────────────────────────────────
+  {
+    id: 70, week: "W24", day: "Mon", type: "carousel",
+    topic: "The research behind Resilium",
+    slides: [
+      { bg: "alt", isHook: true, lines: ["Every question in the Resilium assessment has a source.", "We didn\u2019t invent the framework.\nThe research did."] },
+      { bg: "dark", slideType: "icon-grid", lines: ["The Research Behind Every Question", "\ud83d\udcda Peer-Reviewed Studies\nPositive psychology and resilience science.", "\u2705 Validated Scales\nEstablished resilience measurement tools.", "\ud83c\udfd7\ufe0f Institutional Frameworks\nFEMA, WHO, and public health research.", "\ud83d\udd04 Real-World Application\nAdapted for practical individual use."] },
+      { bg: "dark", lines: ["Why it matters:", "A resilience tool that isn\u2019t grounded in evidence\nisn\u2019t a resilience tool.", "It\u2019s a personality quiz.", "We chose science because it\u2019s more useful."] },
+      { bg: "dark", isCta: true, lines: ["The Pro report includes\nmethodology references.", "Understand the \u2018why\u2019 behind your score.", "resilium-platform.com \u00b7 Link in bio \u2191"] },
+    ],
+    caption: "We get asked sometimes: \"why should I trust this assessment?\"\n\nThe honest answer: don't trust us — trust the research we built it on. Positive psychology. Emergency preparedness science. Validated resilience scales from institutional frameworks.\n\nThe questions aren't arbitrary. They're sourced.\n\nWhat would you want to understand better about the methodology? 👇",
+    hashtags: "#resilience #research #science #peerreviewed #personaldevelopment #evidencebased #resiliumplatform #methodology",
+  },
+  {
+    id: 71, week: "W24", day: "Wed", type: "single",
+    topic: "Why peer-reviewed research was non-negotiable",
+    imageLines: ["Why peer-reviewed research was non-negotiable for us:", "Because people make decisions based on their assessment.", "If the assessment isn\u2019t valid,\nthe decisions built on it aren\u2019t either."],
+    caption: "The science behind the assessment is what makes the results actionable rather than just interesting.\n\nresilium-platform.com — built on evidence.",
+    hashtags: "#resilience #research #evidencebased #peerreviewed #personaldevelopment #resiliumplatform",
+  },
+  {
+    id: 72, week: "W24", day: "Fri", type: "quote",
+    topic: "We built the tool not the framework",
+    imageLines: ["We didn\u2019t build the framework.\nThe research did.\nWe built the tool."],
+    caption: "Decades of resilience science, made accessible and actionable in under five minutes.\n\nresilium-platform.com",
+    hashtags: "#resilience #research #evidencebased #personaldevelopment #growthmindset #resiliumplatform",
+  },
+
+  // ─── WEEK 25 ──────────────────────────────────────────────────────────────
+  {
+    id: 73, week: "W25", day: "Mon", type: "carousel",
+    topic: "Privacy by design",
+    slides: [
+      { bg: "alt", isHook: true, lines: ["You shouldn\u2019t have to give up your identity\nto understand yourself.", "Here\u2019s what privacy by design means at Resilium."] },
+      { bg: "dark", slideType: "icon-grid", lines: ["Privacy by Design \u2014 In Practice", "\ud83d\ude48 No name required\nAnonymous by default from the start.", "\ud83d\udd12 Never sold or shared\nYour data stays yours, always.", "\u2705 GDPR-compliant\nBuilt to the highest privacy standard.", "\u2699\ufe0f You\u2019re in control\nCreate an account only if you choose to track."] },
+      { bg: "dark", lines: ["Why we built it this way:", "People give more honest answers\nwhen they trust the environment.", "Honest answers produce more accurate scores.", "More accurate scores produce more useful plans.", "Privacy isn\u2019t a feature.\nIt\u2019s the foundation."] },
+      { bg: "dark", isCta: true, lines: ["Take the assessment.\nNo account required.", "Understand yourself honestly.", "resilium-platform.com \u00b7 Link in bio \u2191"] },
+    ],
+    caption: "Most apps want your data. We deliberately designed Resilium so you don't have to give it.\n\nAnonymous by default. No name, no email, no advertising profile. Just your results — and what you decide to do with them.\n\nDoes privacy factor into the tools you choose? 👇",
+    hashtags: "#privacybydesign #GDPR #privacy #personaldata #resilience #personaldevelopment #trustworthy #resiliumplatform",
+  },
+  {
+    id: 74, week: "W25", day: "Wed", type: "single",
+    topic: "The trust question",
+    imageLines: ["The question nobody asks about self-assessment tools:", "\u201cWho has access to my answers?\u201d", "At Resilium: no one does.\nNot by default. Not without your explicit choice."],
+    caption: "Self-knowledge requires honesty. Honesty requires trust. Trust requires a system that's actually safe.\n\nAnonymous assessment — resilium-platform.com.",
+    hashtags: "#privacy #personaldata #trust #GDPR #resilience #selfassessment #resiliumplatform",
+  },
+  {
+    id: 75, week: "W25", day: "Sat", type: "quote",
+    topic: "Self-knowledge and privacy",
+    imageLines: ["Self-knowledge\nshouldn\u2019t cost you\nyour privacy."],
+    caption: "It never should have been a trade-off.\n\nresilium-platform.com — anonymous by default.",
+    hashtags: "#privacy #selfawareness #personaldevelopment #resilience #resiliumplatform",
+  },
+
+  // ─── WEEK 26 ──────────────────────────────────────────────────────────────
+  {
+    id: 76, week: "W26", day: "Mon", type: "carousel",
+    topic: "Q1 complete — carry into Q2",
+    slides: [
+      { bg: "alt", isHook: true, lines: ["Q1 is done.", "Here\u2019s what matters most as you carry it into Q2."] },
+      { bg: "dark", slideType: "numbered", lines: ["What to Carry from Q1 into Q2", "Your current score \u2014 write it down. It\u2019s your new baseline.", "The dimension you moved \u2014 that\u2019s your proof of concept.", "The dimension you didn\u2019t touch \u2014 that\u2019s your Q2 priority.", "The habit that stuck \u2014 protect it deliberately."] },
+      { bg: "dark", lines: ["What Q2 looks like:", "Build Awareness & Trust at scale.", "More people in your life need to understand\nwhat resilience actually is.", "Your experience is part of that conversation."] },
+      { bg: "dark", isCta: true, lines: ["Start Q2 with a fresh assessment.\nSee exactly where three months of work landed you.", "resilium-platform.com \u00b7 Link in bio \u2191"] },
+    ],
+    caption: "Q1 ends not with a grade — but with a baseline you can actually use.\n\nThe score you have now is the starting point for Q2. The dimension you moved is your proof that improvement is possible. The dimension you didn't touch is your next opportunity.\n\nWhat's your Q2 priority? 👇",
+    hashtags: "#Q1review #Q2goals #resilience #personaldevelopment #goalsetting #habitbuilding #intentionalliving #growthmindset #resiliumplatform",
+  },
+  {
+    id: 77, week: "W26", day: "Wed", type: "single",
+    topic: "Q1 key lessons",
+    imageLines: ["Three things that built the most resilience in Q1:", "1. Knowing exactly which dimension to focus on.\n2. Taking one specific action instead of ten vague ones.\n3. Measuring \u2014 and letting the number tell the truth."],
+    caption: "The method works because it's specific. Specificity is what separates improvement that sticks from improvement that doesn't.\n\nCarry that into Q2 — and into Q3. resilium-platform.com.",
+    hashtags: "#resilience #lessons #personaldevelopment #growthmindset #intentionalliving #habitbuilding #selfimprovement #resiliumplatform",
+  },
+  {
+    id: 78, week: "W26", day: "Fri", type: "quote",
+    topic: "Ready for what's next",
+    imageLines: ["The version of you\nwho built this foundation\nis ready for what\u2019s next."],
+    caption: "Q2 begins.\n\nresilium-platform.com — free resilience assessment.",
+    hashtags: "#resilience #personaldevelopment #growthmindset #intentionalliving #selfimprovement #resiliumplatform #newyear #Q2",
   },
 ];
 

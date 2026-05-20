@@ -86,6 +86,11 @@ const TREATMENT_MAP: Record<number, Treatment> = {
   25: "standard",  26: "data",      27: "hero",
   28: "data",      29: "geometric", 30: "split",
   31: "quote",     32: "hero",
+  33: "standard",  34: "quote",     35: "data",
+  36: "data",      37: "geometric", 38: "split",
+  39: "data",      40: "quote",     41: "standard",
+  42: "hero",      43: "data",      44: "geometric",
+  45: "hero",
 };
 
 // ─── Branded LinkedIn graphic ─────────────────────────────────────────────────
@@ -104,6 +109,7 @@ function LinkedInFrame({
     Awareness:  "#38bdf8",
     Authority:  "#a78bfa",
     Conversion: colors.accent,
+    Retention:  "#34d399",
   };
   const accentColor = phaseColors[phase] ?? colors.accent;
   const treatment: Treatment = isFounder ? "standard" : (TREATMENT_MAP[post?.id ?? 1] ?? "standard");

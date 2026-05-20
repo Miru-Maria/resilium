@@ -1,5 +1,5 @@
-export type LIQuarter = "Q2 2026" | "Q3 2026" | "Q4 2026";
-export type LIPhase = "Awareness" | "Authority" | "Conversion";
+export type LIQuarter = "Q2 2026" | "Q3 2026" | "Q4 2026" | "Q1 2027";
+export type LIPhase = "Awareness" | "Authority" | "Conversion" | "Retention";
 
 export interface LIPost {
   id: number;
@@ -777,18 +777,319 @@ The assessment is free. It takes five minutes.
 Here's to a year of building from clarity.`,
     graphicDirection: "New year forward-looking graphic. Horizon, purposeful typography. Brand palette.",
   },
+
+  // ─── Q1 2027 — Retention ──────────────────────────────────────────────────────
+  {
+    id: 33, week: 33, date: "January 06, 2027",
+    quarter: "Q1 2027", phase: "Retention", phaseGoal: "Re-engage existing users and deepen platform value",
+    hook: "A new year begins with the same question: where do you actually stand?",
+    body: `Every January, people set intentions.
+
+Lose weight. Save more. Stress less.
+
+The intentions are genuine. The problem is they almost always start without a baseline.
+
+A baseline is the thing that makes improvement measurable. Without it, you're not tracking progress — you're making assumptions about it.
+
+This year, I'd suggest starting differently.
+
+Before setting a single intention, take five minutes to answer the actual question: across financial resilience, career portability, practical preparedness, social infrastructure, physical capacity, and psychological flexibility — where do you actually stand?
+
+The answer might confirm what you suspected. It might surprise you. Either way, it gives you something to work from.
+
+Not a resolution. A starting point.
+
+${LI_CTA}`,
+    graphicDirection: "Clean new year opening — purposeful, not celebratory. Brand navy with amber baseline measurement visual.",
+  },
+  {
+    id: 34, week: 34, date: "January 13, 2027",
+    quarter: "Q1 2027", phase: "Retention", phaseGoal: "Re-engage existing users and deepen platform value",
+    hook: "The relationship between habit and resilience is more direct than most people realize.",
+    body: `Resilience isn't built in crises. It's built in the small, recurring decisions you make when nothing is wrong.
+
+The emergency fund you add to every month — not because you need it now, but because one day you might.
+
+The skill you're developing — not because your job is at risk, but because portability is protection.
+
+The relationships you're maintaining — not because you need support right now, but because isolation in a crisis is its own kind of damage.
+
+This is what habit has to do with resilience: the habits that build it are the ones that feel optional until they're not.
+
+The challenge with optional habits is that they're the first ones to drop when life gets busy.
+
+Which is exactly the wrong time to stop.
+
+The people who consistently score higher on resilience assessments share one trait: they protect the habits that feel unnecessary right up until they become essential.
+
+${LI_CTA}`,
+    graphicDirection: "Quote treatment — centered insight on dark navy. Amber accent. Clean and philosophical.",
+  },
+  {
+    id: 35, week: 35, date: "January 20, 2027",
+    quarter: "Q1 2027", phase: "Retention", phaseGoal: "Re-engage existing users and deepen platform value",
+    hook: "The six-dimension framework didn't emerge from a single source. Here's the full picture.",
+    body: `The Resilium assessment covers six dimensions of resilience:
+
+Financial. Career & Skills. Practical Preparedness. Social. Physical. Psychological.
+
+People sometimes ask: why these six? Where did the framework come from?
+
+The honest answer is that it wasn't invented — it was assembled from multiple bodies of research that had been developing in parallel for decades.
+
+Emergency preparedness science (FEMA, Red Cross) contributed the practical and logistical dimensions. Positive psychology contributed the psychological and social components. Occupational resilience research contributed the career and financial dimensions.
+
+The synthesis was the work: translating rigorous academic and institutional frameworks into something a person could complete in five minutes and act on immediately.
+
+The six dimensions aren't arbitrary. Each one represents a category of vulnerability that research has consistently identified as significant in how people navigate disruption.
+
+Understanding why each question exists is part of what makes the results more useful. The Pro report includes methodology references for exactly that reason.
+
+${LI_CTA}`,
+    graphicDirection: "Data-driven framework visual — six labeled dimensions arranged cleanly. Dark background, amber highlights.",
+  },
+  {
+    id: 36, week: 36, date: "January 27, 2027",
+    quarter: "Q1 2027", phase: "Retention", phaseGoal: "Re-engage existing users and deepen platform value",
+    hook: "Most users who complete a focused 90-day period improve their score by 10–20 points. Here's what that shift actually looks like.",
+    body: `A 10-point improvement sounds modest. In practice, it often represents a meaningful structural change.
+
+Here's what a typical 10-20 point improvement over 90 days involves:
+
+Financial: Building a dedicated emergency buffer that wasn't there before. Automating a small but consistent weekly contribution. Identifying one income diversification option.
+
+Career: Updating professional materials. Re-engaging two or three key relationships. Starting one portable skill development project.
+
+Practical: Assembling a basic 72-hour kit. Backing up essential documents. Saving emergency contact numbers properly.
+
+No single action is dramatic. The compound effect is.
+
+The dimensions that improve fastest are the ones with the clearest, most actionable gaps. Practical resilience tends to move fastest — the barriers are awareness and attention, not time or money.
+
+The dimensions that improve slowest — financial, primarily — require consistency over months. But they compound the most significantly over time.
+
+The most common thing users say after a 90-day reassessment: "I didn't think these small things would actually show up in the score."
+
+They do.
+
+${LI_CTA}`,
+    graphicDirection: "Before/after score comparison — clear data visual. Dimension-level breakdown showing movement. Clean and credible.",
+  },
+  {
+    id: 37, week: 37, date: "February 03, 2027",
+    quarter: "Q1 2027", phase: "Retention", phaseGoal: "Re-engage existing users and deepen platform value",
+    hook: "The resilience dimension most often neglected by high performers.",
+    body: `High performers tend to score well on career resilience.
+
+Strong professional networks. Marketable skills. Clear track records. The portability is real.
+
+They also tend to underinvest in one specific dimension: practical preparedness.
+
+The logic is understandable. When your income is strong, your options are broad, and your professional confidence is high, the 72-hour kit and the document backup feel like someone else's problem.
+
+What the data shows is that practical preparedness gaps don't correlate with income or professional success. They correlate with attention — and high performers are often giving their attention elsewhere.
+
+The irony is that practical resilience gaps are the fastest to close. They're not expensive. They're not complex. They just require a focused afternoon and the awareness that the gap exists.
+
+The Resilium assessment surfaces this gap explicitly. For a lot of high-performing users, it's the dimension that surprises them most — and the one they close fastest once they see it.
+
+${LI_CTA}`,
+    graphicDirection: "Geometric visual — contrasting two dimensions. Career high, practical low. Clean, insight-driven layout.",
+  },
+  {
+    id: 38, week: 38, date: "February 10, 2027",
+    quarter: "Q1 2027", phase: "Retention", phaseGoal: "Re-engage existing users and deepen platform value",
+    hook: "Community is not a soft metric. It's a structural one.",
+    body: `When we talk about social resilience, the conversation often drifts toward warmth.
+
+Having people who care about you. Feeling connected. Not being isolated.
+
+These matter. But social resilience is also structural.
+
+The question isn't just "do you have people around you?" It's "do you have people who can actually help when specific things go wrong?"
+
+A professional contact who would refer you without hesitation. A personal contact who would show up in a practical crisis. Access to a community with enough density that someone in it has information or resources relevant to your situation.
+
+These aren't abstract. In a job loss, the difference between a 3-month job search and a 6-month job search is often the density of a professional network. In a personal crisis, the difference between recovery and prolonged difficulty is often whether someone shows up.
+
+Social resilience is scored in the Resilium assessment because the research is consistent: social support is one of the strongest predictors of resilience outcomes.
+
+It's not soft. It's structural.
+
+${LI_CTA}`,
+    graphicDirection: "Split layout — left shows isolation metric, right shows connected network visual. Dark navy, amber connectors.",
+  },
+  {
+    id: 39, week: 39, date: "February 17, 2027",
+    quarter: "Q1 2027", phase: "Retention", phaseGoal: "Re-engage existing users and deepen platform value",
+    hook: "February is when most improvement plans stall. Here's what the data shows about why.",
+    body: `January momentum is real. February is where it meets resistance.
+
+The initial energy fades. The habits that felt effortless in week one now compete with everything else. The gap between intention and action starts to widen.
+
+For resilience building specifically, there's a pattern worth naming:
+
+The dimensions people improve first are usually the ones with the clearest, most visible actions. Practical preparedness. Updating professional materials. Opening a savings account.
+
+The dimensions that stall in February are the ones that require sustained behavior: adding to the emergency fund consistently, continuing the skill development project, maintaining the social connections that were re-engaged in January.
+
+The solution isn't willpower. It's structure.
+
+The users who maintain momentum past February are the ones who scheduled specific, recurring actions — not just made general commitments.
+
+A weekly auto-transfer. A monthly calendar block for the skill project. A recurring check-in with one key contact.
+
+Specificity outlasts motivation.
+
+${LI_CTA}`,
+    graphicDirection: "Data visual — momentum curve showing January peak and February dip. Brand colors, honest framing.",
+  },
+  {
+    id: 40, week: 40, date: "February 24, 2027",
+    quarter: "Q1 2027", phase: "Retention", phaseGoal: "Re-engage existing users and deepen platform value",
+    hook: "What peer-reviewed research actually says about habit formation and resilience.",
+    body: `The relationship between habit and resilience has a substantial research base. A few findings worth knowing:
+
+On financial resilience: Research consistently shows that automatic saving behaviors — not willpower-based ones — produce better outcomes. The mechanism matters: automation removes the decision point.
+
+On psychological resilience: The most robust predictor of recovery from disruption isn't mindset or optimism alone — it's the presence of specific coping behaviors practiced before the disruption arrives. Novelty under pressure degrades performance.
+
+On social resilience: Weak ties (broad networks) matter for information and opportunity. Strong ties (deep relationships) matter for actual support during crises. Both serve different resilience functions.
+
+On practical preparedness: Most people overestimate their preparedness until they attempt to use it. Documentation gaps and kit incompleteness only surface under pressure — which is the worst time to discover them.
+
+The Resilium framework was built on this research base. The questions aren't intuitive — they're sourced.
+
+${LI_CTA}`,
+    graphicDirection: "Research-driven quote visual — credible, academic tone. Source references implied. Clean amber-on-navy layout.",
+  },
+  {
+    id: 41, week: 41, date: "March 03, 2027",
+    quarter: "Q1 2027", phase: "Retention", phaseGoal: "Re-engage existing users and deepen platform value",
+    hook: "The people who build lasting resilience share one trait: they measure.",
+    body: `I've noticed a consistent pattern in how people approach resilience improvement.
+
+Some start with intention. They identify a dimension they know is weak — usually financial — and commit to improving it. Progress is real but uneven. They can't always tell whether what they're doing is working.
+
+Others start with measurement. They take the assessment, get a score across all six dimensions, and let the number drive the sequence. They know which dimension to prioritize because the data told them. They reassess at 90 days and see exactly what moved.
+
+The second group improves more consistently — not because they're more motivated, but because they have a feedback loop.
+
+Motivation without measurement is guesswork. Measurement without motivation stalls. The combination is what produces durable improvement.
+
+This is what Resilium is designed to support: not a one-time result, but a measurement practice. A score you can track. Dimensions you can watch move. A feedback loop that compounds over time.
+
+${LI_CTA}`,
+    graphicDirection: "Standard typographic treatment — insight-forward, clean authority visual. Brand navy with amber accent.",
+  },
+  {
+    id: 42, week: 42, date: "March 10, 2027",
+    quarter: "Q1 2027", phase: "Retention", phaseGoal: "Re-engage existing users and deepen platform value",
+    hook: "The next phase of Resilium involves expert partnerships. Here's what that means.",
+    body: `One of the most consistent pieces of feedback we receive from users is this: the assessment tells me what to work on — but I want help doing the work.
+
+The score is useful. The action plan is useful. But some gaps — financial planning, career development, mental health, emergency preparedness — benefit from expert guidance, not just a to-do list.
+
+We're developing a partnership layer for Resilium that connects users with vetted experts in the dimensions where they have the most significant gaps.
+
+Not a marketplace of generic advisors. A curated set of practitioners who work specifically with resilience-oriented clients — people who understand that financial planning for someone with a 42 in that dimension is different from planning for someone at 74.
+
+This is early-stage work. But it reflects something important about where the platform is headed: from measurement to action support.
+
+If you're a practitioner working in any of the six resilience dimensions and you're interested in being part of this, reach out.
+
+${LI_CTA}`,
+    graphicDirection: "Hero visual — forward-looking, partnership framing. Clean, professional. Brand palette with structured layout.",
+  },
+  {
+    id: 43, week: 43, date: "March 17, 2027",
+    quarter: "Q1 2027", phase: "Retention", phaseGoal: "Re-engage existing users and deepen platform value",
+    hook: "What happens when you reassess after six months of intentional resilience work.",
+    body: `The first Resilium assessment gives you a baseline.
+
+The second one — taken 90 days later — shows you what changed.
+
+The third one — taken six months in — shows you something more interesting: the compound effect.
+
+Here's what six-month reassessments typically show:
+
+The targeted dimensions — the ones with specific, scheduled improvement actions — have moved consistently. The gap between a focused 90 days and a focused six months is significant.
+
+The untargeted dimensions — the ones that received only passive attention — have sometimes moved slightly, sometimes not at all. The feedback loop has value here: seeing which dimensions didn't move despite good intentions is clarifying.
+
+The psychological dimension is often the last to show clear improvement, and the most resistant to measurement. But users who report the highest overall score gains at six months almost always credit psychological resilience habits — sleep consistency, stress regulation, maintained social connection — as enabling everything else.
+
+The score is useful at one point in time. Tracked over time, it becomes a different kind of tool.
+
+${LI_CTA}`,
+    graphicDirection: "Data timeline visual — score trajectory at baseline, 90 days, and 6 months. Clean progression chart. Brand palette.",
+  },
+  {
+    id: 44, week: 44, date: "March 24, 2027",
+    quarter: "Q1 2027", phase: "Retention", phaseGoal: "Re-engage existing users and deepen platform value",
+    hook: "The compound effect of small resilience improvements — mapped over a year.",
+    body: `There's a version of resilience building that looks impressive from the outside.
+
+The person who radically restructures their finances in a month. Who completely overhauls their career strategy in six weeks. Who builds an exhaustive emergency preparedness system over a long weekend.
+
+And there's a version that doesn't look impressive at all.
+
+The person who adds $50 to their emergency fund every week. Who spends 20 minutes on one skill project every Thursday. Who checks in with one key contact every month. Who updates their document backup every quarter.
+
+The first version makes for better stories. The second version produces better outcomes.
+
+Over twelve months, the unremarkable version compounds:
+
+$50/week becomes $2,600 — roughly two months of basic expenses for many households.
+
+One skill, 20 minutes per week, is over 17 hours of deliberate practice.
+
+Monthly contact check-ins, maintained over a year, rebuild the kind of network depth that produces real optionality.
+
+This is the geometry of resilience. Small consistent actions, compounded over time, become structural.
+
+${LI_CTA}`,
+    graphicDirection: "Geometric compound effect visual — small steps building into meaningful improvement. Visual math. Brand palette.",
+  },
+  {
+    id: 45, week: 45, date: "March 31, 2027",
+    quarter: "Q1 2027", phase: "Retention", phaseGoal: "Re-engage existing users and deepen platform value",
+    hook: "Q1 is done. The foundation you built in 90 days matters more than you think.",
+    body: `The end of March is a useful moment to stop and account for what actually happened.
+
+Not what you intended — what happened.
+
+For some people, Q1 was a quarter of consistent, targeted resilience work. The emergency fund grew. The career dimension received real attention. A practical gap was closed.
+
+For others, Q1 was a quarter of good intentions that competed with everything else life brought.
+
+Both are worth examining honestly.
+
+If you made progress: measure it. Take the assessment again. Quantify the gap between where you started in January and where you are now. That number is evidence — of what focused effort produces, and of what's possible in Q2.
+
+If you didn't: that's information too. Which dimension did you intend to improve and didn't? What specifically got in the way? The answer to that question is more useful than renewed motivation.
+
+Q2 begins with the same question January began with: where do you actually stand?
+
+The difference is that now you have 90 days of data about yourself to work from.
+
+${LI_CTA}`,
+    graphicDirection: "Hero forward-looking graphic — end of Q1, beginning of Q2. Horizon framing, purposeful typography. Brand palette.",
+  },
 ];
 
 export const QUARTER_COLOR: Record<LIQuarter, string> = {
   "Q2 2026": "bg-sky-500/20 text-sky-300 border-sky-500/30",
   "Q3 2026": "bg-violet-500/20 text-violet-300 border-violet-500/30",
   "Q4 2026": "bg-amber-500/20 text-amber-300 border-amber-500/30",
+  "Q1 2027": "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
 };
 
 export const PHASE_COLOR: Record<LIPhase, string> = {
   Awareness:  "bg-sky-500/20 text-sky-300 border-sky-500/30",
   Authority:  "bg-violet-500/20 text-violet-300 border-violet-500/30",
   Conversion: "bg-amber-500/20 text-amber-300 border-amber-500/30",
+  Retention:  "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
 };
 
 // Founder thought-leadership posts (standalone — not in the weekly calendar)

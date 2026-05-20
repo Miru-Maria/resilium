@@ -168,8 +168,117 @@ function FrameContent({ post, slideIndex, colors }: FrameProps) {
         </div>
       )}
 
+      {/* ── Score-bands slide ── */}
+      {isCarousel && slide?.slideType === "score-bands" && (
+        <div style={{ position: "absolute", inset: 0, padding: 80, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <LogoMark size={32} accent={colors.accent} />
+            <span style={{ color: colors.accent, fontWeight: 700, fontSize: 26, letterSpacing: 2, textTransform: "uppercase" }}>RESILIUM</span>
+          </div>
+          {slide.lines[0] && (
+            <div style={{ fontSize: 52, fontWeight: 800, color: colors.text, lineHeight: 1.2 }}>{slide.lines[0]}</div>
+          )}
+          <div style={{ display: "flex", flexDirection: "column", gap: 22, flex: 1, justifyContent: "center", marginTop: 24 }}>
+            {[
+              { range: "0 – 39",   label: "Critically Vulnerable", color: "#EF4444", bg: "rgba(239,68,68,0.13)",   border: "rgba(239,68,68,0.28)" },
+              { range: "40 – 69",  label: "Moderately Prepared",   color: "#E08040", bg: "rgba(224,128,64,0.13)", border: "rgba(224,128,64,0.28)" },
+              { range: "70 – 100", label: "Highly Resilient",      color: "#10B981", bg: "rgba(16,185,129,0.13)", border: "rgba(16,185,129,0.28)" },
+            ].map(band => (
+              <div key={band.range} style={{ background: band.bg, border: `1px solid ${band.border}`, borderRadius: 18, padding: "30px 40px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ color: band.color, fontSize: 54, fontWeight: 900, letterSpacing: -1 }}>{band.range}</span>
+                <span style={{ color: colors.text, fontSize: 36, fontWeight: 600 }}>{band.label}</span>
+              </div>
+            ))}
+          </div>
+          <span style={{ color: colors.text, opacity: 0.4, fontSize: 22 }}>resilium-platform.com</span>
+        </div>
+      )}
+
+      {/* ── Icon-grid slide ── */}
+      {isCarousel && slide?.slideType === "icon-grid" && (
+        <div style={{ position: "absolute", inset: 0, padding: 80, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <LogoMark size={32} accent={colors.accent} />
+            <span style={{ color: colors.accent, fontWeight: 700, fontSize: 26, letterSpacing: 2, textTransform: "uppercase" }}>RESILIUM</span>
+          </div>
+          {slide.lines[0] && (
+            <div style={{ fontSize: 44, fontWeight: 800, color: colors.text, lineHeight: 1.2, marginTop: 16 }}>{slide.lines[0]}</div>
+          )}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, flex: 1, alignContent: "center", marginTop: 24 }}>
+            {slide.lines.slice(1).map((item, i) => {
+              const [firstLine, ...rest] = item.split("\n");
+              const emoji = firstLine.match(/^\S+/)?.[0] ?? "";
+              const label = firstLine.replace(emoji, "").trim();
+              return (
+                <div key={i} style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.10)", borderRadius: 20, padding: "28px 24px", display: "flex", flexDirection: "column", gap: 10 }}>
+                  <div style={{ fontSize: 44 }}>{emoji}</div>
+                  <div style={{ fontSize: 30, fontWeight: 700, color: colors.accent, lineHeight: 1.2 }}>{label}</div>
+                  {rest.length > 0 && <div style={{ fontSize: 24, color: colors.text, opacity: 0.75, lineHeight: 1.4 }}>{rest.join("\n")}</div>}
+                </div>
+              );
+            })}
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 16 }}>
+            <span style={{ color: colors.text, opacity: 0.4, fontSize: 22 }}>Calm. Grounded. Intelligent.</span>
+          </div>
+        </div>
+      )}
+
+      {/* ── Pillars slide ── */}
+      {isCarousel && slide?.slideType === "pillars" && (
+        <div style={{ position: "absolute", inset: 0, padding: 80, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <LogoMark size={32} accent={colors.accent} />
+            <span style={{ color: colors.accent, fontWeight: 700, fontSize: 26, letterSpacing: 2, textTransform: "uppercase" }}>RESILIUM</span>
+          </div>
+          {slide.lines[0] && (
+            <div style={{ fontSize: 48, fontWeight: 800, color: colors.text, lineHeight: 1.2, marginTop: 16 }}>{slide.lines[0]}</div>
+          )}
+          <div style={{ display: "flex", gap: 24, flex: 1, alignItems: "stretch", marginTop: 28 }}>
+            <div style={{ flex: 1, background: "rgba(56,189,248,0.10)", border: "1px solid rgba(56,189,248,0.22)", borderRadius: 24, padding: "36px 32px", display: "flex", flexDirection: "column", gap: 16 }}>
+              <div style={{ fontSize: 44, fontWeight: 900, color: "#38bdf8", lineHeight: 1.1 }}>{slide.lines[1]}</div>
+              <div style={{ fontSize: 28, color: colors.text, opacity: 0.8, lineHeight: 1.5 }}>{slide.lines[2]}</div>
+            </div>
+            <div style={{ flex: 1, background: `rgba(224,128,64,0.10)`, border: `1px solid rgba(224,128,64,0.22)`, borderRadius: 24, padding: "36px 32px", display: "flex", flexDirection: "column", gap: 16 }}>
+              <div style={{ fontSize: 44, fontWeight: 900, color: colors.accent, lineHeight: 1.1 }}>{slide.lines[3]}</div>
+              <div style={{ fontSize: 28, color: colors.text, opacity: 0.8, lineHeight: 1.5 }}>{slide.lines[4]}</div>
+            </div>
+          </div>
+          <div style={{ marginTop: 24 }}>
+            <span style={{ color: colors.text, opacity: 0.4, fontSize: 22 }}>Both are measured. Both matter.</span>
+          </div>
+        </div>
+      )}
+
+      {/* ── Numbered slide ── */}
+      {isCarousel && slide?.slideType === "numbered" && (
+        <div style={{ position: "absolute", inset: 0, padding: 80, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <LogoMark size={32} accent={colors.accent} />
+            <span style={{ color: colors.accent, fontWeight: 700, fontSize: 26, letterSpacing: 2, textTransform: "uppercase" }}>RESILIUM</span>
+          </div>
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 0 }}>
+            {slide.lines[0] && (
+              <div style={{ fontSize: 44, fontWeight: 800, color: colors.text, marginBottom: 36, lineHeight: 1.2 }}>{slide.lines[0]}</div>
+            )}
+            <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+              {slide.lines.slice(1).map((step, i) => (
+                <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 22 }}>
+                  <div style={{ width: 48, height: 48, borderRadius: "50%", background: colors.accent, color: colors.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26, fontWeight: 900, flexShrink: 0, marginTop: 2 }}>{i + 1}</div>
+                  <div style={{ fontSize: 32, color: colors.text, lineHeight: 1.4, opacity: 0.9 }}>{step}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <LogoMark size={28} accent={colors.accent} />
+            <span style={{ color: colors.text, opacity: 0.5, fontSize: 20 }}>RESILIUM</span>
+          </div>
+        </div>
+      )}
+
       {/* ── Content slide ── */}
-      {isCarousel && slide && !slide.isHook && !slide.isCta && (
+      {isCarousel && slide && !slide.isHook && !slide.isCta && !slide.slideType && (
         <div style={{ position: "absolute", inset: 0, padding: 80, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
           <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
             <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
